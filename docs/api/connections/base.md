@@ -41,6 +41,7 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 - `crypto_store`: the crypto store for encrypted communication.
 - `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
 - `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
+- `kwargs`: keyword arguments passed to component base
 
 <a name="aea.connections.base.Connection.loop"></a>
 #### loop
@@ -200,6 +201,11 @@ None
 
 Receive an envelope.
 
+**Arguments**:
+
+- `args`: positional arguments
+- `kwargs`: keyword arguments
+
 **Returns**:
 
 the received envelope, or None if an error occurred.
@@ -220,6 +226,7 @@ Load the connection from a directory.
 - `identity`: the identity object.
 - `crypto_store`: object to access the connection crypto objects.
 - `data_dir`: the assets directory.
+- `kwargs`: keyword arguments passed to connection base
 
 **Returns**:
 
@@ -241,6 +248,7 @@ Load a connection from a configuration.
 - `identity`: the identity object.
 - `crypto_store`: object to access the connection crypto objects.
 - `data_dir`: the directory of the AEA project data.
+- `kwargs`: keyword arguments passed to component base
 
 **Returns**:
 
@@ -305,6 +313,7 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 - `crypto_store`: the crypto store for encrypted communication.
 - `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
 - `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
+- `kwargs`: keyword arguments passed to connection base
 
 <a name="aea.connections.base.BaseSyncConnection.put_envelope"></a>
 #### put`_`envelope
@@ -387,7 +396,7 @@ Run on connect method called.
  | on_disconnect() -> None
 ```
 
-Run on discconnect method called.
+Run on disconnect method called.
 
 <a name="aea.connections.base.BaseSyncConnection.on_send"></a>
 #### on`_`send

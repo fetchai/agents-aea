@@ -62,6 +62,7 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+SIMPLE_ID_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
@@ -116,9 +117,9 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
 
     :param dotted_path: the dotted save_path of the package/module.
     :param filepath: the file to the package/module.
-    :return: None
-    :raises ValueError: if the filepath provided is not a module.
-    :raises Exception: if the execution of the module raises exception.
+    :return: module type
+    :raises ValueError: if the filepath provided is not a module.  # noqa: DAR402
+    :raises Exception: if the execution of the module raises exception.  # noqa: DAR402
     """
     spec = importlib.util.spec_from_file_location(dotted_path, str(filepath))
     module = importlib.util.module_from_spec(spec)
@@ -131,7 +132,6 @@ def load_env_file(env_file: str) -> None:
     Load the content of the environment file into the process environment.
 
     :param env_file: save_path to the env file.
-    :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
@@ -148,7 +148,6 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
     'send_signal' that gives more flexibility in this terms.
 
     :param process: the process to send the signal to.
-    :return: None
     """
     if os.name == "posix":
         process.send_signal(signal.SIGINT)  # pylint: disable=no-member
@@ -164,6 +163,8 @@ def win_popen_kwargs() -> dict:
 
     Help to handle ctrl c properly.
     Return empty dict if platform is not win32
+
+    :return: windows popen kwargs
     """
     kwargs: dict = {}
 
@@ -183,8 +184,7 @@ def send_control_c(
     Send ctrl-C cross-platform to terminate a subprocess.
 
     :param process: the process to send the signal to.
-
-    :return: None
+    :param kill_group: whether or not to kill group
     """
     if platform.system() == "Windows":
         if process.stdin:  # cause ctrl-c event will be handled with stdin
@@ -254,7 +254,7 @@ class SimpleId(RegexConstrainedString):
     ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
     """
 
-    REGEX = re.compile(fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}")
+    REGEX = re.compile(SIMPLE_ID_REGEX)
 
 
 SimpleIdOrStr = Union[SimpleId, str]
@@ -302,6 +302,7 @@ def try_decorator(
     :param error_message: message template with one `{}` for exception
     :param default_return: value to return on exception, by default None
     :param logger_method: name of the logger method or callable to print logs
+    :return: the callable
     """
 
     # for pydocstyle
@@ -311,6 +312,8 @@ def try_decorator(
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+                if len(args) > 0 and getattr(args[0], "raise_on_try", False):
+                    raise e
                 if error_message:
                     log = get_logger_method(fn, logger_method)
                     log(error_message.format(e))
@@ -340,6 +343,7 @@ def retry_decorator(
     :param error_message: message template with one `{}` for exception
     :param delay: number of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
+    :return: the callable
     """
 
     # for pydocstyle
@@ -369,6 +373,7 @@ def exception_log_and_reraise(log_method: Callable, message: str) -> Generator:
 
     :param log_method: function to print log
     :param message: message template to add error text.
+    :yield: the generator
     """
     try:
         yield
@@ -403,7 +408,7 @@ def recursive_update(
 
     :param to_update: the dictionary to update.
     :param new_values: the dictionary of new values to replace.
-    :return: None
+    :param allow_new_values: whether or not to allow new values.
     """
     for key, value in new_values.items():
         if (not allow_new_values) and key not in to_update:
@@ -634,6 +639,7 @@ class CertRequest:
         ledger_id: SimpleIdOrStr,
         not_before: str,
         not_after: str,
+        message_format: str,
         save_path: str,
     ) -> None:
         """
@@ -641,12 +647,10 @@ class CertRequest:
 
         :param public_key: the public key, or the key id.
         :param identifier: certificate identifier.
-        :param not_before: specify the lower bound for certificate validity.
-          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-          will be interpreted as timezone UTC.
-        :param not_before: specify the lower bound for certificate validity.
-          if it is a string, it must follow the format: 'YYYY-MM-DD' It
-          will be interpreted as timezone UTC-0.
+        :param ledger_id: ledger identifier the request is referring to.
+        :param not_before: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+        :param not_after: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+        :param message_format: message format used for signing
         :param save_path: the save_path where to save the certificate.
         """
         self._key_identifier: Optional[str] = None
@@ -657,6 +661,7 @@ class CertRequest:
         self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
         self._not_after = self._parse_datetime(not_after)
+        self._message_format = message_format
         self._save_path = Path(save_path)
 
         self._parse_public_key(public_key)
@@ -698,6 +703,8 @@ class CertRequest:
 
         It first tries to parse it as an identifier,
         and in case of failure as a sequence of hexadecimals, starting with "0x".
+
+        :param public_key_str: the public key
         """
         with contextlib.suppress(ValueError):
             # if this raises ValueError, we don't return
@@ -757,12 +764,19 @@ class CertRequest:
         return self._not_after
 
     @property
+    def message_format(self) -> str:
+        """Get the message format."""
+        return self._message_format
+
+    @property
     def save_path(self) -> Path:
         """
         Get the save path for the certificate.
 
         Note: if the path is *not* absolute, then
         the actual save path might depend on the context.
+
+        :return: the save path
         """
         return self._save_path
 
@@ -802,11 +816,41 @@ class CertRequest:
 
     def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
         """Get the message to sign."""
-        message = public_key.encode("ascii")
-        # + self.identifier.encode("ascii")  # noqa: E800
-        # + self.not_before_string.encode("ascii")  # noqa: E800
-        # + self.not_after_string.encode("ascii")  # noqa: E800
+        message = self.construct_message(
+            public_key,
+            self.identifier,
+            self.not_before_string,
+            self.not_after_string,
+            self.message_format,
+        )
         return message
+
+    @classmethod
+    def construct_message(
+        cls,
+        public_key: str,
+        identifier: SimpleIdOrStr,
+        not_before_string: str,
+        not_after_string: str,
+        message_format: str,
+    ) -> bytes:
+        """
+        Construct message for singning.
+
+        :param public_key: the public key
+        :param identifier: identifier to be signed
+        :param not_before_string: signature not valid before
+        :param not_after_string: signature not valid after
+        :param message_format: message format used for signing
+        :return: the message
+        """
+        message = message_format.format(
+            public_key=public_key,
+            identifier=str(identifier),
+            not_before=not_before_string,
+            not_after=not_after_string,
+        )
+        return message.encode("ascii")
 
     def get_signature(self, path_prefix: Optional[PathLike] = None) -> str:
         """
@@ -835,6 +879,7 @@ class CertRequest:
             not_before=self._not_before_string,
             not_after=self._not_after_string,
             public_key=self.public_key_or_identifier,
+            message_format=self.message_format,
             save_path=str(self.save_path),
         )
         return result
@@ -842,6 +887,9 @@ class CertRequest:
     @classmethod
     def from_json(cls, obj: Dict) -> "CertRequest":
         """Compute the JSON representation."""
+        if "message_format" not in obj:  # pragma: nocover
+            # for backwards compatibility
+            obj["message_format"] = "{public_key}"
         return cls(**obj)
 
     def __eq__(self, other: Any) -> bool:
@@ -854,27 +902,42 @@ class CertRequest:
             and self.key_identifier == other.key_identifier
             and self.not_after == other.not_after
             and self.not_before == other.not_before
+            and self.message_format == other.message_format
             and self.save_path == other.save_path
         )
 
 
 def compute_specifier_from_version(version: Version) -> str:
     """
-    Compute the specifier set from a version, by varying only on the patch number.
+    Compute the specifier set from a version.
+
+    Varying only on the patch number for versions with major 0.
 
     I.e. from "{major}.{minor}.{patch}.{extra}", return
 
     ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
+    Varying on the patch and minor number for versions with major >= 1.
+
+    I.e. from "{major}.{minor}.{patch}.{extra}", return
+
+    ">=min({major}.0.0, {major}.{minor}.{patch}.{extra}), <{major+1}.0.0"
+
     :param version: the version
     :return: the specifier set
     """
-    new_major = version.major
+    new_major_low = version.major
+    new_major_high = version.major + 1
     new_minor_low = version.minor
     new_minor_high = new_minor_low + 1
-    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
-    lower_bound = lower_bound if lower_bound < version else version
-    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
+    if new_major_low == 0:
+        lower_bound = Version(f"{new_major_low}.{new_minor_low}.0")
+        lower_bound = lower_bound if lower_bound < version else version
+        upper_bound = Version(f"{new_major_low}.{new_minor_high}.0")
+    else:
+        lower_bound = Version(f"{new_major_low}.0.0")
+        lower_bound = lower_bound if lower_bound < version else version
+        upper_bound = Version(f"{new_major_high}.0.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set
 
@@ -896,6 +959,8 @@ def decorator_with_optional_params(decorator: Callable) -> Callable:
     def myfunction():
         ...
 
+    :param decorator: a decorator callable
+    :return: a decorator callable
     """
 
     @wraps(decorator)

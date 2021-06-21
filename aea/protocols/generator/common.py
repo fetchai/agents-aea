@@ -30,7 +30,6 @@ from typing import Tuple
 from aea.configurations.base import ProtocolSpecification
 from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    LIBPROTOC_VERSION,
     PACKAGES,
     PROTOCOL_LANGUAGE_JS,
     PROTOCOL_LANGUAGE_PYTHON,
@@ -335,11 +334,7 @@ def base_protolint_command() -> str:
 
 
 def check_prerequisites() -> None:
-    """
-    Check whether a programme is installed on the system.
-
-    :return: None
-    """
+    """Check whether a programme is installed on the system."""
     # check black code formatter is installed
     if not is_installed("black"):
         raise FileNotFoundError(
@@ -364,14 +359,14 @@ def check_prerequisites() -> None:
             "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
         )
 
+
+def get_protoc_version() -> str:
+    """Get the protoc version used."""
     result = subprocess.run(  # nosec
         ["protoc", "--version"], stdout=subprocess.PIPE, check=True
     )
-    result_str = result.stdout.decode("utf-8")
-    if LIBPROTOC_VERSION not in result_str:
-        raise FileNotFoundError(  # pragma: nocover
-            f"Invalid version for protoc. Found: {result_str}. Required: {LIBPROTOC_VERSION}."
-        )
+    result_str = result.stdout.decode("utf-8").strip("\n").strip("\r")
+    return result_str
 
 
 def load_protocol_specification(specification_path: str) -> ProtocolSpecification:
@@ -399,8 +394,6 @@ def _create_protocol_file(
     :param path_to_protocol_package: path to the file
     :param file_name: the name of the file
     :param file_content: the content of the file
-
-    :return: None
     """
     pathname = os.path.join(path_to_protocol_package, file_name)
 
@@ -413,7 +406,6 @@ def try_run_black_formatting(path_to_protocol_package: str) -> None:
     Run Black code formatting via subprocess.
 
     :param path_to_protocol_package: a path where formatting should be applied.
-    :return: None
     """
     subprocess.run(  # nosec
         [sys.executable, "-m", "black", path_to_protocol_package, "--quiet"],
@@ -426,7 +418,6 @@ def try_run_isort_formatting(path_to_protocol_package: str) -> None:
     Run Isort code formatting via subprocess.
 
     :param path_to_protocol_package: a path where formatting should be applied.
-    :return: None
     """
     subprocess.run(  # nosec
         [sys.executable, "-m", "isort", *ISORT_CLI_ARGS, path_to_protocol_package],
@@ -445,8 +436,6 @@ def try_run_protoc(
     :param path_to_generated_protocol_package: path to the protocol buffer schema file.
     :param name: name of the protocol buffer schema file.
     :param language: the target language in which to compile the protobuf schema file
-
-    :return: A completed process object.
     """
     # for closure-styled imports for JS, comment the first line and uncomment the second
     js_commonjs_import_option = (
@@ -475,8 +464,6 @@ def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> Non
 
     :param path_to_generated_protocol_package: path to the protocol buffer schema file.
     :param name: name of the protocol buffer schema file.
-
-    :return: A completed process object.
     """
     # path to proto file
     path_to_proto_file = os.path.join(

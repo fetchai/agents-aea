@@ -21,7 +21,6 @@
 package wallet
 
 import (
-	"os"
 	"testing"
 )
 
@@ -38,12 +37,11 @@ var (
 
 // TestWallet
 func TestWallet(t *testing.T) {
-	os.Args = []string{"cmd", EnvTestFile}
 
 	wallet := Wallet{}
 
 	// initialise
-	err := wallet.InitFromEnv()
+	err := wallet.InitFromEnv(EnvTestFile)
 
 	if err != nil {
 		t.Fatal("Failed to initialise wallet", err)

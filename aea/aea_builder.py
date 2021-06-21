@@ -70,6 +70,7 @@ from aea.configurations.constants import (
     STATE_UPDATE_PROTOCOL,
     _FETCHAI_IDENTIFIER,
 )
+from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.manager import (
     AgentConfigManager,
@@ -82,8 +83,18 @@ from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
-from aea.exceptions import AEAException, AEAValidationError, enforce
-from aea.helpers.base import find_topological_order, load_env_file, load_module
+from aea.exceptions import (
+    AEAException,
+    AEAValidationError,
+    AEAWalletNoAddressException,
+    enforce,
+)
+from aea.helpers.base import (
+    SimpleId,
+    find_topological_order,
+    load_env_file,
+    load_module,
+)
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.io import open_file
@@ -106,9 +117,7 @@ class _DependenciesManager:
         self._all_dependencies_by_type = (
             {}
         )  # type: Dict[ComponentType, Dict[ComponentId, ComponentConfiguration]]
-        self._prefix_to_components = (
-            {}
-        )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
+        self._prefix_to_components = {}  # type: Dict[PackageIdPrefix, Set[ComponentId]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
         self.agent_pypi_dependencies: Dependencies = {}
@@ -164,10 +173,9 @@ class _DependenciesManager:
 
     def add_component(self, configuration: ComponentConfiguration) -> None:
         """
-        Add a component to the dependency manager..
+        Add a component to the dependency manager.
 
         :param configuration: the component configuration to add.
-        :return: None
         """
         # add to main index
         self._dependencies[configuration.component_id] = configuration
@@ -189,7 +197,7 @@ class _DependenciesManager:
         """
         Remove a component.
 
-        :return None
+        :param component_id: the component id
         :raises ValueError: if some component depends on this package.
         """
         if component_id not in self.all_dependencies:
@@ -305,6 +313,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
+    DEFAULT_TASKMANAGER_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
     AEA_CLASS = AEA
     BUILD_TIMEOUT = 120
@@ -322,6 +331,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Initialize the builder.
 
         :param with_default_packages: add the default packages.
+        :param registry_dir: the registry directory.
+        :param build_dir_root: the root of the build directory.
         """
         WithLogger.__init__(self, logger=_default_logger)
         self.registry_dir = os.path.join(os.getcwd(), registry_dir)
@@ -340,7 +351,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             - component instances
 
         :param is_full_reset: whether it is a full reset or not.
-        :return: None
         """
         self._reset(is_full_reset)
 
@@ -349,7 +359,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Reset the builder (private usage).
 
         :param is_full_reset: whether it is a full reset or not.
-        :return: None.
         """
         self._name: Optional[str] = None
         self._private_key_paths: Dict[str, Optional[str]] = {}
@@ -370,6 +379,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if not is_full_reset:
             return
         self._default_ledger: Optional[str] = None
+        self._required_ledgers: Optional[List[str]] = None
         self._build_entrypoint: Optional[str] = None
         self._currency_denominations: Dict[str, str] = {}
         self._default_connection: Optional[PublicId] = None
@@ -390,6 +400,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
+        self._task_manager_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
         self._data_dir: Optional[str] = None
@@ -584,9 +595,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self, connection_exception_policy: Optional[ExceptionPolicyEnum]
     ) -> "AEABuilder":  # pragma: nocover
         """
-        Set skill exception policy.
+        Set connection exception policy.
 
-        :param skill_exception_policy: the policy
+        :param connection_exception_policy: the policy
 
         :return: self
         """
@@ -648,13 +659,25 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode = runtime_mode
         return self
 
+    def set_task_manager_mode(
+        self, task_manager_mode: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the task_manager_mode.
+
+        :param task_manager_mode: the agent task_manager_mode
+        :return: self
+        """
+        self._task_manager_mode = task_manager_mode
+        return self
+
     def set_storage_uri(
         self, storage_uri: Optional[str]
     ) -> "AEABuilder":  # pragma: nocover
         """
         Set the storage uri.
 
-        :param storage uri:  storage uri
+        :param storage_uri: storage uri
         :return: self
         """
         self._storage_uri = storage_uri
@@ -730,7 +753,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Check if a component can be removed.
 
         :param component_id: the component id.
-        :return: None
         :raises ValueError: if the component is already present.
         """
         if component_id not in self._package_dependency_manager.all_dependencies:
@@ -745,7 +767,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Check if the component can be added, given its configuration.
 
         :param configuration: the configuration of the component.
-        :return: None
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
@@ -843,7 +864,27 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param identifier: the identifier of the ledger api
         :return: the AEABuilder
         """
-        self._default_ledger = identifier
+        self._default_ledger = (
+            str(SimpleId(identifier)) if identifier is not None else None
+        )
+        return self
+
+    def set_required_ledgers(
+        self, required_ledgers: Optional[List[str]]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
+
+        :param required_ledgers: the required ledgers.
+        :return: the AEABuilder.
+        """
+        self._required_ledgers = (
+            [str(SimpleId(ledger)) for ledger in required_ledgers]
+            if required_ledgers is not None
+            else None
+        )
         return self
 
     def set_build_entrypoint(
@@ -882,8 +923,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param component_type: the component type.
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :raises AEAException: if a component is already registered with the same component id.
-                            | or if there's a missing dependency.
+        :raises AEAException: if a component is already registered with the same component id.   # noqa: DAR402
+                            | or if there's a missing dependency.  # noqa: DAR402
         :return: the AEABuilder
         """
         directory = Path(directory)
@@ -905,8 +946,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Set component build directory, create if not presents.
 
         :param configuration: component configuration
-
-        :return: None
         """
         configuration.build_directory = os.path.join(
             self.get_build_root_directory(),
@@ -925,6 +964,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         You will have to `reset()` the builder before calling `build()` again.
 
         :param component: Component instance already initialized.
+        :return: self
         """
         self._to_reset = True
         self._check_can_add(component.configuration)
@@ -1100,10 +1140,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Run a build entrypoint script.
 
         :param build_entrypoint: the path to the build script relative to directory.
-        :param directory: the directory root for the entrypoint path.
+        :param source_directory: the source directory.
+        :param target_directory: the target directory.
         :param logger: logger
-
-        :return: None
         """
         cls._check_valid_entrypoint(build_entrypoint, source_directory)
 
@@ -1127,6 +1166,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Run in subprocess.
 
+        :param command: command to run
+        :param source_directory: source directory
         :return: stdout, stderr, code
         """
         res = subprocess.run(  # nosec
@@ -1186,25 +1227,31 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if self._name is None:  # pragma: nocover
             raise ValueError("You must set the name of the agent.")
 
+        default_ledger = self.get_default_ledger()
         if not wallet.addresses:
-            raise ValueError("Wallet has no addresses.")
+            raise AEAWalletNoAddressException("Wallet has no addresses.")
+
+        if default_ledger not in wallet.addresses:
+            raise ValueError(  # pragma: nocover
+                f"Specified default ledger '{default_ledger}' not found in available addresses of types: {'[' + ','.join(wallet.addresses.keys()) + ']'}"
+            )
 
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
-                default_address_key=self.get_default_ledger(),
+                default_address_key=default_ledger,
             )
         else:
             identity = Identity(
                 self._name,
-                address=wallet.addresses[self.get_default_ledger()],
-                default_address_key=self.get_default_ledger(),
+                address=wallet.addresses[default_ledger],
+                default_address_key=default_ledger,
             )
         return identity
 
-    def _process_connection_ids(
-        self, connection_ids: Optional[Collection[PublicId]] = None
+    def _process_connection_ids(  # pylint: disable=unsubscriptable-object
+        self, connection_ids: Optional[Collection[PublicId]] = None,
     ) -> List[PublicId]:
         """
         Process connection ids.
@@ -1266,7 +1313,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """Install components extra dependencies."""
         self._package_dependency_manager.install_dependencies()
 
-    def build(
+    def build(  # pylint: disable=unsubscriptable-object
         self,
         connection_ids: Optional[Collection[PublicId]] = None,
         password: Optional[str] = None,
@@ -1284,10 +1331,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param connection_ids: select only these connections to run the AEA.
         :param password: the password to encrypt/decrypt the private key.
         :return: the AEA object.
-        :raises ValueError: if we cannot
         """
         datadir = self._get_data_dir()
         self._check_we_can_build()
+        self._preliminary_checks_before_build()
         logging.config.dictConfig(self._logging_config)
         wallet = self._build_wallet(datadir, password=password)
         identity = self._build_identity_from_wallet(wallet)
@@ -1323,6 +1370,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            task_manager_mode=self._get_task_manager_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
             storage_uri=self._get_storage_uri(),
@@ -1341,6 +1389,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the default ledger identifier.
         """
         return self._default_ledger or self.DEFAULT_LEDGER
+
+    def get_required_ledgers(self) -> List[str]:
+        """
+        Get the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
+
+        :return: the list of required ledgers.
+        """
+        return self._required_ledgers or [self.DEFAULT_LEDGER]
 
     def _get_agent_act_period(self) -> float:
         """
@@ -1482,6 +1540,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             else self.DEFAULT_RUNTIME_MODE
         )
 
+    def _get_task_manager_mode(self) -> str:
+        """
+        Return the askmanager mode name.
+
+        :return: the taskmanager mode name
+        """
+        return (
+            self._task_manager_mode
+            if self._task_manager_mode is not None
+            else self.DEFAULT_TASKMANAGER_MODE
+        )
+
     def _get_storage_uri(self) -> Optional[str]:
         """
         Return the storage uri.
@@ -1516,8 +1586,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Check the component configuration has not already been added.
 
-        :param configuration: the configuration being added
-        :return: None
+        :param configuration: the component configuration being added
         :raises AEAException: if the component is already present.
         """
         if (
@@ -1536,7 +1605,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Check that we have all the dependencies needed to the package.
 
-        :return: None
+        :param configuration: the component configuration
         :raises AEAException: if there's a missing dependency.
         """
         not_supported_packages = configuration.package_dependencies.difference(
@@ -1557,7 +1626,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Check that PyPI dependencies of a package don't conflict with the existing ones.
 
         :param configuration: the component configuration.
-        :return: None
         :raises AEAException: if some PyPI dependency is conflicting.
         """
         all_pypi_dependencies = self._package_dependency_manager.pypi_dependencies
@@ -1607,7 +1675,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param build_entrypoint: the build entrypoint.
         :param directory: the directory from where to start reading the script.
-        :return: None
         """
         enforce(
             build_entrypoint is not None,
@@ -1641,12 +1708,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param agent_configuration: AgentConfig to get values from.
         :param aea_project_path: PathLike root directory of the agent project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-
-        :return: None
         """
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_required_ledgers(agent_configuration.required_ledgers)
         self.set_build_entrypoint(agent_configuration.build_entrypoint)
         self.set_currency_denominations(agent_configuration.currency_denominations)
 
@@ -1675,6 +1741,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+        self.set_task_manager_mode(agent_configuration.task_manager_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
         self.set_data_dir(agent_configuration.data_dir)
         self.set_logging_config(agent_configuration.logging_config)
@@ -1722,7 +1789,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         aea_project_path: Path,
         skip_consistency_check: bool,
     ) -> List[ComponentId]:
-        """Find import order for skills/connections.
+        """
+        Find import order for skills/connections.
 
         We need to handle skills and connections separately, since skills/connections can depend on each other.
 
@@ -1730,6 +1798,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         - load the skill/connection configurations to find the import order
         - detect if there are cycles
         - import skills/connections from the leaves of the dependency graph, by finding a topological ordering.
+
+        :param component_ids: component ids to check
+        :param aea_project_path: project path to AEA
+        :param skip_consistency_check: consistency check of AEA
+        :return: list of component ids ordered for import
         """
         # the adjacency list for the inverse dependency graph
         dependency_to_supported_dependencies: Dict[
@@ -1767,7 +1840,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def from_aea_project(
-        cls, aea_project_path: PathLike, skip_consistency_check: bool = False,
+        cls,
+        aea_project_path: PathLike,
+        skip_consistency_check: bool = False,
+        password: Optional[str] = None,
     ) -> "AEABuilder":
         """
         Construct the builder from an AEA project.
@@ -1781,6 +1857,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
+        :param password: the password to encrypt/decrypt private keys.
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
@@ -1792,6 +1869,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             aea_project_path,
             substitude_env_vars=False,
             private_key_helper=private_key_verify,
+            password=password,
         ).dump_config()
 
         # just validate
@@ -1799,6 +1877,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             aea_project_path,
             substitude_env_vars=True,
             private_key_helper=private_key_verify,
+            password=password,
         ).agent_config
 
         builder = AEABuilder(with_default_packages=False)
@@ -1826,7 +1905,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param resources: the resources object to populate.
         :param agent_name: the AEA name for logging purposes.
         :param kwargs: keyword argument to forward to the component loader.
-        :return: None
         """
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
@@ -1841,6 +1919,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 new_configuration = self._overwrite_custom_configuration(configuration)
                 if new_configuration.is_abstract_component:
                     load_aea_package(configuration)
+                    self.logger.debug(
+                        f"Package {configuration.public_id} of type {configuration.component_type} is abstract, "
+                        f"therefore only the Python modules have been loaded."
+                    )
                     continue
                 _logger = make_component_logger(new_configuration, agent_name)
                 component = load_component_from_config(
@@ -1891,7 +1973,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param agent_configuration: the agent configuration from where to retrieve the components.
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if true, skip consistency checks.
-        :return: None
         """
         public_ids = getattr(agent_configuration, component_type.to_plural())
         component_ids = [
@@ -1913,6 +1994,20 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+    def _preliminary_checks_before_build(self) -> None:
+        """
+        Do consistency check on build parameters.
+
+        - Check that the specified default ledger is in the list of specified required ledgers.
+        """
+        default_ledger = self.get_default_ledger()
+        required_ledgers = self.get_required_ledgers()
+        enforce(
+            default_ledger in required_ledgers,
+            exception_text=f"Default ledger '{default_ledger}' not declared in the list of required ledgers: {required_ledgers}.",
+            exception_class=AEAValidationError,
+        )
 
 
 def make_component_logger(

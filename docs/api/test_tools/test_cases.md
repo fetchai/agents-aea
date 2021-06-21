@@ -76,10 +76,6 @@ Disable AEA logging of specific agent.
 
 Run from agent's directory.
 
-**Returns**:
-
-None
-
 <a name="aea.test_tools.test_cases.BaseAEATestCase.run_cli_command"></a>
 #### run`_`cli`_`command
 
@@ -94,7 +90,7 @@ Run AEA CLI command.
 
 - `args`: CLI args
 - `cwd`: the working directory from where to run the command.
-- `kwargs`: other keyword arguments to click.CLIRunner.invoke.
+- `kwargs`: other keyword arguments to click.CliRunner.invoke.
 
 **Raises**:
 
@@ -117,6 +113,7 @@ Run python with args as subprocess.
 **Arguments**:
 
 - `args`: CLI args
+- `cwd`: the current working directory
 
 **Returns**:
 
@@ -135,11 +132,11 @@ Start python Thread.
 **Arguments**:
 
 - `target`: target method.
-- `process`: subprocess passed to thread args.
+- `kwargs`: thread keyword arguments
 
 **Returns**:
 
-None.
+thread
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.create_agents"></a>
 #### create`_`agents
@@ -155,11 +152,7 @@ Create agents in current working directory.
 
 - `agents_names`: str agent names.
 - `is_local`: a flag for local folder add True by default.
-- `empty`: optional boolean flag for skip adding default dependencies.
-
-**Returns**:
-
-None
+- `is_empty`: optional boolean flag for skip adding default dependencies.
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.fetch_agent"></a>
 #### fetch`_`agent
@@ -174,12 +167,8 @@ Create agents in current working directory.
 **Arguments**:
 
 - `public_id`: str public id
-- `agents_name`: str agent name.
+- `agent_name`: str agent name.
 - `is_local`: a flag for local folder add True by default.
-
-**Returns**:
-
-None
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.difference_to_fetched_agent"></a>
 #### difference`_`to`_`fetched`_`agent
@@ -194,7 +183,7 @@ Compare agent against the one fetched from public id.
 **Arguments**:
 
 - `public_id`: str public id
-- `agents_name`: str agent name.
+- `agent_name`: str agent name.
 
 **Returns**:
 
@@ -213,10 +202,6 @@ Delete agents in current working directory.
 **Arguments**:
 
 - `agents_names`: str agent names.
-
-**Returns**:
-
-None
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.run_agent"></a>
 #### run`_`agent
@@ -249,10 +234,6 @@ subprocess object.
 Run interaction as subprocess.
 
 Run from agent's directory.
-
-**Arguments**:
-
-- `args`: CLI args
 
 **Returns**:
 
@@ -294,10 +275,6 @@ Check if all subprocesses terminated successfully.
 ```
 
 Initialize AEA locally with author name.
-
-**Returns**:
-
-None
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.add_item"></a>
 #### add`_`item
@@ -379,7 +356,7 @@ Run from agent's directory.
 **Arguments**:
 
 - `item_type`: str item type.
-- `name`: public id of the item.
+- `public_id`: public id of the item.
 
 **Returns**:
 
@@ -427,7 +404,7 @@ Result
 
 ```python
  | @classmethod
- | generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None) -> Result
+ | generate_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None, password: Optional[str] = None) -> Result
 ```
 
 Generate AEA private key with CLI command.
@@ -438,6 +415,7 @@ Run from agent's directory.
 
 - `ledger_api_id`: ledger API ID.
 - `private_key_file`: the private key file.
+- `password`: the password.
 
 **Returns**:
 
@@ -448,7 +426,7 @@ Result
 
 ```python
  | @classmethod
- | add_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE, connection: bool = False) -> Result
+ | add_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE, connection: bool = False, password: Optional[str] = None) -> Result
 ```
 
 Add private key with CLI command.
@@ -460,6 +438,7 @@ Run from agent's directory.
 - `ledger_api_id`: ledger API ID.
 - `private_key_filepath`: private key filepath.
 - `connection`: whether or not the private key filepath is for a connection.
+- `password`: the password to encrypt private keys.
 
 **Returns**:
 
@@ -500,10 +479,6 @@ Replace the private key in the provided file with the provided key.
 
 - `private_key`: the private key
 - `private_key_filepath`: the filepath to the private key file
-
-**Returns**:
-
-None
 :raises: exception if file does not exist
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.generate_wealth"></a>
@@ -511,7 +486,7 @@ None
 
 ```python
  | @classmethod
- | generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result
+ | generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None) -> Result
 ```
 
 Generate wealth with CLI command.
@@ -521,6 +496,7 @@ Run from agent's directory.
 **Arguments**:
 
 - `ledger_api_id`: ledger API ID.
+- `password`: the password.
 
 **Returns**:
 
@@ -531,7 +507,7 @@ Result
 
 ```python
  | @classmethod
- | get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> str
+ | get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None) -> str
 ```
 
 Get wealth with CLI command.
@@ -541,6 +517,7 @@ Run from agent's directory.
 **Arguments**:
 
 - `ledger_api_id`: ledger API ID.
+- `password`: the password to encrypt/decrypt private keys.
 
 **Returns**:
 
@@ -554,16 +531,12 @@ command line output
  | replace_file_content(cls, src: Path, dest: Path) -> None
 ```
 
-Replace the content of the source file to the dest file.
+Replace the content of the source file to the destination file.
 
 **Arguments**:
 
 - `src`: the source file.
 - `dest`: the destination file.
-
-**Returns**:
-
-None
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.change_directory"></a>
 #### change`_`directory
@@ -578,10 +551,6 @@ Change current working directory.
 **Arguments**:
 
 - `path`: path to the new working directory.
-
-**Returns**:
-
-None
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.send_envelope_to_agent"></a>
 #### send`_`envelope`_`to`_`agent
@@ -642,6 +611,10 @@ Check if the AEA is launched and running (ready to process messages).
 
 - `process`: agent subprocess.
 - `timeout`: the timeout to wait for launch to complete
+
+**Returns**:
+
+bool indicating status
 
 <a name="aea.test_tools.test_cases.BaseAEATestCase.invoke"></a>
 #### invoke

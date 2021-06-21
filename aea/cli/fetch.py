@@ -38,7 +38,6 @@ from aea.configurations.constants import (
     CONNECTION,
     CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_REGISTRY_NAME,
     PROTOCOL,
     SKILL,
 )
@@ -82,14 +81,19 @@ def do_fetch(
     :param ctx: the CLI context.
     :param public_id: the public id.
     :param local: whether to fetch from local
-    :param remote whether to fetch from remote
+    :param remote: whether to fetch from remote
     :param alias: the agent alias.
     :param target_dir: the target directory, in case fetching locally.
-    :return: None
     """
     enforce(
         not (local and remote), "'local' and 'remote' options are mutually exclusive."
     )
+    if not local and not remote:
+        try:
+            ctx.registry_path
+        except ValueError as e:
+            click.echo(f"{e}\nTrying remote registry (`--remote`).")
+            remote = True
     is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", is_mixed)
@@ -130,13 +134,14 @@ def fetch_agent_locally(
     :param public_id: public ID of agent to be fetched.
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
-    :return: None
     """
-    packages_path = (
-        DEFAULT_REGISTRY_NAME if ctx.registry_path is None else ctx.registry_path
-    )
+    try:
+        registry_path = ctx.registry_path
+    except ValueError as e:
+        raise click.ClickException(str(e))
+
     source_path = try_get_item_source_path(
-        packages_path, public_id.author, AGENTS, public_id.name
+        registry_path, public_id.author, AGENTS, public_id.name
     )
     enforce(
         ctx.config.get("is_local") is True or ctx.config.get("is_mixed") is True,
@@ -182,9 +187,6 @@ def _fetch_agent_deps(ctx: Context) -> None:
     Fetch agent dependencies.
 
     :param ctx: context object.
-
-    :return: None
-    :raises: ClickException re-raises if occurs in add_item call.
     """
     for item_type in (PROTOCOL, CONTRACT, CONNECTION, SKILL):
         item_type_plural = "{}s".format(item_type)
@@ -206,7 +208,6 @@ def fetch_mixed(
     :param public_id: the public id.
     :param alias: the alias to the agent.
     :param target_dir: the target directory.
-    :return: None
     """
     try:
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)

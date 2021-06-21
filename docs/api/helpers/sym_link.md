@@ -38,12 +38,12 @@ Change directory and call the cross-platform script.
 
 The working directory must be the parent of the symbolic link name
 when executing 'create_symlink_crossplatform.sh'. Hence, we
-need to translate target_path into the relatve path from the
+need to translate target_path into the relative path from the
 symbolic link directory to the target directory.
 
 So:
 1) from link_path, extract the number of jumps to the parent directory
-  in order to reach the repository root directory, and chain many "../" paths.
+in order to reach the repository root directory, and chain many "../" paths.
 2) from target_path, compute the relative path to the root
 3) relative_target_path is just the concatenation of the results from step (1) and (2).
 
@@ -59,4 +59,14 @@ we want to compute:
 The resulting command on UNIX systems will be:
 
     cd directory_1 && ln -s ../../directory_1/target_path symbolic_link
+
+**Arguments**:
+
+- `link_path`: the source path
+- `target_path`: the target path
+- `root_path`: the root path
+
+**Returns**:
+
+exit code
 

@@ -25,3 +25,7 @@ Get the IPFS hash for a single file.
 
 - `file_path`: the file path
 
+**Returns**:
+
+the ipfs hash
+

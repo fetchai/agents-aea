@@ -1,42 +1,43 @@
 name: aries_alice
 author: fetchai
-version: 0.18.0
+version: 0.23.0
 type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
-  __init__.py: QmbM7X2Eavk2R3mRdnZin2QThh1Y5Xskwiy7gggT3SWeLJ
-  behaviours.py: QmbRM4Gv555K4iNCNXzM7J8xjyHRZiMbWnDeo56TN2KZyx
-  dialogues.py: QmS74KVR3EHXSTFa7P1dcqbJsFjNNo4gPzekhKXfKbD3Wj
-  handlers.py: QmQ3hj2HwLDr9zjvFu68jmsgvGiPPjz3QSYSmQVrfhErDP
-  strategy.py: QmPumiGj27yCP3Jjkz9ndYgjxqvGsZbHqBynJ8syZ4GPvH
+  __init__.py: QmNx4xJ3JyyZw7X1mzCziSayandUEYfDNPFke8rNcYK33C
+  behaviours.py: QmZUD3AYp9Tw51zFC5tyS49yunAZvXD6qtWX8buu7jou11
+  dialogues.py: QmPPyGaizHVdJdLzuD4xebhSx6jehNc3oQ9UnZBu6xqu3b
+  handlers.py: QmZMH8RvMCXHXYKz4fS6AhnfiuUHNDXtfnEqhxwgwECnW5
+  strategy.py: Qmaa1usbr2duj3yMm2gF5AbuCpBSyFfkRVHVceeQT8XVGE
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.19.0
+- fetchai/http_client:0.22.0
 contracts: []
 protocols:
-- fetchai/default:0.13.0
-- fetchai/http:0.13.0
-- fetchai/oef_search:0.14.0
+- fetchai/default:1.0.0
+- fetchai/http:1.0.0
+- fetchai/oef_search:1.0.0
 skills: []
 behaviours:
   alice:
     args:
+      max_soef_registration_retries: 5
       services_interval: 20
     class_name: AliceBehaviour
 handlers:
   default:
     args: {}
-    class_name: AliceDefaultHandler
+    class_name: DefaultHandler
   http:
     args: {}
-    class_name: AliceHttpHandler
+    class_name: HttpHandler
   oef_search:
     args: {}
-    class_name: AliceOefSearchHandler
+    class_name: OefSearchHandler
 models:
   default_dialogues:
     args: {}
@@ -51,12 +52,18 @@ models:
     args:
       admin_host: 127.0.0.1
       admin_port: 8031
+      classification:
+        piece: classification
+        value: identity.aries.alice
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: intro_service
         value: intro_alice
-    class_name: AliceStrategy
+    class_name: Strategy
 dependencies: {}
 is_abstract: false

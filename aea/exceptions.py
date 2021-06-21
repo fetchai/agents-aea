@@ -67,6 +67,10 @@ class AEAComponentLoadException(AEAException):
     """Class for component loading errors of an AEA."""
 
 
+class AEAWalletNoAddressException(AEAException):
+    """Class for attempts to instantiate a wallet without addresses."""
+
+
 class _StopRuntime(Exception):
     """
     Exception to stop runtime.
@@ -80,8 +84,6 @@ class _StopRuntime(Exception):
         Init _StopRuntime exception.
 
         :param reraise: exception to reraise.
-
-        :return: None
         """
         self.reraise = reraise
         super().__init__("Stop runtime exception.")
@@ -107,6 +109,7 @@ def parse_exception(exception: Exception, limit: int = -1) -> str:
     """
     Parse an exception to get the relevant lines.
 
+    :param exception: the exception to be parsed
     :param limit: the limit
     :return: exception as string
     """

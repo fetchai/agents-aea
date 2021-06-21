@@ -28,6 +28,7 @@ import click
 from aea import get_current_aea_version
 from aea.cli.add import add_item
 from aea.cli.init import do_init
+from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
@@ -42,7 +43,6 @@ from aea.configurations.constants import (
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
-    DEFAULT_REGISTRY_PATH,
     DEFAULT_VERSION,
     PROTOCOL,
     PROTOCOLS,
@@ -51,6 +51,7 @@ from aea.configurations.constants import (
     STATE_UPDATE_PROTOCOL,
     VENDOR,
 )
+from aea.exceptions import enforce
 from aea.helpers.base import compute_specifier_from_version
 from aea.helpers.io import open_file
 
@@ -63,7 +64,10 @@ from aea.helpers.io import open_file
     required=False,
     help="Add the author to run `init` before `create` execution.",
 )
-@click.option("--local", is_flag=True, help="For using local folder.")
+@registry_flag(
+    help_local="For fetching agent from local folder.",
+    help_remote="For fetching agent from remote registry.",
+)
 @click.option("--empty", is_flag=True, help="Not adding default dependencies.")
 @click.pass_context
 def create(
@@ -71,11 +75,12 @@ def create(
     agent_name: str,
     author: str,
     local: bool,
+    remote: bool,
     empty: bool,
 ) -> None:
     """Create a new agent."""
     ctx = cast(Context, click_context.obj)
-    create_aea(ctx, agent_name, local, author=author, empty=empty)
+    create_aea(ctx, agent_name, local, remote, author=author, empty=empty)
 
 
 @clean_after
@@ -83,6 +88,7 @@ def create_aea(
     ctx: Context,
     agent_name: str,
     local: bool,
+    remote: bool = False,  # for backwards compatibility
     author: Optional[str] = None,
     empty: bool = False,
 ) -> None:
@@ -90,14 +96,28 @@ def create_aea(
     Create AEA project.
 
     :param ctx: Context object.
-    :param local: boolean flag for local folder usage.
     :param agent_name: agent name.
-    :param author: optional author name (valid with local=True only).
+    :param local: boolean flag for local registry usage.
+    :param remote: boolean flag for remote registry usage.
+    :param author: optional author name (valid with local=True and remote=False only).
     :param empty: optional boolean flag for skip adding default dependencies.
 
-    :return: None
-    :raises: ClickException if an error occurred.
+    :raises ClickException: if an error occurred.
     """
+    enforce(
+        not (local and remote), "'local' and 'remote' options are mutually exclusive."
+    )
+    if not local and not remote:
+        try:
+            ctx.registry_path
+        except ValueError as e:
+            click.echo(f"{e}\nTrying remote registry (`--remote`).")
+            remote = True
+    is_mixed = not local and not remote
+    is_local = local and not remote
+    ctx.set_config("is_local", is_local)
+    ctx.set_config("is_mixed", is_mixed)
+
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
     except Exception:
@@ -106,7 +126,7 @@ def create_aea(
         )
 
     if author is not None:
-        if local:
+        if is_local:
             do_init(author, False, False, False)  # pragma: nocover
         else:
             raise click.ClickException(
@@ -152,8 +172,6 @@ def create_aea(
 
         if not empty:
             click.echo("Adding default packages ...")
-            if local:
-                ctx.set_config("is_local", True)
             add_item(ctx, PROTOCOL, PublicId.from_str(DEFAULT_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
@@ -178,9 +196,9 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         author=set_author,
         version=DEFAULT_VERSION,
         license_=DEFAULT_LICENSE,
-        registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
         default_ledger=DEFAULT_LEDGER,
+        required_ledgers=[DEFAULT_LEDGER],
         default_connection=None,
         dependencies=dependencies_from_json(DEFAULT_DEPENDENCIES),
     )
@@ -196,8 +214,7 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     """Look for 'aea-config.yaml' in parent folders recursively up to the user home directory.
 
-    :return: None
-    :raise ValueError: if a parent folder has a file named 'aea-config.yaml'.
+    :raises ValueError: if a parent folder has a file named 'aea-config.yaml'.
     """
     current = Path(".").resolve()
     root = Path("/").resolve()

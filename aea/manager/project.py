@@ -33,6 +33,7 @@ from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
 from aea.crypto.helpers import create_private_key, get_wallet_from_agent_config
+from aea.exceptions import AEAValidationError, enforce
 
 
 class _Base:
@@ -94,8 +95,10 @@ class Project(_Base):
         is_local: bool = False,
         is_remote: bool = False,
         is_restore: bool = False,
+        cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
+        skip_aea_validation: bool = False,
     ) -> "Project":
         """
         Load project with given public_id to working_dir.
@@ -107,12 +110,19 @@ class Project(_Base):
         :param working_dir: the working directory
         :param public_id: the public id
         :param is_local: whether to fetch from local
-        :param is_remote whether to fetch from remote
+        :param is_remote: whether to fetch from remote
+        :param is_restore: whether to restore or not
+        :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
+        :param skip_aea_validation: aea validation flag
+        :return: project
         """
-        ctx = Context(cwd=working_dir, registry_path=registry_path)
+        ctx = Context(
+            cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
+        )
         ctx.set_config("skip_consistency_check", skip_consistency_check)
+        ctx.set_config("skip_aea_validation", skip_aea_validation)
 
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
@@ -126,9 +136,14 @@ class Project(_Base):
         rmtree(self.path)
 
     @property
+    def agent_config(self) -> AgentConfig:
+        """Get the agent configuration."""
+        return self._get_agent_config(self.path)
+
+    @property
     def builder(self) -> AEABuilder:
         """Get builder instance."""
-        return self._get_builder(self._get_agent_config(self.path), self.path)
+        return self._get_builder(self.agent_config, self.path)
 
     def check(self) -> None:
         """Check we can still construct an AEA from the project with builder.build."""
@@ -162,8 +177,6 @@ class AgentAlias(_Base):
         Set agent config instance constructed from json data.
 
         :param json_data: agent config json data
-
-        :return: None
         """
         self._agent_config = AEABuilder.loader.load_agent_config_from_json(json_data)
         self._ensure_private_keys()
@@ -172,17 +185,28 @@ class AgentAlias(_Base):
         """Add private keys if not present in the config."""
         builder = self._get_builder(self.agent_config, self.project.path)
         default_ledger = builder.get_default_ledger()
+        required_ledgers = builder.get_required_ledgers()
+        enforce(
+            default_ledger in required_ledgers,
+            exception_text=f"Default ledger '{default_ledger}' not in required ledgers: {required_ledgers}",
+            exception_class=AEAValidationError,
+        )
 
-        if not self.agent_config.private_key_paths.read_all():
-            self.agent_config.private_key_paths.create(
-                default_ledger, self._create_private_key(default_ledger)
-            )
+        available_private_keys = self.agent_config.private_key_paths.keys()
+        available_connection_private_keys = (
+            self.agent_config.connection_private_key_paths.keys()
+        )
 
-        if not self.agent_config.connection_private_key_paths.read_all():
-            self.agent_config.connection_private_key_paths.create(
-                default_ledger,
-                self._create_private_key(default_ledger, is_connection=True),
-            )
+        for required_ledger in set(required_ledgers):
+            if required_ledger not in available_private_keys:
+                self.agent_config.private_key_paths.create(
+                    required_ledger, self._create_private_key(required_ledger)
+                )
+            if required_ledger not in available_connection_private_keys:
+                self.agent_config.connection_private_key_paths.create(
+                    required_ledger,
+                    self._create_private_key(required_ledger, is_connection=True),
+                )
 
     @property
     def builder(self) -> AEABuilder:
@@ -209,6 +233,7 @@ class AgentAlias(_Base):
         :param ledger: the ledger id
         :param replace: whether or not to replace an existing key
         :param is_connection: whether or not it is a connection key
+        :return: file path to private key
         """
         file_name = (
             f"{ledger}_connection_private.key"
@@ -254,7 +279,10 @@ class AgentAlias(_Base):
     def issue_certificates(self) -> None:
         """Issue the certificates for this agent."""
         issue_certificates_(
-            self.project.path, self.agent_config_manager, self._data_dir
+            self.project.path,
+            self.agent_config_manager,
+            path_prefix=self._data_dir,
+            password=self._password,
         )
 
     def set_overrides(
@@ -282,7 +310,9 @@ class AgentAlias(_Base):
                 )
 
         overrides["component_configurations"] = component_configurations
-        return self.agent_config_manager.update_config(overrides)
+        self.agent_config_manager.update_config(overrides)
+        if agent_overrides:
+            self._ensure_private_keys()
 
     @property
     def agent_config_manager(self) -> AgentConfigManager:

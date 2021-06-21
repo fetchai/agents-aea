@@ -28,7 +28,7 @@ import pytest
 from aea.helpers.base import CertRequest
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
@@ -45,6 +45,12 @@ from tests.conftest import (
     PUBLIC_DHT_P2P_MADDR_2,
     PUBLIC_DHT_P2P_PUBLIC_KEY_1,
     PUBLIC_DHT_P2P_PUBLIC_KEY_2,
+    PUBLIC_STAGING_DHT_DELEGATE_URI_1,
+    PUBLIC_STAGING_DHT_DELEGATE_URI_2,
+    PUBLIC_STAGING_DHT_P2P_MADDR_1,
+    PUBLIC_STAGING_DHT_P2P_MADDR_2,
+    PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
+    PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     libp2p_log_on_failure,
@@ -56,8 +62,32 @@ DEFAULT_PORT = 10234
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
 PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
 PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY_2]
+PUBLIC_STAGING_DHT_MADDRS = [
+    PUBLIC_STAGING_DHT_P2P_MADDR_1,
+    PUBLIC_STAGING_DHT_P2P_MADDR_2,
+]
+PUBLIC_STAGING_DHT_DELEGATE_URIS = [
+    PUBLIC_STAGING_DHT_DELEGATE_URI_1,
+    PUBLIC_STAGING_DHT_DELEGATE_URI_2,
+]
+PUBLIC_STAGING_DHT_PUBLIC_KEYS = [
+    PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
+    PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
+]
 AEA_DEFAULT_LAUNCH_TIMEOUT = 20
 AEA_LIBP2P_LAUNCH_TIMEOUT = 20
+
+
+@pytest.fixture
+def maddrs(request):
+    """Fixture for multi addresses."""
+    return request.param
+
+
+@pytest.fixture
+def delegate_uris_public_keys(request):
+    """Fixture for delegate uris and public keys."""
+    return request.param
 
 
 @pytest.mark.integration
@@ -73,9 +103,12 @@ class TestLibp2pConnectionPublicDHTRelay:
 
         self.log_files = []
 
-    def test_connectivity(self):
+    @pytest.mark.parametrize(
+        "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
+    )
+    def test_connectivity(self, maddrs):
         """Test connectivity."""
-        for i, maddr in enumerate(PUBLIC_DHT_MADDRS):
+        for i, maddr in enumerate(maddrs):
             temp_dir = os.path.join(self.t, f"dir_{i}")
             os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
@@ -97,9 +130,12 @@ class TestLibp2pConnectionPublicDHTRelay:
             finally:
                 multiplexer.disconnect()
 
-    def test_communication_direct(self):
+    @pytest.mark.parametrize(
+        "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
+    )
+    def test_communication_direct(self, maddrs):
         """Test communication direct."""
-        for i, maddr in enumerate(PUBLIC_DHT_MADDRS):
+        for i, maddr in enumerate(maddrs):
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
@@ -161,11 +197,14 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    def test_communication_indirect(self):
+    @pytest.mark.parametrize(
+        "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
+    )
+    def test_communication_indirect(self, maddrs):
         """Test communication indirect."""
-        assert len(PUBLIC_DHT_MADDRS) > 1, "Test requires at least 2 public dht node"
+        assert len(maddrs) > 1, "Test requires at least 2 public dht node"
 
-        for i in range(len(PUBLIC_DHT_MADDRS)):
+        for i in range(len(maddrs)):
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
@@ -173,7 +212,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 connection1 = _make_libp2p_connection(
                     port=DEFAULT_PORT + 1,
                     relay=False,
-                    entry_peers=[PUBLIC_DHT_MADDRS[i]],
+                    entry_peers=[maddrs[i]],
                     data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
@@ -182,7 +221,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 multiplexers.append(multiplexer1)
                 addr_1 = connection1.node.address
 
-                for j in range(len(PUBLIC_DHT_MADDRS)):
+                for j in range(len(maddrs)):
                     if j == i:
                         continue
 
@@ -191,7 +230,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     connection2 = _make_libp2p_connection(
                         port=DEFAULT_PORT + 2,
                         relay=False,
-                        entry_peers=[PUBLIC_DHT_MADDRS[j]],
+                        entry_peers=[maddrs[j]],
                         data_dir=temp_dir_2,
                     )
                     multiplexer2 = Multiplexer([connection2])
@@ -252,11 +291,20 @@ class TestLibp2pConnectionPublicDHTDelegate:
         self.t = tempfile.mkdtemp()
         os.chdir(self.t)
 
-    def test_connectivity(self):
+    @pytest.mark.parametrize(
+        "delegate_uris_public_keys",
+        [
+            (PUBLIC_DHT_DELEGATE_URIS, PUBLIC_DHT_PUBLIC_KEYS),
+            (PUBLIC_STAGING_DHT_DELEGATE_URIS, PUBLIC_STAGING_DHT_PUBLIC_KEYS),
+        ],
+        indirect=True,
+    )
+    def test_connectivity(self, delegate_uris_public_keys):
         """Test connectivity."""
-        for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
-            uri = PUBLIC_DHT_DELEGATE_URIS[i]
-            peer_public_key = PUBLIC_DHT_PUBLIC_KEYS[i]
+        delegate_uris, public_keys = delegate_uris_public_keys
+        for i in range(len(delegate_uris)):
+            uri = delegate_uris[i]
+            peer_public_key = public_keys[i]
             temp_dir = os.path.join(self.t, f"dir_{i}")
             os.mkdir(temp_dir)
             connection = _make_libp2p_client_connection(
@@ -274,11 +322,20 @@ class TestLibp2pConnectionPublicDHTDelegate:
             finally:
                 multiplexer.disconnect()
 
-    def test_communication_direct(self):
+    @pytest.mark.parametrize(
+        "delegate_uris_public_keys",
+        [
+            (PUBLIC_DHT_DELEGATE_URIS, PUBLIC_DHT_PUBLIC_KEYS),
+            (PUBLIC_STAGING_DHT_DELEGATE_URIS, PUBLIC_STAGING_DHT_PUBLIC_KEYS),
+        ],
+        indirect=True,
+    )
+    def test_communication_direct(self, delegate_uris_public_keys):
         """Test communication direct (i.e. both clients registered to same peer)."""
-        for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
-            uri = PUBLIC_DHT_DELEGATE_URIS[i]
-            peer_public_key = PUBLIC_DHT_PUBLIC_KEYS[i]
+        delegate_uris, public_keys = delegate_uris_public_keys
+        for i in range(len(delegate_uris)):
+            uri = delegate_uris[i]
+            peer_public_key = public_keys[i]
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
@@ -332,20 +389,27 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    def test_communication_indirect(self):
+    @pytest.mark.parametrize(
+        "delegate_uris_public_keys",
+        [
+            (PUBLIC_DHT_DELEGATE_URIS, PUBLIC_DHT_PUBLIC_KEYS),
+            (PUBLIC_STAGING_DHT_DELEGATE_URIS, PUBLIC_STAGING_DHT_PUBLIC_KEYS),
+        ],
+        indirect=True,
+    )
+    def test_communication_indirect(self, delegate_uris_public_keys):
         """Test communication indirect (i.e. clients registered to different peers)."""
-        assert (
-            len(PUBLIC_DHT_DELEGATE_URIS) > 1
-        ), "Test requires at least 2 public dht node"
+        delegate_uris, public_keys = delegate_uris_public_keys
+        assert len(delegate_uris) > 1, "Test requires at least 2 public dht node"
 
-        for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
+        for i in range(len(delegate_uris)):
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_client_connection(
-                    peer_public_key=PUBLIC_DHT_PUBLIC_KEYS[i],
-                    uri=PUBLIC_DHT_DELEGATE_URIS[i],
+                    peer_public_key=public_keys[i],
+                    uri=delegate_uris[i],
                     data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
@@ -354,15 +418,15 @@ class TestLibp2pConnectionPublicDHTDelegate:
 
                 addr_1 = connection1.address
 
-                for j in range(len(PUBLIC_DHT_DELEGATE_URIS)):
+                for j in range(len(delegate_uris)):
                     if j == i:
                         continue
 
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_client_connection(
-                        peer_public_key=PUBLIC_DHT_PUBLIC_KEYS[j],
-                        uri=PUBLIC_DHT_DELEGATE_URIS[j],
+                        peer_public_key=public_keys[j],
+                        uri=delegate_uris[j],
                         data_dir=temp_dir_2,
                     )
                     multiplexer2 = Multiplexer([connection2])
@@ -412,13 +476,19 @@ class TestLibp2pConnectionPublicDHTDelegate:
 
 
 @pytest.mark.integration
-class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
+class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
     @libp2p_log_on_failure
-    def test_connectivity(self):
+    @pytest.mark.parametrize(
+        "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
+    )
+    def test_connectivity(self, maddrs):
         """Test connectivity."""
         self.log_files = []
+        self.agent_name = "some"
+        self.create_agents(self.agent_name)
+        self.set_agent_context(self.agent_name)
         self.conn_key_file = os.path.join(
             os.path.abspath(os.getcwd()), "./conn_key.txt"
         )
@@ -440,7 +510,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
             config_path,
             {
                 "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
-                "entry_peers": PUBLIC_DHT_MADDRS,
+                "entry_peers": maddrs,
                 "log_file": log_file,
             },
         )
@@ -463,29 +533,43 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
+        self.unset_agent_context()
+        self.run_cli_command("delete", self.agent_name)
 
 
 @pytest.mark.integration
-class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
+class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
-    def test_connectivity(self):
+    @pytest.mark.parametrize(
+        "delegate_uris_public_keys",
+        [
+            (PUBLIC_DHT_DELEGATE_URIS, PUBLIC_DHT_PUBLIC_KEYS),
+            (PUBLIC_STAGING_DHT_DELEGATE_URIS, PUBLIC_STAGING_DHT_PUBLIC_KEYS),
+        ],
+        indirect=True,
+    )
+    def test_connectivity(self, delegate_uris_public_keys):
         """Test connectivity."""
+        delegate_uris, public_keys = delegate_uris_public_keys
+        self.agent_name = "some"
+        self.create_agents(self.agent_name)
+        self.set_agent_context(self.agent_name)
         self.generate_private_key()
         self.add_private_key()
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,
-            {"nodes": [{"uri": "{}".format(uri)} for uri in PUBLIC_DHT_DELEGATE_URIS]},
+            {"nodes": [{"uri": "{}".format(uri)} for uri in delegate_uris]},
         )
         conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
         self.nested_set_config(
             conn_path + ".config",
             {
                 "nodes": [
-                    {"uri": uri, "public_key": PUBLIC_DHT_PUBLIC_KEYS[i]}
-                    for i, uri in enumerate(PUBLIC_DHT_DELEGATE_URIS)
+                    {"uri": uri, "public_key": public_keys[i]}
+                    for i, uri in enumerate(delegate_uris)
                 ]
             },
         )
@@ -500,9 +584,10 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=public_key,
+                    message_format="{public_key}",
                     save_path=f"./cli_test_cert_{public_key}.txt",
                 )
-                for public_key in PUBLIC_DHT_PUBLIC_KEYS
+                for public_key in public_keys
             ],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
@@ -515,3 +600,5 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
+        self.unset_agent_context()
+        self.run_cli_command("delete", self.agent_name)

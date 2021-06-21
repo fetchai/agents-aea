@@ -21,6 +21,7 @@ import asyncio
 import os
 import shutil
 import tempfile
+from asyncio.futures import Future
 from unittest.mock import Mock, patch
 
 import pytest
@@ -33,6 +34,7 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
+    NodeClient,
     P2PLibp2pClientConnection,
     POR_DEFAULT_SERVICE_ID,
 )
@@ -84,6 +86,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             DEFAULT_LEDGER,
             "2021-01-01",
             "2021-01-02",
+            "{public_key}",
             f"./{crypto.address}_cert.txt",
         )
         _process_cert(crypto, cls.cert_request, cls.t)
@@ -91,7 +94,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
     def test_empty_nodes(self):
         """Test empty nodes."""
         configuration = ConnectionConfig(
-            client_key_file=self.key_file,
+            tcp_key_file=self.key_file,
             nodes=[
                 {
                     "uri": "{}:{}".format(self.node_host, self.node_port),
@@ -106,7 +109,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         )
 
         configuration = ConnectionConfig(
-            client_key_file=self.key_file,
+            tcp_key_file=self.key_file,
             nodes=None,
             connection_id=P2PLibp2pClientConnection.connection_id,
         )
@@ -194,7 +197,7 @@ async def test_connect_attempts():
         )
         con.connect_retries = 2
         with patch(
-            "asyncio.open_connection",
+            "aea.helpers.pipe.TCPSocketChannelClient.connect",
             side_effect=Exception("test exception on connect"),
         ) as open_connection_mock:
             with pytest.raises(Exception, match="test exception on connect"):
@@ -209,14 +212,16 @@ async def test_reconnect_on_receive_fail():
         con = _make_libp2p_client_connection(
             data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
         )
-        mock_reader = Mock()
-        mock_reader.readexactly.side_effect = ConnectionError("oops")
-        con._reader = mock_reader
         con._in_queue = Mock()
+        con._node_client = Mock()
+        f = Future()
+        f.set_exception(ConnectionError("oops"))
+        con._node_client.read_envelope.return_value = f
+
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
         ) as connect_mock:
-            assert await con._receive() is None
+            assert await con._read_envelope_from_node() is None
             connect_mock.assert_called()
 
 
@@ -227,12 +232,35 @@ async def test_reconnect_on_send_fail():
         con = _make_libp2p_client_connection(
             data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
         )
+        con._node_client = Mock()
+        f = Future()
+        f.set_exception(Exception("oops"))
+        con._node_client.send_envelope.side_effect = Exception("oops")
         # test reconnect on send fails
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
         ) as connect_mock, patch.object(
             con, "_ensure_valid_envelope_for_external_comms"
         ):
-            with pytest.raises(ValueError, match="Writer is not set."):
-                await con.send(Mock())
+            with pytest.raises(Exception, match="oops"):
+                await con._send_envelope_with_node_client(Mock())
             connect_mock.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_acn_decode_error_on_read():
+    """Test nodeclient send fails on read."""
+    f = Future()
+    f.set_result(b"some_data")
+    pipe = Mock()
+    pipe.connect = Mock(return_value=f)
+
+    node_client = NodeClient(pipe, Mock())
+    with patch.object(node_client, "_read", lambda: f), patch.object(
+        node_client, "write_acn_status_error", return_value=f
+    ) as mocked_write_acn_status_error, pytest.raises(
+        Exception, match=r"Error parsing acn message:"
+    ):
+        await node_client.read_envelope()
+
+    mocked_write_acn_status_error.assert_called_once()

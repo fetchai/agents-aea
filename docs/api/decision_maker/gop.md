@@ -58,10 +58,6 @@ Update the goal pursuit readiness.
 
 - `new_status`: the new status
 
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.gop.OwnershipState"></a>
 ## OwnershipState Objects
 
@@ -80,10 +76,6 @@ Represent the ownership state of an agent (can proxy a ledger).
 
 Instantiate an ownership state object.
 
-**Arguments**:
-
-- `decision_maker`: the decision maker
-
 <a name="aea.decision_maker.gop.OwnershipState.set"></a>
 #### set
 
@@ -97,6 +89,7 @@ Set values on the ownership state.
 
 - `amount_by_currency_id`: the currency endowment of the agent in this state.
 - `quantities_by_good_id`: the good endowment of the agent in this state.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.decision_maker.gop.OwnershipState.apply_delta"></a>
 #### apply`_`delta
@@ -113,10 +106,7 @@ This method is used to apply a raw state update without a transaction.
 
 - `delta_amount_by_currency_id`: the delta in the currency amounts
 - `delta_quantities_by_good_id`: the delta in the quantities by good
-
-**Returns**:
-
-None
+- `kwargs`: the keyword arguments
 
 <a name="aea.decision_maker.gop.OwnershipState.is_initialized"></a>
 #### is`_`initialized
@@ -198,10 +188,6 @@ Update the agent state from a transaction.
 
 - `terms`: the transaction terms
 
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.gop.OwnershipState.apply_transactions"></a>
 #### apply`_`transactions
 
@@ -259,6 +245,7 @@ Set values on the preferences.
 
 - `exchange_params_by_currency_id`: the exchange params.
 - `utility_params_by_good_id`: the utility params for every asset.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.decision_maker.gop.Preferences.is_initialized"></a>
 #### is`_`initialized
@@ -270,7 +257,9 @@ Set values on the preferences.
 
 Get the initialization status.
 
-Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
+**Returns**:
+
+True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
 
 <a name="aea.decision_maker.gop.Preferences.exchange_params_by_currency_id"></a>
 #### exchange`_`params`_`by`_`currency`_`id
@@ -358,6 +347,7 @@ Compute the marginal utility.
 - `ownership_state`: the ownership state against which to compute the marginal utility.
 - `delta_quantities_by_good_id`: the change in good holdings
 - `delta_amount_by_currency_id`: the change in money holdings
+- `kwargs`: the keyword arguments
 
 **Returns**:
 
@@ -438,10 +428,7 @@ Initialize dialogues.
 **Arguments**:
 
 - `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
+- `kwargs`: the keyword arguments
 
 <a name="aea.decision_maker.gop.DecisionMakerHandler.StateUpdateDialogues"></a>
 ## StateUpdateDialogues Objects
@@ -464,16 +451,13 @@ Initialize dialogues.
 **Arguments**:
 
 - `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
+- `kwargs`: the keyword arguments
 
 <a name="aea.decision_maker.gop.DecisionMakerHandler.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet) -> None
+ | __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any]) -> None
 ```
 
 Initialize the decision maker.
@@ -482,6 +466,7 @@ Initialize the decision maker.
 
 - `identity`: the identity
 - `wallet`: the wallet
+- `config`: the user defined configuration of the handler
 
 <a name="aea.decision_maker.gop.DecisionMakerHandler.handle"></a>
 #### handle
@@ -495,8 +480,4 @@ Handle an internal message from the skills.
 **Arguments**:
 
 - `message`: the internal message
-
-**Returns**:
-
-None
 

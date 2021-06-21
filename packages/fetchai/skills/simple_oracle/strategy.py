@@ -53,6 +53,7 @@ class Strategy(Model):
         self._oracle_value_name = kwargs.pop(
             "oracle_value_name", DEFAULT_ORACLE_VALUE_NAME
         )
+        self._contract_address_file = kwargs.pop("contract_address_file", None)
 
         super().__init__(**kwargs)
 
@@ -93,6 +94,11 @@ class Strategy(Model):
     def oracle_value_name(self) -> str:
         """Get the name of the oracle value."""
         return self._oracle_value_name
+
+    @property
+    def contract_address_file(self) -> str:
+        """Get the filename where the oracle contract is to be stored."""
+        return self._contract_address_file
 
     @property
     def contract_address(self) -> str:

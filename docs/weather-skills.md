@@ -45,23 +45,64 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Blockchain
        
 </div>
+<br>
 
-## Preparation instructions
+## Option 1: AEA Manager approach
 
-### Dependencies
+Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below. 
+
+### Preparation instructions
+
+Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+
+### Demo instructions
+
+The following steps assume you have launched the AEA Manager Desktop app.
+
+1. Add a new AEA called `my_weather_station` with public id `fetchai/weather_station:0.30.0`.
+
+2. Add another new AEA called `my_weather_client` with public id `fetchai/weather_client:0.31.0`.
+
+3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-agent-land.fetch.ai" target="_blank">AgentLand block explorer</a> and request some test tokens via `Get Funds`.
+
+4. Run the `my_weather_station` AEA. Navigate to its logs and copy the multiaddress displayed.
+
+5. Navigate to the settings of the `my_weather_client` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+``` bash
+{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}
+```
+
+6. Run the `my_weather_client`.
+
+In the AEA's logs, you should see the agent trading successfully.
+<br>
+
+## Option 2: CLI approach
+
+Follow this approach when using the `aea` CLI.
+
+### Preparation instructions
+
+#### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-## Demo instructions:
+### Demo instructions:
 
 A demo to run the same scenario but with a true ledger transaction on Fetch.ai `testnet` or Ethereum `ropsten` network. This demo assumes the buyer
 trusts the seller AEA to send the data upon successful payment.
 
-### Create the weather station
+#### Create the weather station
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.24.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.30.0 --alias my_weather_station
 cd my_weather_station
 aea install
 aea build
@@ -74,19 +115,19 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/weather_station:0.21.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
+aea add connection fetchai/ledger:0.18.0
+aea add skill fetchai/weather_station:0.25.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0"
 }'
 aea install
 aea build
@@ -96,11 +137,11 @@ aea build
 </details>
 
 
-### Create the weather client
+#### Create the weather client
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.25.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.31.0 --alias my_weather_client
 cd my_weather_client
 aea install
 aea build
@@ -113,19 +154,19 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/weather_client:0.21.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
+aea add connection fetchai/ledger:0.18.0
+aea add skill fetchai/weather_client:0.24.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0"
 }'
 aea install
 aea build
@@ -135,7 +176,7 @@ aea build
 </details>
 
 
-### Add keys for the weather station AEA
+#### Add keys for the weather station AEA
 
 First, create the private key for the weather station AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
@@ -154,7 +195,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Add keys and generate wealth for the weather client AEA
+#### Add keys and generate wealth for the weather client AEA
 
 The weather client needs to have some wealth to purchase the service from the weather station.
 
@@ -180,7 +221,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Run the AEAs
+#### Run the AEAs
 
 Run both AEAs from their respective terminals.
 
@@ -190,7 +231,7 @@ First, run the weather station AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.18.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.24.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
 
 Then, in the weather client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash
@@ -212,7 +253,7 @@ aea run
 
 You will see that the AEAs negotiate and then transact using the selected ledger.
 
-### Delete the AEAs
+#### Cleaning up
 
 When you're done, go up a level and delete the AEAs.
 
@@ -221,3 +262,5 @@ cd ..
 aea delete my_weather_station
 aea delete my_weather_client
 ```
+
+<br />

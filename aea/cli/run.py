@@ -34,6 +34,7 @@ from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
+from aea.exceptions import AEAWalletNoAddressException
 from aea.helpers.base import load_env_file
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
@@ -89,7 +90,7 @@ def run(
     profiling = int(profiling)
     if profiling > 0:
         with _profiling_context(period=profiling):
-            run_aea(ctx, connection_ids, env_file, is_install_deps)
+            run_aea(ctx, connection_ids, env_file, is_install_deps, password)
             return
     run_aea(ctx, connection_ids, env_file, is_install_deps, password)
 
@@ -146,8 +147,7 @@ def run_aea(
     :param is_install_deps: bool flag is install dependencies.
     :param password: the password to encrypt/decrypt the private key.
 
-    :return: None
-    :raises: ClickException if any Exception occurs.
+    :raises ClickException: if any Exception occurs.
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
@@ -191,9 +191,15 @@ def _build_aea(
     """Build the AEA."""
     try:
         builder = AEABuilder.from_aea_project(
-            Path("."), skip_consistency_check=skip_consistency_check
+            Path("."), skip_consistency_check=skip_consistency_check, password=password
         )
         aea = builder.build(connection_ids=connection_ids, password=password)
         return aea
+    except AEAWalletNoAddressException:
+        error_msg = (
+            "You haven't specified any private key for the AEA project.\n"
+            "Please add one by using the commands `aea generate-key` and `aea add-key` for the ledger of your choice.\n"
+        )
+        raise click.ClickException(error_msg)
     except Exception as e:
         raise click.ClickException(str(e))

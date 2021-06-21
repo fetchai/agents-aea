@@ -24,7 +24,7 @@ Init collection object.
 **Arguments**:
 
 - `storage_backend`: storage backed to use.
-- `collection_name`: srt
+- `collection_name`: str
 
 <a name="aea.helpers.storage.generic_storage.AsyncCollection.put"></a>
 #### put
@@ -231,17 +231,13 @@ Generic storage.
  | __init__(storage_uri: str, loop: asyncio.AbstractEventLoop = None, threaded: bool = False) -> None
 ```
 
-Init stortage.
+Init storage.
 
 **Arguments**:
 
 - `storage_uri`: configuration string for storage.
 - `loop`: asyncio event loop to use.
 - `threaded`: bool. start in thread if True.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.storage.generic_storage.Storage.wait_connected"></a>
 #### wait`_`connected

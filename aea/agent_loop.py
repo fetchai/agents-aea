@@ -67,6 +67,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
 
         :param agent: Agent or AEA to run.
         :param loop: optional asyncio event loop. if not specified a new loop will be created.
+        :param threaded: if True, run in threaded mode, else async
         """
         logger = get_logger(__name__, agent.name)
         WithLogger.__init__(self, logger)
@@ -166,10 +167,10 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """
         Send message or envelope to another skill.
 
-        :param message_or_envelope: envelope to send to another skill.
-        if message passed it will be wrapped into envelope with optional envelope context.
+        If message passed it will be wrapped into envelope with optional envelope context.
 
-        :return: None
+        :param message_or_envelope: envelope to send to another skill.
+        :param context: envelope context
         """
 
     @property
@@ -222,10 +223,10 @@ class AsyncAgentLoop(BaseAgentLoop):
         """
         Send message or envelope to another skill.
 
-        :param message_or_envelope: envelope to send to another skill.
-        if message passed it will be wrapped into envelope with optional envelope context.
+        If message passed it will be wrapped into envelope with optional envelope context.
 
-        :return: None
+        :param message_or_envelope: envelope to send to another skill.
+        :param context: envelope context
         """
         if isinstance(message_or_envelope, Envelope):
             envelope = message_or_envelope
@@ -255,8 +256,6 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :param task_callable: function to be called
         :param: exc: Exception  raised
-
-        :return: None
         """
         self._exceptions.append(exc)
 
@@ -389,7 +388,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             while self.is_running:
                 message = await message_getter()
                 self._execution_control(message_handler, [message])
-        except CancelledError:
+        except CancelledError:  # pylint: disable=try-except-raise
             raise
         except Exception:  # pragma: nocover
             self.logger.exception(

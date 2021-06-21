@@ -266,6 +266,7 @@ class DataModel:
 
         :param name: the name of the data model.
         :param attributes: the attributes of the data model.
+        :param description: the data model description.
         """
         self.name: str = name
         self.attributes = sorted(
@@ -365,7 +366,7 @@ class Description:
 
         :param values: the values in the description.
         :param data_model: the data model (optional)
-        :pram data_model_name: the data model name if a datamodel is created on the fly.
+        :param data_model_name: the data model name if a datamodel is created on the fly.
         """
         _values = deepcopy(values)
         self._values = _values
@@ -503,8 +504,6 @@ class Description:
 
         :param description_pb: the protocol buffer object whose type corresponds with this class.
         :param description: an instance of this class to be encoded in the protocol buffer object.
-
-        :return: None
         """
         description_bytes_pb = description._encode()  # pylint: disable=protected-access
         description_bytes_bytes = description_bytes_pb.SerializeToString()
@@ -617,7 +616,7 @@ class ConstraintType:
                    | Either an instance of the ConstraintTypes enum,
                    | or a string representation associated with the type.
         :param value: the value that defines the constraint.
-        :raises ValueError: if the type of the constraint is not
+        :raises AEAEnforceError: if the type of the constraint is not  # noqa: DAR402
         """
         self.type = ConstraintTypes(type_)
         self.value = value
@@ -627,8 +626,8 @@ class ConstraintType:
         """
         Check the validity of the input provided.
 
-        :return: None
-        :raises ValueError: if the value is not valid wrt the constraint type.
+        :return: boolean to indicate validity
+        :raises AEAEnforceError: if the value is not valid wrt the constraint type.  # noqa: DAR402
         """
         try:
             if self.type == ConstraintTypes.EQUAL:
@@ -765,6 +764,7 @@ class ConstraintType:
         >>> c.get_data_type()
         <class 'int'>
 
+        :return: data type
         """
         if isinstance(self.value, (list, tuple, set)):
             value = next(iter(self.value))
@@ -1067,16 +1067,15 @@ class ConstraintExpr(ABC):
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 
-        :return ``None``
-        :raises ValueError: if the object does not satisfy some requirements.
+        :raises AEAEnforceError: if the object does not satisfy some requirements.  # noqa: DAR402
         """
-        return None
 
     @staticmethod
     def _encode(expression: Any) -> models_pb2.Query.ConstraintExpr:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
+        :param expression: an expression
         :return: the matching protocol buffer object
         """
         constraint_expression_pb = models_pb2.Query.ConstraintExpr()  # type: ignore
@@ -1532,6 +1531,7 @@ class Query:
         """
         Given a data model, check whether the query is valid for that data model.
 
+        :param data_model: optional datamodel
         :return: ``True`` if the query is compliant with the data model, ``False`` otherwise.
         """
         if data_model is None:
@@ -1605,8 +1605,6 @@ class Query:
 
         :param query_pb: the protocol buffer object wrapping an object that corresponds with this class.
         :param query: an instance of this class to be encoded in the protocol buffer object.
-
-        :return: None
         """
         query_bytes_pb = query._encode()  # pylint: disable=protected-access
         query_bytes_bytes = query_bytes_pb.SerializeToString()

@@ -83,10 +83,15 @@ Initialize the connection multiplexer.
 
 - `connections`: a sequence of connections.
 - `default_connection_index`: the index of the connection to use as default.
-This information is used for envelopes which don't specify any routing context.
-If connections is None, this parameter is ignored.
+    This information is used for envelopes which don't specify any routing context.
+    If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
+- `exception_policy`: the exception policy used for connections.
+- `threaded`: if True, run in threaded mode, else async
 - `agent_name`: the name of the agent that owns the multiplexer, for logging purposes.
+- `default_routing`: default routing map
+- `default_connection`: default connection
+- `protocols`: protocols used
 
 <a name="aea.multiplexer.AsyncMultiplexer.default_connection"></a>
 #### default`_`connection
@@ -175,7 +180,7 @@ Get the connection status.
  | async run() -> None
 ```
 
-Run multiplexer connect and recv/send tasks.
+Run multiplexer connect and receive/send tasks.
 
 <a name="aea.multiplexer.AsyncMultiplexer.set_loop"></a>
 #### set`_`loop
@@ -184,15 +189,11 @@ Run multiplexer connect and recv/send tasks.
  | set_loop(loop: AbstractEventLoop) -> None
 ```
 
-Set event loop and all event loopp related objects.
+Set event loop and all event loop related objects.
 
 **Arguments**:
 
 - `loop`: asyncio event loop.
-
-**Returns**:
-
-None
 
 <a name="aea.multiplexer.AsyncMultiplexer.add_connection"></a>
 #### add`_`connection
@@ -201,16 +202,12 @@ None
  | add_connection(connection: Connection, is_default: bool = False) -> None
 ```
 
-Add a connection to the mutliplexer.
+Add a connection to the multiplexer.
 
 **Arguments**:
 
 - `connection`: the connection to add.
 - `is_default`: whether the connection added should be the default one.
-
-**Returns**:
-
-None
 
 <a name="aea.multiplexer.AsyncMultiplexer.connect"></a>
 #### connect
@@ -290,10 +287,6 @@ running on a different thread than the one used in this function.
 
 - `envelope`: the envelope to be sent.
 
-**Returns**:
-
-None
-
 <a name="aea.multiplexer.Multiplexer"></a>
 ## Multiplexer Objects
 
@@ -314,11 +307,8 @@ Initialize the connection multiplexer.
 
 **Arguments**:
 
-- `connections`: a sequence of connections.
-- `default_connection_index`: the index of the connection to use as default.
-| this information is used for envelopes which
-| don't specify any routing context.
-- `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
+- `args`: arguments
+- `kwargs`: keyword arguments
 
 <a name="aea.multiplexer.Multiplexer.set_loop"></a>
 #### set`_`loop
@@ -327,15 +317,11 @@ Initialize the connection multiplexer.
  | set_loop(loop: AbstractEventLoop) -> None
 ```
 
-Set event loop and all event loopp related objects.
+Set event loop and all event loop related objects.
 
 **Arguments**:
 
 - `loop`: asyncio event loop.
-
-**Returns**:
-
-None
 
 <a name="aea.multiplexer.Multiplexer.connect"></a>
 #### connect
@@ -374,10 +360,6 @@ running on a different thread than the one used in this function.
 **Arguments**:
 
 - `envelope`: the envelope to be sent.
-
-**Returns**:
-
-None
 
 <a name="aea.multiplexer.InBox"></a>
 ## InBox Objects
@@ -471,10 +453,6 @@ the envelope object.
 
 Check for a envelope on the in queue.
 
-**Returns**:
-
-the envelope object.
-
 <a name="aea.multiplexer.OutBox"></a>
 ## OutBox Objects
 
@@ -523,10 +501,6 @@ Put an envelope into the queue.
 
 - `envelope`: the envelope.
 
-**Returns**:
-
-None
-
 <a name="aea.multiplexer.OutBox.put_message"></a>
 #### put`_`message
 
@@ -542,8 +516,4 @@ This constructs an envelope with the input arguments.
 
 - `message`: the message
 - `context`: the envelope context
-
-**Returns**:
-
-None
 

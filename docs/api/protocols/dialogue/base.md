@@ -40,10 +40,6 @@ Initialize a dialogue label.
 - `dialogue_opponent_addr`: the addr of the agent with which the dialogue is kept.
 - `dialogue_starter_addr`: the addr of the agent which started the dialogue.
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.dialogue.base.DialogueLabel.dialogue_reference"></a>
 #### dialogue`_`reference
 
@@ -213,10 +209,6 @@ Initialize a dialogue.
 - `terminal_performatives`: the set of all terminal performatives.
 - `valid_replies`: the reply structure of speech-acts.
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.dialogue.base.Dialogue.Rules.initial_performatives"></a>
 #### initial`_`performatives
 
@@ -324,12 +316,9 @@ Initialize a dialogue.
 **Arguments**:
 
 - `dialogue_label`: the identifier of the dialogue
+- `message_class`: the message class used
 - `self_address`: the address of the entity for whom this dialogue is maintained
 - `role`: the role of the agent this dialogue is maintained for
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.dialogue.base.Dialogue.add_terminal_state_callback"></a>
 #### add`_`terminal`_`state`_`callback
@@ -343,10 +332,6 @@ Add callback to be called on dialogue reach terminal state.
 **Arguments**:
 
 - `fn`: callable to be called with one argument: Dialogue
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.dialogue.base.Dialogue.__eq__"></a>
 #### `__`eq`__`
@@ -671,10 +656,6 @@ Add dialogue endstate stats.
 - `end_state`: the end state of the dialogue
 - `is_self_initiated`: whether the dialogue is initiated by the agent or the opponent
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.dialogue.base.find_caller_object"></a>
 #### find`_`caller`_`object
 
@@ -772,10 +753,6 @@ Add dialogue to storage.
 
 - `dialogue`: dialogue to add.
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.dialogue.base.BasicDialoguesStorage.remove"></a>
 #### remove
 
@@ -788,10 +765,6 @@ Remove dialogue from storage by it's label.
 **Arguments**:
 
 - `dialogue_label`: label of the dialogue to remove
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.dialogue.base.BasicDialoguesStorage.get"></a>
 #### get
@@ -936,7 +909,7 @@ Dialogue Storage with dialogues offloading.
  | dialogue_terminal_state_callback(dialogue: "Dialogue") -> None
 ```
 
-Call on dialogue reaches terminal staste.
+Call on dialogue reaches terminal state.
 
 <a name="aea.protocols.dialogue.base.PersistDialoguesStorageWithOffloading.get"></a>
 #### get
@@ -996,11 +969,10 @@ Initialize dialogues.
 
 - `self_address`: the address of the entity for whom dialogues are maintained
 - `end_states`: the list of dialogue endstates
+- `message_class`: the message class used
+- `dialogue_class`: the dialogue class used
+- `role_from_first_message`: the callable determining role from first message
 - `keep_terminal_state_dialogues`: specify do dialogues in terminal state should stay or not
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.dialogue.base.Dialogues.is_keep_dialogues_in_terminal_state"></a>
 #### is`_`keep`_`dialogues`_`in`_`terminal`_`state
@@ -1010,7 +982,7 @@ None
  | is_keep_dialogues_in_terminal_state() -> bool
 ```
 
-Is requrired to keep dialogues in terminal state.
+Is required to keep dialogues in terminal state.
 
 <a name="aea.protocols.dialogue.base.Dialogues.self_address"></a>
 #### self`_`address

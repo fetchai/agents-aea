@@ -18,12 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """Portable pipe implementation for Linux, MacOS, and Windows."""
-
 import asyncio
 import errno
 import logging
 import os
 import socket
+import ssl
 import struct
 import tempfile
 from abc import ABC, abstractmethod
@@ -51,6 +51,7 @@ class IPCChannelClient(ABC):
         Connect to communication channel
 
         :param timeout: timeout for other end to connect
+        :return: connection status
         """
 
     @abstractmethod
@@ -75,11 +76,7 @@ class IPCChannelClient(ABC):
 
     @abstractmethod
     async def close(self) -> None:
-        """
-        Close the communication channel.
-
-        :return: None
-        """
+        """Close the communication channel."""
 
 
 class IPCChannel(IPCChannelClient):
@@ -119,6 +116,8 @@ class PosixNamedPipeProtocol:
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
+        :param logger: the logger
+        :param loop: the event loop
         """
 
         self.logger = logger
@@ -262,6 +261,8 @@ class TCPSocketProtocol:
 
         :param reader: established asyncio reader
         :param writer: established asyncio writer
+        :param logger: the logger
+        :param loop: the event loop
         """
 
         self.logger = logger
@@ -297,6 +298,10 @@ class TCPSocketProtocol:
             data = await self._reader.readexactly(size)
             if not data:  # pragma: no cover
                 return None
+            if len(data) != size:  # pragma: no cover
+                raise ValueError(
+                    f"Incomplete Read Error! Expected size={size}, got: {len(data)}"
+                )
             return data
         except asyncio.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
@@ -310,13 +315,14 @@ class TCPSocketProtocol:
 
     async def close(self) -> None:
         """Disconnect socket."""
-        self._writer.write_eof()
+        if self._writer.can_write_eof():
+            self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
         wait_closed = getattr(self._writer, "wait_closed", None)
         if wait_closed:
             # in py3.6 writer does not have the coroutine
-            await wait_closed()  #  pragma: nocover
+            await wait_closed()  # pragma: nocover
 
 
 class TCPSocketChannel(IPCChannel):
@@ -345,6 +351,7 @@ class TCPSocketChannel(IPCChannel):
         Setup communication channel and wait for other end to connect.
 
         :param timeout: timeout for the connection to be established
+        :return: connection status
         """
 
         if self._loop is None:
@@ -394,7 +401,7 @@ class TCPSocketChannel(IPCChannel):
         """
         Read from channel.
 
-        :param data: read bytes
+        :return: read bytes
         """
         if self._sock is None:
             raise ValueError("Socket pipe not connected.")  # pragma: nocover
@@ -508,11 +515,18 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
+        :param logger: the logger
+        :param loop: the event loop
         """
         self.logger = logger
         self._loop = loop
-
-        self._port = int(in_path)
+        parts = in_path.split(":")
+        if len(parts) == 1:
+            self._port = int(in_path)
+            self._host = "127.0.0.1"
+        else:  # pragma: nocover
+            self._port = int(parts[1])
+            self._host = parts[0]
         self._sock = None  # type: Optional[TCPSocketProtocol]
 
         self._attempts = TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS
@@ -523,6 +537,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         Connect to the other end of the communication channel.
 
         :param timeout: timeout for connection to be established
+        :return: connection status
         """
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -537,14 +552,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         while self._attempts > 0:
             self._attempts -= 1
             try:
-                reader, writer = await asyncio.open_connection(
-                    "127.0.0.1",
-                    self._port,  # pylint: disable=protected-access
-                    loop=self._loop,
-                )
-                self._sock = TCPSocketProtocol(
-                    reader, writer, logger=self.logger, loop=self._loop
-                )
+                self._sock = await self._open_connection()
                 connected = True
                 break
             except ConnectionRefusedError:
@@ -553,6 +561,12 @@ class TCPSocketChannelClient(IPCChannelClient):
                 return False
 
         return connected
+
+    async def _open_connection(self) -> TCPSocketProtocol:
+        reader, writer = await asyncio.open_connection(
+            self._host, self._port, loop=self._loop,  # pylint: disable=protected-access
+        )
+        return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 
     async def write(self, data: bytes) -> None:
         """
@@ -581,6 +595,23 @@ class TCPSocketChannelClient(IPCChannelClient):
         await self._sock.close()
 
 
+class TCPSocketChannelClientTLS(TCPSocketChannelClient):
+    """Interprocess communication channel client using tcp sockets with TLS."""
+
+    async def _open_connection(self) -> TCPSocketProtocol:
+        """Open a connection with TLS support."""
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+        reader, writer = await asyncio.open_connection(
+            self._host,
+            self._port,
+            loop=self._loop,  # pylint: disable=protected-access
+            ssl=ssl_ctx,
+        )
+        return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
+
+
 class PosixNamedPipeChannelClient(IPCChannelClient):
     """Interprocess communication channel client using Posix named pipes."""
 
@@ -596,6 +627,8 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
+        :param logger: the logger
+        :param loop: the event loop
         """
 
         self.logger = logger
@@ -610,6 +643,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         Connect to the other end of the communication channel.
 
         :param timeout: timeout for connection to be established
+        :return: connection status
         """
 
         if self._loop is None:

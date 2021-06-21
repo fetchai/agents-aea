@@ -20,10 +20,20 @@ To lint:
 ``` bash
 golines . -w
 golangci-lint run
+staticcheck ./...
 ```
+
+For mocks generation:
+check https://github.com/golang/mock
 
 ## Messaging patterns
 
+Interaction protocol
+___
+ACN
+___
+TCP/UDP/...
+___
 
 ### Messaging patterns inwards ACN:
 

@@ -41,7 +41,7 @@ Initialize a Message object.
 
 **Arguments**:
 
-- `body`: the dictionary of values to hold.
+- `_body`: the dictionary of values to hold.
 - `kwargs`: any additional value to add to the body. It will overwrite the body values.
 
 <a name="aea.protocols.base.Message.json"></a>
@@ -92,8 +92,6 @@ Check if it has a sender.
 ```
 
 Get the sender of the message in Address form.
-
-:return the address
 
 <a name="aea.protocols.base.Message.sender"></a>
 #### sender
@@ -188,10 +186,6 @@ Set key and value pair.
 
 - `key`: the key.
 - `value`: the value.
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.base.Message.get"></a>
 #### get
@@ -363,6 +357,7 @@ Initialize the protocol manager.
 
 - `configuration`: the protocol configurations.
 - `message_class`: the message class.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.protocols.base.Protocol.serializer"></a>
 #### serializer
@@ -387,6 +382,7 @@ Load the protocol from a directory.
 **Arguments**:
 
 - `directory`: the directory to the skill package.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
@@ -405,6 +401,7 @@ Load the protocol from configuration.
 **Arguments**:
 
 - `configuration`: the protocol configuration.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
@@ -437,5 +434,5 @@ Get protocol specification id.
  | __repr__() -> str
 ```
 
-Get str repr of the protocol.
+Get str representation of the protocol.
 

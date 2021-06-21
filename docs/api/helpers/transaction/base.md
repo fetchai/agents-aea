@@ -58,10 +58,6 @@ The protocol buffer object in the raw_transaction_protobuf_object argument must 
 - `raw_transaction_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `raw_transaction_object`: an instance of this class to be encoded in the protocol buffer object.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.transaction.base.RawTransaction.decode"></a>
 #### decode
 
@@ -165,10 +161,6 @@ The protocol buffer object in the raw_message_protobuf_object argument must be m
 - `raw_message_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `raw_message_object`: an instance of this class to be encoded in the protocol buffer object.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.transaction.base.RawMessage.decode"></a>
 #### decode
 
@@ -261,10 +253,6 @@ The protocol buffer object in the signed_transaction_protobuf_object argument mu
 
 - `signed_transaction_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `signed_transaction_object`: an instance of this class to be encoded in the protocol buffer object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.transaction.base.SignedTransaction.decode"></a>
 #### decode
@@ -369,10 +357,6 @@ The protocol buffer object in the signed_message_protobuf_object argument must b
 - `signed_message_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `signed_message_object`: an instance of this class to be encoded in the protocol buffer object.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.transaction.base.SignedMessage.decode"></a>
 #### decode
 
@@ -466,10 +450,6 @@ The protocol buffer object in the state_protobuf_object argument must be matched
 - `state_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `state_object`: an instance of this class to be encoded in the protocol buffer object.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.transaction.base.State.decode"></a>
 #### decode
 
@@ -533,10 +513,11 @@ Instantiate terms of a transaction.
 - `counterparty_address`: the counterparty address of the transaction.
 - `amount_by_currency_id`: the amount by the currency of the transaction.
 - `quantities_by_good_id`: a map from good id to the quantity of that good involved in the transaction.
-- `is_sender_payable_tx_fee`: whether the sender or counterparty pays the tx fee.
 - `nonce`: nonce to be included in transaction to discriminate otherwise identical transactions.
+- `is_sender_payable_tx_fee`: whether the sender or counterparty pays the tx fee.
 - `fee_by_currency_id`: the fee associated with the transaction.
 - `is_strict`: whether or not terms must have quantities and amounts of opposite signs.
+- `kwargs`: keyword arguments
 
 <a name="aea.helpers.transaction.base.Terms.id"></a>
 #### id
@@ -830,14 +811,15 @@ Generate a hash from transaction information.
 
 **Arguments**:
 
-- `sender_addr`: the sender address
-- `counterparty_addr`: the counterparty address
+- `ledger_id`: the ledger id
+- `sender_address`: the sender address
+- `counterparty_address`: the counterparty address
 - `good_ids`: the list of good ids
 - `sender_supplied_quantities`: the quantities supplied by the sender (must all be positive)
 - `counterparty_supplied_quantities`: the quantities supplied by the counterparty (must all be positive)
 - `sender_payable_amount`: the amount payable by the sender
 - `counterparty_payable_amount`: the amount payable by the counterparty
-- `tx_nonce`: the nonce of the transaction
+- `nonce`: the nonce of the transaction
 
 **Returns**:
 
@@ -859,10 +841,6 @@ The protocol buffer object in the terms_protobuf_object argument must be matched
 
 - `terms_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `terms_object`: an instance of this class to be encoded in the protocol buffer object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.transaction.base.Terms.decode"></a>
 #### decode
@@ -956,10 +934,6 @@ The protocol buffer object in the transaction_digest_protobuf_object argument mu
 
 - `transaction_digest_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `transaction_digest_object`: an instance of this class to be encoded in the protocol buffer object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.transaction.base.TransactionDigest.decode"></a>
 #### decode
@@ -1063,10 +1037,6 @@ The protocol buffer object in the transaction_receipt_protobuf_object argument m
 
 - `transaction_receipt_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `transaction_receipt_object`: an instance of this class to be encoded in the protocol buffer object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.transaction.base.TransactionReceipt.decode"></a>
 #### decode

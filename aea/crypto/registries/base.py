@@ -26,12 +26,12 @@ from typing import Any, Dict, Generic, Optional, Set, Type, TypeVar, Union
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
 from aea.exceptions import AEAException
-from aea.helpers.base import RegexConstrainedString
+from aea.helpers.base import RegexConstrainedString, SIMPLE_ID_REGEX
 
 
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
-ITEM_ID_REGEX = fr"([_A-Za-z][_A-Za-z0-9]*)|{PublicId.PUBLIC_ID_REGEX}"
+ITEM_ID_REGEX = fr"({SIMPLE_ID_REGEX})|{PublicId.PUBLIC_ID_REGEX}"
 ItemType = TypeVar("ItemType")
 
 
@@ -184,7 +184,6 @@ class Registry(Generic[ItemType]):
         :param entry_point: the entry point to load the crypto object.
         :param class_kwargs: keyword arguments to be attached on the class as class variables.
         :param kwargs: arguments to provide to the crypto class.
-        :return: None.
         """
         item_id = ItemId(id_)
         entry_point = EntryPoint[ItemType](entry_point)

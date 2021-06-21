@@ -34,7 +34,10 @@ Execute the task.
 
 - `args`: positional arguments forwarded to the 'execute' method.
 - `kwargs`: keyword arguments forwarded to the 'execute' method.
-:return the task instance
+
+**Returns**:
+
+the task instance
 
 **Raises**:
 
@@ -60,7 +63,9 @@ Check if the task has already been executed.
 
 Get the result.
 
-:return the result from the execute method.
+**Returns**:
+
+the result from the execute method.
 
 **Raises**:
 
@@ -75,10 +80,6 @@ Get the result.
 
 Implement the task setup.
 
-**Returns**:
-
-None
-
 <a name="aea.skills.tasks.Task.execute"></a>
 #### execute
 
@@ -89,9 +90,14 @@ None
 
 Run the task logic.
 
+**Arguments**:
+
+- `args`: the positional arguments
+- `kwargs`: the keyword arguments
+
 **Returns**:
 
-None
+any
 
 <a name="aea.skills.tasks.Task.teardown"></a>
 #### teardown
@@ -101,10 +107,6 @@ None
 ```
 
 Implement the task teardown.
-
-**Returns**:
-
-None
 
 <a name="aea.skills.tasks.init_worker"></a>
 #### init`_`worker
@@ -117,10 +119,6 @@ Initialize a worker.
 
 Disable the SIGINT handler of process pool is using.
 Related to a well-known bug: https://bugs.python.org/issue8296
-
-**Returns**:
-
-None
 
 <a name="aea.skills.tasks.TaskManager"></a>
 ## TaskManager Objects
@@ -144,6 +142,7 @@ Initialize the task manager.
 
 - `nb_workers`: the number of worker processes.
 - `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
+- `logger`: the logger.
 - `pool_mode`: str. multithread or multiprocess
 
 <a name="aea.skills.tasks.TaskManager.is_started"></a>
@@ -178,7 +177,7 @@ int
 #### enqueue`_`task
 
 ```python
- | enqueue_task(func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None) -> int
+ | enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the executor.
@@ -187,8 +186,11 @@ Enqueue a task with the executor.
 
 - `func`: the callable instance to be enqueued
 - `args`: the positional arguments to be passed to the function.
-- `kwds`: the keyword arguments to be passed to the function.
-:return the task id to get the the result.
+- `kwargs`: the keyword arguments to be passed to the function.
+
+**Returns**:
+
+the task id to get the the result.
 
 **Raises**:
 
@@ -203,6 +205,10 @@ Enqueue a task with the executor.
 
 Get the result from a task.
 
+**Arguments**:
+
+- `task_id`: the task id
+
 **Returns**:
 
 async result for task_id
@@ -216,10 +222,6 @@ async result for task_id
 
 Start the task manager.
 
-**Returns**:
-
-None
-
 <a name="aea.skills.tasks.TaskManager.stop"></a>
 #### stop
 
@@ -228,8 +230,4 @@ None
 ```
 
 Stop the task manager.
-
-**Returns**:
-
-None
 

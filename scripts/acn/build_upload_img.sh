@@ -1,16 +1,10 @@
-
 #!/usr/bin/env bash
-VERSION=$(git describe --always --dirty=-WIP)
+set -e
 
-#Check For WIP
-if [[ $VERSION == *-WIP ]];
-then 
-  echo "WIP detected - please commit changes"
-  exit 1
-fi
+VERSION=$(git rev-parse --short HEAD)
 
-# read -p 'Where to upload the image (prod, or colearn)?: ' envvar
-envvar="colearn"
+# read -p 'Where to upload the image (prod, or sandbox)?: ' envvar
+envvar=${1:-"sandbox"}
 shopt -s nocasematch
 case "$envvar" in
  "prod" ) 
@@ -19,9 +13,9 @@ case "$envvar" in
    DOCKERFILE="Dockerfile.dev"
    echo "Registry to upload is $REGISTRY"
    ;;
- "colearn" ) 
-   echo "colearn config selected"
-   REGISTRY="gcr.io/fetch-ai-colearn"
+ "sandbox" ) 
+   echo "sandbox config selected"
+   REGISTRY="gcr.io/fetch-ai-sandbox"
    DOCKERFILE="Dockerfile.dev"
    echo "Registry to upload is $REGISTRY"
    ;;
@@ -34,5 +28,5 @@ esac
 
 sleep 2
 
-docker build -t ${REGISTRY}/acn_node:${VERSION} -f ${DOCKERFILE} ../../
+docker build -t ${REGISTRY}/acn_node:${VERSION} -f ./scripts/acn/${DOCKERFILE} ./
 docker push ${REGISTRY}/acn_node:${VERSION}

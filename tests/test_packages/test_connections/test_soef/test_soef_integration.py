@@ -123,7 +123,7 @@ class Instance:
         service_description = Description(
             service_instance, data_model=models.AGENT_LOCATION_MODEL
         )
-        message, _ = self.oef_search_dialogues.create(
+        message, sending_dialogue = self.oef_search_dialogues.create(
             counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
@@ -135,6 +135,12 @@ class Instance:
             )
         )
         self.multiplexer.put(envelope)
+        # check for register results
+        envelope = self.get()
+        assert envelope
+        message = cast(OefSearchMessage, envelope.message)
+        receiving_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
     def wait_registered(self) -> None:
         """Wait connection gets unique_page_address."""
@@ -150,7 +156,7 @@ class Instance:
         service_description = Description(
             service_instance, data_model=models.AGENT_PERSONALITY_MODEL
         )
-        message, _ = self.oef_search_dialogues.create(
+        message, sending_dialogue = self.oef_search_dialogues.create(
             counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
@@ -158,6 +164,12 @@ class Instance:
         envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info("Registering agent personality")
         self.multiplexer.put(envelope)
+        # check for register results
+        envelope = self.get()
+        assert envelope
+        message = cast(OefSearchMessage, envelope.message)
+        receiving_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
     def register_service_key(self, key: str, value: str) -> None:
         """Register service key."""
@@ -165,7 +177,7 @@ class Instance:
         service_description = Description(
             service_instance, data_model=models.SET_SERVICE_KEY_MODEL
         )
-        message, _ = self.oef_search_dialogues.create(
+        message, sending_dialogue = self.oef_search_dialogues.create(
             counterparty=str(SOEFConnection.connection_id.to_any()),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
@@ -173,6 +185,12 @@ class Instance:
         envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info("Registering agent service key")
         self.multiplexer.put(envelope)
+        # check for register results
+        envelope = self.get()
+        assert envelope
+        message = cast(OefSearchMessage, envelope.message)
+        receiving_dialogue = self.oef_search_dialogues.update(message)
+        assert sending_dialogue == receiving_dialogue
 
     def search(self, query: Query) -> OefSearchMessage:
         """Perform search with query provided."""
@@ -343,8 +361,10 @@ class TestRealNetwork:
             )
             logger.info("Pinging")
             agent.multiplexer.put(envelope)
-            time.sleep(3)
-            assert agent.multiplexer.in_queue.empty()
+            envelope = agent.get()
+            assert (
+                envelope.message.performative == OefSearchMessage.Performative.SUCCESS
+            )
 
         finally:
             agent.stop()

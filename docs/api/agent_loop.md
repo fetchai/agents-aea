@@ -43,6 +43,7 @@ Init loop.
 
 - `agent`: Agent or AEA to run.
 - `loop`: optional asyncio event loop. if not specified a new loop will be created.
+- `threaded`: if True, run in threaded mode, else async
 
 <a name="aea.agent_loop.BaseAgentLoop.agent"></a>
 #### agent
@@ -98,7 +99,7 @@ Get running state of the loop.
  | set_loop(loop: AbstractEventLoop) -> None
 ```
 
-Set event loop and all event loopp related objects.
+Set event loop and all event loop related objects.
 
 <a name="aea.agent_loop.BaseAgentLoop.run"></a>
 #### run
@@ -119,14 +120,12 @@ Run agent loop.
 
 Send message or envelope to another skill.
 
+If message passed it will be wrapped into envelope with optional envelope context.
+
 **Arguments**:
 
 - `message_or_envelope`: envelope to send to another skill.
-if message passed it will be wrapped into envelope with optional envelope context.
-
-**Returns**:
-
-None
+- `context`: envelope context
 
 <a name="aea.agent_loop.BaseAgentLoop.skill2skill_queue"></a>
 #### skill2skill`_`queue
@@ -182,12 +181,10 @@ Get skill to skill message queue.
 
 Send message or envelope to another skill.
 
+If message passed it will be wrapped into envelope with optional envelope context.
+
 **Arguments**:
 
 - `message_or_envelope`: envelope to send to another skill.
-if message passed it will be wrapped into envelope with optional envelope context.
-
-**Returns**:
-
-None
+- `context`: envelope context
 

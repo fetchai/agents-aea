@@ -47,49 +47,49 @@ func TestP2PClientApiInit(t *testing.T) {
 	client := &P2PClientApi{}
 
 	// initialise
-	err := client.InitFromEnv()
+	err := client.InitFromEnv(EnvTestFile)
 
 	if err != nil {
 		t.Fatal("Failed to initialise client", err)
 	}
 
-	if client.client_config == nil {
+	if client.clientConfig == nil {
 		t.Fatal("client_config not set", err)
 	}
 
-	if client.client_config.host != delegate_host {
+	if client.clientConfig.host != delegate_host {
 		t.Fatal("client_config.host not set", err)
 	}
 
-	if client.client_config.port != delegate_port {
+	if client.clientConfig.port != delegate_port {
 		t.Fatal("client_config.port not set", err)
 	}
 
-	if client.agent_record == nil {
+	if client.agentRecord == nil {
 		t.Fatal("client.agent_record not set")
 	}
 
-	if client.agent_record.ServiceId != por_service_id {
+	if client.agentRecord.ServiceId != por_service_id {
 		t.Fatal("agent_record.ServiceId not set")
 	}
 
-	if client.agent_record.LedgerId != por_ledger_id {
+	if client.agentRecord.LedgerId != por_ledger_id {
 		t.Fatal("agent_record.LedgerId not set")
 	}
 
-	if client.agent_record.Address != address {
+	if client.agentRecord.Address != address {
 		t.Fatal("agent_record.Address not set")
 	}
 
-	if client.agent_record.PublicKey != public_key {
+	if client.agentRecord.PublicKey != public_key {
 		t.Fatal("agent_record.PublicKey not set")
 	}
 
-	if client.agent_record.PeerPublicKey != por_peer_public_key {
+	if client.agentRecord.PeerPublicKey != por_peer_public_key {
 		t.Fatal("agent_record.PublicKey not set")
 	}
 
-	if client.agent_record.Signature != por_signature {
+	if client.agentRecord.Signature != por_signature {
 		t.Fatal("agent_record.Signature not set")
 	}
 

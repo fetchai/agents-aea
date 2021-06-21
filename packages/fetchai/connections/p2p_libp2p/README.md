@@ -6,7 +6,7 @@ The DHT provides proper messages delivery by mapping agents addresses to their l
 
 ## Usage
 
-First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p:0.18.0`.
+First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p:0.24.0`.
 
 Next, ensure that the connection is properly configured by setting:
 
@@ -15,4 +15,4 @@ Next, ensure that the connection is properly configured by setting:
 - `entry_peers` to a list of multiaddresses of already deployed nodes to join their network, should be empty for genesis node
 - `delegate_uri` to the IP address and port number for the delegate service, leave empty to disable the service
 
-If the delegate service is enabled, then other AEAs can connect to the peer node using the `fetchai/p2p_libp2p_client:0.14.0` connection.
+If the delegate service is enabled, then other AEAs can connect to the peer node using the `fetchai/p2p_libp2p_client:0.18.0` connection.

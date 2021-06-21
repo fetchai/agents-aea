@@ -143,6 +143,14 @@ class TestParameters(BaseSkillTestCase):
             "location": Location(latitude=51.5194, longitude=0.1270)
         }
         assert self.parameters.set_service_data == {"key": "tac", "value": "v1"}
+        assert self.parameters.set_personality_data == {
+            "piece": "genus",
+            "value": "service",
+        }
+        assert self.parameters.set_classification == {
+            "piece": "classification",
+            "value": "tac.controller",
+        }
         assert self.parameters.remove_service_data == {"key": "tac"}
         assert self.parameters.simple_service_data == {"tac": "v1"}
 

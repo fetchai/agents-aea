@@ -19,8 +19,9 @@
 
 """This package contains a simple behaviour to register a service."""
 
-from typing import Any, cast
+from typing import Any, Optional, cast
 
+from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -30,6 +31,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
 from packages.fetchai.skills.simple_service_registration.strategy import Strategy
 
 
+DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
 DEFAULT_SERVICES_INTERVAL = 30.0
 
 
@@ -41,7 +43,13 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
+        self._max_soef_registration_retries = kwargs.pop(
+            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
+
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self._nb_retries = 0
 
     def setup(self) -> None:
         """
@@ -50,7 +58,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         self._register_agent()
-        self._register_service()
 
     def act(self) -> None:
         """
@@ -58,6 +65,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+        self._retry_failed_registration()
 
     def teardown(self) -> None:
         """
@@ -68,6 +76,53 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._unregister_service()
         self._unregister_agent()
 
+    def _retry_failed_registration(self) -> None:
+        """
+        Retry a failed registration.
+
+        :return: None
+        """
+        if self.failed_registration_msg is not None:
+            self._nb_retries += 1
+            if self._nb_retries > self._max_soef_registration_retries:
+                self.context.is_active = False
+                return
+
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.failed_registration_msg.to,
+                performative=self.failed_registration_msg.performative,
+                service_description=self.failed_registration_msg.service_description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info(
+                f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
+            )
+
+            self.failed_registration_msg = None
+
+    def _register(self, description: Description, logger_msg: str) -> None:
+        """
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
+
+        :return: None
+        """
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(logger_msg)
+
     def _register_agent(self) -> None:
         """
         Register the agent's location.
@@ -76,18 +131,9 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_location_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering agent on SOEF.")
+        self._register(description, "registering agent on SOEF.")
 
-    def _register_service(self) -> None:
+    def register_service(self) -> None:
         """
         Register the agent's service.
 
@@ -95,16 +141,31 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         """
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_service_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
+        self._register(description, "registering agent's service on the SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
         )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering service on SOEF.")
 
     def _unregister_service(self) -> None:
         """

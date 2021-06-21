@@ -26,10 +26,6 @@ Set values on the ownership state.
 
 - `kwargs`: the relevant keyword arguments
 
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.base.OwnershipState.apply_delta"></a>
 #### apply`_`delta
 
@@ -45,10 +41,6 @@ This method is used to apply a raw state update without a transaction.
 **Arguments**:
 
 - `kwargs`: the relevant keyword arguments
-
-**Returns**:
-
-None
 
 <a name="aea.decision_maker.base.OwnershipState.is_initialized"></a>
 #### is`_`initialized
@@ -156,7 +148,7 @@ Compute the marginal utility.
 **Arguments**:
 
 - `ownership_state`: the ownership state against which to compute the marginal utility.
-- `kwargs`: optional keyword argyments
+- `kwargs`: optional keyword arguments
 
 **Returns**:
 
@@ -233,11 +225,9 @@ ignored in that case).
 **Arguments**:
 
 - `internal_message`: the internal message to put on the queue
+- `block`: whether to block or not
+- `timeout`: timeout on block
 :raises: ValueError, if the item is not an internal message
-
-**Returns**:
-
-None
 
 <a name="aea.decision_maker.base.ProtectedQueue.put_nowait"></a>
 #### put`_`nowait
@@ -255,10 +245,6 @@ Equivalent to put(item, False).
 - `internal_message`: the internal message to put on the queue
 :raises: ValueError, if the item is not an internal message
 
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.base.ProtectedQueue.get"></a>
 #### get
 
@@ -268,11 +254,11 @@ None
 
 Inaccessible get method.
 
+**Arguments**:
+
+- `block`: whether to block or not
+- `timeout`: timeout on block
 :raises: ValueError, access not permitted.
-
-**Returns**:
-
-None
 
 <a name="aea.decision_maker.base.ProtectedQueue.get_nowait"></a>
 #### get`_`nowait
@@ -284,10 +270,6 @@ None
 Inaccessible get_nowait method.
 
 :raises: ValueError, access not permitted.
-
-**Returns**:
-
-None
 
 <a name="aea.decision_maker.base.ProtectedQueue.protected_get"></a>
 #### protected`_`get
@@ -322,7 +304,7 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, **kwargs: Any) -> None
+ | __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any], **kwargs: Any) -> None
 ```
 
 Initialize the decision maker handler.
@@ -331,7 +313,7 @@ Initialize the decision maker handler.
 
 - `identity`: the identity
 - `wallet`: the wallet
-- `logger`: the logger
+- `config`: the user defined configuration of the handler
 - `kwargs`: the key word arguments
 
 <a name="aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
@@ -363,6 +345,16 @@ Get identity of the agent.
 ```
 
 Get wallet of the agent.
+
+<a name="aea.decision_maker.base.DecisionMakerHandler.config"></a>
+#### config
+
+```python
+ | @property
+ | config() -> Dict[str, Any]
+```
+
+Get user defined configuration
 
 <a name="aea.decision_maker.base.DecisionMakerHandler.context"></a>
 #### context
@@ -398,10 +390,6 @@ Handle an internal message from the skills.
 
 - `message`: the internal message
 
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.base.DecisionMaker"></a>
 ## DecisionMaker Objects
 
@@ -422,8 +410,17 @@ Initialize the decision maker.
 
 **Arguments**:
 
-- `agent_name`: the agent name
 - `decision_maker_handler`: the decision maker handler
+
+<a name="aea.decision_maker.base.DecisionMaker.agent_name"></a>
+#### agent`_`name
+
+```python
+ | @property
+ | agent_name() -> str
+```
+
+Get the agent name.
 
 <a name="aea.decision_maker.base.DecisionMaker.message_in_queue"></a>
 #### message`_`in`_`queue
@@ -486,10 +483,6 @@ Performs the following while not stopped:
 
 - gets internal messages from the in queue and calls handle() on them
 
-**Returns**:
-
-None
-
 <a name="aea.decision_maker.base.DecisionMaker.handle"></a>
 #### handle
 
@@ -502,8 +495,4 @@ Handle an internal message from the skills.
 **Arguments**:
 
 - `message`: the internal message
-
-**Returns**:
-
-None
 

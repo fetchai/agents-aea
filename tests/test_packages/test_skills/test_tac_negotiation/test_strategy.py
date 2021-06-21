@@ -44,6 +44,7 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
 )
 from packages.fetchai.skills.tac_negotiation.strategy import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     CONTRACT_ID,
@@ -171,6 +172,24 @@ class TestStrategy(BaseSkillTestCase):
         assert description.data_model is AGENT_SET_SERVICE_MODEL
         assert description.values.get("key", "") == self.service_key
         assert description.values.get("value", "") == self.register_as
+
+    def test_get_register_personality_description(self):
+        """Test the get_register_personality_description method of the GenericStrategy class."""
+        description = self.strategy.get_register_personality_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_PERSONALITY_MODEL
+        assert description.values.get("piece", "") == "genus"
+        assert description.values.get("value", "") == "data"
+
+    def test_get_register_classification_description(self):
+        """Test the get_register_classification_description method of the GenericStrategy class."""
+        description = self.strategy.get_register_classification_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_PERSONALITY_MODEL
+        assert description.values.get("piece", "") == "classification"
+        assert description.values.get("value", "") == "tac.participant"
 
     def test_get_unregister_service_description(self):
         """Test the get_unregister_service_description method of the GenericStrategy class."""
@@ -785,14 +804,32 @@ class TestStrategy(BaseSkillTestCase):
             "from_address": self.sender,
             "to_address": self.counterparty,
             "token_ids": [1, 2],
+            "from_supplies": [0, 5],
+            "to_supplies": [10, 0],
+            "value": 0,
+            "trade_nonce": 125,
+            "signature": self.signature,
+        }
+
+        actual_kwargs = self.strategy.kwargs_from_terms(
+            terms, self.signature, is_from_terms_sender=True
+        )
+
+        assert actual_kwargs == expected_kwargs
+
+        expected_kwargs = {
+            "from_address": self.counterparty,
+            "to_address": self.sender,
+            "token_ids": [1, 2],
             "from_supplies": [10, 0],
             "to_supplies": [0, 5],
             "value": 0,
             "trade_nonce": 125,
             "signature": self.signature,
         }
-
-        actual_kwargs = self.strategy.kwargs_from_terms(terms, self.signature)
+        actual_kwargs = self.strategy.kwargs_from_terms(
+            terms, self.signature, is_from_terms_sender=False
+        )
 
         assert actual_kwargs == expected_kwargs
 
@@ -814,8 +851,8 @@ class TestStrategy(BaseSkillTestCase):
             "from_address": self.sender,
             "to_address": self.counterparty,
             "token_ids": [1, 2],
-            "from_supplies": [10, 0],
-            "to_supplies": [0, 5],
+            "from_supplies": [0, 5],
+            "to_supplies": [10, 0],
             "value": 0,
             "trade_nonce": 125,
             "signature": self.signature,

@@ -148,8 +148,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Disable AEA logging of specific agent.
 
         Run from agent's directory.
-
-        :return: None
         """
         config_update_dict = {
             "agent.logging_config.disable_existing_loggers": "False",
@@ -194,6 +192,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Run python with args as subprocess.
 
         :param args: CLI args
+        :param cwd: the current working directory
 
         :return: subprocess object.
         """
@@ -217,6 +216,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Run python with args as subprocess.
 
         :param args: CLI args
+        :param cwd: the current working directory
 
         :return: subprocess object.
         """
@@ -231,9 +231,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Start python Thread.
 
         :param target: target method.
-        :param process: subprocess passed to thread args.
-
-        :return: None.
+        :param kwargs: thread keyword arguments
+        :return: thread
         """
         if "process" in kwargs:
             thread = Thread(target=target, args=(kwargs["process"],))
@@ -252,9 +251,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param agents_names: str agent names.
         :param is_local: a flag for local folder add True by default.
-        :param empty: optional boolean flag for skip adding default dependencies.
-
-        :return: None
+        :param is_empty: optional boolean flag for skip adding default dependencies.
         """
         cli_args = ["create", "--local", "--empty"]
         if not is_local:  # pragma: nocover
@@ -273,10 +270,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Create agents in current working directory.
 
         :param public_id: str public id
-        :param agents_name: str agent name.
+        :param agent_name: str agent name.
         :param is_local: a flag for local folder add True by default.
-
-        :return: None
         """
         cli_args = ["fetch", "--local"]
         if not is_local:  # pragma: nocover
@@ -290,7 +285,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Compare agent against the one fetched from public id.
 
         :param public_id: str public id
-        :param agents_name: str agent name.
+        :param agent_name: str agent name.
 
         :return: list of files differing in the projects
         """
@@ -325,8 +320,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "version",
                 "connection_private_key_paths",
                 "private_key_paths",
-                "registry_path",
                 "dependencies",
+                "required_ledgers",
             ]
             result = all(
                 [key in allowed_diff_keys for key in content1_agentconfig.keys()]
@@ -391,8 +386,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Delete agents in current working directory.
 
         :param agents_names: str agent names.
-
-        :return: None
         """
         for name in set(agents_names):
             cls.run_cli_command("delete", name)
@@ -417,8 +410,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Run interaction as subprocess.
 
         Run from agent's directory.
-
-        :param args: CLI args
 
         :return: subprocess object.
         """
@@ -471,11 +462,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def initialize_aea(cls, author: str) -> None:
-        """
-        Initialize AEA locally with author name.
-
-        :return: None
-        """
+        """Initialize AEA locally with author name."""
         cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
@@ -543,7 +530,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Run from agent's directory.
 
         :param item_type: str item type.
-        :param name: public id of the item.
+        :param public_id: public id of the item.
 
         :return: Result
         """
@@ -579,7 +566,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_private_key(
-        cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None
+        cls,
+        ledger_api_id: str = DEFAULT_LEDGER,
+        private_key_file: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> Result:
         """
         Generate AEA private key with CLI command.
@@ -588,12 +578,14 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param ledger_api_id: ledger API ID.
         :param private_key_file: the private key file.
+        :param password: the password.
 
         :return: Result
         """
         cli_args = ["generate-key", ledger_api_id]
         if private_key_file is not None:  # pragma: nocover
             cli_args.append(private_key_file)
+        cli_args += _get_password_option_args(password)
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
@@ -602,6 +594,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         ledger_api_id: str = DEFAULT_LEDGER,
         private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
         connection: bool = False,
+        password: Optional[str] = None,
     ) -> Result:
         """
         Add private key with CLI command.
@@ -611,19 +604,26 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param ledger_api_id: ledger API ID.
         :param private_key_filepath: private key filepath.
         :param connection: whether or not the private key filepath is for a connection.
+        :param password: the password to encrypt private keys.
 
         :return: Result
         """
+        password_option = _get_password_option_args(password)
         if connection:
             return cls.run_cli_command(
                 "add-key",
                 ledger_api_id,
                 private_key_filepath,
                 "--connection",
+                *password_option,
                 cwd=cls._get_cwd(),
             )
         return cls.run_cli_command(
-            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+            "add-key",
+            ledger_api_id,
+            private_key_filepath,
+            *password_option,
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
@@ -652,8 +652,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param private_key: the private key
         :param private_key_filepath: the filepath to the private key file
-
-        :return: None
         :raises: exception if file does not exist
         """
         with cd(cls._get_cwd()):  # pragma: nocover
@@ -661,32 +659,46 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 f.write(private_key)
 
     @classmethod
-    def generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result:
+    def generate_wealth(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None
+    ) -> Result:
         """
         Generate wealth with CLI command.
 
         Run from agent's directory.
 
         :param ledger_api_id: ledger API ID.
+        :param password: the password.
 
         :return: Result
         """
+        password_option = _get_password_option_args(password)
         return cls.run_cli_command(
-            "generate-wealth", ledger_api_id, "--sync", cwd=cls._get_cwd()
+            "generate-wealth",
+            ledger_api_id,
+            *password_option,
+            "--sync",
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
-    def get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> str:
+    def get_wealth(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None
+    ) -> str:
         """
         Get wealth with CLI command.
 
         Run from agent's directory.
 
         :param ledger_api_id: ledger API ID.
+        :param password: the password to encrypt/decrypt private keys.
 
         :return: command line output
         """
-        cls.run_cli_command("get-wealth", ledger_api_id, cwd=cls._get_cwd())
+        password_option = _get_password_option_args(password)
+        cls.run_cli_command(
+            "get-wealth", ledger_api_id, *password_option, cwd=cls._get_cwd()
+        )
         if cls.last_cli_runner_result is None:
             raise ValueError("Runner result not set!")  # pragma: nocover
         return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
@@ -698,7 +710,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param src: the source file.
         :param dest: the destination file.
-        :return: None
         """
         enforce(
             src.is_file() and dest.is_file(), "Source or destination is not a file."
@@ -711,7 +722,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Change current working directory.
 
         :param path: path to the new working directory.
-        :return: None
         """
         os.chdir(Path(path))
 
@@ -763,8 +773,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Start an output reading thread.
 
         :param process: target process passed to a thread args.
-
-        :return: None.
         """
         cls.stdout[process.pid] = ""
         cls.start_thread(target=cls._read_out, process=process)
@@ -775,8 +783,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Start an error reading thread.
 
         :param process: target process passed to a thread args.
-
-        :return: None.
         """
         cls.stderr[process.pid] = ""
         cls.start_thread(target=cls._read_err, process=process)
@@ -855,6 +861,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param process: agent subprocess.
         :param timeout: the timeout to wait for launch to complete
+        :return: bool indicating status
         """
         missing_strings = cls.missing_from_output(
             process, (LAUNCH_SUCCEED_MESSAGE,), timeout, is_terminating=False
@@ -934,6 +941,16 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
+
+
+def _get_password_option_args(password: Optional[str]) -> List[str]:
+    """
+    Get password option arguments.
+
+    :param password: the password (optional).
+    :return: empty list if password is None, else ['--password', password].
+    """
+    return [] if password is None else ["--password", password]
 
 
 class AEATestCaseEmpty(BaseAEATestCase):

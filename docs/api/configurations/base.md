@@ -36,7 +36,7 @@ Transform a Dependencies object into a JSON object.
 **Returns**:
 
 a dictionary whose keys are package names and
-values are the JSON version of a Dependency object.
+         values are the JSON version of a Dependency object.
 
 <a name="aea.configurations.base.ProtocolSpecificationParseError"></a>
 ## ProtocolSpecificationParseError Objects
@@ -130,10 +130,7 @@ Initialize a package configuration.
 - `author`: the author of the package.
 - `version`: the version of the package (SemVer format).
 - `license_`: the license.
-- `aea_version`: either a fixed version, or a set of specifiers
-describing the AEA versions allowed.
-(default: empty string - no constraint).
-The fixed version is interpreted with the specifier '=='.
+- `aea_version`: either a fixed version, or a set of specifiers describing the AEA versions allowed. (default: empty string - no constraint). The fixed version is interpreted with the specifier '=='.
 - `fingerprint`: the fingerprint.
 - `fingerprint_ignore_patterns`: a list of file patterns to ignore files to fingerprint.
 - `build_entrypoint`: path to a script to execute at build time.
@@ -281,10 +278,7 @@ Update configuration with other data.
 **Arguments**:
 
 - `data`: the data to replace.
-
-**Returns**:
-
-None
+- `env_vars_friendly`: whether or not it is env vars friendly.
 
 <a name="aea.configurations.base.PackageConfiguration.validate_config_data"></a>
 #### validate`_`config`_`data
@@ -315,7 +309,15 @@ Initialize from a JSON object.
 
 Make config data with overrides applied.
 
-Does not update config, just creates json representation
+Does not update config, just creates json representation.
+
+**Arguments**:
+
+- `overrides`: the overrides
+
+**Returns**:
+
+config with overrides applied
 
 <a name="aea.configurations.base.PackageConfiguration.check_overrides_valid"></a>
 #### check`_`overrides`_`valid
@@ -422,9 +424,15 @@ Check whether the component is abstract.
 
 Check that the fingerprint are correct against a directory path.
 
-:raises ValueError if:
-- the argument is not a valid package directory
-- the fingerprints do not match.
+**Arguments**:
+
+- `directory`: the directory path.
+
+**Raises**:
+
+- `ValueError`: if
+    - the argument is not a valid package directory
+    - the fingerprints do not match.
 
 <a name="aea.configurations.base.ComponentConfiguration.check_public_id_consistency"></a>
 #### check`_`public`_`id`_`consistency
@@ -435,9 +443,15 @@ Check that the fingerprint are correct against a directory path.
 
 Check that the public ids in the init file match the config.
 
-:raises ValueError if:
-- the argument is not a valid package directory
-- the public ids do not match.
+**Arguments**:
+
+- `directory`: the directory path.
+
+**Raises**:
+
+- `ValueError`: if
+    - the argument is not a valid package directory
+    - the public ids do not match.
 
 <a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
@@ -535,8 +549,8 @@ Initialize a skill component configuration.
 
 **Arguments**:
 
-- `skill_component_type`: the skill component type.
 - `class_name`: the class name of the component.
+- `file_path`: the file path.
 - `args`: keyword arguments.
 
 <a name="aea.configurations.base.SkillComponentConfiguration.json"></a>
@@ -614,7 +628,7 @@ Return the JSON representation.
  | get_overridable() -> dict
 ```
 
-Get overrideable confg data.
+Get overridable configuration data.
 
 <a name="aea.configurations.base.AgentConfig"></a>
 ## AgentConfig Objects
@@ -629,7 +643,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, registry_path: str = DEFAULT_REGISTRY_NAME, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None, dependencies: Optional[Dependencies] = None) -> None
+ | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, required_ledgers: Optional[List[str]] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, task_manager_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None, dependencies: Optional[Dependencies] = None) -> None
 ```
 
 Instantiate the agent configuration object.
@@ -728,10 +742,7 @@ mapping from ComponentId to configurations.
 **Arguments**:
 
 - `data`: the data to replace.
-
-**Returns**:
-
-None
+- `env_vars_friendly`: whether or not it is env vars friendly.
 
 <a name="aea.configurations.base.SpeechActContentConfig"></a>
 ## SpeechActContentConfig Objects

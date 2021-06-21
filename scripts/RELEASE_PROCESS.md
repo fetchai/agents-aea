@@ -23,7 +23,7 @@
 
 11. Tag version on main.
 
-12. Pull main, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
+12. Pull main, make a clean environment (`pipenv --rm` and `pipenv --python 3.7`) and create distributions: `make dist`.
 
 13. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
@@ -34,6 +34,6 @@
 
 16. Release packages into registry: `python scripts/deploy_to_registry.py`.
 
-17. Create and push Docker images `user-image` and `deploy-image`.
+17. Create and push Docker images `user-image` and `develop-image`.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.

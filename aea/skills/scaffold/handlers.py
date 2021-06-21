@@ -32,11 +32,7 @@ class MyScaffoldHandler(Handler):
     SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         raise NotImplementedError
 
     def handle(self, message: Message) -> None:
@@ -44,14 +40,9 @@ class MyScaffoldHandler(Handler):
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         raise NotImplementedError
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
         raise NotImplementedError

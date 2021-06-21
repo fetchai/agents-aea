@@ -84,7 +84,7 @@ class TestCreate:
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
 
         cls.result = cls.runner.invoke(
             cli,
@@ -139,9 +139,7 @@ class TestCreate:
             if version_no_micro < expected_aea_version
             else expected_aea_version
         )
-        version_next_minor = Version(
-            f"{expected_aea_version.major}.{expected_aea_version.minor + 1}.0"
-        )
+        version_next_minor = Version(f"{expected_aea_version.major + 1}.0.0")
         version_range = f">={version_no_micro}, <{version_next_minor}"
         assert self.agent_config["aea_version"] == version_range
 
@@ -317,6 +315,10 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
@@ -429,8 +431,6 @@ class TestCreateFailsWhenAlreadyInAEAProject:
 
         # calling 'aea create myagent' again within an AEA project - recursively.
         os.chdir(cls.agent_name)
-        os.mkdir("another_subdir")
-        os.chdir("another_subdir")
         cls.result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],

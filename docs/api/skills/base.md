@@ -21,8 +21,10 @@ This class implements the context of a skill.
 
 Initialize a skill context.
 
-:agent_context: the agent context.
-:skill: the skill.
+**Arguments**:
+
+- `agent_context`: the agent context.
+- `skill`: the skill.
 
 <a name="aea.skills.base.SkillContext.logger"></a>
 #### logger
@@ -116,7 +118,9 @@ Queue for the new behaviours.
 This queue can be used to send messages to the framework
 to request the registration of a behaviour.
 
-:return the queue of new behaviours.
+**Returns**:
+
+the queue of new behaviours.
 
 <a name="aea.skills.base.SkillContext.new_handlers"></a>
 #### new`_`handlers
@@ -131,7 +135,9 @@ Queue for the new handlers.
 This queue can be used to send messages to the framework
 to request the registration of a handler.
 
-:return the queue of new handlers.
+**Returns**:
+
+the queue of new handlers.
 
 <a name="aea.skills.base.SkillContext.agent_addresses"></a>
 #### agent`_`addresses
@@ -311,14 +317,12 @@ Get attribute.
 
 Send message or envelope to another skill.
 
+If message passed it will be wrapped into envelope with optional envelope context.
+
 **Arguments**:
 
 - `message_or_envelope`: envelope to send to another skill.
-if message passed it will be wrapped into envelope with optional envelope context.
-
-**Returns**:
-
-None
+- `context`: the optional envelope context
 
 <a name="aea.skills.base.SkillComponent"></a>
 ## SkillComponent Objects
@@ -343,6 +347,7 @@ Initialize a skill component.
 - `name`: the name of the component.
 - `configuration`: the configuration for the component.
 - `skill_context`: the skill context.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.skills.base.SkillComponent.name"></a>
 #### name
@@ -404,10 +409,6 @@ Get the config of the skill component.
 
 Implement the setup.
 
-**Returns**:
-
-None
-
 <a name="aea.skills.base.SkillComponent.teardown"></a>
 #### teardown
 
@@ -417,10 +418,6 @@ None
 ```
 
 Implement the teardown.
-
-**Returns**:
-
-None
 
 <a name="aea.skills.base.SkillComponent.parse_module"></a>
 #### parse`_`module
@@ -473,6 +470,13 @@ class Behaviour(AbstractBehaviour,  ABC)
 ```
 
 This class implements an abstract behaviour.
+
+In a subclass of Behaviour, the flag 'is_programmatically_defined'
+ can be used by the developer to signal to the framework that the class
+ is meant to be used programmatically; hence, in case the class is
+ not declared in the configuration file but it is present in a skill
+ module, the framework will just ignore this class instead of printing
+ a warning message.
 
 <a name="aea.skills.base.Behaviour.act"></a>
 #### act
@@ -534,6 +538,18 @@ class Handler(SkillComponent,  ABC)
 ```
 
 This class implements an abstract behaviour.
+
+In a subclass of Handler, the flag 'is_programmatically_defined'
+ can be used by the developer to signal to the framework that the component
+ is meant to be used programmatically; hence, in case the class is
+ not declared in the configuration file but it is present in a skill
+ module, the framework will just ignore this class instead of printing
+ a warning message.
+
+SUPPORTED_PROTOCOL is read by the framework when the handlers are loaded
+ to register them as 'listeners' to the protocol identified by the specified
+ public id. Whenever a message of protocol 'SUPPORTED_PROTOCOL' is sent
+ to the agent, the framework will call the 'handle' method.
 
 <a name="aea.skills.base.Handler.handle"></a>
 #### handle
@@ -606,10 +622,7 @@ Initialize a model.
 - `configuration`: the configuration for the component.
 - `skill_context`: the skill context.
 - `keep_terminal_state_dialogues`: specify do dialogues in terminal state should stay or not
-
-**Returns**:
-
-None
+- `kwargs`: the keyword arguments.
 
 <a name="aea.skills.base.Model.setup"></a>
 #### setup
@@ -674,6 +687,7 @@ Initialize a skill.
 - `handlers`: dictionary of handlers.
 - `behaviours`: dictionary of behaviours.
 - `models`: dictionary of models.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.skills.base.Skill.skill_context"></a>
 #### skill`_`context
@@ -728,7 +742,8 @@ Load the skill from a directory.
 **Arguments**:
 
 - `directory`: the directory to the skill package.
-- `agent_context`: the skill context
+- `agent_context`: the skill context.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
@@ -746,6 +761,10 @@ Get the logger.
 
 In the case of a skill, return the
 logger provided by the skill context.
+
+**Returns**:
+
+the logger
 
 <a name="aea.skills.base.Skill.logger"></a>
 #### logger
@@ -771,6 +790,7 @@ Load the skill from configuration.
 
 - `configuration`: a skill configuration. Must be associated with a directory.
 - `agent_context`: the agent context.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 

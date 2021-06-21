@@ -28,9 +28,11 @@ from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
+from aea.configurations.base import AgentConfig
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import PackageIdPrefix, PublicId
 from aea.crypto.plugin import load_all_plugins
+from aea.exceptions import enforce
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
 
@@ -46,6 +48,38 @@ class ProjectCheckError(ValueError):
         """Init exception."""
         super().__init__(msg)
         self.source_exception = source_exception
+
+
+class ProjectPackageConsistencyCheckError(ValueError):
+    """Check consistency of package versions against already added project."""
+
+    def __init__(
+        self,
+        agent_project_id: PublicId,
+        conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]],
+    ):
+        """
+        Initialize the exception.
+
+        :param agent_project_id: the agent project id whose addition has failed.
+        :param conflicting_packages: the conflicting packages.
+        """
+        self.agent_project_id = agent_project_id
+        self.conflicting_packages = conflicting_packages
+        super().__init__(self._build_error_message())
+
+    def _build_error_message(self) -> str:
+        """Build the error message."""
+        conflicting_packages = sorted(self.conflicting_packages, key=str)
+        message = f"cannot add project '{self.agent_project_id}': the following AEA dependencies have conflicts with previously added projects:\n"
+        for (
+            (type_, author, name),
+            existing_version,
+            new_version,
+            agents,
+        ) in conflicting_packages:
+            message += f"- '{author}/{name}' of type {type_}: the new version '{new_version}' conflicts with existing version '{existing_version}' of the same package required by agents: {list(agents)}\n"
+        return message
 
 
 class AgentRunAsyncTask:
@@ -164,8 +198,6 @@ class MultiAgentManager:
         :param registry_path: str. path to the local packages registry
         :param auto_add_remove_project: bool. add/remove project on the first agent add/last agent remove
         :param password: the password to encrypt/decrypt the private key.
-
-        :return: None
         """
         self.working_dir = working_dir
         self._auto_add_remove_project = auto_add_remove_project
@@ -186,7 +218,10 @@ class MultiAgentManager:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._event: Optional[asyncio.Event] = None
 
-        self._error_callbacks: List[Callable[[str, BaseException], None]] = []
+        self._error_callbacks: List[Callable[[str, BaseException], None]] = [
+            self._default_error_callback
+        ]
+        self._custom_callback_added: bool = False
         self._last_start_status: Optional[
             Tuple[
                 bool,
@@ -202,6 +237,19 @@ class MultiAgentManager:
         self._started_event = threading.Event()
         self._mode = mode
         self._password = password
+
+        # this flags will control whether we have already printed the warning message
+        # for a certain agent
+        self._warning_message_printed_for_agent: Dict[str, bool] = {}
+
+        # the dictionary keeps track of the AEA packages used across
+        # AEA projects in the same MAM.
+        # It maps package prefixes to a pair: (version, agent_ids)
+        # where agent_ids is the set of agent ids whose projects
+        # have the package in the key at the specific version.
+        self._package_id_prefix_to_version: Dict[
+            PackageIdPrefix, Tuple[str, Set[PublicId]]
+        ] = {}
 
     @property
     def data_dir(self) -> str:
@@ -224,6 +272,11 @@ class MultiAgentManager:
             "projects": [str(public_id) for public_id in self._projects.keys()],
             "agents": [alias.dict for alias in self._agents.values()],
         }
+
+    @property
+    def projects(self) -> Dict[PublicId, Project]:
+        """Get all projects."""
+        return self._projects
 
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
@@ -265,9 +318,14 @@ class MultiAgentManager:
 
     def add_error_callback(
         self, error_callback: Callable[[str, BaseException], None]
-    ) -> None:
+    ) -> "MultiAgentManager":
         """Add error callback to call on error raised."""
+        if len(self._error_callbacks) == 1 and not self._custom_callback_added:
+            # only default callback present, reset before adding new callback
+            self._custom_callback_added = True
+            self._error_callbacks = []
         self._error_callbacks.append(error_callback)
+        return self
 
     def start_manager(
         self, local: bool = False, remote: bool = False
@@ -351,6 +409,7 @@ class MultiAgentManager:
             self._thread.join(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
         self._thread = None
+        self._warning_message_printed_for_agent = {}
         return self
 
     def _cleanup(self, only_data: bool = False) -> None:
@@ -376,17 +435,15 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
-
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
+        :return: self
         """
         if public_id.to_any() in self._versionless_projects_set:
             raise ValueError(
                 f"The project ({public_id.author}/{public_id.name}) was already added!"
             )
-
-        self._versionless_projects_set.add(public_id.to_any())
 
         project = Project.load(
             self.working_dir,
@@ -395,12 +452,15 @@ class MultiAgentManager:
             remote,
             registry_path=self.registry_path,
             is_restore=restore,
+            skip_aea_validation=False,
         )
 
         if not restore:
             project.install_pypi_dependencies()
             load_all_plugins(is_raising_exception=False)
             project.build()
+
+        self._check_version_consistency(project.agent_config)
 
         try:
             project.check()
@@ -410,6 +470,8 @@ class MultiAgentManager:
                 f"Failed to load project: {public_id} Error: {str(e)}", e
             )
 
+        self._add_new_package_versions(project.agent_config)
+        self._versionless_projects_set.add(public_id.to_any())
         self._projects[public_id] = project
         return self
 
@@ -426,6 +488,7 @@ class MultiAgentManager:
             )
 
         project = self._projects.pop(public_id)
+        self._remove_package_versions(project.agent_config)
         self._versionless_projects_set.remove(public_id.to_any())
         if not keep_files:
             project.remove()
@@ -459,13 +522,10 @@ class MultiAgentManager:
         :param agent_name: unique name for the agent
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
-        :param config: agent config (used for agent re-creation).
-
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
-
-        :return: manager
+        :return: self
         """
         agent_name = agent_name or public_id.name
 
@@ -545,15 +605,14 @@ class MultiAgentManager:
         agent_name: str,
         agent_overides: Optional[Dict],
         components_overrides: Optional[List[Dict]],
-    ) -> None:
+    ) -> "MultiAgentManager":
         """
         Set agent overrides.
 
         :param agent_name: str
         :param agent_overides: optional dict of agent config overrides
         :param components_overrides: optional list of dict of components overrides
-
-        :return: None
+        :return: self
         """
         if agent_name not in self._agents:  # pragma: nocover
             raise ValueError(f"Agent with name {agent_name} does not exist!")
@@ -562,6 +621,7 @@ class MultiAgentManager:
             raise ValueError("Agent is running. stop it first!")
 
         self._agents[agent_name].set_overrides(agent_overides, components_overrides)
+        return self
 
     def list_agents_info(self) -> List[Dict[str, Any]]:
         """
@@ -682,7 +742,7 @@ class MultiAgentManager:
 
         :param agent_name: agent name to stop
 
-        :return: None
+        :return: self
         """
         if not self._is_agent_running(agent_name) or not self._thread or not self._loop:
             raise ValueError(f"{agent_name} is not running!")
@@ -717,7 +777,7 @@ class MultiAgentManager:
         """
         Stop all agents running.
 
-        :return: None
+        :return: self
         """
         agents_list = self.list_agents(running_only=True)
         self.stop_agents(agents_list)
@@ -728,7 +788,8 @@ class MultiAgentManager:
         """
         Stop specified agents.
 
-        :return: None
+        :param agent_names: names of agents
+        :return: self
         """
         for agent_name in agent_names:
             if not self._is_agent_running(agent_name):
@@ -743,7 +804,8 @@ class MultiAgentManager:
         """
         Stop specified agents.
 
-        :return: None
+        :param agent_names: names of agents
+        :return: self
         """
         for agent_name in agent_names:
             self.start_agent(agent_name)
@@ -754,6 +816,7 @@ class MultiAgentManager:
         """
         Return details about agent alias definition.
 
+        :param agent_name: name of agent
         :return: AgentAlias
         """
         if agent_name not in self._agents:  # pragma: nocover
@@ -788,7 +851,7 @@ class MultiAgentManager:
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
 
-        :return: None
+        :return: Tuple of bool indicating load success, settings of loaded, list of failed
         :raises: ValueError if failed to load state.
         """
         if not os.path.exists(self._save_path):
@@ -820,7 +883,6 @@ class MultiAgentManager:
                 break
 
             for agent_settings in agents_settings:
-
                 self.add_agent_with_config(
                     public_id=PublicId.from_str(agent_settings["public_id"]),
                     agent_name=agent_settings["agent_name"],
@@ -832,10 +894,136 @@ class MultiAgentManager:
         return True, loaded_ok, failed_to_load
 
     def _save_state(self) -> None:
-        """
-        Save MultiAgentManager state.
-
-        :return: None.
-        """
+        """Save MultiAgentManager state."""
         with open_file(self._save_path, "w") as f:
             json.dump(self.dict_state, f, indent=4, sort_keys=True)
+
+    def _default_error_callback(
+        self, agent_name: str, exception: BaseException
+    ) -> None:
+        """
+        Handle errors from running agents.
+
+        This is the default error callback. To replace it
+        with another one, use the method 'add_error_callback'.
+
+        :param agent_name: the agent name
+        :param exception: the caught exception
+        """
+        self._print_exception_occurred_but_no_error_callback(agent_name, exception)
+
+    def _print_exception_occurred_but_no_error_callback(
+        self, agent_name: str, exception: BaseException
+    ) -> None:
+        """
+        Print a warning message when an exception occurred but no error callback is registered.
+
+        :param agent_name: the agent name.
+        :param exception: the caught exception.
+        """
+        if self._warning_message_printed_for_agent.get(agent_name, False):
+            return  # pragma: nocover
+        self._warning_message_printed_for_agent[agent_name] = True
+        print(
+            f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
+            str(exception),
+            "\nHowever, since no error callback was found the exception is handled silently. Please "
+            "add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
+        )
+
+    def _check_version_consistency(self, agent_config: AgentConfig) -> None:
+        """
+        Check that the agent dependencies in input are consistent with the other projects.
+
+        :param agent_config: the agent configuration we are going to add.
+        :return: None
+        :raises ProjectPackageConsistencyCheckError: if a version conflict is detected.
+        """
+        existing_packages = set(self._package_id_prefix_to_version.keys())
+        prefix_to_version = {
+            component_id.component_prefix: component_id.version
+            for component_id in agent_config.package_dependencies
+        }
+        component_prefixes_to_be_added = set(prefix_to_version.keys())
+
+        potentially_conflicting_packages = existing_packages.intersection(
+            component_prefixes_to_be_added
+        )
+        if len(potentially_conflicting_packages) == 0:
+            return
+
+        # conflicting_packages is a list of tuples whose elements are:
+        # - package id prefix: the triple (component type, author, name)
+        # - current_version: the version currently present in the MAM, across all projects
+        # - new_version: the version of the package in the new project
+        # - agents: the set of agents in the MAM that have the package;
+        #           used to provide a better error message
+        conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]] = []
+        for package_prefix in potentially_conflicting_packages:
+            existing_version, agents = self._package_id_prefix_to_version[
+                package_prefix
+            ]
+            new_version = prefix_to_version[package_prefix]
+            if existing_version != new_version:
+                conflicting_packages.append(
+                    (package_prefix, existing_version, new_version, agents)
+                )
+
+        if len(conflicting_packages) == 0:
+            return
+
+        raise ProjectPackageConsistencyCheckError(
+            agent_config.public_id, conflicting_packages
+        )
+
+    def _add_new_package_versions(self, agent_config: AgentConfig) -> None:
+        """
+        Add new package versions.
+
+        This method is called whenever a project agent is added.
+        It updates an internal data structure that it is used to
+        check inconsistencies of AEA package versions across projects.
+        In particular, all the AEA packages with the same "prefix" must
+        be of the same version.
+
+        :param agent_config: the agent configuration.
+        """
+        for component_id in agent_config.package_dependencies:
+            if component_id.component_prefix not in self._package_id_prefix_to_version:
+                self._package_id_prefix_to_version[component_id.component_prefix] = (
+                    component_id.version,
+                    set(),
+                )
+            version, agents = self._package_id_prefix_to_version[
+                component_id.component_prefix
+            ]
+            enforce(
+                version == component_id.version,
+                f"internal consistency error: expected version '{version}', found {component_id.version}",
+            )
+            agents.add(agent_config.public_id)
+
+    def _remove_package_versions(self, agent_config: AgentConfig) -> None:
+        """
+        Remove package versions.
+
+        This method is called whenever a project agent is removed.
+        It updates an internal data structure that it is used to
+        check inconsistencies of AEA package versions across projects.
+        In particular, all the AEA packages with the same "prefix" must
+        be of the same version.
+
+        :param agent_config: the agent configuration.
+        """
+        package_prefix_to_remove = set()
+        for (
+            package_prefix,
+            (_version, agents),
+        ) in self._package_id_prefix_to_version.items():
+            if agent_config.public_id in agents:
+                agents.remove(agent_config.public_id)
+                if len(agents) == 0:
+                    package_prefix_to_remove.add(package_prefix)
+
+        for package_prefix in package_prefix_to_remove:
+            self._package_id_prefix_to_version.pop(package_prefix)

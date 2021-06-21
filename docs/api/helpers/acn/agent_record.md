@@ -1,7 +1,7 @@
 <a name="aea.helpers.acn.agent_record"></a>
 # aea.helpers.acn.agent`_`record
 
-This module contains types and helpers for acn Proof-of-Representation.
+This module contains types and helpers for ACN Proof-of-Representation.
 
 <a name="aea.helpers.acn.agent_record.AgentRecord"></a>
 ## AgentRecord Objects
@@ -16,7 +16,7 @@ Agent Proof-of-Representation to representative.
 #### `__`init`__`
 
 ```python
- | __init__(address: str, representative_public_key: str, message: bytes, signature: str, ledger_id: str) -> None
+ | __init__(address: str, representative_public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, signature: str) -> None
 ```
 
 Initialize the AgentRecord
@@ -25,9 +25,12 @@ Initialize the AgentRecord
 
 - `address`: agent address
 - `representative_public_key`: representative's public key
-- `message`: message to be signed as proof-of-represenation of this AgentRecord
+- `identifier`: certificate identifier.
+- `ledger_id`: ledger identifier the request is referring to.
+- `not_before`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+- `not_after`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+- `message_format`: message format used for signing
 - `signature`: proof-of-representation of this AgentRecord
-- `ledger_id`: ledger id
 
 <a name="aea.helpers.acn.agent_record.AgentRecord.address"></a>
 #### address
@@ -79,15 +82,55 @@ Get record signature
 
 Get the message.
 
+<a name="aea.helpers.acn.agent_record.AgentRecord.identifier"></a>
+#### identifier
+
+```python
+ | @property
+ | identifier() -> SimpleIdOrStr
+```
+
+Get the identifier.
+
 <a name="aea.helpers.acn.agent_record.AgentRecord.ledger_id"></a>
 #### ledger`_`id
 
 ```python
  | @property
- | ledger_id() -> str
+ | ledger_id() -> SimpleIdOrStr
 ```
 
 Get ledger id.
+
+<a name="aea.helpers.acn.agent_record.AgentRecord.not_before"></a>
+#### not`_`before
+
+```python
+ | @property
+ | not_before() -> str
+```
+
+Get the not_before field.
+
+<a name="aea.helpers.acn.agent_record.AgentRecord.not_after"></a>
+#### not`_`after
+
+```python
+ | @property
+ | not_after() -> str
+```
+
+Get the not_after field.
+
+<a name="aea.helpers.acn.agent_record.AgentRecord.message_format"></a>
+#### message`_`format
+
+```python
+ | @property
+ | message_format() -> str
+```
+
+Get the message format.
 
 <a name="aea.helpers.acn.agent_record.AgentRecord.__str__"></a>
 #### `__`str`__`

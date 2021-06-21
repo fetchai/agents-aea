@@ -62,6 +62,9 @@ class BaseRuntime(Runnable, WithLogger):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
+    TASKMANAGERS = {"threaded": TaskManager}
+    DEFAULT_TASKMANAGER = "threaded"
+
     def __init__(
         self,
         agent: AbstractAgent,
@@ -69,14 +72,17 @@ class BaseRuntime(Runnable, WithLogger):
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
         threaded: bool = False,
+        task_manager_mode: Optional[str] = None,
     ) -> None:
         """
         Init runtime.
 
         :param agent: Agent to run.
+        :param multiplexer_options: options for the multiplexer.
         :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
-        :return: None
+        :param threaded: if True, run in threaded mode, else async
+        :param task_manager_mode: mode of the task manager.
         """
         Runnable.__init__(self, threaded=threaded, loop=loop if not threaded else None)
         logger = get_logger(__name__, agent.name)
@@ -88,7 +94,8 @@ class BaseRuntime(Runnable, WithLogger):
         self._multiplexer: AsyncMultiplexer = self._get_multiplexer_instance(
             multiplexer_options
         )
-        self._task_manager = TaskManager()
+        self._task_manager_mode = task_manager_mode or self.DEFAULT_TASKMANAGER
+        self._task_manager = self._get_taskmanager_instance()
         self._decision_maker: Optional[DecisionMaker] = None
         self._storage: Optional[Storage] = self._get_storage(agent)
 
@@ -98,6 +105,15 @@ class BaseRuntime(Runnable, WithLogger):
     def _log_runtime_state(self, state: RuntimeStates) -> None:
         """Log a runtime state changed."""
         self.logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
+
+    def _get_taskmanager_instance(self) -> TaskManager:
+        """Get taskmanager instance."""
+        if self._task_manager_mode not in self.TASKMANAGERS:
+            raise ValueError(  # pragma: nocover
+                f"Task manager mode `{self._task_manager_mode} is not supported. valid are: `{list(self.TASKMANAGERS.keys())}`"
+            )
+        cls = self.TASKMANAGERS[self._task_manager_mode]
+        return cls()
 
     def _get_multiplexer_instance(
         self, multiplexer_options: Dict, threaded: bool = False
@@ -258,9 +274,10 @@ class AsyncRuntime(BaseRuntime):
         Init runtime.
 
         :param agent: Agent to run.
+        :param multiplexer_options: options for the multiplexer.
         :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
-        :return: None
+        :param threaded: if True, run in threaded mode, else async
         """
         super().__init__(
             agent=agent,

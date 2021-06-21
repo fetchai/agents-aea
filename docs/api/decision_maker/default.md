@@ -33,16 +33,13 @@ Initialize dialogues.
 **Arguments**:
 
 - `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
+- `kwargs`: the keyword arguments
 
 <a name="aea.decision_maker.default.DecisionMakerHandler.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet) -> None
+ | __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any]) -> None
 ```
 
 Initialize the decision maker.
@@ -51,6 +48,7 @@ Initialize the decision maker.
 
 - `identity`: the identity
 - `wallet`: the wallet
+- `config`: the user defined configuration of the handler
 
 <a name="aea.decision_maker.default.DecisionMakerHandler.handle"></a>
 #### handle
@@ -64,8 +62,4 @@ Handle an internal message from the skills.
 **Arguments**:
 
 - `message`: the internal message
-
-**Returns**:
-
-None
 

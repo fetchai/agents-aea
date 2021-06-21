@@ -39,9 +39,12 @@ from aea.crypto.registries import (
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    ETHEREUM_PRIVATE_KEY_TWO_PATH,
     FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
+    get_register_erc1155,
 )
 
 
@@ -242,6 +245,111 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "from"]
         ]
     ), "Error, found: {}".format(tx)
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_full(update_default_ethereum_ledger_api, ganache):
+    """Setup."""
+    ledger_api = ledger_apis_registry.make(EthereumCrypto.identifier)
+    deployer_crypto = crypto_registry.make(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
+    )
+    item_owner_crypto = crypto_registry.make(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH
+    )
+
+    contract = get_register_erc1155()
+
+    # Test tokens IDs
+    token_ids = contract.generate_token_ids(token_type=2, nb_tokens=10)
+
+    # deploy
+    tx = contract.get_deploy_transaction(
+        ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=5000000,
+    )
+    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    tx["gas"] = gas
+    tx_signed = deployer_crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    contract_address = cast(Dict, receipt)["contractAddress"]
+
+    # create
+    tx = contract.get_create_batch_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        deployer_address=deployer_crypto.address,
+        token_ids=token_ids,
+    )
+    tx_signed = deployer_crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    assert ledger_api.is_transaction_settled(receipt)
+
+    mint_quantities = [10] * len(token_ids)
+    # mint
+    tx = contract.get_mint_batch_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        deployer_address=deployer_crypto.address,
+        recipient_address=deployer_crypto.address,
+        token_ids=token_ids,
+        mint_quantities=mint_quantities,
+    )
+    tx_signed = deployer_crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    assert ledger_api.is_transaction_settled(receipt)
+
+    tx = contract.get_mint_batch_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        deployer_address=deployer_crypto.address,
+        recipient_address=item_owner_crypto.address,
+        token_ids=token_ids,
+        mint_quantities=mint_quantities,
+    )
+    tx_signed = deployer_crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    assert ledger_api.is_transaction_settled(receipt)
+
+    #  batch trade
+    from_address = deployer_crypto.address
+    to_address = item_owner_crypto.address
+    from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
+    to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+    value = 0
+    trade_nonce = 1
+    tx_hash = contract.get_hash_batch(
+        ledger_api,
+        contract_address,
+        from_address,
+        to_address,
+        token_ids,
+        from_supplies,
+        to_supplies,
+        value,
+        trade_nonce,
+    )
+    signature = item_owner_crypto.sign_message(tx_hash, is_deprecated_mode=True)
+    tx = contract.get_atomic_swap_batch_transaction(
+        ledger_api=ledger_api,
+        contract_address=contract_address,
+        from_address=from_address,
+        to_address=to_address,
+        token_ids=token_ids,
+        from_supplies=from_supplies,
+        to_supplies=to_supplies,
+        value=value,
+        trade_nonce=trade_nonce,
+        signature=signature,
+    )
+    tx_signed = deployer_crypto.sign_transaction(tx)
+    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
+    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    assert ledger_api.is_transaction_settled(receipt)
 
 
 class TestCosmWasmContract:

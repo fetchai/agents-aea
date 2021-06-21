@@ -97,15 +97,11 @@ Get the contracts.
  | add_component(configuration: ComponentConfiguration) -> None
 ```
 
-Add a component to the dependency manager..
+Add a component to the dependency manager.
 
 **Arguments**:
 
 - `configuration`: the component configuration to add.
-
-**Returns**:
-
-None
 
 <a name="aea.aea_builder._DependenciesManager.remove_component"></a>
 #### remove`_`component
@@ -116,7 +112,9 @@ None
 
 Remove a component.
 
-:return None
+**Arguments**:
+
+- `component_id`: the component id
 
 **Raises**:
 
@@ -212,6 +210,8 @@ Initialize the builder.
 **Arguments**:
 
 - `with_default_packages`: add the default packages.
+- `registry_dir`: the registry directory.
+- `build_dir_root`: the root of the build directory.
 
 <a name="aea.aea_builder.AEABuilder.reset"></a>
 #### reset
@@ -224,17 +224,13 @@ Reset the builder.
 
 A full reset causes a reset of all data on the builder. A partial reset
 only resets:
-- name,
-- private keys, and
-- component instances
+    - name,
+    - private keys, and
+    - component instances
 
 **Arguments**:
 
 - `is_full_reset`: whether it is a full reset or not.
-
-**Returns**:
-
-None
 
 <a name="aea.aea_builder.AEABuilder.set_period"></a>
 #### set`_`period
@@ -287,37 +283,39 @@ Set agent max reaction in one react.
 
 self
 
-<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler_paths"></a>
-#### set`_`decision`_`maker`_`handler`_`paths
+<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler_details"></a>
+#### set`_`decision`_`maker`_`handler`_`details
 
 ```python
- | set_decision_maker_handler_paths(decision_maker_handler_dotted_path: str, file_path: Optional[str]) -> "AEABuilder"
+ | set_decision_maker_handler_details(decision_maker_handler_dotted_path: str, file_path: str, config: Dict[str, Any]) -> "AEABuilder"
 ```
 
-Set decision maker handler class.
+Set error handler details.
 
 **Arguments**:
 
 - `decision_maker_handler_dotted_path`: the dotted path to the decision maker handler
 - `file_path`: the file path to the file which contains the decision maker handler
+- `config`: the configuration passed to the decision maker handler on instantiation
 
 **Returns**:
 
 self
 
-<a name="aea.aea_builder.AEABuilder.set_error_handler"></a>
-#### set`_`error`_`handler
+<a name="aea.aea_builder.AEABuilder.set_error_handler_details"></a>
+#### set`_`error`_`handler`_`details
 
 ```python
- | set_error_handler(error_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+ | set_error_handler_details(error_handler_dotted_path: str, file_path: str, config: Dict[str, Any]) -> "AEABuilder"
 ```
 
-Set error handler class.
+Set error handler details.
 
 **Arguments**:
 
 - `error_handler_dotted_path`: the dotted path to the error handler
 - `file_path`: the file path to the file which contains the error handler
+- `config`: the configuration passed to the error handler on instantiation
 
 **Returns**:
 
@@ -347,11 +345,11 @@ self
  | set_connection_exception_policy(connection_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
 ```
 
-Set skill exception policy.
+Set connection exception policy.
 
 **Arguments**:
 
-- `skill_exception_policy`: the policy
+- `connection_exception_policy`: the policy
 
 **Returns**:
 
@@ -410,6 +408,23 @@ Set the runtime mode.
 
 self
 
+<a name="aea.aea_builder.AEABuilder.set_task_manager_mode"></a>
+#### set`_`task`_`manager`_`mode
+
+```python
+ | set_task_manager_mode(task_manager_mode: Optional[str]) -> "AEABuilder"
+```
+
+Set the task_manager_mode.
+
+**Arguments**:
+
+- `task_manager_mode`: the agent task_manager_mode
+
+**Returns**:
+
+self
+
 <a name="aea.aea_builder.AEABuilder.set_storage_uri"></a>
 #### set`_`storage`_`uri
 
@@ -419,7 +434,9 @@ self
 
 Set the storage uri.
 
-:param storage uri:  storage uri
+**Arguments**:
+
+- `storage_uri`: storage uri
 
 **Returns**:
 
@@ -527,7 +544,7 @@ Add a private key path.
 
 - `identifier`: the identifier for that private key path.
 - `private_key_path`: an (optional) path to the private key file.
-If None, the key will be created at build time.
+    If None, the key will be created at build time.
 - `is_connection`: if the pair is for the connection cryptos
 
 **Returns**:
@@ -589,6 +606,25 @@ Set a default ledger API to use.
 
 the AEABuilder
 
+<a name="aea.aea_builder.AEABuilder.set_required_ledgers"></a>
+#### set`_`required`_`ledgers
+
+```python
+ | set_required_ledgers(required_ledgers: Optional[List[str]]) -> "AEABuilder"
+```
+
+Set the required ledger identifiers.
+
+These are the ledgers for which the AEA requires a key pair.
+
+**Arguments**:
+
+- `required_ledgers`: the required ledgers.
+
+**Returns**:
+
+the AEABuilder.
+
 <a name="aea.aea_builder.AEABuilder.set_build_entrypoint"></a>
 #### set`_`build`_`entrypoint
 
@@ -613,7 +649,7 @@ the AEABuilder
  | set_currency_denominations(currency_denominations: Dict[str, str]) -> "AEABuilder"
 ```
 
-Set the mapping from ledger ids to currency denomincations.
+Set the mapping from ledger ids to currency denominations.
 
 **Arguments**:
 
@@ -640,8 +676,8 @@ Add a component, given its type and the directory.
 
 **Raises**:
 
-- `AEAException`: if a component is already registered with the same component id.
-| or if there's a missing dependency.
+- `AEAException`: if a component is already registered with the same component id.   # noqa: DAR402
+                    | or if there's a missing dependency.  # noqa: DAR402
 
 **Returns**:
 
@@ -664,6 +700,10 @@ You will have to `reset()` the builder before calling `build()` again.
 **Arguments**:
 
 - `component`: Component instance already initialized.
+
+**Returns**:
+
+self
 
 <a name="aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
@@ -879,13 +919,13 @@ Run a build entrypoint script for component configuration.
  | install_pypi_dependencies() -> None
 ```
 
-Install components extra dependecies.
+Install components extra dependencies.
 
 <a name="aea.aea_builder.AEABuilder.build"></a>
 #### build
 
 ```python
- | build(connection_ids: Optional[Collection[PublicId]] = None) -> AEA
+ | build(connection_ids: Optional[Collection[PublicId]] = None, password: Optional[str] = None) -> AEA
 ```
 
 Build the AEA.
@@ -900,14 +940,11 @@ via 'add_component_instance' and the private keys.
 **Arguments**:
 
 - `connection_ids`: select only these connections to run the AEA.
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 
 the AEA object.
-
-**Raises**:
-
-- `ValueError`: if we cannot
 
 <a name="aea.aea_builder.AEABuilder.get_default_ledger"></a>
 #### get`_`default`_`ledger
@@ -921,6 +958,21 @@ Return default ledger.
 **Returns**:
 
 the default ledger identifier.
+
+<a name="aea.aea_builder.AEABuilder.get_required_ledgers"></a>
+#### get`_`required`_`ledgers
+
+```python
+ | get_required_ledgers() -> List[str]
+```
+
+Get the required ledger identifiers.
+
+These are the ledgers for which the AEA requires a key pair.
+
+**Returns**:
+
+the list of required ledgers.
 
 <a name="aea.aea_builder.AEABuilder.try_to_load_agent_configuration_file"></a>
 #### try`_`to`_`load`_`agent`_`configuration`_`file
@@ -947,16 +999,12 @@ Set builder variables from AgentConfig.
 - `aea_project_path`: PathLike root directory of the agent project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
 
-**Returns**:
-
-None
-
 <a name="aea.aea_builder.AEABuilder.from_aea_project"></a>
 #### from`_`aea`_`project
 
 ```python
  | @classmethod
- | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, create_keys: bool = True) -> "AEABuilder"
+ | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, password: Optional[str] = None) -> "AEABuilder"
 ```
 
 Construct the builder from an AEA project.
@@ -972,7 +1020,7 @@ Construct the builder from an AEA project.
 
 - `aea_project_path`: path to the AEA project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
-- `create_keys`: if True, create keys, otherwise just verify
+- `password`: the password to encrypt/decrypt private keys.
 
 **Returns**:
 

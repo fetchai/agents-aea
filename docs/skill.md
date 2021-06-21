@@ -76,7 +76,7 @@ There can be one or more `Behaviour` classes per skill. The developer must creat
 A behaviour can be registered in two ways:
 
 - By declaring it in the skill configuration file `skill.yaml` (see <a href="../skill/#skill-config">below</a>)
-- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
+- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`. In that case, `setup`is not called by the framework, as the behaviour will be added after the AEA setup is complete.
 
 The framework supports different types of behaviours:
 
@@ -262,7 +262,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.13.0
+- fetchai/default:1.0.0
 ```
 
 
@@ -275,7 +275,7 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.13.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:1.0.0` protocol which provides error codes for the above.
 
 
 ## Custom Error handler

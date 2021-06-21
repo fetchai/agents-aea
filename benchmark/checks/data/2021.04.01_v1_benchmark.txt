@@ -1,0 +1,113 @@
+Performance report for 01.04.2021
+-----------------------------
+
+Multi agents with http dialogues: number of runs: 100, num_agents: 10, messages: 100
+------------------------------------------------------------------
+runtime mode     duration       value          mean        stdev
+------------------------------------------------------------------
+async		     2		    mem	     63.065273    0.41207
+async		     5		    mem	     64.22625    0.379626
+async		     10		    mem	     66.182461    0.40166
+async		     20		    mem	     69.05918    0.282377
+async		     30		    mem	     71.520469    0.438192
+async		     50		    mem	     76.893984    0.882001
+
+
+Message generation and allocation: number of runs: 100
+------------------------------------------------------------------
+message        value          mean        stdev
+------------------------------------------------------------------
+10000		    mem	     0.304688    0.051566
+10000		    time     0.509305    0.031975
+50000		    mem	     6.645781    0.065213
+50000		    time     2.743519    0.10603
+100000		    mem	     14.294063    0.024781
+100000		    time     5.541937    0.326452
+
+
+Dialogues message processing: number of runs: 100
+------------------------------------------------------------------
+message        value          mean        stdev
+------------------------------------------------------------------
+10000		    mem	     7.238008    0.065209
+10000		    time     3.555162    0.141159
+20000		    mem	     14.319102    0.025112
+20000		    time     6.942097    0.232013
+50000		    mem	     38.223203    0.139953
+50000		    time     17.392467    0.503368
+
+
+
+Reactive: number of runs: 100, duration: 10
+----------------------------------------------------
+runtime mode        value          mean        stdev
+----------------------------------------------------
+threaded    latency     1350.913681    39.467721
+threaded    rate     654.473    17.384876
+async    latency     1094.870201    46.66503
+async    rate     788.42    28.667664
+
+Proactive: number of runs: 100, duration: 10
+----------------------------------------------------
+runtime mode        value          mean        stdev
+----------------------------------------------------
+threaded    rate     3136.821    50.660694
+async    rate     0.791    0.028762
+
+MultiAgent: number of runs: 100, duration: 10, messages: 100
+------------------------------------------------------------------
+runtime mode     num_agents       value          mean        stdev
+------------------------------------------------------------------
+threaded     2    rate     675.654    13.657716
+threaded     2    mem     48.126836    0.176016
+threaded     2    RTT     0.596222    0.011607
+threaded     2    latency     0.297669    0.005628
+threaded     4    rate     679.966    17.678088
+threaded     4    mem     49.095859    0.218971
+threaded     4    RTT     3.662645    0.078505
+threaded     4    latency     1.802625    0.03475
+threaded     8    rate     1449.882    281.714217
+threaded     8    mem     52.813281    0.467479
+threaded     8    RTT     19.373796    3.780258
+threaded     8    latency     10.401749    1.717344
+threaded     16    rate     4735.086    1410.656106
+threaded     16    mem     61.390781    1.540248
+threaded     16    RTT     60.171576    14.865577
+threaded     16    latency     35.057816    9.472234
+threaded     32    rate     14810.817    6722.336041
+threaded     32    mem     87.794141    8.46622
+threaded     32    RTT     189.72728    79.581276
+threaded     32    latency     122.309386    51.589368
+threaded     64    rate     27860.344    18340.58782
+threaded     64    mem     163.312305    44.267701
+threaded     64    RTT     419.02488    271.182984
+threaded     64    latency     282.563078    179.758986
+threaded     128    rate     49397.043    18398.274532
+threaded     128    mem     294.158906    103.471503
+threaded     128    RTT     855.809125    483.501904
+threaded     128    latency     568.189828    301.868828
+async     2    rate     670.926    13.463461
+async     2    mem     48.149766    0.174008
+async     2    RTT     0.597284    0.012575
+async     2    latency     0.298328    0.006285
+async     4    rate     609.235    11.144201
+async     4    mem     49.121719    0.154711
+async     4    RTT     3.841597    0.070842
+async     4    latency     1.858407    0.038073
+async     8    rate     548.831    25.953609
+async     8    mem     51.70832    0.193377
+async     8    RTT     2.237455    4.020524
+async     8    latency     6.375603    0.453957
+async     16    rate     2249.182    823.35554
+async     16    mem     55.84707    0.714784
+async     16    RTT     28.762427    25.072808
+async     16    latency     28.067046    12.508153
+async     32    rate     3961.37    3479.249814
+async     32    mem     70.209453    2.544705
+async     32    RTT     38.147726    78.039112
+async     32    latency     42.875331    68.118355
+async     64    rate     7647.276    2359.938405
+async     64    mem     132.389844    13.37811
+async     64    RTT     167.018874    138.893537
+async     64    latency     65.395231    79.366779
+

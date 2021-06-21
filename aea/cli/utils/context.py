@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """A module with context tools of the aea cli."""
 import os
 from pathlib import Path
@@ -34,6 +33,7 @@ from aea.configurations.constants import (
     CONNECTION,
     CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_REGISTRY_NAME,
     PROTOCOL,
     SKILL,
     VENDOR,
@@ -47,43 +47,82 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(
-        self,
-        cwd: str = ".",
-        verbosity: str = "INFO",
-        registry_path: Optional[str] = None,
-    ) -> None:
+    def __init__(self, cwd: str, verbosity: str, registry_path: Optional[str]) -> None:
         """Init the context."""
         self.config = dict()  # type: Dict
         self.cwd = cwd
         self.verbosity = verbosity
         self.clean_paths: List = []
-        self.registry_path = registry_path
+        self._registry_path = registry_path
+
+    @property
+    def registry_path(self) -> str:
+        """Get registry path specified or from config or default one with check is it present."""
+        # registry path is provided or in config or default
+        if self._registry_path:
+            registry_path = Path(self._registry_path)
+            if not (registry_path.exists() and registry_path.is_dir()):
+                raise ValueError(
+                    f"Registry path directory provided ({self._registry_path}) can not be found. Current work dir is {self.cwd}"
+                )
+            return str(registry_path)
+
+        registry_path = (Path(self.cwd) / DEFAULT_REGISTRY_NAME).absolute()
+        if registry_path.is_dir():
+            return str(registry_path)
+        registry_path = (Path(self.cwd) / ".." / DEFAULT_REGISTRY_NAME).absolute()
+        if registry_path.is_dir():
+            return str(registry_path)
+        raise ValueError(
+            f"Registry path not provided and local registry `{DEFAULT_REGISTRY_NAME}` not found in current ({self.cwd}) and parent directory."
+        )
+
+    @property
+    def skip_aea_validation(self) -> bool:
+        """
+        Get the 'skip_aea_validation' flag.
+
+        If true, validation of the AEA version for loaded configuration
+        file is skipped.
+
+        :return: the 'skip_aea_validation'
+        """
+        return self.config.get("skip_aea_validation", True)
 
     @property
     def agent_loader(self) -> ConfigLoader:
         """Get the agent loader."""
-        return ConfigLoader.from_configuration_type(PackageType.AGENT)
+        return ConfigLoader.from_configuration_type(
+            PackageType.AGENT, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def protocol_loader(self) -> ConfigLoader:
         """Get the protocol loader."""
-        return ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+        return ConfigLoader.from_configuration_type(
+            PackageType.PROTOCOL, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def connection_loader(self) -> ConfigLoader:
         """Get the connection loader."""
-        return ConfigLoader.from_configuration_type(PackageType.CONNECTION)
+        return ConfigLoader.from_configuration_type(
+            PackageType.CONNECTION, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def skill_loader(self) -> ConfigLoader:
         """Get the skill loader."""
-        return ConfigLoader.from_configuration_type(PackageType.SKILL)
+        return ConfigLoader.from_configuration_type(
+            PackageType.SKILL, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def contract_loader(self) -> ConfigLoader:
         """Get the contract loader."""
-        return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
+        return ConfigLoader.from_configuration_type(
+            PackageType.CONTRACT, skip_aea_validation=self.skip_aea_validation
+        )
 
     def set_config(self, key: str, value: Any) -> None:
         """
@@ -91,7 +130,6 @@ class Context:
 
         :param key: the key for the configuration.
         :param value: the value associated with the key.
-        :return: None
         """
         self.config[key] = value
         logger.debug("  config[{}] = {}".format(key, value))
@@ -121,7 +159,7 @@ class Context:
     def get_dependencies(self) -> Dependencies:
         """Aggregate the dependencies from every component.
 
-        :return a list of dependency version specification. e.g. ["gym >= 1.0.0"]
+        :return: a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
         dependencies = {}  # type: Dependencies
 

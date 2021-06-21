@@ -1,5 +1,5 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,tac.sh,tac_local.sh
+ignore-patterns=__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
 disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801
@@ -7,20 +7,21 @@ disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801
 # See here for more options: https://www.codeac.io/documentation/pylint-configuration.html
 ## Eventually resolve these:
 # W0707: raise-missing-from
-# decide on a logging policy:
+
+## Eventually decide on a logging policy:
 # W1202: logging-format-interpolation
 # W1203: logging-fstring-interpolation
 
 ## Keep the following:
-# C0103: invalid-name
-# C0201: consider-iterating-dictionary
-# C0301: http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s)
-# C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s)
+# C0103: invalid-name, # kept as no harm
+# C0201: consider-iterating-dictionary, # kept as no harm
+# C0301: http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s), # kept as no harm
+# C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s) , # kept as no harm
 # W0105: pointless-string-statement, # kept as no harm
 # R0801: similar lines, # too granular
 
 [IMPORTS]
-ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes
+ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto
 
 [DESIGN]
 min-public-methods=1
@@ -32,7 +33,7 @@ max-locals=31
 max-statements=80
 max-parents=11
 max-branches=24
-max-attributes=36
+max-attributes=38
 
 [REFACTORING]
 max-nested-blocks=6

@@ -36,7 +36,8 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 from tests.conftest import ROOT_DIR
 
 
-LEDGER_ID = "ethereum"
+ETHEREUM_LEDGER_ID = "ethereum"
+FETCHAI_LEDGER_ID = "fetchai"
 AGENT_ADDRESS = "some_eth_address"
 DEFAULT_ADDRESS = "0x0000000000000000000000000000000000000000"
 
@@ -57,6 +58,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     def test_setup(self):
         """Test the setup method of the simple_oracle behaviour."""
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
+
         self.simple_oracle_behaviour.setup()
         self.assert_quantity_in_outbox(3)
 
@@ -138,8 +142,11 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     def test_act_pre_deploy(self):
         """Test the act method of the simple_oracle behaviour before contract is deployed."""
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
+
         self.simple_oracle_behaviour.context.agent_addresses[
-            LEDGER_ID
+            ETHEREUM_LEDGER_ID
         ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(1)
@@ -149,10 +156,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             address=cast(
                 str,
-                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
+                self.simple_oracle_behaviour.context.agent_addresses.get(
+                    ETHEREUM_LEDGER_ID
+                ),
             ),
         )
         assert has_attributes, error_str
@@ -161,9 +170,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test the act method of the simple_oracle behaviour before role is granted."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         strategy.contract_address = DEFAULT_ADDRESS
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
         strategy.is_contract_deployed = True
         self.simple_oracle_behaviour.context.agent_addresses[
-            LEDGER_ID
+            ETHEREUM_LEDGER_ID
         ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(2)
@@ -173,10 +183,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             address=cast(
                 str,
-                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
+                self.simple_oracle_behaviour.context.agent_addresses.get(
+                    ETHEREUM_LEDGER_ID
+                ),
             ),
         )
         assert has_attributes, error_str
@@ -196,14 +208,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test the act method of the simple_oracle behaviour for normal updating."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         strategy.contract_address = DEFAULT_ADDRESS
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
         strategy.is_contract_deployed = True
         strategy.is_oracle_role_granted = True
         strategy._oracle_value_name = "oracle_value"
-        self.simple_oracle_behaviour.context.shared_state["observation"] = {
-            "oracle_value": {"some_key": "some_value"}
+        self.simple_oracle_behaviour.context.shared_state["oracle_value"] = {
+            "some_key": "some_value"
         }
         self.simple_oracle_behaviour.context.agent_addresses[
-            LEDGER_ID
+            ETHEREUM_LEDGER_ID
         ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(2)
@@ -213,10 +226,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             address=cast(
                 str,
-                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
+                self.simple_oracle_behaviour.context.agent_addresses.get(
+                    ETHEREUM_LEDGER_ID
+                ),
             ),
         )
         assert has_attributes, error_str
@@ -236,10 +251,11 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test the act method of the simple_oracle behaviour when no oracle value is present."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         strategy.contract_address = DEFAULT_ADDRESS
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
         strategy.is_contract_deployed = True
         strategy.is_oracle_role_granted = True
         self.simple_oracle_behaviour.context.agent_addresses[
-            LEDGER_ID
+            ETHEREUM_LEDGER_ID
         ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(1)
@@ -249,21 +265,23 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             address=cast(
                 str,
-                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
+                self.simple_oracle_behaviour.context.agent_addresses.get(
+                    ETHEREUM_LEDGER_ID
+                ),
             ),
         )
         assert has_attributes, error_str
 
     def test__request_contract_deploy_transaction(self):
         """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for ethereum ledger."""
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
+
         self.simple_oracle_behaviour._request_contract_deploy_transaction()
         self.assert_quantity_in_outbox(1)
-
-        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
-        strategy._ledger_id = "ethereum"
 
         kwargs = strategy.get_deploy_kwargs()
         assert "ERC20Address" in kwargs.body
@@ -283,7 +301,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test__request_contract_store_transaction(self):
         """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for fetchai ledger."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
-        strategy._ledger_id = "fetchai"
+        strategy._ledger_id = FETCHAI_LEDGER_ID
 
         self.simple_oracle_behaviour._request_contract_deploy_transaction()
         self.assert_quantity_in_outbox(1)
@@ -307,6 +325,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test that the _request_grant_role_transaction function sends the right message to the contract_api."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         strategy.contract_address = DEFAULT_ADDRESS
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_behaviour._request_grant_role_transaction()
         self.assert_quantity_in_outbox(1)
@@ -326,6 +345,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test that the _request_update_transaction function sends the right message to the contract_api."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         strategy.contract_address = DEFAULT_ADDRESS
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         update_args = {"some": "args"}
         self.simple_oracle_behaviour._request_update_transaction(update_args)
@@ -344,8 +364,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     def test__get_balance(self):
         """Test that the _get_balance function sends the right message to the ledger_api."""
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
         self.simple_oracle_behaviour.context.agent_addresses[
-            LEDGER_ID
+            ETHEREUM_LEDGER_ID
         ] = "AGENT_ADDRESS"
 
         self.simple_oracle_behaviour._get_balance()
@@ -356,10 +378,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             address=cast(
                 str,
-                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
+                self.simple_oracle_behaviour.context.agent_addresses.get(
+                    ETHEREUM_LEDGER_ID
+                ),
             ),
         )
         assert has_attributes, error_str

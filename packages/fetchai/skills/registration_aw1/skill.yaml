@@ -1,26 +1,26 @@
 name: registration_aw1
 author: fetchai
-version: 0.7.0
+version: 0.11.0
 type: skill
 description: The registration_aw1 skill is a skill for registration in Agent World
   1.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc9dfzqAXJWCJxYNqLd1yz8U7p4DQNbGGMmXMP73wUvJR
-  __init__.py: QmUwzhSGUoim45wWNry4CsFokugnWnj6bEfsqajRrAWrsB
-  behaviours.py: QmWfKLb7K6ndqvoVXV1snBkqQDkcQkoSafr4QBLR5ogfGg
+  __init__.py: QmW8Lx23toJiXrMewhZZm4qNpUn1LPc6oSttrVDGJgbxvU
+  behaviours.py: QmQPjdZaKCvDJYLMag52hUpuzyUCEDEX95Y9RDZXCquAWa
   dialogues.py: QmQLCbYVWeqhBwqg7KP5WpZcx7eX3g8zhwfNiR1RRufWfe
-  handlers.py: QmcgcahHk8XvkTCqkti9mzyZ8cHRSrG2jrs1cjSDTTkvrj
-  strategy.py: QmdeQQeYc2dhhAdkdCjsXJyDfbYaSsfL8RnzeLAPjktHEq
+  handlers.py: QmVGZFoDrhLLmDnxjb4gUEe7H4o27eZmcbZfXNdDeciHet
+  strategy.py: QmSuFSfoSi54USrr7sT37z1egJn45G8G3vQDGXFtiSJSeT
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/register:0.6.0
-- fetchai/signing:0.11.0
+- fetchai/register:1.0.0
+- fetchai/signing:1.0.0
 skills:
-- fetchai/simple_service_search:0.6.0
+- fetchai/simple_service_search:0.9.0
 behaviours:
   registration:
     args:
@@ -42,7 +42,9 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      announce_termination_key: null
       developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
+      developer_handle_only: false
       ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE
       shared_storage_key: agents_found
       signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE
@@ -51,5 +53,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
 is_abstract: false

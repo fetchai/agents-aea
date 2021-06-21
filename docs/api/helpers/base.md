@@ -28,12 +28,12 @@ Load a module.
 
 **Returns**:
 
-None
+module type
 
 **Raises**:
 
-- `ValueError`: if the filepath provided is not a module.
-- `Exception`: if the execution of the module raises exception.
+- `ValueError`: if the filepath provided is not a module.  # noqa: DAR402
+- `Exception`: if the execution of the module raises exception.  # noqa: DAR402
 
 <a name="aea.helpers.base.load_env_file"></a>
 #### load`_`env`_`file
@@ -47,10 +47,6 @@ Load the content of the environment file into the process environment.
 **Arguments**:
 
 - `env_file`: save_path to the env file.
-
-**Returns**:
-
-None.
 
 <a name="aea.helpers.base.sigint_crossplatform"></a>
 #### sigint`_`crossplatform
@@ -72,10 +68,6 @@ However, a subprocess.Popen class has the method
 
 - `process`: the process to send the signal to.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.base.win_popen_kwargs"></a>
 #### win`_`popen`_`kwargs
 
@@ -88,6 +80,10 @@ Return kwargs to start a process in windows with new process group.
 Help to handle ctrl c properly.
 Return empty dict if platform is not win32
 
+**Returns**:
+
+windows popen kwargs
+
 <a name="aea.helpers.base.send_control_c"></a>
 #### send`_`control`_`c
 
@@ -95,15 +91,12 @@ Return empty dict if platform is not win32
 send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None
 ```
 
-Send ctrl-C crossplatform to terminate a subprocess.
+Send ctrl-C cross-platform to terminate a subprocess.
 
 **Arguments**:
 
 - `process`: the process to send the signal to.
-
-**Returns**:
-
-None
+- `kill_group`: whether or not to kill group
 
 <a name="aea.helpers.base.RegexConstrainedString"></a>
 ## RegexConstrainedString Objects
@@ -152,6 +145,11 @@ Traceback (most recent call last):
 ...
 ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
+>>> SimpleId("an identifier")
+Traceback (most recent call last):
+...
+ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
 >>> SimpleId("")
 Traceback (most recent call last):
 ...
@@ -176,7 +174,7 @@ get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable
 
 Get logger method for function.
 
-Get logger in `fn` definion module or creates logger is module.__name__.
+Get logger in `fn` definition module or creates logger is module.__name__.
 Or return logger_method if it's callable.
 
 **Arguments**:
@@ -205,6 +203,10 @@ Does not support async or coroutines!
 - `default_return`: value to return on exception, by default None
 - `logger_method`: name of the logger method or callable to print logs
 
+**Returns**:
+
+the callable
+
 <a name="aea.helpers.base.MaxRetriesError"></a>
 ## MaxRetriesError Objects
 
@@ -229,8 +231,12 @@ Does not support async or coroutines!
 
 - `number_of_retries`: amount of attempts
 - `error_message`: message template with one `{}` for exception
-- `delay`: num of seconds to sleep between retries. default 0
+- `delay`: number of seconds to sleep between retries. default 0
 - `logger_method`: name of the logger method or callable to print logs
+
+**Returns**:
+
+the callable
 
 <a name="aea.helpers.base.exception_log_and_reraise"></a>
 #### exception`_`log`_`and`_`reraise
@@ -246,6 +252,7 @@ Run code in context to log and re raise exception.
 
 - `log_method`: function to print log
 - `message`: message template to add error text.
+:yield: the generator
 
 <a name="aea.helpers.base.recursive_update"></a>
 #### recursive`_`update
@@ -268,10 +275,7 @@ It does side-effects to the first dictionary.
 
 - `to_update`: the dictionary to update.
 - `new_values`: the dictionary of new values to replace.
-
-**Returns**:
-
-None
+- `allow_new_values`: whether or not to allow new values.
 
 <a name="aea.helpers.base.find_topological_order"></a>
 #### find`_`topological`_`order
@@ -388,7 +392,7 @@ Certificate request for proof of representation.
 #### `__`init`__`
 
 ```python
- | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, save_path: str) -> None
+ | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, save_path: str) -> None
 ```
 
 Initialize the certificate request.
@@ -397,12 +401,10 @@ Initialize the certificate request.
 
 - `public_key`: the public key, or the key id.
 - `identifier`: certificate identifier.
-- `not_before`: specify the lower bound for certificate validity.
-If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-will be interpreted as timezone UTC.
-- `not_before`: specify the lower bound for certificate validity.
-if it is a string, it must follow the format: 'YYYY-MM-DD' It
-will be interpreted as timezone UTC-0.
+- `ledger_id`: ledger identifier the request is referring to.
+- `not_before`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+- `not_after`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+- `message_format`: message format used for signing
 - `save_path`: the save_path where to save the certificate.
 
 <a name="aea.helpers.base.CertRequest.public_key"></a>
@@ -485,6 +487,16 @@ Get the not_before field.
 
 Get the not_after field.
 
+<a name="aea.helpers.base.CertRequest.message_format"></a>
+#### message`_`format
+
+```python
+ | @property
+ | message_format() -> str
+```
+
+Get the message format.
+
 <a name="aea.helpers.base.CertRequest.save_path"></a>
 #### save`_`path
 
@@ -497,6 +509,10 @@ Get the save path for the certificate.
 
 Note: if the path is *not* absolute, then
 the actual save path might depend on the context.
+
+**Returns**:
+
+the save path
 
 <a name="aea.helpers.base.CertRequest.get_absolute_save_path"></a>
 #### get`_`absolute`_`save`_`path
@@ -537,6 +553,28 @@ Get the public key or identifier.
 
 Get the message to sign.
 
+<a name="aea.helpers.base.CertRequest.construct_message"></a>
+#### construct`_`message
+
+```python
+ | @classmethod
+ | construct_message(cls, public_key: str, identifier: SimpleIdOrStr, not_before_string: str, not_after_string: str, message_format: str) -> bytes
+```
+
+Construct message for singning.
+
+**Arguments**:
+
+- `public_key`: the public key
+- `identifier`: identifier to be signed
+- `not_before_string`: signature not valid before
+- `not_after_string`: signature not valid after
+- `message_format`: message format used for signing
+
+**Returns**:
+
+the message
+
 <a name="aea.helpers.base.CertRequest.get_signature"></a>
 #### get`_`signature
 
@@ -548,7 +586,7 @@ Get signature from save_path.
 
 **Arguments**:
 
-- `path_prefix`: the path prefix to be prependend to save_path. Defaults to cwd.
+- `path_prefix`: the path prefix to be prepended to save_path. Defaults to cwd.
 
 **Returns**:
 
@@ -590,11 +628,19 @@ Check equality.
 compute_specifier_from_version(version: Version) -> str
 ```
 
-Compute the specifier set from a version, by varying only on the patch number.
+Compute the specifier set from a version.
 
-I.e. from "{major}.{minor}.{patch}", return
+Varying only on the patch number for versions with major 0.
 
-">={major}.{minor}.0, <{major}.{minor + 1}.0"
+I.e. from "{major}.{minor}.{patch}.{extra}", return
+
+">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
+
+Varying on the patch and minor number for versions with major >= 1.
+
+I.e. from "{major}.{minor}.{patch}.{extra}", return
+
+">=min({major}.0.0, {major}.{minor}.{patch}.{extra}), <{major+1}.0.0"
 
 **Arguments**:
 
@@ -625,6 +671,14 @@ or as:
 @mydecorator(arg1, kwarg1="value")
 def myfunction():
     ...
+
+**Arguments**:
+
+- `decorator`: a decorator callable
+
+**Returns**:
+
+a decorator callable
 
 <a name="aea.helpers.base.delete_directory_contents"></a>
 #### delete`_`directory`_`contents

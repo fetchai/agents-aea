@@ -3,21 +3,23 @@ author: fetchai
 version: 0.2.0
 description: An example of agent configuration file for testing purposes.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/oef:0.17.0
+- fetchai/oef:0.20.0
 contracts: []
 protocols:
-- fetchai/oef_search:0.14.0
-- fetchai/default:0.13.0
-- fetchai/tac:0.14.0
-- fetchai/fipa:0.14.0
+- fetchai/oef_search:1.0.0
+- fetchai/default:1.0.0
+- fetchai/tac:1.0.0
+- fetchai/fipa:1.0.0
 skills:
-- fetchai/echo:0.15.0
-default_connection: fetchai/oef:0.17.0
+- fetchai/echo:0.18.0
+default_connection: fetchai/oef:0.20.0
 default_ledger: cosmos
+required_ledgers:
+- cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -27,5 +29,4 @@ private_key_paths:
 connection_private_key_paths:
    cosmos: cosmos_private_key.txt
    ethereum: ethereum_private_key.txt
-registry_path: ../../packages
 dependencies: {}

@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Module to declare constants."""
-from pathlib import Path
 from typing import Dict, List
 
 
@@ -39,8 +38,8 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SCAFFOLD_PUBLIC_ID = "fetchai/scaffold:0.1.0"
 PACKAGES = "packages"
+REGISTRY_PATH_KEY = "registry_path"
 DEFAULT_REGISTRY_NAME = PACKAGES
-DEFAULT_REGISTRY_PATH = Path("./", DEFAULT_REGISTRY_NAME)
 VENDOR = "vendor"
 AGENT = "agent"
 AGENTS = "agents"
@@ -70,6 +69,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
+    PRIVATE_KEY_PATH_SCHEMA.format("*"),
 ]
 DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
 DEFAULT_GIT_REF = "master"
@@ -78,7 +78,6 @@ IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
 IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
-LIBPROTOC_VERSION = "libprotoc 3.11.4"
 DEFAULT_BUILD_DIR_NAME = ".build"
 DEFAULT_DEPENDENCIES: Dict[str, Dict] = {"aea-ledger-fetchai": {}}
 
@@ -119,3 +118,23 @@ SUPPORTED_PROTOCOL_LANGUAGES = [
     PROTOCOL_LANGUAGE_OBJC,
     PROTOCOL_LANGUAGE_JS,
 ]
+DEFAULT_CERTS_DIR_NAME = ".certs"
+DEFAULT_IGNORE_DIRS_AGENT_FINGERPRINT = [
+    SKILLS,
+    PROTOCOLS,
+    CONTRACTS,
+    CONNECTIONS,
+    VENDOR,
+    DEFAULT_BUILD_DIR_NAME,
+    DEFAULT_CERTS_DIR_NAME,
+]
+
+ITEM_TYPE_TO_PLURAL = {
+    PROTOCOL: PROTOCOLS,
+    AGENT: AGENTS,
+    CONTRACT: CONTRACTS,
+    CONNECTION: CONNECTIONS,
+    SKILL: SKILLS,
+}
+
+ITEM_TYPE_PLURAL_TO_TYPE = {v: k for k, v in ITEM_TYPE_TO_PLURAL.items()}

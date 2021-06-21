@@ -11,16 +11,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.21.0
+aea fetch fetchai/generic_seller:0.27.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.22.0
+aea eject skill fetchai/generic_seller:0.26.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.22.0
+aea fetch fetchai/generic_buyer:0.28.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.22.0
+aea eject skill fetchai/generic_buyer:0.25.0
 cd ..
 ```
 
@@ -62,8 +62,9 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and replace the stub code with the following:
 
 ``` python
-from typing import Any, cast
+from typing import Any, Optional, cast
 
+from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -79,6 +80,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
+DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
@@ -90,7 +92,13 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
+        self._max_soef_registration_retries = kwargs.pop(
+            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
+
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self._nb_retries = 0
 
     def setup(self) -> None:
         """
@@ -111,7 +119,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -119,6 +126,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+        self._retry_failed_registration()
 
     def teardown(self) -> None:
         """
@@ -129,14 +137,42 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self._unregister_service()
         self._unregister_agent()
 
-    def _register_agent(self) -> None:
+    def _retry_failed_registration(self) -> None:
         """
-        Register the agent's location.
+        Retry a failed registration.
 
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_location_description()
+        if self.failed_registration_msg is not None:
+            self._nb_retries += 1
+            if self._nb_retries > self._max_soef_registration_retries:
+                self.context.is_active = False
+                return
+
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.failed_registration_msg.to,
+                performative=self.failed_registration_msg.performative,
+                service_description=self.failed_registration_msg.service_description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info(
+                f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
+            )
+
+            self.failed_registration_msg = None
+
+    def _register(self, description: Description, logger_msg: str) -> None:
+        """
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
+
+        :return: None
+        """
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -146,31 +182,51 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             service_description=description,
         )
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering agent on SOEF.")
+        self.context.logger.info(logger_msg)
 
-    def _register_service_personality_classification(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Register the agent's service, personality and classification.
+        Register the agent's location.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        descriptions = [
-            strategy.get_register_service_description(),
-            strategy.get_register_personality_description(),
-            strategy.get_register_classification_description(),
-        ]
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
+        description = strategy.get_location_description()
+        self._register(description, "registering agent on SOEF.")
+
+    def register_service(self) -> None:
+        """
+        Register the agent's service.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_service_description()
+        self._register(description, "registering agent's service on the SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
         )
-        for description in descriptions:
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                service_description=description,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering service on SOEF.")
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
+        )
 
     def _unregister_service(self) -> None:
         """
@@ -281,6 +337,9 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.generic_seller.behaviours import (
+    GenericServiceRegistrationBehaviour,
+)
 from packages.fetchai.skills.generic_seller.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -745,7 +804,9 @@ class GenericOefSearchHandler(Handler):
             return
 
         # handle message
-        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+        if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
+            self._handle_success(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._handle_error(oef_search_msg, oef_search_dialogue)
         else:
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
@@ -769,21 +830,88 @@ class GenericOefSearchHandler(Handler):
             )
         )
 
-    def _handle_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    def _handle_success(
+        self,
+        oef_search_success_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Handle an oef search message.
 
-        :param oef_search_msg: the oef search message
+        :param oef_search_success_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search success message={} in dialogue={}.".format(
+                oef_search_success_msg, oef_search_dialogue
+            )
+        )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            description = target_message.service_description
+            data_model_name = description.data_model.name
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
+            )
+            if "location_agent" in data_model_name:
+                registration_behaviour.register_service()
+            elif "set_service_key" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
+                self.context.logger.info(
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
+                )
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
+
+    def _handle_error(
+        self,
+        oef_search_error_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
-                oef_search_msg, oef_search_dialogue
+                oef_search_error_msg, oef_search_dialogue
             )
         )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
+            )
+            registration_behaviour.failed_registration_msg = target_message
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -1337,7 +1465,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
   __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
@@ -1347,13 +1475,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.15.0
+- fetchai/ledger:0.18.0
 contracts: []
 protocols:
-- fetchai/default:0.13.0
-- fetchai/fipa:0.14.0
-- fetchai/ledger_api:0.11.0
-- fetchai/oef_search:0.14.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
 skills: []
 behaviours:
   service_registration:
@@ -3045,7 +3173,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
@@ -3055,14 +3183,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.15.0
+- fetchai/ledger:0.18.0
 contracts: []
 protocols:
-- fetchai/default:0.13.0
-- fetchai/fipa:0.14.0
-- fetchai/ledger_api:0.11.0
-- fetchai/oef_search:0.14.0
-- fetchai/signing:0.11.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/signing:1.0.0
 skills: []
 behaviours:
   search:
@@ -3161,8 +3289,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0"
 }'
 ```
 
@@ -3179,13 +3307,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add protocol fetchai/fipa:0.14.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
+aea add connection fetchai/ledger:0.18.0
+aea add protocol fetchai/fipa:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea run
 ```
 
@@ -3196,14 +3324,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add protocol fetchai/fipa:0.14.0
-aea add protocol fetchai/signing:0.11.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
+aea add connection fetchai/ledger:0.18.0
+aea add protocol fetchai/fipa:1.0.0
+aea add protocol fetchai/signing:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:

@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry push methods."""
 import filecmp
+import os
 from unittest import TestCase, mock
 
 import pytest
@@ -59,10 +60,7 @@ class SaveItemLocallyTestCase(TestCase):
             "cwd", None, "skills", item_id.name
         )
         try_get_item_target_path_mock.assert_called_once_with(
-            ctx_mock.agent_config.registry_path,
-            item_id.author,
-            item_type + "s",
-            item_id.name,
+            ctx_mock.registry_path, item_id.author, item_type + "s", item_id.name,
         )
         _check_package_public_id_mock.assert_called_once_with(
             "source", item_type, item_id
@@ -72,7 +70,7 @@ class SaveItemLocallyTestCase(TestCase):
 
 @mock.patch("aea.cli.push.copytree")
 class TestPushLocally(AEATestCaseEmpty):
-    """Test case for clu push --local."""
+    """Test case for cli push --local."""
 
     ITEM_PUBLIC_ID = PUBLIC_ID
     ITEM_TYPE = "skill"
@@ -87,15 +85,43 @@ class TestPushLocally(AEATestCaseEmpty):
         self, copy_tree_mock,
     ):
         """Test ok for vendor's item."""
-        self.invoke("push", "--local", "skill", "fetchai/echo")
+        with mock.patch("os.path.exists", side_effect=[False, True, False]):
+            self.invoke("push", "--local", "skill", "fetchai/echo")
         copy_tree_mock.assert_called_once()
+        src_path, dst_path = copy_tree_mock.mock_calls[0][1]
+        # check for correct author, type, name
+        assert (
+            os.path.normpath(src_path).split(os.sep)[-3:]
+            == os.path.normpath(dst_path).split(os.sep)[-3:]
+        )
+
+    def test_user_ok(
+        self, copy_tree_mock,
+    ):
+        """Test ok for users's item."""
+        with mock.patch(
+            "aea.cli.push.try_get_item_source_path",
+            return_value=f"{self.author}/skills/echo",
+        ), mock.patch("aea.cli.push.check_package_public_id"):
+            self.invoke("push", "--local", "skill", f"{self.author}/echo")
+        copy_tree_mock.assert_called_once()
+        src_path, dst_path = copy_tree_mock.mock_calls[0][1]
+        # check for correct author, type, name
+        assert (
+            os.path.normpath(src_path).split(os.sep)[-3:]
+            == os.path.normpath(dst_path).split(os.sep)[-3:]
+        )
 
     def test_fail_no_item(
         self, *mocks,
     ):
-        """Test fail, item_noit_exists ."""
+        """Test fail, item_not_exists ."""
+        expected_path_pattern = ".*" + ".*".join(
+            ["vendor", "fetchai", "skills", "not_exists"]
+        )
         with pytest.raises(
-            ClickException, match='Item "not_exists" not found in source folder.'
+            ClickException,
+            match=rf'Item "fetchai/not_exists" not found in source folder "{expected_path_pattern}"\.',
         ):
             self.invoke("push", "--local", "skill", "fetchai/not_exists")
 

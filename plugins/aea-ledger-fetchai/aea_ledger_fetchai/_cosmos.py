@@ -20,7 +20,6 @@
 import base64
 import gzip
 import hashlib
-import hmac
 import json
 import logging
 import os
@@ -28,12 +27,13 @@ import subprocess  # nosec
 import tempfile
 import time
 from collections import namedtuple
-from hashlib import pbkdf2_hmac
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Tuple, cast
 
-import pyaes  # type: ignore
+from Crypto.Cipher import AES  # nosec
+from Crypto.Protocol.KDF import scrypt  # nosec
+from Crypto.Random import get_random_bytes  # nosec
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
     bech32_encode,
@@ -50,7 +50,7 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
-from aea.crypto.helpers import DecryptError, KeyIsIncorrect, hex_to_bytes_for_key
+from aea.crypto.helpers import KeyIsIncorrect, hex_to_bytes_for_key
 from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
@@ -81,81 +81,57 @@ MESSAGE_FORMAT_BY_VERSION = {
 class DataEncrypt:
     """Class to encrypt/decrypt data strings with password provided."""
 
-    hash_algo = "sha256"
-    hash_iterations = 20000
-
     @classmethod
     def _aes_encrypt(
         cls, password: str, data: bytes
-    ) -> Tuple[bytes, int, bytes, bytes]:
+    ) -> Tuple[bytes, bytes, bytes, bytes]:
         """
         Encryption schema for private keys
 
         :param password: plaintext password to use for encryption
         :param data: plaintext data to encrypt
 
-        :return: encrypted data, length of original data, initialisation vector for aes, password hashing salt
+        :return: encrypted data, nonce, tag, salt
         """
-        # Generate hash from password
-        salt = os.urandom(16)
-        hashed_pass = cls._get_hashed_password(password, salt)
+        key, salt = cls._password_to_key_and_salt(password)
+        cipher = AES.new(key, AES.MODE_EAX)
+        ciphertext, tag = cipher.encrypt_and_digest(data)  # type:ignore
 
-        # Random initialisation vector
-        iv = os.urandom(16)
+        return ciphertext, cipher.nonce, tag, salt  # type:ignore
 
-        # Encrypt data using AES
-        aes = pyaes.AESModeOfOperationCBC(hashed_pass, iv=iv)
-
-        # Pad data to multiple of 16
-        data_length = len(data)
-        if data_length % 16 != 0:  # pragma: nocover
-            data += b" " * (16 - data_length % 16)
-
-        encrypted = b""
-        while data:
-            encrypted += aes.encrypt(data[:16])
-            data = data[16:]
-
-        return encrypted, data_length, iv, salt
+    @staticmethod
+    def _password_to_key_and_salt(
+        password: str, salt: Optional[bytes] = None
+    ) -> Tuple[bytes, bytes]:
+        salt = salt or get_random_bytes(16)
+        key = scrypt(password, salt, 16, N=2 ** 14, r=8, p=1)  # type: ignore
+        return key, salt  # type: ignore
 
     @classmethod
     def _aes_decrypt(
-        cls,
-        password: str,
-        salt: bytes,
-        encrypted_data: bytes,
-        data_length: int,
-        initialisation_vector: bytes,
+        cls, password: str, encrypted_data: bytes, nonce: bytes, tag: bytes, salt: bytes
     ) -> bytes:
         """
         Decryption schema for private keys.
 
         :param password: plaintext password used for encryption
-        :param salt: password hashing salt
-        :param encrypted_data: encrypted data string
-        :param data_length: length of original plaintext data
-        :param initialisation_vector: initialisation vector for aes
+        :param nonce:  bytes
+        :param tag:  bytes
 
         :return: decrypted data as plaintext
         """
         # Hash password
-        hashed_pass = cls._get_hashed_password(password, salt)
-        # Decrypt data, noting original length
-        aes = pyaes.AESModeOfOperationCBC(hashed_pass, iv=initialisation_vector)
-
-        decrypted = b""
-        while encrypted_data:
-            decrypted += aes.decrypt(encrypted_data[:16])
-            encrypted_data = encrypted_data[16:]
-        decrypted_data = decrypted[:data_length]
-
-        # Return original data
+        key, _ = cls._password_to_key_and_salt(password, salt)
+        cipher = AES.new(key, AES.MODE_EAX, nonce)
+        try:
+            decrypted_data = cipher.decrypt_and_verify(  # type:ignore
+                encrypted_data, tag
+            )
+        except ValueError as e:
+            if e.args[0] == "MAC check failed":
+                raise ValueError("Decrypt error! Bad password?") from e
+            raise  # pragma: nocover
         return decrypted_data
-
-    @classmethod
-    def _get_hashed_password(cls, password: str, salt: bytes) -> bytes:
-        """Get hashed password."""
-        return pbkdf2_hmac(cls.hash_algo, password.encode(), salt, cls.hash_iterations)
 
     @classmethod
     def encrypt(cls, data: bytes, password: str) -> bytes:
@@ -163,23 +139,15 @@ class DataEncrypt:
         if not isinstance(data, bytes):  # pragma: nocover
             raise ValueError(f"data has to be bytes! not {type(data)}")
 
-        encrypted_data, data_length, initialisation_vector, salt = cls._aes_encrypt(
-            password, data
-        )
+        encrypted_data, nonce, tag, salt = cls._aes_encrypt(password, data)
 
         json_data = {
             "encrypted_data": cls.bytes_encode(encrypted_data),
-            "data_length": data_length,
-            "initialisation_vector": cls.bytes_encode(initialisation_vector),
+            "nonce": cls.bytes_encode(nonce),
+            "tag": cls.bytes_encode(tag),
             "salt": cls.bytes_encode(salt),
-            "hmac": cls.get_hmac_for_data(password, data),
         }
         return json.dumps(json_data).encode()
-
-    @staticmethod
-    def get_hmac_for_data(password: str, data: bytes) -> str:
-        """Get hmac digest for data."""
-        return hmac.new(password.encode(), data, "sha256").hexdigest()
 
     @staticmethod
     def bytes_encode(data: bytes) -> str:
@@ -204,14 +172,10 @@ class DataEncrypt:
             decrypted_data = cls._aes_decrypt(
                 password,
                 encrypted_data=cls.bytes_decode(json_data["encrypted_data"]),
-                data_length=json_data["data_length"],
-                initialisation_vector=cls.bytes_decode(
-                    json_data["initialisation_vector"]
-                ),
+                nonce=cls.bytes_decode(json_data["nonce"]),
+                tag=cls.bytes_decode(json_data["tag"]),
                 salt=cls.bytes_decode(json_data["salt"]),
             )
-            if cls.get_hmac_for_data(password, decrypted_data) != json_data["hmac"]:
-                raise DecryptError()
             return decrypted_data
         except (KeyError, JSONDecodeError) as e:
             raise ValueError(f"Bad encrypted key format!: {str(e)}") from e
@@ -617,7 +581,7 @@ class CosmosCrypto(Crypto[SigningKey]):
             return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
         except UnicodeDecodeError as e:
             raise ValueError(
-                "key file data can not be translated to string! bad bassword?"
+                "key file data can not be translated to string! bad password?"
             ) from e
 
 
@@ -661,12 +625,18 @@ class _CosmosApi(LedgerApi):
         balance = None  # type: Optional[int]
         url = self.network_address + f"/bank/balances/{address}"
         response = requests.get(url=url)
-        if response.status_code == 200:
+        if response.status_code != 200:  # pragma: nocover
+            raise ValueError("Cannot get balance: {}".format(response.json()))
+        try:
             result = response.json()["result"]
             if len(result) == 0:
                 balance = 0
             else:
                 balance = int(result[0]["amount"])
+        except KeyError:  # pragma: nocover
+            raise ValueError(
+                f"key `amount` or `result` not found in response_json={response.json()}"
+            )
         return balance
 
     def get_state(
@@ -697,6 +667,8 @@ class _CosmosApi(LedgerApi):
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
+        else:  # pragma: nocover
+            raise ValueError("Cannot get state: {}".format(response.json()))
         return result
 
     def get_deploy_transaction(
@@ -953,9 +925,17 @@ class _CosmosApi(LedgerApi):
                 os.path.join(tmpdirname, signed_tx_filename),
             ]
 
-            tx_digest_json = json.loads(self._execute_shell_command(command))
+            cli_stdout = self._execute_shell_command(command)
 
-        hash_ = cast(str, tx_digest_json["txhash"])
+        try:
+            tx_digest_json = json.loads(cli_stdout)
+            hash_ = cast(str, tx_digest_json["txhash"])
+        except JSONDecodeError:  # pragma: nocover
+            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
+        except KeyError:  # pragma: nocover
+            raise ValueError(
+                f"key `txhash` not found in tx_digest_json={tx_digest_json}"
+            )
         return hash_
 
     def execute_contract_query(
@@ -995,7 +975,11 @@ class _CosmosApi(LedgerApi):
             json.dumps(query_msg),
         ]
 
-        return json.loads(self._execute_shell_command(command))
+        cli_stdout = self._execute_shell_command(command)
+        try:
+            return json.loads(cli_stdout)
+        except JSONDecodeError:  # pragma: nocover
+            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -1104,10 +1088,18 @@ class _CosmosApi(LedgerApi):
         result: Tuple[Optional[int], Optional[int]] = (None, None)
         url = self.network_address + f"/auth/accounts/{address}"
         response = requests.get(url=url)
-        if response.status_code == 200:
+        if response.status_code != 200:  # pragma: nocover
+            raise ValueError(
+                "Cannot get account number and sequence: {}".format(response.json())
+            )
+        try:
             result = (
                 int(response.json()["result"]["value"]["account_number"]),
                 int(response.json()["result"]["value"]["sequence"]),
+            )
+        except KeyError:  # pragma: nocover
+            raise ValueError(
+                f"keys `account_number` and `sequence` not found in response_json={response.json()}."
             )
         return result
 
@@ -1168,9 +1160,14 @@ class _CosmosApi(LedgerApi):
         url = self.network_address + "/txs"
         response = requests.post(url=url, json=tx_signed)
         if response.status_code == 200:
-            tx_digest = response.json()["txhash"]
+            try:
+                tx_digest = response.json()["txhash"]
+            except KeyError:  # pragma: nocover
+                raise ValueError(
+                    f"key `txhash` not found in response_json={response.json()}"
+                )
         else:  # pragma: nocover
-            _default_logger.error("Cannot send transaction: {}".format(response.json()))
+            raise ValueError("Cannot send transaction: {}".format(response.json()))
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
@@ -1199,6 +1196,10 @@ class _CosmosApi(LedgerApi):
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
+        else:  # pragma: nocover
+            raise ValueError(
+                "Cannot get transaction receipt: {}".format(response.json())
+            )
         return result
 
     def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
@@ -1369,9 +1370,10 @@ class CosmosFaucetApi(FaucetApi):
 
         uid = None
         if response.status_code == 200:
-            data = response.json()
-            uid = data["uid"]
-
+            try:
+                uid = response.json()["uid"]
+            except KeyError:  # pragma: nocover
+                ValueError(f"key `uid` not found in response_json={response.json()}")
             _default_logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
             _default_logger.warning(

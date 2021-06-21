@@ -1,14 +1,14 @@
 name: oracle_client
 author: fetchai
-version: 0.5.0
+version: 0.9.0
 type: contract
 description: Fetch oracle client contract
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUBEziYn29b61higYFNsSxtnKcSNq7CRFpsQ68WjmTCcN
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmcF7UQN1gD6GKG2vYnjjDdYBm7cVLFL9rUW7MBJRZjtza
+  contract.py: QmaLczdSom6R1jeASM8WqE2QbgNErqyEFFL2gioARfDD3B
   contracts/FetchOracleTestClient.sol: QmWpUJ4aBrNreiyuXe6EgfSfE7T7hWz3xHDdT7fFye3WCG
 fingerprint_ignore_patterns:
 - build/*
@@ -18,6 +18,6 @@ contract_interface_paths:
   fetchai: build/oracle_client.wasm
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0

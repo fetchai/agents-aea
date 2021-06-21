@@ -4,7 +4,7 @@ An agent that is generated using the AEA framework is a modular system with diff
 
 The file structure of an AEA is fixed.
 
-The top level directory has the AEA's name. Below is a `aea-config.yaml` configuration file, then directories containing the connections, contracts, protocols, and skills developed by the developer as part of the given project. The connections, contracts, protocols and skills used from the registry are located in `vendor` and sorted by author. Finally, there are files containing the private keys of the AEA.
+The top level directory has the AEA's name. Below is a `aea-config.yaml` configuration file, then directories containing the connections, contracts, protocols, and skills developed by the developer as part of the given project. The connections, contracts, protocols and skills used from the registry (local or remote - added via `aea fetch` or `aea add`) are located in `vendor` and sorted by author. Build artefacts are placed in the `.build/` directory and certificates are placed in the `.certs/` directory. Finally, there are files containing the private keys of the AEA.
 
 When we create a new agent with the command `aea create my_aea` we create the file structure that looks like the following:
 
@@ -47,14 +47,14 @@ The `aea-config.yaml` is the top level configuration file of an AEA. It defines 
 For the AEA to use a package, the `public_id` for the package must be listed in the `aea-config.yaml` file, e.g.
 ``` yaml
 connections:
-- fetchai/stub:0.18.0
+- fetchai/stub:0.20.0
 ```
 
 The above shows a part of the `aea-config.yaml`. If you see the connections, you will see that we follow a pattern of `author/name_package:version` to identify each package, also referred to as `public_id`. Here the `author` is the author of the package.
 
 ## Vendor and package directories
 
-The `vendor` folder contains the packages from the registry which have been developed by ourselves, other authors or Fetch.ai and are namespaced by author name.
+The `vendor` folder contains the packages from the registry (local or remote) which have been developed by ourselves, other authors or Fetch.ai and are namespaced by author name.
 
 The packages we develop as part of the given AEA project are in the respective `connections/`, `contracts/`, `protocols/`, and `skills/` folders.
 
@@ -70,7 +70,7 @@ We use a custom package management approach for the AEAs rather than the default
 
 ## Python dependencies of packages
 
-Python dependencies of packages are specified in their respective configuration files under `dependencies`.
+Python dependencies of packages are specified in their respective configuration files under `dependencies`. They will be installed when `aea install` is run on an agent project.
 
 ## Create a package
 
@@ -88,3 +88,5 @@ You can use the CLI to interact with the registry. By default the CLI points to 
 ## Package versioning
 
 By default, the AEA can only handle one version per package. That is, a project should never use both `some_author/some_package_name:0.1.0` and `some_author/some_package_name:0.2.0`.
+
+If two AEA packages with the same author and name but different versions are used in the same Python process, then only the code from one of the packages (generally not deterministic) will be available in `sys.modules`. This can lead to inconsistencies and exceptions at runtime.

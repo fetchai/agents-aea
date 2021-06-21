@@ -34,6 +34,7 @@ from aea.helpers.preference_representations.base import (
 )
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
 )
@@ -748,6 +749,7 @@ class Game(Model):
         self._transactions = Transactions()
         self._already_minted_agents = []  # type: List[str]
         self._is_allowed_to_mint = True
+        self.is_registered_agent = False
 
     @property
     def phase(self) -> Phase:
@@ -1039,6 +1041,30 @@ class Game(Model):
         description = Description(
             self.context.parameters.set_service_data,
             data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_register_personality_description(self) -> Description:
+        """
+        Get the register personality description.
+
+        :return: a description of the personality
+        """
+        description = Description(
+            self.context.parameters.set_personality_data,
+            data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_register_classification_description(self) -> Description:
+        """
+        Get the register classification description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self.context.parameters.set_classification,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 

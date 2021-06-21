@@ -17,7 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the fipa protocol."""
+"""
+This module contains the support resources for the fipa protocol.
+
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0`.
+"""
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.serialization import FipaSerializer

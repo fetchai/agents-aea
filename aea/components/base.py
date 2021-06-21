@@ -55,6 +55,7 @@ class Component(ABC, WithLogger):
 
         :param configuration: the package configuration.
         :param is_vendor: whether the package is vendorized.
+        :param kwargs: the keyword arguments for the logger.
         """
         WithLogger.__init__(self, **kwargs)
         self._configuration = configuration
@@ -120,7 +121,6 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     It adds all the __init__.py modules into `sys.modules`.
 
     :param configuration: the configuration object.
-    :return: None
     """
     dir_ = configuration.directory
     if dir_ is None:  # pragma: nocover
@@ -153,7 +153,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
             # this handles the case when 'subpackage_init_file'
             # is path/to/package/__init__.py
             import_path = prefix_pkg
-        else:
+        else:  # pragma: nocover
             import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
 
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)

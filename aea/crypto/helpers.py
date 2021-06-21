@@ -19,7 +19,6 @@
 """Module wrapping the helpers of public and private key cryptography."""
 import logging
 import os
-import sys
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -37,10 +36,7 @@ _ = PRIVATE_KEY_PATH_SCHEMA  # some modules expect this here
 
 
 def try_validate_private_key_path(
-    ledger_id: str,
-    private_key_path: str,
-    password: Optional[str] = None,
-    exit_on_error: bool = True,
+    ledger_id: str, private_key_path: str, password: Optional[str] = None,
 ) -> None:
     """
     Try validate a private key path.
@@ -48,23 +44,18 @@ def try_validate_private_key_path(
     :param ledger_id: one of 'fetchai', 'ethereum'
     :param private_key_path: the path to the private key.
     :param password: the password to encrypt/decrypt the private key.
-    :return: None
     :raises: ValueError if the identifier is invalid.
     """
     try:
         # to validate the file, we just try to create a crypto object
         # with private_key_path as parameter
         make_crypto(ledger_id, private_key_path=private_key_path, password=password)
-    except Exception as e:  # pylint: disable=broad-except  # thats ok, will exit or reraise
+    except Exception as e:  # pylint: disable=broad-except  # thats ok, reraise
         error_msg = "This is not a valid private key file: '{}'\n Exception: '{}'".format(
             private_key_path, e
         )
-        if exit_on_error:
-            _default_logger.exception(error_msg)  # show exception traceback on exit
-            sys.exit(1)
-        else:  # pragma: no cover
-            _default_logger.error(error_msg)
-            raise
+        _default_logger.error(error_msg)
+        raise
 
 
 def create_private_key(
@@ -76,7 +67,6 @@ def create_private_key(
     :param ledger_id: the ledger identifier.
     :param private_key_file: the private key file.
     :param password: the password to encrypt/decrypt the private key.
-    :return: None
     :raises: ValueError if the identifier is invalid.
     """
     crypto = make_crypto(ledger_id)
@@ -93,7 +83,6 @@ def try_generate_testnet_wealth(
     :param address: the address to check for
     :param url: the url
     :param _sync: whether to wait to sync or not; currently unused
-    :return: None
     """
     faucet_api = make_faucet_api(identifier)
     if faucet_api is not None:
@@ -109,8 +98,6 @@ def private_key_verify(
     :param aea_conf: AgentConfig
     :param aea_project_path: Path, where project placed.
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     for identifier, _ in aea_conf.private_key_paths.read_all():
         if identifier not in crypto_registry.supported_ids:  # pragma: nocover
@@ -134,7 +121,6 @@ def private_key_verify(
                 identifier,
                 str(aea_project_path / config_private_key_path),
                 password=password,
-                exit_on_error=False,  # do not exit process
             )
         except FileNotFoundError:  # pragma: no cover
             raise ValueError(

@@ -81,8 +81,6 @@ def _add_private_key(
     :param file: path to file.
     :param connection: whether or not it is a private key for a connection.
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     ctx = cast(Context, click_context.obj)
     if file is None:
@@ -90,9 +88,7 @@ def _add_private_key(
 
     key_file_argument.convert(file, None, click_context)
     try:
-        try_validate_private_key_path(
-            type_, file, password=password, exit_on_error=False
-        )
+        try_validate_private_key_path(type_, file, password=password)
     except Exception as e:
         raise click.ClickException(repr(e)) from e
     _try_add_key(ctx, type_, file, connection)

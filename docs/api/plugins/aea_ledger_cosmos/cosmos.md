@@ -3,6 +3,55 @@
 
 Cosmos module wrapping the public and private key cryptography and ledger api.
 
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.DataEncrypt"></a>
+## DataEncrypt Objects
+
+```python
+class DataEncrypt()
+```
+
+Class to encrypt/decrypt data strings with password provided.
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.DataEncrypt.encrypt"></a>
+#### encrypt
+
+```python
+ | @classmethod
+ | encrypt(cls, data: bytes, password: str) -> bytes
+```
+
+Encrypt data with password.
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.DataEncrypt.bytes_encode"></a>
+#### bytes`_`encode
+
+```python
+ | @staticmethod
+ | bytes_encode(data: bytes) -> str
+```
+
+Encode bytes to ascii friendly string.
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.DataEncrypt.bytes_decode"></a>
+#### bytes`_`decode
+
+```python
+ | @staticmethod
+ | bytes_decode(data: str) -> bytes
+```
+
+Decode ascii friendly string to bytes.
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.DataEncrypt.decrypt"></a>
+#### decrypt
+
+```python
+ | @classmethod
+ | decrypt(cls, encrypted_data: bytes, password: str) -> bytes
+```
+
+Decrypt data with password provided.
+
 <a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper"></a>
 ## CosmosHelper Objects
 
@@ -96,7 +145,7 @@ True if the random_message is equals to tx['input']
  | generate_tx_nonce(seller: Address, client: Address) -> str
 ```
 
-Generate a unique hash to distinguish txs with the same terms.
+Generate a unique hash to distinguish transactions with the same terms.
 
 **Arguments**:
 
@@ -228,7 +277,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None) -> None
+ | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None) -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -236,6 +285,7 @@ Instantiate an ethereum crypto object.
 **Arguments**:
 
 - `private_key_path`: the private key path of the agent
+- `password`: the password to encrypt/decrypt the private key.
 
 <a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.private_key"></a>
 #### private`_`key
@@ -284,7 +334,7 @@ a display_address str
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name: str) -> SigningKey
+ | load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> SigningKey
 ```
 
 Load a private key in hex format from a file.
@@ -292,6 +342,7 @@ Load a private key in hex format from a file.
 **Arguments**:
 
 - `file_name`: the path to the hex file.
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 
@@ -342,22 +393,42 @@ signed transaction
 
 Generate a key pair for cosmos network.
 
-<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.dump"></a>
-#### dump
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.encrypt"></a>
+#### encrypt
 
 ```python
- | dump(fp: BinaryIO) -> None
+ | encrypt(password: str) -> str
 ```
 
-Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+Encrypt the private key and return in json.
 
 **Arguments**:
 
-- `fp`: the output file pointer. Must be set in binary mode (mode='wb')
+- `private_key`: the raw private key.
+- `password`: the password to decrypt.
 
 **Returns**:
 
-None
+json string containing encrypted private key.
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.decrypt"></a>
+#### decrypt
+
+```python
+ | @classmethod
+ | decrypt(cls, keyfile_json: str, password: str) -> str
+```
+
+Decrypt the private key and return in raw form.
+
+**Arguments**:
+
+- `keyfile_json`: json string containing encrypted private key.
+- `password`: the password to decrypt.
+
+**Returns**:
+
+the raw private key.
 
 <a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi"></a>
 ## `_`CosmosApi Objects

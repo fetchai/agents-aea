@@ -102,6 +102,15 @@ class AEAComponentLoadException(AEAException)
 
 Class for component loading errors of an AEA.
 
+<a name="aea.exceptions.AEAWalletNoAddressException"></a>
+## AEAWalletNoAddressException Objects
+
+```python
+class AEAWalletNoAddressException(AEAException)
+```
+
+Class for attempts to instantiate a wallet without addresses.
+
 <a name="aea.exceptions._StopRuntime"></a>
 ## `_`StopRuntime Objects
 
@@ -126,10 +135,6 @@ Init _StopRuntime exception.
 **Arguments**:
 
 - `reraise`: exception to reraise.
-
-**Returns**:
-
-None
 
 <a name="aea.exceptions.enforce"></a>
 #### enforce
@@ -157,6 +162,7 @@ Parse an exception to get the relevant lines.
 
 **Arguments**:
 
+- `exception`: the exception to be parsed
 - `limit`: the limit
 
 **Returns**:

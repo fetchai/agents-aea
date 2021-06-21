@@ -1,7 +1,7 @@
 <a name="aea.manager.project"></a>
 # aea.manager.project
 
-This module contains the implementation of AEA agents project configuiration.
+This module contains the implementation of AEA agents project configuration.
 
 <a name="aea.manager.project._Base"></a>
 ## `_`Base Objects
@@ -63,7 +63,7 @@ Call all build entry points.
 
 ```python
  | @classmethod
- | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_remote: bool = False, is_restore: bool = False, registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False) -> "Project"
+ | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_remote: bool = False, is_restore: bool = False, cli_verbosity: str = "INFO", registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False) -> "Project"
 ```
 
 Load project with given public_id to working_dir.
@@ -77,9 +77,15 @@ registry, and then from remote registry in case of failure).
 - `working_dir`: the working directory
 - `public_id`: the public id
 - `is_local`: whether to fetch from local
-:param is_remote whether to fetch from remote
+- `is_remote`: whether to fetch from remote
+- `is_restore`: whether to restore or not
+- `cli_verbosity`: the logging verbosity of the CLI
 - `registry_path`: the path to the registry locally
 - `skip_consistency_check`: consistency checks flag
+
+**Returns**:
+
+project
 
 <a name="aea.manager.project.Project.remove"></a>
 #### remove
@@ -122,7 +128,7 @@ Agent alias representation.
 #### `__`init`__`
 
 ```python
- | __init__(project: Project, agent_name: str, data_dir: str)
+ | __init__(project: Project, agent_name: str, data_dir: str, password: Optional[str] = None)
 ```
 
 Init agent alias with project, config, name, agent, builder.
@@ -139,10 +145,6 @@ Set agent config instance constructed from json data.
 **Arguments**:
 
 - `json_data`: agent config json data
-
-**Returns**:
-
-None
 
 <a name="aea.manager.project.AgentAlias.builder"></a>
 #### builder

@@ -4,7 +4,7 @@ version: 0.1.0
 type: connection
 description: dummy_connection connection description.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: QmbjcWHRhRiYMqZbgeGkEGVYi8hQ1HnYM8pBYugGKx9YnK
   connection.py: QmZS4eMTj6DbxfMWMm8bioRrZ2M7pUeqgFS6YShxZ5xQ4V
@@ -16,7 +16,7 @@ class_name: DummyConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/default:0.13.0
+- fetchai/default:1.0.0
 dependencies:
   dep1:
     version: ==1.0.0
@@ -30,12 +30,14 @@ is_abstract: false
 cert_requests:
 - identifier: cert_id_1
   ledger_id: some_ledger_id
+  message_format: '{public_key}'
   not_after: '2020-01-02'
   not_before: '2020-01-01'
   public_key: key_id
   save_path: /source/some/path_1
 - identifier: cert_id_2
   ledger_id: some_ledger_id
+  message_format: '{public_key}'
   not_after: '2020-01-02'
   not_before: '2020-01-01'
   public_key: '0xABCDEF123456'

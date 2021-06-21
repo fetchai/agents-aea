@@ -173,6 +173,24 @@ plugin
 Fetch.AI
 AEALite
 Pipfile
+12-factor
+Disposability
+disposability
+ad-hoc
+Nuitka
+Perun
+1.0.0rc1
+docstrings
+1.0.0rc2
+install.ps1
+pylint
+quickstart
+CVE-2021-27291
+AgentLand
+GCloud
+p2p
+docstring
+utils
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

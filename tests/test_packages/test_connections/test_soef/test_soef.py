@@ -230,8 +230,9 @@ class TestSoef:
         ):
             await self.connection.send(envelope)
 
-        with pytest.raises(asyncio.TimeoutError):  # got no message back
-            await asyncio.wait_for(self.connection.receive(), timeout=1)
+        response = await asyncio.wait_for(self.connection.receive(), timeout=1)
+        assert response.message.performative == OefSearchMessage.Performative.SUCCESS
+        assert response.message.agents_info.body == {}
 
     @pytest.mark.asyncio
     async def test_remove_service_key(self):
@@ -255,8 +256,9 @@ class TestSoef:
         ):
             await self.connection.send(envelope)
 
-        with pytest.raises(asyncio.TimeoutError):  # got no message back
-            await asyncio.wait_for(self.connection.receive(), timeout=1)
+        response = await asyncio.wait_for(self.connection.receive(), timeout=1)
+        assert response.message.performative == OefSearchMessage.Performative.SUCCESS
+        assert response.message.agents_info.body == {}
 
     def test_connected(self):
         """Test connected==True."""
@@ -296,8 +298,9 @@ class TestSoef:
         ):
             await self.connection.send(envelope)
 
-        with pytest.raises(asyncio.TimeoutError):  # got no message back
-            await asyncio.wait_for(self.connection.receive(), timeout=1)
+        response = await asyncio.wait_for(self.connection.receive(), timeout=1)
+        assert response.message.performative == OefSearchMessage.Performative.SUCCESS
+        assert response.message.agents_info.body == {}
 
         assert self.connection.channel.agent_location == agent_location
 
@@ -379,8 +382,9 @@ class TestSoef:
         ):
             await self.connection.send(envelope)
 
-        with pytest.raises(asyncio.TimeoutError):  # got no message back
-            await asyncio.wait_for(self.connection.receive(), timeout=1)
+        response = await asyncio.wait_for(self.connection.receive(), timeout=1)
+        assert response.message.performative == OefSearchMessage.Performative.SUCCESS
+        assert response.message.agents_info.body == {}
 
     @pytest.mark.asyncio
     async def test_bad_message(self):
@@ -616,7 +620,7 @@ class TestSoef:
         ), patch.object(self.connection.channel, "connection_check_timeout", 0.01):
             with pytest.raises(
                 SOEFNetworkConnectionError,
-                match="<SOEF Network Connection Error: Server can not be reached within timeout =",
+                match="<SOEF Network Connection Error: Server can not be reached within timeout=",
             ):
                 await self.connection.channel._check_server_reachable()
 
@@ -790,8 +794,9 @@ class TestSoef:
         ):
             await self.connection.send(envelope)
 
-        with pytest.raises(asyncio.TimeoutError):  # got no message back
-            await asyncio.wait_for(self.connection.receive(), timeout=1)
+        response = await asyncio.wait_for(self.connection.receive(), timeout=1)
+        assert response.message.performative == OefSearchMessage.Performative.SUCCESS
+        assert response.message.agents_info.body == {}
 
     @pytest.mark.asyncio
     async def test_periodic_ping_task_is_set(self):

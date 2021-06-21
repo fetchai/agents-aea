@@ -39,6 +39,8 @@ from tests.conftest import ROOT_DIR
 
 
 DEFAULT_ADDRESS = "0x0000000000000000000000000000000000000000"
+ETHEREUM_LEDGER_ID = "ethereum"
+FETCHAI_LEDGER_ID = "fetchai"
 
 
 class TestSkillBehaviour(BaseSkillTestCase):
@@ -63,6 +65,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.oracle_contract_address = DEFAULT_ADDRESS
         strategy.erc20_address = DEFAULT_ADDRESS
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour.setup()
 
@@ -86,6 +89,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.erc20_address = DEFAULT_ADDRESS
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         with patch.object(
             self.simple_oracle_client_behaviour.context.logger, "log"
@@ -116,6 +120,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.erc20_address = DEFAULT_ADDRESS
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour.act()
         self.assert_quantity_in_outbox(1)
@@ -140,6 +145,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_transaction_approved = True
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour.act()
         self.assert_quantity_in_outbox(1)
@@ -160,7 +166,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for ethereum ledger."""
         strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
         strategy.oracle_contract_address = "some_address"
-        strategy._ledger_id = "ethereum"
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour._request_contract_deploy_transaction()
         self.assert_quantity_in_outbox(1)
@@ -183,7 +189,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for fetchai ledger."""
         strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
         strategy.oracle_contract_address = "some_address"
-        strategy._ledger_id = "fetchai"
+        strategy._ledger_id = FETCHAI_LEDGER_ID
 
         self.simple_oracle_client_behaviour._request_contract_deploy_transaction()
         self.assert_quantity_in_outbox(1)

@@ -31,7 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.9.0")
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.oracle_client.contract"
@@ -48,7 +48,9 @@ class FetchOracleClientContract(Contract):
         contract_address: Address,
         from_address: Address,
         query_function: str,
+        amount: int = 0,
         gas: int = 0,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get transaction to query oracle value in contract
@@ -79,6 +81,13 @@ class FetchOracleClientContract(Contract):
         if ledger_api.identifier == FetchAIApi.identifier:
             msg = {"query_oracle_value": {}}  # type: JSONLike
             fetchai_api = cast(FetchAIApi, ledger_api)
-            tx = fetchai_api.execute_contract_query(contract_address, msg)
+            tx = fetchai_api.get_handle_transaction(
+                from_address,
+                contract_address,
+                msg,
+                amount=amount,
+                tx_fee=tx_fee,
+                gas=gas,
+            )
             return tx
         raise NotImplementedError

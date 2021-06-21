@@ -25,17 +25,18 @@ from setuptools import find_packages, setup
 
 setup(
     name="aea-ledger-ethereum",
-    version="1.0.0rc1",
+    version="1.0.1",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
     packages=find_packages(include=["aea_ledger_ethereum*"]),
     install_requires=[
-        "aea>=1.0.0rc1, <2.0.0",
+        "aea>=1.0.0, <2.0.0",
         "web3==5.12.0",
         "ipfshttpclient==0.6.1",
         "eth-account==0.5.2",
     ],
+    tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["ethereum = aea_ledger_ethereum:EthereumCrypto"],
         "aea.ledger_apis": ["ethereum = aea_ledger_ethereum:EthereumApi"],
@@ -44,7 +45,7 @@ setup(
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",

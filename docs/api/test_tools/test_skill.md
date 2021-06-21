@@ -151,7 +151,7 @@ the created incoming message
 Quickly create an incoming message with the provided attributes for a dialogue.
 
 For any attribute not provided, a value based on the dialogue is used.
-These values are shown in parantheses in the list of parameters below.
+These values are shown in parentheses in the list of parameters below.
 
 NOTE: This method must be used with care. The dialogue provided is part of the skill
 which is being tested. Because for any unspecified attribute, a "correct" value is used,
@@ -166,7 +166,7 @@ the test will be, by design, insured to pass on these values.
 - `message_id`: (the id of the last message in the provided dialogue + 1) the id of the message
 - `target`: (the id of the last message in the provided dialogue) the target of the message
 - `to`: (the agent address associated with this skill) the receiver of the message
-- `sender`: (the counterperty in the provided dialogue) the sender of the message
+- `sender`: (the counterparty in the provided dialogue) the sender of the message
 - `kwargs`: other attributes
 
 **Returns**:
@@ -184,10 +184,10 @@ Quickly create a dialogue.
 
 The 'messages' argument is a tuple of DialogueMessages.
 For every DialogueMessage (performative, contents, is_incoming, target):
-- if 'is_incoming' is not provided: for the first message it is assumed False (outgoing),
-for any other message, it is the opposite of the one preceding it.
-- if 'target' is not provided: for the first message it is assumed 0,
-for any other message, it is the index of the message before it in the tuple of messages + 1.
+    - if 'is_incoming' is not provided: for the first message it is assumed False (outgoing),
+    for any other message, it is the opposite of the one preceding it.
+    - if 'target' is not provided: for the first message it is assumed 0,
+    for any other message, it is the index of the message before it in the tuple of messages + 1.
 
 **Arguments**:
 

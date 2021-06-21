@@ -64,8 +64,7 @@ class SearchBehaviour(GenericSearchBehaviour):
             if not result.successful():
                 return
 
-            ml_task = result.get()
-            strategy.weights = ml_task.result
+            strategy.weights = result.get()
             strategy.current_task_id = None
 
         if len(strategy.data) > 0:

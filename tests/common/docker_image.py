@@ -20,7 +20,12 @@
 """This module contains testing utilities."""
 import asyncio
 import logging
+import os
+import re
+import shutil
+import subprocess  # nosec
 import sys
+import tempfile
 import time
 from abc import ABC, abstractmethod
 from threading import Timer
@@ -43,6 +48,8 @@ logger = logging.getLogger(__name__)
 class DockerImage(ABC):
     """A class to wrap interatction with a Docker image."""
 
+    MINIMUM_DOCKER_VERSION = (19, 0, 0)
+
     def __init__(self, client: docker.DockerClient):
         """Initialize."""
         self._client = client
@@ -53,6 +60,31 @@ class DockerImage(ABC):
 
         By default, nothing happens.
         """
+        self._check_docker_binary_available()
+
+    def _check_docker_binary_available(self):
+        """Check the 'Docker' CLI tool is in the OS PATH."""
+        result = shutil.which("docker")
+        if result is None:
+            pytest.skip("Docker not in the OS Path; skipping the test")
+
+        result = subprocess.run(  # nosec
+            ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        if result.returncode != 0:
+            pytest.skip(f"'docker --version' failed with exit code {result.returncode}")
+
+        match = re.search(
+            r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
+            result.stdout.decode("utf-8"),
+        )
+        if match is None:
+            pytest.skip("cannot read version from the output of 'docker --version'")
+        version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        if version < self.MINIMUM_DOCKER_VERSION:
+            pytest.skip(
+                f"expected Docker version to be at least {'.'.join(self.MINIMUM_DOCKER_VERSION)}, found {'.'.join(version)}"
+            )
 
     @property
     @abstractmethod
@@ -184,6 +216,7 @@ class OEFSearchDockerImage(DockerImage):
 
     def check_skip(self):
         """Check if the test should be skipped."""
+        super().check_skip()
         if sys.version_info < (3, 7):
             pytest.skip("Python version < 3.7 not supported by the OEF.")
             return
@@ -286,6 +319,91 @@ class GanacheDockerImage(DockerImage):
         container = self._client.containers.run(
             self.tag, command=cmd, detach=True, ports=self._make_ports()
         )
+        return container
+
+    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
+        """Wait until the image is up."""
+        request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
+        for i in range(max_attempts):
+            try:
+                response = requests.post(f"{self._addr}:{self._port}", json=request)
+                enforce(response.status_code == 200, "")
+                return True
+            except Exception:
+                logger.info(
+                    "Attempt %s failed. Retrying in %s seconds...", i, sleep_rate
+                )
+                time.sleep(sleep_rate)
+        return False
+
+
+class FetchLedgerDockerImage(DockerImage):
+    """Wrapper to Fetch ledger Docker image."""
+
+    def __init__(
+        self,
+        client: DockerClient,
+        addr: str,
+        port: int,
+        tag: str,
+        config: Optional[Dict] = None,
+    ):
+        """
+        Initialize the Fetch ledger Docker image.
+
+        :param client: the Docker client.
+        :param addr: the address.
+        :param port: the port.
+        :param config: optional configuration to command line.
+        """
+        super().__init__(client)
+        self._addr = addr
+        self._port = port
+        self._image_tag = tag
+        self._config = config or {}
+
+    @property
+    def tag(self) -> str:
+        """Get the image tag."""
+        return self._image_tag
+
+    def _make_entrypoint_file(self, tmpdirname) -> None:
+        """Make a temporary entrypoint file to setup and run the test ledger node"""
+        run_node_lines = [
+            "#!/usr/bin/env bash",
+            "set -e",
+            f'fetchd init {self._config["moniker"]} --chain-id {self._config["chain_id"]}',
+            'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
+            'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
+            f'MNEMONIC="{self._config["mnemonic"]}"',
+            "fetchcli config keyring-backend test",
+            f'echo $MNEMONIC | fetchcli keys add {self._config["genesis_account"]} --recover',
+            f'fetchd add-genesis-account $(fetchcli keys show {self._config["genesis_account"]} -a) 1152997575000000000000000000{self._config["denom"]}',
+            f'fetchd gentx --amount 100000000000000000000{self._config["denom"]} --name {self._config["genesis_account"]} --keyring-backend test',
+            "fetchd collect-gentxs",
+            f'fetchcli config chain-id {self._config["chain_id"]}',
+            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port} &",
+            "fetchcli rest-server --trust-node=true",
+        ]
+        entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
+        with open(entrypoint_file, "w") as file:
+            file.writelines(line + "\n" for line in run_node_lines)
+        os.chmod(entrypoint_file, 300)  # nosec
+
+    def create(self) -> Container:
+        """Create the container."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            self._make_entrypoint_file(tmpdirname)
+            mount_path = "/mnt"
+            volumes = {tmpdirname: {"bind": mount_path, "mode": "rw"}}
+            entrypoint = os.path.join(mount_path, "run-node.sh")
+            container = self._client.containers.run(
+                self.tag,
+                detach=True,
+                network="host",
+                volumes=volumes,
+                entrypoint=str(entrypoint),
+            )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:

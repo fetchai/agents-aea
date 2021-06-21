@@ -1,34 +1,34 @@
 name: tac_negotiation
 author: fetchai
-version: 0.22.0
+version: 0.27.0
 type: skill
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
-  __init__.py: QmRmdXfRoDvMzuNscds8BdyWzTvDq9r4npKHjaDyVCn2yN
-  behaviours.py: QmWG6gEXaUB44H9xdHcAT6QqjqxPeG18QdVmB42L5YrVfd
+  __init__.py: Qmc57bJM6xc9CNAvC7qjUq2wfNpdDmHx7XpGacZE7kStXJ
+  behaviours.py: QmQrguMfyMXUnSgGBhNE4D6ep1or3TxPQ2zXj7EVFwtwcT
   dialogues.py: Qmes8sm5yw7pYsKbGbfZNvihJnmtqDdzbdWmrZdx8p8P18
-  handlers.py: QmeYmgtii47STzcvw4k4WFwQ1Zqmtjf9ygJwmUtHQaQNAp
+  handlers.py: QmSAevkXv9ZCnYVAwB3J3o1FkyFYaNTnDSsPmqy26m7cMg
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
-  strategy.py: QmVmmo1n1yKtCm54MkVhvQeHLjsANAG3Wdy7UQuKbgDpRr
+  strategy.py: QmfYTikXbLjEsjNUt6ayr61pPhUYVbMSVqhQt7L1E53NT8
   transactions.py: QmPZoTBt1otvnkdMDwWdPExLKA7kk6fyUS1prVZqipVUVM
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.15.0
+- fetchai/ledger:0.18.0
 contracts:
-- fetchai/erc1155:0.18.0
+- fetchai/erc1155:0.21.0
 protocols:
-- fetchai/contract_api:0.12.0
-- fetchai/default:0.13.0
-- fetchai/fipa:0.14.0
-- fetchai/ledger_api:0.11.0
-- fetchai/oef_search:0.14.0
-- fetchai/signing:0.11.0
+- fetchai/contract_api:1.0.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/signing:1.0.0
 skills:
-- fetchai/tac_participation:0.19.0
+- fetchai/tac_participation:0.23.0
 behaviours:
   clean_up:
     args:
@@ -36,6 +36,7 @@ behaviours:
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
     args:
+      max_soef_registration_retries: 5
       search_interval: 5.0
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
@@ -75,10 +76,16 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: tac.participant
       is_contract_tx: false
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       register_as: both
       search_for: both
       search_radius: 5.0
@@ -90,7 +97,7 @@ models:
     class_name: Transactions
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
 is_abstract: false

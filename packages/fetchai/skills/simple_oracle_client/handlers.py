@@ -172,7 +172,7 @@ class LedgerApiHandler(Handler):
                     {
                         "label": "OracleContract",
                         "init_msg": {
-                            "oracle_address": strategy.oracle_contract_address
+                            "oracle_contract_address": strategy.oracle_contract_address
                         },
                         "gas": strategy.default_gas_deploy,
                         "amount": 0,
@@ -186,7 +186,7 @@ class LedgerApiHandler(Handler):
                 is_init_transaction=True
             )
             self.context.outbox.put_message(message=contract_api_msg)
-        else:
+        else:  # pragma: nocover
             self.context.logger.info("Failed to initialize contract: code_id not found")
 
     def _handle_transaction_receipt(
@@ -237,7 +237,7 @@ class LedgerApiHandler(Handler):
                 else:
                     self.context.logger.error(
                         f"Invalid transaction label: {transaction_label}"
-                    )
+                    )  # pragma: nocover
             elif (
                 not strategy.is_oracle_transaction_approved
                 and transaction_label == "approve"

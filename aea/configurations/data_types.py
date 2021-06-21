@@ -49,7 +49,7 @@ from aea.configurations.constants import (
 from aea.exceptions import enforce
 from aea.helpers.base import (
     RegexConstrainedString,
-    STRING_LENGTH_LIMIT,
+    SIMPLE_ID_REGEX,
     SimpleId,
     SimpleIdOrStr,
 )
@@ -147,6 +147,7 @@ class PackageType(Enum):
         >>> PackageType.CONTRACT.to_plural()
         'contracts'
 
+        :return: pluralised package type
         """
         return self.value + "s"
 
@@ -168,12 +169,14 @@ class ComponentType(Enum):
         return PackageType(self.value)
 
     @staticmethod
-    def plurals() -> Collection[str]:
+    def plurals() -> Collection[str]:  # pylint: disable=unsubscriptable-object
         """
         Get the collection of type names, plural.
 
         >>> ComponentType.plurals()
         ['protocols', 'connections', 'skills', 'contracts']
+
+        :return: list of all pluralised component types
         """
         return list(map(lambda x: x.to_plural(), ComponentType))
 
@@ -189,12 +192,17 @@ class ComponentType(Enum):
         'skills'
         >>> ComponentType.CONTRACT.to_plural()
         'contracts'
+
+        :return: pluralised component type
         """
         return self.value + "s"
 
     def __str__(self) -> str:
         """Get the string representation."""
         return str(self.value)
+
+
+PackageIdPrefix = Tuple[ComponentType, str, str]
 
 
 class PublicId(JSONSerializable):
@@ -225,8 +233,8 @@ class PublicId(JSONSerializable):
 
     __slots__ = ("_author", "_name", "_package_version")
 
-    AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
-    PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
+    AUTHOR_REGEX = SIMPLE_ID_REGEX
+    PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
     VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
@@ -426,6 +434,9 @@ class PublicId(JSONSerializable):
         ...
         ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
 
+        :param other: the object to compate to
+        :raises ValueError: if the public ids cannot be confirmed
+        :return: whether or not the inequality is satisfied
         """
         if (
             isinstance(other, PublicId)
@@ -596,7 +607,7 @@ class ComponentId(PackageId):
         return ComponentType(self.package_type.value)
 
     @property
-    def component_prefix(self) -> Tuple[ComponentType, str, str]:
+    def component_prefix(self) -> PackageIdPrefix:
         """Get the component identifier without the version."""
         package_prefix = super().package_prefix
         package_type, author, name = package_prefix
@@ -807,7 +818,6 @@ class CRUDCollection(Generic[T]):
 
         :param item_id: the item id.
         :param item: the item to be added.
-        :return: None
         :raises ValueError: if the item with the same id is already in the collection.
         """
         if item_id in self._items_by_id:
@@ -829,7 +839,6 @@ class CRUDCollection(Generic[T]):
 
         :param item_id: the item id.
         :param item: the item to be added.
-        :return: None
         """
         self._items_by_id[item_id] = item
 

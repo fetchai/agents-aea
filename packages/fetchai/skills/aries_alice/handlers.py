@@ -32,6 +32,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.aries_alice.behaviours import AliceBehaviour
 from packages.fetchai.skills.aries_alice.dialogues import (
     DefaultDialogue,
     DefaultDialogues,
@@ -42,22 +43,18 @@ from packages.fetchai.skills.aries_alice.dialogues import (
 )
 from packages.fetchai.skills.aries_alice.strategy import (
     ADMIN_COMMAND_RECEIVE_INVITE,
-    AliceStrategy,
+    Strategy,
 )
 
 
-class AliceDefaultHandler(Handler):
+class DefaultHandler(Handler):
     """This class represents alice's handler for default messages."""
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
-        self.handled_message: Optional[DefaultMessage] = None
-
-    def _handle_received_invite(self, invite_detail: Dict[str, str]) -> Optional[str]:
+    def _handle_received_invite(
+        self, invite_detail: Dict[str, str]
+    ) -> Optional[str]:  # pragma: no cover
         """
         Prepare an invitation detail received from Faber_AEA to be send to the Alice ACA.
 
@@ -113,24 +110,24 @@ class AliceDefaultHandler(Handler):
         :return: None
         """
         message = cast(DefaultMessage, message)
+
+        # recover dialogue
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-
-        strategy = cast(AliceStrategy, self.context.strategy)
-
-        self.handled_message = message
-        if message.performative == DefaultMessage.Performative.BYTES:
-            http_dialogue = cast(
-                Optional[DefaultDialogue], default_dialogues.update(message)
+        default_dialogue = cast(
+            Optional[DefaultDialogue], default_dialogues.update(message)
+        )
+        if default_dialogue is None:
+            self.context.logger.error(
+                "alice -> default_handler -> handle(): something went wrong when adding the incoming default message to the dialogue."
             )
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "alice -> default_handler -> handle(): something went wrong when adding the incoming HTTP response message to the dialogue."
-                )
-                return
+            return
+
+        if message.performative == DefaultMessage.Performative.BYTES:
             content_bytes = message.content
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
+                strategy = cast(Strategy, self.context.strategy)
                 details = self._handle_received_invite(content)
                 self.context.behaviours.alice.send_http_request_message(
                     method="POST",
@@ -146,7 +143,7 @@ class AliceDefaultHandler(Handler):
         """
 
 
-class AliceHttpHandler(Handler):
+class HttpHandler(Handler):
     """This class represents alice's handler for HTTP messages."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
@@ -157,8 +154,6 @@ class AliceHttpHandler(Handler):
 
         self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Faber = False
-
-        self.handled_message: Optional[HttpMessage] = None
 
     def setup(self) -> None:
         """
@@ -175,16 +170,17 @@ class AliceHttpHandler(Handler):
         :return: None
         """
         message = cast(HttpMessage, message)
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
 
-        self.handled_message = message
+        # recover dialogue
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+        if http_dialogue is None:
+            self.context.logger.error(
+                "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
+            )
+            return
+
         if message.performative == HttpMessage.Performative.REQUEST:  # webhook
-            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
-                )
-                return
             content_bytes = message.body
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
@@ -196,29 +192,23 @@ class AliceHttpHandler(Handler):
         elif (
             message.performative == HttpMessage.Performative.RESPONSE
         ):  # response to http_client request
-            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "alice -> http_handler -> handle() -> RESPONSE: something went wrong when adding the incoming HTTP response message to the dialogue."
-                )
-                return
             content_bytes = message.body
-            content = content_bytes.decode("utf-8")
+            content = json.loads(content_bytes)
             if "Error" in content:
                 self.context.logger.error(
                     "Something went wrong after I sent the administrative command of 'invitation receive'"
                 )
             else:
                 self.context.logger.info(
-                    "Received http response message content:" + str(content)
+                    f"Received http response message content:{str(content)}"
                 )
                 if "connection_id" in content:
                     connection = content
                     self.connection_id = content["connection_id"]
                     invitation = connection["invitation"]
-                    self.context.logger.info("invitation response: " + str(connection))
-                    self.context.logger.info("connection id: " + self.connection_id)  # type: ignore
-                    self.context.logger.info("invitation: " + str(invitation))
+                    self.context.logger.info(f"invitation response: {str(connection)}")
+                    self.context.logger.info(f"connection id: {self.connection_id}")  # type: ignore
+                    self.context.logger.info(f"invitation: {str(invitation)}")
 
     def teardown(self) -> None:
         """
@@ -228,7 +218,7 @@ class AliceHttpHandler(Handler):
         """
 
 
-class AliceOefSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
@@ -257,7 +247,9 @@ class AliceOefSearchHandler(Handler):
             return
 
         # handle message
-        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+        if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
+            self._handle_success(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._handle_error(oef_search_msg, oef_search_dialogue)
         else:
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
@@ -281,21 +273,84 @@ class AliceOefSearchHandler(Handler):
             )
         )
 
-    def _handle_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    def _handle_success(
+        self,
+        oef_search_success_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Handle an oef search message.
 
-        :param oef_search_msg: the oef search message
+        :param oef_search_success_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search success message={} in dialogue={}.".format(
+                oef_search_success_msg, oef_search_dialogue
+            )
+        )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            description = target_message.service_description
+            data_model_name = description.data_model.name
+            registration_behaviour = cast(
+                AliceBehaviour, self.context.behaviours.alice,
+            )
+            if "location_agent" in data_model_name:
+                registration_behaviour.register_service()
+            elif "set_service_key" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
+                self.context.logger.info(
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
+                )
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
+
+    def _handle_error(
+        self,
+        oef_search_error_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
-                oef_search_msg, oef_search_dialogue
+                oef_search_error_msg, oef_search_dialogue
             )
         )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            alice_behaviour = cast(AliceBehaviour, self.context.behaviours.alice,)
+            alice_behaviour.failed_registration_msg = target_message
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

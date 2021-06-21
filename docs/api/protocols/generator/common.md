@@ -42,9 +42,14 @@ check_prerequisites() -> None
 
 Check whether a programme is installed on the system.
 
-**Returns**:
+<a name="aea.protocols.generator.common.get_protoc_version"></a>
+#### get`_`protoc`_`version
 
-None
+```python
+get_protoc_version() -> str
+```
+
+Get the protoc version used.
 
 <a name="aea.protocols.generator.common.load_protocol_specification"></a>
 #### load`_`protocol`_`specification
@@ -76,10 +81,6 @@ Run Black code formatting via subprocess.
 
 - `path_to_protocol_package`: a path where formatting should be applied.
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.generator.common.try_run_isort_formatting"></a>
 #### try`_`run`_`isort`_`formatting
 
@@ -92,10 +93,6 @@ Run Isort code formatting via subprocess.
 **Arguments**:
 
 - `path_to_protocol_package`: a path where formatting should be applied.
-
-**Returns**:
-
-None
 
 <a name="aea.protocols.generator.common.try_run_protoc"></a>
 #### try`_`run`_`protoc
@@ -112,10 +109,6 @@ Run 'protoc' protocol buffer compiler via subprocess.
 - `name`: name of the protocol buffer schema file.
 - `language`: the target language in which to compile the protobuf schema file
 
-**Returns**:
-
-A completed process object.
-
 <a name="aea.protocols.generator.common.try_run_protolint"></a>
 #### try`_`run`_`protolint
 
@@ -129,10 +122,6 @@ Run 'protolint' linter via subprocess.
 
 - `path_to_generated_protocol_package`: path to the protocol buffer schema file.
 - `name`: name of the protocol buffer schema file.
-
-**Returns**:
-
-A completed process object.
 
 <a name="aea.protocols.generator.common.check_protobuf_using_protoc"></a>
 #### check`_`protobuf`_`using`_`protoc

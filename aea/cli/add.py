@@ -47,6 +47,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.exceptions import enforce
 
 
 @click.group()
@@ -56,8 +57,18 @@ from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 def add(click_context: click.Context, local: bool, remote: bool) -> None:
     """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
+    enforce(
+        not (local and remote), "'local' and 'remote' options are mutually exclusive."
+    )
+    if not local and not remote:
+        try:
+            ctx.registry_path
+        except ValueError as e:
+            click.echo(f"{e}\nTrying remote registry (`--remote`).")
+            remote = True
+    is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)
-    ctx.set_config("is_mixed", not local and not remote)
+    ctx.set_config("is_mixed", is_mixed)
 
 
 @add.command()
@@ -100,7 +111,6 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
-    :return: None
     """
     click.echo(f"Adding {item_type} '{item_public_id}'...")
     if is_item_present(ctx.cwd, ctx.agent_config, item_type, item_public_id):
@@ -150,8 +160,6 @@ def _add_item_deps(
     :param ctx: Context object.
     :param item_type: type of item.
     :param item_config: item configuration object.
-
-    :return: None
     """
     if item_type in {CONNECTION, SKILL}:
         item_config = cast(Union[SkillConfig, ConnectionConfig], item_config)

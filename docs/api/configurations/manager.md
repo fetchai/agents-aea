@@ -22,12 +22,12 @@ handle_dotted_path(value: str, author: str, aea_project_path: Union[str, Path] =
 Separate the path between path to resource and json path to attribute.
 
 Allowed values:
-'agent.an_attribute_name'
-'protocols.my_protocol.an_attribute_name'
-'connections.my_connection.an_attribute_name'
-'contracts.my_contract.an_attribute_name'
-'skills.my_skill.an_attribute_name'
-'vendor.author.[protocols|contracts|connections|skills].package_name.attribute_name
+    'agent.an_attribute_name'
+    'protocols.my_protocol.an_attribute_name'
+    'connections.my_connection.an_attribute_name'
+    'contracts.my_contract.an_attribute_name'
+    'skills.my_skill.an_attribute_name'
+    'vendor.author.[protocols|contracts|connections|skills].package_name.attribute_name
 
 We also return the component id to retrieve the configuration of a specific
 component. Notice that at this point we don't know the version,
@@ -75,6 +75,7 @@ Init manager.
 
 - `agent_config`: AgentConfig to manage.
 - `aea_project_directory`: directory where project for agent_config placed.
+- `env_vars_friendly`: whether or not it is env vars friendly
 
 <a name="aea.configurations.manager.AgentConfigManager.load_component_configuration"></a>
 #### load`_`component`_`configuration
@@ -128,10 +129,6 @@ Set config variable.
 - `path`: str dotted path  or List[Union[ComponentId, str]]
 - `value`: one of the json friendly objects.
 
-**Returns**:
-
-None
-
 <a name="aea.configurations.manager.AgentConfigManager.get_variable"></a>
 #### get`_`variable
 
@@ -163,7 +160,7 @@ Does not save it on the disc!
 
 **Arguments**:
 
-- `overrides`: overrided values dictionary
+- `overrides`: overridden values dictionary
 
 **Returns**:
 
@@ -197,15 +194,15 @@ Return current agent config json representation.
 
 Save agent config on the disc.
 
-<a name="aea.configurations.manager.AgentConfigManager.verify_or_create_private_keys"></a>
-#### verify`_`or`_`create`_`private`_`keys
+<a name="aea.configurations.manager.AgentConfigManager.verify_private_keys"></a>
+#### verify`_`private`_`keys
 
 ```python
  | @classmethod
- | verify_or_create_private_keys(cls, aea_project_path: Union[Path, str], private_key_helper: Callable[[AgentConfig, Path, bool], None], substitude_env_vars: bool = False, create_keys: bool = True) -> "AgentConfigManager"
+ | verify_private_keys(cls, aea_project_path: Union[Path, str], private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None], substitude_env_vars: bool = False, password: Optional[str] = None) -> "AgentConfigManager"
 ```
 
-Verify or create private keys.
+Verify private keys.
 
 Does not saves the config! Use AgentConfigManager.dump_config()
 
@@ -214,6 +211,7 @@ Does not saves the config! Use AgentConfigManager.dump_config()
 - `aea_project_path`: path to an AEA project.
 - `private_key_helper`: private_key_helper is a function that use agent config to check the keys
 - `substitude_env_vars`: replace env vars with values, does not dump config
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 

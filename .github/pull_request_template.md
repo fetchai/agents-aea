@@ -57,7 +57,7 @@ _Put an `x` in the boxes that apply._
 - [ ] I bumped the version number in the `aea/__version__.py` file.
 - [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest`  
       (check the READMEs of [`aea-develop`](../develop-image/README.md#publish) 
-      and [`aea-deploy`](../deploy-image/README.md#publish))
+      and [`aea-user`](../user-image/README.md#publish))
 - [ ] I have pushed the latest packages to the registry.
 - [ ] I have uploaded the latest `aea` to PyPI.
 - [ ] I have uploaded the latest plugins to PyPI.

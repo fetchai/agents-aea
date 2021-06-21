@@ -85,7 +85,6 @@ class EchoHandler(Handler):
         reply, _ = default_dialogues.create(
             counterparty=message.sender,
             performative=DefaultMessage.Performative.ERROR,
-            dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
             error_data={"default_message": message.encode()},

@@ -22,7 +22,7 @@ import itertools
 import pprint
 from typing import Iterator, List, Set
 
-from pkg_resources import EntryPoint, iter_entry_points
+from pkg_resources import EntryPoint, WorkingSet
 
 from aea.configurations.constants import (
     ALLOWED_GROUPS,
@@ -64,7 +64,7 @@ class Plugin:
         """
         Check consistency of input.
 
-        :raises AEAPluginError: if some input is not correct.
+        :raises AEAPluginError: if some input is not correct.  # noqa: DAR402
         """
         _error_message_prefix = f"Error with plugin '{self._entry_point.name}':"
         enforce(
@@ -129,7 +129,8 @@ def _get_plugins(group: str) -> List[Plugin]:
     :param group: the plugin group.
     :return: a mapping from plugin name to Plugin objects.
     """
-    entry_points: List[EntryPoint] = list(iter_entry_points(group=group))
+
+    entry_points: List[EntryPoint] = list(WorkingSet().iter_entry_points(group=group))
     _check_no_duplicates(entry_points)
     return [Plugin(group, entry_point) for entry_point in entry_points]
 

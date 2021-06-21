@@ -49,15 +49,15 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/http_client:0.19.0")
-        self.add_item("connection", "fetchai/http_server:0.18.0")
-        self.add_item("connection", "fetchai/prometheus:0.4.0")
-        self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.18.0")
+        self.add_item("connection", "fetchai/http_client:0.22.0")
+        self.add_item("connection", "fetchai/http_server:0.21.0")
+        self.add_item("connection", "fetchai/prometheus:0.7.0")
+        self.add_item("skill", "fetchai/advanced_data_request:0.5.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.21.0")
 
         default_routing = {
-            "fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
-            "fetchai/prometheus:0.4.0": "fetchai/prometheus:0.4.0",
+            "fetchai/http:1.0.0": "fetchai/http_client:0.22.0",
+            "fetchai/prometheus:1.0.0": "fetchai/prometheus:0.7.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -69,7 +69,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
-            "fetchai/advanced_data_request:0.1.0",
+            "fetchai/advanced_data_request:0.5.0",
         )
         self.set_config(
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",
@@ -88,7 +88,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.9.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.13.0", coin_price_feed_aea_name
         )
         assert (
             diff == []

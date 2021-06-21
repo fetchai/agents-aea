@@ -20,6 +20,7 @@
 
 """This test module contains the tests for the `aea run` sub-command."""
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -40,6 +41,7 @@ from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
 )
 from aea.exceptions import AEAPackageLoadingError
+from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
@@ -61,7 +63,7 @@ from tests.conftest import (
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-def test_run():
+def test_run(password_or_none):
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
     agent_name = "myagent"
@@ -69,6 +71,7 @@ def test_run():
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
+    password_options = _get_password_option_args(password_or_none)
 
     os.chdir(t)
     result = runner.invoke(
@@ -82,11 +85,14 @@ def test_run():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli,
+        [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier, *password_options],
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_options]
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(
@@ -109,7 +115,7 @@ def test_run():
 
     try:
         process = PexpectWrapper(  # nosec
-            [sys.executable, "-m", "aea.cli", "run"],
+            [sys.executable, "-m", "aea.cli", "run", *password_options],
             env=os.environ.copy(),
             maxread=10000,
             encoding="utf-8",
@@ -953,71 +959,25 @@ class TestRunFailsWhenConfigurationFileInvalid:
             pass
 
 
-class TestRunFailsWhenConnectionNotDeclared:
+class TestRunFailsWhenConnectionNotDeclared(AEATestCaseEmpty):
     """Test that the command 'aea run --connections' fails when the connection is not declared."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
+        super().setup_class()
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
+        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(FetchAICrypto.identifier)
 
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        os.chdir(Path(cls.t, cls.agent_name))
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
-        )
-        assert result.exit_code == 0
-
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "run", "--connections", cls.connection_id],
-            standalone_mode=False,
-        )
-
-    def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
-
-    def test_log_error_message(self):
-        """Test that the log error message is fixed."""
-        s = "Connection ids ['{}'] not declared in the configuration file.".format(
-            self.connection_id
-        )
-        assert self.result.exception.message == s
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    def test_run(self):
+        """Run the test."""
+        expected_message = f"Connection ids ['{self.connection_id}'] not declared in the configuration file."
+        with pytest.raises(ClickException, match=re.escape(expected_message)):
+            self.run_cli_command(
+                "run", "--connections", str(self.connection_id), cwd=self._get_cwd()
+            )
 
 
 class TestRunFailsWhenConnectionConfigFileNotFound:
@@ -1113,63 +1073,20 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             pass
 
 
-class TestRunFailsWhenConnectionNotComplete:
+class TestRunFailsWhenConnectionNotComplete(AEATestCaseEmpty):
     """Test that the command 'aea run --connections' fails when the connection.py module is missing."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
+        super().setup_class()
         cls.connection_id = HTTP_ClIENT_PUBLIC_ID
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
-
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        os.chdir(Path(cls.t, cls.agent_name))
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                str(HTTP_ClIENT_PUBLIC_ID),
-            ],
-        )
-        assert result.exit_code == 0
+        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_item("connection", str(cls.connection_id))
+        cls.set_config("agent.default_connection", str(HTTP_ClIENT_PUBLIC_ID))
         connection_module_path = Path(
             cls.t,
             cls.agent_name,
@@ -1183,93 +1100,35 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.relative_connection_module_path = connection_module_path.relative_to(
             Path(cls.t, cls.agent_name)
         )
-        cls.result = cls.runner.invoke(
-            cli,
-            [
-                "--skip-consistency-check",
-                *CLI_LOG_OPTION,
-                "run",
-                "--connections",
-                str(cls.connection_id),
-            ],
-            standalone_mode=False,
-        )
 
-    def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
-
-    def test_log_error_message(self):
-        """Test that the log error message is fixed."""
-        s = "Package loading error: An error occurred while loading connection {}: Connection module '{}' not found.".format(
+    def test_run(self):
+        """Run the test."""
+        expected_message = "Package loading error: An error occurred while loading connection {}: Connection module '{}' not found.".format(
             self.connection_id, self.relative_connection_module_path
         )
-        assert self.result.exception.message == s
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        with pytest.raises(ClickException, match=re.escape(expected_message)):
+            self.run_cli_command(
+                "--skip-consistency-check",
+                "run",
+                "--connections",
+                str(self.connection_id),
+                cwd=self._get_cwd(),
+            )
 
 
-class TestRunFailsWhenConnectionClassNotPresent:
-    """Test that the command 'aea run --connections' fails when the connection class is missing in connection.py."""
+class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
+    """Test that the command 'aea run --connections' fails when the connection is not declared."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
+        super().setup_class()
         cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
-
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
-        )
-        assert result.exit_code == 0
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                str(HTTP_ClIENT_PUBLIC_ID),
-            ],
-        )
-        assert result.exit_code == 0
+        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_item("connection", cls.connection_id)
+        cls.set_config("agent.default_connection", cls.connection_id)
         Path(
             cls.t,
             cls.agent_name,
@@ -1280,37 +1139,19 @@ class TestRunFailsWhenConnectionClassNotPresent:
             "connection.py",
         ).write_text("")
 
-        cls.result = cls.runner.invoke(
-            cli,
-            [
-                "--skip-consistency-check",
-                *CLI_LOG_OPTION,
-                "run",
-                "--connections",
-                cls.connection_id,
-            ],
-            standalone_mode=False,
-        )
-
-    def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
-
-    def test_log_error_message(self):
-        """Test that the log error message is fixed."""
-        s = "Package loading error: An error occurred while loading connection {}: Connection class '{}' not found.".format(
+    def test_run(self):
+        """Run the test."""
+        expected_message = "Package loading error: An error occurred while loading connection {}: Connection class '{}' not found.".format(
             self.connection_id, "HTTPClientConnection"
         )
-        assert self.result.exception.message == s
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        with pytest.raises(ClickException, match=expected_message):
+            self.run_cli_command(
+                "--skip-consistency-check",
+                "run",
+                "--connections",
+                self.connection_id,
+                cwd=self._get_cwd(),
+            )
 
 
 class TestRunFailsWhenProtocolConfigFileNotFound:

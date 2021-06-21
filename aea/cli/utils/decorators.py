@@ -53,7 +53,7 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -
 
     :param ctx: the context
     :param check_aea_version: whether it should check also the AEA version.
-    :raise ValueError: if there is a missing configuration file.
+    :raises ValueError: if there is a missing configuration file.
                        or if the configuration file is not valid.
                        or if the fingerprints do not match
     """
@@ -114,7 +114,11 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -
         )
 
 
-def _check_aea_project(args: Tuple[Any, ...], check_aea_version: bool = True) -> None:
+def _check_aea_project(
+    args: Tuple[Any, ...],
+    check_aea_version: bool = True,
+    check_finger_prints: bool = False,
+) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
@@ -122,21 +126,40 @@ def _check_aea_project(args: Tuple[Any, ...], check_aea_version: bool = True) ->
         skip_consistency_check = ctx.config["skip_consistency_check"]
         if not skip_consistency_check:
             _validate_config_consistency(ctx, check_aea_version=check_aea_version)
+        if check_finger_prints:
+            _compare_fingerprints(
+                ctx.agent_config,
+                Path(ctx.cwd),
+                is_vendor=False,
+                item_type=PackageType.AGENT,
+                is_recursive=False,
+            )
     except Exception as e:  # pylint: disable=broad-except
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e)) from e
 
 
 @decorator_with_optional_params
-def check_aea_project(f: Callable, check_aea_version: bool = True) -> Callable:
+def check_aea_project(
+    f: Callable, check_aea_version: bool = True, check_finger_prints: bool = False
+) -> Callable:
     """
     Check the consistency of the project as a decorator.
 
     - try to load agent configuration file
     - iterate over all the agent packages and check for consistency.
+
+    :param f: callable
+    :param check_aea_version: whether or not to check aea version
+    :param check_finger_prints: whether or not to check fingerprints
+    :return: callable
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
-        _check_aea_project(args, check_aea_version=check_aea_version)
+        _check_aea_project(
+            args,
+            check_aea_version=check_aea_version,
+            check_finger_prints=check_finger_prints,
+        )
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)
@@ -147,8 +170,6 @@ def _rmdirs(*paths: str) -> None:
     Remove directories.
 
     :param paths: paths to folders to remove.
-
-    :return: None
     """
     for path in paths:
         if os.path.exists(path):
@@ -190,8 +211,10 @@ def clean_after(func: Callable) -> Callable:
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
         :param context: context object.
+        :param args: positional arguments.
+        :param kwargs: keyword arguments.
 
-        :raises ClickException: if caught re-raises it.
+        :raises ClickException: if caught re-raises it.  # noqa: DAR402
 
         :return: source method output.
         """

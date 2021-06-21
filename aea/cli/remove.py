@@ -62,7 +62,7 @@ from aea.helpers.io import open_file
     help="Remove obsolete dependencies not required anymore.",
 )
 @click.pass_context
-@check_aea_project
+@check_aea_project(check_aea_version=False)  # type: ignore  # pylint: disable=no-value-for-parameter
 def remove(
     click_context: click.Context, with_dependencies: bool
 ) -> None:  # pylint: disable=unused-argument
@@ -76,11 +76,7 @@ def remove(
 @click.argument("connection_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def connection(ctx: Context, connection_id: PublicId) -> None:
-    """
-    Remove a connection from the agent.
-
-    It expects the public id of the connection to remove from the local registry.
-    """
+    """Remove a connection from the agent."""
     remove_item(ctx, CONNECTION, connection_id)
 
 
@@ -88,11 +84,7 @@ def connection(ctx: Context, connection_id: PublicId) -> None:
 @click.argument("contract_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def contract(ctx: Context, contract_id: PublicId) -> None:
-    """
-    Remove a contract from the agent.
-
-    It expects the public id of the contract to remove from the local registry.
-    """
+    """Remove a contract from the agent."""
     remove_item(ctx, CONTRACT, contract_id)
 
 
@@ -100,11 +92,7 @@ def contract(ctx: Context, contract_id: PublicId) -> None:
 @click.argument("protocol_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def protocol(ctx: Context, protocol_id: PublicId) -> None:
-    """
-    Remove a protocol from the agent.
-
-    It expects the public id of the protocol to remove from the local registry.
-    """
+    """Remove a protocol from the agent."""
     remove_item(ctx, PROTOCOL, protocol_id)
 
 
@@ -112,11 +100,7 @@ def protocol(ctx: Context, protocol_id: PublicId) -> None:
 @click.argument("skill_id", type=PublicIdParameter(), required=True)
 @pass_ctx
 def skill(ctx: Context, skill_id: PublicId) -> None:
-    """
-    Remove a skill from the agent.
-
-    It expects the public id of the skill to remove from the local registry.
-    """
+    """Remove a skill from the agent."""
     remove_item(ctx, SKILL, skill_id)
 
 
@@ -188,7 +172,9 @@ class ItemRemoveHelper:
         """
         List all the requirements for item provided.
 
-        :return: generator with package ids: (type, public_id)
+        :param item: the item package configuration
+        :param ignore_non_vendor: whether or not to ignore vendor packages
+        :yield: package ids: (type, public_id)
         """
         for item_type in map(str, ComponentType):
             items = getattr(item, f"{item_type}s", set())
@@ -211,6 +197,8 @@ class ItemRemoveHelper:
 
         It's recursive and provides all the sub dependencies.
 
+        :param item: the item package configuration
+        :param package_id: the package id.
         :return: dict with PackageId: and set of PackageIds that uses this package
         """
         result: defaultdict = defaultdict(set)
@@ -254,6 +242,8 @@ class ItemRemoveHelper:
         can be deleted - set of dependencies used only by component so can be deleted
         can not be deleted  - dict - keys - packages can not be deleted, values are set of packages required by.
 
+        :param item_type: the item type.
+        :param item_public_id: the item public id.
         :return: Tuple[required by, can be deleted, can not be deleted.]
         """
         package_id = PackageId(item_type, item_public_id)
@@ -281,6 +271,9 @@ def remove_unused_component_configurations(ctx: Context) -> Generator:
 
     Context manager!
     Clean all configurations on enter, restore actual configurations and dump agent config.
+
+    :param ctx: click context
+    :yield: None
     """
     saved_configuration = ctx.agent_config.component_configurations
     ctx.agent_config.component_configurations = {}
@@ -322,11 +315,9 @@ class RemoveItem:
         :param ctx: click context.
         :param item_type: str, package type
         :param item_id: PublicId of the item to remove.
+        :param with_dependencies: whether or not to remove dependencies.
         :param force: bool. if True remove even required by another package.
-        :param ignore_non_vendor: bool. if True, ignore non-vendor packages when computing
-          inverse dependencies. The effect of this flag is ignored if force = True
-
-        :return: None
+        :param ignore_non_vendor: bool. if True, ignore non-vendor packages when computing inverse dependencies. The effect of this flag is ignored if force = True
         """
         self.ctx = ctx
         self.force = force
@@ -471,9 +462,6 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     :param ctx: Context object.
     :param item_type: type of item.
     :param item_id: item public ID.
-
-    :return: None
-    :raises ClickException: if some error occurs.
     """
     with remove_unused_component_configurations(ctx):
         RemoveItem(

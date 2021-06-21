@@ -31,6 +31,7 @@ from aea_ledger_ethereum import (
     EthereumApi,
     EthereumCrypto,
     EthereumFaucetApi,
+    EthereumHelper,
     LruLockWrapper,
     get_gas_price_strategy,
     requests,
@@ -39,7 +40,7 @@ from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 
-from aea.crypto.helpers import DecryptError
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
@@ -367,3 +368,36 @@ def test_dump_load_with_password():
             )
         ec2 = EthereumCrypto(encrypted_file_name, password)
         assert ec2.private_key == ec.private_key
+
+
+def test_load_errors():
+    """Test load errors: bad password, no password specified."""
+    ec = EthereumCrypto()
+    with patch.object(EthereumCrypto, "load", return_value="bad sTring"):
+        with pytest.raises(KeyIsIncorrect, match="Try to specify `password`"):
+            ec.load_private_key_from_path("any path")
+
+        with pytest.raises(KeyIsIncorrect, match="Wrong password?"):
+            ec.load_private_key_from_path("any path", password="some")
+
+
+def test_decrypt_error():
+    """Test bad password error on decrypt."""
+    ec = EthereumCrypto()
+    ec._pritvate_key = EthereumCrypto.generate_private_key()
+    password = "test"
+    encrypted_data = ec.encrypt(password=password)
+    with pytest.raises(DecryptError, match="Bad password"):
+        ec.decrypt(encrypted_data, password + "some")
+
+    with patch(
+        "aea_ledger_ethereum.ethereum.Account.decrypt",
+        side_effect=ValueError("expected"),
+    ):
+        with pytest.raises(ValueError, match="expected"):
+            ec.decrypt(encrypted_data, password + "some")
+
+
+def test_helper_get_contract_address():
+    """Test EthereumHelper.get_contract_address."""
+    assert EthereumHelper.get_contract_address({"contractAddress": "123"}) == "123"

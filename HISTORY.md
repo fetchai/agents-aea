@@ -1,6 +1,149 @@
 # Release History
 
-## 0.11.2 (2020-03-17)
+## 1.0.2 (2021-06-03)
+
+AEA:
+- Bounds versions of dependencies by next major
+- Fixes incoherent warning message during package loading
+- Improves various incomprehensible error messages
+- Adds debug log message when abstract components are loaded
+- Adds tests and minor fixes for password related CLI commands and password usage in `MultiAgentManager`
+- Adds default error handler in `MultiAgentManager`
+- Ensures private key checks are performed after override setting in `MultiAgentManager`
+- Applies docstring fixes suggested by `darglint`
+- Fixes `aea push --local` command to use correct author
+- Fixes `aea get-multiaddress` command to consider overrides
+
+Plugins:
+- Bounds versions of dependencies by next major
+
+Packages:
+- Updates `p2p_libp2p` connection to use TCP sockets for all platforms
+- Multiple fixes on `libp2p_node` including better error handling and stream creation
+- Adds sending queue in `p2p_libp2p` connection to handle sending failures
+- Adds unit tests for `libp2p_node` utils
+- Adds additional tests for `p2p_libp2p` connection
+- Fixes location bug in AW5
+- Improves connection check handling in soef connection
+- Updates oracle and oracle client contracts for better access control
+- Adds skill tests for `erc1155` skills
+- Adds skill tests for `aries` skills
+- Fixes minor bug in ML skills
+- Multiple additional tests and test stability fixes
+
+Docs:
+- Extends demo docs to include guidance of usage in AEA Manager
+- Adds short guide on Kubernetes deployment
+- Multiple additional docs updates
+
+Chores:
+- Adds `--no-bump` option to `generate_all_protocols` script
+- Adds script to detect if aea or plugins need bumping
+- Bumps various development dependencies
+- Adds Golang and GCC in Windows install script
+- Adds `darglint` to CI
+
+Examples:
+- Updates TAC deployment scripts and images
+
+## - (2021-05-05)
+
+Packages:
+- Adds node watcher to `p2p_libp2p` connection
+- Improves logging and error handling in `p2p_libp2p` node
+- Addresses potential overflow issue in `p2p_libp2p` node
+- Fixes concurrency issue in `p2p_libp2p` node which could lead to wrongly ordered envelopes
+- Improves logging in TAC skills
+- Fixes Exception handling in connect/disconnect calls of soef connection
+- Extends public DHT tests to include staging
+- Adds tests for envelope ordering for all routes
+- Multiple additional tests and test stability fixes
+
+## 1.0.1 (2021-04-30)
+
+AEA:
+- Fixes wheels issue for Windows
+- Fixes password propagation for certificate issuance in `MultiAgentManager`
+- Improves error message when local registry not present
+
+AEALite:
+- Adds full protocol support
+- Adds end-to-end interaction example with AEA (based on `fetchai/fipa` protocol)
+- Multiple additional tests and test stability fixes
+
+Packages:
+- Fixes multiple bugs in `ERC1155` version of TAC
+- Refactors p2p connections for better separation of concerns and maintainability
+- Integrates aggregation with simple oracle skill
+- Ensures genus and classifications are used in all skills using SOEF
+- Extends SOEF connection to implement `oef_search` protocol fully
+- Handles SOEF failures in skills
+- Adds simple aggregation skills including tests and docs
+- Adds tests for registration AW agents
+- Adds tests for reconnection logic in p2p connections
+- Multiple additional tests and test stability fixes
+
+Docs:
+- Extends car park demo with usage guide for AEA manager
+- Multiple additional docs updates
+
+Examples:
+- Adds TAC deployment example 
+
+## 1.0.0 (2021-03-30)
+
+- Improves contributor guide
+- Enables additional pylint checks
+- Adds configuration support on exception behaviour in ledger plugins
+- Improves exception handling in `aea-ledger-cosmos` and `aea-ledger-fetchai` plugins
+- Improves quickstart guide
+- Fixes multiple flaky tests
+- Fixes various outdated metadata
+- Resolves a CVE (CVE-2021-27291) affecting development dependencies
+- Adds end-to-end support and tests for simple oracle on Ethereum and Fetch.ai ledgers
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
+## 1.0.0rc2 (2021-03-28)
+
+- Extends CLI command `aea fingerprint` to allow fingerprinting of agents
+- Improves `deploy-image` Docker example
+- Fixes a bug in `MultiAgentManager` which leaves it in an unclean state when project adding fails
+- Fixes dependencies of `aea-legder-fetchai`
+- Improves guide on HTTP client and server connection
+- Removes pickle library usage in the ML skills
+- Adds various consistency checks in configurations
+- Replaces usage of `pyaes` with `pycryptodome` in plugins
+- Changes generator to avoid non-idiomatic usage of type checks
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
+## 1.0.0rc1 (2021-03-24)
+
+- Adds CLI command `aea get-public-key`
+- Adds support for encrypting private keys at rest
+- Adds support for configuration of decision maker and error handler instances from `aea-config.yaml`
+- Adds support for explicitly marking behaviours and handlers as dynamic
+- Adds support for fetchai ledger to oracle skills and contract
+- Adds timeout support on multiplexer calls to connections
+- Fixes bug in regex constrained string for id validation
+- Adds docs section on how AEAs satisfy 12-factor methodology
+- Adds docs section on tradeoffs made in `v1`
+- Adds example for logs streaming to browser
+- Removes multiple temporary hacks for backwards compatibility
+- Adds skills tests coverage for `echo` and `http_echo` skills
+- Adds `required_ledgers` field in `aea-config.yaml`
+- Removes `registry_path` field in `aea-config.yaml`
+- Adds `message_format` field to cert requests
+- Removes requirement for exact protocol buffers compiler, prints version used in protocols
+- Adds support to configure task manager mode via `aea-config.yaml`
+- Fixed spelling across docstrings in code base
+- Multiple minor fixes
+- Multiple docs updates to fix order of CLI commands with respect to installing dependencies
+- Multiple additional tests and test stability fixes
+
+
+## 0.11.2 (2021-03-17)
 
 - Fixes a package import issue
 - Fixes an issue where `AgentLoop` did not teardown properly under certain conditions
@@ -16,7 +159,7 @@
 - Adds support for CLI plugins to framework
 - Multiple additional tests and test stability fixes
 
-## 0.11.1 (2020-03-06)
+## 0.11.1 (2021-03-06)
 
 - Bumps `aiohttp` to `>=3.7.4` to address a CVE affecting `http_server`, `http_client` and `webhook` connections
 - Adds script to ensure Pipfile and `tox.ini` dependencies align
@@ -30,7 +173,7 @@
 - Multiple docs updates to fix order of CLI commands with respect to installing dependencies
 - Multiple additional tests and test stability fixes
 
-## 0.11.0 (2020-03-04)
+## 0.11.0 (2021-03-04)
 
 - Adds slots usage in frequently used framework objects, including `Dialogue`
 - Fixes a bug in `aea upgrade` command where eject prompt was not offered
@@ -55,7 +198,7 @@
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.10.1 (2020-02-21)
+## 0.10.1 (2021-02-21)
 
 - Changes default URL of `soef` connection to https
 - Improves teardown, retry and edge case handling of `p2p_libp2p` and `p2p_libp2p_client` connections
@@ -73,7 +216,7 @@
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.10.0 (2020-02-11)
+## 0.10.0 (2021-02-11)
 
 - Removes error skill from agents which do not need it
 - Adds support for relay connection reconnect in ACN
@@ -94,7 +237,7 @@
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.9.2 (2020-01-21)
+## 0.9.2 (2021-01-21)
 
 - Fixes `CosmosApi`, in particular for CosmWasm
 - Fixes error output from `add-key` CLI command
@@ -106,7 +249,7 @@
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.9.1 (2020-01-14)
+## 0.9.1 (2021-01-14)
 
 - Fixes multiple issues with `MultiAgentManager` including overrides not being correctly applied
 - Restructures docs navigation
@@ -119,7 +262,7 @@
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.9.0 (2020-01-06)
+## 0.9.0 (2021-01-06)
 
 - Adds multiple bug fixes on `MultiAgentManager`
 - Adds `AgentConfigManager` for better programmatic configuration management

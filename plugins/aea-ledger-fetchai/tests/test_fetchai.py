@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the fetchai module."""
 import json
 import logging
@@ -25,11 +24,13 @@ import tempfile
 import time
 from pathlib import Path
 from unittest import mock
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 from uuid import uuid4
 
 import pytest
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+
+from aea.crypto.helpers import KeyIsIncorrect
 
 from tests.conftest import FETCHAI_TESTNET_CONFIG, MAX_FLAKY_RERUNS, ROOT_DIR
 
@@ -851,3 +852,28 @@ def test_construct_handle_transaction_both_versions():
         isinstance(transaction, dict) and len(transaction) == 6
     ), "Incorrect transfer_transaction constructed."
     assert len(transaction["msgs"][0]["value"]["sent_funds"]) == 0
+
+
+def test_load_errors():
+    """Test load errors: bad password, no password specified."""
+    ec = FetchAICrypto()
+    with patch.object(FetchAICrypto, "load", return_value="bad sTring"):
+        with pytest.raises(KeyIsIncorrect, match="Try to specify `password`"):
+            ec.load_private_key_from_path("any path")
+
+        with pytest.raises(KeyIsIncorrect, match="Wrong password?"):
+            ec.load_private_key_from_path("any path", password="some")
+
+
+def test_decrypt_error():
+    """Test bad password error on decrypt."""
+    ec = FetchAICrypto()
+    ec._pritvate_key = FetchAICrypto.generate_private_key()
+    password = "test"
+    encrypted_data = ec.encrypt(password=password)
+    with patch(
+        "aea_ledger_fetchai._cosmos.DataEncrypt.decrypt",
+        side_effect=UnicodeDecodeError("expected", b"", 2, 3, ""),
+    ):
+        with pytest.raises(ValueError, match="bad password?"):
+            ec.decrypt(encrypted_data, password + "some")

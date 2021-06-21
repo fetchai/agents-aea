@@ -1,7 +1,7 @@
 <a name="aea.helpers.install_dependency"></a>
 # aea.helpers.install`_`dependency
 
-Helper to install python dependecies.
+Helper to install python dependencies.
 
 <a name="aea.helpers.install_dependency.install_dependency"></a>
 #### install`_`dependency
@@ -16,10 +16,7 @@ Install python dependency to the current python environment.
 
 - `dependency_name`: name of the python package
 - `dependency`: Dependency specification
-
-**Returns**:
-
-None
+- `logger`: the logger
 
 <a name="aea.helpers.install_dependency.run_install_subprocess"></a>
 #### run`_`install`_`subprocess

@@ -8,7 +8,6 @@ on:
   pull_request:
 
 jobs:
-
   common_checks_1:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -24,7 +23,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install pipenv
-      - name: Pipenv lock
+      - name: Pipenv install requirements and check it can be locked
         run: |
           pipenv install --dev --skip-lock --clear
           pipenv run pip install -e .[all]
@@ -74,6 +73,8 @@ jobs:
           tox -e black-check
           tox -e isort-check
           tox -e flake8
+      - name: Docstring check
+        run: tox -e darglint
       - name: Unused code check
         run: tox -e vulture
       - name: Static type check
@@ -208,6 +209,40 @@ jobs:
         run: |
           tox -e dependencies_check
 
+  plugins_install_check:
+    continue-on-error: False
+    runs-on: ${{ matrix.sys.os }}
+    strategy:
+      matrix:
+        sys:
+          - { os: windows-latest, shell: 'msys2 {0}' }
+          - { os: ubuntu-latest,  shell: bash  }
+          - { os: macos-latest,   shell: bash  }
+        python_version: [3.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - if: matrix.sys.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+      - uses: actions/setup-python@master
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: Install tox
+        run : |
+          pip install tox
+      - name: Check plugin aea-ledger-cosmos
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && aea generate-key cosmos && echo aea-ledger-cosmos checked!"
+      - name: Check plugin aea-ledger-ethereum
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-ethereum && aea generate-key ethereum && echo aea-ledger-ethereum checked!"
+      - name: Check plugin aea-ledger-fetchai
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-fetchai && aea generate-key fetchai && echo aea-ledger-fetchai checked!"
+      - name: Check plugin aea-cli-ipfs
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
+
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -237,6 +272,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -270,6 +307,8 @@ jobs:
       - common_checks_2
       - common_checks_3
       - common_checks_4
+      - dependencies_checks
+      - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -326,6 +365,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -402,6 +443,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -433,6 +476,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -447,15 +492,51 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
+    - if: matrix.os == 'macos-latest'
+      working-directory: ./libs/go/libp2p_node
+      run: |
+         export LINKPATH=$GOROOT/pkg/tool/darwin_amd64/link
+         echo $LINKPATH
+         sudo cp $LINKPATH ${LINKPATH}_orig
+         sudo cp link $LINKPATH
+         sudo chmod a+x $LINKPATH
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
-      run: go test -p 1 -timeout 0 -count 1 -v ./...
+      run: make test
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
-
+  libp2p_coverage:
+    name: libp2p_coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          sudo apt-get install make -y
+      - name: Get dependencies
+        working-directory: ./libs/go/libp2p_node/
+        run: |
+          make install
+      - name: Generate coverage report
+        working-directory: ./libs/go/libp2p_node/
+        run: |
+          make test
+      - name: Print coverage report
+        working-directory: ./libs/go/libp2p_node/
+        run: |
+          go tool cover -func=coverage.txt
   coverage_checks:
     continue-on-error: True
     needs:

@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, **kwargs: Any, ,) -> None
+ | __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, error_handler_config: Optional[Dict[str, Any]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, decision_maker_handler_config: Optional[Dict[str, Any]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, task_manager_mode: Optional[str] = None, **kwargs: Any, ,) -> None
 ```
 
 Instantiate the agent.
@@ -31,8 +31,12 @@ Instantiate the agent.
 - `period`: period to call agent's act
 - `execution_timeout`: amount of time to limit single act/handle to execute.
 - `max_reactions`: the processing rate of envelopes per tick (i.e. single loop).
+- `error_handler_class`: the class implementing the error handler
+- `error_handler_config`: the configuration of the error handler
 - `decision_maker_handler_class`: the class implementing the decision maker handler to be used.
+- `decision_maker_handler_config`: the configuration of the decision maker handler
 - `skill_exception_policy`: the skill exception policy enum
+- `connection_exception_policy`: the connection exception policy enum
 - `loop_mode`: loop_mode to choose agent run loop.
 - `runtime_mode`: runtime mode (async, threaded) to run AEA in.
 - `default_ledger`: default ledger id
@@ -42,11 +46,8 @@ Instantiate the agent.
 - `connection_ids`: active connection ids. Default: consider all the ones in the resources.
 - `search_service_address`: the address of the search service used.
 - `storage_uri`: optional uri to set generic storage
+- `task_manager_mode`: task manager mode (threaded) to run tasks with.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
-
-**Returns**:
-
-None
 
 <a name="aea.aea.AEA.get_build_dir"></a>
 #### get`_`build`_`dir
@@ -119,10 +120,6 @@ Set up the agent.
 
 Calls setup() on the resources.
 
-**Returns**:
-
-None
-
 <a name="aea.aea.AEA.act"></a>
 #### act
 
@@ -133,10 +130,6 @@ None
 Perform actions.
 
 Adds new handlers and behaviours for use/execution by the runtime.
-
-**Returns**:
-
-None
 
 <a name="aea.aea.AEA.handle_envelope"></a>
 #### handle`_`envelope
@@ -220,10 +213,6 @@ Performs the following:
 
 - tears down the resources.
 
-**Returns**:
-
-None
-
 <a name="aea.aea.AEA.get_task_result"></a>
 #### get`_`task`_`result
 
@@ -233,6 +222,10 @@ None
 
 Get the result from a task.
 
+**Arguments**:
+
+- `task_id`: the id of the task
+
 **Returns**:
 
 async result for task_id
@@ -241,7 +234,7 @@ async result for task_id
 #### enqueue`_`task
 
 ```python
- | enqueue_task(func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None) -> int
+ | enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the task manager.
@@ -250,10 +243,9 @@ Enqueue a task with the task manager.
 
 - `func`: the callable instance to be enqueued
 - `args`: the positional arguments to be passed to the function.
-- `kwds`: the keyword arguments to be passed to the function.
-:return the task id to get the the result.
+- `kwargs`: the keyword arguments to be passed to the function.
 
-**Raises**:
+**Returns**:
 
-- `ValueError`: if the task manager is not running.
+the task id to get the the result.
 

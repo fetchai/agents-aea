@@ -1,34 +1,35 @@
 name: erc1155_deploy
 author: fetchai
-version: 0.24.0
+version: 0.29.0
 type: skill
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
-  __init__.py: QmWPX7w5SqgoNTGhb51JPyHHi7tXLmzGoixu5zSRwf5JnR
-  behaviours.py: QmZ3SrAXarJa1iCMoShxHUsARDtak9R9GLGpXfmeGTcCDR
+  __init__.py: QmRk8QdcJgdw8stB6MpAcwgK7AhPgS1N24r9HPLdsUxx2e
+  behaviours.py: QmRZg5QSeDxk97spB4iyaPtjGuNQzMovcTq4LemxEVnTmd
   dialogues.py: QmU1T8Ag8kTTqhL2vPsMBd5eb6siZMkyGsTHsVHGBbLktP
-  handlers.py: QmW6WF7TQMthtkqeqJrZGR1jbfVG3e3NjvwcurEuWaWq7B
-  strategy.py: QmUDturpVPqMf6FqkTcd7byE61Vc9dCsdbecpmPHrsWqKM
+  handlers.py: QmSeTHvMviDVQzyZpcHbNk2d1iDuJoNKutAzWnVQHv14bp
+  strategy.py: QmRDcYs2XBT4TcrhMi81Vhg5oEQExQzkdz3dU2vmZwsRCs
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.15.0
+- fetchai/ledger:0.18.0
 contracts:
-- fetchai/erc1155:0.18.0
+- fetchai/erc1155:0.21.0
 protocols:
-- fetchai/contract_api:0.12.0
-- fetchai/default:0.13.0
-- fetchai/fipa:0.14.0
-- fetchai/ledger_api:0.11.0
-- fetchai/oef_search:0.14.0
-- fetchai/signing:0.11.0
+- fetchai/contract_api:1.0.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/signing:1.0.0
 skills: []
 behaviours:
   service_registration:
     args:
+      max_soef_registration_retries: 5
       services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:
@@ -68,6 +69,9 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: seller
       from_supply: 10
       location:
         latitude: 51.5194
@@ -84,6 +88,9 @@ models:
       - 100
       - 100
       nb_tokens: 10
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: seller_service
         value: erc1155_contract
@@ -93,5 +100,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
 is_abstract: false

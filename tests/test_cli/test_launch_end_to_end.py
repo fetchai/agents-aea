@@ -19,6 +19,7 @@
 """This test module contains the tests for the `aea launch` sub-command."""
 import json
 import os
+import sqlite3
 import sys
 import uuid
 
@@ -89,6 +90,17 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             "set",
             "vendor.fetchai.connections.soef.config.token_storage_path",
             os.path.join(self.t, registration_agent_name, "soef_key.txt"),
+            cwd=registration_agent_name,
+        )
+
+        storage_file_name = os.path.abspath(
+            os.path.join(registration_agent_name, "test.db")
+        )
+        self.run_cli_command(
+            "config",
+            "set",
+            "agent.storage_uri",
+            f"sqlite://{storage_file_name}",
             cwd=registration_agent_name,
         )
 
@@ -199,3 +211,19 @@ class TestLaunchEndToEnd(AEATestCaseMany):
         finally:
             proc.control_c()
             proc.expect("Exit cli. code: 0", timeout=30)
+
+        assert os.path.exists(storage_file_name)
+        con = sqlite3.connect(storage_file_name)
+        try:
+            cursor = con.cursor()
+            tables = cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table';"
+            ).fetchall()
+            assert tables
+            table_name = tables[0][0]
+            num_of_records = cursor.execute(  # nosec
+                f"SELECT count(*) FROM {table_name};"
+            ).fetchone()[0]
+            assert num_of_records > 0
+        finally:
+            con.close

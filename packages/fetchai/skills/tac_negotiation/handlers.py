@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 
+from collections import OrderedDict
 from typing import Optional, Tuple, cast
 
 from aea.configurations.base import PublicId
@@ -37,6 +38,9 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.tac_negotiation.behaviours import (
+    GoodsRegisterAndSearchBehaviour,
+)
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
@@ -290,7 +294,9 @@ class FipaNegotiationHandler(Handler):
                     contract_address=strategy.contract_address,
                     callable="get_hash_batch",
                     kwargs=ContractApiMessage.Kwargs(
-                        strategy.kwargs_from_terms(fipa_dialogue.terms)
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms, is_from_terms_sender=False
+                        )
                     ),
                 )
                 contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
@@ -511,7 +517,7 @@ class SigningHandler(Handler):
             counterparty_signature = fipa_dialogue.counterparty_signature
             tx_id = fipa_dialogue.terms.sender_hash
             if "transactions" not in self.context.shared_state.keys():
-                self.context.shared_state["transactions"] = {}
+                self.context.shared_state["transactions"] = OrderedDict()
             tx = {
                 "terms": fipa_dialogue.terms,
                 "sender_signature": signing_msg.signed_message.body,
@@ -804,6 +810,8 @@ class OefSearchHandler(Handler):
         # handle message
         if oef_search_msg.performative == OefSearchMessage.Performative.SEARCH_RESULT:
             self._on_search_result(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
+            self._handle_success(oef_search_msg, oef_search_dialogue)
         elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._on_oef_error(oef_search_msg, oef_search_dialogue)
         else:
@@ -828,22 +836,90 @@ class OefSearchHandler(Handler):
             )
         )
 
+    def _handle_success(
+        self,
+        oef_search_success_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_success_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search success message={} in dialogue={}.".format(
+                oef_search_success_msg, oef_search_dialogue
+            )
+        )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            description = target_message.service_description
+            data_model_name = description.data_model.name
+            registration_behaviour = cast(
+                GoodsRegisterAndSearchBehaviour,
+                self.context.behaviours.tac_negotiation,
+            )
+            if "location_agent" in data_model_name:
+                registration_behaviour.register_service()
+            elif "set_service_key" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
+                registration_behaviour.is_registered = True
+                self.context.logger.info(
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
+                )
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
+
     def _on_oef_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+        self,
+        oef_search_error_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Handle an OEF error message.
 
-        :param oef_search_msg: the oef search msg
+        :param oef_search_error_msg: the oef search msg
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.warning(
             "received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
                 oef_search_dialogue.dialogue_label.dialogue_reference,
-                oef_search_msg.oef_error_operation,
+                oef_search_error_msg.oef_error_operation,
             )
         )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            registration_behaviour = cast(
+                GoodsRegisterAndSearchBehaviour,
+                self.context.behaviours.tac_negotiation,
+            )
+            registration_behaviour.failed_registration_msg = target_message
 
     def _on_search_result(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

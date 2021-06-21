@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tac-deploy
+spec:
+  selector:
+    matchLabels:
+      app: tac-deploy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tac-deploy
+      namespace: aea-research
+    spec:
+      nodeSelector:
+        # type: agent-test
+        kubernetes.io/os: linux
+      containers:
+      - name: tac-deploy-container
+        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.14
+        resources:
+          requests:
+            memory: "12000000Ki"
+            cpu: "3700m"
+          limits:
+            memory: "12000000Ki"
+            cpu: "3700m"
+        env:
+         - name: PARTICIPANTS_AMOUNT
+           value: "70"
+         - name: MINUTES_TILL_START
+           value: "10"
+         - name: COMPETITION_TIMEOUT
+           value: "86400"
+         - name: INACTIVITY_TIMEOUT
+           value: "3600"
+         - name: SEARCH_INTERVAL_GAME
+           value: "20"
+         - name: SEARCH_INTERVAL_TRADING
+           value: "600"
+         - name: CLEANUP_INTERVAL
+           value: "1800"
+         - name: NODE_CONNECTION_TIMEOUT
+           value: "30"
+         - name: LOG_LEVEL
+           value: "INFO"
+         - name: CLEAR_LOG_DATA_ON_LAUNCH
+           value: "true"
+         - name: CLEAR_KEY_DATA_ON_LAUNCH
+           value: "true"
+         - name: USE_CLIENT
+           value: "false"
+        volumeMounts:
+         - name: tac-deploy-data-vol
+           mountPath: /data
+      volumes:
+      - name: tac-deploy-data-vol
+        persistentVolumeClaim:
+          claimName: tac-deploy-data-vol
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tac-deploy-data-vol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

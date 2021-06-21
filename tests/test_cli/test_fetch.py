@@ -295,6 +295,37 @@ class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
     MODE = "--remote"
 
 
+def test_fetch_mixed_no_local_registry():
+    """Test that mixed becomes remote when no local registry."""
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            name = "my_first_aea"
+            runner = CliRunner()
+            result = runner.invoke(
+                cli, ["fetch", "fetchai/my_first_aea"], catch_exceptions=False,
+            )
+            assert result.exit_code == 0, result.stdout
+            assert os.path.exists(name)
+            assert "Trying remote registry (`--remote`)." in result.stdout
+
+
+def test_fetch_local_no_local_registry():
+    """Test that local fetch fails when no local registry."""
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            runner = CliRunner()
+            result = runner.invoke(
+                cli,
+                ["fetch", "--local", "fetchai/my_first_aea"],
+                catch_exceptions=False,
+            )
+            assert result.exit_code == 1, result.stdout
+            assert (
+                "Registry path not provided and local registry `packages` not found in current (.) and parent directory."
+                in result.stdout
+            )
+
+
 def test_fetch_twice_locally():
     """Test fails on fetch if dir exists."""
     with TemporaryDirectory() as tmp_dir:
@@ -359,7 +390,13 @@ def test_fetch_twice_remote():
             ):
                 result = runner.invoke(
                     cli,
-                    ["fetch", "--remote", "fetchai/my_first_aea"],
+                    [
+                        "--registry-path",
+                        PACKAGES_DIR,
+                        "fetch",
+                        "--remote",
+                        "fetchai/my_first_aea",
+                    ],
                     standalone_mode=False,
                     catch_exceptions=False,
                 )

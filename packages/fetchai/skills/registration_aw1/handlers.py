@@ -111,6 +111,9 @@ class AW1RegistrationHandler(Handler):
         strategy.is_registration_pending = False
         strategy.is_ready_to_register = False
 
+        if strategy.announce_termination_key is not None:
+            self.context.shared_state[strategy.announce_termination_key] = True
+
     def _handle_error(
         self, register_msg: RegisterMessage, register_dialogue: RegisterDialogue
     ) -> None:

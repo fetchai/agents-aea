@@ -48,7 +48,10 @@ Get the distance to another location.
 **Arguments**:
 
 - `other`: the other location
-:retun: the distance
+
+**Returns**:
+
+the distance
 
 <a name="aea.helpers.search.models.Location.__eq__"></a>
 #### `__`eq`__`
@@ -207,6 +210,7 @@ Initialize a data model.
 
 - `name`: the name of the data model.
 - `attributes`: the attributes of the data model.
+- `description`: the data model description.
 
 <a name="aea.helpers.search.models.DataModel.attributes_by_name"></a>
 #### attributes`_`by`_`name
@@ -310,7 +314,7 @@ Initialize the description object.
 
 - `values`: the values in the description.
 - `data_model`: the data model (optional)
-:pram data_model_name: the data model name if a datamodel is created on the fly.
+- `data_model_name`: the data model name if a datamodel is created on the fly.
 
 <a name="aea.helpers.search.models.Description.values"></a>
 #### values
@@ -366,10 +370,6 @@ with the instance of this class in the 'description_object' argument.
 
 - `description_pb`: the protocol buffer object whose type corresponds with this class.
 - `description`: an instance of this class to be encoded in the protocol buffer object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.search.models.Description.decode"></a>
 #### decode
@@ -446,13 +446,13 @@ Initialize a constraint type.
 **Arguments**:
 
 - `type_`: the type of the constraint.
-| Either an instance of the ConstraintTypes enum,
-| or a string representation associated with the type.
+           | Either an instance of the ConstraintTypes enum,
+           | or a string representation associated with the type.
 - `value`: the value that defines the constraint.
 
 **Raises**:
 
-- `ValueError`: if the type of the constraint is not
+- `AEAEnforceError`: if the type of the constraint is not  # noqa: DAR402
 
 <a name="aea.helpers.search.models.ConstraintType.check_validity"></a>
 #### check`_`validity
@@ -465,11 +465,11 @@ Check the validity of the input provided.
 
 **Returns**:
 
-None
+boolean to indicate validity
 
 **Raises**:
 
-- `ValueError`: if the value is not valid wrt the constraint type.
+- `AEAEnforceError`: if the value is not valid wrt the constraint type.  # noqa: DAR402
 
 <a name="aea.helpers.search.models.ConstraintType.is_valid"></a>
 #### is`_`valid
@@ -520,6 +520,10 @@ For instance:
 >>> c = ConstraintType(ConstraintTypes.EQUAL, 1)
 >>> c.get_data_type()
 <class 'int'>
+
+**Returns**:
+
+data type
 
 <a name="aea.helpers.search.models.ConstraintType.check"></a>
 #### check
@@ -651,11 +655,9 @@ Specifically, check the following conditions:
 
 Check whether a Constraint Expression satisfies some basic requirements.
 
-:return ``None``
-
 **Raises**:
 
-- `ValueError`: if the object does not satisfy some requirements.
+- `AEAEnforceError`: if the object does not satisfy some requirements.  # noqa: DAR402
 
 <a name="aea.helpers.search.models.And"></a>
 ## And Objects
@@ -1016,39 +1018,39 @@ Check if a description satisfies the constraint. The implementation depends on t
 True if the description satisfies the constraint, False otherwise.
 
 Examples:
->>> attr_author = Attribute("author" , str, True, "The author of the book.")
->>> attr_year   = Attribute("year",    int, True, "The year of publication of the book.")
->>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
->>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
->>> c2 = Constraint("year", ConstraintType(">", 1990))
->>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
->>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
->>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
+    >>> attr_author = Attribute("author" , str, True, "The author of the book.")
+    >>> attr_year   = Attribute("year",    int, True, "The year of publication of the book.")
+    >>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
+    >>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
+    >>> c2 = Constraint("year", ConstraintType(">", 1990))
+    >>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
+    >>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
+    >>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
 
-The "author" attribute instantiation satisfies the constraint, so the result is True.
+    The "author" attribute instantiation satisfies the constraint, so the result is True.
 
->>> c1.check(book_1)
-True
+    >>> c1.check(book_1)
+    True
 
-Here, the "author" does not satisfy the constraints. Hence, the result is False.
+    Here, the "author" does not satisfy the constraints. Hence, the result is False.
 
->>> c1.check(book_2)
-False
+    >>> c1.check(book_2)
+    False
 
-In this case, there is a missing field specified by the query, that is "year"
-So the result is False, even in the case it is not required by the schema:
+    In this case, there is a missing field specified by the query, that is "year"
+    So the result is False, even in the case it is not required by the schema:
 
->>> c2.check(Description({"author": "Stephen King"}))
-False
+    >>> c2.check(Description({"author": "Stephen King"}))
+    False
 
-If the type of some attribute of the description is not correct, the result is False.
-In this case, the field "year" has a string instead of an integer:
+    If the type of some attribute of the description is not correct, the result is False.
+    In this case, the field "year" has a string instead of an integer:
 
->>> c2.check(Description({"author": "Stephen King", "year": "1991"}))
-False
+    >>> c2.check(Description({"author": "Stephen King", "year": "1991"}))
+    False
 
->>> c3.check(Description({"author": "Stephen King", "genre": False}))
-False
+    >>> c3.check(Description({"author": "Stephen King", "genre": False}))
+    False
 
 <a name="aea.helpers.search.models.Constraint.is_valid"></a>
 #### is`_`valid
@@ -1167,6 +1169,10 @@ True if the description satisfies all the constraints, False otherwise.
 
 Given a data model, check whether the query is valid for that data model.
 
+**Arguments**:
+
+- `data_model`: optional datamodel
+
 **Returns**:
 
 ``True`` if the query is compliant with the data model, ``False`` otherwise.
@@ -1221,10 +1227,6 @@ with the instance of this class in the 'query_object' argument.
 
 - `query_pb`: the protocol buffer object wrapping an object that corresponds with this class.
 - `query`: an instance of this class to be encoded in the protocol buffer object.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.search.models.Query.decode"></a>
 #### decode

@@ -15,7 +15,9 @@ Lock file in context manager.
 
 **Arguments**:
 
-- `file_descriptor`: file descriptio of file to lock.
+- `file_descriptor`: file descriptor of file to lock.
+- `logger`: the logger.
+:yield: generator
 
 <a name="aea.helpers.file_io.write_envelope"></a>
 #### write`_`envelope
@@ -44,8 +46,13 @@ envelope_from_bytes(bytes_: bytes, separator: bytes = SEPARATOR, logger: Logger 
 
 Decode bytes to get the envelope.
 
+**Arguments**:
+
+- `bytes_`: the encoded envelope
+- `separator`: the separator used
+- `logger`: the logger
+
 **Returns**:
 
 Envelope
-:raise: Exception
 
