@@ -2,15 +2,23 @@
 The aim of this document is to describe at a high-level
 the main implementation of the Agent Communication Network (ACN).
 
-## Introduction
-
-The ACN protocol implements transmission control over the ACN.
-The message serialization is based on 
-<a href="https://developers.google.com/protocol-buffers" target="_blank">Protocol Buffers</a>.
-and the definition of the data structures involved is defined
-<a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">here</a>.
+This documentation page is structured as follows:
+TODO
 
 ## Messages and Data Structures
+
+At the foundation of the ACN there is the _ACN protocol_.
+The protocol messages and the reply structure are generated from this 
+<a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>,
+using the <a href="../protocol-generator" target="_blank">protocol generator</a>.
+Therefore, it uses <a href="https://developers.google.com/protocol-buffers" target="_blank">Protocol Buffers</a>
+as a serialization format,
+and the definition of the data structures involved is defined in this
+<a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
+
+To know more about the protocol generator, refer to the relevant
+section of the documentation:
+<a href="../protocol-generator" target="_blank">Protocol Generator</a>.
 
 ### Agent Record
 
@@ -116,9 +124,58 @@ It contains:
 
 ## Overview of ACN 
 
-TODO: add picture from paper
+## Joining the ACN network
 
-## ACN with direct connection
+When an ACN peer wants to join the network, it has
+to start from so called _bootstrap peers_, i.e.
+a list of ACN peers to connect with.
+
+Each node handles four different types of <a href="https://docs.libp2p.io/concepts/stream-multiplexing/" target="_blank">libp2p streams</a>:
+
+- the _notification stream_, identified by the URI `/aea-notif/`:
+  this stream is used by new peers to notify their existence to
+- the _address stream_, identified by the URI `/aea-address/`:
+  used to send look-up requests and look-up responses;
+- the _envelope stream_, identified by the URI `/aea/`:
+  used to forward and to receive ACN envelopes;
+- the _register relay stream_, identified by the URI `/aea-register/`:
+  this is to receive messages from clients that want to register their agents addresses;
+  this peer, and then it can register their addresses.
+
+To begin with, the node process initializes
+the transport connections with the bootstrap peers,
+the local copy of the Kademlia Distributed
+Hash Table (DHT), 
+the persistent storage for agent records,
+and performs other non-functional operations 
+like setting up the <a href="https://prometheus.io/" target="_blank"> Prometheus monitoring system</a>.
+
+Then, it sets up the notification stream and notifies the bootstrap peers (if any).
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Peer1
+        participant Peer2
+        participant Peer3
+        note over Peer1: notify<br/>bootstrap peers
+        Peer1->>Peer2: notify
+        Peer2->>Peer2: wait until notifying peer <br/>added to DHT
+        activate Peer2
+        Peer1->>Peer3: notify
+        Peer3->>Peer3: wait until notifying peer <br/>added to DHT
+        activate Peer3
+        note over Peer2,Peer3: Peer1 registered to DHT
+        deactivate Peer2
+        deactivate Peer3
+        loop for each local/relay/delegate address 
+            Peer1->>Peer1: compute CID from address
+            Peer1->>Peer2: register address
+            Peer1->>Peer3: register address
+        end
+        note over Peer1: set up:<br/>- address stream<br/>- envelope stream<br/>- register relay stream
+</div>
+
+## ACN transport
 
 In the following sections, we describe the main three steps of the routing
 of an envelope through the ACN:
@@ -132,12 +189,12 @@ of an envelope through the ACN:
   through its representative peer, i.e. peer-to-agent communication.
   
 
-### ACN Entrance
+### ACN Envelope Entrance (with direct connection)
 
 In this section, we will describe the interaction protocols between agents and peers 
 for the messages sent by the agent to the ACN network.
 
-#### Envelope entrance: Agent -> AgentApi -> DHTPeer (direct connection)
+#### Envelope entrance: Agent -> AgentApi -> DHTPeer
 
 The following diagram explains the exchange of messages on entering an envelope in the ACN.
 Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
@@ -149,12 +206,12 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
         loop until Status(success) received
             Agent->>DHTPeer: AcnMessage(AeaEnvelope)
             Agent->>Agent: wait
-            note left of Agent: Wait until Status(success)
+            note left of Agent: Wait until<br/>Status(success)
             alt successful case
                 DHTPeer->>Agent: Status(success)
                 note over Agent: break loop
             else ack-timeout OR conn-error
-                note left of Agent: continue (Try to resend/reconnect)
+                note left of Agent: continue: Try to<br/>resend/reconnect
             else version not supported
                 DHTPeer->>Agent: Status(ERROR_UNSUPPORTED_VERSION)
             else error on decoding of ACN message
@@ -165,7 +222,7 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
                 DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
             end
         end
-        note over DHTPeer: route envelope to next peer
+        note over DHTPeer: route envelope<br/>to next peer
 </div>
 
 An envelope sent via the `fetchai/p2p_libp2p` connection 
@@ -177,9 +234,10 @@ by an AEA's skill passes through:
 3. an output queue, which is processed by an output coroutine and routed to the next peer. 
 
 
-### ACN middle
+### ACN Envelope Routing
 
-In this section, we describe the interaction between peers.
+In this section, we describe the interaction between peers
+when it comes to envelope routing.
 
 Assume an envelope arrives from an agent to peer `DHTPeer1`,
 i.e. `DHTPeer1` is the first hop 
@@ -258,11 +316,11 @@ We may have different scenario:
             note over DHTPeer1: destination is a relay client
         else lookup address in DHT
             note over DHTPeer1: send lookup request<br/> to all peers
-            DHTPeer1->>DHTPeer2: LookUpRequest
+            DHTPeer1->>DHTPeer2: LookupRequest
             alt generic error
                 DHTPeer2->>DHTPeer1: Status(GENERIC_ERROR)
             else look-up response
-                DHTPeer2->>DHTPeer1: LookUpResponse
+                DHTPeer2->>DHTPeer1: LookupResponse
                 note over DHTPeer1: Check PoR
             else not found
                 DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
@@ -277,7 +335,7 @@ We may have different scenario:
         end
 </div>
 
-In particular, when a peer receives a LookUpRequest message,
+In particular, when a peer receives a LookupRequest message,
 it does the following:
 
 
@@ -285,17 +343,17 @@ it does the following:
     sequenceDiagram
         participant DHTPeer1
         participant DHTPeer2
-        DHTPeer1->>DHTPeer2: LookUpRequest
+        DHTPeer1->>DHTPeer2: LookupRequest
         alt error
             DHTPeer2->>DHTPeer1: Status(Error)
         else local agent/relay/delegate
             note over DHTPeer2: requested address is<br/>a local agent<br/>OR<br/>requested address is<br/>in my relay clients<br/>OR<br/>requested address is<br/>in my delegate clients
-            DHTPeer2->>DHTPeer1: LookUpResponse
+            DHTPeer2->>DHTPeer1: LookupResponse
             note over DHTPeer1: Check PoR
         else not found locally
             note over DHTPeer2: send lookup request<br/>to other peers...
             alt found
-                DHTPeer2->>DHTPeer1: LookUpResponse
+                DHTPeer2->>DHTPeer1: LookupResponse
                 note over DHTPeer1: Check PoR
             else not found
                 DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
@@ -303,9 +361,9 @@ it does the following:
         end
 </div>
 
-### ACN Exit
+### ACN Envelope Exit (direct connection)
 
-#### Envelope exit: DHTPeer -> AgentApi -> Agent (direct connection)
+#### Envelope exit: DHTPeer -> AgentApi -> Agent
 
 The following diagram explains the exchange of messages on exiting an envelope in the ACN.
 Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
@@ -317,21 +375,18 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
         participant AgentApi
         participant DHTPeer
         DHTPeer->>AgentApi: AeaEnvelope
-        note right of Agent: Put envelope in AgentApi incoming queue
+        note right of Agent: Put envelope in<br/>AgentApi incoming<br/>queue
         AgentApi->>Agent: AeaEnvelope
         alt successful case
             Agent->>AgentApi: Status(success)
         else ack-timeout OR conn-error
             note left of AgentApi: do nothing
         else error on decoding of ACN message
-            Agent->>AgentApi: Status(generic_error)
-            note left of Agent: use DESERIALIZATION_ERROR
+            Agent->>AgentApi: Status(GENERIC_ERROR)
         else error on decoding of Envelope payload
-            Agent->>AgentApi: Status(generic_error)
-            note left of Agent: use DESERIALIZATION_ERROR
+            Agent->>AgentApi: Status(GENERIC_ERROR)
         else wrong payload
-            Agent->>AgentApi: Status(generic_error)
-            note left of Agent: use some custom error code
+            Agent->>AgentApi: Status(GENERIC_ERROR)
         end
 </div>
 
