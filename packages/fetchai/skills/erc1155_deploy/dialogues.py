@@ -92,7 +92,6 @@ class ContractApiDialogue(BaseContractApiDialogue):
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
 
-        :return: None
         """
         BaseContractApiDialogue.__init__(
             self,

@@ -73,7 +73,7 @@ class P2PStubConnection(StubConnection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if self.loop is None:
             raise ValueError("Loop not initialized.")  # pragma: nocover

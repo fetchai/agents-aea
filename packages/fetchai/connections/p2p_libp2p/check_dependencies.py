@@ -100,7 +100,6 @@ def print_ok_message(
     :param binary_name: the binary binary_name.
     :param actual_version: the actual version.
     :param version_lower_bound: the version lower bound.
-    :return: None
     """
     print(
         f"check '{binary_name}'>={version_to_string(version_lower_bound)}, found {version_to_string(actual_version)}"
@@ -124,8 +123,6 @@ def check_binary(
     :param args: the arguments to provide to the binary to retrieve the version.
     :param version_regex: the regex used to extract the version from the output.
     :param version_lower_bound: the minimum required version.
-
-    :return: None
     """
     path = shutil.which(binary_name)
     if not path:

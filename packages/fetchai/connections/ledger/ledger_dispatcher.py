@@ -49,7 +49,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -116,7 +116,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :return: None
+        :return: the ledger api message
         """
         balance = api.get_balance(message.address)
         if balance is None:
@@ -143,7 +143,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :return: None
+        :return: the ledger api message
         """
         result = api.get_state(message.callable, *message.args, **message.kwargs.body)
         if result is None:  # pragma: nocover
@@ -170,7 +170,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :return: None
+        :return: the ledger api message
         """
         raw_transaction = api.get_transfer_transaction(
             sender_address=message.terms.sender_address,
@@ -205,7 +205,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :return: None
+        :return: the ledger api message
         """
         is_settled = False
         attempts = 0
@@ -269,7 +269,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :return: None
+        :return: the ledger api message
         """
         transaction_digest = api.send_signed_transaction(
             message.signed_transaction.body

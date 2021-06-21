@@ -58,7 +58,6 @@ class FetERC20(Contract):
         :param spender: the address approved to spend on behalf of sender.
         :param amount: the amount approved to be spent.
         :param gas: the gas limit for the transaction.
-        :return: None
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
@@ -95,7 +94,6 @@ class FetERC20(Contract):
         :param receiver: the address to which to transfer tokens.
         :param amount: the amount of tokens to transfer.
         :param gas: the gas limit for the transaction.
-        :return: None
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)

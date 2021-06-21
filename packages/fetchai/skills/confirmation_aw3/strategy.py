@@ -42,7 +42,7 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         aw1_aea: Optional[str] = kwargs.pop("aw1_aea", None)
         if aw1_aea is None:
@@ -147,11 +147,7 @@ class Strategy(GenericStrategy):
         registration_db.set_registered(counterparty, developer_handle)
 
     def update_search_query_params(self) -> None:
-        """
-        Update agent location and query for search.
-
-        :return: None
-        """
+        """Update agent location and query for search."""
         search_query_type, search_query = random.choice(  # nosec
             list(self._search_queries.items())
         )

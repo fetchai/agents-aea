@@ -58,8 +58,6 @@ class FaberBehaviour(TickerBehaviour):
         :param method: the http request method (i.e. 'GET' or 'POST').
         :param url: the url to send the message to.
         :param content: the payload.
-
-        :return: None
         """
         # context
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
@@ -78,20 +76,12 @@ class FaberBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = True
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching:
             query = strategy.get_location_and_service_query()
@@ -107,8 +97,4 @@ class FaberBehaviour(TickerBehaviour):
             self.context.logger.info("Searching for Alice on SOEF...")
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

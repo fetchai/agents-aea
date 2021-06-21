@@ -58,18 +58,13 @@ class AW1RegistrationHandler(Handler):
     SUPPORTED_PROTOCOL = RegisterMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         register_msg = cast(RegisterMessage, message)
 
@@ -89,11 +84,7 @@ class AW1RegistrationHandler(Handler):
             self._handle_invalid(register_msg, register_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, register_msg: RegisterMessage) -> None:
         """
@@ -113,7 +104,6 @@ class AW1RegistrationHandler(Handler):
 
         :param register_msg: the register message
         :param register_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             f"received register_msg register message={register_msg} in dialogue={register_dialogue}."
@@ -175,7 +165,6 @@ class AW1RegistrationHandler(Handler):
 
         :param register_msg: the register message
         :param register_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             f"cannot handle register_msg message of performative={register_msg.performative} in dialogue={register_dialogue}."
@@ -195,7 +184,6 @@ class ContractApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         contract_api_msg = cast(ContractApiMessage, message)
 
@@ -220,11 +208,7 @@ class ContractApiHandler(Handler):
             self._handle_invalid(contract_api_msg, contract_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(
         self, contract_api_msg: ContractApiMessage
@@ -333,7 +317,6 @@ class LedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -367,11 +350,7 @@ class LedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -481,7 +460,6 @@ class LedgerApiHandler(Handler):
         Send a confirmation of registration to aw2 AEAs.
 
         :param confirmed_aea: the confirmed aea's address
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         if strategy.awx_aeas != []:
@@ -550,7 +528,6 @@ class SigningHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         signing_msg = cast(SigningMessage, message)
 
@@ -572,11 +549,7 @@ class SigningHandler(Handler):
             self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
@@ -596,7 +569,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info("transaction signing was successful.")
         ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
@@ -619,7 +591,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             f"transaction signing was not successful. Error_code={signing_msg.error_code} in dialogue={signing_dialogue}"
@@ -646,7 +617,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             f"cannot handle signing message of performative={signing_msg.performative} in dialogue={signing_dialogue}."

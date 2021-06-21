@@ -456,11 +456,7 @@ class Libp2pNode:
         return self.proc.returncode is None
 
     async def start(self) -> None:
-        """
-        Start the node.
-
-        :return: None
-        """
+        """Start the node."""
         self._is_on_stop = False
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -606,11 +602,7 @@ class Libp2pNode:
         return error_msg if error_msg != "" else panic_msg
 
     async def stop(self) -> None:
-        """
-        Stop the node.
-
-        :return: None
-        """
+        """Stop the node."""
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
             self._is_on_stop = True
@@ -804,11 +796,7 @@ class P2PLibp2pConnection(Connection):
         return self.configuration.build_directory
 
     async def connect(self) -> None:
-        """
-        Set up the connection.
-
-        :return: None
-        """
+        """Set up the connection."""
         if self.is_connected:
             return  # pragma: nocover
         try:
@@ -839,11 +827,7 @@ class P2PLibp2pConnection(Connection):
         await self._start_node()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:
             return  # pragma: nocover
 
@@ -950,7 +934,7 @@ class P2PLibp2pConnection(Connection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if not self._node_client or not self._send_queue:
             raise ValueError("Node is not connected!")  # pragma: nocover
@@ -974,11 +958,7 @@ class P2PLibp2pConnection(Connection):
             return await self._node_client.read_envelope()
 
     async def _receive_from_node(self) -> None:
-        """
-        Receive data from node.
-
-        :return: None
-        """
+        """Receive data from node."""
         while True:
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover

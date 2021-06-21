@@ -64,11 +64,7 @@ class SearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=ledger_api_msg)
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching:
             query = strategy.get_location_and_service_query()
@@ -83,8 +79,4 @@ class SearchBehaviour(TickerBehaviour):
             self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

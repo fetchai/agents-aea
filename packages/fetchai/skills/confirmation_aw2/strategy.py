@@ -33,7 +33,7 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         aw1_aea: Optional[str] = kwargs.pop("aw1_aea", None)
         if aw1_aea is None:

@@ -108,7 +108,6 @@ class LedgerConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         task = self._schedule_request(envelope)
         self.receiving_tasks.append(task)
@@ -120,7 +119,7 @@ class LedgerConnection(Connection):
         Schedule a ledger API request.
 
         :param envelope: the message.
-        :return: None
+        :return: task
         """
         dispatcher: RequestDispatcher
         if (

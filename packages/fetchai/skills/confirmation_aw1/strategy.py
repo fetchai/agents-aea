@@ -54,7 +54,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         self._token_denomination = kwargs.pop(
             "token_denomination", DEFAULT_TOKEN_DENOMINATION

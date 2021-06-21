@@ -78,11 +78,7 @@ class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
     def __init__(self) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
+        """Initialize dialogues."""
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
@@ -145,8 +141,6 @@ class HTTPClientAsyncChannel:
         Connect channel using loop.
 
         :param loop: asyncio event loop to use
-
-        :return: None
         """
         self._loop = loop
         self._in_queue = asyncio.Queue()
@@ -170,9 +164,7 @@ class HTTPClientAsyncChannel:
         """
         Perform http request and send back response.
 
-        :param request_http_message: HttpMessage with http request constructed.
-
-        :return: None
+        :param request_envelope: request envelope.
         """
         if not self._loop:  # pragma: nocover
             raise ValueError("Channel is not connected")
@@ -259,8 +251,6 @@ class HTTPClientAsyncChannel:
         Send the response envelope to the in-queue.
 
         :param request_envelope: the envelope containing an http request
-
-        :return: None
         """
         if self._loop is None or self.is_stopped:
             raise ValueError("Can not send a message! Channel is not started!")
@@ -294,13 +284,11 @@ class HTTPClientAsyncChannel:
         Removes tasks from _tasks.
 
         :param task: Task completed.
-
-        :return: None
         """
         self._tasks.remove(task)
         self.logger.debug(f"Task completed: {task}")
 
-    async def get_message(self) -> Union["Envelope", None]:
+    async def get_message(self) -> Optional["Envelope"]:
         """
         Get http response from in-queue.
 
@@ -389,11 +377,7 @@ class HTTPClientConnection(Connection):
         )
 
     async def connect(self) -> None:
-        """
-        Connect to a HTTP server.
-
-        :return: None
-        """
+        """Connect to a HTTP server."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -402,11 +386,7 @@ class HTTPClientConnection(Connection):
             await self.channel.connect(self.loop)
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from a HTTP server.
-
-        :return: None
-        """
+        """Disconnect from a HTTP server."""
         if self.is_disconnected:
             return  # pragma: nocover
         self.state = ConnectionStates.disconnecting
@@ -418,7 +398,6 @@ class HTTPClientConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         self.channel.send(envelope)

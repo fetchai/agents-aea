@@ -168,11 +168,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
+        """Initialize dialogues."""
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
@@ -437,7 +433,6 @@ class SOEFChannel:
         Send message handler.
 
         :param envelope: the envelope.
-        :return: None
         """
         await self.process_envelope(envelope)
 
@@ -468,7 +463,6 @@ class SOEFChannel:
         Process envelope.
 
         :param envelope: the envelope.
-        :return: None
         """
         enforce(
             isinstance(envelope.message, OefSearchMessage),
@@ -540,7 +534,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         service_description = oef_message.service_description
 
@@ -619,8 +612,6 @@ class SOEFChannel:
         Send ping command every `period`.
 
         :param period: period of ping in seconds
-
-        :return: None
         """
         with suppress(asyncio.CancelledError):
             while self.unique_page_address:
@@ -916,8 +907,6 @@ class SOEFChannel:
         - acknowledge registration
         - set default personality piece for agent framework
         - initiate ping task
-
-        :return: None
         """
         self.logger.debug("Applying to SOEF lobby with address={}".format(self.address))
         url = parse.urljoin(self.base_url, "register")
@@ -977,7 +966,6 @@ class SOEFChannel:
         :param oef_search_message: the oef search message
         :param oef_search_dialogue: the oef search dialogue
         :param oef_error_operation: the error code to send back
-        :return: None
         """
         if self.in_queue is None:
             raise ValueError("Inqueue not set!")  # pragma: nocover
@@ -997,7 +985,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         service_description = oef_message.service_description
 
@@ -1028,7 +1015,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         if not self._unregister_lock:
             raise ValueError(  # pragma: nocover
@@ -1115,11 +1101,7 @@ class SOEFChannel:
             self.unique_page_address = None
 
     async def disconnect(self) -> None:
-        """
-        Disconnect unregisters any potential services still registered.
-
-        :return: None
-        """
+        """Disconnect unregisters any potential services still registered."""
         await self._stop_periodic_ping_task()
 
         if self.in_queue is None:
@@ -1146,7 +1128,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         query = oef_message.query
 
@@ -1193,7 +1174,6 @@ class SOEFChannel:
         :param oef_search_dialogue: OefSearchDialogue
         :param radius: the radius in which to search
         :param params: the parameters for the query
-        :return: None
         """
         if not self._find_around_me_queue:
             raise ValueError("SOEFChannel not started.")  # pragma: nocover
@@ -1215,7 +1195,6 @@ class SOEFChannel:
         :param oef_search_dialogue: OefSearchDialogue
         :param radius: the radius in which to search
         :param params: the parameters for the query
-        :return: None
         """
         if self.in_queue is None:
             raise ValueError("Inqueue not set!")  # pragma: nocover
@@ -1328,7 +1307,6 @@ class SOEFConnection(Connection):
         """
         Connect to the channel.
 
-        :return: None
         :raises Exception if the connection to the OEF fails.
         """
         if self.is_connected:  # pragma: nocover
@@ -1343,11 +1321,7 @@ class SOEFConnection(Connection):
         return self.channel.in_queue
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:  # pragma: nocover
             return
         if self.in_queue is None:
@@ -1383,7 +1357,6 @@ class SOEFConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         if self.is_connected:
             await self.channel.send(envelope)

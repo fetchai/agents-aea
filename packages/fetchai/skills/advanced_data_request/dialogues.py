@@ -47,8 +47,7 @@ class HttpDialogues(Model, BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -86,9 +85,8 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
-
         self.enabled = kwargs.pop("enabled", False)
         self.metrics = kwargs.pop("metrics", [])
 

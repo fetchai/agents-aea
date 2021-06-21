@@ -64,11 +64,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
+        """Initialize dialogues."""
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
@@ -192,7 +188,6 @@ class LocalNode:
         """Handle an envelope.
 
         :param envelope: the envelope
-        :return: None
         """
         if (
             envelope.protocol_specification_id
@@ -209,7 +204,6 @@ class LocalNode:
         """Handle oef messages.
 
         :param envelope: the envelope
-        :return: None
         """
         if not isinstance(envelope.message, OefSearchMessage):  # pragma: nocover
             raise ValueError("Message not of type OefSearchMessage.")
@@ -240,7 +234,6 @@ class LocalNode:
         Forward an envelope to the right agent.
 
         :param envelope: the envelope
-        :return: None
         """
         destination = envelope.to
 
@@ -269,7 +262,6 @@ class LocalNode:
 
         :param address: the address of the service agent to be registered.
         :param service_description: the description of the service agent to be registered.
-        :return: None
         """
         with self._lock:
             self.services[address].append(service_description)
@@ -282,7 +274,6 @@ class LocalNode:
 
         :param oef_search_msg: the incoming message.
         :param dialogue: the dialogue.
-        :return: None
         """
         service_description = oef_search_msg.service_description
         address = oef_search_msg.sender
@@ -311,7 +302,6 @@ class LocalNode:
 
         :param oef_search_msg: the message.
         :param dialogue: the dialogue.
-        :return: None
         """
         with self._lock:
             query = oef_search_msg.query
@@ -361,7 +351,6 @@ class LocalNode:
         Disconnect.
 
         :param address: the address of the agent
-        :return: None
         """
         with self._lock:
             self._out_queues.pop(address, None)

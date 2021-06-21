@@ -251,7 +251,7 @@ class StubConnection(Connection):
         """
         Send messages.
 
-        :return: None
+        :param: the envelope
         """
         self._ensure_connected()
         self._ensure_valid_envelope_for_external_comms(envelope)

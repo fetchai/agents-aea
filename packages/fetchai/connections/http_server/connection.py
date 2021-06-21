@@ -75,7 +75,8 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: address of the dialogues maintainer.
+        :param kwargs: keyword arguments.
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -301,8 +302,6 @@ class BaseAsyncChannel(ABC):
         Upon HTTP Channel connection, start the HTTP Server in its own thread.
 
         :param loop: asyncio event loop
-
-        :return: None
         """
         self._loop = loop
         self._in_queue = asyncio.Queue()
@@ -328,7 +327,6 @@ class BaseAsyncChannel(ABC):
         Send the envelope in_queue.
 
         :param envelope: the envelope
-        :return: None
         """
 
     @abstractmethod
@@ -393,8 +391,6 @@ class HTTPChannel(BaseAsyncChannel):
         Upon HTTP Channel connection, start the HTTP Server in its own thread.
 
         :param loop: asyncio event loop
-
-        :return: None
         """
         if self.is_stopped:
             await super().connect(loop)
@@ -478,7 +474,6 @@ class HTTPChannel(BaseAsyncChannel):
         Send the envelope in_queue.
 
         :param envelope: the envelope
-        :return: None
         """
         if self.http_server is None:  # pragma: nocover
             raise ValueError("Server not connected, call connect first!")
@@ -552,11 +547,7 @@ class HTTPServerConnection(Connection):
         )
 
     async def connect(self) -> None:
-        """
-        Connect to the http.
-
-        :return: None
-        """
+        """Connect to the http channel."""
         if self.is_connected:
             return
 
@@ -569,11 +560,7 @@ class HTTPServerConnection(Connection):
             self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from HTTP.
-
-        :return: None
-        """
+        """Disconnect from HTTP channel."""
         if self.is_disconnected:
             return
 
@@ -586,7 +573,6 @@ class HTTPServerConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         self.channel.send(envelope)

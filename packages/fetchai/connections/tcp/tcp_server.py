@@ -61,7 +61,6 @@ class TCPServerConnection(TCPConnection):
 
         :param reader: the stream reader.
         :param writer: the stream writer.
-        :return: None
         """
         self.logger.debug("Waiting for client address...")
         address_bytes = await self._recv(reader)

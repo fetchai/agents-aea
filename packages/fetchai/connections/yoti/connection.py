@@ -54,7 +54,7 @@ class YotiDialogues(BaseYotiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -115,7 +115,6 @@ class YotiConnection(BaseSyncConnection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         self.dispatch(envelope)
 
@@ -168,7 +167,7 @@ class YotiConnection(BaseSyncConnection):
 
         :param message: the Yoti message
         :param dialogue: the Yoti dialogue
-        :return: None
+        :return: the yoti message
         """
         activity_details = self._client.get_activity_details(message.token)
         if activity_details is None:

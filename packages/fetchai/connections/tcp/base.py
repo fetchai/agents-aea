@@ -89,12 +89,7 @@ class TCPConnection(Connection, ABC):
             self.state = ConnectionStates.disconnected
 
     async def disconnect(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None.
-        """
-
+        """Tear down the connection."""
         if self.is_disconnected:  # pragma: nocover
             self.logger.warning("Connection already disconnected.")
             return
@@ -132,7 +127,6 @@ class TCPConnection(Connection, ABC):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None.
         """
         self._ensure_valid_envelope_for_external_comms(envelope)
         writer = self.select_writer_from_envelope(envelope)

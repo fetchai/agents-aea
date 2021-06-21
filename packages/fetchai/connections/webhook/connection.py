@@ -56,7 +56,7 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -125,7 +125,6 @@ class WebhookChannel:
         Connect the webhook.
 
         Connects the webhook via the webhook_address and webhook_port parameters
-        :return: None
         """
         if self.is_stopped:
             self.app = web.Application()
@@ -145,8 +144,6 @@ class WebhookChannel:
         Disconnect.
 
         Shut-off and cleanup the webhook site, the runner and the web app, then stop the channel.
-
-        :return: None
         """
         if self.webhook_site is None or self.runner is None or self.app is None:
             raise ValueError(
@@ -251,11 +248,7 @@ class WebhookConnection(Connection):
         )
 
     async def connect(self) -> None:
-        """
-        Connect to a HTTP server.
-
-        :return: None
-        """
+        """Connect to a HTTP server."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -265,11 +258,7 @@ class WebhookConnection(Connection):
             await self.channel.connect()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from a HTTP server.
-
-        :return: None
-        """
+        """Disconnect from a HTTP server."""
         if self.is_disconnected:  # pragma: nocover
             return
 
@@ -282,7 +271,6 @@ class WebhookConnection(Connection):
         Send does nothing. Webhooks only receive.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         if self.channel.in_queue is None:
