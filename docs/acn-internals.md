@@ -152,6 +152,8 @@ Hash Table (DHT),
 the persistent storage for agent records,
 and performs other non-functional operations 
 like setting up the <a href="https://prometheus.io/" target="_blank"> Prometheus monitoring system</a>.
+Optionally, can also start listening for relay connections
+and delegate connections.
 
 Then, it sets up the notification stream and notifies the bootstrap peers (if any).
 
@@ -176,6 +178,40 @@ Then, it sets up the notification stream and notifies the bootstrap peers (if an
             Peer1->>Peer3: register address
         end
         note over Peer1: set up:<br/>- address stream<br/>- envelope stream<br/>- register relay stream
+</div>
+
+## Relay connections
+
+If the ACN node is configured to run the relay service,
+it sets up the register relay stream, waiting for registration
+requests.
+
+The following diagram shows an example of the message exchanged
+during a registration request:
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant Peer
+        Agent->>Peer: Register
+        alt decoding error of ACN message
+            Peer->>Agent: Status(ERROR_SERIALIZATION)
+        else wrong payload
+            Peer->>Agent: Status(ERROR_UNEXPECTED_PAYLOAD)
+        else PoR check fails
+            alt wrong agent address
+                Peer->>Agent: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else unsupported ledger
+                Peer->>Agent: Status(ERROR_UNSUPPORTED_LEDGER)
+            else agent address and public key don't match
+                Peer->>Agent: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else invalid proof
+                Peer->>Agent: Status(ERROR_INVALID_PROOF)
+            end
+        else PoR check succeeds
+            Peer->>Agent: Status(SUCCESS)
+            note over Peer: announce agent address<br/>to other peers
+        end
 </div>
 
 ## ACN transport
