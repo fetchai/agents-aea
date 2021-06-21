@@ -259,11 +259,13 @@ We may have different scenario:
         else lookup address in DHT
             note over DHTPeer1: send lookup request<br/> to all peers
             DHTPeer1->>DHTPeer2: LookUpRequest
-            alt error
-                DHTPeer2->>DHTPeer1: Status(Error)
-            else success
+            alt generic error
+                DHTPeer2->>DHTPeer1: Status(GENERIC_ERROR)
+            else look-up response
                 DHTPeer2->>DHTPeer1: LookUpResponse
                 note over DHTPeer1: Check PoR
+            else not found
+                DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
             end
         end
         note over DHTPeer1,DHTPeer2: assume next peer is DHTPeer2
@@ -272,6 +274,32 @@ We may have different scenario:
             DHTPeer2->>DHTPeer1: Status(Success)
         else error
             DHTPeer2->>DHTPeer1: Status(Error)
+        end
+</div>
+
+In particular, when a peer receives a LookUpRequest message,
+it does the following:
+
+
+<div class="mermaid">
+    sequenceDiagram
+        participant DHTPeer1
+        participant DHTPeer2
+        DHTPeer1->>DHTPeer2: LookUpRequest
+        alt error
+            DHTPeer2->>DHTPeer1: Status(Error)
+        else local agent/relay/delegate
+            note over DHTPeer2: requested address is<br/>a local agent<br/>OR<br/>requested address is<br/>in my relay clients<br/>OR<br/>requested address is<br/>in my delegate clients
+            DHTPeer2->>DHTPeer1: LookUpResponse
+            note over DHTPeer1: Check PoR
+        else not found locally
+            note over DHTPeer2: send lookup request<br/>to other peers...
+            alt found
+                DHTPeer2->>DHTPeer1: LookUpResponse
+                note over DHTPeer1: Check PoR
+            else not found
+                DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
+            end
         end
 </div>
 
