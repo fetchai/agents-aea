@@ -197,7 +197,7 @@ of an envelope through the ACN:
 In this section, we will describe the interaction protocols between agents and peers 
 for the messages sent by the agent to the ACN network.
 
-#### Envelope entrance: Agent -> AgentApi -> DHTPeer  (with direct connection)
+#### Envelope entrance: Agent -> AgentApi -> Peer  (with direct connection)
 
 The following diagram explains the exchange of messages on entering an envelope in the ACN,
 in the case of _direct connection_.
@@ -206,27 +206,27 @@ in the case of _direct connection_.
 <div class="mermaid">
     sequenceDiagram
         participant Agent
-        participant DHTPeer
+        participant Peer
         loop until Status(success) received
-            Agent->>DHTPeer: AcnMessage(AeaEnvelope)
+            Agent->>Peer: AcnMessage(AeaEnvelope)
             Agent->>Agent: wait
             note left of Agent: Wait until<br/>Status(success)
             alt successful case
-                DHTPeer->>Agent: Status(success)
+                Peer->>Agent: Status(success)
                 note over Agent: break loop
             else ack-timeout OR conn-error
                 note left of Agent: continue: Try to<br/>resend/reconnect
             else version not supported
-                DHTPeer->>Agent: Status(ERROR_UNSUPPORTED_VERSION)
+                Peer->>Agent: Status(ERROR_UNSUPPORTED_VERSION)
             else error on decoding of ACN message
-                DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
+                Peer->>Agent: Status(SERIALIZATION_ERROR)
             else error on decoding of Envelope payload
-                DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
+                Peer->>Agent: Status(SERIALIZATION_ERROR)
             else the payload cannot be handled
-                DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
+                Peer->>Agent: Status(SERIALIZATION_ERROR)
             end
         end
-        note over DHTPeer: route envelope<br/>to next peer
+        note over Peer: route envelope<br/>to next peer
 </div>
 
 An envelope sent via the `fetchai/p2p_libp2p` connection 
@@ -243,14 +243,14 @@ by an AEA's skill passes through:
 In this section, we describe the interaction between peers
 when it comes to envelope routing.
 
-Assume an envelope arrives from an agent to peer `DHTPeer1`,
-i.e. `DHTPeer1` is the first hop 
+Assume an envelope arrives from an agent to peer `Peer1`,
+i.e. `Peer1` is the first hop 
 of the routing.
 Let `Agent` be the local agent directly connected
-to `DHTPeer1`, `DHTPeer2` a direct peer
-of peer `DHTPeer1`.
+to `Peer1`, `Peer2` a direct peer
+of peer `Peer1`.
 
-When the envelope is leaving `DHTPeer1`,
+When the envelope is leaving `Peer1`,
 we may have different scenario:
 
 1) In case of direct connection,
@@ -261,11 +261,11 @@ we may have different scenario:
 <div class="mermaid">
     sequenceDiagram
         participant Agent
-        participant DHTPeer1
-        participant DHTPeer2
-        Agent->>DHTPeer1: AeaEnvelope
+        participant Peer1
+        participant Peer2
+        Agent->>Peer1: AeaEnvelope
         alt envelope sender not registered locally
-            note over DHTPeer1: stop, log error
+            note over Peer1: stop, log error
         end
 </div>
 
@@ -276,16 +276,16 @@ we may have different scenario:
 <div class="mermaid">
     sequenceDiagram
         participant Agent
-        participant DHTPeer1
-        participant DHTPeer2
-        Agent->>DHTPeer1: AeaEnvelope
+        participant Peer1
+        participant Peer2
+        Agent->>Peer1: AeaEnvelope
         alt target == peer1.my_agent
-            note over DHTPeer1: envelope destinated<br/> to local agent,<br/> not routing
+            note over Peer1: envelope destinated<br/> to local agent,<br/> not routing
             loop agent not ready
-                note over DHTPeer1: sleep for 100ms
+                note over Peer1: sleep for 100ms
             end
-            DHTPeer1->>Agent: AeaEnvelope
-            Agent->>DHTPeer1: Status(Success)
+            Peer1->>Agent: AeaEnvelope
+            Agent->>Peer1: Status(Success)
         end
 </div>
 
@@ -295,13 +295,13 @@ we may have different scenario:
 <div class="mermaid">
     sequenceDiagram
         participant Delegate
-        participant DHTPeer1
-        participant DHTPeer2
-        Delegate->>DHTPeer1: AeaEnvelope
+        participant Peer1
+        participant Peer2
+        Delegate->>Peer1: AeaEnvelope
         alt destination is a delegate
-            note over DHTPeer1: send envelope<br/> to delegate via TCP
-            DHTPeer1->>Delegate: AeaEnvelope
-            Delegate->>DHTPeer1: Status(Success)
+            note over Peer1: send envelope<br/> to delegate via TCP
+            Peer1->>Delegate: AeaEnvelope
+            Delegate->>Peer1: Status(Success)
         end
 </div>
 
@@ -313,24 +313,24 @@ we may have different scenario:
 <div class="mermaid">
     sequenceDiagram
         participant Agent
-        participant DHTPeer1
-        participant DHTPeer2
-        Agent->>DHTPeer1: AeaEnvelope
+        participant Peer1
+        participant Peer2
+        Agent->>Peer1: AeaEnvelope
         alt address found in DHT
-            note over DHTPeer1: destination is a<br/>relay client
+            note over Peer1: destination is a<br/>relay client
         else lookup address in DHT
-            note over DHTPeer1: send lookup request<br/> to all peers
-            DHTPeer1->>DHTPeer2: LookupRequest
+            note over Peer1: send lookup request<br/> to all peers
+            Peer1->>Peer2: LookupRequest
             alt generic error
-                DHTPeer2->>DHTPeer1: Status(GENERIC_ERROR)
+                Peer2->>Peer1: Status(GENERIC_ERROR)
             else look-up response
-                DHTPeer2->>DHTPeer1: LookupResponse
-                note over DHTPeer1: Check PoR
+                Peer2->>Peer1: LookupResponse
+                note over Peer1: Check PoR
             else not found
-                DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
+                Peer2->>Peer1:Status(UNKNOWN_AGENT_ADDRESS)
             end
         end
-        note over DHTPeer1,DHTPeer2: Now DHTPeer1 knows the contact peer<br/>is DHTPeerX
+        note over Peer1,Peer2: Now Peer1 knows the contact peer<br/>is PeerX
 </div>
 
 In particular, when a peer receives a LookupRequest message,
@@ -339,71 +339,71 @@ it does the following:
 
 <div class="mermaid">
     sequenceDiagram
-        participant DHTPeer1
-        participant DHTPeer2
-        DHTPeer1->>DHTPeer2: LookupRequest
+        participant Peer1
+        participant Peer2
+        Peer1->>Peer2: LookupRequest
         alt error
-            DHTPeer2->>DHTPeer1: Status(Error)
+            Peer2->>Peer1: Status(Error)
         else local agent/relay/delegate
-            note over DHTPeer2: requested address is<br/>a local agent<br/>OR<br/>requested address is<br/>in my relay clients<br/>OR<br/>requested address is<br/>in my delegate clients
-            DHTPeer2->>DHTPeer1: LookupResponse
-            note over DHTPeer1: Check PoR
+            note over Peer2: requested address is<br/>a local agent<br/>OR<br/>requested address is<br/>in my relay clients<br/>OR<br/>requested address is<br/>in my delegate clients
+            Peer2->>Peer1: LookupResponse
+            note over Peer1: Check PoR
         else not found locally
-            note over DHTPeer2: send lookup request<br/>to other peers...
+            note over Peer2: send lookup request<br/>to other peers...
             alt found
-                DHTPeer2->>DHTPeer1: LookupResponse
-                note over DHTPeer1: Check PoR
+                Peer2->>Peer1: LookupResponse
+                note over Peer1: Check PoR
             else not found
-                DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
+                Peer2->>Peer1:Status(UNKNOWN_AGENT_ADDRESS)
             end
         end
 </div>
 
-Let `DHTPeer3` the contact peer of the recipient of the envelope. 
+Let `Peer3` the contact peer of the recipient of the envelope. 
 The following diagram shows how the contact peer of the 
 envelope recipient handles the incoming envelope:
 
 <div class="mermaid">
     sequenceDiagram
-        participant DHTPeer1
-        participant DHTPeer3
-        DHTPeer1->>DHTPeer3: AeaEnvelope
+        participant Peer1
+        participant Peer3
+        Peer1->>Peer3: AeaEnvelope
         alt decoding error of ACN message
-            DHTPeer3->>DHTPeer1: Status(ERROR_SERIALIZATION)
+            Peer3->>Peer1: Status(ERROR_SERIALIZATION)
         else unexpected payload
-            DHTPeer3->>DHTPeer1: Status(ERROR_UNEXPECTED_PAYLOAD)
+            Peer3->>Peer1: Status(ERROR_UNEXPECTED_PAYLOAD)
         else decoding error of envelope payload
-            DHTPeer3->>DHTPeer1: Status(ERROR_SERIALIZATION)        
+            Peer3->>Peer1: Status(ERROR_SERIALIZATION)        
         else PoR check fails
             alt wrong agent address
-                DHTPeer3->>DHTPeer1: Status(ERROR_WRONG_AGENT_ADDRESS)
+                Peer3->>Peer1: Status(ERROR_WRONG_AGENT_ADDRESS)
             else unsupported ledger
-                DHTPeer3->>DHTPeer1: Status(ERROR_UNSUPPORTED_LEDGER)
+                Peer3->>Peer1: Status(ERROR_UNSUPPORTED_LEDGER)
             else agent address and public key don't match
-                DHTPeer3->>DHTPeer1: Status(ERROR_WRONG_AGENT_ADDRESS)
+                Peer3->>Peer1: Status(ERROR_WRONG_AGENT_ADDRESS)
             else invalid proof
-                DHTPeer3->>DHTPeer1: Status(ERROR_INVALID_PROOF)
+                Peer3->>Peer1: Status(ERROR_INVALID_PROOF)
             end
         else PoR check succeeds
             alt target is delegate, not ready
-                DHTPeer3->>DHTPeer1: Status(ERROR_AGENT_NOT_READY)
+                Peer3->>Peer1: Status(ERROR_AGENT_NOT_READY)
             else exists delegate, ready
-                note over DHTPeer3: forward envelope via<br/>delegate connection
-                DHTPeer3->>DHTPeer1: Status(SUCCESS)
+                note over Peer3: forward envelope via<br/>delegate connection
+                Peer3->>Peer1: Status(SUCCESS)
             else target is local agent, not ready
-                DHTPeer3->>DHTPeer1: Status(ERROR_AGENT_NOT_READY)
+                Peer3->>Peer1: Status(ERROR_AGENT_NOT_READY)
             else target is local agent, ready
-                note over DHTPeer3: forward envelope via<br/>direct connection
-                DHTPeer3->>DHTPeer1: Status(SUCCESS)
+                note over Peer3: forward envelope via<br/>direct connection
+                Peer3->>Peer1: Status(SUCCESS)
             else agent does not exist
-                DHTPeer3->>DHTPeer1: Status(ERROR_UNKNOWN_AGENT_ADDRESS)
+                Peer3->>Peer1: Status(ERROR_UNKNOWN_AGENT_ADDRESS)
             end
         end
 </div>
 
 ### ACN Envelope Exit
 
-#### Envelope exit: DHTPeer -> AgentApi -> Agent (direct connection)
+#### Envelope exit: Peer -> AgentApi -> Agent (direct connection)
 
 The following diagram explains the exchange of messages on exiting an envelope in the ACN,
 in the case of direct connection.
@@ -414,8 +414,8 @@ in the case of direct connection.
     sequenceDiagram
         participant Agent
         participant AgentApi
-        participant DHTPeer
-        DHTPeer->>AgentApi: AeaEnvelope
+        participant Peer
+        Peer->>AgentApi: AeaEnvelope
         note right of Agent: Put envelope in<br/>AgentApi incoming<br/>queue
         AgentApi->>Agent: AeaEnvelope
         alt successful case
