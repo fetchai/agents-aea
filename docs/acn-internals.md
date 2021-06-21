@@ -130,8 +130,8 @@ TODO
 ## Joining the ACN network
 
 When an ACN peer wants to join the network, it has
-to start from so called _bootstrap peers_, i.e.
-a list of ACN peers to connect with.
+to start from a list of _bootstrap peers_, i.e.
+a list of ACN peers to connect with (at least one).
 
 Each node handles four different types of <a href="https://docs.libp2p.io/concepts/stream-multiplexing/" target="_blank">libp2p streams</a>:
 
@@ -214,6 +214,42 @@ during a registration request:
         end
 </div>
 
+## Delegate connections
+
+If the ACN node is configured to run the delegate service,
+it start listening from a TCP socket at a configurable URI.
+
+The following diagram shows an example of the message exchanged
+during a registration request:
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant Peer
+        Agent->>Peer: Register (via TCP)
+        alt decoding error of ACN message
+            Peer->>Agent: Status(ERROR_SERIALIZATION)
+        else wrong payload
+            Peer->>Agent: Status(ERROR_UNEXPECTED_PAYLOAD)
+        else PoR check fails
+            alt wrong agent address
+                Peer->>Agent: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else unsupported ledger
+                Peer->>Agent: Status(ERROR_UNSUPPORTED_LEDGER)
+            else agent address and public key don't match
+                Peer->>Agent: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else invalid proof
+                Peer->>Agent: Status(ERROR_INVALID_PROOF)
+            end
+        else PoR check succeeds
+            Peer->>Agent: Status(SUCCESS)
+            note over Peer: announce agent<br/>address to<br/>other peers
+            Peer->>Peer: wait data from socket 
+            activate Peer
+            deactivate Peer
+        end
+</div>
+
 ## ACN transport
 
 In the following sections, we describe the main three steps of the routing
@@ -228,16 +264,22 @@ of an envelope through the ACN:
   through its representative peer, i.e. peer-to-agent communication.
   
 
-### ACN Envelope Entrance
+### ACN Envelope Entrance: Agent -> Peer
 
 In this section, we will describe the interaction protocols between agents and peers 
 for the messages sent by the agent to the ACN network.
 
-#### Envelope entrance: Agent -> AgentApi -> Peer  (with direct connection)
+The following diagram explains the exchange of messages on entering an envelope in the ACN.
 
-The following diagram explains the exchange of messages on entering an envelope in the ACN,
-in the case of _direct connection_.
-`Agent` is a Python process, whereas `AgentApi` and `Peer` are in a separate (Golang) process.
+In the case of _direct connection_, 
+`Agent` is a Python process, whereas `Peer` is in a separate (Golang) process.
+The logic of the Python Agent client is implemented in 
+the [AEA connection `fetchai/p2p_libp2p`](https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p).
+The communication between `Agent` and `Peer` is done through 
+an OS pipe for Inter-Process Communication (IPC) between the AEA's process and the libp2p node process;
+then, the message gets enqueued to an output queue by an input coroutine.
+Finally, the envelope ends up in an output queue, 
+which is processed by an output coroutine and routed to the next peer.
 
 <div class="mermaid">
     sequenceDiagram
@@ -265,14 +307,16 @@ in the case of _direct connection_.
         note over Peer: route envelope<br/>to next peer
 </div>
 
-An envelope sent via the `fetchai/p2p_libp2p` connection 
-by an AEA's skill passes through:
 
-1. the `fetchai/p2p_libp2p` connection; 
-2. a pipe for Inter-Process Communication (IPC) between the AEA's process and the libp2p node process, and then
-   it gets enqueued to an output queue by an input coroutine;
-3. an output queue, which is processed by an output coroutine and routed to the next peer. 
+In the case of _delegate connection_, 
+the message exchange is very similar; however, instead of using 
+pipes, the communication is done through the network, i.e. TCP.
+Moreover, there is also the `RelayedPeer`, which is 
+connected to the `RelayPeer` via a relayed connection.
+The logic of the `Agent` client is implemented in 
+the [AEA connection `fetchai/p2p_libp2p_client`](https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client).
 
+TODO
 
 ### ACN Envelope Routing
 
@@ -437,33 +481,31 @@ envelope recipient handles the incoming envelope:
         end
 </div>
 
-### ACN Envelope Exit
+### ACN Envelope Exit: Peer -> Agent
 
-#### Envelope exit: Peer -> AgentApi -> Agent (direct connection)
+The following diagram explains the exchange of messages on exiting an envelope in the ACN.
 
-The following diagram explains the exchange of messages on exiting an envelope in the ACN,
-in the case of direct connection.
-`Agent` is a Python process, whereas `AgentApi` and `Peer` are in a separate (Golang) process.
-
+The same message exchange is done 
+both in the case of direct connection and
+delegate connection,
+similarly for what has been described for the envelope entrance
+<a href="#acn-envelope-entrance-agent-peer">(see above)</a>.
 
 <div class="mermaid">
     sequenceDiagram
         participant Agent
-        participant AgentApi
         participant Peer
-        Peer->>AgentApi: AeaEnvelope
-        note right of Agent: Put envelope in<br/>AgentApi incoming<br/>queue
-        AgentApi->>Agent: AeaEnvelope
+        Peer->>Agent: AeaEnvelope
         alt successful case
-            Agent->>AgentApi: Status(success)
+            Agent->>Peer: Status(success)
         else ack-timeout OR conn-error
-            note left of AgentApi: do nothing
+            note left of Peer: do nothing
         else error on decoding of ACN message
-            Agent->>AgentApi: Status(GENERIC_ERROR)
+            Agent->>Peer: Status(GENERIC_ERROR)
         else error on decoding of Envelope payload
-            Agent->>AgentApi: Status(GENERIC_ERROR)
+            Agent->>Peer: Status(GENERIC_ERROR)
         else wrong payload
-            Agent->>AgentApi: Status(GENERIC_ERROR)
+            Agent->>Peer: Status(GENERIC_ERROR)
         end
 </div>
 
