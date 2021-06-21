@@ -67,7 +67,7 @@ the sender about the handling of certain requests.
 The payload contains:
 
 - the `status_code`, a positive integer among the ones in the 
-  <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">Protobuf file</a>.
+  <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">Protobuf file</a>.
 - a list of error messages (string).
 
 A status code `0`, identified as `SUCCESS`, 
