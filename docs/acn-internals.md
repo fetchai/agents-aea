@@ -146,13 +146,77 @@ It contains:
 - `envelope`: the envelope to be forwarded, in byte representation;
 - an `AgentRecord` (see above).
 
-## ACN Protocol interactions
+## ACN Protocol Interactions
 
-Show diagrams of interactions using ACN messages,
-e.g. <envelope; status>, <lookup_request; \[lookup_response, status\]>,
-<register; status>.
+The ACN protocol specifies three different possible interactions:
 
-TODO
+- the _registration_ interaction
+- the _look-up_ interaction
+- the _routing_ interaction
+
+### "Registration" Interaction
+
+The registration interaction is used by delegate agents or relayed peers
+to register themselves to another peer.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent/RelayedPeer
+        participant Peer
+        Agent/RelayedPeer->>Peer: Register(AgentRecord)
+        alt success
+            note over Peer: check PoR
+            Peer->>Agent/RelayedPeer: Status(SUCCESS)
+        else wrong agent address
+            Peer->>Agent/RelayedPeer: Status(ERROR_WRONG_AGENT_ADDRESS)
+        else wrong public key
+            Peer->>Agent/RelayedPeer: Status(ERROR_WRONG_PUBLIC_KEY)
+        else invalid proof of representation
+            Peer->>Agent/RelayedPeer: Status(ERROR_INVALID_PROOF)
+        else unsupported ledger
+            Peer->>Agent/RelayedPeer: Status(ERROR_UNSUPPORTED_LEDGER)
+        end
+</div>
+
+### "Look-up" Interaction
+
+The look-up interaction is used by a peer
+to request information to another peer about an agent address.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Peer1
+        participant Peer2
+        Peer1->>Peer2: LookupRequest(address)
+        alt success
+            Peer2->>Peer1: LookupResponse(AgentRecord)
+        else unknown agent address
+            Peer2->>Peer1: Status(ERROR_UNKNOWN_AGENT_ADDRESS)
+        end
+</div>
+
+
+### "Routing" Interaction
+
+The routing interaction is used by agents
+and peers to route the envelope through the ACN.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Peer1
+        participant Peer2
+        Peer1->>Peer2: AeaEnvelope(envelope, AgentRecord)
+        alt success
+            note over Peer2: check PoR
+            Peer2->>Peer1: Status(SUCCESS)
+        else error on decoding of Envelope payload
+            Peer2->>Peer1: Status(ERROR_SERIALIZATION)
+        else PoR errors
+            note over Peer1,Peer2: see above 
+        end
+
+</div>
+
 
 ## Joining the ACN network
 
@@ -296,7 +360,7 @@ the [AEA connection `fetchai/p2p_libp2p_client`](https://github.com/fetchai/agen
         participant Agent
         participant Peer
         loop until Status(success) received
-            Agent->>Peer: AcnMessage(AeaEnvelope)
+            Agent->>Peer: AeaEnvelope
             Agent->>Agent: wait
             note left of Agent: Wait until<br/>Status(success)
             alt successful case
@@ -307,11 +371,11 @@ the [AEA connection `fetchai/p2p_libp2p_client`](https://github.com/fetchai/agen
             else version not supported
                 Peer->>Agent: Status(ERROR_UNSUPPORTED_VERSION)
             else error on decoding of ACN message
-                Peer->>Agent: Status(SERIALIZATION_ERROR)
+                Peer->>Agent: Status(ERROR_SERIALIZATION)
             else error on decoding of Envelope payload
-                Peer->>Agent: Status(SERIALIZATION_ERROR)
+                Peer->>Agent: Status(ERROR_SERIALIZATION)
             else the payload cannot be handled
-                Peer->>Agent: Status(SERIALIZATION_ERROR)
+                Peer->>Agent: Status(ERROR_UNEXPECTED_PAYLOAD)
             end
         end
         note over Peer: route envelope<br/>to next peer
