@@ -281,6 +281,15 @@ then, the message gets enqueued to an output queue by an input coroutine.
 Finally, the envelope ends up in an output queue, 
 which is processed by an output coroutine and routed to the next peer.
 
+In the case of _delegate connection_, 
+the message exchange is very similar; however, instead of using 
+pipes, the communication is done through the network, i.e. TCP,
+with a peer which has the delegate service enabled.
+The logic of the `Agent` client connected with a delegate connection
+is implemented in 
+the [AEA connection `fetchai/p2p_libp2p_client`](https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client).
+
+
 <div class="mermaid">
     sequenceDiagram
         participant Agent
@@ -307,16 +316,6 @@ which is processed by an output coroutine and routed to the next peer.
         note over Peer: route envelope<br/>to next peer
 </div>
 
-
-In the case of _delegate connection_, 
-the message exchange is very similar; however, instead of using 
-pipes, the communication is done through the network, i.e. TCP.
-Moreover, there is also the `RelayedPeer`, which is 
-connected to the `RelayPeer` via a relayed connection.
-The logic of the `Agent` client is implemented in 
-the [AEA connection `fetchai/p2p_libp2p_client`](https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client).
-
-TODO
 
 ### ACN Envelope Routing
 
