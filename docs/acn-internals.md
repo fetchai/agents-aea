@@ -246,36 +246,9 @@ during a registration request:
 If the ACN node is configured to run the delegate service,
 it start listening from a TCP socket at a configurable URI.
 
-The following diagram shows an example of the message exchanged
-during a registration request:
-
-<div class="mermaid">
-    sequenceDiagram
-        participant Agent
-        participant Peer
-        Agent->>Peer: Register (via TCP)
-        alt decoding error of ACN message
-            Peer->>Agent: Status(ERROR_SERIALIZATION)
-        else wrong payload
-            Peer->>Agent: Status(ERROR_UNEXPECTED_PAYLOAD)
-        else PoR check fails
-            alt wrong agent address
-                Peer->>Agent: Status(ERROR_WRONG_AGENT_ADDRESS)
-            else unsupported ledger
-                Peer->>Agent: Status(ERROR_UNSUPPORTED_LEDGER)
-            else agent address and public key don't match
-                Peer->>Agent: Status(ERROR_WRONG_AGENT_ADDRESS)
-            else invalid proof
-                Peer->>Agent: Status(ERROR_INVALID_PROOF)
-            end
-        else PoR check succeeds
-            Peer->>Agent: Status(SUCCESS)
-            note over Peer: announce agent<br/>address to<br/>other peers
-            Peer->>Peer: wait data from socket 
-            activate Peer
-            deactivate Peer
-        end
-</div>
+To see a diagram of the message exchanged
+during a registration request read 
+<a href="#the-fetchaip2p_libp2p_delegate-connection" target="_blank">this section</a>.
 
 ## ACN transport
 
@@ -559,7 +532,7 @@ or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetcha
 
 The package provides the connection class `P2PLibp2pConnection`,
 which implements the `Connection` interface and
-therefore can be used by the Mutliplexer as any other connection.
+therefore can be used by the Multiplexer as any other connection.
 
 - The `connect` method of this connection spawns a new instance
   of the <a href="https://github.com/fetchai/agents-aea/blob/main/libs/go/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
@@ -661,9 +634,63 @@ which receives messages from the Libp2p node.
 
 The source code of the `fetchai/p2p_libp2p_delegate` connection  
 can be downloaded from
-<a href="or from <a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p_client/latest" target="_blank">the main AEA framework repository.</a>
+<a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p_client/latest" target="_blank">the main AEA framework repository.</a>
 or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the main AEA framework repository.</a>
 
+The package provides the connection class `P2PLibp2pClientConnection`,
+which implements the `Connection` interface and
+therefore can be used by the Multiplexer as any other connection.
+
+- The `connect` method of this connection will set up a TCP
+  connection to the URI of the delegate peer. Then, it will
+  send a `Register` request to register the agent among the peer's
+  client connections.
+  On registration success, it sets up the _message receiving loop_, 
+  which enqueues messages in the input queue to be read by read method calls, 
+  and the _message sending loop_, which dequeues messages from the output queue 
+  and forwards them to the Libp2p node. 
+  The loops are run concurrently in the Multiplexer thread, 
+  using the Python asynchronous programming library `asyncio`.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Libp2p Client Connection
+        participant Libp2p Node
+        activate Libp2p Node
+        Libp2p Node->>Libp2p Node: listening for TCP connections
+        Libp2p Client Connection->>Libp2p Node: Register (via TCP)
+        deactivate Libp2p Node
+        alt decoding error of ACN message
+            Libp2p Node->>Libp2p Client Connection: Status(ERROR_SERIALIZATION)
+        else wrong payload
+            Libp2p Node->>Libp2p Client Connection: Status(ERROR_UNEXPECTED_PAYLOAD)
+        else PoR check fails
+            alt wrong agent address
+                Libp2p Node->>Libp2p Client Connection: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else unsupported ledger
+                Libp2p Node->>Libp2p Client Connection: Status(ERROR_UNSUPPORTED_LEDGER)
+            else agent address and public key don't match
+                Libp2p Node->>Libp2p Client Connection: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else invalid proof
+                Libp2p Node->>Libp2p Client Connection: Status(ERROR_INVALID_PROOF)
+            end
+        else PoR check succeeds
+            Libp2p Node->>Libp2p Client Connection: Status(SUCCESS)
+            note over Libp2p Node: announce agent<br/>address to<br/>other peers
+            Libp2p Node->>Libp2p Node: wait data from socket 
+            activate Libp2p Node
+            deactivate Libp2p Node
+        end
+</div>
+
+- The `send` method and the `receive` methods behave similarly to
+  the `send` and `receive` methods of the
+  <a href="#the-fetchaip2p_libp2p-connection" target="_blank">`p2p_libp2p connection</a>, 
+  in terms of message exchange;
+  however, the communication is done via TCP rather than pipes.
+
+- The `disconnect` method interrupts the connection with the delegate peer,
+  without explicitly deregistering.
 
 ## Known issues and limitations
 
@@ -679,6 +706,7 @@ This can cause two problems: either the delegate client is not found,
 or connection is closed during the send operation.
 
 Possible solutions:
+
 - Create more complicated structure for clients storage;
 - Keep the delegate client record for longer; 
 - Clean up the record by timeout, per client queues.
