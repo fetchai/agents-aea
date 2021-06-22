@@ -245,7 +245,7 @@ class OefSearchHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the oef search message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -274,7 +274,8 @@ class OefSearchHandler(Handler):
         """
         Handle the search response.
 
-        :param agents: the agents returned by the search
+        :param oef_search_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
         """
         if len(oef_search_msg.agents) == 0:
             self.context.logger.info(
@@ -365,7 +366,7 @@ class ContractApiHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param contract_api_msg: the contract api message
         """
         self.context.logger.info(
             "received invalid contract_api message={}, unidentified dialogue.".format(
@@ -381,7 +382,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of raw_message performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info("received raw message={}".format(contract_api_msg))
@@ -411,7 +412,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -428,7 +429,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -478,7 +479,7 @@ class SigningHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             "received invalid signing message={}, unidentified dialogue.".format(
@@ -586,7 +587,7 @@ class LedgerApiHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -598,7 +599,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -612,7 +613,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -627,7 +628,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(

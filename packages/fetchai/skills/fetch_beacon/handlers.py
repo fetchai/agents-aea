@@ -52,9 +52,7 @@ class LedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
-
         self.context.logger.info("Handling ledger api msg")
 
         ledger_api_msg = cast(LedgerApiMessage, message)
@@ -79,17 +77,13 @@ class LedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -101,7 +95,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of state performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
 
         self.context.logger.debug(f"Handling ledger API message: {ledger_api_msg}")
@@ -147,7 +141,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(  # pragma: nocover
@@ -162,7 +156,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(

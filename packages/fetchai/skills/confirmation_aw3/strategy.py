@@ -75,6 +75,7 @@ class Strategy(GenericStrategy):
         """
         Process counterparties and drop unacceptable ones.
 
+        :param counterparties: tuple of counterparties
         :return: list of counterparties
         """
         valid_counterparties: List[str] = []
@@ -87,6 +88,7 @@ class Strategy(GenericStrategy):
         """
         Check if the counterparty is valid.
 
+        :param counterparty: the counterparty
         :return: bool indicating validity
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
@@ -105,7 +107,6 @@ class Strategy(GenericStrategy):
 
         :param counterparty: the counterparty address
         :param data: the data
-        :return: False
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_trade(counterparty, datetime.datetime.now(), data)
@@ -140,8 +141,6 @@ class Strategy(GenericStrategy):
 
         :param counterparty: the counterparty address
         :param developer_handle: the developer handle
-        :param data: the data
-        :return: False
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_registered(counterparty, developer_handle)

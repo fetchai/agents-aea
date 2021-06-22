@@ -82,7 +82,7 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
         Add a prometheus metric.
 
         :param metric_name: the name of the metric to add.
-        :param type: the type of the metric.
+        :param metric_type: the type of the metric.
         :param description: a description of the metric.
         :param labels: the metric labels.
         """

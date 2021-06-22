@@ -82,7 +82,7 @@ class DefaultHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param fipa_msg: the message
+        :param default_msg: the message
         """
         self.context.logger.info(
             f"received invalid default message={default_msg}, unidentified dialogue."

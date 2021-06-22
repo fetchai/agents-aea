@@ -90,7 +90,7 @@ class AW1RegistrationHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param register_msg: the register message
         """
         self.context.logger.info(
             f"received invalid register_msg message={register_msg}, unidentified dialogue."
@@ -216,7 +216,7 @@ class ContractApiHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param contract_api_msg: the contract api message
         """
         self.context.logger.info(
             f"received invalid contract_api message={contract_api_msg}, unidentified dialogue."
@@ -230,7 +230,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of raw_message performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(f"received state message={contract_api_msg}")
@@ -270,7 +270,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -293,7 +293,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -356,7 +356,7 @@ class LedgerApiHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             f"received invalid ledger_api message={ledger_api_msg}, unidentified dialogue."
@@ -368,7 +368,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of raw_transaction performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(f"received raw transaction={ledger_api_msg}")
@@ -392,7 +392,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of transaction_digest performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -414,7 +414,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         register_dialogue = ledger_api_dialogue.associated_register_dialogue
@@ -482,7 +482,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -507,7 +507,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -555,7 +555,7 @@ class SigningHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             f"received invalid signing message={signing_msg}, unidentified dialogue."
