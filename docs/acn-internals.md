@@ -2,8 +2,31 @@
 The aim of this document is to describe at a high-level
 the main implementation of the Agent Communication Network (ACN).
 
+In particular:
+
+- <a href="https://github.com/fetchai/agents-aea/tree/main/libs/go/libp2p_node" target="_blank">the `libp2p_node` Golang library<a/>;
+- <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">the `p2p_libp2p` AEA connection, written in Python, that implements the _direct connection_ with an ACN peer<a/>;
+- <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the `p2p_libp2p_CLIENT` AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer<a/>.
+
+It is assumed the reader already knows what is the ACN and
+its purposes; if not, we suggest reading <a href="../acn">this page<a/>.
+
 This documentation page is structured as follows:
-TODO
+
+- Firstly, the ACN protocol is described: all the messages
+and data structures involved, as well as some example of interaction
+protocol with these messages;
+- Then, it is explained how a peer can join an existing ACN network,
+and the message exchange involved;
+- It follows the description of the journey of an envelope
+  in the ACN network: from the agent connection to its contact
+  peer, between ACN peers, and then from the contact peer of the
+  destination agent to the target agent;
+- The following section describes the functionalities
+  of the AEA connections that allow to communicate through
+  the ACN: `fetchai/p2p_libp2p` and `fetchia/p2p_libp2p_delegate`;
+- The documentation ends with a section of known issues and limitations
+  of the current implementation.
 
 ## Messages and Data Structures
 
@@ -123,7 +146,11 @@ It contains:
 - `envelope`: the envelope to be forwarded, in byte representation;
 - an `AgentRecord` (see above).
 
-## Overview of ACN 
+## ACN Protocol interactions
+
+Show diagrams of interactions using ACN messages,
+e.g. <envelope; status>, <lookup_request; \[lookup_response, status\]>,
+<register; status>.
 
 TODO
 
@@ -180,7 +207,7 @@ Then, it sets up the notification stream and notifies the bootstrap peers (if an
         note over Peer1: set up:<br/>- address stream<br/>- envelope stream<br/>- register relay stream
 </div>
 
-## Relay connections
+### Relay connections
 
 If the ACN node is configured to run the relay service,
 it sets up the register relay stream, waiting for registration
@@ -214,7 +241,7 @@ during a registration request:
         end
 </div>
 
-## Delegate connections
+### Delegate connections
 
 If the ACN node is configured to run the delegate service,
 it start listening from a TCP socket at a configurable URI.
@@ -267,7 +294,8 @@ of an envelope through the ACN:
 ### ACN Envelope Entrance: Agent -> Peer
 
 In this section, we will describe the interaction protocols between agents and peers 
-for the messages sent by the agent to the ACN network.
+for the messages sent by the agent to the ACN network;
+in particular, the communication from the contact peer of an agent to the agent.
 
 The following diagram explains the exchange of messages on entering an envelope in the ACN.
 
@@ -483,6 +511,7 @@ envelope recipient handles the incoming envelope:
 ### ACN Envelope Exit: Peer -> Agent
 
 The following diagram explains the exchange of messages on exiting an envelope in the ACN.
+That is, the communication from the contact peer of an agent to the agent.
 
 The same message exchange is done 
 both in the case of direct connection and
@@ -508,6 +537,15 @@ similarly for what has been described for the envelope entrance
         end
 </div>
 
+## Connect your AEA to the ACN
+
+### The `fetchai/p2p_libp2p` connection
+
+TODO
+
+### The `fetchai/p2p_libp2p_delegate` connection
+
+TODO
 
 ## Known issues and limitations
 
