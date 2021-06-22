@@ -6,7 +6,7 @@ In particular:
 
 - <a href="https://github.com/fetchai/agents-aea/tree/main/libs/go/libp2p_node" target="_blank">the `libp2p_node` Golang library<a/>;
 - <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">the `p2p_libp2p` AEA connection, written in Python, that implements the _direct connection_ with an ACN peer<a/>;
-- <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the `p2p_libp2p_CLIENT` AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer<a/>.
+- <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the `p2p_libp2p_client` AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer<a/>.
 
 It is assumed the reader already knows what is the ACN and
 its purposes; if not, we suggest reading <a href="../acn">this page<a/>.
@@ -539,13 +539,131 @@ similarly for what has been described for the envelope entrance
 
 ## Connect your AEA to the ACN
 
+To connect the AEA to the ACN network,
+there are two AEA connections available:
+
+- the `fetchai/p2p_libp2p`, that implements
+  a direct connection, and
+- the `fetchai/p2p_libp2p_delegate` connection,
+  that implements the delegate connection.
+
+For more information on the AEA connection package type,
+refer to <a href="../connection/ target="_blank">this guide</a>.
+
 ### The `fetchai/p2p_libp2p` connection
 
-TODO
+The source code of the `fetchai/p2p_libp2p` connection  
+can be downloaded from 
+<a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p/latest" target="_blank">the AEA Regsitry</a>,
+or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">the main AEA framework repository.</a>
+
+The package provides the connection class `P2PLibp2pConnection`,
+which implements the `Connection` interface and
+therefore can be used by the Mutliplexer as any other connection.
+
+- The `connect` method of this connection spawns a new instance
+  of the <a href="https://github.com/fetchai/agents-aea/blob/main/libs/go/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
+(i.e. an ACN peer node) and connects to it through OS pipes. 
+Then, it sets up the _message receiving loop_,
+  which enqueues messages in the input queue to be read by `read` method calls,
+  and the _message sending loop_, 
+  which dequeues messages from the output queue and forwards them to the Libp2p node. 
+The loops are run concurrently in the Multiplexer thread, 
+  using the Python asynchronous programming library `asyncio`.  
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Libp2p Connection
+        participant sending loop
+        participant receiving loop
+        participant Libp2p Node
+        Libp2p Connection->>Libp2p Node: spawn process
+        activate Libp2p Node
+        Libp2p Connection->>sending loop: start recv loop
+        sending loop->>sending loop: wait messages from output queue
+        activate sending loop
+        Libp2p Connection->>receiving loop: start send loop
+        receiving loop->>receiving loop: wait messages from input queue
+        activate receiving loop
+        deactivate Libp2p Node
+        deactivate sending loop
+        deactivate receiving loop
+</div>
+
+- The `send` method enqueues a message in the output queue.
+The message is then dequeued by the sending loop,
+and then sent to the Libp2p node. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Libp2p Connection
+        participant sending loop
+        participant Libp2p Node
+        activate sending loop
+        Libp2p Connection->>Libp2p Connection: enqueue message to output queue
+        sending loop->>sending loop: dequeue message from output queue
+        deactivate sending loop
+        sending loop->>Libp2p Node: AeaEnvelope
+        sending loop->>sending loop: wait for status
+        activate sending loop
+        alt success
+            note over Libp2p Node: route envelope
+            Libp2p Node->>sending loop: Status(SUCCESS)
+            deactivate sending loop
+            note over sending loop: OK
+        else timed out
+            note over sending loop: raise with error
+        else acn message decoding error 
+            Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
+        else unexpected payload
+            Libp2p Node->>sending loop: Status(ERROR_UNEXPECTED_PAYLOAD)
+        else envelope decoding error 
+            Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
+        end
+</div>
+
+- The `receive` method dequeues a message from the input queue.
+The queue is populated by the receiving loop,
+which receives messages from the Libp2p node. 
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Libp2p Connection
+        participant receiving loop
+        participant Libp2p Node
+        activate receiving loop
+        Libp2p Node->>receiving loop: AeaEnvelope
+        deactivate receiving loop
+        Libp2p Node->>Libp2p Node: wait for status
+        activate Libp2p Node
+        alt success
+            note over receiving loop: enqueue envelope<br/>to input queue
+            receiving loop->>Libp2p Node: Status(SUCCESS)
+            deactivate Libp2p Node
+            note over receiving loop: OK
+        else timed out
+            note over Libp2p Node: ignore
+        else acn message decoding error 
+            receiving loop->>Libp2p Node: Status(ERROR_SERIALIZATION)
+        else unexpected payload
+            receiving loop->>Libp2p Node: Status(ERROR_UNEXPECTED_PAYLOAD)
+        else envelope decoding error 
+            receiving loop->>Libp2p Node: Status(ERROR_SERIALIZATION)
+        end
+        Libp2p Connection->>receiving loop: read message from output queue
+        note over Libp2p Connection: return message<br/>to Multiplexer
+</div>
+
+- the `disconnect` method stops both the receiving loop and the sending loop,
+  and stops the Libp2p node.
 
 ### The `fetchai/p2p_libp2p_delegate` connection
 
-TODO
+The source code of the `fetchai/p2p_libp2p_delegate` connection  
+can be downloaded from
+<a href="or from <a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p_client/latest" target="_blank">the main AEA framework repository.</a>
+or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the main AEA framework repository.</a>
+
 
 ## Known issues and limitations
 
