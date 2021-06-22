@@ -25,7 +25,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Union, cast
+from typing import Any, Optional, Set, Tuple, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
@@ -117,8 +117,7 @@ class HTTPClientAsyncChannel:
         :param agent_address: the address of the agent.
         :param address: server hostname / IP address
         :param port: server port number
-        :param excluded_protocols: this connection cannot handle messages adhering to any of the protocols in this set
-        :param restricted_to_protocols: this connection can only handle messages adhering to protocols in this set
+        :param connection_id: the id of the connection
         """
         self.agent_address = agent_address
         self.address = address
@@ -319,6 +318,7 @@ class HTTPClientAsyncChannel:
         :param headers: dict of http response headers
         :param status_text: the http status_text, str
         :param body: bytes of http response content
+        :param dialogue: the http dialogue
 
         :return: Envelope with http response data.
         """
@@ -366,7 +366,11 @@ class HTTPClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize a HTTP client connection."""
+        """
+        Initialize a HTTP client connection.
+
+        :param kwargs: keyword arguments
+        """
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
@@ -402,12 +406,12 @@ class HTTPClientConnection(Connection):
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(
-        self, *args: Any, **kwargs: Any
-    ) -> Optional[Union["Envelope", None]]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         self._ensure_connected()

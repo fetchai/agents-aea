@@ -111,6 +111,7 @@ class OEFChannel(OEFAgent):
         :param address: the address of the agent.
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
+        :param logger: the logger.
         """
         super().__init__(
             address,
@@ -474,8 +475,6 @@ class OEFConnection(Connection):
         """
         Initialize.
 
-        :param oef_addr: the OEF IP address.
-        :param oef_port: the OEF port.
         :param kwargs: the keyword arguments (check the parent constructor)
         """
         super().__init__(**kwargs)
@@ -539,6 +538,8 @@ class OEFConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: the positional arguments
+        :param kwargs: the keyword arguments
         :return: the envelope received, or None.
         """
         try:

@@ -23,7 +23,7 @@ import logging
 
 from aea_ledger_ethereum import EthereumApi
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
@@ -48,7 +48,7 @@ class FetERC20(Contract):
         spender: Address,
         amount: int,
         gas: int = 0,
-    ) -> None:
+    ) -> JSONLike:
         """
         Get transaction to approve oracle client contract transactions on behalf of sender.
 
@@ -58,6 +58,7 @@ class FetERC20(Contract):
         :param spender: the address approved to spend on behalf of sender.
         :param amount: the amount approved to be spent.
         :param gas: the gas limit for the transaction.
+        :return: the approve transaction
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
@@ -84,7 +85,7 @@ class FetERC20(Contract):
         receiver: Address,
         amount: int,
         gas: int = 0,
-    ) -> None:
+    ) -> JSONLike:
         """
         Get transaction to transfer tokens to an account
 
@@ -94,6 +95,7 @@ class FetERC20(Contract):
         :param receiver: the address to which to transfer tokens.
         :param amount: the amount of tokens to transfer.
         :param gas: the gas limit for the transaction.
+        :return: the transfer transaction
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)

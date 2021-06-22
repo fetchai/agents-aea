@@ -53,8 +53,11 @@ class RequestDispatcher(ABC):
         """
         Initialize the request dispatcher.
 
+        :param logger: the logger.
+        :param connection_state: the connection state.
         :param loop: the asyncio loop.
         :param executor: an executor.
+        :param api_configs: the configurations of the api.
         """
         self.connection_state = connection_state
         self.loop = loop if loop is not None else asyncio.get_event_loop()
@@ -80,7 +83,9 @@ class RequestDispatcher(ABC):
         Run a function in executor.
 
         :param func: the function to execute.
-        :param args: the arguments to pass to the function.
+        :param api: the ledger api.
+        :param message: the message.
+        :param dialogue: the dialogue.
         :return: the return value of the function.
         """
         try:

@@ -96,6 +96,7 @@ class LocalNode:
         Initialize a local (i.e. non-networked) implementation of an OEF Node.
 
         :param loop: the event loop. If None, a new event loop is instantiated.
+        :param logger: the logger.
         """
         self._lock = threading.Lock()
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
@@ -374,6 +375,7 @@ class OEFLocalConnection(Connection):
         Initialize a OEF proxy for a local OEF Node
 
         :param local_node: the Local OEF Node object. This reference must be the same across the agents of interest. (Note, AEA loader will not accept this argument.)
+        :param kwargs: keyword arguments.
         """
         super().__init__(**kwargs)
         self._local_node = local_node
@@ -407,7 +409,11 @@ class OEFLocalConnection(Connection):
         self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
-        """Send a message."""
+        """
+        Send a message.
+
+        :param envelope: the envelope.
+        """
         self._ensure_connected()
         self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
 
@@ -415,6 +421,8 @@ class OEFLocalConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments.
+        :param kwargs: keyword arguments.
         :return: the envelope received, or None.
         """
         self._ensure_connected()

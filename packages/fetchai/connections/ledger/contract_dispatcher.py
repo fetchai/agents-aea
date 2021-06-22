@@ -113,6 +113,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param e: the exception.
         :param api: the Ledger API.
         :param message: the request message.
+        :param dialogue: the dialogue
         :return: an error message response.
         """
         response = cast(

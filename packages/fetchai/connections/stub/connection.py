@@ -132,8 +132,7 @@ class StubConnection(Connection):
         Generate input file read chunks and truncate data already read.
 
         :param delay: float, delay on empty read.
-
-        :return: async generator return file read bytes.
+        :yield: async generator return file read bytes.
         """
         if not self.input_file:  # pragma: nocover
             raise ValueError("Input file not opened! Call Connection.connect first.")
@@ -251,7 +250,7 @@ class StubConnection(Connection):
         """
         Send messages.
 
-        :param: the envelope
+        :param envelope: the envelope
         """
         self._ensure_connected()
         self._ensure_valid_envelope_for_external_comms(envelope)

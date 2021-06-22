@@ -63,6 +63,7 @@ class FetchOracleContract(Contract):
         :param contract_address: the contract address
         :param oracle_address: the address of the oracle
         :param gas: the gas limit
+        :param tx_fee: the transaction fee
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -108,6 +109,8 @@ class FetchOracleContract(Contract):
         :param oracle_address: the oracle address.
         :param update_function: the oracle value update function.
         :param update_kwargs: the arguments to the contract's update function.
+        :param gas: the gas limit
+        :param tx_fee: the transaction fee
         :return: transaction json
         """
         if ledger_api.identifier == EthereumApi.identifier:

@@ -74,6 +74,9 @@ def get_version(*args: int) -> VERSION:
     Get the version from a list of arguments.
 
     Set to '0' if there are not enough arguments.
+
+    :param args: positional arguments
+    :return: the version
     """
     major = nth(args, 0, 0)
     minor = nth(args, 1, 0)
@@ -190,6 +193,8 @@ def _golang_module_build(
     """
     Builds go module located at `path`, downloads necessary dependencies
 
+    :param path: the path to the node code
+    :param timeout: the build timeout
     :return: str with logs or error description if happens
     """
     proc = Popen(  # nosec

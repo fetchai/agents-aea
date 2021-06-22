@@ -22,7 +22,7 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, cast
 
 from aiohttp import web  # type: ignore
 
@@ -100,6 +100,8 @@ class WebhookChannel:
         :param webhook_port: webhook port number
         :param webhook_url_path: the url path to receive webhooks from
         :param connection_id: the connection id
+        :param target_skill_id: the skill id which should receive the http messages
+        :param logger: the logger
         """
         self.agent_address = agent_address
 
@@ -277,12 +279,12 @@ class WebhookConnection(Connection):
             raise ValueError("Channel in queue not set.")  # pragma: nocover
         await self.channel.send(envelope)
 
-    async def receive(
-        self, *args: Any, **kwargs: Any
-    ) -> Optional[Union["Envelope", None]]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         self._ensure_connected()

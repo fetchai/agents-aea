@@ -44,6 +44,7 @@ class TCPServerConnection(TCPConnection):
         Initialize a TCP server connection.
 
         :param configuration: the configuration object.
+        :param kwargs: keyword arguments.
         """
         address = cast(str, configuration.config.get("address"))
         port = cast(int, configuration.config.get("port"))
@@ -76,6 +77,8 @@ class TCPServerConnection(TCPConnection):
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the received envelope, or None if an error occurred.
         """
         if len(self._read_tasks_to_address) == 0:

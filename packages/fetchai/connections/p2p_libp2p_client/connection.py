@@ -480,6 +480,8 @@ class P2PLibp2pClientConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         try:

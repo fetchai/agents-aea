@@ -225,10 +225,15 @@ class SOEFChannel:
 
         :param address: the address of the agent.
         :param api_key: the SOEF API key.
+        :param is_https: whether htts or http is used.
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
-        :param chain_identifier: supported chain id
-        :param connection_check_timeout: timeout to check network connection on connect
+        :param data_dir: the data directory.
+        :param chain_identifier: supported chain id.
+        :param token_storage_path: storage path for the SOEF token.
+        :param logger: the logger.
+        :param connection_check_timeout: timeout to check network connection on connect.
+        :param connection_check_max_retries: maximum retries when performing connection check.
         """
         if chain_identifier is not None and not any(
             regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
@@ -564,8 +569,8 @@ class SOEFChannel:
         Perform ping command.
 
         :param service_description: Service description
-
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.PING.value)
         await self._ping_command()
@@ -581,8 +586,8 @@ class SOEFChannel:
         Perform ping command.
 
         :param service_description: Service description
-
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         if not self.in_queue:  # pragma: no cover
             """not connected."""
@@ -636,7 +641,8 @@ class SOEFChannel:
         Set service key from service description.
 
         :param service_description: Service description
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.SET_SERVICE_KEY.value)
 
@@ -723,7 +729,6 @@ class SOEFChannel:
 
         :param key: key to set
         :param value: value to set
-        :return None:
         """
         await self._generic_oef_command(
             "set_service_key", {"key": key, "value": str(value)}
@@ -739,7 +744,8 @@ class SOEFChannel:
         Remove service key from service description.
 
         :param service_description: Service description
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.REMOVE_SERVICE_KEY.value)
         key = service_description.values.get("key", None)
@@ -755,7 +761,6 @@ class SOEFChannel:
         Perform remove service key command.
 
         :param key: key to remove
-        :return None:
         """
         await self._generic_oef_command("remove_service_key", {"key": key})
 
@@ -769,7 +774,8 @@ class SOEFChannel:
         Register service with location.
 
         :param service_description: Service description
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.LOCATION_AGENT.value)
 
@@ -808,7 +814,7 @@ class SOEFChannel:
 
         :param oef_search_dialogue: the oef search dialogue
         :param oef_message: the oef message
-        :return None
+        :param agents_info: the agents info json
         """
         if self.in_queue is None:
             raise ValueError("Inqueue not set!")  # pragma: nocover
@@ -833,7 +839,6 @@ class SOEFChannel:
 
         :param service_description: Service description
         :param data_model_name: data model name expected.
-        :return None
         """
         if service_description.data_model.name != data_model_name:  # pragma: nocover
             raise SOEFException.error(
@@ -846,7 +851,8 @@ class SOEFChannel:
         """
         Set the location.
 
-        :param service_location: the service location
+        :param agent_location: the agent location
+        :param disclosure_accuracy: the accuracy of the agent location disclosure
         """
         latitude = agent_location.latitude
         longitude = agent_location.longitude
@@ -872,8 +878,9 @@ class SOEFChannel:
         """
         Set the personality piece.
 
-        :param piece: the piece to be set
-        :param value: the value to be set
+        :param service_description: the service description.
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.PERSONALITY_AGENT.value)
         piece = service_description.values.get("piece", None)
@@ -1334,6 +1341,8 @@ class SOEFConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         try:

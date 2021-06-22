@@ -116,6 +116,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
+        :param dialogue: the dialogue
         :return: the ledger api message
         """
         balance = api.get_balance(message.address)
@@ -143,6 +144,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
+        :param dialogue: the dialogue
         :return: the ledger api message
         """
         result = api.get_state(message.callable, *message.args, **message.kwargs.body)
@@ -170,6 +172,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
+        :param dialogue: the dialogue
         :return: the ledger api message
         """
         raw_transaction = api.get_transfer_transaction(
@@ -205,6 +208,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
+        :param dialogue: the dialogue
         :return: the ledger api message
         """
         is_settled = False
@@ -269,6 +273,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
+        :param dialogue: the dialogue
         :return: the ledger api message
         """
         transaction_digest = api.send_signed_transaction(
@@ -300,6 +305,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param e: the exception.
         :param api: the Ledger API.
         :param message: the request message.
+        :param dialogue: the dialogue
         :return: an error message response.
         """
         message = cast(LedgerApiMessage, message)

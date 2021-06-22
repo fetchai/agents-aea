@@ -45,6 +45,7 @@ class TCPConnection(Connection, ABC):
 
         :param host: the socket bind address.
         :param port: the socket bind port.
+        :param kwargs: keyword arguments.
         """
         super().__init__(**kwargs)
         # for the server, the listening address/port
@@ -70,12 +71,7 @@ class TCPConnection(Connection, ABC):
         """
 
     async def connect(self) -> None:
-        """
-        Set up the connection.
-
-        :return: A queue or None.
-        :raises ConnectionError: if a problem occurred during the connection.
-        """
+        """Set up the connection."""
         if self.is_connected:  # pragma: nocover
             self.logger.warning("Connection already set up.")
             return

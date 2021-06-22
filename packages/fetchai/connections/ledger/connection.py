@@ -146,6 +146,8 @@ class LedgerConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         # if there are done tasks, return the result

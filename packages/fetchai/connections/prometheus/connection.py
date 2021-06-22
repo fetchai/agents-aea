@@ -91,8 +91,9 @@ class PrometheusChannel:
         Initialize a prometheus channel.
 
         :param address: The address of the connection.
-        :param metrics: The prometheus metrics.
+        :param host: The host at which to expose the metrics.
         :param port: The port at which to expose the metrics.
+        :param logger: The logger.
         """
         self.address = address
         self.metrics = {}  # type: Dict[str, aioprometheus.Collector]

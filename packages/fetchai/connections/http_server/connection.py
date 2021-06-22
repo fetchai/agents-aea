@@ -152,7 +152,7 @@ class Request(OpenAPIRequest):
         query_params = parse_qs(parsed_path.query, keep_blank_values=True)
 
         parameters = RequestParameters(
-            query=ImmutableMultiDict(query_params),
+            query=ImmutableMultiDict(query_params),  # type: ignore
             header=headers_to_string(dict(http_request.headers)),
             path={},
         )
@@ -172,7 +172,7 @@ class Request(OpenAPIRequest):
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
-        :param dialogue_reference: new dialog reference for envelope
+        :param dialogues: the http dialogues
         :param target_skill_id: the target skill id
 
         :return: envelope
@@ -239,6 +239,8 @@ class APISpec:
         Initialize the API spec.
 
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
+        :param server: the server url
+        :param logger: the logger
         """
         self._validator = None  # type: Optional[RequestValidator]
         self.logger = logger
@@ -281,7 +283,7 @@ class APISpec:
 class BaseAsyncChannel(ABC):
     """Base asynchronous channel class."""
 
-    def __init__(self, address: Address, connection_id: PublicId,) -> None:
+    def __init__(self, address: Address, connection_id: PublicId) -> None:
         """
         Initialize a channel.
 
@@ -363,8 +365,8 @@ class HTTPChannel(BaseAsyncChannel):
         :param target_skill_id: the skill id which handles the requests
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
         :param connection_id: public id of connection using this channel.
-        :param restricted_to_protocols: set of restricted protocols
         :param timeout_window: the timeout (in seconds) for a request to be handled.
+        :param logger: the logger
         """
         super().__init__(address=address, connection_id=connection_id)
         self.host = host
@@ -411,7 +413,7 @@ class HTTPChannel(BaseAsyncChannel):
         """
         Verify the request then send the request to Agent as an envelope.
 
-        :param request: the request object
+        :param http_request: the request object
 
         :return: a tuple of response code and response description
         """
@@ -581,6 +583,8 @@ class HTTPServerConnection(Connection):
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         self._ensure_connected()
