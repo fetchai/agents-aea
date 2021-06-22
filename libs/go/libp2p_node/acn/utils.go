@@ -21,12 +21,42 @@ package acn
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"time"
+
+	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
 
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
 )
+
+type StatusBody = acn_protocol.AcnMessage_StatusBody
+type AgentRecord = acn_protocol.AcnMessage_AgentRecord
+type AcnMessage = acn_protocol.AcnMessage
+type LookupRequest = acn_protocol.AcnMessage_LookupRequest
+type LookupResponse = acn_protocol.AcnMessage_LookupResponse
+type Status = acn_protocol.AcnMessage_Status
+type LookupRequestPerformative = acn_protocol.AcnMessage_Lookup_Request_Performative
+type LookupResponsePerformative = acn_protocol.AcnMessage_Lookup_Response_Performative
+type StatusPerformative = acn_protocol.AcnMessage_Status_Performative
+type RegisterPerformative = acn_protocol.AcnMessage_Register_Performative
+type Register = acn_protocol.AcnMessage_Register
+type AeaEnvelope = acn_protocol.AcnMessage_AeaEnvelope
+type AeaEnvelopePerformative = acn_protocol.AcnMessage_Aea_Envelope_Performative
+
+const ERROR_SERIALIZATION = acn_protocol.AcnMessage_StatusBody_ERROR_SERIALIZATION
+const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
+const ERROR_UNEXPECTED_PAYLOAD = acn_protocol.AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD
+const ERROR_AGENT_NOT_READY = acn_protocol.AcnMessage_StatusBody_ERROR_AGENT_NOT_READY
+const ERROR_UNKNOWN_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_UNKNOWN_AGENT_ADDRESS
+const ERROR_GENERIC = acn_protocol.AcnMessage_StatusBody_ERROR_GENERIC
+const ERROR_WRONG_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_AGENT_ADDRESS
+const ERROR_UNSUPPORTED_LEDGER = acn_protocol.AcnMessage_StatusBody_ERROR_UNSUPPORTED_LEDGER
+const ERROR_WRONG_PUBLIC_KEY = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_PUBLIC_KEY
+const ERROR_INVALID_PROOF = acn_protocol.AcnMessage_StatusBody_ERROR_INVALID_PROOF
+
+type Status_ErrCode = acn_protocol.AcnMessage_StatusBody_StatusCodeEnum
 
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
@@ -39,34 +69,44 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 
 const CurrentVersion = "0.1.0"
 
-func DecodeAcnMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
+type ACNError struct {
+	ErrorCode Status_ErrCode
+	Err       error
+}
+
+func (err *ACNError) Error() string {
+	return err.Err.Error()
+}
+
+func DecodeAcnMessage(buf []byte) (string, *AeaEnvelopePerformative, *StatusBody, *ACNError) {
 	response := &AcnMessage{}
 	err := proto.Unmarshal(buf, response)
 	msg_type := ""
+
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while decoding acn message")
-		return msg_type, nil, nil, err
+		return msg_type, nil, nil, &ACNError{ErrorCode: ERROR_SERIALIZATION, Err: err}
 	}
 	// response is either a LookupResponse or Status
-	var aeaEnvelope *AeaEnvelope = nil
-	var status *Status = nil
+	var aeaEnvelope *AeaEnvelopePerformative = nil
+	var status *StatusBody = nil
 
-	switch pl := response.Payload.(type) {
-	case *AcnMessage_AeaEnvelope:
+	switch pl := response.Performative.(type) {
+	case *AeaEnvelope:
 		aeaEnvelope = pl.AeaEnvelope
 		msg_type = "aea_envelope"
-	case *AcnMessage_Status:
-		status = pl.Status
+	case *Status:
+		status = pl.Status.Body
 		msg_type = "status"
 	default:
-		err = errors.New("unexpected ACN Message")
+		err = fmt.Errorf("unexpected ACN Message: %s", response)
 		logger.Error().Msg(err.Error())
-		return msg_type, nil, nil, err
+		return msg_type, nil, nil, &ACNError{ErrorCode: ERROR_UNEXPECTED_PAYLOAD, Err: err}
 	}
-	return msg_type, aeaEnvelope, status, err
+	return msg_type, aeaEnvelope, status, nil
 }
 
-func WaitForStatus(ch chan *Status, timeout time.Duration) (*Status, error) {
+func WaitForStatus(ch chan *StatusBody, timeout time.Duration) (*StatusBody, error) {
 	select {
 	case m := <-ch:
 		return m, nil
@@ -78,10 +118,10 @@ func WaitForStatus(ch chan *Status, timeout time.Duration) (*Status, error) {
 }
 
 func SendAcnSuccess(pipe Pipe) error {
-	status := &Status{Code: Status_SUCCESS}
+	status := &StatusBody{Code: SUCCESS}
+	performative := &StatusPerformative{Body: status}
 	msg := &AcnMessage{
-		Version: CurrentVersion,
-		Payload: &AcnMessage_Status{Status: status},
+		Performative: &Status{Status: performative},
 	}
 	buf, err := proto.Marshal(msg)
 	if err != nil {
@@ -100,15 +140,14 @@ func SendAcnError(pipe Pipe, error_msg string, err_codes ...Status_ErrCode) erro
 	var err_code Status_ErrCode
 
 	if len(err_codes) == 0 {
-		err_code = Status_ERROR_GENERIC
+		err_code = ERROR_GENERIC
 	} else {
 		err_code = err_codes[0]
 	}
 
-	status := &Status{Code: err_code, Msgs: []string{error_msg}}
+	status := &StatusBody{Code: err_code, Msgs: []string{error_msg}}
 	msg := &AcnMessage{
-		Version: CurrentVersion,
-		Payload: &AcnMessage_Status{Status: status},
+		Performative: &Status{Status: &StatusPerformative{Body: status}},
 	}
 	buf, err := proto.Marshal(msg)
 	if err != nil {
@@ -124,10 +163,9 @@ func SendAcnError(pipe Pipe, error_msg string, err_codes ...Status_ErrCode) erro
 }
 
 func EncodeAcnEnvelope(envelope_bytes []byte) (error, []byte) {
-	aeaEnvelope := &AeaEnvelope{Envel: envelope_bytes}
+	performative := &AeaEnvelopePerformative{Envelope: envelope_bytes}
 	msg := &AcnMessage{
-		Version: CurrentVersion,
-		Payload: &AcnMessage_AeaEnvelope{AeaEnvelope: aeaEnvelope},
+		Performative: &AeaEnvelope{AeaEnvelope: performative},
 	}
 	buf, err := proto.Marshal(msg)
 	return err, buf
@@ -141,5 +179,5 @@ type Pipe interface {
 }
 
 type StatusQueue interface {
-	AddAcnStatusMessage(status *Status, counterpartyID string)
+	AddAcnStatusMessage(status *StatusBody, counterpartyID string)
 }

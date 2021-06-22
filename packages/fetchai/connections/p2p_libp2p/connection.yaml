@@ -10,50 +10,50 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmVz8npmRFFHqHwTLCHoHUDEzr5r7fu4eM3L3CP5CDx1g4
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  acn_message.proto: QmQtqmAqRM6KhYyfXGPYbYLBLuwfTRwTbvt5Rmt1ghS33J
-  acn_message_pb2.py: QmRmTieVDVaRoiynFx9YJbXEf41JfTTWdqTWuRYWFpM8iw
   check_dependencies.py: QmTs1ydcs71QsqrVEyPmZpUNRntmjgQbx5d5t1xUKg8sad
-  connection.py: QmYPAu7KC8XMXmwKx8ezE2AnX2vk9Zabqje4G3FRYDMi9M
+  connection.py: QmeL1ATu3Uort85edXPsZRji3W4nHjAyhQJVDTkvT1pYLv
   consts.py: QmNup63K21nAMgQ8VLjNGZgceus97gUpsgBMNpDxcSTmCr
-  libp2p_node/Makefile: QmPpjEgNQD59BBDefLS5C8gbY7CEppeVGACJeAL9rufSgv
-  libp2p_node/README.md: Qmak56XnWfarVxasiaGqYQWJaNVnEAh2hsLWstuFVND98w
-  libp2p_node/acn/acn_message.pb.go: QmXWS3njZsFfdbuvXYv3iHy9YF9nGtmJomSQFTbSgRQb8H
-  libp2p_node/acn/acn_message.proto: QmbgFcGVbxx4CP53cefW7JhXLYha6meSYqZ9hZJgBpcinF
-  libp2p_node/acn/utils.go: QmVbyjJyHJZkzisx5XwTWji4ph5ZX2bVVuL6wwTT4Pkgbr
-  libp2p_node/aea/api.go: QmRmcrdCVNbbNSV1w7dZ1yTKK77T6FzaHtz8cFQc4SyJXT
+  libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
+  libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
+  libp2p_node/acn/utils.go: QmQCXKTJTK6o9tqTUVkPCQBfvvCBDFosUA54VuBXc4WT5p
+  libp2p_node/aea/api.go: QmR55Loa5FxbHzQTzJyhzXNuk3takGqQ8fd9TY3ufuYHmu
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe.go: QmdY77nQhJt5ojfcpJn2quaxdseGxS8GymQbzNvizkXNoz
-  libp2p_node/aea/utils.go: QmUzV2kNtXpj1PH9ckdDW44ymq8VWbucHhDBqgaPk4Ua3f
+  libp2p_node/aea/utils.go: QmZTt7MkLreiA14Hs4tQTREy9vngTPf4kuw4mFN35hxMrM
   libp2p_node/common/common.go: QmeGr6xMzqkBVJMnWzCTcXJVQj2A8RK64mhTSewZJKpiJa
-  libp2p_node/dht/dhtclient/dhtclient.go: QmQuwyrsqqPMAnwewkqo9tFKNTNHcTc9ZGQXeftvaFtaMr
+  libp2p_node/dht/dhtclient/dhtclient.go: QmZGWCuqNoTzBEC7UokC3NQ96Fy1A42ad14MnC18aHroxi
   libp2p_node/dht/dhtclient/dhtclient_test.go: QmY5YQVYPHYdHc3GXPgbMQBtMstEpYiik1KtZH9ZchJVNh
   libp2p_node/dht/dhtclient/options.go: QmbjHT3ZXFo5GaMDTFbpZVRNiq3KPeoQWuGQuDaz7QJfaU
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  libp2p_node/dht/dhtnode/utils.go: Qmacw5a7j4nxesJdA2gMeeWHzvsm6AKthn8oNRdqDQv8x8
+  libp2p_node/dht/dhtnode/utils.go: QmUabTTyRXixEEfksTzSNiHsqF9GcQ9qXpfwVY3VNsXBYK
   libp2p_node/dht/dhtpeer/benchmarks_test.go: QmcXvXrdwJtczmqj29Qx4AAmHzSgHSo8fASh91g8AfhVQf
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmTePZGcggb1MXsJvBsZWu86jkCWQnj5HN7tLVF5Dx8Gxh
-  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmZ9UkcqH5N6suVvDWm8PtHcYKynaKQvmsw9FBUQgHPZyz
+  libp2p_node/dht/dhtpeer/dhtpeer.go: Qmf8qNmcp6x9254J2sKdpz1v9hnDV51b8kTpVMbtrQ9Pj6
+  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmSg9hdKU1ffL5gMNZt2EwhxQdLg3rz2q3WdNHzHMXhD4s
   libp2p_node/dht/dhtpeer/options.go: QmYmMiuX9sEKZ3M94AZSnpM8RxuvUCeHGTBjMvifRdXucp
   libp2p_node/dht/dhttests/dhttests.go: QmSe8XsEhMJAWuokeWtPLXP4m9G5rDEAXrrQWBcma8t71c
-  libp2p_node/dht/monitoring/file.go: Qmc4QpKtjXaEFqGPeunV6TR4qR5RcMzoy8atzJH4ouBkfH
+  libp2p_node/dht/monitoring/file.go: QmZwH59RcraRfgYjugVafVojakv1oEcgBUKuMdFAoeZBhS
   libp2p_node/dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
   libp2p_node/go.mod: QmZAefiBvioX9DfJvKWibSbDGnAEo1w9LuoEVzjRoWJGWT
-  libp2p_node/go.sum: QmXELVbhPqVqSN9osMh1zpnsihPZmCC3A8tCt9maF6sjFS
+  libp2p_node/go.sum: QmchXxL6fqJWqxPpEQzE6moZpxvpNtP36WHtKWHuuP7oAx
   libp2p_node/libp2p_node.go: QmPgMQ3g93Jqu4GAv8e7fTWbrGK8hjSp7BDrKj1EuR1WcS
   libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
   libp2p_node/mocks/mock_host.go: QmSJ7g6S2PGhC5j8xBQyrjs56hXJGEewkgFgiivyZDthbW
   libp2p_node/mocks/mock_net.go: QmVKnkDdH8XCJ9jriEkZui4NoB36GBYF2DtfX8uCqAthMw
   libp2p_node/mocks/mock_network.go: QmbVVvd3wrY6PnVs1rn9T9m6FD5kbmSVJLwhSxUgSLAiM5
   libp2p_node/mocks/mock_peerstore.go: QmaPCBrwsTeWCHZoAKDzaxN6uhY3bez1karzeGeovWYwkB
-  libp2p_node/utils/utils.go: QmUPs4SB7p1b4BEScZHD6Zp1ZUc7R8hbvzQLFkdYGhPCFx
+  libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmQqkU1XA1UrKBrMd3MawxWiqNRSHH4cLKjwcYqFexJx6F
+  libp2p_node/protocols/acn/v1_0_0/acn.proto: QmYNCxKy5NXnPRGZQCn2VmtFYLg2GyuWMHCwu6x99o2vsp
+  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUTxkycEYsDZYXNekhPXd8s66qCvuCUvN15JeG4PHhXK2
+  libp2p_node/utils/utils.go: QmRYpCrW8fia1qtmraGcGRhFz5KgAJ8zwGBFP2DJkpFnm8
   libp2p_node/utils/utils_test.go: QmaUTrtqhPYcCLTHnJic4EN7R1pZY8ra7QbeRrPuedgAuc
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
-protocols: []
+protocols:
+- fetchai/acn:1.0.0
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

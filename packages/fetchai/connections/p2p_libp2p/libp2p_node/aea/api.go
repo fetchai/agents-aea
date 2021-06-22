@@ -85,7 +85,7 @@ type AeaApi struct {
 	connected       bool
 	sandbox         bool
 	standalone      bool
-	acn_status_chan chan *acn.Status
+	acn_status_chan chan *acn.StatusBody
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -321,7 +321,7 @@ func (aea *AeaApi) Init() error {
 		aea.pipe = NewPipe(aea.msgin_path, aea.msgout_path)
 	}
 
-	aea.acn_status_chan = make(chan *acn.Status, 1000)
+	aea.acn_status_chan = make(chan *acn.StatusBody, 1000)
 	return nil
 }
 
@@ -462,7 +462,7 @@ func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 			Msgf("on status wait. envelope: %s", envelope.String())
 		return err
 	}
-	if status.Code != acn.Status_SUCCESS {
+	if status.Code != acn.SUCCESS {
 		logger.Error().
 			Str("op", "send_envelope").
 			Msgf("acn confirmation status is not Status Success: %d. envelope: %s", status.Code, envelope.String())
@@ -474,7 +474,7 @@ func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 	return err
 }
 
-func (aea AeaApi) AddAcnStatusMessage(status *acn.Status, counterpartyID string) {
+func (aea AeaApi) AddAcnStatusMessage(status *acn.StatusBody, counterpartyID string) {
 	aea.acn_status_chan <- status
 	logger.Info().Msgf("chan len is %d", len(aea.acn_status_chan))
 }

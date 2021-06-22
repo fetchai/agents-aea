@@ -96,7 +96,6 @@ func ignore(err error) {
 */
 
 func newConsoleLogger() zerolog.Logger {
-	zerolog.TimeFieldFormat = time.RFC3339Nano
 	return zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		NoColor:    false,
