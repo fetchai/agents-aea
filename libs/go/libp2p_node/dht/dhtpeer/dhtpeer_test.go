@@ -1822,6 +1822,8 @@ func SetupDelegateClient(
 	if err != nil {
 		return nil, nil, err
 	}
+	// Read signature, skip it here
+	_, _ = utils.ReadBytesConn(client.Conn)
 
 	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = address

@@ -417,6 +417,7 @@ class P2PLibp2pClientConnection(Connection):
                 pipe = TCPSocketChannelClientTLS(
                     f"{self.node_uri.host}:{self.node_uri._port}",  # pylint: disable=protected-access
                     "",
+                    server_pub_key=self.node_por.representative_public_key,
                 )
                 await pipe.connect()
                 self._node_client = NodeClient(pipe, self.node_por)

@@ -27,6 +27,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+    "crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/tls"
@@ -78,7 +79,6 @@ func check(err error) {
 		panic(err)
 	}
 }
-
 func ignore(err error) {
 	if err != nil {
 		log.Println("IGNORED", err)
@@ -658,7 +658,6 @@ func generate_x509_cert() (*tls.Certificate, error) {
 
 	privPEM := new(bytes.Buffer)
 	b, err := x509.MarshalECPrivateKey(privKey)
-	//b, err := cryptop2p.MarshalECDSAPrivateKey(privKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "while marshaling ec private key")
 	}
@@ -686,11 +685,21 @@ func (dhtPeer *DHTPeer) launchDelegateService() {
 	}
 	config := &tls.Config{Certificates: []tls.Certificate{*dhtPeer.cert}}
 	uri := dhtPeer.host + ":" + strconv.FormatInt(int64(dhtPeer.delegatePort), 10)
-	dhtPeer.tcpListener, err = tls.Listen("tcp", uri, config)
+	listener, err := tls.Listen("tcp", uri, config)
+	
 	if err != nil {
 		lerror(err).Msgf("while setting up listening tcp socket %s", uri)
 		check(err)
 	}
+
+	cert_pub_key := dhtPeer.cert.PrivateKey.(*ecdsa.PrivateKey).Public().(*ecdsa.PublicKey)
+	cert_pub_key_bytes := elliptic.Marshal(cert_pub_key.Curve, cert_pub_key.X, cert_pub_key.Y)
+	signature, err := dhtPeer.key.Sign(cert_pub_key_bytes)
+	if err != nil {
+		lerror(err).Msgf("while generating tls signature")
+		check(err)
+	}
+	dhtPeer.tcpListener = TLSListener{Listener: listener, Signature: signature}
 }
 
 // handleDelegateService listens for new connections to delegate service and handles them

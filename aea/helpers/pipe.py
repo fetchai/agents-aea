@@ -19,7 +19,9 @@
 # ------------------------------------------------------------------------------
 """Portable pipe implementation for Linux, MacOS, and Windows."""
 import asyncio
+import contextlib
 import errno
+import hashlib
 import logging
 import os
 import socket
@@ -28,8 +30,15 @@ import struct
 import tempfile
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
+from asyncio.streams import StreamWriter
 from shutil import rmtree
 from typing import IO, Optional
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.x509.base import load_der_x509_certificate
+from ecdsa.curves import SECP256k1
+from ecdsa.keys import BadSignatureError, VerifyingKey
+from ecdsa.util import sigdecode_der
 
 from aea.exceptions import enforce
 
@@ -269,6 +278,11 @@ class TCPSocketProtocol:
         self.loop = loop if loop is not None else asyncio.get_event_loop()
         self._reader = reader
         self._writer = writer
+
+    @property
+    def writer(self) -> StreamWriter:
+        """Get a writer associated with  protocol."""
+        return self._writer
 
     async def write(self, data: bytes) -> None:
         """
@@ -598,11 +612,71 @@ class TCPSocketChannelClient(IPCChannelClient):
 class TCPSocketChannelClientTLS(TCPSocketChannelClient):
     """Interprocess communication channel client using tcp sockets with TLS."""
 
+    VERIFICATION_SIGNATURE_WAIT_TIMEOUT = 5.0
+
+    def __init__(  # pylint: disable=unused-argument
+        self,
+        in_path: str,
+        out_path: str,
+        server_pub_key: str,
+        logger: logging.Logger = _default_logger,
+        loop: Optional[AbstractEventLoop] = None,
+    ) -> None:
+        """
+        Initialize a tcp socket communication channel client.
+
+        :param in_path: rendezvous point for incoming data
+        :param out_path: rendezvous point for outgoing data
+        :param server_pub_key: str, server public key to verify identity
+        :param logger: the logger
+        :param loop: the event loop
+        """
+        self.server_pub_key = server_pub_key
+        super().__init__(in_path, out_path, logger, loop)
+
+    @staticmethod
+    def _get_session_pub_key(writer: StreamWriter) -> bytes:  # pragma: nocover
+        """Get session public key from tls stream writer."""
+        cert_data = writer.get_extra_info("ssl_object").getpeercert(binary_form=True)
+        cert = load_der_x509_certificate(cert_data)
+
+        session_pub_key = cert.public_key().public_bytes(
+            encoding=serialization.Encoding.X962,
+            format=serialization.PublicFormat.UncompressedPoint,
+        )
+        return session_pub_key
+
     async def _open_connection(self) -> TCPSocketProtocol:
+        """Open a connection with TLS support and verify peer."""
+        sock = await self._open_tls_connection()
+        session_pub_key = self._get_session_pub_key(sock.writer)
+
+        try:
+            signature = await asyncio.wait_for(
+                sock.read(), timeout=self.VERIFICATION_SIGNATURE_WAIT_TIMEOUT
+            )
+        except asyncio.TimeoutError:  # pragma: nocover
+            raise ValueError(
+                f"Failed to get peer verification record in timeout: {self.VERIFICATION_SIGNATURE_WAIT_TIMEOUT}"
+            )
+
+        if not signature:  # pragma: nocover
+            raise ValueError("Unexpected socket read data!")
+
+        try:
+            self._verify_session_key_signature(signature, session_pub_key)
+        except BadSignatureError as e:  # pragma: nocover
+            with contextlib.suppress(Exception):
+                await sock.close()
+            raise ValueError(f"Invalid session key signature: {e}")
+        return sock
+
+    async def _open_tls_connection(self) -> TCPSocketProtocol:
         """Open a connection with TLS support."""
         ssl_ctx = ssl.create_default_context()
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_NONE
+
         reader, writer = await asyncio.open_connection(
             self._host,
             self._port,
@@ -610,6 +684,20 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
             ssl=ssl_ctx,
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
+
+    def _verify_session_key_signature(
+        self, signature: bytes, session_pub_key: bytes
+    ) -> None:
+        """
+        Validate signature of session public key.
+
+        :param signature: bytes, signature of session public key made with server private key
+        :param session_pub_key: session public key to check signature for.
+        """
+        vk = VerifyingKey.from_string(bytes.fromhex(self.server_pub_key), SECP256k1)
+        vk.verify(
+            signature, session_pub_key, hashfunc=hashlib.sha256, sigdecode=sigdecode_der
+        )
 
 
 class PosixNamedPipeChannelClient(IPCChannelClient):
