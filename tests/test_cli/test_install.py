@@ -19,123 +19,73 @@
 
 """This test module contains the tests for the `aea install` sub-command."""
 
-import os
-import shutil
-import tempfile
 from pathlib import Path
 
+import pytest
 import yaml
+from click import ClickException
 
-from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
-from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, ROOT_DIR
+from tests.conftest import CUR_PATH
 
 
-class TestInstall:
+class TestInstall(AEATestCase):
     """Test that the command 'aea install' works as expected."""
 
+    path_to_aea: Path = Path(CUR_PATH, "data", "dummy_aea")
+
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        dir_path = Path("packages")
-        tmp_dir = cls.t / dir_path
-        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
-        shutil.copytree(str(src_dir), str(tmp_dir))
-        # copy the 'dummy_aea' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
-        cls.runner = CliRunner()
-        os.chdir(Path(cls.t, "dummy_aea"))
-        cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
+        super().setup_class()
+        cls.result = cls.run_cli_command("install", cwd=cls._get_cwd())
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         assert self.result.exit_code == 0
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
-
-class TestInstallFromRequirementFile:
+class TestInstallFromRequirementFile(AEATestCase):
     """Test that the command 'aea install --requirement REQ_FILE' works."""
 
+    path_to_aea: Path = Path(CUR_PATH, "data", "dummy_aea")
+
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'dummy_aea' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
-        cls.runner = CliRunner()
-        os.chdir(Path(cls.t, "dummy_aea"))
-
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "install", "-r", "requirements.txt"],
-            standalone_mode=False,
+        super().setup_class()
+        cls.result = cls.run_cli_command(
+            "install", "-r", "requirements.txt", cwd=cls._get_cwd()
         )
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         assert self.result.exit_code == 0
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
-
-class TestInstallFailsWhenDependencyDoesNotExist:
+class TestInstallFailsWhenDependencyDoesNotExist(AEATestCaseEmpty):
     """Test that the command 'aea install' fails when a dependency is not found."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
-
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        dir_path = Path("packages")
-        tmp_dir = cls.t / dir_path
-        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
-        shutil.copytree(str(src_dir), str(tmp_dir))
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        super().setup_class()
+        result = cls.run_cli_command(
+            "scaffold", "protocol", "-y", "my_protocol", cwd=cls._get_cwd()
         )
         assert result.exit_code == 0
 
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
-            standalone_mode=False,
+        config_path = (
+            Path(cls._get_cwd())
+            / "protocols"
+            / "my_protocol"
+            / DEFAULT_PROTOCOL_CONFIG_FILE
         )
-        assert result.exit_code == 0
-        os.chdir(cls.agent_name)
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", "-y", "my_protocol"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
+        with config_path.open() as fp:
+            config = yaml.safe_load(fp)
 
-        config_path = Path("protocols", "my_protocol", DEFAULT_PROTOCOL_CONFIG_FILE)
-        config = yaml.safe_load(open(config_path))
         config.setdefault("dependencies", {}).update(
             {
                 "this_is_a_test_dependency": {
@@ -148,53 +98,30 @@ class TestInstallFailsWhenDependencyDoesNotExist:
                 },
             }
         )
-        yaml.safe_dump(config, open(config_path, "w"))
-        cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "install"], standalone_mode=False
-        )
 
-    def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
+        with config_path.open(mode="w") as fp:
+            yaml.safe_dump(config, fp)
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    def test_error(self):
+        """Assert an error occurs."""
+        with pytest.raises(
+            ClickException,
+            match="An error occurred while installing this_is_a_test_dependency.*",
+        ):
+            self.run_cli_command("install", cwd=self._get_cwd())
 
 
-class TestInstallWithRequirementFailsWhenFileIsBad:
+class TestInstallWithRequirementFailsWhenFileIsBad(AEATestCase):
     """Test that the command 'aea install -r REQ_FILE' fails if the requirement file is not good."""
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up."""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'dummy_aea' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
-        cls.runner = CliRunner()
-        os.chdir(Path(cls.t, "dummy_aea"))
+    path_to_aea: Path = Path(CUR_PATH, "data", "dummy_aea")
 
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "install", "-r", "bad_requirements.txt"],
-            standalone_mode=False,
-        )
-
-    def test_exit_code_equal_to_zero(self):
-        """Assert that the exit code is equal to zero (i.e. success)."""
-        assert self.result.exit_code == 1
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+    def test_error(self):
+        """Test that an error occurs."""
+        with pytest.raises(
+            ClickException,
+            match="An error occurred while installing requirement file bad_requirements.txt. Stopping...",
+        ):
+            self.run_cli_command(
+                "install", "-r", "bad_requirements.txt", cwd=self._get_cwd()
+            )
