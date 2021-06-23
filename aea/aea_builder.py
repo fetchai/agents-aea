@@ -76,7 +76,11 @@ from aea.configurations.manager import (
     AgentConfigManager,
     find_component_directory_from_component_id,
 )
-from aea.configurations.pypi import is_satisfiable, merge_dependencies
+from aea.configurations.pypi import (
+    is_satisfiable,
+    merge_dependencies,
+    merge_dependencies_list,
+)
 from aea.configurations.validation import ExtraPropertiesError
 from aea.crypto.helpers import private_key_verify
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
@@ -240,13 +244,12 @@ class _DependenciesManager:
 
         :return: the merged PyPI dependencies
         """
-        all_pypi_dependencies = {}  # type: Dependencies
-        for configuration in self._dependencies.values():
-            all_pypi_dependencies = merge_dependencies(
-                all_pypi_dependencies, configuration.pypi_dependencies
-            )
-        all_pypi_dependencies = merge_dependencies(
-            all_pypi_dependencies, self.agent_pypi_dependencies
+        all_pypi_dependencies = merge_dependencies_list(
+            self.agent_pypi_dependencies,
+            *[
+                configuration.pypi_dependencies
+                for configuration in self._dependencies.values()
+            ],
         )
         return all_pypi_dependencies
 

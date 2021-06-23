@@ -39,6 +39,7 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.pypi import merge_dependencies_list
 from aea.helpers.io import open_file
 
 
@@ -157,27 +158,38 @@ class Context:
         return deps
 
     def get_dependencies(self) -> Dependencies:
-        """Aggregate the dependencies from every component.
+        """
+        Aggregate the dependencies from every component.
 
         :return: a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
-        dependencies = {}  # type: Dependencies
+        protocol_dependencies = [
+            self._get_item_dependencies(PROTOCOL, protocol_id)
+            for protocol_id in self.agent_config.protocols
+        ]
+        connection_dependencies = [
+            self._get_item_dependencies(CONNECTION, connection_id)
+            for connection_id in self.agent_config.connections
+        ]
+        skill_dependencies = [
+            self._get_item_dependencies(SKILL, skill_id)
+            for skill_id in self.agent_config.skills
+        ]
+        contract_dependencies = [
+            self._get_item_dependencies(CONTRACT, contract_id)
+            for contract_id in self.agent_config.contracts
+        ]
 
-        dependencies.update(self.agent_config.dependencies)
+        all_dependencies = [
+            self.agent_config.dependencies,
+            *protocol_dependencies,
+            *connection_dependencies,
+            *skill_dependencies,
+            *contract_dependencies,
+        ]
 
-        for protocol_id in self.agent_config.protocols:
-            dependencies.update(self._get_item_dependencies(PROTOCOL, protocol_id))
-
-        for connection_id in self.agent_config.connections:
-            dependencies.update(self._get_item_dependencies(CONNECTION, connection_id))
-
-        for skill_id in self.agent_config.skills:
-            dependencies.update(self._get_item_dependencies(SKILL, skill_id))
-
-        for contract_id in self.agent_config.contracts:
-            dependencies.update(self._get_item_dependencies(CONTRACT, contract_id))
-
-        return dependencies
+        result = merge_dependencies_list(*all_dependencies)
+        return result
 
     def dump_agent_config(self) -> None:
         """Dump the current agent configuration."""

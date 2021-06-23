@@ -27,6 +27,8 @@ import click
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
+from aea.configurations.data_types import Dependencies
+from aea.configurations.pypi import is_satisfiable, is_simple_dep, to_set_specifier
 from aea.exceptions import AEAException, enforce
 from aea.helpers.install_dependency import install_dependency, run_install_subprocess
 
@@ -64,11 +66,43 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
         else:
             logger.debug("Installing all the dependencies...")
             dependencies = ctx.get_dependencies()
+
+            logger.debug("Preliminary check on satisfiability of version specifiers...")
+            unsat_dependencies = _find_unsatisfiable_dependencies(dependencies)
+            if len(unsat_dependencies) != 0:
+                raise AEAException(
+                    "cannot install the following dependencies "
+                    + "as the joint version specifier is unsatisfiable:\n - "
+                    + "\n -".join(
+                        [
+                            f"{name}: {to_set_specifier(dep)}"
+                            for name, dep in unsat_dependencies.items()
+                        ]
+                    )
+                )
+
             for name, d in dependencies.items():
                 click.echo(f"Installing {pprint.pformat(name)}...")
                 install_dependency(name, d, logger)
     except AEAException as e:
         raise click.ClickException(str(e))
+
+
+def _find_unsatisfiable_dependencies(dependencies: Dependencies) -> Dependencies:
+    """
+    Find unsatisfiable dependencies.
+
+    It only checks among 'simple' dependencies (i.e. if it has no field specified,
+    or only the 'version' field set.)
+
+    :param dependencies: the dependencies to check.
+    :return: the unsatisfiable dependencies.
+    """
+    return {
+        name: dep
+        for name, dep in dependencies.items()
+        if is_simple_dep(dep) and not is_satisfiable(to_set_specifier(dep))
+    }
 
 
 def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
