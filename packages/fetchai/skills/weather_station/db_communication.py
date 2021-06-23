@@ -34,11 +34,7 @@ class DBCommunication:
     """A class to communicate with a database."""
 
     def __init__(self) -> None:
-        """
-        Initialize the database communication.
-
-        :param source: the source
-        """
+        """Initialize the database communication."""
         self.source = DB_SOURCE
 
     def db_connection(self) -> sqlite3.Connection:

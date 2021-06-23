@@ -37,25 +37,24 @@ class HttpHandler(Handler):
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
     def __init__(self, **kwargs: Any):
-        """Initialize the handler."""
+        """
+        Initialize the handler.
+
+        :param kwargs: keyword arguments
+        """
         self.shared_state_key = kwargs.pop("shared_state_key", None)
         if self.shared_state_key is None:
             raise ValueError("No shared_state_key provided!")
         super().__init__(**kwargs)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         http_msg = cast(HttpMessage, message)
 
@@ -77,7 +76,6 @@ class HttpHandler(Handler):
         Handle an unidentified dialogue.
 
         :param http_msg: the message
-        :return: None
         """
         self.context.logger.info(
             "received invalid http message={}, unidentified dialogue.".format(http_msg)
@@ -91,7 +89,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the message
         :param http_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.debug(
             "received http response={} in dialogue={}.".format(http_msg, http_dialogue)
@@ -112,7 +109,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the message
         :param http_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle http message of performative={} in dialogue={}.".format(
@@ -121,8 +117,4 @@ class HttpHandler(Handler):
         )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""

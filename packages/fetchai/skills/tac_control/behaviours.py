@@ -52,19 +52,11 @@ class TacBehaviour(Behaviour):
         self._nb_retries = 0
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         self._register_agent()
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         self._retry_failed_registration()
 
         game = cast(Game, self.context.game)
@@ -99,20 +91,12 @@ class TacBehaviour(Behaviour):
             game.phase = Phase.POST_GAME
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
         self._unregister_tac()
         self._unregister_agent()
 
     def _retry_failed_registration(self) -> None:
-        """
-        Retry a failed registration.
-
-        :return: None
-        """
+        """Retry a failed registration."""
         if self.failed_registration_msg is not None:
             self._nb_retries += 1
             if self._nb_retries > self._max_soef_registration_retries:
@@ -140,8 +124,6 @@ class TacBehaviour(Behaviour):
 
         :param description: the description of what is being registered
         :param logger_msg: the logger message to print after the registration
-
-        :return: None
         """
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -155,21 +137,13 @@ class TacBehaviour(Behaviour):
         self.context.logger.info(logger_msg)
 
     def _register_agent(self) -> None:
-        """
-        Register the agent's location.
-
-        :return: None
-        """
+        """Register the agent's location."""
         game = cast(Game, self.context.game)
         description = game.get_location_description()
         self._register(description, "registering agent on SOEF.")
 
     def register_genus(self) -> None:
-        """
-        Register the agent's personality genus.
-
-        :return: None
-        """
+        """Register the agent's personality genus."""
         game = cast(Game, self.context.game)
         description = game.get_register_personality_description()
         self._register(
@@ -177,11 +151,7 @@ class TacBehaviour(Behaviour):
         )
 
     def register_classification(self) -> None:
-        """
-        Register the agent's personality classification.
-
-        :return: None
-        """
+        """Register the agent's personality classification."""
         game = cast(Game, self.context.game)
         description = game.get_register_classification_description()
         self._register(
@@ -189,21 +159,13 @@ class TacBehaviour(Behaviour):
         )
 
     def _register_tac(self) -> None:
-        """
-        Register the agent's TAC controller service on the SOEF.
-
-        :return: None
-        """
+        """Register the agent's TAC controller service on the SOEF."""
         game = cast(Game, self.context.game)
         description = game.get_register_tac_description()
         self._register(description, "registering TAC data model on SOEF.")
 
     def _unregister_tac(self) -> None:
-        """
-        Unregister from the OEF as a TAC controller agent.
-
-        :return: None.
-        """
+        """Unregister from the OEF as a TAC controller agent."""
         game = cast(Game, self.context.game)
         description = game.get_unregister_tac_description()
         oef_search_dialogues = cast(
@@ -219,11 +181,7 @@ class TacBehaviour(Behaviour):
         self.context.logger.info("unregistering TAC data model from SOEF.")
 
     def _unregister_agent(self) -> None:
-        """
-        Unregister agent from the SOEF.
-
-        :return: None
-        """
+        """Unregister agent from the SOEF."""
         game = cast(Game, self.context.game)
         description = game.get_location_description()
         oef_search_dialogues = cast(
@@ -238,7 +196,11 @@ class TacBehaviour(Behaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 
     def _start_tac(self, game: Game) -> None:
-        """Create a game and send the game configuration to every registered agent."""
+        """
+        Create a game and send the game configuration to every registered agent.
+
+        :param game: the game
+        """
         count = len(game.conf.agent_addr_to_name)
         participant_names = sorted(list(game.conf.agent_addr_to_name.values()))
         self.context.logger.info(
@@ -287,7 +249,11 @@ class TacBehaviour(Behaviour):
             )
 
     def _cancel_tac(self, game: Game) -> None:
-        """Notify agents that the TAC is cancelled."""
+        """
+        Notify agents that the TAC is cancelled.
+
+        :param game: the game
+        """
         self.context.logger.info("notifying agents that TAC is cancelled.")
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)
         for agent_address in game.registration.agent_addr_to_name.keys():

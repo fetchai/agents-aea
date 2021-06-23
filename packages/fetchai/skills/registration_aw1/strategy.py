@@ -41,7 +41,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         developer_handle = kwargs.pop("developer_handle", DEFAULT_DEVELOPER_HANDLE)
         enforce(

@@ -54,7 +54,6 @@ class ProxyEnv(gym.Env):
         Instantiate the proxy environment.
 
         :param skill_context: the skill context
-        :return: None
         """
         super().__init__()
         self._skill_context = skill_context
@@ -131,15 +130,11 @@ class ProxyEnv(gym.Env):
         """
         Render the environment.
 
-        :return: None
+        :param mode: the mode
         """
 
     def reset(self) -> None:
-        """
-        Reset the environment.
-
-        :return: None
-        """
+        """Reset the environment."""
         self._step_count = 0
         self._is_rl_agent_trained = False
         gym_msg, gym_dialogue = self.gym_dialogues.create(
@@ -160,11 +155,7 @@ class ProxyEnv(gym.Env):
             )
 
     def close(self) -> None:
-        """
-        Close the environment.
-
-        :return: None
-        """
+        """Close the environment."""
         self._is_rl_agent_trained = True
         last_msg = self.active_gym_dialogue.last_message
         if last_msg is None:  # pragma: nocover
@@ -180,7 +171,6 @@ class ProxyEnv(gym.Env):
 
         :param action: the action that is the output of an RL algorithm.
         :param step_id: the step id
-        :return: an envelope
         """
         last_msg = self.active_gym_dialogue.last_message
         if last_msg is None:  # pragma: nocover
@@ -199,7 +189,7 @@ class ProxyEnv(gym.Env):
         """
         Transform the message received from the gym environment into observation, reward, done, info.
 
-        :param: the message received as a response to the action performed in apply_action.
+        :param message: the message received as a response to the action performed in apply_action.
         :return: the standard feedback (observation, reward, done, info) of a gym environment.
         """
         msg = cast(GymMessage, message)
@@ -221,5 +211,4 @@ class RLAgent(ABC):
 
         :param proxy_env: the proxy gym environment
         :param nb_steps: number of training steps to be performed.
-        :return: None
         """

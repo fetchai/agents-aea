@@ -185,6 +185,7 @@ class Strategy(Model):
         """
         Get terms of deployment.
 
+        :param is_init_transaction: whether the transaction is init or store.
         :return: terms
         """
         if self.ledger_id == EthereumApi.identifier:

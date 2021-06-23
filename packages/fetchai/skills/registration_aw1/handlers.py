@@ -41,18 +41,13 @@ class AW1RegistrationHandler(Handler):
     SUPPORTED_PROTOCOL = RegisterMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         register_msg = cast(RegisterMessage, message)
 
@@ -74,17 +69,13 @@ class AW1RegistrationHandler(Handler):
             self._handle_invalid(register_msg, register_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, register_msg: RegisterMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param register_msg: the message
         """
         self.context.logger.info(
             f"received invalid register_msg message={register_msg}, unidentified dialogue."
@@ -98,7 +89,6 @@ class AW1RegistrationHandler(Handler):
 
         :param register_msg: the register message
         :param register_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.debug(
             f"received register_msg success message={register_msg} in dialogue={register_dialogue}."
@@ -122,7 +112,6 @@ class AW1RegistrationHandler(Handler):
 
         :param register_msg: the register message
         :param register_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.debug(
             f"received register_msg error message={register_msg} in dialogue={register_dialogue}."
@@ -142,7 +131,6 @@ class AW1RegistrationHandler(Handler):
 
         :param register_msg: the register message
         :param register_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             f"cannot handle register_msg message of performative={register_msg.performative} in dialogue={register_dialogue}."
@@ -162,7 +150,6 @@ class SigningHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         signing_msg = cast(SigningMessage, message)
 
@@ -184,17 +171,13 @@ class SigningHandler(Handler):
             self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             f"received invalid signing message={signing_msg}, unidentified dialogue."
@@ -208,7 +191,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.debug(
             f"received signing message from decision maker, message={signing_msg} in dialogue={signing_dialogue}"
@@ -228,7 +210,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             f"transaction signing was not successful. Error_code={signing_msg.error_code} in dialogue={signing_dialogue}"
@@ -242,7 +223,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             f"cannot handle signing message of performative={signing_msg.performative} in dialogue={signing_dialogue}."

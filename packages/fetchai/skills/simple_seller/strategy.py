@@ -32,7 +32,7 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         self.shared_state_key = kwargs.pop("shared_state_key", None)
         if self.shared_state_key is None:
@@ -53,6 +53,7 @@ class Strategy(GenericStrategy):
         """
         Convert to dict.
 
+        :param data: the bytes data to format
         :return: a dict with key and values as strings
         """
         result: Dict[str, str] = {}

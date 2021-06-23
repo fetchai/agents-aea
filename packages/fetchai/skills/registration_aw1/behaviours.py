@@ -37,11 +37,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
     """This class scaffolds a behaviour."""
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         strategy = cast(Strategy, self.context.strategy)
         if strategy.announce_termination_key is not None:
             self.context.shared_state[strategy.announce_termination_key] = False
@@ -67,11 +63,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
             self.context.decision_maker_message_queue.put_nowait(msg)
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_ready_to_register:
             return
@@ -92,11 +84,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
         )
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
 
     def _register_for_aw1(
         self,

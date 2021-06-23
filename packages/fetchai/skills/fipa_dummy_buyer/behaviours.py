@@ -59,8 +59,4 @@ class FIPAInitializerBehaviour(TickerBehaviour):
         self.context.logger.info("CFP message sent.")
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

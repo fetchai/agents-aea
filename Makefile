@@ -46,7 +46,7 @@ lint:
 	isort aea benchmark examples packages plugins scripts tests
 	flake8 aea benchmark examples packages plugins scripts tests
 	vulture aea scripts/whitelist.py --exclude "*_pb2.py"
-	darglint aea
+	darglint aea packages/fetchai/connections packages/fetchai/contracts packages/fetchai/skills
 
 .PHONY: pylint
 pylint:
