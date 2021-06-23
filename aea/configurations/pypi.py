@@ -253,20 +253,24 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
         old_dep_exists = old_dep is not None
         new_dep_is_simple = is_simple_dep(info)
         old_dep_is_simple = is_simple_dep(info) if old_dep_exists else False
-        # in case a dependency exists in both operands and one of them is not simple:
-        if (new_dep_is_simple and old_dep_exists and not old_dep_is_simple) or (
-            not new_dep_is_simple and old_dep_exists
-        ):
-            # we raise error because we can't trivially merge the specifier sets;
-            raise ValueError(
-                f"cannot trivially merge these two PyPI dependencies:\n- {pkg_name}: {old_dep}\n- {pkg_name}: {info}"
-            )
 
+        # if the new dependency already exists in the list, ignore
+        if old_dep == info:
+            continue
         # if one of the operands does not have a dependency,
         # we add it untouched to the final result and continue
         if not old_dep_exists:
             result[pkg_name] = info
             continue
+
+        # in case a dependency exists in both operands and one of them is not simple:
+        if (new_dep_is_simple and old_dep_exists and not old_dep_is_simple) or (
+            not new_dep_is_simple and old_dep_exists
+        ):
+            # we raise error because we can't trivially merge the specifier sets (unless they are equal, see above)
+            raise ValueError(
+                f"cannot trivially merge these two PyPI dependencies:\n- {pkg_name}: {old_dep}\n- {pkg_name}: {info}"
+            )
 
         # if we are here, it means both in the first and second operand
         # there are two 'simple' dependencies with the same name
@@ -277,7 +281,7 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
             if pkg_name in result
             else SpecifierSet("")
         )
-        combined_specifier = new_specifier & old_specifier
+        combined_specifier = and_(new_specifier, old_specifier)
         new_info = Dependency(
             name=info.name,
             version=combined_specifier,

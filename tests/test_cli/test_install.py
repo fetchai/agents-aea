@@ -20,12 +20,14 @@
 """This test module contains the tests for the `aea install` sub-command."""
 
 from pathlib import Path
+from typing import Dict
 
 import pytest
 import yaml
 from click import ClickException
 
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
+from aea.configurations.constants import DEFAULT_CONNECTION_CONFIG_FILE
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
 from tests.conftest import CUR_PATH
@@ -125,3 +127,59 @@ class TestInstallWithRequirementFailsWhenFileIsBad(AEATestCase):
             self.run_cli_command(
                 "install", "-r", "bad_requirements.txt", cwd=self._get_cwd()
             )
+
+
+class TestInstallFailsWhenDependencyHasUnsatisfiableSpecifier(AEATestCaseEmpty):
+    """Test that the command 'aea install' fails when a dependency has an unsatisfiable version specifier."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super().setup_class()
+        result = cls.run_cli_command(
+            "scaffold", "connection", "my_connection_1", cwd=cls._get_cwd()
+        )
+        assert result.exit_code == 0
+        result = cls.run_cli_command(
+            "scaffold", "connection", "my_connection_2", cwd=cls._get_cwd()
+        )
+        assert result.exit_code == 0
+
+        config_path_1 = (
+            Path(cls._get_cwd())
+            / "connections"
+            / "my_connection_1"
+            / DEFAULT_CONNECTION_CONFIG_FILE
+        )
+
+        cls._write_dependencies(
+            {"this_is_a_test_dependency": {"version": "==0.1.0"}}, config_path_1
+        )
+
+        config_path_2 = (
+            Path(cls._get_cwd())
+            / "connections"
+            / "my_connection_2"
+            / DEFAULT_CONNECTION_CONFIG_FILE
+        )
+
+        cls._write_dependencies(
+            {"this_is_a_test_dependency": {"version": "==0.2.0"}}, config_path_2
+        )
+
+    @classmethod
+    def _write_dependencies(cls, dependency_dict: Dict, path_to_config: Path):
+        """Write a dependency to a configuration file."""
+        with path_to_config.open() as fp:
+            config = yaml.safe_load(fp)
+        config.setdefault("dependencies", {}).update(dependency_dict)
+        with path_to_config.open(mode="w") as fp:
+            yaml.safe_dump(config, fp)
+
+    def test_error(self):
+        """Assert an error occurs."""
+        with pytest.raises(
+            ClickException,
+            match="cannot install the following dependencies as the joint version specifier is unsatisfiable:\n - this_is_a_test_dependency: ==0.1.0,==0.2.0",
+        ):
+            self.run_cli_command("install", cwd=self._get_cwd())
