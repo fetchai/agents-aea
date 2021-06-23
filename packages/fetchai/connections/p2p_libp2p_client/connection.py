@@ -99,13 +99,15 @@ class NodeClient:
         buf = acn_msg.SerializeToString()
         await self._write(buf)
 
-    async def write_acn_status_error(self, msg: str) -> None:
+    async def write_acn_status_error(
+        self,
+        msg: str,
+        status_code: AcnMessage.StatusBody.StatusCode = AcnMessage.StatusBody.StatusCode.ERROR_GENERIC,  # type: ignore
+    ) -> None:
         """Send acn status error generic."""
         acn_msg = acn_pb2.AcnMessage()
         performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
-        status = AcnMessage.StatusBody(
-            status_code=AcnMessage.StatusBody.StatusCode.ERROR_GENERIC, msgs=[msg]
-        )
+        status = AcnMessage.StatusBody(status_code=status_code, msgs=[msg])
         AcnMessage.StatusBody.encode(
             performative.body, status  # pylint: disable=no-member
         )
@@ -163,7 +165,10 @@ class NodeClient:
                 acn_msg.ParseFromString(buf)
 
             except Exception as e:
-                await self.write_acn_status_error(f"Failed to parse acn message {e}")
+                await self.write_acn_status_error(
+                    f"Failed to parse acn message {e}",
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
+                )
                 raise ValueError(f"Error parsing acn message: {e}") from e
 
             performative = acn_msg.WhichOneof("performative")
@@ -174,7 +179,10 @@ class NodeClient:
                     await self.write_acn_status_ok()
                     return envelope
                 except Exception as e:
-                    await self.write_acn_status_error(f"Failed to decode envelope: {e}")
+                    await self.write_acn_status_error(
+                        f"Failed to decode envelope: {e}",
+                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
+                    )
                     raise
 
             elif performative == "status":
@@ -183,7 +191,10 @@ class NodeClient:
                         acn_msg.status.body  # pylint: disable=no-member
                     )
             else:  # pragma: nocover
-                await self.write_acn_status_error(f"Bad acn message {performative}")
+                await self.write_acn_status_error(
+                    f"Bad acn message {performative}",
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_UNEXPECTED_PAYLOAD,
+                )
 
     async def _write(self, data: bytes) -> None:
         """
