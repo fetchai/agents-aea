@@ -78,6 +78,8 @@ def test_merge_dependencies():
     expected_merged_dependencies = {
         "package_1": Dependency("package_1", "==0.1.0"),
         "package_2": Dependency("package_2", "==0.2.0,==0.3.0"),
+        "package_3": Dependency("package_3", "==0.2.0", "https://pypi.org"),
+        "package_4": Dependency("package_4", "==0.1.0", "https://pypi.org"),
     }
     assert expected_merged_dependencies == merge_dependencies(
         dependencies_a, dependencies_b
