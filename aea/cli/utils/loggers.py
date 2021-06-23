@@ -63,6 +63,11 @@ def simple_verbosity_option(
 
     Name can be configured through `*names`. Keyword arguments are passed to
     the underlying `click.option` decorator.
+
+    :param logger_: the logger
+    :param names: list of names
+    :param kwargs: keyword arguments
+    :return: callable
     """
     if not names:
         names = ("--verbosity", "-v")

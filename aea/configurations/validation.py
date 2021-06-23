@@ -130,6 +130,7 @@ class ConfigValidator:
         Initialize the parser for configuration files.
 
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
+        :param env_vars_friendly: whether or not it is env var friendly.
         """
         base_uri = Path(_SCHEMAS_DIR)
         with open_file(base_uri / schema_filename) as fp:
@@ -187,7 +188,6 @@ class ConfigValidator:
         :param configuration: the configuration dictionary.
         :param env_vars_friendly: bool, if set True, will not raise errors over the env variable definitions.
 
-        :return: None
         :raises ValueError: if the configuration is not valid.
         """
         schema_file = _get_path_to_custom_config_schema_from_type(
@@ -211,7 +211,6 @@ class ConfigValidator:
         Validate a JSON object against the right JSON schema.
 
         :param json_data: the JSON data.
-        :return: None.
         """
         if json_data.get("type", AGENT) == AGENT:
             json_data_copy = deepcopy(json_data)
@@ -250,9 +249,7 @@ class ConfigValidator:
         """
         Validate agent component configurations overrides.
 
-        :param component_configurations:
-
-        :return: None
+        :param component_configurations: the component configurations to validate.
         """
         for idx, component_configuration_json in enumerate(component_configurations):
             component_id = self.split_component_id_and_config(
@@ -281,6 +278,7 @@ def validate_data_with_pattern(
     """
     Validate data dict with pattern dict for attributes present and type match.
 
+    :param data: data dict to validate
     :param pattern: dict with pattern to check over
     :param excludes: list of tuples of str of paths to be skipped during the check
     :param skip_env_vars: is set True will not check data type over env variables.

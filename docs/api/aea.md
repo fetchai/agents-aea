@@ -31,8 +31,12 @@ Instantiate the agent.
 - `period`: period to call agent's act
 - `execution_timeout`: amount of time to limit single act/handle to execute.
 - `max_reactions`: the processing rate of envelopes per tick (i.e. single loop).
+- `error_handler_class`: the class implementing the error handler
+- `error_handler_config`: the configuration of the error handler
 - `decision_maker_handler_class`: the class implementing the decision maker handler to be used.
+- `decision_maker_handler_config`: the configuration of the decision maker handler
 - `skill_exception_policy`: the skill exception policy enum
+- `connection_exception_policy`: the connection exception policy enum
 - `loop_mode`: loop_mode to choose agent run loop.
 - `runtime_mode`: runtime mode (async, threaded) to run AEA in.
 - `default_ledger`: default ledger id
@@ -44,10 +48,6 @@ Instantiate the agent.
 - `storage_uri`: optional uri to set generic storage
 - `task_manager_mode`: task manager mode (threaded) to run tasks with.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
-
-**Returns**:
-
-None
 
 <a name="aea.aea.AEA.get_build_dir"></a>
 #### get`_`build`_`dir
@@ -120,10 +120,6 @@ Set up the agent.
 
 Calls setup() on the resources.
 
-**Returns**:
-
-None
-
 <a name="aea.aea.AEA.act"></a>
 #### act
 
@@ -134,10 +130,6 @@ None
 Perform actions.
 
 Adds new handlers and behaviours for use/execution by the runtime.
-
-**Returns**:
-
-None
 
 <a name="aea.aea.AEA.handle_envelope"></a>
 #### handle`_`envelope
@@ -221,10 +213,6 @@ Performs the following:
 
 - tears down the resources.
 
-**Returns**:
-
-None
-
 <a name="aea.aea.AEA.get_task_result"></a>
 #### get`_`task`_`result
 
@@ -233,6 +221,10 @@ None
 ```
 
 Get the result from a task.
+
+**Arguments**:
+
+- `task_id`: the id of the task
 
 **Returns**:
 
@@ -252,9 +244,8 @@ Enqueue a task with the task manager.
 - `func`: the callable instance to be enqueued
 - `args`: the positional arguments to be passed to the function.
 - `kwargs`: the keyword arguments to be passed to the function.
-:return the task id to get the the result.
 
-**Raises**:
+**Returns**:
 
-- `ValueError`: if the task manager is not running.
+the task id to get the the result.
 

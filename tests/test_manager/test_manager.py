@@ -20,10 +20,13 @@
 import asyncio
 import os
 import re
+import sys
 from contextlib import suppress
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
+from textwrap import dedent
+from typing import Optional
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
@@ -35,6 +38,7 @@ from aea.crypto.plugin import load_all_plugins
 from aea.crypto.registries import crypto_registry
 from aea.helpers.install_dependency import run_install_subprocess
 from aea.manager import MultiAgentManager
+from aea.manager.manager import ProjectPackageConsistencyCheckError
 
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
@@ -44,39 +48,48 @@ from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
-class TestMultiAgentManagerAsyncMode(
-    TestCase
-):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
-    """Tests for MultiAgentManager in async mode."""
+class BaseTestMultiAgentManager(TestCase):
+    """Base test class for multi-agent manager"""
 
     MODE = "async"
+    PASSWORD: Optional[str] = None
 
     echo_skill_id = ECHO_SKILL_PUBLIC_ID
 
     def setUp(self):
         """Set test case."""
         self.agent_name = "test_what_ever12"
-        self.working_dir = "MultiAgentManager_dir"
         self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
         self.project_path = os.path.join(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
         assert not os.path.exists(self.working_dir)
-        self.manager = MultiAgentManager(self.working_dir, mode=self.MODE)
+        self.manager = MultiAgentManager(
+            self.working_dir, mode=self.MODE, password=self.PASSWORD
+        )
 
     def tearDown(self):
         """Tear down test case."""
-        self.manager.stop_manager()
-        if os.path.exists(self.working_dir):
-            rmtree(self.working_dir)
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
 
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
-        install_cmd = f"pip install --no-deps {plugin_path}".split(" ")
+        install_cmd = f"{sys.executable} -m pip install --no-deps {plugin_path}".split(
+            " "
+        )
         try:
             self.manager.start_manager()
-            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(
+                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
+            )
             from aea.crypto.registries import ledger_apis_registry
 
             ledger_apis_registry.specs.pop("fetchai", None)
@@ -98,7 +111,9 @@ class TestMultiAgentManagerAsyncMode(
 
             assert "fetchai" in ledger_apis_registry.specs
         finally:
-            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(
+                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
+            )
             run_install_subprocess(install_cmd)
 
     def test_workdir_created_removed(self, *args):
@@ -251,7 +266,7 @@ class TestMultiAgentManagerAsyncMode(
             wait_for_condition(lambda: act_mock.call_count > 0, timeout=10)
 
     def test_exception_handling(self, *args):
-        """Test erro callback works."""
+        """Test error callback works."""
         self.test_add_agent()
         self.manager.start_all_agents()
         agent = self.manager._agents_tasks[self.agent_name].agent
@@ -265,6 +280,23 @@ class TestMultiAgentManagerAsyncMode(
         with patch.object(behaviour, "act", side_effect=ValueError("expected")):
             self.manager.start_all_agents()
             wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+
+    def test_default_exception_handling(self, *args):
+        """Test that the default error callback works."""
+        self.test_add_agent()
+        self.manager.start_all_agents()
+        agent = self.manager._agents_tasks[self.agent_name].agent
+        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
+        assert behaviour
+
+        with patch.object(
+            self.manager,
+            "_print_exception_occurred_but_no_error_callback",
+            side_effect=self.manager._print_exception_occurred_but_no_error_callback,
+        ) as callback_mock:
+            with patch.object(behaviour, "act", side_effect=ValueError("expected")):
+                wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+                callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""
@@ -457,7 +489,7 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
-        create_private_key("fetchai", priv_key_path)
+        create_private_key("fetchai", priv_key_path, password=self.PASSWORD)
         assert os.path.exists(priv_key_path)
 
         component_overrides = [
@@ -528,10 +560,150 @@ class TestMultiAgentManagerAsyncMode(
         assert len(agent_alias.get_connections_addresses()) == 1
 
 
-class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
+class TestMultiAgentManagerAsyncMode(
+    BaseTestMultiAgentManager
+):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode."""
+
+
+class TestMultiAgentManagerAsyncModeWithPassword(
+    BaseTestMultiAgentManager
+):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode, with password."""
+
+    PASSWORD = "password"  # nosec
+
+
+class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
+
+
+class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
+    """Tests for MultiAgentManager in threaded mode, with password."""
+
+    MODE = "threaded"
+    PASSWORD = "password"  # nosec
+
+
+class TestMultiAgentManagerPackageConsistencyError:
+    """
+    Test that the MultiAgentManager (MAM) raises an error on package version inconsistency.
+
+    In particular, an invariant to keep for the MAM state is that
+    there are no two AEA package dependencies across all the projects
+    that have different versions. This is due to a known limitation
+    in the package loading system.
+
+    This test checks that when the invariant is violated when
+    the method "add_project" is called, the framework raises an
+    exception with a descriptive error message.
+    """
+
+    EXPECTED_ERROR_MESSAGE = dedent(
+        """    cannot add project 'fetchai/weather_client:0.27.0': the following AEA dependencies have conflicts with previously added projects:
+    - 'fetchai/ledger' of type connection: the new version '0.17.0' conflicts with existing version '0.18.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/p2p_libp2p' of type connection: the new version '0.20.0' conflicts with existing version '0.21.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/soef' of type connection: the new version '0.21.0' conflicts with existing version '0.22.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/contract_api' of type protocol: the new version '0.14.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/default' of type protocol: the new version '0.15.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/fipa' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/ledger_api' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/oef_search' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/state_update' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    """
+    )
+
+    def setup(self):
+        """Set up the test case."""
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
+        self.project_path = os.path.join(
+            self.working_dir, self.project_public_id.author, self.project_public_id.name
+        )
+        assert not os.path.exists(self.working_dir)
+        self.manager = MultiAgentManager(self.working_dir)
+
+    def test_run(self):
+        """
+        Run the test.
+
+        First add agent project "fetchai/weather_station:0.27.0",
+        and then add "fetchai/weather_client:0.27.0".
+        The second addition will fail because the projects
+        contain conflicting AEA package versions.
+        """
+        self.manager.start_manager()
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
+        self.manager.add_project(weather_station_id)
+        weather_client_id = PublicId.from_str("fetchai/weather_client:0.27.0")
+        with pytest.raises(
+            ProjectPackageConsistencyCheckError,
+            match=re.escape(self.EXPECTED_ERROR_MESSAGE),
+        ):
+            self.manager.add_project(weather_client_id)
+
+    def teardown(self):
+        """Tear down test case."""
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
+
+
+class TestMultiAgentManagerWithPotentiallyConflictingPackages:
+    """
+    Test that the MultiAgentManager (MAM) handles correctly potentially conflicting packages.
+
+    "Potentially conflicting packages" are packages that have the same
+    package id prefix. The reason why they are "potentially conflicting"
+    is that their version may be different, i.e. conflicting,
+    and therefore are incompatible within the same MAM.
+
+    This test checks that, when adding a new project,
+    in case there are potentially conflicting packages but that
+    are not in fact conflicting, the operation is completed successfully.
+    """
+
+    def setup(self):
+        """Set up the test case."""
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
+        self.project_path = os.path.join(
+            self.working_dir, self.project_public_id.author, self.project_public_id.name
+        )
+        assert not os.path.exists(self.working_dir)
+        self.manager = MultiAgentManager(self.working_dir)
+
+    def test_run(self):
+        """
+        Run the test.
+
+        First add agent project "fetchai/weather_station:0.27.0",
+        and then add "fetchai/weather_client:0.27.0".
+        The second addition will fail because the projects
+        contain conflicting AEA package versions.
+        """
+        self.manager.start_manager()
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
+        self.manager.add_project(weather_station_id)
+        weather_client_id = PublicId.from_str("fetchai/weather_client:0.28.0")
+        self.manager.add_project(weather_client_id)
+
+    def teardown(self):
+        """Tear down test case."""
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
 
 
 def test_project_auto_added_removed():

@@ -56,7 +56,6 @@ def fetch_agent(
     :param public_id: str public ID of desirable agent.
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
-    :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
 

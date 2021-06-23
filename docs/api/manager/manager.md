@@ -174,10 +174,6 @@ Initialize manager.
 - `auto_add_remove_project`: bool. add/remove project on the first agent add/last agent remove
 - `password`: the password to encrypt/decrypt the private key.
 
-**Returns**:
-
-None
-
 <a name="aea.manager.manager.MultiAgentManager.data_dir"></a>
 #### data`_`dir
 
@@ -231,7 +227,7 @@ Get all projects.
 #### add`_`error`_`callback
 
 ```python
- | add_error_callback(error_callback: Callable[[str, BaseException], None]) -> None
+ | add_error_callback(error_callback: Callable[[str, BaseException], None]) -> "MultiAgentManager"
 ```
 
 Add error callback to call on error raised.
@@ -306,10 +302,13 @@ registry, and then from remote registry in case of failure).
 **Arguments**:
 
 - `public_id`: the public if of the agent project.
-
 - `local`: whether or not to fetch from local registry.
 - `remote`: whether or not to fetch from remote registry.
 - `restore`: bool flag for restoring already fetched agent.
+
+**Returns**:
+
+self
 
 <a name="aea.manager.manager.MultiAgentManager.remove_project"></a>
 #### remove`_`project
@@ -350,15 +349,13 @@ Alias is stored in memory only!
 - `agent_name`: unique name for the agent
 - `agent_overrides`: overrides for agent config.
 - `component_overrides`: overrides for component section.
-- `config`: agent config (used for agent re-creation).
-
 - `local`: whether or not to fetch from local registry.
 - `remote`: whether or not to fetch from remote registry.
 - `restore`: bool flag for restoring already fetched agent.
 
 **Returns**:
 
-manager
+self
 
 <a name="aea.manager.manager.MultiAgentManager.add_agent_with_config"></a>
 #### add`_`agent`_`with`_`config
@@ -402,7 +399,7 @@ Tuple of agent overridables dict and  and list of component overridables dict.
 #### set`_`agent`_`overrides
 
 ```python
- | set_agent_overrides(agent_name: str, agent_overides: Optional[Dict], components_overrides: Optional[List[Dict]]) -> None
+ | set_agent_overrides(agent_name: str, agent_overides: Optional[Dict], components_overrides: Optional[List[Dict]]) -> "MultiAgentManager"
 ```
 
 Set agent overrides.
@@ -415,7 +412,7 @@ Set agent overrides.
 
 **Returns**:
 
-None
+self
 
 <a name="aea.manager.manager.MultiAgentManager.list_agents_info"></a>
 #### list`_`agents`_`info
@@ -510,7 +507,7 @@ Stop running agent.
 
 **Returns**:
 
-None
+self
 
 <a name="aea.manager.manager.MultiAgentManager.stop_all_agents"></a>
 #### stop`_`all`_`agents
@@ -523,7 +520,7 @@ Stop all agents running.
 
 **Returns**:
 
-None
+self
 
 <a name="aea.manager.manager.MultiAgentManager.stop_agents"></a>
 #### stop`_`agents
@@ -534,9 +531,13 @@ None
 
 Stop specified agents.
 
+**Arguments**:
+
+- `agent_names`: names of agents
+
 **Returns**:
 
-None
+self
 
 <a name="aea.manager.manager.MultiAgentManager.start_agents"></a>
 #### start`_`agents
@@ -547,9 +548,13 @@ None
 
 Stop specified agents.
 
+**Arguments**:
+
+- `agent_names`: names of agents
+
 **Returns**:
 
-None
+self
 
 <a name="aea.manager.manager.MultiAgentManager.get_agent_alias"></a>
 #### get`_`agent`_`alias
@@ -559,6 +564,10 @@ None
 ```
 
 Return details about agent alias definition.
+
+**Arguments**:
+
+- `agent_name`: name of agent
 
 **Returns**:
 

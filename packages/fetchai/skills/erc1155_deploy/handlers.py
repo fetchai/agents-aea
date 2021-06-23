@@ -363,7 +363,7 @@ class LedgerApiHandler(Handler):
             elif strategy.is_tokens_minted:
                 self.context.is_active = False
                 self.context.logger.info("demo finished!")
-            else:
+            else:  # pragma: no cover
                 self.context.logger.error("unexpected transaction receipt!")
         else:
             self.context.logger.error(
@@ -502,7 +502,7 @@ class ContractApiHandler(Handler):
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "received ledger_api error message={} in dialogue={}.".format(
+            "received contract_api error message={} in dialogue={}.".format(
                 contract_api_msg, contract_api_dialogue
             )
         )

@@ -1,6 +1,6 @@
 agent_name: simple_aggregator
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 license: Apache-2.0
 description: AEA that aggregates observations
 aea_version: '>=1.0.0, <2.0.0'
@@ -9,9 +9,9 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
 - fetchai/http_server:0.21.0
-- fetchai/p2p_libp2p:0.23.0
+- fetchai/p2p_libp2p:0.24.0
 - fetchai/prometheus:0.7.0
-- fetchai/soef:0.24.0
+- fetchai/soef:0.25.0
 contracts: []
 protocols:
 - fetchai/aggregation:0.1.0
@@ -24,7 +24,7 @@ protocols:
 skills:
 - fetchai/advanced_data_request:0.5.0
 - fetchai/simple_aggregation:0.1.0
-default_connection: fetchai/p2p_libp2p:0.23.0
+default_connection: fetchai/p2p_libp2p:0.24.0
 default_ledger: fetchai
 required_ledgers:
 - fetchai

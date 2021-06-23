@@ -83,10 +83,12 @@ from aea.crypto.ledger_apis import (
 )
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
+from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -233,11 +235,11 @@ NON_GENESIS_CONFIG = {
     "ledger_id": "fetchai",
 }
 NON_GENESIS_CONFIG_TWO = {
-    "delegate_uri": "127.0.0.1:11002",
+    "delegate_uri": "127.0.0.1:11003",
     "entry_peers": [FETCHAI_P2P_ADDRESS],
-    "local_uri": "127.0.0.1:9002",
+    "local_uri": "127.0.0.1:9003",
     "log_file": "libp2p_node.log",
-    "public_uri": "127.0.0.1:9002",
+    "public_uri": "127.0.0.1:9003",
     "ledger_id": "fetchai",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
@@ -1461,3 +1463,33 @@ def change_directory():
             yield temporary_directory
     finally:
         shutil.rmtree(temporary_directory)
+
+
+@pytest.fixture(params=[None, "fake-password"])
+def password_or_none(request) -> Optional[str]:
+    """
+    Return a password for testing purposes, including None.
+
+    Note that this is a parametrized fixture.
+    """
+    return request.param
+
+
+def method_scope(cls):
+    """
+    Class decorator to make the setup/teardown to have the 'method' scope.
+
+    :param cls: the class. It must be a subclass of
+    :return:
+    """
+    enforce(
+        issubclass(cls, BaseAEATestCase),
+        "cannot use decorator if class is not instance of BaseAEATestCase",
+    )
+    old_setup_class = cls.setup_class
+    old_teardown_class = cls.teardown_class
+    cls.setup_class = classmethod(lambda _cls: None)
+    cls.teardown_class = classmethod(lambda _cls: None)
+    cls.setup = lambda self: old_setup_class()
+    cls.teardown = lambda self: old_teardown_class()
+    return cls

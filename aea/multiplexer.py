@@ -106,7 +106,12 @@ class AsyncMultiplexer(Runnable, WithLogger):
             This information is used for envelopes which don't specify any routing context.
             If connections is None, this parameter is ignored.
         :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
+        :param exception_policy: the exception policy used for connections.
+        :param threaded: if True, run in threaded mode, else async
         :param agent_name: the name of the agent that owns the multiplexer, for logging purposes.
+        :param default_routing: default routing map
+        :param default_connection: default connection
+        :param protocols: protocols used
         """
         self._exception_policy: ExceptionPolicyEnum = exception_policy
         logger = get_logger(__name__, agent_name)
@@ -232,7 +237,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         Set event loop and all event loop related objects.
 
         :param loop: asyncio event loop.
-        :return: None
         """
         self._loop = loop
         self._lock = asyncio.Lock(loop=self._loop)
@@ -243,8 +247,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
         :param fn: a method where it raised .send .connect etc
         :param exc:  exception
-
-        :return: None.
         """
         if self._exception_policy == ExceptionPolicyEnum.just_log:
             self.logger.exception(f"Exception raised in {fn}")
@@ -261,7 +263,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
         :param connection: the connection to add.
         :param is_default: whether the connection added should be the default one.
-        :return: None
         """
         if connection.connection_id in self._id_to_connection:  # pragma: nocover
             self.logger.warning(
@@ -277,7 +278,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         Do some consistency checks on the multiplexer connections.
 
-        :return: None
         :raise AEAEnforceError: if an inconsistency is found.
         """
         if len(self.connections) == 0:
@@ -427,7 +427,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         Set a connection up.
 
         :param connection_id: the id of the connection.
-        :return: None
         """
         connection = self._id_to_connection[connection_id]
         self.logger.debug("Processing connection {}".format(connection.connection_id))
@@ -467,7 +466,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         Tear a connection down.
 
         :param connection_id: the id of the connection.
-        :return: None
         """
         connection = self._id_to_connection[connection_id]
         self.logger.debug("Processing connection {}".format(connection.connection_id))
@@ -553,8 +551,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
-        :raises ValueError: if the connection id provided is not valid.
         """
         envelope_protocol_id = self._get_protocol_id_for_envelope(envelope)
         connection_id = self._get_connection_id_from_envelope(
@@ -717,7 +713,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         running on a different thread than the one used in this function.
 
         :param envelope: the envelope to be sent.
-        :return: None
         """
         await self.out_queue.put(envelope)
 
@@ -729,7 +724,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         running on a different thread than the one used in this function.
 
         :param envelope: the envelope to be sent.
-        :return: None
         """
         if self._threaded:
             self._loop.call_soon_threadsafe(self.out_queue.put_nowait, envelope)
@@ -748,7 +742,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param connections: the connections to use. It will replace the other ones.
         :param default_routing: the default routing.
         :param default_connection: the default connection.
-        :return: None.
         """
         self.default_routing = default_routing or {}
 
@@ -785,11 +778,8 @@ class Multiplexer(AsyncMultiplexer):
         """
         Initialize the connection multiplexer.
 
-        :param connections: a sequence of connections.
-        :param default_connection_index: the index of the connection to use as default.
-                                       | this information is used for envelopes which
-                                       | don't specify any routing context.
-        :param loop: the event loop to run the multiplexer. If None, a new event loop is created.
+        :param args: arguments
+        :param kwargs: keyword arguments
         """
         super().__init__(*args, **kwargs)
         self._sync_lock = threading.Lock()
@@ -805,7 +795,6 @@ class Multiplexer(AsyncMultiplexer):
         Set event loop and all event loop related objects.
 
         :param loop: asyncio event loop.
-        :return: None
         """
         super().set_loop(loop)
         self._thread_runner = ThreadedAsyncRunner(self._loop)
@@ -858,7 +847,6 @@ class Multiplexer(AsyncMultiplexer):
         running on a different thread than the one used in this function.
 
         :param envelope: the envelope to be sent.
-        :return: None
         """
         self._thread_runner.call(super()._put(envelope))  # .result(240)
 
@@ -931,11 +919,7 @@ class InBox:
         return envelope
 
     async def async_wait(self) -> None:
-        """
-        Check for a envelope on the in queue.
-
-        :return: the envelope object.
-        """
+        """Check for a envelope on the in queue."""
         self._multiplexer.logger.debug(
             "Checks for envelope presents in queue async way..."
         )
@@ -967,7 +951,6 @@ class OutBox:
         Put an envelope into the queue.
 
         :param envelope: the envelope.
-        :return: None
         """
         self._multiplexer.logger.debug(f"Put an envelope in the queue: {envelope}.")
         if not isinstance(envelope.message, Message):
@@ -991,7 +974,6 @@ class OutBox:
 
         :param message: the message
         :param context: the envelope context
-        :return: None
         """
         if not isinstance(message, Message):
             raise ValueError("Provided message not of type Message.")

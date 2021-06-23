@@ -70,12 +70,12 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
         for (i, agent) in enumerate(agents):
             # add packages for agent
             self.set_agent_context(agent)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.23.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.24.0")
             self.add_item("connection", "fetchai/http_client:0.22.0")
             self.add_item("connection", "fetchai/http_server:0.21.0")
-            self.add_item("connection", "fetchai/soef:0.24.0")
+            self.add_item("connection", "fetchai/soef:0.25.0")
             self.add_item("connection", "fetchai/prometheus:0.7.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.23.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.24.0")
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
             )
@@ -144,7 +144,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
 
             if i == 0:
                 diff = self.difference_to_fetched_agent(
-                    "fetchai/simple_aggregator:0.2.0", agent
+                    "fetchai/simple_aggregator:0.3.0", agent
                 )
                 assert (
                     diff == []

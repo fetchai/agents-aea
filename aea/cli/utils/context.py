@@ -78,29 +78,51 @@ class Context:
         )
 
     @property
+    def skip_aea_validation(self) -> bool:
+        """
+        Get the 'skip_aea_validation' flag.
+
+        If true, validation of the AEA version for loaded configuration
+        file is skipped.
+
+        :return: the 'skip_aea_validation'
+        """
+        return self.config.get("skip_aea_validation", True)
+
+    @property
     def agent_loader(self) -> ConfigLoader:
         """Get the agent loader."""
-        return ConfigLoader.from_configuration_type(PackageType.AGENT)
+        return ConfigLoader.from_configuration_type(
+            PackageType.AGENT, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def protocol_loader(self) -> ConfigLoader:
         """Get the protocol loader."""
-        return ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+        return ConfigLoader.from_configuration_type(
+            PackageType.PROTOCOL, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def connection_loader(self) -> ConfigLoader:
         """Get the connection loader."""
-        return ConfigLoader.from_configuration_type(PackageType.CONNECTION)
+        return ConfigLoader.from_configuration_type(
+            PackageType.CONNECTION, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def skill_loader(self) -> ConfigLoader:
         """Get the skill loader."""
-        return ConfigLoader.from_configuration_type(PackageType.SKILL)
+        return ConfigLoader.from_configuration_type(
+            PackageType.SKILL, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def contract_loader(self) -> ConfigLoader:
         """Get the contract loader."""
-        return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
+        return ConfigLoader.from_configuration_type(
+            PackageType.CONTRACT, skip_aea_validation=self.skip_aea_validation
+        )
 
     def set_config(self, key: str, value: Any) -> None:
         """
@@ -108,7 +130,6 @@ class Context:
 
         :param key: the key for the configuration.
         :param value: the value associated with the key.
-        :return: None
         """
         self.config[key] = value
         logger.debug("  config[{}] = {}".format(key, value))
@@ -138,7 +159,7 @@ class Context:
     def get_dependencies(self) -> Dependencies:
         """Aggregate the dependencies from every component.
 
-        :return a list of dependency version specification. e.g. ["gym >= 1.0.0"]
+        :return: a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
         dependencies = {}  # type: Dependencies
 

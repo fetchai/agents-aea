@@ -239,10 +239,6 @@ Init storage.
 - `loop`: asyncio event loop to use.
 - `threaded`: bool. start in thread if True.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.storage.generic_storage.Storage.wait_connected"></a>
 #### wait`_`connected
 

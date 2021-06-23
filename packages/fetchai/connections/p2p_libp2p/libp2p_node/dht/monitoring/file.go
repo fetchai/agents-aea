@@ -29,54 +29,71 @@ import (
 
 type FileGauge struct {
 	value float64
+	lock  sync.RWMutex
 }
 
 func (fg *FileGauge) Set(value float64) {
+	fg.lock.Lock()
 	fg.value = value
+	fg.lock.Unlock()
+
 }
 
-func (fg FileGauge) Get() float64 {
+func (fg *FileGauge) Get() float64 {
 	return fg.value
+
 }
 
 func (fg *FileGauge) Inc() {
-	fg.value += 1.
+	fg.Add(1.)
 }
 
 func (fg *FileGauge) Dec() {
-	fg.value -= 1.
+	fg.Sub(1)
 }
 
 func (fg *FileGauge) Add(count float64) {
+	fg.lock.Lock()
 	fg.value += count
+	fg.lock.Unlock()
+
 }
 
 func (fg *FileGauge) Sub(count float64) {
+	fg.lock.Lock()
 	fg.value -= count
+	fg.lock.Unlock()
+
 }
 
 type FileCounter struct {
 	value float64
+	lock  sync.RWMutex
 }
 
 func (fc *FileCounter) Inc() {
-	fc.value += 1.
+	fc.Add(1.)
+
 }
 
 func (fc *FileCounter) Add(count float64) {
+	fc.lock.Lock()
 	fc.value += count
+	fc.lock.Unlock()
 }
 
-func (fc FileCounter) Get() float64 {
+func (fc *FileCounter) Get() float64 {
 	return fc.value
 }
 
 type FileHistogram struct {
 	buckets []float64
 	counts  []uint64
+	lock    sync.RWMutex
 }
 
 func (fh *FileHistogram) Observe(value float64) {
+	fh.lock.Lock()
 	var i int = 0
 	for i < len(fh.buckets) {
 		if value <= fh.buckets[i] {
@@ -85,6 +102,7 @@ func (fh *FileHistogram) Observe(value float64) {
 		i++
 	}
 	fh.counts[i] += 1
+	fh.lock.Unlock()
 }
 
 type FileMonitoring struct {

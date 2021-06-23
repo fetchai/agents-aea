@@ -54,15 +54,7 @@ from aea.configurations.loader import ConfigLoader
 @click.option("--local", is_flag=True, help="For local search.")
 @click.pass_context
 def search(click_context: click.Context, local: bool) -> None:
-    """Search for packages in the registry.
-
-    If called from an agent directory, it will check
-
-    E.g.
-
-        aea search connections
-        aea search --local skills
-    """
+    """Search for packages in the registry."""
     ctx = cast(Context, click_context.obj)
     if local:
         ctx.set_config("is_local", True)
@@ -197,6 +189,7 @@ def search_items(
     :param ctx: Context object.
     :param item_type: item type.
     :param query: query string.
+    :param page: page.
 
     :return: (List of items, int items total count).
     """
@@ -228,7 +221,7 @@ def _output_search_results(
     :param item_type: str item type.
     :param results: list of found items.
     :param count: items total count.
-
+    :param page: page.
     """
     item_type_plural = item_type + "s"
     len_results = len(results)
