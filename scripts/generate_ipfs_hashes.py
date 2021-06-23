@@ -269,8 +269,7 @@ def assert_hash_consistency(
 
     :param fingerprint: the fingerprint dictionary.
     :param path_prefix: the path prefix to prepend.
-    :return: None.
-    :raises AssertionError: if the IPFS hashes don't match.
+    :param client: the client.
     """
     # confirm ipfs only generates same hash:
     for file_name, ipfs_hash in fingerprint.items():
@@ -291,8 +290,8 @@ def _replace_fingerprint_non_invasive(
     content of the .yaml file when loading/dumping. Instead,
     working with the content of the file gives us finer granularity.
 
-    :param text: the content of a configuration file.
     :param fingerprint_dict: the fingerprint dictionary.
+    :param text: the content of a configuration file.
     :return: the updated content of the configuration file.
     """
 
@@ -315,8 +314,7 @@ def compute_fingerprint(  # pylint: disable=unsubscriptable-object
 
     :param package_path: path to the package.
     :param fingerprint_ignore_patterns: filename patterns whose matches will be ignored.
-    :param client: the IPFS Client. It is used to compare our implementation
-                |  with the true implementation of IPFS hashing.
+    :param client: the IPFS Client. It is used to compare our implementation with the true implementation of IPFS hashing.
     :return: the fingerprint
     """
     fingerprint = _compute_fingerprint(
@@ -333,8 +331,7 @@ def update_fingerprint(
     Update the fingerprint of a package.
 
     :param configuration: the configuration object.
-    :param client: the IPFS Client. It is used to compare our implementation
-                |  with the true implementation of IPFS hashing.
+    :param client: the IPFS Client. It is used to compare our implementation with the true implementation of IPFS hashing.
     :return: None
     """
     # we don't process agent configurations
@@ -359,8 +356,7 @@ def check_fingerprint(
     Check the fingerprint of a package, given the loaded configuration file.
 
     :param configuration: the configuration object.
-    :param client: the IPFS Client. It is used to compare our implementation
-                |  with the true implementation of IPFS hashing.
+    :param client: the IPFS Client. It is used to compare our implementation with the true implementation of IPFS hashing.
     :return: True if the fingerprint match, False otherwise.
     """
     # we don't process agent configurations
@@ -408,7 +404,8 @@ def update_hashes(timeout: float = 15.0) -> int:
     """
     Process all AEA packages, update fingerprint, and update hashes.csv files.
 
-    :return exit code. 0 for success, 1 if an exception occurred.
+    :param timeout: timeout to the update.
+    :return: exit code. 0 for success, 1 if an exception occurred.
     """
     return_code_ = 0
     package_hashes = {}  # type: Dict[str, str]
@@ -491,8 +488,8 @@ def check_hashes(timeout: float = 15.0) -> int:
     """
     Check fingerprints and outer hash of all AEA packages.
 
-    :return: exit code. 1 if some fingerprint/hash don't match or if an exception occurs,
-           | 0 in case of success.
+    :param timeout: timeout to the check.
+    :return: exit code. 1 if some fingerprint/hash don't match or if an exception occurs, 0 in case of success.
     """
     return_code_ = 0
     failed = False

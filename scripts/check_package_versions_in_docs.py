@@ -128,6 +128,7 @@ def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     Get the public id from yaml.
 
     :param configuration_file: the path to the config yaml
+    :return: public id
     """
     data = unified_yaml_load(configuration_file)
     author = data.get("author", None)
@@ -186,8 +187,6 @@ def check_add_commands(file: Path) -> None:
     Check that 'aea add' commands of the documentation file contains known package ids.
 
     :param file: path to the file.
-    :return: None
-    :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
     def extract_package_id(match: Match) -> PackageId:
@@ -203,8 +202,6 @@ def check_fetch_commands(file: Path) -> None:
     Check that 'aea fetch' commands of the documentation file contains known package ids.
 
     :param file: path to the file.
-    :return: None
-    :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
     def extract_package_id(match: Match) -> PackageId:
@@ -220,8 +217,6 @@ def check_file(file: Path) -> None:
     Check documentation file.
 
     :param file: path to the file to check.
-    :return: None
-    :raises PackageIdNotFound: if a package id does not pass the checks.
     """
     check_add_commands(file)
     check_fetch_commands(file)

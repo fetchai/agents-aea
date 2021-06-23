@@ -112,6 +112,7 @@ class AcnNodeConfig:
         Create a new AcnNodeConfig objet from file.
 
         :param file_path: path to the file containing the configuration
+        :param enable_checks: whether or not to enable checks
         :return: newly created AcnNodeConfig object, if successful
         """
 
