@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a checker for PyPI version consistency."""
+import operator
 from collections import defaultdict
 from copy import deepcopy
 from functools import reduce
@@ -28,6 +29,11 @@ from packaging.specifiers import Specifier, SpecifierSet
 from packaging.version import InvalidVersion, Version
 
 from aea.configurations.base import Dependencies, Dependency
+
+
+def and_(s1: SpecifierSet, s2: SpecifierSet) -> SpecifierSet:
+    """Do the and between two specifier sets."""
+    return operator.and_(s1, s2)
 
 
 def _handle_compatibility_operator(
