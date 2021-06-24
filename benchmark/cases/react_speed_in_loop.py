@@ -32,8 +32,6 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount: int = 1000) -
 
     :param benchmark: benchmark special parameter to communicate with executor
     :param inbox_amount: number of inbox messages for every agent
-
-    :return: None
     """
     aea_test_wrapper = AEATestWrapper(
         name="dummy agent",

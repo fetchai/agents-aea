@@ -59,7 +59,9 @@ class FetchOracleClientContract(Contract):
         :param contract_address: the contract address.
         :param from_address: the address of the transaction sender.
         :param query_function: the query oracle value function.
+        :param amount: the amount to transfer as part of the transaction.
         :param gas: the gas limit for the transaction.
+        :param tx_fee: the transaction fee.
         :return: the query transaction
         """
         if ledger_api.identifier == EthereumApi.identifier:

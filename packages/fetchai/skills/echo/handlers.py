@@ -41,7 +41,6 @@ class EchoHandler(Handler):
         Handle the message.
 
         :param message: the message.
-        :return: None
         """
         default_message = cast(DefaultMessage, message)
 
@@ -62,11 +61,7 @@ class EchoHandler(Handler):
             self._handle_invalid(default_message, default_dialogue)
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""
         self.context.logger.info("Echo Handler: teardown method called.")
 
     def _handle_unidentified_dialogue(self, message: DefaultMessage) -> None:
@@ -74,7 +69,6 @@ class EchoHandler(Handler):
         Handle unidentified dialogue.
 
         :param message: the message.
-        :return: None
         """
         self.context.logger.info(
             "received invalid default message={}, unidentified dialogue.".format(
@@ -110,7 +104,6 @@ class EchoHandler(Handler):
 
         :param message: the default message.
         :param dialogue: the default dialogue.
-        :return: None
         """
         self.context.logger.info(
             "Echo Handler: message={}, sender={}".format(message, message.sender)
@@ -130,7 +123,6 @@ class EchoHandler(Handler):
 
         :param message: the message.
         :param dialogue: the dialogue.
-        :return: None
         """
         self.context.logger.info(
             "received invalid message={} in dialogue={}.".format(message, dialogue)

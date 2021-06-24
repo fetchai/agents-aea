@@ -59,18 +59,13 @@ class MlTradeHandler(Handler):
     SUPPORTED_PROTOCOL = MlTradeMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Set up the handler.
-
-        :return: None
-        """
+        """Set up the handler."""
 
     def handle(self, message: Message) -> None:
         """
         Handle messages.
 
         :param message: the message
-        :return: None
         """
         ml_trade_msg = cast(MlTradeMessage, message)
 
@@ -92,17 +87,13 @@ class MlTradeHandler(Handler):
             self._handle_invalid(ml_trade_msg, ml_trade_dialogue)
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""
 
     def _handle_unidentified_dialogue(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param fipa_msg: the message
+        :param ml_trade_msg: the message
         """
         self.context.logger.info(
             "received invalid ml_trade message={}, unidentified dialogue.".format(
@@ -127,7 +118,6 @@ class MlTradeHandler(Handler):
 
         :param ml_trade_msg: the ml trade message
         :param ml_trade_dialogue: the dialogue object
-        :return: None
         """
         proposal_terms = ml_trade_msg.terms
         self.context.logger.info(
@@ -168,7 +158,6 @@ class MlTradeHandler(Handler):
         Handle the data.
 
         :param ml_trade_msg: the ml trade message
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         terms = ml_trade_msg.terms
@@ -197,7 +186,6 @@ class MlTradeHandler(Handler):
 
         :param ml_trade_msg: the message
         :param ml_trade_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle ml_trade message of performative={} in dialogue={}.".format(
@@ -219,7 +207,6 @@ class OEFSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -243,17 +230,13 @@ class OEFSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -269,7 +252,6 @@ class OEFSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -283,8 +265,8 @@ class OEFSearchHandler(Handler):
         """
         Handle the search response.
 
-        :param agents: the agents returned by the search
-        :return: None
+        :param oef_search_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
         """
         if len(oef_search_msg.agents) == 0:
             self.context.logger.info(
@@ -324,7 +306,6 @@ class OEFSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
@@ -346,7 +327,6 @@ class LedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -384,17 +364,13 @@ class LedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -406,8 +382,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
-        :param ledger_api_dialogue: the ledger api dialogue
+        :param ledger_api_msg: the ledger api message
         """
         strategy = cast(Strategy, self.context.strategy)
         if ledger_api_msg.balance > 0:
@@ -430,7 +405,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of raw_transaction performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
@@ -459,7 +434,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of transaction_digest performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -481,7 +456,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         ml_trade_dialogue = ledger_api_dialogue.associated_ml_trade_dialogue
@@ -530,7 +505,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -557,7 +532,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -580,7 +555,6 @@ class SigningHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         signing_msg = cast(SigningMessage, message)
 
@@ -602,17 +576,13 @@ class SigningHandler(Handler):
             self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             "received invalid signing message={}, unidentified dialogue.".format(
@@ -628,7 +598,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info("transaction signing was successful.")
         ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
@@ -653,7 +622,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "transaction signing was not successful. Error_code={} in dialogue={}".format(
@@ -682,7 +650,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle signing message of performative={} in dialogue={}.".format(

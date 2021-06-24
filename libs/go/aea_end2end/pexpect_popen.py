@@ -80,8 +80,6 @@ class PexpectWrapper(PopenSpawn):
         :param pattern_list: list of string to expect
         :param timeout: timeout in seconds
         :param strict: if non strict, it allows regular expression
-
-        :return: None
         """
         pattern_list = list(pattern_list)
 
@@ -101,8 +99,6 @@ class PexpectWrapper(PopenSpawn):
         Wait for EOF of the process.
 
         :param timeout: timeout in seconds
-
-        :return: None
         """
         self.expect(EOF, timeout=timeout)
 

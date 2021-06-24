@@ -64,7 +64,7 @@ class AggregationStrategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         self._round = 0
@@ -153,7 +153,7 @@ class AggregationStrategy(Model):
         """
         Update registered peers with list found in search
 
-        :return: None
+        :param found_peers: the peers found
         """
         for _, peer in enumerate(found_peers):
             self._peers.add(peer)

@@ -45,7 +45,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {

@@ -45,11 +45,7 @@ class TacHandler(Handler):
     SUPPORTED_PROTOCOL = TacMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the handler setup.
-
-        :return: None
-        """
+        """Implement the handler setup."""
 
     def handle(self, message: Message) -> None:
         """
@@ -58,7 +54,6 @@ class TacHandler(Handler):
         If the address is already registered, answer with an error message.
 
         :param message: the 'get agent state' TacMessage.
-        :return: None
         """
         tac_msg = cast(TacMessage, message)
 
@@ -86,11 +81,7 @@ class TacHandler(Handler):
             )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, tac_msg: TacMessage) -> None:
         """
@@ -121,7 +112,6 @@ class TacHandler(Handler):
 
         :param tac_msg: the tac message
         :param tac_dialogue: the tac dialogue
-        :return: None
         """
         game = cast(Game, self.context.game)
         if not game.phase == Phase.GAME_REGISTRATION:
@@ -186,7 +176,6 @@ class TacHandler(Handler):
 
         :param tac_msg: the tac message
         :param tac_dialogue: the tac dialogue
-        :return: None
         """
         game = cast(Game, self.context.game)
         if not game.phase == Phase.GAME_REGISTRATION:
@@ -223,7 +212,6 @@ class TacHandler(Handler):
 
         :param tac_msg: the tac message
         :param tac_dialogue: the tac dialogue
-        :return: None
         """
         game = cast(Game, self.context.game)
         if not game.phase == Phase.GAME:
@@ -251,8 +239,9 @@ class TacHandler(Handler):
         - update the game state
         - send a transaction confirmation both to the buyer and the seller.
 
+        :param tac_msg: the message
+        :param tac_dialogue: the fipa dialogue
         :param transaction: the transaction.
-        :return: None
         """
         game = cast(Game, self.context.game)
         self.context.logger.info(
@@ -325,7 +314,6 @@ class TacHandler(Handler):
 
         :param tac_msg: the message
         :param tac_dialogue: the fipa dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle tac message of performative={} in dialogue={}.".format(
@@ -340,18 +328,13 @@ class OefSearchHandler(Handler):
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the handler setup.
-
-        :return: None
-        """
+        """Implement the handler setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -375,17 +358,13 @@ class OefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -403,7 +382,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_success_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search success message={} in dialogue={}.".format(
@@ -452,7 +430,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -478,7 +455,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(

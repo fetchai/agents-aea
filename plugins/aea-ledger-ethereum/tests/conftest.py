@@ -27,7 +27,7 @@ import tempfile
 import time
 from functools import wraps
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Generator
 
 import docker
 import pytest
@@ -78,9 +78,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     Decorate a pytest class or method to skip on certain platform.
 
     :param platform_name: check `platform.system()` for available platforms.
-    :param skip: if True, the test will be skipped;
-      if False, the test will be run ONLY on the chosen platform.
-
+    :param skip: if True, the test will be skipped; if False, the test will be run ONLY on the chosen platform.
     :return: decorated object
     """
 
@@ -98,6 +96,9 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
         logically, the condition is a boolean equivalence
         between the variables "is_different" and "skip"
         Hence, the condition becomes:
+
+        :param pytest_func: the pytest function to wrap
+        :return: the wrapped function
         """
         is_different = platform.system() != platform_name
         if is_different is skip:
@@ -204,12 +205,16 @@ def ganache(
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
-def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10):
+def _launch_image(
+    image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
+) -> Generator:
     """
     Launch image.
 
     :param image: an instance of Docker image.
-    :return: None
+    :param timeout: timeout to launch
+    :param max_attempts: max launch attempts
+    :yield: image
     """
     image.check_skip()
     image.stop_if_already_running()

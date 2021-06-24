@@ -146,10 +146,9 @@ class K8sPodDeployment:
         """
         Initialize a K8sPodDeployment object
 
-        :param deployment_files: list of kubernetes yaml files to deploy
+        :param deployments_files: list of kubernetes yaml files to deploy
         :param docker_deployment: optional DockerDeployment to build and publish
         """
-
         self.deployment_files = deployments_files
         self.docker_deployment = docker_deployment
 

@@ -45,6 +45,7 @@ class TCPConnection(Connection, ABC):
 
         :param host: the socket bind address.
         :param port: the socket bind port.
+        :param kwargs: keyword arguments.
         """
         super().__init__(**kwargs)
         # for the server, the listening address/port
@@ -70,12 +71,7 @@ class TCPConnection(Connection, ABC):
         """
 
     async def connect(self) -> None:
-        """
-        Set up the connection.
-
-        :return: A queue or None.
-        :raises ConnectionError: if a problem occurred during the connection.
-        """
+        """Set up the connection."""
         if self.is_connected:  # pragma: nocover
             self.logger.warning("Connection already set up.")
             return
@@ -89,12 +85,7 @@ class TCPConnection(Connection, ABC):
             self.state = ConnectionStates.disconnected
 
     async def disconnect(self) -> None:
-        """
-        Tear down the connection.
-
-        :return: None.
-        """
-
+        """Tear down the connection."""
         if self.is_disconnected:  # pragma: nocover
             self.logger.warning("Connection already disconnected.")
             return
@@ -132,7 +123,6 @@ class TCPConnection(Connection, ABC):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None.
         """
         self._ensure_valid_envelope_for_external_comms(envelope)
         writer = self.select_writer_from_envelope(envelope)

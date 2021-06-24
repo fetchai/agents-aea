@@ -61,7 +61,7 @@ class GenericStrategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         ledger_id = kwargs.pop("ledger_id", None)
         currency_id = kwargs.pop("currency_id", None)
@@ -179,6 +179,7 @@ class GenericStrategy(Model):
         """
         Check whether it is an acceptable proposal.
 
+        :param proposal: a description
         :return: whether it is acceptable
         """
         result = (
@@ -212,6 +213,7 @@ class GenericStrategy(Model):
         """
         Check whether it is an affordable proposal.
 
+        :param proposal: a description
         :return: whether it is affordable
         """
         if self.is_ledger_tx:
@@ -227,6 +229,7 @@ class GenericStrategy(Model):
         """
         Process counterparties and drop unacceptable ones.
 
+        :param counterparties: a tuple of counterparties
         :return: list of counterparties
         """
         valid_counterparties: List[str] = []
@@ -242,6 +245,7 @@ class GenericStrategy(Model):
         Get the terms from a proposal.
 
         :param proposal: the proposal
+        :param counterparty_address: the counterparty
         :return: terms
         """
         buyer_address = self.context.agent_addresses[proposal.values["ledger_id"]]
@@ -269,12 +273,7 @@ class GenericStrategy(Model):
 
         :param counterparty: the counterparty address
         :param data: the data
-        :return: False
         """
 
     def update_search_query_params(self) -> None:
-        """
-        Update agent location and query for search.
-
-        :return: None
-        """
+        """Update agent location and query for search."""

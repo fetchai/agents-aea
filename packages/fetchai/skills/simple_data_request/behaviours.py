@@ -51,18 +51,10 @@ class HttpRequestBehaviour(TickerBehaviour):
         super().__init__(tick_interval=request_interval, **kwargs)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         if self.lookup_termination_key is not None:
             prerequisite_satisfied = self.context.shared_state.get(
                 self.lookup_termination_key, False
@@ -73,11 +65,7 @@ class HttpRequestBehaviour(TickerBehaviour):
         self._generate_http_request()
 
     def _generate_http_request(self) -> None:
-        """
-        Generate http request to provided url with provided body and method.
-
-        :return: None
-        """
+        """Generate http request to provided url with provided body and method."""
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
         request_http_message, _ = http_dialogues.create(
             counterparty=str(HTTP_CLIENT_PUBLIC_ID),
@@ -91,8 +79,4 @@ class HttpRequestBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=request_http_message)
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

@@ -115,9 +115,10 @@ class DataEncrypt:
         Decryption schema for private keys.
 
         :param password: plaintext password used for encryption
+        :param encrypted_data: data to decrypt
         :param nonce:  bytes
         :param tag:  bytes
-
+        :param salt: bytes
         :return: decrypted data as plaintext
         """
         # Hash password
@@ -354,6 +355,7 @@ class CosmosHelper(Helper):
         Check if the address is valid.
 
         :param address: the address to validate
+        :return: whether address is valid or not
         """
         result = bech32_decode(address)
         return result != (None, None) and result[0] == cls.address_prefix
@@ -562,7 +564,6 @@ class CosmosCrypto(Crypto[SigningKey]):
         """
         Encrypt the private key and return in json.
 
-        :param private_key: the raw private key.
         :param password: the password to decrypt.
         :return: json string containing encrypted private key.
         """
@@ -649,6 +650,11 @@ class _CosmosApi(LedgerApi):
         API specification, which takes a path (strings separated by '/'). The
         convention here is to define the root of the path (txs, blocks, etc.)
         as the callable_name and the rest of the path as args.
+
+        :param callable_name: name of the callable
+        :param args: positional arguments
+        :param kwargs: keyword arguments
+        :return: the transaction dictionary
         """
         response = self._try_get_state(callable_name, *args, **kwargs)
         return response
@@ -684,7 +690,8 @@ class _CosmosApi(LedgerApi):
 
         :param contract_interface: the contract interface.
         :param deployer_address: The address that will deploy the contract.
-        :returns tx: the transaction dictionary.
+        :param kwargs: keyword arguments.
+        :return: the transaction dictionary.
         """
         denom = (
             kwargs.pop("denom") if kwargs.get("denom", None) is not None else self.denom
@@ -764,11 +771,17 @@ class _CosmosApi(LedgerApi):
         """
         Create a CosmWasm bytecode deployment transaction.
 
-        :param sender_address: the sender address of the message initiator.
-        :param filename: the path to wasm bytecode file.
+        :param contract_interface: the contract interface.
+        :param deployer_address: the deployer address.
+        :param denom: the denomination.
+        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :param account_number: the account number.
+        :param sequence: the sequence number.
+        :param tx_fee: the transaction fee.
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
-        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :param source: the source.
+        :param builder: the builder.
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = {
@@ -912,6 +925,7 @@ class _CosmosApi(LedgerApi):
         Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
 
         :param tx_signed: the signed transaction.
+        :param signed_tx_filename: signed transaction file name.
         :return: the transaction digest
         """
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -1006,6 +1020,7 @@ class _CosmosApi(LedgerApi):
         :param gas: the gas used.
         :param memo: memo to include in tx.
         :param chain_id: the chain ID of the transaction.
+        :param kwargs: keyword arguments.
         :return: the transfer transaction
         """
         denom = denom if denom is not None else self.denom
@@ -1276,7 +1291,7 @@ class _CosmosApi(LedgerApi):
         Attempts to update the transaction with a gas estimate
 
         :param transaction: the transaction
-        :return: the updated transaction
+        :raises: NotImplementedError
         """
         raise NotImplementedError(  # pragma: nocover
             "No gas estimation has been implemented."
@@ -1325,7 +1340,6 @@ class CosmosFaucetApi(FaucetApi):
 
         :param address: the address.
         :param url: the url
-        :return: None
         :raises: RuntimeError of explicit faucet failures
         """
         uid = self._try_create_faucet_claim(address, url)
@@ -1418,6 +1432,7 @@ class CosmosFaucetApi(FaucetApi):
         Generates the request URI derived from `cls.faucet_base_url` or provided url.
 
         :param url: the url
+        :return: the faucet request uri
         """
         if cls.testnet_faucet_url is None:  # pragma: nocover
             raise ValueError("Testnet faucet url not set.")

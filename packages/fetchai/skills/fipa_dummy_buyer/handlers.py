@@ -33,11 +33,7 @@ class FipaBuyerHandler(Handler):
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """Handle an evelope."""
@@ -71,8 +67,4 @@ class FipaBuyerHandler(Handler):
             )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""

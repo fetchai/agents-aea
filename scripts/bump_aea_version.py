@@ -192,10 +192,9 @@ class PythonPackageVersionBumper:
         :param root_dir: the root directory from which to look for files.
         :param python_pkg_dir: the path to the Python package to upgrade.
         :param new_version: the new version.
-        :param package_name: the Python package name aliases (defaults to
-           dirname of python_pkg_dir).
         :param files_to_pattern: a list of pairs.
         :param specifier_set_patterns: a list of patterns for specifier sets.
+        :param package_name: the Python package name aliases (defaults to dirname of python_pkg_dir).
         :param ignore_dirs: a list of paths to ignore during the substitution.
         """
         self.root_dir = root_dir
@@ -307,9 +306,7 @@ class PythonPackageVersionBumper:
         :param path: the file path
         :param current_version: the regex for the current version
         :param new_version: the new version
-        :param version_regex_template: the regex template
-          to replace with the current version. Defaults to exactly
-          the current version.
+        :param version_regex_template: the regex template to replace with the current version. Defaults to exactly the current version.
         """
         if version_regex_template is not None:
             regex_str = version_regex_template.format(
