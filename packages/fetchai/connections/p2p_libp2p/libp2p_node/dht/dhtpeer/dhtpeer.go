@@ -642,6 +642,8 @@ func generate_x509_cert() (*tls.Certificate, error) {
 		},
 		BasicConstraintsValid: true,
 	}
+	ca.IsCA = true
+	ca.KeyUsage |= x509.KeyUsageCertSign
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, pubKey, privKey)
 	if err != nil {

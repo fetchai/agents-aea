@@ -29,7 +29,7 @@ fingerprint:
   libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   libp2p_node/dht/dhtnode/utils.go: QmUabTTyRXixEEfksTzSNiHsqF9GcQ9qXpfwVY3VNsXBYK
   libp2p_node/dht/dhtpeer/benchmarks_test.go: QmcXvXrdwJtczmqj29Qx4AAmHzSgHSo8fASh91g8AfhVQf
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmWyLK2kafJZdRvGE8W9zrrDhvUXEwZxbd7fmXcR2kNhUE
+  libp2p_node/dht/dhtpeer/dhtpeer.go: QmXEgbycNaKt3xJtTT4i7FJyJsqZBG2aEaN5aJiw5EWJMR
   libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmSmA5mVMfrnT9vFWe38XqmMqhgdemT5SXhkDqzD28CWiL
   libp2p_node/dht/dhtpeer/options.go: QmYmMiuX9sEKZ3M94AZSnpM8RxuvUCeHGTBjMvifRdXucp
   libp2p_node/dht/dhtpeer/utils.go: QmczhPhCoj9Jcf6romw1HKeyXLUaDaU3g19ecvkczeWaTW

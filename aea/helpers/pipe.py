@@ -34,8 +34,7 @@ from asyncio.streams import StreamWriter
 from shutil import rmtree
 from typing import IO, Optional
 
-from cryptography.hazmat.primitives import serialization
-from cryptography.x509.base import load_der_x509_certificate
+from asn1crypto import x509
 from ecdsa.curves import SECP256k1
 from ecdsa.keys import BadSignatureError, VerifyingKey
 from ecdsa.util import sigdecode_der
@@ -638,11 +637,10 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
     def _get_session_pub_key(writer: StreamWriter) -> bytes:  # pragma: nocover
         """Get session public key from tls stream writer."""
         cert_data = writer.get_extra_info("ssl_object").getpeercert(binary_form=True)
-        cert = load_der_x509_certificate(cert_data)
 
-        session_pub_key = cert.public_key().public_bytes(
-            encoding=serialization.Encoding.X962,
-            format=serialization.PublicFormat.UncompressedPoint,
+        cert = x509.Certificate.load(cert_data)
+        session_pub_key = VerifyingKey.from_der(cert.public_key.dump()).to_string(
+            "uncompressed"
         )
         return session_pub_key
 
@@ -673,10 +671,13 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
 
     async def _open_tls_connection(self) -> TCPSocketProtocol:
         """Open a connection with TLS support."""
-        ssl_ctx = ssl.create_default_context()
-        ssl_ctx.check_hostname = False
-        ssl_ctx.verify_mode = ssl.CERT_NONE
+        # BLOCKING!
+        cadata = ssl.get_server_certificate((self._host, self._port))
+        # BLOCKING!
 
+        ssl_ctx = ssl.create_default_context(cadata=cadata)
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_REQUIRED
         reader, writer = await asyncio.open_connection(
             self._host,
             self._port,
