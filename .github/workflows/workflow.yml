@@ -508,7 +508,6 @@ jobs:
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
-
   libp2p_coverage:
     name: libp2p_coverage
     runs-on: ubuntu-latest
@@ -538,7 +537,6 @@ jobs:
         working-directory: ./libs/go/libp2p_node/
         run: |
           go tool cover -func=coverage.txt
-
   coverage_checks:
     continue-on-error: True
     needs:
