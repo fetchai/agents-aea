@@ -41,9 +41,8 @@ class AdvancedDataRequestModel(Model):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
-
         self.url = kwargs.pop("url", DEFAULT_URL)
         self.method = kwargs.pop("method", DEFAULT_METHOD)
         self.body = kwargs.pop("body", DEFAULT_BODY)
@@ -56,12 +55,7 @@ class AdvancedDataRequestModel(Model):
         self._validate_config()
 
     def _validate_config(self) -> None:  # pragma: nocover
-        """
-        Ensure the configuration settings are all valid
-
-        :return None
-        """
-
+        """Ensure the configuration settings are all valid."""
         msg = []
         if not isinstance(self.url, str):
             msg.append("'url' must be provided as a string")

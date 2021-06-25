@@ -102,8 +102,8 @@ class Configuration:
         :param version_id: the version of the game.
         :param tx_fee: the fee for a transaction.
         :param agent_addr_to_name: a dictionary mapping agent addresses to agent names (as strings).
-        :param nb_goods: the number of goods.
-        :param nb_currencies: the number of currencies.
+        :param currency_id_to_name: the mapping of currency id to name.
+        :param good_id_to_name: the mapping of good id to name.
         """
         self._version_id = version_id
         self._tx_fee = tx_fee
@@ -160,7 +160,6 @@ class Configuration:
         """
         Check the consistency of the game configuration.
 
-        :return: None
         :raises: AEAEnforceError: if some constraint is not satisfied.
         """
         if self.version_id is None:
@@ -249,12 +248,7 @@ class Initialization:
         return self._agent_addr_to_eq_currency_holdings
 
     def _check_consistency(self) -> None:
-        """
-        Check the consistency of the game configuration.
-
-        :return: None
-        :raises: AEAEnforceError: if some constraint is not satisfied.
-        """
+        """Check the consistency of the game configuration."""
         enforce(
             all(
                 c_e >= 0
@@ -531,6 +525,8 @@ class AgentState:
 
         E.g. check that the agent state has enough money if it is a buyer
         or enough holdings if it is a seller.
+
+        :param tx: the transaction
         :return: True if the transaction is legal wrt the current state, False otherwise.
         """
         result = self.agent_address in [tx.sender_address, tx.counterparty_address]
@@ -597,7 +593,6 @@ class AgentState:
         Update the agent state from a transaction.
 
         :param tx: the transaction.
-        :return: None
         """
         enforce(self.is_consistent_transaction(tx), "Inconsistent transaction.")
 
@@ -685,7 +680,6 @@ class Transactions:
         Add a confirmed transaction.
 
         :param transaction: the transaction
-        :return: None
         """
         now = datetime.datetime.now()
         self._confirmed[now] = transaction
@@ -720,7 +714,6 @@ class Registration:
 
         :param agent_addr: the Address of the agent
         :param agent_name: the name of the agent
-        :return: None
         """
         self._agent_addr_to_name[agent_addr] = agent_name
 
@@ -729,7 +722,6 @@ class Registration:
         Register an agent.
 
         :param agent_addr: the Address of the agent
-        :return: None
         """
         self._agent_addr_to_name.pop(agent_addr)
 
@@ -1007,7 +999,6 @@ class Game(Model):
         Settle a valid transaction.
 
         :param tx: the game transaction.
-        :return: None
         :raises: AEAEnforceError if the transaction is not valid.
         """
         if self._current_agent_states is None:

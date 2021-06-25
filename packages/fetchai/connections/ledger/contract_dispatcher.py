@@ -53,7 +53,7 @@ class ContractApiDialogues(BaseContractApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -113,6 +113,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param e: the exception.
         :param api: the Ledger API.
         :param message: the request message.
+        :param dialogue: the dialogue
         :return: an error message response.
         """
         response = cast(
@@ -171,7 +172,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: None
+        :return: the contract api message
         """
 
         def build_response(
@@ -203,7 +204,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: None
+        :return: the contract api message
         """
 
         def build_response(
@@ -235,7 +236,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: None
+        :return: the contract api message
         """
 
         def build_response(
@@ -267,7 +268,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the ledger API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: None
+        :return: the contract api message
         """
 
         def build_response(

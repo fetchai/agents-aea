@@ -63,7 +63,6 @@ class PriceBandit:
         Update the bandit.
 
         :param outcome: the outcome used for updating
-        :return: None
         """
         outcome_int = 1 if outcome else 0  # explicit type conversion
         self.beta_a += outcome_int
@@ -85,7 +84,6 @@ class GoodPriceModel:
 
         :param price: the price to be updated
         :param outcome: the negotiation outcome
-        :return: None
         """
         bandit = self.price_bandits[price]
         bandit.update(outcome)
@@ -115,7 +113,6 @@ class MyRLAgent(RLAgent):
 
         :param nb_goods: number of goods
         :param logger: the logger.
-        :return: None
         """
         self.good_price_models = dict(
             (good_id, GoodPriceModel()) for good_id in range(nb_goods)
@@ -126,7 +123,7 @@ class MyRLAgent(RLAgent):
         """
         Pick an action.
 
-        :return: None
+        :return: any
         """
         # Get the good
         good_id = self._get_random_next_good()
@@ -155,7 +152,6 @@ class MyRLAgent(RLAgent):
         :param: done: whether the episode has ended
         :param: info: auxiliary diagnostic information
         :param: action: action the agent performed on the environment to which the response was the above 4
-        :return: None
         """
         good_id, price = action
 
@@ -178,7 +174,6 @@ class MyRLAgent(RLAgent):
 
         :param proxy_env: the proxy gym environment
         :param nb_steps: number of training steps to be performed.
-        :return: None
         """
         action_counter = 0
 

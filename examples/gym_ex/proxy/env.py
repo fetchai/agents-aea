@@ -89,7 +89,6 @@ class ProxyEnv(gym.Env):
         Instantiate the proxy environment.
 
         :param gym_env: gym environment
-        :return: None
         """
         super().__init__()
         self._queue: Queue = Queue()
@@ -141,16 +140,12 @@ class ProxyEnv(gym.Env):
         """
         Render the environment.
 
-        :return: None
+        :param mode: the run mode
         """
         self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)
 
     def reset(self) -> None:
-        """
-        Reset the environment.
-
-        :return: None
-        """
+        """Reset the environment."""
         if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
         gym_msg, gym_dialogue = self.gym_dialogues.create(
@@ -166,11 +161,7 @@ class ProxyEnv(gym.Env):
         self._decode_status(in_envelope)
 
     def close(self) -> None:
-        """
-        Close the environment.
-
-        :return: None
-        """
+        """Close the environment."""
         last_msg = self.active_dialogue.last_message
         if last_msg is None:
             raise ValueError("Cannot retrieve last message.")
@@ -182,11 +173,7 @@ class ProxyEnv(gym.Env):
         self._disconnect()
 
     def _connect(self):
-        """
-        Connect to this proxy environment. It starts a proxy agent that can interact with the framework.
-
-        :return: None
-        """
+        """Connect to this proxy environment. It starts a proxy agent that can interact with the framework."""
         if self._agent_thread.is_alive():
             raise ValueError("Agent already running.")
         self._agent_thread.start()
@@ -195,11 +182,7 @@ class ProxyEnv(gym.Env):
             time.sleep(0.01)
 
     def _disconnect(self):
-        """
-        Disconnect from this proxy environment. It stops the proxy agent and kills its thread.
-
-        :return: None
-        """
+        """Disconnect from this proxy environment. It stops the proxy agent and kills its thread."""
         self._agent.stop()
         self._agent_thread.join()
         self._agent_thread = None
@@ -210,7 +193,6 @@ class ProxyEnv(gym.Env):
 
         :param action: the action that is the output of an RL algorithm.
         :param step_id: the step id
-        :return: an envelope
         """
         last_msg = self.active_dialogue.last_message
         if last_msg is None:
@@ -230,6 +212,7 @@ class ProxyEnv(gym.Env):
 
         The response is a PERCEPT message containing the usual 'observation', 'reward', 'done', 'info' parameters.
 
+        :param envelope: the envelope
         :param expected_step_id: the expected step id
         :return: a message received as a response to the action performed in apply_action.
         """
@@ -267,6 +250,7 @@ class ProxyEnv(gym.Env):
 
         The response is a STATUS message.
 
+        :param envelope: the envelope
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
@@ -301,7 +285,7 @@ class ProxyEnv(gym.Env):
         """
         Transform the message received from the gym environment into observation, reward, done, info.
 
-        :param: the message received as a response to the action performed in apply_action.
+        :param message: the message received as a response to the action performed in apply_action.
         :return: the standard feedback (observation, reward, done, info) of a gym environment.
         """
         observation = cast(Any, message.observation.any)

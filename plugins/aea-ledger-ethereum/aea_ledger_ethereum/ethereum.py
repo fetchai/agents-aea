@@ -90,6 +90,10 @@ def get_gas_price_strategy(
         Get gas price from Eth Gas Station api.
 
         Visit `https://docs.ethgasstation.info/gas-price` for documentation.
+
+        :param web3: web3 instance
+        :param transaction_params: transaction parameters
+        :return: wei
         """
         response = requests.get(f"{ETH_GASSTATION_URL}?api-key={api_key}")
         if response.status_code != 200:
@@ -336,7 +340,6 @@ class EthereumCrypto(Crypto[Account]):
         """
         Encrypt the private key and return in json.
 
-        :param private_key: the raw private key.
         :param password: the password to decrypt.
         :return: json string containing encrypted private key.
         """
@@ -369,7 +372,7 @@ class EthereumHelper(Helper):
         """
         Check whether a transaction is settled or not.
 
-        :param tx_digest: the digest associated to the transaction.
+        :param tx_receipt: the receipt associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
@@ -527,7 +530,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         Initialize the Ethereum ledger APIs.
 
-        :param address: the endpoint for Web3 APIs.
+        :param kwargs: keyword arguments
         """
         self._api = Web3(
             HTTPProvider(endpoint_uri=kwargs.pop("address", DEFAULT_ADDRESS))
@@ -600,6 +603,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param chain_id: the Chain ID of the Ethereum transaction.
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
+        :param kwargs: keyword arguments
         :return: the transfer transaction
         """
         transaction: Optional[JSONLike] = None
@@ -795,7 +799,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param gas: the gas to be used (in Wei)
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
-        :returns tx: the transaction dictionary.
+        :param kwargs: keyword arguments
+        :return: the transaction dictionary.
         """
         transaction: Optional[JSONLike] = None
         _deployer_address = self.api.toChecksumAddress(deployer_address)
@@ -828,6 +833,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         Check if the address is valid.
 
         :param address: the address to validate
+        :return: whether the address is valid
         """
         return Web3.isAddress(address)
 
@@ -844,7 +850,6 @@ class EthereumFaucetApi(FaucetApi):
 
         :param address: the address.
         :param url: the url
-        :return: None
         """
         self._try_get_wealth(address, url)
 
@@ -859,7 +864,6 @@ class EthereumFaucetApi(FaucetApi):
 
         :param address: the address.
         :param url: the url
-        :return: None
         """
         if url is None:
             raise ValueError(  # pragma: nocover

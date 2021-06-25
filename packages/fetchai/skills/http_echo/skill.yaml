@@ -9,8 +9,8 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmYC2Y95Mg327LyHzQ3WbxZA8g1NfSHasmDTRcvrGCXmiR
   __init__.py: QmeY9uVVa41C8HpUJFvPwEahYRMhY6NXiD3Txw1epS6rQa
-  dialogues.py: QmbAJG7hHENeANPJsbpcwboM6YnLvxXEvugm7PQ9CYFp3f
-  handlers.py: QmQx8Ki4wCuSndppgn7z4CTQG8P8maFgFq7ozU7tn4PmFZ
+  dialogues.py: QmUcZREKJdoo5V1ZREtowYYyAdddH1REhpXgvJ9NQCkGoa
+  handlers.py: QmNzeJt95CurRhn9FqTQw6nSxc51XJ6Y9VwBvURZcsz3vA
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_server:0.21.0

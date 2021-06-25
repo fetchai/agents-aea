@@ -32,18 +32,10 @@ class ServiceSearchBehaviour(TickerBehaviour):
     """This class provides a simple search behaviour."""
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         strategy = cast(Strategy, self.context.strategy)
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -57,8 +49,4 @@ class ServiceSearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=search_request)
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

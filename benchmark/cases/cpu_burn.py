@@ -33,8 +33,6 @@ def cpu_burn(
     :param benchmark: benchmark special parameter to communicate with executor
     :param run_time: time limit to run this function
     :param sleep: time to sleep in loop
-
-    :return: None
     """
     benchmark.start()
     start_time = time.time()

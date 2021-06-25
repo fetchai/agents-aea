@@ -13,7 +13,7 @@ fingerprint:
   database.py: QmWiNScq4WBokCoXQi4vqqN4Q9GNkV4YtDwsV7XyQqgKi4
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
-  strategy.py: QmZtYA9SKuoREFXENqSKY7Ngde6EK6Mt95ng3H6fZ8vpvn
+  strategy.py: QmebfJ69ZfKBSdCXeMY5Pu7AjMqere8BnGTKg3mLimc8jA
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 connections: []

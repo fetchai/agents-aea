@@ -97,6 +97,7 @@ def _golang_module_run(
     :param args: the args
     :param log_file_desc: the file descriptor of the log file.
     :param logger: the logger
+    :return: subprocess
     """
     cmd = [os.path.join(path, name)]
 
@@ -306,6 +307,7 @@ class Libp2pNode:
         :param agent_record: the agent proof-of-representation for peer.
         :param key: secp256k1 curve private key.
         :param module_path: the module path.
+        :param data_dir: the data directory.
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
@@ -316,8 +318,9 @@ class Libp2pNode:
         :param env_file: the env file path for the exchange of environment variables
         :param logger: the logger.
         :param peer_registration_delay: add artificial delay to agent registration in seconds
-        :param connection_timeout: the connection timeout of the node
-        :param max_restarts: amount of node restarts during operation
+        :param records_storage_path: the path where to store the agent records.
+        :param connection_timeout: the connection timeout of the node.
+        :param max_restarts: amount of node restarts during operation.
         """
 
         self.record = agent_record
@@ -469,11 +472,7 @@ class Libp2pNode:
         return self.proc.returncode is None
 
     async def start(self) -> None:
-        """
-        Start the node.
-
-        :return: None
-        """
+        """Start the node."""
         self._is_on_stop = False
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -619,11 +618,7 @@ class Libp2pNode:
         return error_msg if error_msg != "" else panic_msg
 
     async def stop(self) -> None:
-        """
-        Stop the node.
-
-        :return: None
-        """
+        """Stop the node."""
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
             self._is_on_stop = True
@@ -817,11 +812,7 @@ class P2PLibp2pConnection(Connection):
         return self.configuration.build_directory
 
     async def connect(self) -> None:
-        """
-        Set up the connection.
-
-        :return: None
-        """
+        """Set up the connection."""
         if self.is_connected:
             return  # pragma: nocover
         try:
@@ -852,11 +843,7 @@ class P2PLibp2pConnection(Connection):
         await self._start_node()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:
             return  # pragma: nocover
 
@@ -883,6 +870,8 @@ class P2PLibp2pConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         try:
@@ -963,7 +952,7 @@ class P2PLibp2pConnection(Connection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if not self._node_client or not self._send_queue:
             raise ValueError("Node is not connected!")  # pragma: nocover
@@ -987,11 +976,7 @@ class P2PLibp2pConnection(Connection):
             return await self._node_client.read_envelope()
 
     async def _receive_from_node(self) -> None:
-        """
-        Receive data from node.
-
-        :return: None
-        """
+        """Receive data from node."""
         while True:
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover

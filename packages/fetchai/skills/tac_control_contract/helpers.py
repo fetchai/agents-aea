@@ -54,7 +54,7 @@ def generate_good_ids(nb_goods: int) -> List[int]:
     Generate ids for things.
 
     :param nb_goods: the number of things.
-    :param contract: the instance of the contract
+    :return: a list of good ids
     """
     good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods)
     enforce(
@@ -82,7 +82,7 @@ def generate_currency_ids(nb_currencies: int) -> List[int]:
     Generate currency ids.
 
     :param nb_currencies: the number of currencies.
-    :param contract: the instance of the contract.
+    :return: a list of currency ids
     """
     currency_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_currencies)
     enforce(

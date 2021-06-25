@@ -60,10 +60,7 @@ class GenericStrategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
-        :return: None
+        :param kwargs: keyword arguments
         """
         ledger_id = kwargs.pop("ledger_id", None)
         currency_id = kwargs.pop("currency_id", None)

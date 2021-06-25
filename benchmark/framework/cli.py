@@ -212,11 +212,7 @@ class TestCli:
         return [argument, num_executions, plot]
 
     def run(self) -> None:
-        """
-        Run performance test.
-
-        :return: None
-        """
+        """Run performance test."""
         command = self._make_command()
         command()
 
@@ -224,9 +220,7 @@ class TestCli:
         """
         Run test on command.
 
-        :params params: dictionary of options and arguments of cli Command
-
-        :return: None
+        :param params: dictionary of options and arguments of cli Command
         """
         arguments_list = params.pop("args")
 
@@ -260,10 +254,8 @@ class TestCli:
 
         Block by plot window shown!
 
-        :params params: dict of command options passed
-        :params reports: list of performance reports to draw charts for
-
-        :return: None
+        :param params: dict of command options passed
+        :param reports: list of performance reports to draw charts for
         """
         xparam_idx = params.get("plot")
 
@@ -304,8 +296,6 @@ class TestCli:
         :param reports: performance reports to get values from
         :param resources_range: list of resource ids in performance.resource list to draw values for
         :param title: title for chart.
-
-        :return: None
         """
         for r in resources_range:
             res = reports[0].resources[r]
@@ -334,11 +324,7 @@ class TestCli:
         return PerformanceReport(exec_reports)
 
     def print_help(self) -> None:
-        """
-        Print help for command. can be invoked with --help option.
-
-        :return: None
-        """
+        """Print help for command. can be invoked with --help option."""
         command = self._make_command()
         with click.Context(command) as ctx:  # type: ignore
             click.echo(command.get_help(ctx))

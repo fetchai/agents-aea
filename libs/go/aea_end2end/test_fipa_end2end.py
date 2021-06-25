@@ -56,7 +56,7 @@ class BuyerDialogues(FipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: address of the dialogues maintainer
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

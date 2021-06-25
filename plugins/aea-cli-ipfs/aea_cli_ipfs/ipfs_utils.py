@@ -129,8 +129,6 @@ class IPFSTool:
         :param hash_id: str. hash of file to download
         :param target_dir: str. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
-
-        :return: None
         """
         if not os.path.exists(target_dir):  # pragma: nocover
             os.makedirs(target_dir, exist_ok=True)

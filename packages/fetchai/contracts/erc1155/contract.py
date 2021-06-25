@@ -492,9 +492,9 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
-        :param token_id: the token id
-        :param from_supply: the supply of tokens by the sender
-        :param to_supply: the supply of tokens by the receiver
+        :param token_ids: the token ids
+        :param from_supplies: the supply of tokens by the sender
+        :param to_supplies: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
         :param trade_nonce: the nonce of the trade, this is separate from the nonce of the transaction
         :param signature: the signature of the trade
@@ -553,7 +553,7 @@ class ERC1155Contract(Contract):
         :param from_supply: the supply of tokens by the sender
         :param to_supply: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
-        :param ledger_api: the ledger API
+        :param trade_nonce: the nonce used in the trade
         :return: the transaction hash in a dict
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -603,7 +603,7 @@ class ERC1155Contract(Contract):
 
         :param _from: the from address hashed
         :param _to: the to address hashed
-        :param _ids: the token ids
+        :param _id: the token id
         :param _from_value: the from value
         :param _to_value: the to value
         :param _value_eth_wei: the value eth (in wei)

@@ -54,7 +54,6 @@ class ProxyAgent(Agent):
         :param name: the name of the agent
         :param gym_env: gym environment
         :param proxy_env_queue: the queue of the proxy environment
-        :return: None
         """
         identity = Identity(name, ADDRESS)
         configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
@@ -73,32 +72,19 @@ class ProxyAgent(Agent):
         self.proxy_env_queue = proxy_env_queue
 
     def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
+        """Set up the agent."""
 
     def act(self) -> None:
-        """
-        Perform actions.
-
-        :return: None
-        """
+        """Perform actions."""
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle envelope.
 
         :param envelope: the envelope
-        :return: None
         """
         if envelope is not None:
             self.proxy_env_queue.put(envelope)
 
     def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
+        """Tear down the agent."""
