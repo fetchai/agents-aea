@@ -59,7 +59,7 @@ base_deps = [
     "requests>=2.22.0,<3.0.0",
     "python-dotenv>=0.14.0,<0.18.0",
     "ecdsa>=0.15,<0.17.0",
-    "asn1crypto>=1.4.0,<=1.5.0",
+    "asn1crypto>=1.4.0,<1.5.0",
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":

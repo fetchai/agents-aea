@@ -34,7 +34,7 @@ from asyncio.streams import StreamWriter
 from shutil import rmtree
 from typing import IO, Optional
 
-from asn1crypto import x509
+from asn1crypto import x509  # type: ignore
 from ecdsa.curves import SECP256k1
 from ecdsa.keys import BadSignatureError, VerifyingKey
 from ecdsa.util import sigdecode_der
@@ -613,7 +613,7 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
 
     VERIFICATION_SIGNATURE_WAIT_TIMEOUT = 5.0
 
-    def __init__(  # pylint: disable=unused-argument
+    def __init__(
         self,
         in_path: str,
         out_path: str,
@@ -671,18 +671,15 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
 
     async def _open_tls_connection(self) -> TCPSocketProtocol:
         """Open a connection with TLS support."""
-        # BLOCKING!
-        cadata = ssl.get_server_certificate((self._host, self._port))
-        # BLOCKING!
+        cadata = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: ssl.get_server_certificate((self._host, self._port))
+        )
 
         ssl_ctx = ssl.create_default_context(cadata=cadata)
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
         reader, writer = await asyncio.open_connection(
-            self._host,
-            self._port,
-            loop=self._loop,  # pylint: disable=protected-access
-            ssl=ssl_ctx,
+            self._host, self._port, loop=self._loop, ssl=ssl_ctx,
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 
