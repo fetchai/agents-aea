@@ -87,7 +87,6 @@ class HttpHandler(Handler):
         Send a default message to Alice.
 
         :param content: the content of the message.
-        :return: None
         """
         # context
         strategy = cast(Strategy, self.context.strategy)
@@ -103,11 +102,7 @@ class HttpHandler(Handler):
         self.context.outbox.put_message(message=message)
 
     def _register_did(self) -> None:
-        """
-        Register DID on the ledger.
-
-        :return: None
-        """
+        """Register DID on the ledger."""
         strategy = cast(Strategy, self.context.strategy)
         self.context.logger.info(f"Registering Faber_ACA with seed {str(self.seed)}")
         data = {"alias": self.faber_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
@@ -126,8 +121,6 @@ class HttpHandler(Handler):
         :param schema_name: the name of the schema
         :param version: the version of the schema
         :param schema_attrs: the attributes of the schema
-
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         schema_body = {
@@ -149,7 +142,6 @@ class HttpHandler(Handler):
         Register credential definition.
 
         :param schema_id: the id of the schema definition registered on the ledger
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         credential_definition_body = {
@@ -163,18 +155,13 @@ class HttpHandler(Handler):
         )
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         message = cast(HttpMessage, message)
 
@@ -239,11 +226,7 @@ class HttpHandler(Handler):
                         self.is_connected_to_Alice = True
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
 
 class OefSearchHandler(Handler):
@@ -259,7 +242,6 @@ class OefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         self.context.logger.info("Handling SOEF message...")
         oef_search_msg = cast(OefSearchMessage, message)
@@ -284,18 +266,13 @@ class OefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
         :param oef_search_msg: the oef search message to be handled
-        :return: None
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -311,7 +288,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message to be handled
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -324,7 +300,6 @@ class OefSearchHandler(Handler):
         Handle the search response.
 
         :param oef_search_msg: the oef search message to be handled
-        :return: None
         """
         if len(oef_search_msg.agents) != 1:
             self.context.logger.info(
@@ -354,7 +329,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(

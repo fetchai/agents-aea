@@ -38,10 +38,7 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
-        :return: None
+        :param kwargs: keyword arguments
         """
         self._date_one = kwargs.pop("date_one", DEFAULT_DATE_ONE)
         self._date_two = kwargs.pop("date_two", DEFAULT_DATE_TWO)
@@ -52,7 +49,6 @@ class Strategy(GenericStrategy):
         """
         Build the data payload.
 
-        :param fetched_data: the fetched data
         :return: a tuple of the data and the rows
         """
         fetched_data = self.db.get_data_for_specific_dates(

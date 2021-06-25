@@ -196,7 +196,7 @@ class Strategy(Model):
         """
         Check whether the terms are acceptable.
 
-        :params terms: the terms
+        :param terms: the terms
         :return: boolean
         """
         result = (
@@ -216,7 +216,7 @@ class Strategy(Model):
         """
         Check whether the terms are affordable.
 
-        :params terms: the terms
+        :param terms: the terms
         :return: whether it is affordable
         """
         if self.is_ledger_tx:

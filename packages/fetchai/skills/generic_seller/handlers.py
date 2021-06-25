@@ -65,7 +65,6 @@ class GenericFipaHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         fipa_msg = cast(FipaMessage, message)
 
@@ -89,11 +88,7 @@ class GenericFipaHandler(Handler):
             self._handle_invalid(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, fipa_msg: FipaMessage) -> None:
         """
@@ -122,7 +117,6 @@ class GenericFipaHandler(Handler):
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received CFP from sender={}".format(fipa_msg.sender[-5:])
@@ -167,7 +161,7 @@ class GenericFipaHandler(Handler):
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
+        :param fipa_dialogues: the dialogues object
         """
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
@@ -186,7 +180,6 @@ class GenericFipaHandler(Handler):
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received ACCEPT from sender={}".format(fipa_msg.sender[-5:])
@@ -215,7 +208,6 @@ class GenericFipaHandler(Handler):
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received INFORM from sender={}".format(fipa_msg.sender[-5:])
@@ -278,7 +270,6 @@ class GenericFipaHandler(Handler):
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle fipa message of performative={} in dialogue={}.".format(
@@ -300,7 +291,6 @@ class GenericLedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -329,17 +319,13 @@ class GenericLedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -351,7 +337,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -365,7 +351,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
@@ -414,7 +400,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -429,7 +415,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -452,7 +438,6 @@ class GenericOefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -476,17 +461,13 @@ class GenericOefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -504,7 +485,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_success_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search success message={} in dialogue={}.".format(
@@ -556,7 +536,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -585,7 +564,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(

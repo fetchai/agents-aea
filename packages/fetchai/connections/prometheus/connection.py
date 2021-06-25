@@ -54,7 +54,7 @@ class PrometheusDialogues(BasePrometheusDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -91,8 +91,9 @@ class PrometheusChannel:
         Initialize a prometheus channel.
 
         :param address: The address of the connection.
-        :param metrics: The prometheus metrics.
+        :param host: The host at which to expose the metrics.
         :param port: The port at which to expose the metrics.
+        :param logger: The logger.
         """
         self.address = address
         self.metrics = {}  # type: Dict[str, aioprometheus.Collector]
@@ -126,11 +127,7 @@ class PrometheusChannel:
         return self._queue
 
     async def connect(self) -> None:
-        """
-        Start prometheus http server.
-
-        :return: None
-        """
+        """Start prometheus http server."""
         if self._queue:  # pragma: nocover
             return None
         self._loop = asyncio.get_event_loop()
@@ -141,7 +138,7 @@ class PrometheusChannel:
         """
         Process the envelopes to prometheus.
 
-        :return: None
+        :param envelope: envelope
         """
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
@@ -159,7 +156,6 @@ class PrometheusChannel:
         Handle messages to prometheus.
 
         :param envelope: the envelope
-        :return: None
         """
         enforce(
             isinstance(envelope.message, PrometheusMessage),
@@ -256,16 +252,11 @@ class PrometheusChannel:
         """Send a message.
 
         :param envelope: the envelope
-        :return: None
         """
         await self.queue.put(envelope)
 
     async def disconnect(self) -> None:
-        """
-        Disconnect.
-
-        :return: None
-        """
+        """Disconnect."""
         if self._queue is not None:
             await self._queue.put(None)
             self._queue = None
@@ -296,11 +287,7 @@ class PrometheusConnection(Connection):
         )
 
     async def connect(self) -> None:
-        """
-        Connect to prometheus server via prometheus channel.
-
-        :return: None
-        """
+        """Connect to prometheus server via prometheus channel."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -311,11 +298,7 @@ class PrometheusConnection(Connection):
             self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from prometheus server.
-
-        :return: None
-        """
+        """Disconnect from prometheus server."""
         if self.is_disconnected:  # pragma: nocover
             return
 
@@ -328,7 +311,6 @@ class PrometheusConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         await self.channel.send(envelope)
@@ -337,6 +319,8 @@ class PrometheusConnection(Connection):
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: The received envelope or None
         """
         self._ensure_connected()

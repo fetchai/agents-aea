@@ -134,6 +134,10 @@ def create_symlink(link_path: Path, target_path: Path, root_path: Path) -> int:
 
         cd directory_1 && ln -s ../../directory_1/target_path symbolic_link
 
+    :param link_path: the link path
+    :param target_path: the target path
+    :param root_path: the root path
+    :return: exit code
     """
     working_directory = link_path.parent
     target_relative_to_root = target_path.relative_to(root_path)

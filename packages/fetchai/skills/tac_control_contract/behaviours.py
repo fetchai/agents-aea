@@ -44,11 +44,7 @@ class TacBehaviour(BaseTacBehaviour):
     """This class implements the TAC control behaviour."""
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         super().setup()
         parameters = cast(Parameters, self.context.parameters)
         if not parameters.is_contract_deployed:
@@ -57,11 +53,7 @@ class TacBehaviour(BaseTacBehaviour):
             self._request_contract_deploy_transaction()
 
     def _request_contract_deploy_transaction(self) -> None:
-        """
-        Request contract deploy transaction
-
-        :return: None
-        """
+        """Request contract deploy transaction"""
         parameters = cast(Parameters, self.context.parameters)
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
@@ -85,11 +77,7 @@ class TacBehaviour(BaseTacBehaviour):
         self.context.logger.info("requesting contract deployment transaction...")
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
@@ -152,7 +140,7 @@ class TacBehaviour(BaseTacBehaviour):
         """
         Request token create transaction
 
-        :return: None
+        :param game: the game
         """
         parameters = cast(Parameters, self.context.parameters)
         contract_api_dialogues = cast(
@@ -188,7 +176,7 @@ class TacBehaviour(BaseTacBehaviour):
         """
         Request token mint transaction
 
-        :return: None
+        :param game: the game
         """
         if not game.is_allowed_to_mint:
             return

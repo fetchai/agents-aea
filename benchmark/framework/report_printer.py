@@ -34,7 +34,7 @@ class ContextPrinter:
         Make performance report printer instance.
 
         :param func_details: details about function being tested
-        :param exec_params: executor parameters: timeout, interval
+        :param executor_params: executor parameters: timeout, interval
         """
         self.func_details = func_details
         self.executor_params = executor_params
@@ -188,8 +188,6 @@ class ReportPrinter(ContextPrinter):
         Prints arguments, number of runs and number of terminates.
 
         :param report: performance report to print header for
-
-        :return: None
         """
         text = inspect.cleandoc(
             f"""
@@ -207,8 +205,6 @@ class ReportPrinter(ContextPrinter):
         Print resources details for performance report.
 
         :param report: performance report to print header for
-
-        :return: None
         """
         for resource in report.resources:
             print(
@@ -220,8 +216,6 @@ class ReportPrinter(ContextPrinter):
         Print full performance report for case.
 
         :param report: performance report to print header for
-
-        :return: None
         """
         self._print_header(report)
         self._print_resources(report)

@@ -86,10 +86,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
-        :return: None
+        :param kwargs: keyword arguments
         """
         self._register_as = Strategy.RegisterAs(kwargs.pop("register_as", "both"))
         self._search_for = Strategy.SearchFor(kwargs.pop("search_for", "both"))
@@ -357,7 +354,7 @@ class Strategy(Model):
         Generate proposal (in the form of a description) which matches the query.
 
         :param query: the query for which to build the proposal
-        :is_seller: whether the agent making the proposal is a seller or not
+        :param is_seller: whether the agent making the proposal is a seller or not
 
         :return: a description
         """
@@ -508,6 +505,7 @@ class Strategy(Model):
         :param proposal: the proposal
         :param sender: the sender of the proposal
         :param counterparty: the receiver of the proposal
+        :param role: the role
         :return: the terms
         """
         is_seller = role == FipaDialogue.Role.SELLER
@@ -549,8 +547,7 @@ class Strategy(Model):
 
         :param terms: the terms
         :param signature: the signature
-        :param is_from_terms_sender: whether from == terms.sender_address (i.e. agent submitting tx is the
-        one which terms are considered)
+        :param is_from_terms_sender: whether from == terms.sender_address (i.e. agent submitting tx is the one which terms are considered)
         :return: the kwargs
         """
         all_tokens = {**terms.amount_by_currency_id, **terms.quantities_by_good_id}

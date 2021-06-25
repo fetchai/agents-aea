@@ -72,11 +72,7 @@ class GenericSearchBehaviour(TickerBehaviour):
             strategy.is_searching = True
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         strategy = cast(GenericStrategy, self.context.strategy)
         if not strategy.is_searching:
             return
@@ -102,11 +98,7 @@ class GenericSearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
 
 
 class GenericTransactionBehaviour(TickerBehaviour):
@@ -130,11 +122,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         """Setup behaviour."""
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         if self.processing is not None:
             if self.processing_time <= self.max_processing:
                 # already processing

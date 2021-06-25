@@ -57,7 +57,6 @@ class MlTradeHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ml_trade_msg = cast(MlTradeMessage, message)
 
@@ -79,17 +78,13 @@ class MlTradeHandler(Handler):
             self._handle_invalid(ml_trade_msg, ml_trade_dialogue)
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""
 
     def _handle_unidentified_dialogue(self, ml_trade_msg: MlTradeMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param fipa_msg: the message
+        :param ml_trade_msg: the message
         """
         self.context.logger.info(
             "received invalid ml_trade message={}, unidentified dialogue.".format(
@@ -114,7 +109,6 @@ class MlTradeHandler(Handler):
 
         :param ml_trade_msg: the ml trade message
         :param ml_trade_dialogue: the dialogue object
-        :return: None
         """
         query = ml_trade_msg.query
         self.context.logger.info(
@@ -145,7 +139,6 @@ class MlTradeHandler(Handler):
 
         :param ml_trade_msg: the ml trade message
         :param ml_trade_dialogue: the dialogue object
-        :return: None
         """
         terms = ml_trade_msg.terms
         self.context.logger.info(
@@ -178,7 +171,6 @@ class MlTradeHandler(Handler):
 
         :param ml_trade_msg: the message
         :param ml_trade_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle ml_trade message of performative={} in dialogue={}.".format(
@@ -200,7 +192,6 @@ class LedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -224,17 +215,13 @@ class LedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -246,7 +233,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -260,7 +247,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -275,7 +262,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -298,7 +285,6 @@ class OefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -322,17 +308,13 @@ class OefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -350,7 +332,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_success_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search success message={} in dialogue={}.".format(
@@ -402,7 +383,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -431,7 +411,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(

@@ -10,11 +10,11 @@ fingerprint:
   README.md: QmV56JmGf2DsJw3m2zu8fjL7Jvgdtsg7pXsgN7J35suZk4
   __init__.py: QmUi5gwEb273vvSE7JwPZoPdvnjSsjtDeCGoMbFv9ANPzC
   behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
-  db_communication.py: QmVFT9vuN5FmU7spAjPrJK2sGuya2F2xtpxxn6zqu922pb
+  db_communication.py: Qmchv7pxizFmf11KFEEPZhJwZSWtfDdMuzpcNM1ZY8HiTc
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
-  dummy_weather_station_data.py: QmaqaxY9EdaVsDyAtk8QgKQMv3gXhaQLsss2PX5a1ig6AP
+  dummy_weather_station_data.py: QmUnGWqNzRKpqtHQTBVGHvGBTdBRp9rCmdTBrjXE4ZhfAK
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
-  strategy.py: QmRw7YwwJTxt6iNW37pRBGi827Wx3Dw7B3ax4cagcjmT7o
+  strategy.py: QmQgjfo7AdTk3r1mp35UkC2ZGhqwYQZpDGYbbwsRjPgWMw
 fingerprint_ignore_patterns:
 - '*.db'
 connections: []

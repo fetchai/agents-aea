@@ -147,12 +147,7 @@ class Configuration:
         return self._controller_addr
 
     def _check_consistency(self) -> None:
-        """
-        Check the consistency of the game configuration.
-
-        :return: None
-        :raises: AEAEnforceError: if some constraint is not satisfied.
-        """
+        """Check the consistency of the game configuration."""
         enforce(self.version_id is not None, "A version id must be set.")
         enforce(
             len(self.fee_by_currency_id) == 1 and self.tx_fee >= 0,
@@ -286,8 +281,6 @@ class Game(Model):
 
         :param tac_message: the tac message with the game instance data
         :param controller_addr: the address of the controller
-
-        :return: None
         """
         enforce(
             tac_message.performative == TacMessage.Performative.GAME_DATA,
@@ -314,8 +307,6 @@ class Game(Model):
         Overwrite the expected controller address.
 
         :param controller_addr: the address of the controller
-
-        :return: None
         """
         self.context.logger.warning(
             "TAKE CARE! Circumventing controller identity check! For added security provide the expected controller key as an argument to the Game instance and check against it."

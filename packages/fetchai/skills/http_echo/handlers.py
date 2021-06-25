@@ -40,18 +40,13 @@ class HttpHandler(Handler):
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         http_msg = cast(HttpMessage, message)
 
@@ -95,7 +90,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         self.context.logger.info(
             "received http request with method={}, url={} and body={!r}".format(
@@ -113,7 +107,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
@@ -133,7 +126,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
@@ -155,7 +147,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle http message of performative={} in dialogue={}.".format(
@@ -164,8 +155,4 @@ class HttpHandler(Handler):
         )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""

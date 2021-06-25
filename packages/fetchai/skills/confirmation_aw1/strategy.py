@@ -54,7 +54,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         self._token_denomination = kwargs.pop(
             "token_denomination", DEFAULT_TOKEN_DENOMINATION
@@ -277,7 +277,8 @@ class Strategy(Model):
         """
         Get the kwargs for the contract state call.
 
-        :param counterparty:
+        :param info: info dict
+        :return: kwargs json
         """
         counterparty = info["ethereum_address"]
         return {"address": counterparty}
@@ -286,6 +287,7 @@ class Strategy(Model):
         """
         Check if the agent has staked.
 
+        :param state: json state
         :return: bool, indicating outcome
         """
         if self._override_staking_check:

@@ -38,11 +38,7 @@ class FetchBeaconBehaviour(TickerBehaviour):
         super().__init__(**kwargs)
 
     def _get_random_beacon(self) -> None:
-        """
-        Request the latest random beacon value by sending a message to the ledger API
-
-        :return: None
-        """
+        """Request the latest random beacon value by sending a message to the ledger API."""
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
         )
@@ -57,27 +53,15 @@ class FetchBeaconBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=ledger_api_msg)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         self.context.logger.info("setting up FetchBeaconBehaviour")
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
 
         self.context.logger.info("Fetching random beacon value...")
         self._get_random_beacon()
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
         self.context.logger.info("tearing down FetchBeaconBehaviour")

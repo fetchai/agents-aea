@@ -117,7 +117,6 @@ class BanditEnv(gym.Env):
 
         :param mode: the rendering mode
         :param close: a bool, true if ending
-        :return: None
         """
 
 

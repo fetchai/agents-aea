@@ -34,28 +34,16 @@ class TacSearchBehaviour(TickerBehaviour):
     """This class scaffolds a behaviour."""
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         game = cast(Game, self.context.game)
         if game.phase.value == Phase.PRE_GAME.value:
             self._search_for_tac()
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
 
     def _search_for_tac(self) -> None:
         """
@@ -63,8 +51,6 @@ class TacSearchBehaviour(TickerBehaviour):
 
         We assume that the controller is registered as a service with the 'tac' data model
         and with an attribute version = expected_version_id.
-
-        :return: None
         """
         game = cast(Game, self.context.game)
         query = game.get_game_query()
@@ -86,35 +72,19 @@ class TransactionProcessBehaviour(TickerBehaviour):
     """This class implements the processing of the transactions class."""
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def act(self) -> None:
-        """
-        Implement the task execution.
-
-        :return: None
-        """
+        """Implement the task execution."""
         game = cast(Game, self.context.game)
         if game.phase.value == Phase.GAME.value:
             self._process_transactions()
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
 
     def _process_transactions(self) -> None:
-        """
-        Process transactions.
-
-        :return: None
-        """
+        """Process transactions."""
         game = cast(Game, self.context.game)
         tac_dialogue = game.tac_dialogue
         transactions = cast(

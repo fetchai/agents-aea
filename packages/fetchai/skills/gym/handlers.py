@@ -99,8 +99,8 @@ class GymHandler(Handler):
         """
         Handle messages.
 
-        :param message: the message
-        :return: None
+        :param gym_msg: the gym message
+        :param gym_dialogue: the gym dialogue
         """
         if self.task.proxy_env.active_gym_dialogue == gym_dialogue:
             self.task.proxy_env_queue.put(gym_msg)
@@ -111,8 +111,8 @@ class GymHandler(Handler):
         """
         Handle messages.
 
-        :param message: the message
-        :return: None
+        :param gym_msg: the gym message
+        :param gym_dialogue: the gym dialogue
         """
         if (
             self.task.proxy_env.active_gym_dialogue == gym_dialogue
@@ -128,7 +128,6 @@ class GymHandler(Handler):
 
         :param gym_msg: the gym message
         :param gym_dialogue: the gym dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle gym message of performative={} in dialogue={}.".format(
@@ -137,11 +136,7 @@ class GymHandler(Handler):
         )
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""
         self.context.logger.info("Gym handler: teardown method called.")
         if self._task_id is None:
             return  # pragma: nocover

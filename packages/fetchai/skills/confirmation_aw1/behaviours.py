@@ -61,11 +61,7 @@ class TransactionBehaviour(TickerBehaviour):
         """Setup behaviour."""
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         if self.processing is not None:
             if self.processing_time <= self.max_processing:
                 # already processing

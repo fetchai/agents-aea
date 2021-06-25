@@ -373,11 +373,7 @@ class P2PLibp2pClientConnection(Connection):
             await self._node_client.send_envelope(envelope)
 
     async def connect(self) -> None:
-        """
-        Set up the connection.
-
-        :return: None
-        """
+        """Set up the connection."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -454,11 +450,7 @@ class P2PLibp2pClientConnection(Connection):
         await self._node_client.register()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:  # pragma: nocover
             return
         self.logger.debug("disconnecting libp2p client connection...")
@@ -489,6 +481,8 @@ class P2PLibp2pClientConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         try:
@@ -511,7 +505,7 @@ class P2PLibp2pClientConnection(Connection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if not self._node_client or not self._send_queue:
             raise ValueError("Node is not connected!")  # pragma: nocover
@@ -549,11 +543,7 @@ class P2PLibp2pClientConnection(Connection):
             return None
 
     async def _process_messages(self) -> None:
-        """
-        Receive data from node.
-
-        :return: None
-        """
+        """Receive data from node."""
         if not self._node_client:  # pragma: nocover
             raise ValueError("Connection not connected to node!")
 

@@ -109,7 +109,6 @@ def run_aea(*args: Any, **kwargs: Any) -> None:
 
     :param args: the AEA command
     :param kwargs: keyword arguments to subprocess function
-    :return: None
     """
     run_cli(sys.executable, "-m", "aea.cli", *args, **kwargs)
 
@@ -125,6 +124,7 @@ class AEAProject:
         Initialize an AEA project.
 
         :param name: the name of the AEA project.
+        :param parent_dir: the parent directory.
         """
         self.name = name
         self.parent_dir = parent_dir
@@ -152,7 +152,6 @@ def _save_specification_in_temporary_file(
 
     :param name: the name of the package.
     :param specification_content: the specification content.
-    :return: None
     """
     # here, the cwd is the temporary AEA project
     # hence, we are writing in a temporary directory
@@ -166,7 +165,6 @@ def _generate_protocol(package_path: Path) -> None:
     Generate the protocol.
 
     :param package_path: package to the path.
-    :return: None
     """
     cmd = ["generate", "protocol", os.path.join("..", package_path.name) + ".yaml"]
     log(f"Generate the protocol. Command: {pprint.pformat(cmd)}")
@@ -196,7 +194,6 @@ def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]) ->
 
     :param name: the protocol name.
     :param replacement_pairs: a list of pairs of strings (to_replace, replacement).
-    :return: None
     """
     log(f"Replace prefix of import statements in directory '{name}'")
     package_dir = Path(PROTOCOLS_PLURALS, name)
@@ -217,9 +214,7 @@ def _fix_generated_protocol(package_path: Path) -> None:
     - restore the original custom types, if any.
     - copy the README, if any.
 
-    :param package_path: path to the protocol package.
-                         Used also to recover the protocol name.
-    :return: None
+    :param package_path: path to the protocol package. Used also to recover the protocol name.
     """
     log(f"Restore original custom types in {package_path}")
     custom_types_module = package_path / CUSTOM_TYPE_MODULE_NAME
@@ -242,9 +237,7 @@ def _update_original_protocol(package_path: Path) -> None:
     """
     Update the original protocol.
 
-    :param package_path: the path to the original package.
-                         Used to recover the protocol name.
-    :return: None
+    :param package_path: the path to the original package. Used to recover the protocol name.
     """
     log(f"Copy the new protocol into the original directory {package_path}")
     shutil.rmtree(package_path)
@@ -291,7 +284,6 @@ def _replace_generator_docstring(package_path: Path, replacement: str) -> None:
 
     :param package_path: path to the
     :param replacement: the replacement to use.
-    :return: None
     """
     protocol_name = package_path.name
     init_module = Path(PROTOCOLS_PLURALS) / protocol_name / "__init__.py"
@@ -322,9 +314,7 @@ def _process_packages_protocol(
     It assumes the working directory is an AEA project.
 
     :param package_path: path to the package.
-    :param preserve_generator_docstring: if True, the protocol generator docstring
-      is preserved (see above).
-    :return: None
+    :param preserve_generator_docstring: if True, the protocol generator docstring is preserved (see above).
     """
     if preserve_generator_docstring:
         # save the old protocol generator docstring
@@ -365,7 +355,6 @@ def _process_test_protocol(specification: Path, package_path: Path) -> None:
 
     :param specification: path to specification.
     :param package_path: the output directory.
-    :return: None
     """
     specification_content = specification.read_text()
     _save_specification_in_temporary_file(package_path.name, specification_content)
@@ -417,7 +406,6 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     - if different, bump protocol specification version, else don't.
 
     :param package_path: path to the protocol package.
-    :return: None
     """
     # extract protocol specification file from README
     current_specification_content = get_protocol_specification_from_readme(package_path)
@@ -468,7 +456,6 @@ def main(no_bump: bool = False) -> None:
     Run the script.
 
     :param no_bump: if True, the (default: False)
-    :return: None
     """
     _check_preliminaries()
 

@@ -74,6 +74,9 @@ def get_version(*args: int) -> VERSION:
     Get the version from a list of arguments.
 
     Set to '0' if there are not enough arguments.
+
+    :param args: positional arguments
+    :return: the version
     """
     major = nth(args, 0, 0)
     minor = nth(args, 1, 0)
@@ -100,7 +103,6 @@ def print_ok_message(
     :param binary_name: the binary binary_name.
     :param actual_version: the actual version.
     :param version_lower_bound: the version lower bound.
-    :return: None
     """
     print(
         f"check '{binary_name}'>={version_to_string(version_lower_bound)}, found {version_to_string(actual_version)}"
@@ -124,8 +126,6 @@ def check_binary(
     :param args: the arguments to provide to the binary to retrieve the version.
     :param version_regex: the regex used to extract the version from the output.
     :param version_lower_bound: the minimum required version.
-
-    :return: None
     """
     path = shutil.which(binary_name)
     if not path:
@@ -193,6 +193,8 @@ def _golang_module_build(
     """
     Builds go module located at `path`, downloads necessary dependencies
 
+    :param path: the path to the node code
+    :param timeout: the build timeout
     :return: str with logs or error description if happens
     """
     proc = Popen(  # nosec
