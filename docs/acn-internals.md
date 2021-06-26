@@ -749,7 +749,7 @@ therefore can be used by the Multiplexer as any other connection.
 
 - The `send` method and the `receive` methods behave similarly to
   the `send` and `receive` methods of the
-  <a href="#the-fetchaip2p_libp2p-connection" target="_blank">`p2p_libp2p connection</a>, 
+  <a href="#the-fetchaip2p_libp2p-connection" target="_blank">`p2p_libp2p connection`</a>, 
   in terms of message exchange;
   however, the communication is done via TCP rather than pipes.
 
