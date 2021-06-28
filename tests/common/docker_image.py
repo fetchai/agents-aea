@@ -373,7 +373,7 @@ class SOEFDockerImage(DockerImage):
             "# (Author Toby Simpson)",
             "#",
             "# Port we're listening on",
-            "port 9002",
+            f"port {self._port}",
             "#",
             "# Our declared location",
             "latitude 52.205278",
