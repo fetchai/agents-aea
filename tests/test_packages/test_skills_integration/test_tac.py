@@ -44,6 +44,7 @@ from tests.conftest import (
     NON_GENESIS_CONFIG,
     NON_GENESIS_CONFIG_TWO,
     UseGanache,
+    UseSOEF,
 )
 
 
@@ -327,7 +328,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
         ), "Agents weren't successfully terminated."
 
 
-class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
+class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
     """Test that tac skills work."""
 
     capture_log = True
@@ -411,8 +412,11 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             ]
         )
         self.set_config(setting_path, settings, type_="list")
+
+        # set SOEF configuration
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, EthereumCrypto.identifier)
+
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
 
@@ -434,6 +438,14 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
+
+        # change SOEF configuration to local
+        setting_path = "vendor.fetchai.connections.soef.config.is_https"
+        self.set_config(setting_path, False)
+        setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+        self.set_config(setting_path, "127.0.0.1")
+        setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+        self.set_config(setting_path, 12002)
 
         # prepare agents for test
         for agent_name, config, private_key in (
@@ -544,6 +556,15 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             ), "Difference between created and fetched project for files={}".format(
                 diff
             )
+
+            # change SOEF configuration to local
+            setting_path = "vendor.fetchai.connections.soef.config.is_https"
+            self.set_config(setting_path, False)
+            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+            self.set_config(setting_path, "127.0.0.1")
+            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+            self.set_config(setting_path, 12002)
+
             self.set_config(
                 "vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key",
                 tac_service,
