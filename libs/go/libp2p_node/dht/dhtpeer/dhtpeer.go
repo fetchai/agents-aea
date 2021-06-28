@@ -27,7 +27,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-    "crypto/ecdsa"
+	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/tls"
@@ -619,6 +619,10 @@ func (dhtPeer *DHTPeer) Close() []error {
 	return status
 }
 
+// Generate selfsigned c509 certificate with temprorary key to be used with TLS server
+// We can not use peer private key cause it does not supported by golang TLS implementation
+// So we generate a new one and send session public key signature made with peer private key
+// snd client can validate it with peer public key/address
 func generate_x509_cert() (*tls.Certificate, error) {
 	privBtcKey, err := btcec.NewPrivateKey(elliptic.P256())
 	if err != nil {
@@ -688,20 +692,27 @@ func (dhtPeer *DHTPeer) launchDelegateService() {
 	config := &tls.Config{Certificates: []tls.Certificate{*dhtPeer.cert}}
 	uri := dhtPeer.host + ":" + strconv.FormatInt(int64(dhtPeer.delegatePort), 10)
 	listener, err := tls.Listen("tcp", uri, config)
-	
+
 	if err != nil {
 		lerror(err).Msgf("while setting up listening tcp socket %s", uri)
 		check(err)
 	}
 
-	cert_pub_key := dhtPeer.cert.PrivateKey.(*ecdsa.PrivateKey).Public().(*ecdsa.PublicKey)
-	cert_pub_key_bytes := elliptic.Marshal(cert_pub_key.Curve, cert_pub_key.X, cert_pub_key.Y)
-	signature, err := dhtPeer.key.Sign(cert_pub_key_bytes)
+	signature, err := makeSessionKeySignature(dhtPeer.cert, dhtPeer.key)
+
 	if err != nil {
 		lerror(err).Msgf("while generating tls signature")
 		check(err)
 	}
 	dhtPeer.tcpListener = TLSListener{Listener: listener, Signature: signature}
+}
+
+// Make signature for session public key using peer private key
+func makeSessionKeySignature(cert *tls.Certificate, privateKey cryptop2p.PrivKey) ([]byte, error) {
+	cert_pub_key := cert.PrivateKey.(*ecdsa.PrivateKey).Public().(*ecdsa.PublicKey)
+	cert_pub_key_bytes := elliptic.Marshal(cert_pub_key.Curve, cert_pub_key.X, cert_pub_key.Y)
+	signature, err := privateKey.Sign(cert_pub_key_bytes)
+	return signature, err
 }
 
 // handleDelegateService listens for new connections to delegate service and handles them

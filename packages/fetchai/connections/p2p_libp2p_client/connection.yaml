@@ -10,7 +10,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmXqYJSYyymih236DJY7q28vaspHxvxkrFqYiYaAHXfDWo
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmaQYaS1RPrnUZBB6z5oFYhaxQQbJkTCkThjtGGUrc865q
+  connection.py: Qme7kbmMAkgE1QeoqzBrzkgqW64XFUKmwcJMpa2AWfX5ef
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -41,5 +41,7 @@ cert_requests:
   save_path: .certs/acn_fetch_ai_11001.txt
 excluded_protocols: []
 restricted_to_protocols: []
-dependencies: {}
+dependencies:
+  asn1crypto:
+    version: <1.5.0,>=1.4.0
 is_abstract: false

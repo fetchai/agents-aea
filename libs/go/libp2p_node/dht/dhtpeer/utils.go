@@ -21,23 +21,22 @@
 package dhtpeer
 
 import (
-    "net"
-    utils "libp2p_node/utils"
+	utils "libp2p_node/utils"
+	"net"
 )
 
 type TLSListener struct {
-	Listener net.Listener
+	Listener  net.Listener
 	Signature []byte
-	
 }
 
 func (listener TLSListener) Accept() (net.Conn, error) {
 	con, err := listener.Listener.Accept()
-	
-	if (err != nil){
+
+	if err != nil {
 		return con, err
 	}
-	
+
 	err = utils.WriteBytesConn(con, listener.Signature)
 	return con, err
 }
@@ -49,6 +48,3 @@ func (listener TLSListener) Close() error {
 func (listener TLSListener) Addr() net.Addr {
 	return listener.Listener.Addr()
 }
-
-
-	

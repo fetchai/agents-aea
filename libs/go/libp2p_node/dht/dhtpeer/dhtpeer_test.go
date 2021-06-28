@@ -22,6 +22,8 @@ package dhtpeer
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/tls"
 	"fmt"
 	"log"
@@ -1819,12 +1821,27 @@ func SetupDelegateClient(
 		InsecureSkipVerify: true,
 	}
 	client.Conn, err = tls.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10), conf)
+
 	if err != nil {
 		return nil, nil, err
 	}
-	// Read signature, skip it here
-	_, _ = utils.ReadBytesConn(client.Conn)
 
+	cert_pub_key := client.Conn.(*tls.Conn).ConnectionState().PeerCertificates[0].PublicKey.(*ecdsa.PublicKey)
+	cert_pub_key_bytes := elliptic.Marshal(cert_pub_key.Curve, cert_pub_key.X, cert_pub_key.Y)
+	// Read signature, skip it here
+	tlsSignature, _ := utils.ReadBytesConn(client.Conn)
+	verifyKey, err := utils.PubKeyFromFetchAIPublicKey(peerPubKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	ok, err := verifyKey.Verify(cert_pub_key_bytes, tlsSignature)
+
+	if err != nil {
+		return nil, nil, err
+	}
+	if !ok {
+		return nil, nil, errors.New("error on signature validation for tls start")
+	}
 	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = address
 	record.PublicKey = pubKey
