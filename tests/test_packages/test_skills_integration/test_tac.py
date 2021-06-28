@@ -445,7 +445,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
         setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
         self.set_config(setting_path, "127.0.0.1")
         setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-        self.set_config(setting_path, 9002)
+        self.set_config(setting_path, 12002)
 
         # prepare agents for test
         for agent_name, config, private_key in (
@@ -563,7 +563,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
             self.set_config(setting_path, "127.0.0.1")
             setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-            self.set_config(setting_path, 9002)
+            self.set_config(setting_path, 12002)
 
             self.set_config(
                 "vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key",
