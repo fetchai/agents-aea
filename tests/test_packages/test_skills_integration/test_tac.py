@@ -416,12 +416,6 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
         # set SOEF configuration
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, EthereumCrypto.identifier)
-        setting_path = "vendor.fetchai.connections.soef.config.is_https"
-        self.set_config(setting_path, False)
-        setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
-        self.set_config(setting_path, "127.0.0.1")
-        setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-        self.set_config(setting_path, 9002)
 
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
@@ -436,6 +430,22 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
         data = {"key": "tac", "value": tac_id}
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.service_data"
         self.nested_set_config(setting_path, data)
+
+        # check manually built agent is the same as the fetched one
+        diff = self.difference_to_fetched_agent(
+            "fetchai/tac_controller_contract:0.30.0", tac_controller_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
+        # change SOEF configuration to local
+        setting_path = "vendor.fetchai.connections.soef.config.is_https"
+        self.set_config(setting_path, False)
+        setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+        self.set_config(setting_path, "127.0.0.1")
+        setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+        self.set_config(setting_path, 9002)
 
         # prepare agents for test
         for agent_name, config, private_key in (
@@ -506,12 +516,6 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             # set SOEF configuration
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
             self.set_config(setting_path, EthereumCrypto.identifier)
-            setting_path = "vendor.fetchai.connections.soef.config.is_https"
-            self.set_config(setting_path, False)
-            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
-            self.set_config(setting_path, "127.0.0.1")
-            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-            self.set_config(setting_path, 9002)
 
             # set tac participant configuration
             self.set_config(
@@ -543,6 +547,23 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                 "vendor.fetchai.skills.tac_participation.models.game.args.search_query"
             )
             self.nested_set_config(setting_path, data)
+
+            diff = self.difference_to_fetched_agent(
+                "fetchai/tac_participant_contract:0.20.0", agent_name
+            )
+            assert (
+                diff == []
+            ), "Difference between created and fetched project for files={}".format(
+                diff
+            )
+
+            # change SOEF configuration to local
+            setting_path = "vendor.fetchai.connections.soef.config.is_https"
+            self.set_config(setting_path, False)
+            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+            self.set_config(setting_path, "127.0.0.1")
+            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+            self.set_config(setting_path, 9002)
 
             self.set_config(
                 "vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key",
