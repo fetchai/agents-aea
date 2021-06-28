@@ -579,7 +579,7 @@ class P2PLibp2pClientConnection(Connection):
 class TCPSocketChannelClientTLS(TCPSocketChannelClient):
     """Interprocess communication channel client using tcp sockets with TLS."""
 
-    VERIFICATION_SIGNATURE_WAIT_TIMEOUT = 5.0
+    DEFAULT_VERIFICATION_SIGNATURE_WAIT_TIMEOUT = 5.0
 
     def __init__(
         self,
@@ -588,6 +588,7 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         server_pub_key: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
+        verification_signature_wait_timeout: Optional[float] = None,
     ) -> None:
         """
         Initialize a tcp socket communication channel client.
@@ -597,9 +598,15 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         :param server_pub_key: str, server public key to verify identity
         :param logger: the logger
         :param loop: the event loop
+        :param verification_signature_wait_timeout: optional float, if not provided, default value will be used
         """
-        self.server_pub_key = server_pub_key
         super().__init__(in_path, out_path, logger, loop)
+        self.verification_signature_wait_timeout = (
+            self.DEFAULT_VERIFICATION_SIGNATURE_WAIT_TIMEOUT
+            if verification_signature_wait_timeout is None
+            else verification_signature_wait_timeout
+        )
+        self.server_pub_key = server_pub_key
 
     @staticmethod
     def _get_session_pub_key(writer: StreamWriter) -> bytes:  # pragma: nocover
@@ -619,11 +626,11 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
 
         try:
             signature = await asyncio.wait_for(
-                sock.read(), timeout=self.VERIFICATION_SIGNATURE_WAIT_TIMEOUT
+                sock.read(), timeout=self.verification_signature_wait_timeout
             )
         except asyncio.TimeoutError:  # pragma: nocover
             raise ValueError(
-                f"Failed to get peer verification record in timeout: {self.VERIFICATION_SIGNATURE_WAIT_TIMEOUT}"
+                f"Failed to get peer verification record in timeout: {self.verification_signature_wait_timeout}"
             )
 
         if not signature:  # pragma: nocover
