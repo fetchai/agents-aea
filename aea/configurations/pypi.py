@@ -21,6 +21,8 @@
 """This module contains a checker for PyPI version consistency."""
 import operator
 from collections import defaultdict
+from copy import deepcopy
+from functools import reduce
 from typing import Dict, List, Set, cast
 
 from packaging.specifiers import Specifier, SpecifierSet
@@ -235,18 +237,44 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
     """
     Merge two groups of dependencies.
 
-    If some of them are not "simple" (see above), we just filter them out.
+    If some of them are not "simple" (see above), and there is no risk
+      of conflict because there is no other package with the same name,
+      we leave them; otherwise we raise an error.
 
     :param dep1: the first operand
     :param dep2: the second operand.
     :return: the merged dependencies.
     """
     result: Dependencies
-    result = {pkg_name: info for pkg_name, info in dep1.items() if is_simple_dep(info)}
+    result = deepcopy(dep1)
 
     for pkg_name, info in dep2.items():
-        if not is_simple_dep(info):
+        old_dep = result.get(pkg_name)
+        old_dep_exists = old_dep is not None
+        new_dep_is_simple = is_simple_dep(info)
+        old_dep_is_simple = is_simple_dep(info) if old_dep_exists else False
+
+        # if the new dependency already exists in the list, ignore
+        if old_dep == info:
             continue
+        # if one of the operands does not have a dependency,
+        # we add it untouched to the final result and continue
+        if not old_dep_exists:
+            result[pkg_name] = info
+            continue
+
+        # in case a dependency exists in both operands and one of them is not simple:
+        if (new_dep_is_simple and old_dep_exists and not old_dep_is_simple) or (
+            not new_dep_is_simple and old_dep_exists
+        ):
+            # we raise error because we can't trivially merge the specifier sets (unless they are equal, see above)
+            raise ValueError(
+                f"cannot trivially merge these two PyPI dependencies:\n- {pkg_name}: {old_dep}\n- {pkg_name}: {info}"
+            )
+
+        # if we are here, it means both in the first and second operand
+        # there are two 'simple' dependencies with the same name
+        # therefore, we need to merge them
         new_specifier = SpecifierSet(info.version)
         old_specifier = (
             SpecifierSet(result[pkg_name].version)
@@ -263,4 +291,15 @@ def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies:
         )
         result[pkg_name] = new_info
 
+    return result
+
+
+def merge_dependencies_list(*deps: Dependencies) -> Dependencies:
+    """
+    Merge a list of dependencies.
+
+    :param deps: the list of dependencies
+    :return: the merged dependencies.
+    """
+    result: Dependencies = reduce(merge_dependencies, deps, {})
     return result
