@@ -19,7 +19,6 @@
 """Tests for the pipe module."""
 import asyncio
 from threading import Thread
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -29,7 +28,6 @@ from aea.helpers.pipe import (
     PosixNamedPipeChannelClient,
     TCPSocketChannel,
     TCPSocketChannelClient,
-    TCPSocketChannelClientTLS,
     make_ipc_channel,
     make_ipc_channel_client,
 )
@@ -143,35 +141,6 @@ def make_future(result) -> asyncio.Future:
     f = asyncio.Future()  # type: ignore
     f.set_result(result)
     return f
-
-
-@pytest.mark.asyncio
-class TestAEAHelperTCPSocketChannelTLS:
-    """Test that TCPSocketChannelTLS work properly"""
-
-    SERVER_PUB_KEY = (
-        "03e09d7febfc3e3ef4c38321fb10c4303956e65e1d03ead77470941e82428f80d2"
-    )
-    SIGNATURE = b"0D\x02 \x7f\xcf\xa7\xe9~\x1d{\xf1\xb6\"\x98\x1d'\xd2}\x13\xb5\x13\x0c,]}7\xf3\xa6G\x958q_\x89\x08\x02 >\x91\x9e!\xb5\x1f/\xe4\x0c\xab\x9ej\xb7~Z8\x0b\x06Et\x9f\x1b.SZ*Q\xb7\x13\x85\xaa-"
-    SESSION_KEY = b"\x04D\x08\xe1\xca\xfc;\x01(\x0f\xb9&\x92\x12\xe6\x0b\x02\xdc\x082\xa3\xff\x05\x1f#\xeaK\xd3!\xf5\xcc\xcf\x86\x98\x17g\x80_\xc7o;\x9e\x86,O\xbd\xa1bO\x06\x92\x85\x94\x9f\xbf}\xc2\xdd[\xe6AI\x9a\x9c\x92"
-
-    @pytest.mark.asyncio
-    async def test_connection_communication(self):
-        """Test connection communication."""
-        client_pipe = TCPSocketChannelClientTLS(
-            "localhost:11111", "", server_pub_key=self.SERVER_PUB_KEY
-        )
-
-        with patch(
-            "asyncio.open_connection",
-            MagicMock(return_value=make_future((MagicMock(), MagicMock()))),
-        ), patch(
-            "aea.helpers.pipe.TCPSocketProtocol.read",
-            MagicMock(return_value=make_future(self.SIGNATURE)),
-        ), patch.object(
-            client_pipe, "_get_session_pub_key", return_value=self.SESSION_KEY
-        ):
-            await client_pipe._open_connection()
 
 
 @skip_test_windows
