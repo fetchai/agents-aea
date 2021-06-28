@@ -47,9 +47,7 @@ def install_dependency(
         enforce(return_code == 0, "Return code != 0.")
     except Exception as e:
         raise AEAException(
-            "An error occurred while installing {}, {}: {}".format(
-                dependency_name, dependency, str(e)
-            )
+            f"An error occurred while installing {dependency_name}, {dependency}: {e}"
         )
 
 
