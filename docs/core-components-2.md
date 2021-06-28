@@ -16,6 +16,13 @@ You can learn more about the decision maker <a href="../decision-maker">here</a>
 
 The <a href="../api/crypto/wallet#wallet-objects">`Wallet`</a> contains the private-public key pairs used by the AEA. Skills do not have access to the wallet, only the decision maker does.
 
+The agent has two sets of private keys, as configured in the `aea-config.yaml`:
+
+- `private_key_paths`: This is a dictionary mapping identifiers to the file paths of private keys used in the AEA. For each identifier, e.g. `fetchai`, the AEA can have one private key. The private keys listed here are available in the `Decision Maker` and the associated public keys and addresses are available in all skills. The AEA uses these keys to sign transactions and messages. These keys usually hold the AEAs funds.
+- `connection_private_key_paths`: This is a dictionary mapping identifiers to the file paths of private keys used in connections. For each identifier, e.g. `fetchai`, the `Multiplexer` can have one private key. The private keys listed here are available in the connections. The connections use these keys to secure message transport, for instance.
+
+It is the responsibility of the AEA's user to safe-guard the keys used and ensure that keys are only used in a single AEA. Using the same key across different AEAs will lead to various failure modes.  
+
 ### Identity
 
 The <a href="../api/identity/base#identity-objects">`Identity`</a> is an abstraction that represents the identity of an AEA in the Open Economic Framework, backed by public-key cryptography. It contains the AEA's addresses as well as its name.
