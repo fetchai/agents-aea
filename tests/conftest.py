@@ -111,6 +111,7 @@ from tests.common.docker_image import (
     FetchLedgerDockerImage,
     GanacheDockerImage,
     OEFSearchDockerImage,
+    SOEFDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -234,11 +235,11 @@ NON_GENESIS_CONFIG = {
     "ledger_id": "fetchai",
 }
 NON_GENESIS_CONFIG_TWO = {
-    "delegate_uri": "127.0.0.1:11002",
+    "delegate_uri": "127.0.0.1:11003",
     "entry_peers": [FETCHAI_P2P_ADDRESS],
-    "local_uri": "127.0.0.1:9002",
+    "local_uri": "127.0.0.1:9003",
     "log_file": "libp2p_node.log",
-    "public_uri": "127.0.0.1:9002",
+    "public_uri": "127.0.0.1:9003",
     "ledger_id": "fetchai",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
@@ -729,6 +730,20 @@ def ganache(
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration
     )
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+@pytest.mark.integration
+@pytest.fixture(scope="class")
+def soef(
+    soef_addr: str = "http://127.0.0.1",
+    soef_port: int = 9002,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    """Launch the soef image."""
+    client = docker.from_env()
+    image = SOEFDockerImage(client, soef_addr, soef_port)
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
@@ -1419,6 +1434,15 @@ class UseGanache:
     @pytest.fixture(autouse=True)
     def _start_ganache(self, ganache):
         """Start a Ganache image."""
+
+
+@pytest.mark.integration
+class UseSOEF:
+    """Inherit from this class to use SOEF."""
+
+    @pytest.fixture(autouse=True)
+    def _start_soef(self, soef):
+        """Start an SOEF image."""
 
 
 @pytest.mark.integration
