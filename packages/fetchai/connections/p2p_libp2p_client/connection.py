@@ -275,11 +275,16 @@ class P2PLibp2pClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     DEFAULT_CONNECT_RETRIES = 3
+    DEFAULT_TLS_CONNECTION_SIGNATURE_TIMEOUT = 5.0
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a libp2p client connection."""
         super().__init__(**kwargs)
 
+        self.tls_connection_signature_timeout = self.configuration.config.get(
+            "tls_connection_signature_timeout",
+            self.DEFAULT_TLS_CONNECTION_SIGNATURE_TIMEOUT,
+        )
         self.connect_retries = self.configuration.config.get(
             "connect_retries", self.DEFAULT_CONNECT_RETRIES
         )
@@ -434,6 +439,7 @@ class P2PLibp2pClientConnection(Connection):
                     f"{self.node_uri.host}:{self.node_uri._port}",  # pylint: disable=protected-access
                     "",
                     server_pub_key=self.node_por.representative_public_key,
+                    verification_signature_wait_timeout=self.tls_connection_signature_timeout,
                 )
                 await pipe.connect()
                 self._node_client = NodeClient(pipe, self.node_por)

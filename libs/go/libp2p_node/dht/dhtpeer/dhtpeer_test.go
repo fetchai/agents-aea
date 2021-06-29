@@ -1828,7 +1828,7 @@ func SetupDelegateClient(
 
 	cert_pub_key := client.Conn.(*tls.Conn).ConnectionState().PeerCertificates[0].PublicKey.(*ecdsa.PublicKey)
 	cert_pub_key_bytes := elliptic.Marshal(cert_pub_key.Curve, cert_pub_key.X, cert_pub_key.Y)
-	// Read signature, skip it here
+
 	tlsSignature, _ := utils.ReadBytesConn(client.Conn)
 	verifyKey, err := utils.PubKeyFromFetchAIPublicKey(peerPubKey)
 	if err != nil {
