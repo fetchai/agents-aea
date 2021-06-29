@@ -737,7 +737,7 @@ def ganache(
 @pytest.fixture(scope="class")
 def soef(
     soef_addr: str = "http://127.0.0.1",
-    soef_port: int = 9002,
+    soef_port: int = 19002,
     timeout: float = 2.0,
     max_attempts: int = 10,
 ):

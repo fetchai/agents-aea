@@ -173,15 +173,13 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
                 setting_path = "vendor.fetchai.connections.http_server.config.port"
                 self.set_config(setting_path, 8000 + i)
 
-            # direct soef connection to locally running docker container
-            setting_path = "vendor.fetchai.connections.soef.config"
-            settings = {
-                "chain_identifier": FetchAICrypto.identifier,
-                "api_key": "TwiCIriSl0mLahw17pyqoA",
-                "soef_addr": "127.0.0.1",
-                "soef_port": 9002,
-            }
-            self.nested_set_config(setting_path, settings)
+            # set SOEF configuration
+            setting_path = "vendor.fetchai.connections.soef.config.is_https"
+            self.set_config(setting_path, False)
+            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+            self.set_config(setting_path, "127.0.0.1")
+            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+            self.set_config(setting_path, 19002)
 
             # set up data request skill to fetch coin price
             self.set_config(

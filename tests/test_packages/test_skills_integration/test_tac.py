@@ -421,7 +421,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
         setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
         self.set_config(setting_path, "127.0.0.1")
         setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-        self.set_config(setting_path, 9002)
+        self.set_config(setting_path, 19002)
 
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
@@ -511,7 +511,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
             self.set_config(setting_path, "127.0.0.1")
             setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-            self.set_config(setting_path, 9002)
+            self.set_config(setting_path, 19002)
 
             # set tac participant configuration
             self.set_config(
