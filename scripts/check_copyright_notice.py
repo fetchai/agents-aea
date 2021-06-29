@@ -67,7 +67,7 @@ def check_copyright(file: Path) -> bool:
     optionally prefixed by the shebang. Return False otherwise.
 
     :param file: the file to check.
-    :return True if the file is compliant with the checks, False otherwise.
+    :return: True if the file is compliant with the checks, False otherwise.
     """
     content = file.read_text()
     header_regex = re.compile(HEADER_REGEX, re.MULTILINE)

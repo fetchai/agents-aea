@@ -81,7 +81,6 @@ class Forecast:
         Add data to the forecast.
 
         :param tagged_data: the data dictionary
-        :return: None
         """
         con_ = sqlite3.connect(DB_SOURCE)
         cur_ = con_.cursor()

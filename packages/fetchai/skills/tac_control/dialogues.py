@@ -59,7 +59,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -91,8 +91,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -124,7 +123,7 @@ class TacDialogues(Model, BaseTacDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 

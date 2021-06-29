@@ -179,7 +179,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
             setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
             self.set_config(setting_path, "127.0.0.1")
             setting_path = "vendor.fetchai.connections.soef.config.soef_port"
-            self.set_config(setting_path, 19002)
+            self.set_config(setting_path, 12002)
 
             # set up data request skill to fetch coin price
             self.set_config(

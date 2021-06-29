@@ -52,11 +52,7 @@ class DefaultHandler(Handler):
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
@@ -97,7 +93,6 @@ class DefaultHandler(Handler):
 
         :param default_msg: the message
         :param default_dialogue: the default dialogue
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         if default_msg.sender == strategy.aw1_aea:
@@ -134,15 +129,10 @@ class DefaultHandler(Handler):
 
         :param default_msg: the message
         :param default_dialogue: the default dialogue
-        :return: None
         """
         self.context.logger.warning(
             f"cannot handle default message of performative={default_msg.performative} in dialogue={default_dialogue}."
         )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""

@@ -55,11 +55,7 @@ class DefaultHandler(Handler):
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
@@ -86,7 +82,7 @@ class DefaultHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param fipa_msg: the message
+        :param default_msg: the message
         """
         self.context.logger.info(
             f"received invalid default message={default_msg}, unidentified dialogue."
@@ -100,7 +96,6 @@ class DefaultHandler(Handler):
 
         :param default_msg: the message
         :param default_dialogue: the default dialogue
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         if default_msg.sender == strategy.aw1_aea:
@@ -137,18 +132,13 @@ class DefaultHandler(Handler):
 
         :param default_msg: the message
         :param default_dialogue: the default dialogue
-        :return: None
         """
         self.context.logger.warning(
             f"cannot handle default message of performative={default_msg.performative} in dialogue={default_dialogue}."
         )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
 
 class HttpHandler(Handler):
@@ -157,18 +147,13 @@ class HttpHandler(Handler):
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         http_msg = cast(HttpMessage, message)
 
@@ -203,7 +188,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         self.context.logger.info(
             "received http response with status_code={}, status_text={} and body={!r} in dialogue={}".format(
@@ -219,7 +203,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle http message of performative={} in dialogue={}.".format(
@@ -228,8 +211,4 @@ class HttpHandler(Handler):
         )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""

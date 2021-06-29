@@ -83,7 +83,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -123,8 +123,7 @@ class MlTradeDialogue(BaseMlTradeDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseMlTradeDialogue.__init__(
             self,
@@ -157,7 +156,7 @@ class MlTradeDialogues(Model, BaseMlTradeDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -197,8 +196,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseLedgerApiDialogue.__init__(
             self,
@@ -232,7 +230,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -265,8 +263,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -306,8 +303,7 @@ class SigningDialogue(BaseSigningDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseSigningDialogue.__init__(
             self,
@@ -344,8 +340,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 

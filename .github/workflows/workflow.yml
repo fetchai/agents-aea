@@ -284,6 +284,11 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
+    - name: Setup GCloud - production
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+          project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
+          service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
     - name: Install dependencies (ubuntu-latest)
       run: |
         sudo apt-get update --fix-missing
@@ -294,6 +299,12 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker 
+    - name: Pull SOEF Image
+      run: |
+        docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
     - name: Sync AEA loop integration tests
       run: |
         tox -e py3.8 -- -m 'sync'  # --aea-loop sync
@@ -316,6 +327,11 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.8
+      - name: Setup GCloud - production
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+            project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
+            service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -355,6 +371,12 @@ jobs:
           fetchcli config output json
           fetchcli config indent true
           fetchcli config broadcast-mode block
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker 
+      - name: Pull SOEF Image
+        run: |
+          docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
 

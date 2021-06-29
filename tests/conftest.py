@@ -235,11 +235,11 @@ NON_GENESIS_CONFIG = {
     "ledger_id": "fetchai",
 }
 NON_GENESIS_CONFIG_TWO = {
-    "delegate_uri": "127.0.0.1:11003",
+    "delegate_uri": "127.0.0.1:11002",
     "entry_peers": [FETCHAI_P2P_ADDRESS],
-    "local_uri": "127.0.0.1:9003",
+    "local_uri": "127.0.0.1:9002",
     "log_file": "libp2p_node.log",
-    "public_uri": "127.0.0.1:9003",
+    "public_uri": "127.0.0.1:9002",
     "ledger_id": "fetchai",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
@@ -737,7 +737,7 @@ def ganache(
 @pytest.fixture(scope="class")
 def soef(
     soef_addr: str = "http://127.0.0.1",
-    soef_port: int = 19002,
+    soef_port: int = 12002,
     timeout: float = 2.0,
     max_attempts: int = 10,
 ):

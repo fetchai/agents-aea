@@ -96,18 +96,13 @@ class DefaultHandler(Handler):
         return None
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         message = cast(DefaultMessage, message)
 
@@ -136,11 +131,7 @@ class DefaultHandler(Handler):
                 )
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
 
 class HttpHandler(Handler):
@@ -156,18 +147,13 @@ class HttpHandler(Handler):
         self.is_connected_to_Faber = False
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to an envelope.
 
         :param message: the message
-        :return: None
         """
         message = cast(HttpMessage, message)
 
@@ -211,11 +197,7 @@ class HttpHandler(Handler):
                     self.context.logger.info(f"invitation: {str(invitation)}")
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
 
 class OefSearchHandler(Handler):
@@ -231,7 +213,6 @@ class OefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -255,11 +236,7 @@ class OefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -283,7 +260,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_success_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search success message={} in dialogue={}.".format(
@@ -334,7 +310,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -360,7 +335,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(

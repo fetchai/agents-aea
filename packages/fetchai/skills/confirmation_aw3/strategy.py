@@ -42,7 +42,7 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         aw1_aea: Optional[str] = kwargs.pop("aw1_aea", None)
         if aw1_aea is None:
@@ -75,6 +75,7 @@ class Strategy(GenericStrategy):
         """
         Process counterparties and drop unacceptable ones.
 
+        :param counterparties: tuple of counterparties
         :return: list of counterparties
         """
         valid_counterparties: List[str] = []
@@ -87,6 +88,7 @@ class Strategy(GenericStrategy):
         """
         Check if the counterparty is valid.
 
+        :param counterparty: the counterparty
         :return: bool indicating validity
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
@@ -105,7 +107,6 @@ class Strategy(GenericStrategy):
 
         :param counterparty: the counterparty address
         :param data: the data
-        :return: False
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_trade(counterparty, datetime.datetime.now(), data)
@@ -140,18 +141,12 @@ class Strategy(GenericStrategy):
 
         :param counterparty: the counterparty address
         :param developer_handle: the developer handle
-        :param data: the data
-        :return: False
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_registered(counterparty, developer_handle)
 
     def update_search_query_params(self) -> None:
-        """
-        Update agent location and query for search.
-
-        :return: None
-        """
+        """Update agent location and query for search."""
         search_query_type, search_query = random.choice(  # nosec
             list(self._search_queries.items())
         )

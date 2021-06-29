@@ -36,11 +36,7 @@ class ErrorHandler(Handler):
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
@@ -50,18 +46,13 @@ class ErrorHandler(Handler):
         """
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def send_unsupported_protocol(self, envelope: Envelope) -> None:
         """
         Handle the received envelope in case the protocol is not supported.
 
         :param envelope: the envelope
-        :return: None
         """
         self.context.logger.warning(
             "Unsupported protocol: {}. You might want to add a handler for this protocol.".format(
@@ -93,7 +84,6 @@ class ErrorHandler(Handler):
         Handle a decoding error.
 
         :param envelope: the envelope
-        :return: None
         """
         self.context.logger.warning(
             "Decoding error for envelope: {}. protocol_specification_id='{}' and message='{!r}' are inconsistent.".format(
@@ -119,7 +109,6 @@ class ErrorHandler(Handler):
         Handle the received envelope in case the skill is not supported.
 
         :param envelope: the envelope
-        :return: None
         """
         self.context.logger.warning(
             "Cannot handle envelope: no active handler registered for the protocol_specification_id='{}'.".format(

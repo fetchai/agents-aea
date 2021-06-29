@@ -62,22 +62,14 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self._nb_retries = 0
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         self._request_balance()
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_contract_deployed:
             self._request_contract_deploy_transaction()
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         self._retry_failed_registration()
 
         strategy = cast(Strategy, self.context.strategy)
@@ -103,20 +95,12 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self._register_agent()
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
         self._unregister_service()
         self._unregister_agent()
 
     def _retry_failed_registration(self) -> None:
-        """
-        Retry a failed registration.
-
-        :return: None
-        """
+        """Retry a failed registration."""
         if self.failed_registration_msg is not None:
             self._nb_retries += 1
             if self._nb_retries > self._max_soef_registration_retries:
@@ -139,11 +123,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             self.failed_registration_msg = None
 
     def _request_balance(self) -> None:
-        """
-        Request ledger balance.
-
-        :return: None
-        """
+        """Request ledger balance."""
         strategy = cast(Strategy, self.context.strategy)
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
@@ -157,11 +137,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=ledger_api_msg)
 
     def _request_contract_deploy_transaction(self) -> None:
-        """
-        Request contract deploy transaction
-
-        :return: None
-        """
+        """Request contract deploy transaction"""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -183,11 +159,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_token_create_transaction(self) -> None:
-        """
-        Request token create transaction
-
-        :return: None
-        """
+        """Request token create transaction."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -214,11 +186,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("requesting create batch transaction...")
 
     def _request_token_mint_transaction(self) -> None:
-        """
-        Request token mint transaction
-
-        :return: None
-        """
+        """Request token mint transaction."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -252,8 +220,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :param description: the description of what is being registered
         :param logger_msg: the logger message to print after the registration
-
-        :return: None
         """
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -267,31 +233,19 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info(logger_msg)
 
     def _register_agent(self) -> None:
-        """
-        Register the agent's location.
-
-        :return: None
-        """
+        """Register the agent's location."""
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_location_description()
         self._register(description, "registering agent on SOEF.")
 
     def register_service(self) -> None:
-        """
-        Register the agent's service.
-
-        :return: None
-        """
+        """Register the agent's service."""
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_service_description()
         self._register(description, "registering agent's service on the SOEF.")
 
     def register_genus(self) -> None:
-        """
-        Register the agent's personality genus.
-
-        :return: None
-        """
+        """Register the agent's personality genus."""
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_personality_description()
         self._register(
@@ -299,11 +253,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         )
 
     def register_classification(self) -> None:
-        """
-        Register the agent's personality classification.
-
-        :return: None
-        """
+        """Register the agent's personality classification."""
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_classification_description()
         self._register(
@@ -311,11 +261,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         )
 
     def _unregister_service(self) -> None:
-        """
-        Unregister service from the SOEF.
-
-        :return: None
-        """
+        """Unregister service from the SOEF."""
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
@@ -330,11 +276,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering service from SOEF.")
 
     def _unregister_agent(self) -> None:
-        """
-        Unregister agent from the SOEF.
-
-        :return: None
-        """
+        """Unregister agent from the SOEF."""
         strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_location_description()
         oef_search_dialogues = cast(

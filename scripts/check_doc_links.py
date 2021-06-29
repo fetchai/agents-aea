@@ -91,7 +91,6 @@ def validate_internal_url(file: Path, url: str, all_files: Set[Path]) -> None:
     :param file: the file path
     :param url: the url to check
     :param all_files: all the docs files.
-    :return: None
     """
     is_index_file = file == INDEX_FILE_PATH
 
@@ -153,7 +152,6 @@ def validate_external_url(url: str, file: Path) -> None:
 
     :param url: the URL.
     :param file: the file where the URL is found.
-    :return: None
     """
     if not is_url_reachable(url):
         raise ValueError("Could not reach url={} in file={}!".format(url, str(file)))
@@ -183,7 +181,6 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
     Checks a file for matches to a pattern.
 
     :param file: the file path
-    :param all_files: all the doc file paths
     :param regex: the regex to check for in the file.
     """
     if file == Path("docs/version.md"):
@@ -214,7 +211,6 @@ def _checks_target_blank(file: Path) -> None:
     Check target blank.
 
     :param file: the file.
-    :return: None
     """
     matches = re.finditer("<a.*?>(.+?)</a>", file.read_text())
     for match in matches:
@@ -233,7 +229,6 @@ def check_file(file: Path, all_files: Set[Path]) -> None:
 
     :param file: the file path
     :param all_files: all the doc file paths
-    :return: None
     """
     _checks_all_html(file)
     _checks_link(file, all_files)

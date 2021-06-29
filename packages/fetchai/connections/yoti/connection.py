@@ -54,7 +54,7 @@ class YotiDialogues(BaseYotiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -88,9 +88,7 @@ class YotiConnection(BaseSyncConnection):
         """
         Initialize a connection to an SDK or API.
 
-        :param configuration: the connection configuration.
-        :param crypto_store: object to access the connection crypto objects.
-        :param identity: the identity object.
+        :param kwargs: keyword arguments
         """
         super().__init__(**kwargs)
         yoti_client_sdk_id = cast(
@@ -115,7 +113,6 @@ class YotiConnection(BaseSyncConnection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         self.dispatch(envelope)
 
@@ -154,7 +151,7 @@ class YotiConnection(BaseSyncConnection):
         """
         Get the handler method, given the message performative.
 
-        :param performative_name: the message performative.
+        :param performative: the message performative.
         :return: the method that will send the request.
         """
         handler = getattr(self, performative, None)
@@ -168,7 +165,7 @@ class YotiConnection(BaseSyncConnection):
 
         :param message: the Yoti message
         :param dialogue: the Yoti dialogue
-        :return: None
+        :return: the yoti message
         """
         activity_details = self._client.get_activity_details(message.token)
         if activity_details is None:

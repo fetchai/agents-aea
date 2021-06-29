@@ -168,11 +168,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
+        """Initialize dialogues."""
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
@@ -229,10 +225,15 @@ class SOEFChannel:
 
         :param address: the address of the agent.
         :param api_key: the SOEF API key.
+        :param is_https: whether htts or http is used.
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
-        :param chain_identifier: supported chain id
-        :param connection_check_timeout: timeout to check network connection on connect
+        :param data_dir: the data directory.
+        :param chain_identifier: supported chain id.
+        :param token_storage_path: storage path for the SOEF token.
+        :param logger: the logger.
+        :param connection_check_timeout: timeout to check network connection on connect.
+        :param connection_check_max_retries: maximum retries when performing connection check.
         """
         if chain_identifier is not None and not any(
             regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
@@ -437,7 +438,6 @@ class SOEFChannel:
         Send message handler.
 
         :param envelope: the envelope.
-        :return: None
         """
         await self.process_envelope(envelope)
 
@@ -468,7 +468,6 @@ class SOEFChannel:
         Process envelope.
 
         :param envelope: the envelope.
-        :return: None
         """
         enforce(
             isinstance(envelope.message, OefSearchMessage),
@@ -540,7 +539,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         service_description = oef_message.service_description
 
@@ -571,8 +569,8 @@ class SOEFChannel:
         Perform ping command.
 
         :param service_description: Service description
-
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.PING.value)
         await self._ping_command()
@@ -588,8 +586,8 @@ class SOEFChannel:
         Perform ping command.
 
         :param service_description: Service description
-
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         if not self.in_queue:  # pragma: no cover
             """not connected."""
@@ -619,8 +617,6 @@ class SOEFChannel:
         Send ping command every `period`.
 
         :param period: period of ping in seconds
-
-        :return: None
         """
         with suppress(asyncio.CancelledError):
             while self.unique_page_address:
@@ -645,7 +641,8 @@ class SOEFChannel:
         Set service key from service description.
 
         :param service_description: Service description
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.SET_SERVICE_KEY.value)
 
@@ -732,7 +729,6 @@ class SOEFChannel:
 
         :param key: key to set
         :param value: value to set
-        :return None:
         """
         await self._generic_oef_command(
             "set_service_key", {"key": key, "value": str(value)}
@@ -748,7 +744,8 @@ class SOEFChannel:
         Remove service key from service description.
 
         :param service_description: Service description
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.REMOVE_SERVICE_KEY.value)
         key = service_description.values.get("key", None)
@@ -764,7 +761,6 @@ class SOEFChannel:
         Perform remove service key command.
 
         :param key: key to remove
-        :return None:
         """
         await self._generic_oef_command("remove_service_key", {"key": key})
 
@@ -778,7 +774,8 @@ class SOEFChannel:
         Register service with location.
 
         :param service_description: Service description
-        :return None
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.LOCATION_AGENT.value)
 
@@ -817,7 +814,7 @@ class SOEFChannel:
 
         :param oef_search_dialogue: the oef search dialogue
         :param oef_message: the oef message
-        :return None
+        :param agents_info: the agents info json
         """
         if self.in_queue is None:
             raise ValueError("Inqueue not set!")  # pragma: nocover
@@ -842,7 +839,6 @@ class SOEFChannel:
 
         :param service_description: Service description
         :param data_model_name: data model name expected.
-        :return None
         """
         if service_description.data_model.name != data_model_name:  # pragma: nocover
             raise SOEFException.error(
@@ -855,7 +851,8 @@ class SOEFChannel:
         """
         Set the location.
 
-        :param service_location: the service location
+        :param agent_location: the agent location
+        :param disclosure_accuracy: the accuracy of the agent location disclosure
         """
         latitude = agent_location.latitude
         longitude = agent_location.longitude
@@ -881,8 +878,9 @@ class SOEFChannel:
         """
         Set the personality piece.
 
-        :param piece: the piece to be set
-        :param value: the value to be set
+        :param service_description: the service description.
+        :param oef_message: the oef message.
+        :param oef_search_dialogue: the oef search dialogue
         """
         self._check_data_model(service_description, ModelNames.PERSONALITY_AGENT.value)
         piece = service_description.values.get("piece", None)
@@ -916,8 +914,6 @@ class SOEFChannel:
         - acknowledge registration
         - set default personality piece for agent framework
         - initiate ping task
-
-        :return: None
         """
         self.logger.debug("Applying to SOEF lobby with address={}".format(self.address))
         url = parse.urljoin(self.base_url, "register")
@@ -977,7 +973,6 @@ class SOEFChannel:
         :param oef_search_message: the oef search message
         :param oef_search_dialogue: the oef search dialogue
         :param oef_error_operation: the error code to send back
-        :return: None
         """
         if self.in_queue is None:
             raise ValueError("Inqueue not set!")  # pragma: nocover
@@ -997,7 +992,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         service_description = oef_message.service_description
 
@@ -1028,7 +1022,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         if not self._unregister_lock:
             raise ValueError(  # pragma: nocover
@@ -1115,11 +1108,7 @@ class SOEFChannel:
             self.unique_page_address = None
 
     async def disconnect(self) -> None:
-        """
-        Disconnect unregisters any potential services still registered.
-
-        :return: None
-        """
+        """Disconnect unregisters any potential services still registered."""
         await self._stop_periodic_ping_task()
 
         if self.in_queue is None:
@@ -1146,7 +1135,6 @@ class SOEFChannel:
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
-        :return: None
         """
         query = oef_message.query
 
@@ -1193,7 +1181,6 @@ class SOEFChannel:
         :param oef_search_dialogue: OefSearchDialogue
         :param radius: the radius in which to search
         :param params: the parameters for the query
-        :return: None
         """
         if not self._find_around_me_queue:
             raise ValueError("SOEFChannel not started.")  # pragma: nocover
@@ -1215,7 +1202,6 @@ class SOEFChannel:
         :param oef_search_dialogue: OefSearchDialogue
         :param radius: the radius in which to search
         :param params: the parameters for the query
-        :return: None
         """
         if self.in_queue is None:
             raise ValueError("Inqueue not set!")  # pragma: nocover
@@ -1328,7 +1314,6 @@ class SOEFConnection(Connection):
         """
         Connect to the channel.
 
-        :return: None
         :raises Exception if the connection to the OEF fails.
         """
         if self.is_connected:  # pragma: nocover
@@ -1343,11 +1328,7 @@ class SOEFConnection(Connection):
         return self.channel.in_queue
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:  # pragma: nocover
             return
         if self.in_queue is None:
@@ -1360,6 +1341,8 @@ class SOEFConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         try:
@@ -1383,7 +1366,6 @@ class SOEFConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         if self.is_connected:
             await self.channel.send(envelope)

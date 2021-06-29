@@ -76,6 +76,7 @@ def replace_underscores(text: str) -> str:
     """
     Replace escaped underscores in a text.
 
+    :param text: the text to replace underscores in
     :return: the processed text
     """
     text_a = text.replace("\\_\\_", "`__`")

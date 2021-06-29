@@ -52,6 +52,7 @@ class P2PStubConnection(StubConnection):
 
         :param configuration: the connection configuration
         :param identity: the identity
+        :param kwargs: positional arguments
         """
         namespace_dir_path = cast(
             Union[str, Path],
@@ -73,7 +74,7 @@ class P2PStubConnection(StubConnection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if self.loop is None:
             raise ValueError("Loop not initialized.")  # pragma: nocover

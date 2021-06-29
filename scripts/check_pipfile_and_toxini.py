@@ -61,8 +61,6 @@ def check_versions_in_tox_correct(file: str = "tox.ini") -> None:
     Check the versions in tox are matching the ones in Pipfile.
 
     :param file: the file to check.
-    :param dependencies: the deps in pipfile
-    :return: True if match
     """
     dependencies = get_deps_in_pipfile()
 

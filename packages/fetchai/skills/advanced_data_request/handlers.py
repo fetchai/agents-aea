@@ -87,7 +87,6 @@ class HttpHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
 
         message = cast(HttpMessage, message)
@@ -116,7 +115,6 @@ class HttpHandler(Handler):
         Handle an Http response.
 
         :param http_msg: the http message
-        :return: None
         """
 
         model = self.context.advanced_data_request_model
@@ -162,7 +160,6 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
         self.context.logger.info(
             "received http request with method={}, url={} and body={!r}".format(
@@ -184,9 +181,7 @@ class HttpHandler(Handler):
 
         :param http_msg: the http message
         :param http_dialogue: the http dialogue
-        :return: None
         """
-
         model = self.context.advanced_data_request_model
         outputs = [output["name"] for output in model.outputs]
         data = {
@@ -218,19 +213,13 @@ class HttpHandler(Handler):
         Handle an unidentified dialogue.
 
         :param msg: the unidentified message to be handled
-        :return: None
         """
-
         self.context.logger.info(
             "received invalid message={}, unidentified dialogue.".format(msg)
         )
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""
 
 
 class PrometheusHandler(Handler):
@@ -247,9 +236,7 @@ class PrometheusHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
-
         message = cast(PrometheusMessage, message)
 
         # recover dialogue
@@ -277,7 +264,6 @@ class PrometheusHandler(Handler):
         Handle an unidentified dialogue.
 
         :param msg: the unidentified message to be handled
-        :return: None
         """
 
         self.context.logger.info(
@@ -285,8 +271,4 @@ class PrometheusHandler(Handler):
         )
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""

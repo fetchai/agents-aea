@@ -85,6 +85,7 @@ def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     Get the public id from yaml.
 
     :param configuration_file: the path to the config yaml
+    :return: public id
     """
     data = unified_yaml_load(configuration_file)
     author = data["author"]
@@ -119,7 +120,7 @@ def check_correct_author(runner: CliRunner) -> None:
     """
     Check whether the correct author is locally configured.
 
-    :return: None
+    :param runner: the cli runner
     """
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "init"], standalone_mode=False,)
     if "{'author': 'fetchai'}" not in result.output:
@@ -141,7 +142,6 @@ def push_package(package_id: PackageId, runner: CliRunner) -> None:
 
     :param package_id: the package id
     :param runner: the cli runner
-    :return: None
     """
     print(
         "Trying to push {}: {}".format(
@@ -276,7 +276,6 @@ def check_and_upload(package_id: PackageId, runner: CliRunner) -> None:
 
     :param package_id: the package id
     :param runner: the cli runner
-    :return: None
     """
     result = runner.invoke(
         cli,
@@ -309,7 +308,6 @@ def upload_new_packages(runner: CliRunner) -> None:
     Checks whether packages are missing from registry in the dependency order.
 
     :param runner: the cli runner
-    :return: None
     """
     print("\nPushing protocols:")
     for package_id in ALL_PACKAGE_IDS:

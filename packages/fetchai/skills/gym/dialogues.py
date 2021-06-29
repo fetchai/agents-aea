@@ -51,7 +51,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -83,7 +83,7 @@ class GymDialogues(Model, BaseGymDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 

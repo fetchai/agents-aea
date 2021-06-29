@@ -72,8 +72,6 @@ def react_speed_in_loop(
     :param skills_num: number of skills to add to each agent
     :param inbox_num: number of inbox messages for every agent
     :param agent_loop_timeout: idle sleep time for agent's loop
-
-    :return: None
     """
     wrappers = []
     envelope = AEATestWrapper.dummy_envelope()

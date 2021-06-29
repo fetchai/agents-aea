@@ -340,7 +340,7 @@ class GanacheDockerImage(DockerImage):
 class SOEFDockerImage(DockerImage):
     """Wrapper to SOEF Docker image."""
 
-    PORT = 9002
+    PORT = 19002
     SOEF_MOUNT_PATH = os.path.abspath(os.path.join(os.sep, "etc", "soef"))
     SOEF_CONFIG_FILE_NAME = "soef.conf"
 
@@ -373,7 +373,7 @@ class SOEFDockerImage(DockerImage):
             "# (Author Toby Simpson)",
             "#",
             "# Port we're listening on",
-            "port 9002",
+            "port 12002",
             "#",
             "# Our declared location",
             "latitude 52.205278",
