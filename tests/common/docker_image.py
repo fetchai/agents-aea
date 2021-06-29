@@ -373,7 +373,7 @@ class SOEFDockerImage(DockerImage):
             "# (Author Toby Simpson)",
             "#",
             "# Port we're listening on",
-            "port 12002",
+            f"port {self._port}",
             "#",
             "# Our declared location",
             "latitude 52.205278",
@@ -396,7 +396,7 @@ class SOEFDockerImage(DockerImage):
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
-        return {f"{self.PORT}/tcp": ("0.0.0.0", self._port)}  # nosec
+        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
 
     def create(self) -> Container:
         """Create the container."""
