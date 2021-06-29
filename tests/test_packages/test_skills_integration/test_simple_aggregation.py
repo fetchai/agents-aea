@@ -32,6 +32,7 @@ from tests.conftest import (
     UseSOEF,
 )
 
+
 MAX_RERUNS = 1
 
 COIN_URLS = [
