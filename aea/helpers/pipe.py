@@ -536,6 +536,7 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         self._attempts = TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS
         self._timeout = PIPE_CONN_TIMEOUT / self._attempts
+        self.last_exception: Optional[Exception] = None
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
@@ -562,7 +563,8 @@ class TCPSocketChannelClient(IPCChannelClient):
                 break
             except ConnectionRefusedError:
                 await asyncio.sleep(self._timeout)
-            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+            except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+                self.last_exception = e
                 return False
 
         return connected
@@ -625,6 +627,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         self._in_path = in_path
         self._out_path = out_path
         self._pipe = None  # type: Optional[PosixNamedPipeProtocol]
+        self.last_exception: Optional[Exception] = None
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
@@ -640,7 +643,11 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         self._pipe = PosixNamedPipeProtocol(
             self._in_path, self._out_path, logger=self.logger, loop=self._loop
         )
-        return await self._pipe.connect()
+        try:
+            return await self._pipe.connect()
+        except Exception as e:  # pragma: nocover  # pylint: disable=broad-except
+            self.last_exception = e
+            return False
 
     async def write(self, data: bytes) -> None:
         """

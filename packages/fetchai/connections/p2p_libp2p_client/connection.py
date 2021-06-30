@@ -441,7 +441,11 @@ class P2PLibp2pClientConnection(Connection):
                     server_pub_key=self.node_por.representative_public_key,
                     verification_signature_wait_timeout=self.tls_connection_signature_timeout,
                 )
-                await pipe.connect()
+                if not await pipe.connect():
+                    raise ValueError(
+                        f"Pipe connection error: {pipe.last_exception or ''}"
+                    )
+
                 self._node_client = NodeClient(pipe, self.node_por)
                 await self._setup_connection()
 
@@ -647,7 +651,7 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         except BadSignatureError as e:  # pragma: nocover
             with contextlib.suppress(Exception):
                 await sock.close()
-            raise ValueError(f"Invalid session key signature: {e}")
+            raise ValueError(f"Invalid TLS session key signature: {e}")
         return sock
 
     async def _open_tls_connection(self) -> TCPSocketProtocol:
