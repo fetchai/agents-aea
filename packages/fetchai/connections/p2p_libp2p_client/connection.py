@@ -16,14 +16,23 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the libp2p client connection."""
 import asyncio
+import contextlib
+import hashlib
 import logging
 import random
+import ssl
 from asyncio import CancelledError
+from asyncio.events import AbstractEventLoop
+from asyncio.streams import StreamWriter
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from asn1crypto import x509  # type: ignore
+from ecdsa.curves import SECP256k1
+from ecdsa.keys import BadSignatureError, VerifyingKey
+from ecdsa.util import sigdecode_der
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -32,7 +41,7 @@ from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
-from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient
+from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient, TCPSocketProtocol
 from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.acn import acn_pb2
@@ -266,11 +275,16 @@ class P2PLibp2pClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     DEFAULT_CONNECT_RETRIES = 3
+    DEFAULT_TLS_CONNECTION_SIGNATURE_TIMEOUT = 5.0
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a libp2p client connection."""
         super().__init__(**kwargs)
 
+        self.tls_connection_signature_timeout = self.configuration.config.get(
+            "tls_connection_signature_timeout",
+            self.DEFAULT_TLS_CONNECTION_SIGNATURE_TIMEOUT,
+        )
         self.connect_retries = self.configuration.config.get(
             "connect_retries", self.DEFAULT_CONNECT_RETRIES
         )
@@ -421,11 +435,17 @@ class P2PLibp2pClientConnection(Connection):
                         str(self.node_uri), attempt + 1
                     )
                 )
-                pipe = TCPSocketChannelClient(
+                pipe = TCPSocketChannelClientTLS(
                     f"{self.node_uri.host}:{self.node_uri._port}",  # pylint: disable=protected-access
                     "",
+                    server_pub_key=self.node_por.representative_public_key,
+                    verification_signature_wait_timeout=self.tls_connection_signature_timeout,
                 )
-                await pipe.connect()
+                if not await pipe.connect():
+                    raise ValueError(
+                        f"Pipe connection error: {pipe.last_exception or ''}"
+                    )
+
                 self._node_client = NodeClient(pipe, self.node_por)
                 await self._setup_connection()
 
@@ -564,3 +584,100 @@ class P2PLibp2pClientConnection(Connection):
             self._in_queue.put_nowait(envelope)
             if envelope is None:
                 break  # pragma: no cover
+
+
+class TCPSocketChannelClientTLS(TCPSocketChannelClient):
+    """Interprocess communication channel client using tcp sockets with TLS."""
+
+    DEFAULT_VERIFICATION_SIGNATURE_WAIT_TIMEOUT = 5.0
+
+    def __init__(
+        self,
+        in_path: str,
+        out_path: str,
+        server_pub_key: str,
+        logger: logging.Logger = _default_logger,
+        loop: Optional[AbstractEventLoop] = None,
+        verification_signature_wait_timeout: Optional[float] = None,
+    ) -> None:
+        """
+        Initialize a tcp socket communication channel client.
+
+        :param in_path: rendezvous point for incoming data
+        :param out_path: rendezvous point for outgoing data
+        :param server_pub_key: str, server public key to verify identity
+        :param logger: the logger
+        :param loop: the event loop
+        :param verification_signature_wait_timeout: optional float, if not provided, default value will be used
+        """
+        super().__init__(in_path, out_path, logger, loop)
+        self.verification_signature_wait_timeout = (
+            self.DEFAULT_VERIFICATION_SIGNATURE_WAIT_TIMEOUT
+            if verification_signature_wait_timeout is None
+            else verification_signature_wait_timeout
+        )
+        self.server_pub_key = server_pub_key
+
+    @staticmethod
+    def _get_session_pub_key(writer: StreamWriter) -> bytes:  # pragma: nocover
+        """Get session public key from tls stream writer."""
+        cert_data = writer.get_extra_info("ssl_object").getpeercert(binary_form=True)
+
+        cert = x509.Certificate.load(cert_data)
+        session_pub_key = VerifyingKey.from_der(cert.public_key.dump()).to_string(
+            "uncompressed"
+        )
+        return session_pub_key
+
+    async def _open_connection(self) -> TCPSocketProtocol:
+        """Open a connection with TLS support and verify peer."""
+        sock = await self._open_tls_connection()
+        session_pub_key = self._get_session_pub_key(sock.writer)
+
+        try:
+            signature = await asyncio.wait_for(
+                sock.read(), timeout=self.verification_signature_wait_timeout
+            )
+        except asyncio.TimeoutError:  # pragma: nocover
+            raise ValueError(
+                f"Failed to get peer verification record in timeout: {self.verification_signature_wait_timeout}"
+            )
+
+        if not signature:  # pragma: nocover
+            raise ValueError("Unexpected socket read data!")
+
+        try:
+            self._verify_session_key_signature(signature, session_pub_key)
+        except BadSignatureError as e:  # pragma: nocover
+            with contextlib.suppress(Exception):
+                await sock.close()
+            raise ValueError(f"Invalid TLS session key signature: {e}")
+        return sock
+
+    async def _open_tls_connection(self) -> TCPSocketProtocol:
+        """Open a connection with TLS support."""
+        cadata = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: ssl.get_server_certificate((self._host, self._port))
+        )
+
+        ssl_ctx = ssl.create_default_context(cadata=cadata)
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_REQUIRED
+        reader, writer = await asyncio.open_connection(
+            self._host, self._port, loop=self._loop, ssl=ssl_ctx,
+        )
+        return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
+
+    def _verify_session_key_signature(
+        self, signature: bytes, session_pub_key: bytes
+    ) -> None:
+        """
+        Validate signature of session public key.
+
+        :param signature: bytes, signature of session public key made with server private key
+        :param session_pub_key: session public key to check signature for.
+        """
+        vk = VerifyingKey.from_string(bytes.fromhex(self.server_pub_key), SECP256k1)
+        vk.verify(
+            signature, session_pub_key, hashfunc=hashlib.sha256, sigdecode=sigdecode_der
+        )

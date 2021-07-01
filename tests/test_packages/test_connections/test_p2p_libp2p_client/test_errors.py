@@ -264,3 +264,52 @@ async def test_acn_decode_error_on_read():
         await node_client.read_envelope()
 
     mocked_write_acn_status_error.assert_called_once()
+
+
+@pytest.mark.asyncio
+class TestLibp2pClientConnectionCheckSignature:
+    """Test that TLS signature is checked properly."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        temp_dir = os.path.join(cls.t, "temp_dir_node")
+        os.mkdir(temp_dir)
+        cls.connection_node = _make_libp2p_connection(data_dir=temp_dir, delegate=True)
+        temp_dir_client = os.path.join(cls.t, "temp_dir_client")
+        os.mkdir(temp_dir_client)
+        cls.connection = _make_libp2p_client_connection(
+            data_dir=temp_dir_client, peer_public_key=cls.connection_node.node.pub
+        )
+
+    @pytest.mark.asyncio
+    async def test_signature_check_fail(self):
+        """Test signature check failed."""
+        key = make_crypto(DEFAULT_LEDGER)
+
+        assert self.connection.is_connected is False
+        await self.connection_node.connect()
+        self.connection.connect_retries = 1
+        try:
+            self.connection.node_por._representative_public_key = key.public_key
+            with pytest.raises(
+                ValueError,
+                match=".*Invalid TLS session key signature: Signature verification failed.*",
+            ):
+                await self.connection.connect()
+            assert self.connection.is_connected is False
+        finally:
+            await self.connection_node.disconnect()
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

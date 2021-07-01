@@ -22,6 +22,9 @@ package dhtpeer
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"math/rand"
@@ -1783,6 +1786,27 @@ func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	client.processEnvelope = fn
 }
 
+func ValidateTLSSignature(
+	tlsSignature []byte,
+	sessionPubKey *ecdsa.PublicKey,
+	peerPubKey string,
+) error {
+	sessionPubKeyBytes := elliptic.Marshal(sessionPubKey.Curve, sessionPubKey.X, sessionPubKey.Y)
+	verifyKey, err := utils.PubKeyFromFetchAIPublicKey(peerPubKey)
+	if err != nil {
+		return err
+	}
+	ok, err := verifyKey.Verify(sessionPubKeyBytes, tlsSignature)
+
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("error on signature validation for tls start")
+	}
+	return nil
+}
+
 func SetupDelegateClient(
 	key string,
 	host string,
@@ -1814,7 +1838,19 @@ func SetupDelegateClient(
 	client.PoR = signature
 
 	client.Rx = make(chan *aea.Envelope, 2)
-	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
+	conf := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	client.Conn, err = tls.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10), conf)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	certPubKey := client.Conn.(*tls.Conn).ConnectionState().PeerCertificates[0].PublicKey.(*ecdsa.PublicKey)
+
+	tlsSignature, _ := utils.ReadBytesConn(client.Conn)
+	err = ValidateTLSSignature(tlsSignature, certPubKey, peerPubKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1994,5 +2030,39 @@ func TestEthereumCrypto(t *testing.T) {
 
 	if !valid {
 		t.Errorf("Signer address don't match %s", addFromPublicKey)
+	}
+}
+
+// Perform tests for tls signature generation and checking
+func TestTLSSignatureValidation(t *testing.T) {
+	key1, pubKey, _ := utils.KeyPairFromFetchAIKey(FetchAITestKeys[0])
+	key2, _, _ := utils.KeyPairFromFetchAIKey(FetchAITestKeys[1])
+	peerPubKey, _ := utils.FetchAIPublicKeyFromPubKey(pubKey)
+
+	cert, err := generate_x509_cert()
+	sessionPubKey := cert.PrivateKey.(*ecdsa.PrivateKey).Public().(*ecdsa.PublicKey)
+
+	if err != nil {
+		t.Fatal("Failed to generate certificate")
+	}
+
+	// valid
+	tlsSignature, err := makeSessionKeySignature(cert, key1)
+	if err != nil {
+		t.Fatal("Failed to make signature")
+	}
+	err = ValidateTLSSignature(tlsSignature, sessionPubKey, peerPubKey)
+	if err != nil {
+		t.Fatal("Signature is invalid, but expected to be ok")
+	}
+
+	//invalid
+	tlsSignature, err = makeSessionKeySignature(cert, key2)
+	if err != nil {
+		t.Fatal("Failed to make signature")
+	}
+	err = ValidateTLSSignature(tlsSignature, sessionPubKey, peerPubKey)
+	if err == nil {
+		t.Fatal("Signature is valid, but shoud not")
 	}
 }
