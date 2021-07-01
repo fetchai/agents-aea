@@ -814,8 +814,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         timeout: int = DEFAULT_PROCESS_TIMEOUT,
         period: int = 1,
         is_terminating: bool = True,
-        return_logs: bool = False,
-    ) -> Union[List[str], Tuple[List[str], str]]:
+    ) -> List[str]:
         """
         Check if strings are present in process output.
 
@@ -827,9 +826,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param timeout: int amount of seconds before stopping check.
         :param period: int period of checking.
         :param is_terminating: whether or not the agents are terminated
-        :param return_logs: whether or not to return the agent logs
 
-        :return: list of missed strings and logs if requested.
+        :return: list of missed strings.
         """
         missing_strings = list(strings)
         end_time = time.time() + timeout
@@ -852,9 +850,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "Non-empty missing strings, stdout:\n{}".format(cls.stdout[process.pid])
             )
             _default_logger.info("=====================")
-
-        if return_logs:
-            return (missing_strings, cls.stdout[process.pid])
         return missing_strings
 
     @classmethod

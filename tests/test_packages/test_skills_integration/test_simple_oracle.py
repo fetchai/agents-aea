@@ -213,17 +213,13 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "Successfully connected to libp2p node!",
                 LIBP2P_SUCCESS_MESSAGE,
             )
-            missing_strings, aea_logs = self.missing_from_output(
-                oracle_aea_process,
-                check_strings,
-                timeout=60,
-                is_terminating=False,
-                return_logs=True,
+            missing_strings = self.missing_from_output(
+                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
             )
             assert (
                 missing_strings == []
             ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, aea_logs
+                missing_strings, self.stdout[oracle_aea_process.pid]
             )
 
             check_strings = (
@@ -238,17 +234,13 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "transaction was successfully settled. Transaction receipt=",
                 "Oracle value successfully updated!",
             )
-            missing_strings, aea_logs = self.missing_from_output(
-                oracle_aea_process,
-                check_strings,
-                timeout=60,
-                is_terminating=False,
-                return_logs=True,
+            missing_strings = self.missing_from_output(
+                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
             )
             assert (
                 missing_strings == []
             ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, aea_logs
+                missing_strings, self.stdout[oracle_aea_process.pid]
             )
 
             # Get oracle contract address from file
@@ -272,17 +264,13 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "transaction was successfully settled. Transaction receipt=",
                 "Oracle value successfully requested!",
             )
-            missing_strings, aea_logs = self.missing_from_output(
-                client_aea_process,
-                check_strings,
-                timeout=60,
-                is_terminating=False,
-                return_logs=True,
+            missing_strings = self.missing_from_output(
+                client_aea_process, check_strings, timeout=60, is_terminating=False,
             )
             assert (
                 missing_strings == []
             ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, aea_logs
+                missing_strings, self.stdout[client_aea_process.pid]
             )
 
             self.terminate_agents(oracle_aea_process, client_aea_process)
@@ -469,17 +457,13 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
-        missing_strings, aea_logs = self.missing_from_output(
-            oracle_aea_process,
-            check_strings,
-            timeout=60,
-            is_terminating=False,
-            return_logs=True,
+        missing_strings = self.missing_from_output(
+            oracle_aea_process, check_strings, timeout=60, is_terminating=False,
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in aea output: \n{}".format(
-            missing_strings, aea_logs
+            missing_strings, self.stdout[oracle_aea_process.pid]
         )
 
         check_strings = (
@@ -494,17 +478,13 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             "transaction was successfully settled. Transaction receipt=",
             "Oracle value successfully updated!",
         )
-        missing_strings, aea_logs = self.missing_from_output(
-            oracle_aea_process,
-            check_strings,
-            timeout=60,
-            is_terminating=False,
-            return_logs=True,
+        missing_strings = self.missing_from_output(
+            oracle_aea_process, check_strings, timeout=60, is_terminating=False,
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in aea output: \n{}".format(
-            missing_strings, aea_logs
+            missing_strings, self.stdout[oracle_aea_process.pid]
         )
 
         if ledger_id == FetchAICrypto.identifier:
@@ -529,17 +509,13 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             "transaction was successfully settled. Transaction receipt=",
             "Oracle value successfully requested!",
         )
-        missing_strings, aea_logs = self.missing_from_output(
-            client_aea_process,
-            check_strings,
-            timeout=60,
-            is_terminating=False,
-            return_logs=True,
+        missing_strings = self.missing_from_output(
+            client_aea_process, check_strings, timeout=60, is_terminating=False,
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in aea output: \n{}".format(
-            missing_strings, aea_logs
+            missing_strings, self.stdout[client_aea_process.pid]
         )
 
         self.terminate_agents(oracle_aea_process, client_aea_process)
