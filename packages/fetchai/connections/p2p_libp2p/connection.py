@@ -173,18 +173,6 @@ class NodeClient:
         buf = acn_msg.SerializeToString()
         return buf
 
-    def make_agent_record(self) -> AcnMessage.AgentRecord:  # type: ignore
-        """Make acn agent record."""
-        agent_record = AcnMessage.AgentRecord(
-            address=self.agent_record.address,
-            public_key=self.agent_record.public_key,
-            peer_public_key=self.agent_record.representative_public_key,
-            signature=self.agent_record.signature,
-            service_id=POR_DEFAULT_SERVICE_ID,
-            ledger_id=self.agent_record.ledger_id,
-        )
-        return agent_record
-
     async def read_envelope(self) -> Optional[Envelope]:
         """Read envelope from the node."""
         while True:

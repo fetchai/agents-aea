@@ -173,7 +173,7 @@ class NodeClient:
                 acn_msg = acn_pb2.AcnMessage()
                 acn_msg.ParseFromString(buf)
 
-            except Exception as e:
+            except Exception as e:  # pragma: nocover
                 await self.write_acn_status_error(
                     f"Failed to parse acn message {e}",
                     status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
