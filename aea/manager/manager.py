@@ -771,7 +771,7 @@ class MultiAgentManager:
         agent_task.stop()
         event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
-        if agent_task.is_running:
+        if agent_task.is_running:  # pragma: nocover
             raise ValueError(f"cannot stop task of agent {agent_name}")
 
         return self

@@ -173,7 +173,7 @@ class NodeClient:
         buf = acn_msg.SerializeToString()
         return buf
 
-    def make_agent_record(self) -> AcnMessage.AgentRecord:  # type: ignore
+    def make_agent_record(self) -> AcnMessage.AgentRecord:  # type: ignore  # pragma: nocover
         """Make acn agent record."""
         agent_record = AcnMessage.AgentRecord(
             address=self.agent_record.address,
