@@ -22,7 +22,6 @@ package aea
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -430,48 +429,45 @@ func (aea *AeaApi) stop() {
 */
 const CurrentVersion = "0.1.0"
 
-func MakeAcnMessageFromEnvelope(envelope *Envelope) (error, []byte) {
+func MakeAcnMessageFromEnvelope(envelope *Envelope) ([]byte, error) {
 	envelope_bytes, err := proto.Marshal(envelope)
 	if err != nil {
-		return err, envelope_bytes
+		return envelope_bytes, err
 	}
-	return acn.EncodeAcnEnvelope(envelope_bytes)
+	return acn.EncodeAcnEnvelope(envelope_bytes, nil)
 }
 
 func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
-	err, data := MakeAcnMessageFromEnvelope(envelope)
+	return SendEnvelope(aea.pipe, aea.acn_status_chan, envelope, AcnStatusTimeout)
+}
+
+func SendEnvelope(
+	pipe acn.Pipe,
+	acn_status_chan chan *acn.StatusBody,
+	envelope *Envelope,
+	acnStatusTimeout time.Duration,
+) error {
+	envelope_bytes, err := proto.Marshal(envelope)
 	if err != nil {
 		logger.Error().
 			Str("err", err.Error()).
 			Msgf("while serializing envelope: %s", envelope.String())
 		return err
 	}
-	err = aea.pipe.Write(data)
-	if err != nil {
-		logger.Error().
-			Str("err", err.Error()).
-			Msgf("on pipe write. envelope: %s", envelope.String())
-		return err
-	}
-
-	status, err := acn.WaitForStatus(aea.acn_status_chan, AcnStatusTimeout)
+	err = acn.SendEnvelopeMessageAndWaitForStatus(
+		pipe,
+		envelope_bytes,
+		acn_status_chan,
+		acnStatusTimeout,
+	)
 
 	if err != nil {
 		logger.Error().
 			Str("err", err.Error()).
-			Msgf("on status wait. envelope: %s", envelope.String())
+			Msgf("on send envelope: %s", envelope.String())
 		return err
 	}
-	if status.Code != acn.SUCCESS {
-		logger.Error().
-			Str("op", "send_envelope").
-			Msgf("acn confirmation status is not Status Success: %d. envelope: %s", status.Code, envelope.String())
-		return fmt.Errorf(
-			"send envelope: acn confirmation status is not Status Success: %d",
-			status.Code,
-		)
-	}
-	return err
+	return nil
 }
 
 func (aea AeaApi) AddAcnStatusMessage(status *acn.StatusBody, counterpartyID string) {
