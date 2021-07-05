@@ -465,18 +465,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 
 	streamPipe := utils.StreamPipe{Stream: stream}
 
-	err = acn.SendLookupRequest(streamPipe, target)
-	if err != nil {
-		lerror(err).
-			Str("op", "route").
-			Str("target", target).
-			Msg("while sending LookupRequest message")
-		errReset := stream.Reset()
-		ignore(errReset)
-		return err
-	}
-
-	record, err := acn.ReadLookupResponse(streamPipe)
+	record, err := acn.PerformAddressLookup(streamPipe, target)
 	if err != nil {
 		lerror(err).Str("op", "route").Str("target", target).
 			Msgf("failed agent lookup")

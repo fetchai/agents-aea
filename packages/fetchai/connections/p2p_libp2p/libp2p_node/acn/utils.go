@@ -164,7 +164,6 @@ func SendAcnError(pipe Pipe, error_msg string, err_codes ...Status_ErrCode) erro
 	err = pipe.Write(buf)
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("error on sending acn status message")
-
 	}
 	return err
 }
@@ -308,10 +307,7 @@ func SendLookupRequest(pipe Pipe, address string) error {
 		return err
 	}
 	err = pipe.Write([]byte(buf))
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func ReadLookupResponse(pipe Pipe) (*AgentRecord, error) {
@@ -359,10 +355,7 @@ func SendLookupResponse(pipe Pipe, record *AgentRecord) error {
 		return err
 	}
 	err = pipe.Write(buf)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func SendEnvelopeMessage(pipe Pipe, envelope_bytes []byte, record *AgentRecord) error {
@@ -456,4 +449,12 @@ func ReadEnvelopeMessage(pipe Pipe) (*AeaEnvelopePerformative, error) {
 		return nil, errors.New("unexpected payload for acn message")
 	}
 	return envelope, nil
+}
+
+func PerformAddressLookup(pipe Pipe, address string) (*AgentRecord, error) {
+	err := SendLookupRequest(pipe, address)
+	if err != nil {
+		return nil, err
+	}
+	return ReadLookupResponse(pipe)
 }

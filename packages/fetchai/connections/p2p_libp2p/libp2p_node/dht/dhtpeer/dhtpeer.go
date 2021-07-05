@@ -1209,23 +1209,15 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, *acn.AgentRec
 			linfo().Str("op", "lookup").Str("addr", address).
 				Msgf("getting agent record from provider %s...", provider)
 
-			// prepare LookupRequest
-			err = acn.SendLookupRequest(streamPipe, address)
-			if err != nil {
-				lwarn().Str("op", "lookup").Str("addr", address).
-					Msgf("couldn't send agent lookup request to provider %s (%s), looking up other providers...", provider, err.Error())
-				err = stream.Reset()
-				ignore(err)
-				continue
-			}
+			// perfrormaddress lookup
+			record, err := acn.PerformAddressLookup(streamPipe, address)
 
-			record, err := acn.ReadLookupResponse(streamPipe)
 			// Response is either a LookupResponse or Status
 			ignore(stream.Reset())
 			stream.Close()
 			if err != nil {
 				lwarn().Str("op", "lookup").Str("addr", address).
-					Msgf("Failed agent lookup response from provider %s (%s), looking up other providers...", provider, err.Error())
+					Msgf("Failed agent lookup from provider %s (%s), looking up other providers...", provider, err.Error())
 				continue
 			}
 
