@@ -1769,7 +1769,7 @@ func (client *DelegateClient) Close() error {
 }
 
 func (client *DelegateClient) Send(envelope *aea.Envelope) error {
-	err, data := aea.MakeAcnMessageFromEnvelope(envelope)
+	data, err := aea.MakeAcnMessageFromEnvelope(envelope)
 	if err != nil {
 		println("while serializing envelope:", err.Error())
 		return err
