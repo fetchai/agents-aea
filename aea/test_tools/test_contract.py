@@ -81,7 +81,7 @@ class BaseContractTestCase:
         configuration = load_component_configuration(
             ComponentType.CONTRACT, cls.path_to_contract
         )
-        configuration._directory = cls.path_to_contract
+        configuration._directory = cls.path_to_contract  # pylint: disable=protected-access
         configuration = cast(ContractConfig, configuration)
 
         if str(configuration.public_id) not in contract_registry.specs:
