@@ -188,7 +188,7 @@ class NodeClient:
             except Exception as e:
                 await self.write_acn_status_error(
                     f"Failed to parse acn message {e}",
-                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
                 )
                 raise ValueError(f"Error parsing acn message: {e}") from e
 
@@ -202,7 +202,7 @@ class NodeClient:
                 except Exception as e:
                     await self.write_acn_status_error(
                         f"Failed to decode envelope: {e}",
-                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
+                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
                     )
                     raise
 

@@ -48,11 +48,7 @@ _ACNMESSAGE_STATUSBODY_STATUSCODEENUM = _descriptor.EnumDescriptor(
             name="ERROR_GENERIC", index=3, number=3, serialized_options=None, type=None
         ),
         _descriptor.EnumValueDescriptor(
-            name="ERROR_SERIALIZATION",
-            index=4,
-            number=4,
-            serialized_options=None,
-            type=None,
+            name="ERROR_DECODE", index=4, number=4, serialized_options=None, type=None,
         ),
         _descriptor.EnumValueDescriptor(
             name="ERROR_WRONG_AGENT_ADDRESS",

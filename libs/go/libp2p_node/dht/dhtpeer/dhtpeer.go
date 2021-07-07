@@ -1291,7 +1291,7 @@ func (dhtPeer *DHTPeer) HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError {
 			lerror(err).Msgf("while serializing envelope: %s", envel)
 			return &acn.ACNError{
 				Err:       errors.New("serializing envelope error"),
-				ErrorCode: acn.ERROR_SERIALIZATION,
+				ErrorCode: acn.ERROR_DECODE,
 			}
 		}
 		err = utils.WriteBytesConn(connDelegate, data)

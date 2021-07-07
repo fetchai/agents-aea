@@ -69,7 +69,7 @@ func receiveEnvelopeFromPeer(dhtHandler DHTHandler, stream network.Stream) (*aea
 		ignore(acn.SendAcnError(
 			streamPipe,
 			"while deserializing acn aea envelope message",
-			acn.ERROR_SERIALIZATION,
+			acn.ERROR_DECODE,
 		))
 		return nil, err
 	}

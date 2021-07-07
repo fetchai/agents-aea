@@ -33,7 +33,7 @@ const (
 	AcnMessage_StatusBody_ERROR_UNSUPPORTED_VERSION AcnMessage_StatusBody_StatusCodeEnum = 1
 	AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD  AcnMessage_StatusBody_StatusCodeEnum = 2
 	AcnMessage_StatusBody_ERROR_GENERIC             AcnMessage_StatusBody_StatusCodeEnum = 3
-	AcnMessage_StatusBody_ERROR_SERIALIZATION       AcnMessage_StatusBody_StatusCodeEnum = 4
+	AcnMessage_StatusBody_ERROR_DECODE       AcnMessage_StatusBody_StatusCodeEnum = 4
 	// register (1x)
 	AcnMessage_StatusBody_ERROR_WRONG_AGENT_ADDRESS AcnMessage_StatusBody_StatusCodeEnum = 10
 	AcnMessage_StatusBody_ERROR_WRONG_PUBLIC_KEY    AcnMessage_StatusBody_StatusCodeEnum = 11
@@ -51,7 +51,7 @@ var (
 		1:  "ERROR_UNSUPPORTED_VERSION",
 		2:  "ERROR_UNEXPECTED_PAYLOAD",
 		3:  "ERROR_GENERIC",
-		4:  "ERROR_SERIALIZATION",
+		4:  "ERROR_DECODE",
 		10: "ERROR_WRONG_AGENT_ADDRESS",
 		11: "ERROR_WRONG_PUBLIC_KEY",
 		12: "ERROR_INVALID_PROOF",
@@ -64,7 +64,7 @@ var (
 		"ERROR_UNSUPPORTED_VERSION":   1,
 		"ERROR_UNEXPECTED_PAYLOAD":    2,
 		"ERROR_GENERIC":               3,
-		"ERROR_SERIALIZATION":         4,
+		"ERROR_DECODE":         4,
 		"ERROR_WRONG_AGENT_ADDRESS":   10,
 		"ERROR_WRONG_PUBLIC_KEY":      11,
 		"ERROR_INVALID_PROOF":         12,
