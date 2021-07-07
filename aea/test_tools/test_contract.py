@@ -96,52 +96,6 @@ class BaseContractTestCase:
             cls._contract, cls.ledger_api, cls.deployer_crypto, gas=5000000
         )
 
-    def _deploy_fetchai_contract(self) -> None:
-        """Deploy contract on the Fetch.ai ledger."""
-        tx = self.contract.get_deploy_transaction(
-            ledger_api=self.ledger_api,
-            deployer_address=self.deployer_crypto.address,
-            gas=2000000,
-        )
-        assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
-        assert len(tx_receipt) == 9
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
-
-        code_id = self.ledger_api.get_code_id(tx_receipt)
-
-        assert code_id is not None
-        assert code_id == self.ledger_api.get_last_code_id()
-        self.code_id = code_id
-
-        # Init contract
-        tx = self.contract.get_deploy_transaction(
-            ledger_api=self.ledger_api,
-            deployer_address=self.deployer_crypto.address,
-            code_id=self.code_id,
-            init_msg={},
-            tx_fee=0,
-            amount=0,
-            label="ERC1155",
-            gas=1000000,
-        )
-        assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
-        assert len(tx_receipt) == 9
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
-
-        contract_address = self.ledger_api.get_contract_address(tx_receipt)
-
-        assert contract_address is not None
-        assert contract_address == self.ledger_api.get_last_contract_address(
-            self.code_id
-        )
-        self.contract_address = contract_address
-
     @staticmethod
     def _deploy_ethereum_contract(
         contract: Contract, ledger_api: LedgerApi, deployer_crypto: Crypto, gas: int
