@@ -761,7 +761,7 @@ class Dependency:
             result["ref"] = cast(str, self.ref)
         return {self.name: result}
 
-    def get_pip_install_args(self) -> List[str]:
+    def get_call_pip_args(self) -> List[str]:
         """Get 'pip install' arguments."""
         name = self.name
         index = self.index

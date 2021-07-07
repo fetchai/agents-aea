@@ -947,7 +947,7 @@ def test_package_version_lt():
 
 
 class TestDependencyGetPipInstallArgs:
-    """Test 'get_pip_install_args' of 'Dependency' class."""
+    """Test 'get_call_pip_args' of 'Dependency' class."""
 
     @classmethod
     def setup_class(cls):
@@ -962,14 +962,14 @@ class TestDependencyGetPipInstallArgs:
         """Test only with name and version."""
         # no index and no git
         dep = Dependency(self.package_name, self.version)
-        assert dep.get_pip_install_args() == [
+        assert dep.get_call_pip_args() == [
             f"{self.package_name}{self.version}",
         ]
 
     def test_name_version_index(self):
         """Test the method with name, version and index."""
         dep = Dependency(self.package_name, self.version, self.custom_index)
-        assert dep.get_pip_install_args() == [
+        assert dep.get_call_pip_args() == [
             "-i",
             self.custom_index,
             f"{self.package_name}{self.version}",
@@ -981,7 +981,7 @@ class TestDependencyGetPipInstallArgs:
             self.package_name, self.version, self.custom_index, self.git_url
         )
         git_url = f"git+{self.git_url}@{DEFAULT_GIT_REF}#egg={self.package_name}"
-        assert dep.get_pip_install_args() == ["-i", self.custom_index, git_url]
+        assert dep.get_call_pip_args() == ["-i", self.custom_index, git_url]
 
     def test_name_version_index_git_ref(self):
         """Test the method when name, version, index, git and ref fields are provided."""
@@ -989,7 +989,7 @@ class TestDependencyGetPipInstallArgs:
             self.package_name, self.version, self.custom_index, self.git_url, self.ref
         )
         git_url = f"git+{self.git_url}@{self.ref}#egg={self.package_name}"
-        assert dep.get_pip_install_args() == ["-i", self.custom_index, git_url]
+        assert dep.get_call_pip_args() == ["-i", self.custom_index, git_url]
 
 
 def test_dependencies_from_to_json():
