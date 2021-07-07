@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import Dict, cast
 
 import pytest
-from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.configurations.base import ComponentType, ContractConfig
@@ -35,321 +34,327 @@ from aea.crypto.registries import (
     faucet_apis_registry,
     ledger_apis_registry,
 )
+from aea.test_tools.test_contract import BaseContractTestCase
 
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_PRIVATE_KEY_TWO_PATH,
+    ETHEREUM_TESTNET_CONFIG,
     FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
-    get_register_erc1155,
+    UseGanache,
 )
 
 
-crypto = [
-    (EthereumCrypto.identifier,),
-]
+class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
+    """Test the ERC1155 contract on Ethereum."""
 
+    path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
 
-@pytest.fixture(params=crypto)
-def crypto_api(request):
-    """Crypto api fixture."""
-    crypto_id = request.param[0]
-    api = crypto_registry.make(crypto_id)
-    yield api
+    @classmethod
+    def setup(cls):
+        """Setup."""
+        super().setup(
+            ledger_config=ETHEREUM_TESTNET_CONFIG,
+            deployer_private_key_path=ETHEREUM_PRIVATE_KEY_PATH,
+            item_owner_private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH,
+        )
 
-
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_helper_methods_and_get_transactions(ledger_api, erc1155_contract):
-    """Test helper methods and get transactions."""
-    contract, contract_address = erc1155_contract
-    expected_a = [
-        340282366920938463463374607431768211456,
-        340282366920938463463374607431768211457,
-        340282366920938463463374607431768211458,
-        340282366920938463463374607431768211459,
-        340282366920938463463374607431768211460,
-        340282366920938463463374607431768211461,
-        340282366920938463463374607431768211462,
-        340282366920938463463374607431768211463,
-        340282366920938463463374607431768211464,
-        340282366920938463463374607431768211465,
-    ]
-    actual = contract.generate_token_ids(token_type=1, nb_tokens=10)
-    assert expected_a == actual
-    expected_b = [
-        680564733841876926926749214863536422912,
-        680564733841876926926749214863536422913,
-    ]
-    actual = contract.generate_token_ids(token_type=2, nb_tokens=2)
-    assert expected_b == actual
-    tx = contract.get_deploy_transaction(
-        ledger_api=ledger_api, deployer_address=ETHEREUM_ADDRESS_ONE
-    )
-    assert len(tx) == 6
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [key in tx for key in ["value", "from", "gas", "gasPrice", "nonce"]]
-    ), "Error, found: {}".format(tx)
-    tx = contract.get_create_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=ETHEREUM_ADDRESS_ONE,
-        deployer_address=ETHEREUM_ADDRESS_ONE,
-        token_ids=expected_a,
-    )
-    assert len(tx) == 7
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
-    ), "Error, found: {}".format(tx)
-    tx = contract.get_create_single_transaction(
-        ledger_api=ledger_api,
-        contract_address=ETHEREUM_ADDRESS_ONE,
-        deployer_address=ETHEREUM_ADDRESS_ONE,
-        token_id=expected_b[0],
-    )
-    assert len(tx) == 7
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
-    ), "Error, found: {}".format(tx)
-    mint_quantities = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    tx = contract.get_mint_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=ETHEREUM_ADDRESS_ONE,
-        deployer_address=ETHEREUM_ADDRESS_ONE,
-        recipient_address=ETHEREUM_ADDRESS_ONE,
-        token_ids=expected_a,
-        mint_quantities=mint_quantities,
-    )
-    assert len(tx) == 7
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
-    ), "Error, found: {}".format(tx)
-    mint_quantity = 1
-    tx = contract.get_mint_single_transaction(
-        ledger_api=ledger_api,
-        contract_address=ETHEREUM_ADDRESS_ONE,
-        deployer_address=ETHEREUM_ADDRESS_ONE,
-        recipient_address=ETHEREUM_ADDRESS_ONE,
-        token_id=expected_b[1],
-        mint_quantity=mint_quantity,
-    )
-    assert len(tx) == 7
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [key in tx for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]]
-    ), "Error, found: {}".format(tx)
-
-
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_get_single_atomic_swap(ledger_api, crypto_api, erc1155_contract):
-    """Test get single atomic swap."""
-    contract, contract_address = erc1155_contract
-    from_address = ETHEREUM_ADDRESS_ONE
-    to_address = ETHEREUM_ADDRESS_TWO
-    token_id = contract.generate_token_ids(token_type=2, nb_tokens=1)[0]
-    from_supply = 0
-    to_supply = 10
-    value = 1
-    trade_nonce = 1
-    tx_hash = contract.get_hash_single(
-        ledger_api,
-        contract_address,
-        from_address,
-        to_address,
-        token_id,
-        from_supply,
-        to_supply,
-        value,
-        trade_nonce,
-    )
-    assert isinstance(tx_hash, bytes)
-    signature = crypto_api.sign_message(tx_hash)
-    tx = contract.get_atomic_swap_single_transaction(
-        ledger_api=ledger_api,
-        contract_address=contract_address,
-        from_address=from_address,
-        to_address=to_address,
-        token_id=token_id,
-        from_supply=from_supply,
-        to_supply=to_supply,
-        value=value,
-        trade_nonce=trade_nonce,
-        signature=signature,
-    )
-    assert len(tx) == 8
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [
-            key in tx
-            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "from"]
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_helper_methods_and_get_transactions(self):
+        """Test helper methods and get transactions."""
+        expected_a = [
+            340282366920938463463374607431768211456,
+            340282366920938463463374607431768211457,
+            340282366920938463463374607431768211458,
+            340282366920938463463374607431768211459,
+            340282366920938463463374607431768211460,
+            340282366920938463463374607431768211461,
+            340282366920938463463374607431768211462,
+            340282366920938463463374607431768211463,
+            340282366920938463463374607431768211464,
+            340282366920938463463374607431768211465,
         ]
-    ), "Error, found: {}".format(tx)
-
-
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
-    """Test get batch atomic swap."""
-    contract, contract_address = erc1155_contract
-    from_address = ETHEREUM_ADDRESS_ONE
-    to_address = ETHEREUM_ADDRESS_TWO
-    token_ids = contract.generate_token_ids(token_type=2, nb_tokens=10)
-    from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
-    to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
-    value = 1
-    trade_nonce = 1
-    tx_hash = contract.get_hash_batch(
-        ledger_api,
-        contract_address,
-        from_address,
-        to_address,
-        token_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-    )
-    assert isinstance(tx_hash, bytes)
-    signature = crypto_api.sign_message(tx_hash)
-    tx = contract.get_atomic_swap_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=contract_address,
-        from_address=from_address,
-        to_address=to_address,
-        token_ids=token_ids,
-        from_supplies=from_supplies,
-        to_supplies=to_supplies,
-        value=value,
-        trade_nonce=trade_nonce,
-        signature=signature,
-    )
-    assert len(tx) == 8
-    data = tx.pop("data")
-    assert len(data) > 0 and data.startswith("0x")
-    assert all(
-        [
-            key in tx
-            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "from"]
+        actual = self.contract.generate_token_ids(token_type=1, nb_tokens=10)
+        assert expected_a == actual
+        expected_b = [
+            680564733841876926926749214863536422912,
+            680564733841876926926749214863536422913,
         ]
-    ), "Error, found: {}".format(tx)
+        actual = self.contract.generate_token_ids(token_type=2, nb_tokens=2)
+        assert expected_b == actual
+        tx = self.contract.get_deploy_transaction(
+            ledger_api=self.ledger_api, deployer_address=ETHEREUM_ADDRESS_ONE
+        )
+        assert len(tx) == 6
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [key in tx for key in ["value", "from", "gas", "gasPrice", "nonce"]]
+        ), "Error, found: {}".format(tx)
+        tx = self.contract.get_create_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=ETHEREUM_ADDRESS_ONE,
+            deployer_address=ETHEREUM_ADDRESS_ONE,
+            token_ids=expected_a,
+        )
+        assert len(tx) == 7
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [
+                key in tx
+                for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]
+            ]
+        ), "Error, found: {}".format(tx)
+        tx = self.contract.get_create_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=ETHEREUM_ADDRESS_ONE,
+            deployer_address=ETHEREUM_ADDRESS_ONE,
+            token_id=expected_b[0],
+        )
+        assert len(tx) == 7
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [
+                key in tx
+                for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]
+            ]
+        ), "Error, found: {}".format(tx)
+        mint_quantities = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        tx = self.contract.get_mint_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=ETHEREUM_ADDRESS_ONE,
+            deployer_address=ETHEREUM_ADDRESS_ONE,
+            recipient_address=ETHEREUM_ADDRESS_ONE,
+            token_ids=expected_a,
+            mint_quantities=mint_quantities,
+        )
+        assert len(tx) == 7
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [
+                key in tx
+                for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]
+            ]
+        ), "Error, found: {}".format(tx)
+        mint_quantity = 1
+        tx = self.contract.get_mint_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=ETHEREUM_ADDRESS_ONE,
+            deployer_address=ETHEREUM_ADDRESS_ONE,
+            recipient_address=ETHEREUM_ADDRESS_ONE,
+            token_id=expected_b[1],
+            mint_quantity=mint_quantity,
+        )
+        assert len(tx) == 7
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [
+                key in tx
+                for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to"]
+            ]
+        ), "Error, found: {}".format(tx)
 
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_get_single_atomic_swap(self):
+        """Test get single atomic swap."""
+        from_address = ETHEREUM_ADDRESS_ONE
+        to_address = ETHEREUM_ADDRESS_TWO
+        token_id = self.contract.generate_token_ids(token_type=2, nb_tokens=1)[0]
+        from_supply = 0
+        to_supply = 10
+        value = 1
+        trade_nonce = 1
+        tx_hash = self.contract.get_hash_single(
+            self.ledger_api,
+            self.contract_address,
+            from_address,
+            to_address,
+            token_id,
+            from_supply,
+            to_supply,
+            value,
+            trade_nonce,
+        )
+        assert isinstance(tx_hash, bytes)
+        signature = self.deployer_crypto.sign_message(tx_hash)
+        tx = self.contract.get_atomic_swap_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=from_address,
+            to_address=to_address,
+            token_id=token_id,
+            from_supply=from_supply,
+            to_supply=to_supply,
+            value=value,
+            trade_nonce=trade_nonce,
+            signature=signature,
+        )
+        assert len(tx) == 8
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [
+                key in tx
+                for key in [
+                    "value",
+                    "chainId",
+                    "gas",
+                    "gasPrice",
+                    "nonce",
+                    "to",
+                    "from",
+                ]
+            ]
+        ), "Error, found: {}".format(tx)
 
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_full(update_default_ethereum_ledger_api, ganache):
-    """Setup."""
-    ledger_api = ledger_apis_registry.make(EthereumCrypto.identifier)
-    deployer_crypto = crypto_registry.make(
-        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
-    )
-    item_owner_crypto = crypto_registry.make(
-        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH
-    )
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_get_batch_atomic_swap(self):
+        """Test get batch atomic swap."""
+        from_address = ETHEREUM_ADDRESS_ONE
+        to_address = ETHEREUM_ADDRESS_TWO
+        token_ids = self.contract.generate_token_ids(token_type=2, nb_tokens=10)
+        from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
+        to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+        value = 1
+        trade_nonce = 1
+        tx_hash = self.contract.get_hash_batch(
+            self.ledger_api,
+            self.contract_address,
+            from_address,
+            to_address,
+            token_ids,
+            from_supplies,
+            to_supplies,
+            value,
+            trade_nonce,
+        )
+        assert isinstance(tx_hash, bytes)
+        signature = self.deployer_crypto.sign_message(tx_hash)
+        tx = self.contract.get_atomic_swap_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=from_address,
+            to_address=to_address,
+            token_ids=token_ids,
+            from_supplies=from_supplies,
+            to_supplies=to_supplies,
+            value=value,
+            trade_nonce=trade_nonce,
+            signature=signature,
+        )
+        assert len(tx) == 8
+        data = tx.pop("data")
+        assert len(data) > 0 and data.startswith("0x")
+        assert all(
+            [
+                key in tx
+                for key in [
+                    "value",
+                    "chainId",
+                    "gas",
+                    "gasPrice",
+                    "nonce",
+                    "to",
+                    "from",
+                ]
+            ]
+        ), "Error, found: {}".format(tx)
 
-    contract = get_register_erc1155()
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    def test_full(self):
+        """Setup."""
+        # Test tokens IDs
+        token_ids = self.contract.generate_token_ids(token_type=2, nb_tokens=10)
 
-    # Test tokens IDs
-    token_ids = contract.generate_token_ids(token_type=2, nb_tokens=10)
+        # create
+        tx = self.contract.get_create_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            token_ids=token_ids,
+        )
+        tx_signed = self.deployer_crypto.sign_transaction(tx)
+        tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
+        assert self.ledger_api.is_transaction_settled(receipt)
 
-    # deploy
-    tx = contract.get_deploy_transaction(
-        ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=5000000,
-    )
-    gas = ledger_api.api.eth.estimateGas(transaction=tx)
-    tx["gas"] = gas
-    tx_signed = deployer_crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
-    contract_address = cast(Dict, receipt)["contractAddress"]
+        mint_quantities = [10] * len(token_ids)
+        # mint
+        tx = self.contract.get_mint_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.deployer_crypto.address,
+            token_ids=token_ids,
+            mint_quantities=mint_quantities,
+        )
+        tx_signed = self.deployer_crypto.sign_transaction(tx)
+        tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
+        assert self.ledger_api.is_transaction_settled(receipt)
 
-    # create
-    tx = contract.get_create_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_crypto.address,
-        token_ids=token_ids,
-    )
-    tx_signed = deployer_crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
-    assert ledger_api.is_transaction_settled(receipt)
+        tx = self.contract.get_mint_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.item_owner_crypto.address,
+            token_ids=token_ids,
+            mint_quantities=mint_quantities,
+        )
+        tx_signed = self.deployer_crypto.sign_transaction(tx)
+        tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
+        assert self.ledger_api.is_transaction_settled(receipt)
 
-    mint_quantities = [10] * len(token_ids)
-    # mint
-    tx = contract.get_mint_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_crypto.address,
-        recipient_address=deployer_crypto.address,
-        token_ids=token_ids,
-        mint_quantities=mint_quantities,
-    )
-    tx_signed = deployer_crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
-    assert ledger_api.is_transaction_settled(receipt)
-
-    tx = contract.get_mint_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=contract_address,
-        deployer_address=deployer_crypto.address,
-        recipient_address=item_owner_crypto.address,
-        token_ids=token_ids,
-        mint_quantities=mint_quantities,
-    )
-    tx_signed = deployer_crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
-    assert ledger_api.is_transaction_settled(receipt)
-
-    #  batch trade
-    from_address = deployer_crypto.address
-    to_address = item_owner_crypto.address
-    from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
-    to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
-    value = 0
-    trade_nonce = 1
-    tx_hash = contract.get_hash_batch(
-        ledger_api,
-        contract_address,
-        from_address,
-        to_address,
-        token_ids,
-        from_supplies,
-        to_supplies,
-        value,
-        trade_nonce,
-    )
-    signature = item_owner_crypto.sign_message(tx_hash, is_deprecated_mode=True)
-    tx = contract.get_atomic_swap_batch_transaction(
-        ledger_api=ledger_api,
-        contract_address=contract_address,
-        from_address=from_address,
-        to_address=to_address,
-        token_ids=token_ids,
-        from_supplies=from_supplies,
-        to_supplies=to_supplies,
-        value=value,
-        trade_nonce=trade_nonce,
-        signature=signature,
-    )
-    tx_signed = deployer_crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
-    assert ledger_api.is_transaction_settled(receipt)
+        #  batch trade
+        from_address = self.deployer_crypto.address
+        to_address = self.item_owner_crypto.address
+        from_supplies = [0, 1, 0, 0, 1, 0, 0, 0, 0, 1]
+        to_supplies = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+        value = 0
+        trade_nonce = 1
+        tx_hash = self.contract.get_hash_batch(
+            self.ledger_api,
+            self.contract_address,
+            from_address,
+            to_address,
+            token_ids,
+            from_supplies,
+            to_supplies,
+            value,
+            trade_nonce,
+        )
+        signature = self.item_owner_crypto.sign_message(
+            tx_hash, is_deprecated_mode=True
+        )
+        tx = self.contract.get_atomic_swap_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=from_address,
+            to_address=to_address,
+            token_ids=token_ids,
+            from_supplies=from_supplies,
+            to_supplies=to_supplies,
+            value=value,
+            trade_nonce=trade_nonce,
+            signature=signature,
+        )
+        tx_signed = self.deployer_crypto.sign_transaction(tx)
+        tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
+        assert self.ledger_api.is_transaction_settled(receipt)
 
 
 class TestCosmWasmContract:
