@@ -214,11 +214,13 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 LIBP2P_SUCCESS_MESSAGE,
             )
             missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=30, is_terminating=False
+                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
             )
             assert (
                 missing_strings == []
-            ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+            ), "Strings {} didn't appear in aea output: \n{}".format(
+                missing_strings, self.stdout[oracle_aea_process.pid]
+            )
 
             check_strings = (
                 "setting up HttpHandler",
@@ -233,11 +235,13 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "Oracle value successfully updated!",
             )
             missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False
+                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
             )
             assert (
                 missing_strings == []
-            ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+            ), "Strings {} didn't appear in aea output: \n{}".format(
+                missing_strings, self.stdout[oracle_aea_process.pid]
+            )
 
             # Get oracle contract address from file
             with open(ORACLE_CONTRACT_ADDRESS_FILE) as file:
@@ -261,11 +265,13 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "Oracle value successfully requested!",
             )
             missing_strings = self.missing_from_output(
-                client_aea_process, check_strings, timeout=60, is_terminating=False
+                client_aea_process, check_strings, timeout=60, is_terminating=False,
             )
             assert (
                 missing_strings == []
-            ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+            ), "Strings {} didn't appear in aea output: \n{}".format(
+                missing_strings, self.stdout[client_aea_process.pid]
+            )
 
             self.terminate_agents(oracle_aea_process, client_aea_process)
             assert (
@@ -452,11 +458,13 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            oracle_aea_process, check_strings, timeout=30, is_terminating=False
+            oracle_aea_process, check_strings, timeout=60, is_terminating=False,
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in aea output: \n{}".format(
+            missing_strings, self.stdout[oracle_aea_process.pid]
+        )
 
         check_strings = (
             "setting up HttpHandler",
@@ -471,11 +479,13 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             "Oracle value successfully updated!",
         )
         missing_strings = self.missing_from_output(
-            oracle_aea_process, check_strings, timeout=60, is_terminating=False
+            oracle_aea_process, check_strings, timeout=60, is_terminating=False,
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in aea output: \n{}".format(
+            missing_strings, self.stdout[oracle_aea_process.pid]
+        )
 
         if ledger_id == FetchAICrypto.identifier:
             # Get oracle contract address from file
@@ -500,11 +510,13 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             "Oracle value successfully requested!",
         )
         missing_strings = self.missing_from_output(
-            client_aea_process, check_strings, timeout=60, is_terminating=False
+            client_aea_process, check_strings, timeout=60, is_terminating=False,
         )
         assert (
             missing_strings == []
-        ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+        ), "Strings {} didn't appear in aea output: \n{}".format(
+            missing_strings, self.stdout[client_aea_process.pid]
+        )
 
         self.terminate_agents(oracle_aea_process, client_aea_process)
         assert (

@@ -10,7 +10,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmXqYJSYyymih236DJY7q28vaspHxvxkrFqYiYaAHXfDWo
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmcvfLZLQMZGKbmaGvpVFrmTSciV4bv5SjVLWVvW8wxugV
+  connection.py: QmVWx436dze9KqcRV2dgHYfYfHyKqj1HFk5jXffwiGxC84
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -24,6 +24,7 @@ config:
     public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
   - uri: acn.fetch.ai:11001
     public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
+  tls_connection_signature_timeout: 5.0
 cert_requests:
 - identifier: acn
   ledger_id: fetchai
@@ -41,5 +42,7 @@ cert_requests:
   save_path: .certs/acn_fetch_ai_11001.txt
 excluded_protocols: []
 restricted_to_protocols: []
-dependencies: {}
+dependencies:
+  asn1crypto:
+    version: <1.5.0,>=1.4.0
 is_abstract: false

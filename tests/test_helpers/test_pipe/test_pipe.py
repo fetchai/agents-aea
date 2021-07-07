@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for the pipe module."""
-
 import asyncio
 from threading import Thread
 
@@ -135,6 +134,13 @@ class TestAEAHelperTCPSocketChannel:
 
         connected = await client_pipe.connect()
         assert connected is False
+
+
+def make_future(result) -> asyncio.Future:
+    """Make future for value."""
+    f = asyncio.Future()  # type: ignore
+    f.set_result(result)
+    return f
 
 
 @skip_test_windows

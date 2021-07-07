@@ -26,7 +26,11 @@ from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
-from tests.conftest import FETCHAI_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+from tests.conftest import (
+    FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+    UseSOEF,
+)
 
 
 MAX_RERUNS = 1
@@ -47,7 +51,7 @@ SERVICE_ID = "generic_aggregation_service"
 
 
 @pytest.mark.integration
-class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
+class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
     """Test that simple aggregation skill works."""
 
     @pytest.mark.flaky(reruns=MAX_RERUNS)  # cause possible network issues
@@ -169,6 +173,14 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 self.set_config(setting_path, 20000 + i)
                 setting_path = "vendor.fetchai.connections.http_server.config.port"
                 self.set_config(setting_path, 8000 + i)
+
+            # set SOEF configuration
+            setting_path = "vendor.fetchai.connections.soef.config.is_https"
+            self.set_config(setting_path, False)
+            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+            self.set_config(setting_path, "127.0.0.1")
+            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+            self.set_config(setting_path, 12002)
 
             # set up data request skill to fetch coin price
             self.set_config(

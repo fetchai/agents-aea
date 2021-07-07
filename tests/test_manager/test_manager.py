@@ -326,6 +326,14 @@ class BaseTestMultiAgentManager(TestCase):
 
         self.manager.start_all_agents()
 
+        # check every agent started
+        wait_for_condition(
+            lambda: len(self.manager.list_agents())
+            == len(self.manager.list_agents(running_only=True)),
+            timeout=20,
+            period=0.5,
+        )
+
         with pytest.raises(ValueError, match="is already started!"):
             self.manager.start_agents(self.manager.list_agents())
 
@@ -339,9 +347,17 @@ class BaseTestMultiAgentManager(TestCase):
         """Test stop agent."""
         self.test_start_all()
         wait_for_condition(
-            lambda: self.manager.list_agents(running_only=True), timeout=10
+            lambda: self.manager.list_agents(running_only=True), timeout=20
         )
+
+        agent_task = self.manager._agents_tasks[self.agent_name]
+        wait_for_condition(lambda: agent_task.agent.is_running, timeout=20)
+
         self.manager.stop_all_agents()
+
+        wait_for_condition(
+            lambda: len(self.manager.list_agents(running_only=True)) == 0, timeout=20
+        )
 
         assert not self.manager.list_agents(running_only=True)
 
@@ -408,14 +424,20 @@ class BaseTestMultiAgentManager(TestCase):
     def test_remove_running_agent(self, *args):
         """Test fail on remove running agent."""
         self.test_start_all()
+
         with pytest.raises(ValueError, match="Agent is running. stop it first!"):
             self.manager.remove_agent(self.agent_name)
 
         self.manager.stop_all_agents()
+
+        # wait all stopped
         wait_for_condition(
-            lambda: self.agent_name not in self.manager.list_agents(running_only=True),
-            timeout=5,
+            lambda: len(self.manager.list_agents(running_only=True)) == 0,
+            timeout=20,
+            period=0.5,
         )
+        assert self.agent_name not in self.manager.list_agents(running_only=True)
+
         self.manager.remove_agent(self.agent_name)
         assert self.agent_name not in self.manager.list_agents()
 

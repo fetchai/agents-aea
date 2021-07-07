@@ -713,7 +713,7 @@ class MultiAgentManager:
         return self
 
     def _is_agent_running(self, agent_name: str) -> bool:
-        """Return is agent running state."""
+        """Return is agent task in running state."""
         if agent_name not in self._agents_tasks:
             return False
 
@@ -770,6 +770,9 @@ class MultiAgentManager:
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()
         event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+
+        if agent_task.is_running:  # pragma: nocover
+            raise ValueError(f"cannot stop task of agent {agent_name}")
 
         return self
 

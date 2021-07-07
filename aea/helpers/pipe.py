@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """Portable pipe implementation for Linux, MacOS, and Windows."""
-
 import asyncio
 import errno
 import logging
@@ -28,6 +27,7 @@ import struct
 import tempfile
 from abc import ABC, abstractmethod
 from asyncio import AbstractEventLoop
+from asyncio.streams import StreamWriter
 from shutil import rmtree
 from typing import IO, Optional
 
@@ -270,6 +270,11 @@ class TCPSocketProtocol:
         self._reader = reader
         self._writer = writer
 
+    @property
+    def writer(self) -> StreamWriter:
+        """Get a writer associated with  protocol."""
+        return self._writer
+
     async def write(self, data: bytes) -> None:
         """
         Write to socket.
@@ -315,7 +320,8 @@ class TCPSocketProtocol:
 
     async def close(self) -> None:
         """Disconnect socket."""
-        self._writer.write_eof()
+        if self._writer.can_write_eof():
+            self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
         wait_closed = getattr(self._writer, "wait_closed", None)
@@ -530,6 +536,7 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         self._attempts = TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS
         self._timeout = PIPE_CONN_TIMEOUT / self._attempts
+        self.last_exception: Optional[Exception] = None
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
@@ -551,22 +558,22 @@ class TCPSocketChannelClient(IPCChannelClient):
         while self._attempts > 0:
             self._attempts -= 1
             try:
-                reader, writer = await asyncio.open_connection(
-                    self._host,
-                    self._port,  # pylint: disable=protected-access
-                    loop=self._loop,
-                )
-                self._sock = TCPSocketProtocol(
-                    reader, writer, logger=self.logger, loop=self._loop
-                )
+                self._sock = await self._open_connection()
                 connected = True
                 break
             except ConnectionRefusedError:
                 await asyncio.sleep(self._timeout)
-            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+            except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+                self.last_exception = e
                 return False
 
         return connected
+
+    async def _open_connection(self) -> TCPSocketProtocol:
+        reader, writer = await asyncio.open_connection(
+            self._host, self._port, loop=self._loop,  # pylint: disable=protected-access
+        )
+        return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 
     async def write(self, data: bytes) -> None:
         """
@@ -620,6 +627,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         self._in_path = in_path
         self._out_path = out_path
         self._pipe = None  # type: Optional[PosixNamedPipeProtocol]
+        self.last_exception: Optional[Exception] = None
 
     async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
@@ -635,7 +643,11 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         self._pipe = PosixNamedPipeProtocol(
             self._in_path, self._out_path, logger=self.logger, loop=self._loop
         )
-        return await self._pipe.connect()
+        try:
+            return await self._pipe.connect()
+        except Exception as e:  # pragma: nocover  # pylint: disable=broad-except
+            self.last_exception = e
+            return False
 
     async def write(self, data: bytes) -> None:
         """
