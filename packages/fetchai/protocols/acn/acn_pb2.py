@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="aea.aea.acn.v1_0_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\tacn.proto\x12\x12\x61\x65\x61.aea.acn.v1_0_0"\x99\x0b\n\nAcnMessage\x12P\n\x0c\x61\x65\x61_envelope\x18\x05 \x01(\x0b\x32\x38.aea.aea.acn.v1_0_0.AcnMessage.Aea_Envelope_PerformativeH\x00\x12T\n\x0elookup_request\x18\x06 \x01(\x0b\x32:.aea.aea.acn.v1_0_0.AcnMessage.Lookup_Request_PerformativeH\x00\x12V\n\x0flookup_response\x18\x07 \x01(\x0b\x32;.aea.aea.acn.v1_0_0.AcnMessage.Lookup_Response_PerformativeH\x00\x12H\n\x08register\x18\x08 \x01(\x0b\x32\x34.aea.aea.acn.v1_0_0.AcnMessage.Register_PerformativeH\x00\x12\x44\n\x06status\x18\t \x01(\x0b\x32\x32.aea.aea.acn.v1_0_0.AcnMessage.Status_PerformativeH\x00\x1a\xac\x01\n\x0b\x41gentRecord\x12\x12\n\nservice_id\x18\x01 \x01(\t\x12\x11\n\tledger_id\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x12\n\npublic_key\x18\x04 \x01(\t\x12\x17\n\x0fpeer_public_key\x18\x05 \x01(\t\x12\x11\n\tsignature\x18\x06 \x01(\t\x12\x12\n\nnot_before\x18\x07 \x01(\t\x12\x11\n\tnot_after\x18\x08 \x01(\t\x1a\x99\x03\n\nStatusBody\x12\x46\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x38.aea.aea.acn.v1_0_0.AcnMessage.StatusBody.StatusCodeEnum\x12\x0c\n\x04msgs\x18\x02 \x03(\t"\xb4\x02\n\x0eStatusCodeEnum\x12\x0b\n\x07SUCCESS\x10\x00\x12\x1d\n\x19\x45RROR_UNSUPPORTED_VERSION\x10\x01\x12\x1c\n\x18\x45RROR_UNEXPECTED_PAYLOAD\x10\x02\x12\x11\n\rERROR_GENERIC\x10\x03\x12\x17\n\x13\x45RROR_SERIALIZATION\x10\x04\x12\x1d\n\x19\x45RROR_WRONG_AGENT_ADDRESS\x10\n\x12\x1a\n\x16\x45RROR_WRONG_PUBLIC_KEY\x10\x0b\x12\x17\n\x13\x45RROR_INVALID_PROOF\x10\x0c\x12\x1c\n\x18\x45RROR_UNSUPPORTED_LEDGER\x10\r\x12\x1f\n\x1b\x45RROR_UNKNOWN_AGENT_ADDRESS\x10\x14\x12\x19\n\x15\x45RROR_AGENT_NOT_READY\x10\x15\x1aS\n\x15Register_Performative\x12:\n\x06record\x18\x01 \x01(\x0b\x32*.aea.aea.acn.v1_0_0.AcnMessage.AgentRecord\x1a\x34\n\x1bLookup_Request_Performative\x12\x15\n\ragent_address\x18\x01 \x01(\t\x1aZ\n\x1cLookup_Response_Performative\x12:\n\x06record\x18\x01 \x01(\x0b\x32*.aea.aea.acn.v1_0_0.AcnMessage.AgentRecord\x1ai\n\x19\x41\x65\x61_Envelope_Performative\x12\x10\n\x08\x65nvelope\x18\x01 \x01(\x0c\x12:\n\x06record\x18\x02 \x01(\x0b\x32*.aea.aea.acn.v1_0_0.AcnMessage.AgentRecord\x1aN\n\x13Status_Performative\x12\x37\n\x04\x62ody\x18\x01 \x01(\x0b\x32).aea.aea.acn.v1_0_0.AcnMessage.StatusBodyB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\tacn.proto\x12\x12\x61\x65\x61.aea.acn.v1_0_0"\x92\x0b\n\nAcnMessage\x12P\n\x0c\x61\x65\x61_envelope\x18\x05 \x01(\x0b\x32\x38.aea.aea.acn.v1_0_0.AcnMessage.Aea_Envelope_PerformativeH\x00\x12T\n\x0elookup_request\x18\x06 \x01(\x0b\x32:.aea.aea.acn.v1_0_0.AcnMessage.Lookup_Request_PerformativeH\x00\x12V\n\x0flookup_response\x18\x07 \x01(\x0b\x32;.aea.aea.acn.v1_0_0.AcnMessage.Lookup_Response_PerformativeH\x00\x12H\n\x08register\x18\x08 \x01(\x0b\x32\x34.aea.aea.acn.v1_0_0.AcnMessage.Register_PerformativeH\x00\x12\x44\n\x06status\x18\t \x01(\x0b\x32\x32.aea.aea.acn.v1_0_0.AcnMessage.Status_PerformativeH\x00\x1a\xac\x01\n\x0b\x41gentRecord\x12\x12\n\nservice_id\x18\x01 \x01(\t\x12\x11\n\tledger_id\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x12\n\npublic_key\x18\x04 \x01(\t\x12\x17\n\x0fpeer_public_key\x18\x05 \x01(\t\x12\x11\n\tsignature\x18\x06 \x01(\t\x12\x12\n\nnot_before\x18\x07 \x01(\t\x12\x11\n\tnot_after\x18\x08 \x01(\t\x1a\x92\x03\n\nStatusBody\x12\x46\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x38.aea.aea.acn.v1_0_0.AcnMessage.StatusBody.StatusCodeEnum\x12\x0c\n\x04msgs\x18\x02 \x03(\t"\xad\x02\n\x0eStatusCodeEnum\x12\x0b\n\x07SUCCESS\x10\x00\x12\x1d\n\x19\x45RROR_UNSUPPORTED_VERSION\x10\x01\x12\x1c\n\x18\x45RROR_UNEXPECTED_PAYLOAD\x10\x02\x12\x11\n\rERROR_GENERIC\x10\x03\x12\x10\n\x0c\x45RROR_DECODE\x10\x04\x12\x1d\n\x19\x45RROR_WRONG_AGENT_ADDRESS\x10\n\x12\x1a\n\x16\x45RROR_WRONG_PUBLIC_KEY\x10\x0b\x12\x17\n\x13\x45RROR_INVALID_PROOF\x10\x0c\x12\x1c\n\x18\x45RROR_UNSUPPORTED_LEDGER\x10\r\x12\x1f\n\x1b\x45RROR_UNKNOWN_AGENT_ADDRESS\x10\x14\x12\x19\n\x15\x45RROR_AGENT_NOT_READY\x10\x15\x1aS\n\x15Register_Performative\x12:\n\x06record\x18\x01 \x01(\x0b\x32*.aea.aea.acn.v1_0_0.AcnMessage.AgentRecord\x1a\x34\n\x1bLookup_Request_Performative\x12\x15\n\ragent_address\x18\x01 \x01(\t\x1aZ\n\x1cLookup_Response_Performative\x12:\n\x06record\x18\x01 \x01(\x0b\x32*.aea.aea.acn.v1_0_0.AcnMessage.AgentRecord\x1ai\n\x19\x41\x65\x61_Envelope_Performative\x12\x10\n\x08\x65nvelope\x18\x01 \x01(\x0c\x12:\n\x06record\x18\x02 \x01(\x0b\x32*.aea.aea.acn.v1_0_0.AcnMessage.AgentRecord\x1aN\n\x13Status_Performative\x12\x37\n\x04\x62ody\x18\x01 \x01(\x0b\x32).aea.aea.acn.v1_0_0.AcnMessage.StatusBodyB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -48,7 +48,7 @@ _ACNMESSAGE_STATUSBODY_STATUSCODEENUM = _descriptor.EnumDescriptor(
             name="ERROR_GENERIC", index=3, number=3, serialized_options=None, type=None
         ),
         _descriptor.EnumValueDescriptor(
-            name="ERROR_DECODE", index=4, number=4, serialized_options=None, type=None,
+            name="ERROR_DECODE", index=4, number=4, serialized_options=None, type=None
         ),
         _descriptor.EnumValueDescriptor(
             name="ERROR_WRONG_AGENT_ADDRESS",
@@ -96,7 +96,7 @@ _ACNMESSAGE_STATUSBODY_STATUSCODEENUM = _descriptor.EnumDescriptor(
     containing_type=None,
     serialized_options=None,
     serialized_start=725,
-    serialized_end=1033,
+    serialized_end=1026,
 )
 _sym_db.RegisterEnumDescriptor(_ACNMESSAGE_STATUSBODY_STATUSCODEENUM)
 
@@ -318,7 +318,7 @@ _ACNMESSAGE_STATUSBODY = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=624,
-    serialized_end=1033,
+    serialized_end=1026,
 )
 
 _ACNMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
@@ -355,8 +355,8 @@ _ACNMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1035,
-    serialized_end=1118,
+    serialized_start=1028,
+    serialized_end=1111,
 )
 
 _ACNMESSAGE_LOOKUP_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
@@ -393,8 +393,8 @@ _ACNMESSAGE_LOOKUP_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1120,
-    serialized_end=1172,
+    serialized_start=1113,
+    serialized_end=1165,
 )
 
 _ACNMESSAGE_LOOKUP_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
@@ -431,8 +431,8 @@ _ACNMESSAGE_LOOKUP_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1174,
-    serialized_end=1264,
+    serialized_start=1167,
+    serialized_end=1257,
 )
 
 _ACNMESSAGE_AEA_ENVELOPE_PERFORMATIVE = _descriptor.Descriptor(
@@ -487,8 +487,8 @@ _ACNMESSAGE_AEA_ENVELOPE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1266,
-    serialized_end=1371,
+    serialized_start=1259,
+    serialized_end=1364,
 )
 
 _ACNMESSAGE_STATUS_PERFORMATIVE = _descriptor.Descriptor(
@@ -525,8 +525,8 @@ _ACNMESSAGE_STATUS_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1373,
-    serialized_end=1451,
+    serialized_start=1366,
+    serialized_end=1444,
 )
 
 _ACNMESSAGE = _descriptor.Descriptor(
@@ -652,7 +652,7 @@ _ACNMESSAGE = _descriptor.Descriptor(
         ),
     ],
     serialized_start=34,
-    serialized_end=1467,
+    serialized_end=1460,
 )
 
 _ACNMESSAGE_AGENTRECORD.containing_type = _ACNMESSAGE
