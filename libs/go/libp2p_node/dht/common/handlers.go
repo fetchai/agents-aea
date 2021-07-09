@@ -45,6 +45,7 @@ func ignore(err error) {
 	}
 }
 
+//Abstract DHTHandler that provides logging function and handle for incoming envelopes and ACN address requests
 type DHTHandler interface {
 	GetLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event)
 	HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError
@@ -92,6 +93,7 @@ func receiveEnvelopeFromPeer(dhtHandler DHTHandler, stream network.Stream) (*aea
 	return envel, nil
 }
 
+// handle envelope stream, handle acn protocol and call dhtHandler.HandleAeaEnvelope for incoming envelopes
 func HandleAeaEnvelopeStream(dhtHandler DHTHandler, stream network.Stream) {
 	lerror, _, _, ldebug := dhtHandler.GetLoggers()
 
@@ -123,6 +125,7 @@ func HandleAeaEnvelopeStream(dhtHandler DHTHandler, stream network.Stream) {
 	ignore(err)
 }
 
+// handle address request stream, handle acn protocol and call dhtHandler.HandleAeaAddressRequest for incoming requests
 func HandleAeaAddressStream(dhtHandler DHTHandler, stream network.Stream) {
 	lerror, _, _, ldebug := dhtHandler.GetLoggers()
 

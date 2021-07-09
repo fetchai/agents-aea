@@ -1270,10 +1270,15 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, *acn.AgentRec
 	}
 }
 
+// handleAeaEnvelopeStream deals with incoming envelopes on the AeaEnvelopeStream
+// envelopes arrive from other peers (full or client) and are processed
+// by HandleAeaEnvelope
 func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 	common.HandleAeaEnvelopeStream(dhtPeer, stream)
 }
 
+// Callback to handle and route  aea envelope comes from the aea envelope stream
+// return ACNError if message routing failed, otherwise nil.
 func (dhtPeer *DHTPeer) HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError {
 	var err error
 	lerror, lwarn, linfo, _ := dhtPeer.GetLoggers()
