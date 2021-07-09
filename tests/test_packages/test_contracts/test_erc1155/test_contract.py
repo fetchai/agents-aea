@@ -36,6 +36,8 @@ from aea.crypto.registries import (
 )
 from aea.test_tools.test_contract import BaseContractTestCase
 
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
+
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
@@ -49,10 +51,14 @@ from tests.conftest import (
 )
 
 
+@pytest.mark.ledger
 class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
     """Test the ERC1155 contract on Ethereum."""
 
     path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+
+    def __init__(self):
+        self._contract = cast(ERC1155Contract, self._contract)
 
     @classmethod
     def setup(cls):
@@ -63,8 +69,21 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             item_owner_private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH,
         )
 
+    def test_generate_token_ids(self):
+        """Test the generate_token_ids method of the ERC1155 contract."""
+        # setup
+        expected_toke_ids = [1, 2]
+        self.skill.skill_context._agent_context._shared_state = {
+            "is_game_finished": True
+        }
+
+        # operation
+        actual_toke_ids = self.contract.generate_token_ids(1, 2)
+
+        # after
+        assert actual_toke_ids == expected_toke_ids
+
     @pytest.mark.integration
-    @pytest.mark.ledger
     def test_helper_methods_and_get_transactions(self):
         """Test helper methods and get transactions."""
         expected_a = [
@@ -164,7 +183,6 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ), "Error, found: {}".format(tx)
 
     @pytest.mark.integration
-    @pytest.mark.ledger
     def test_get_single_atomic_swap(self):
         """Test get single atomic swap."""
         from_address = ETHEREUM_ADDRESS_ONE
@@ -218,7 +236,6 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ), "Error, found: {}".format(tx)
 
     @pytest.mark.integration
-    @pytest.mark.ledger
     def test_get_batch_atomic_swap(self):
         """Test get batch atomic swap."""
         from_address = ETHEREUM_ADDRESS_ONE
@@ -272,7 +289,6 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ), "Error, found: {}".format(tx)
 
     @pytest.mark.integration
-    @pytest.mark.ledger
     def test_full(self):
         """Setup."""
         # Test tokens IDs
