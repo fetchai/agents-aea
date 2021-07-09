@@ -73,3 +73,25 @@ def call_pip(pip_args: List[str], timeout: float = 300, retry: bool = False) -> 
         result.returncode == 0,
         f"pip install failed. Return code != 0: stderr is {str(result.stderr)}",
     )
+
+
+def run_install_subprocess(
+    install_command: List[str], install_timeout: float = 300
+) -> int:  # pragma: nocover
+    """
+    Try executing install command.
+
+    :param install_command: list strings of the command
+    :param install_timeout: timeout to wait pip to install
+    :return: the return code of the subprocess
+    """
+    try:
+        subp = subprocess.Popen(install_command)  # nosec
+        subp.wait(install_timeout)
+        return_code = subp.returncode
+    finally:
+        poll = subp.poll()
+        if poll is None:  # pragma: no cover
+            subp.terminate()
+            subp.wait(30)
+    return return_code
