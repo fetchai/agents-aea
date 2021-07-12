@@ -20,7 +20,6 @@
 import asyncio
 import os
 import re
-import sys
 from contextlib import suppress
 from pathlib import Path
 from shutil import rmtree
@@ -36,7 +35,7 @@ from aea.configurations.base import PublicId
 from aea.crypto.helpers import create_private_key
 from aea.crypto.plugin import load_all_plugins
 from aea.crypto.registries import crypto_registry
-from aea.helpers.install_dependency import run_install_subprocess
+from aea.helpers.install_dependency import call_pip
 from aea.manager import MultiAgentManager
 from aea.manager.manager import ProjectPackageConsistencyCheckError
 
@@ -82,14 +81,10 @@ class BaseTestMultiAgentManager(TestCase):
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
-        install_cmd = f"{sys.executable} -m pip install --no-deps {plugin_path}".split(
-            " "
-        )
+        install_cmd = f"install --no-deps {plugin_path}".split(" ")
         try:
             self.manager.start_manager()
-            run_install_subprocess(
-                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
-            )
+            call_pip("uninstall aea-ledger-fetchai -y".split(" "))
             from aea.crypto.registries import ledger_apis_registry
 
             ledger_apis_registry.specs.pop("fetchai", None)
@@ -102,7 +97,7 @@ class BaseTestMultiAgentManager(TestCase):
             self.manager.remove_project(self.project_public_id)
 
             def install_deps(*_):
-                assert run_install_subprocess(install_cmd) == 0, install_cmd
+                call_pip(install_cmd)
 
             with patch(
                 "aea.aea_builder.AEABuilder.install_pypi_dependencies", install_deps
@@ -111,10 +106,8 @@ class BaseTestMultiAgentManager(TestCase):
 
             assert "fetchai" in ledger_apis_registry.specs
         finally:
-            run_install_subprocess(
-                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
-            )
-            run_install_subprocess(install_cmd)
+            call_pip("uninstall aea-ledger-fetchai -y".split(" "))
+            call_pip(install_cmd)
 
     def test_workdir_created_removed(self, *args):
         """Check work dit created removed on MultiAgentManager start and stop."""

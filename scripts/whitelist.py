@@ -266,3 +266,4 @@ _.last_exception  # unused attribute (/home/solarw/MyData/work/fetchai/agents-ae
 _.last_exception  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/pipe.py:567)
 _.last_exception  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/pipe.py:630)
 _.last_exception  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/pipe.py:649)
+run_install_subprocess  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/install_dependency.py:75)
