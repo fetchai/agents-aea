@@ -29,7 +29,7 @@ metadata:
     app: ph-deployment-name-here
 spec:
   serviceName: ph-deployment-name-here
-  replicas: 1
+  replicas: 4
   selector:
     matchLabels:
       app: ph-deployment-name-here 
