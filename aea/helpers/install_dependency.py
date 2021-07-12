@@ -42,7 +42,7 @@ def install_dependency(
     :param install_timeout: timeout to wait pip to install
     """
     try:
-        pip_args = dependency.get_call_pip_args()
+        pip_args = dependency.get_pip_install_args()
         logger.debug("Calling 'pip install {}'".format(" ".join(pip_args)))
         call_pip(["install", *pip_args], timeout=install_timeout, retry=True)
     except Exception as e:
