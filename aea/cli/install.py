@@ -19,7 +19,6 @@
 """Implementation of the 'aea install' subcommand."""
 
 import pprint
-import sys
 from typing import Optional, cast
 
 import click
@@ -29,8 +28,8 @@ from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
 from aea.configurations.data_types import Dependencies
 from aea.configurations.pypi import is_satisfiable, is_simple_dep, to_set_specifier
-from aea.exceptions import AEAException, enforce
-from aea.helpers.install_dependency import install_dependency, run_install_subprocess
+from aea.exceptions import AEAException
+from aea.helpers.install_dependency import call_pip, install_dependency
 
 
 @click.command()
@@ -115,10 +114,7 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
     :raises AEAException: if an error occurs during installation.
     """
     try:
-        returncode = run_install_subprocess(
-            [sys.executable, "-m", "pip", "install", "-r", file], install_timeout
-        )
-        enforce(returncode == 0, "Return code != 0.")
+        call_pip(["install", "-r", file], timeout=install_timeout)
     except Exception:
         raise AEAException(
             "An error occurred while installing requirement file {}. Stopping...".format(

@@ -53,7 +53,7 @@ from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException, AEAWalletNoAddressException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.install_dependency import run_install_subprocess
+from aea.helpers.install_dependency import call_pip
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
@@ -859,9 +859,7 @@ class TestExtraDeps(AEATestCaseEmpty):
         package_name = "async_generator"
         dependency = Dependency(package_name, "==1.10")
         sys.modules.pop(package_name, None)
-        run_install_subprocess(
-            [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
-        )
+        call_pip(["uninstall", package_name, "-y"])
         try:
             import_module(package_name)
 
@@ -879,9 +877,7 @@ class TestExtraDeps(AEATestCaseEmpty):
         import_module(package_name)
 
         sys.modules.pop(package_name)
-        run_install_subprocess(
-            [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
-        )
+        call_pip(["uninstall", package_name, "-y"])
         try:
             import_module(package_name)
 

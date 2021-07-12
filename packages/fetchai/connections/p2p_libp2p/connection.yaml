@@ -22,14 +22,15 @@ fingerprint:
   libp2p_node/aea/pipe.go: QmdY77nQhJt5ojfcpJn2quaxdseGxS8GymQbzNvizkXNoz
   libp2p_node/aea/utils.go: QmZTt7MkLreiA14Hs4tQTREy9vngTPf4kuw4mFN35hxMrM
   libp2p_node/common/common.go: QmeGr6xMzqkBVJMnWzCTcXJVQj2A8RK64mhTSewZJKpiJa
-  libp2p_node/dht/dhtclient/dhtclient.go: QmfVtQSAVeup8MX7Z1JHocHgj62aURJwrXjtWfxspfArTp
+  libp2p_node/dht/common/handlers.go: QmPmzrWaiqNchecNUs2pfKwtgsuGYt4QPfvuwS7H3YoWpU
+  libp2p_node/dht/dhtclient/dhtclient.go: QmeMtf5KP3jzQmF1WSVSky4zkspRCquAuFg3p89F6gSB2R
   libp2p_node/dht/dhtclient/dhtclient_test.go: QmY5YQVYPHYdHc3GXPgbMQBtMstEpYiik1KtZH9ZchJVNh
   libp2p_node/dht/dhtclient/options.go: QmbjHT3ZXFo5GaMDTFbpZVRNiq3KPeoQWuGQuDaz7QJfaU
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   libp2p_node/dht/dhtnode/utils.go: QmUabTTyRXixEEfksTzSNiHsqF9GcQ9qXpfwVY3VNsXBYK
   libp2p_node/dht/dhtpeer/benchmarks_test.go: QmcXvXrdwJtczmqj29Qx4AAmHzSgHSo8fASh91g8AfhVQf
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmNoZqm45DuW2vswgx3wMixVC3nrimbiPraJDfnYWNdWUB
+  libp2p_node/dht/dhtpeer/dhtpeer.go: QmWpXaP12cqv9TH4bE5NArKJQhiFKXd2NLSyjfHayfCzEQ
   libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmYBdpeowc5kSLLQFi46Wx54WZYRW6D488ZWathDDpzP22
   libp2p_node/dht/dhtpeer/options.go: QmYmMiuX9sEKZ3M94AZSnpM8RxuvUCeHGTBjMvifRdXucp
   libp2p_node/dht/dhtpeer/utils.go: QmPWx5716sBX43gkCqHHXMmQ8hcg5KBbXqCsRGAnqJcSZw
@@ -39,7 +40,7 @@ fingerprint:
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
   libp2p_node/go.mod: QmZAefiBvioX9DfJvKWibSbDGnAEo1w9LuoEVzjRoWJGWT
   libp2p_node/go.sum: QmchXxL6fqJWqxPpEQzE6moZpxvpNtP36WHtKWHuuP7oAx
-  libp2p_node/libp2p_node.go: QmShxpoJnAsSvQd5wdEvrf7exmVHVUWgkwwKPy6GkZ9MDy
+  libp2p_node/libp2p_node.go: QmWXySXZ8iwedYTdN28p2v8K1p4anx5dgBvzbGRYg4foWC
   libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
   libp2p_node/mocks/mock_host.go: QmSJ7g6S2PGhC5j8xBQyrjs56hXJGEewkgFgiivyZDthbW
   libp2p_node/mocks/mock_net.go: QmVKnkDdH8XCJ9jriEkZui4NoB36GBYF2DtfX8uCqAthMw
