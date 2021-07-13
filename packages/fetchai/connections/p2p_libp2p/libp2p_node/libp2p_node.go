@@ -167,6 +167,7 @@ func main() {
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
+
 	// SIGTERM for k8s graceful stop support
 	signal.Notify(c, syscall.SIGTERM)
 
