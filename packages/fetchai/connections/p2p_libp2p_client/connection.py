@@ -402,9 +402,7 @@ class P2PLibp2pClientConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self.state = ConnectionStates.connecting
-
-        try:
+        with self._connect_context():
             # connect libp2p client
 
             await self._perform_connection_to_node()
@@ -415,10 +413,6 @@ class P2PLibp2pClientConnection(Connection):
             )
             self._send_queue = asyncio.Queue()
             self._send_task = self.loop.create_task(self._send_loop())
-            self.state = ConnectionStates.connected
-        except (CancelledError, Exception):
-            self.state = ConnectionStates.disconnected
-            raise
 
     async def _perform_connection_to_node(self) -> None:
         """Connect to node with retries."""
@@ -483,8 +477,9 @@ class P2PLibp2pClientConnection(Connection):
         """Disconnect from the channel."""
         if self.is_disconnected:  # pragma: nocover
             return
-        self.logger.debug("disconnecting libp2p client connection...")
+
         self.state = ConnectionStates.disconnecting
+        self.logger.debug("disconnecting libp2p client connection...")
 
         if self._process_messages_task is not None:
             if not self._process_messages_task.done():
@@ -496,16 +491,20 @@ class P2PLibp2pClientConnection(Connection):
                 self._send_task.cancel()
             self._send_task = None
 
-        self.logger.debug("disconnecting libp2p node client connection...")
-        if self._node_client is not None:
-            await self._node_client.close()
+        try:
+            self.logger.debug("disconnecting libp2p node client connection...")
+            if self._node_client is not None:
+                await self._node_client.close()
+        except Exception:  # pragma: nocover  # pylint:disable=broad-except
+            self.logger.exception("exception on node client close")
+            raise
+        finally:
+            # set disconnected state anyway
+            if self._in_queue is not None:
+                self._in_queue.put_nowait(None)
 
-        if self._in_queue is not None:
-            self._in_queue.put_nowait(None)
-        else:  # pragma: no cover
-            self.logger.debug("Called disconnect when input queue not initialized.")
-        self.state = ConnectionStates.disconnected
-        self.logger.debug("libp2p client connection disconnected.")
+            self.state = ConnectionStates.disconnected
+            self.logger.debug("libp2p client connection disconnected.")
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """

@@ -971,6 +971,7 @@ class P2PLibp2pConnection(Connection):
 
             if not self._node_client:
                 raise ValueError("Node is not connected!")  # pragma: nocover
+
             envelope = await self._read_envelope_from_node()
             if envelope is None:
                 break
