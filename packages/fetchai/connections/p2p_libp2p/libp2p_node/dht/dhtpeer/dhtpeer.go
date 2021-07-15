@@ -138,7 +138,9 @@ type DHTPeer struct {
 	tcpListener net.Listener
 	cert        *tls.Certificate
 
-	addressAnnouncedMap       map[string]bool
+	addressAnnouncedMap map[string]bool
+
+	// flag to announce addresses over network if peer connected to other peers
 	enableAddressAnnouncement bool
 
 	myAgentAddress   string
@@ -348,7 +350,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	// if peer is joining an existing network, announce my agent address if set
 	if len(dhtPeer.bootstrapPeers) > 0 {
-		// TOFIX, set to true even when no address present
+		// there are some bootstrap peers so we can announce addresses to them
 		dhtPeer.enableAddressAnnouncement = true
 
 		if dhtPeer.myAgentAddress != "" && !dhtPeer.IsAddressAnnounced(dhtPeer.myAgentAddress) {
@@ -1494,6 +1496,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	duration := timer.GetTimer(start)
 	opLatencyRegister.Observe(float64(duration.Microseconds()))
 	ldebug().Msg("Address was announced")
+	// got a connection to a peer, so now we can allow address announcements
 	dhtPeer.enableAddressAnnouncement = true
 }
 
