@@ -1946,11 +1946,10 @@ func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
 
 func ensureAddressAnnounced(peers ...*DHTPeer) {
 	for _, peer := range peers {
-		peer.addressAnnouncedWg.Wait()
 		ctx, cancel := context.WithTimeout(context.Background(), DHTPeerSetupTimeout)
 		defer cancel()
 	L:
-		for !peer.addressAnnounced {
+		for !peer.IsAddressAnnounced(peer.myAgentAddress) {
 			select {
 			case <-ctx.Done():
 				break L
