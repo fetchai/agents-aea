@@ -30,8 +30,8 @@ fingerprint:
   libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   libp2p_node/dht/dhtnode/utils.go: QmUabTTyRXixEEfksTzSNiHsqF9GcQ9qXpfwVY3VNsXBYK
   libp2p_node/dht/dhtpeer/benchmarks_test.go: QmcXvXrdwJtczmqj29Qx4AAmHzSgHSo8fASh91g8AfhVQf
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmWpXaP12cqv9TH4bE5NArKJQhiFKXd2NLSyjfHayfCzEQ
-  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmYBdpeowc5kSLLQFi46Wx54WZYRW6D488ZWathDDpzP22
+  libp2p_node/dht/dhtpeer/dhtpeer.go: Qmd8EPKA2yDyHKu5EqmBcmMGvJBmtkrW7BfrGdDqTb7PnM
+  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmYPNejqyPTXBKMzia2aT4dSDPG8t2kHf48kmXKwqXhALJ
   libp2p_node/dht/dhtpeer/options.go: QmYmMiuX9sEKZ3M94AZSnpM8RxuvUCeHGTBjMvifRdXucp
   libp2p_node/dht/dhtpeer/utils.go: QmPWx5716sBX43gkCqHHXMmQ8hcg5KBbXqCsRGAnqJcSZw
   libp2p_node/dht/dhttests/dhttests.go: QmSe8XsEhMJAWuokeWtPLXP4m9G5rDEAXrrQWBcma8t71c
@@ -40,7 +40,7 @@ fingerprint:
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
   libp2p_node/go.mod: QmZAefiBvioX9DfJvKWibSbDGnAEo1w9LuoEVzjRoWJGWT
   libp2p_node/go.sum: QmchXxL6fqJWqxPpEQzE6moZpxvpNtP36WHtKWHuuP7oAx
-  libp2p_node/libp2p_node.go: QmPgMQ3g93Jqu4GAv8e7fTWbrGK8hjSp7BDrKj1EuR1WcS
+  libp2p_node/libp2p_node.go: QmShxpoJnAsSvQd5wdEvrf7exmVHVUWgkwwKPy6GkZ9MDy
   libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
   libp2p_node/mocks/mock_host.go: QmSJ7g6S2PGhC5j8xBQyrjs56hXJGEewkgFgiivyZDthbW
   libp2p_node/mocks/mock_net.go: QmVKnkDdH8XCJ9jriEkZui4NoB36GBYF2DtfX8uCqAthMw

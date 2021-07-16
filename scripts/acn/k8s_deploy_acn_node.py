@@ -190,6 +190,8 @@ class AcnK8sPodConfig:
     """Store, parse, and generate kubernetes deployment for an ACN node"""
 
     K8S_DEPLOYMENT_NAME = "ph-deployment-name-here"
+    K8S_NUMBER_OF_REPLICAS = "number-of-replicas"
+    DEFAULT_K8S_NUMBER_OF_REPLICAS = 2
     K8S_NAMESPACE = "ph-deployment-namespace-here"
     K8S_PUBLIC_DNS = "ph-deployment-dns-here"
 
@@ -228,6 +230,7 @@ class AcnK8sPodConfig:
         k8s_public_hostname: str,
         k8s_namespace: str,
         k8s_template_files_dir: str,
+        k8s_number_of_replicas: Optional[int],
         enable_checks: bool = True,
     ):
         """
@@ -246,10 +249,15 @@ class AcnK8sPodConfig:
         :param k8s_namespace: k8s namespace to deploy node to
         :param k8s_template_files_dir: path to directory containing k8s yaml deployment templates
         :param enable_checks: enable configuration checks
+        :param k8s_number_of_replicas: number of replica pods to run
         """
 
         config: Dict[str, str] = dict()
         cls: Type[AcnK8sPodConfig] = AcnK8sPodConfig
+
+        k8s_number_of_replicas = (
+            k8s_number_of_replicas or self.DEFAULT_K8S_NUMBER_OF_REPLICAS
+        )
 
         # acn node configuration
         config[cls.NODE_KEY_NAME] = "node-priv-key-{}".format(acn_port)
@@ -283,6 +291,7 @@ class AcnK8sPodConfig:
             )
 
         # k8s configuration
+        config[cls.K8S_NUMBER_OF_REPLICAS] = str(k8s_number_of_replicas)
         config[cls.K8S_DEPLOYMENT_NAME] = "{}-{}".format(
             cls.Defaults[cls.K8S_DEPLOYMENT_NAME], str(acn_port)
         )
@@ -518,6 +527,15 @@ def parse_commandline():
         help="Docker remote registry",
     )
 
+    parser.add_argument(
+        "--number-of-replicas",
+        action="store",
+        type=int,
+        dest="number_of_replicas",
+        required=False,
+        help="Number of replicas",
+    )
+
     args = parser.parse_args()
 
     # checks
@@ -646,6 +664,7 @@ def main():
             dargs[9],
             dargs[10],
             dargs[11],
+            k8s_number_of_replicas=args.number_of_replicas,
         ).generate_deployment()
 
     if args.generate_only:
