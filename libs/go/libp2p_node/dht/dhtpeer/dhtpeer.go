@@ -138,10 +138,13 @@ type DHTPeer struct {
 	tcpListener net.Listener
 	cert        *tls.Certificate
 
-	addressAnnouncedMap map[string]bool
+	addressAnnouncedMap     map[string]bool
+	addressAnnouncedMapLock sync.RWMutex
 
 	// flag to announce addresses over network if peer connected to other peers
-	enableAddressAnnouncement bool
+	enableAddressAnnouncement     bool
+	enableAddressAnnouncementWg   *sync.WaitGroup
+	enableAddressAnnouncementLock sync.RWMutex
 
 	myAgentAddress   string
 	myAgentRecord    *acn.AgentRecord
@@ -186,6 +189,9 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.persistentStoragePath = defaultPersistentStoragePath
 	dhtPeer.syncMessages = make(map[string](chan *aea.Envelope))
 	dhtPeer.addressAnnouncedMap = map[string]bool{}
+	dhtPeer.addressAnnouncedMapLock = sync.RWMutex{}
+	dhtPeer.enableAddressAnnouncementWg = &sync.WaitGroup{}
+	dhtPeer.enableAddressAnnouncementLock = sync.RWMutex{}
 
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
@@ -831,7 +837,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 	//linfo().Msgf("announcing tcp client address %s...", addr)
 	// TOFIX(LR) disconnect client?
-	if dhtPeer.enableAddressAnnouncement {
+	if dhtPeer.isAddressAnnouncementEnabled() {
 		err = dhtPeer.registerAgentAddress(addr)
 		if err != nil {
 			lerror(err).Msgf("while announcing tcp client address %s to the dht", addr)
@@ -1448,6 +1454,10 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 		routingTableConnectionUpdateTimeout,
 	)
 	defer cancel()
+
+	defer dhtPeer.enableAddressAnnouncementWg.Done()
+	dhtPeer.enableAddressAnnouncementWg.Add(1)
+
 	for dhtPeer.dht.RoutingTable().Find(stream.Conn().RemotePeer()) == "" {
 		select {
 		case <-ctx.Done():
@@ -1497,7 +1507,18 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	opLatencyRegister.Observe(float64(duration.Microseconds()))
 	ldebug().Msg("Address was announced")
 	// got a connection to a peer, so now we can allow address announcements
+	dhtPeer.enableAddressAnnouncementLock.Lock()
 	dhtPeer.enableAddressAnnouncement = true
+	dhtPeer.enableAddressAnnouncementLock.Unlock()
+}
+
+func (dhtPeer *DHTPeer) isAddressAnnouncementEnabled() bool {
+	// wait if new peers connection establish in process
+	dhtPeer.enableAddressAnnouncementWg.Wait()
+	dhtPeer.enableAddressAnnouncementLock.Lock()
+	isEnabled := dhtPeer.enableAddressAnnouncement
+	dhtPeer.enableAddressAnnouncementLock.Unlock()
+	return isEnabled
 }
 
 func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
@@ -1577,7 +1598,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		Str("addr", clientAddr).
 		Msgf("peer added: %s", clientPeerID)
 
-	if dhtPeer.enableAddressAnnouncement && !dhtPeer.IsAddressAnnounced(string(clientAddr)) {
+	if dhtPeer.isAddressAnnouncementEnabled() && !dhtPeer.IsAddressAnnounced(string(clientAddr)) {
 		linfo().Str("op", "register").
 			Str("addr", clientAddr).
 			Msgf("Announcing client address on behalf of %s...", clientPeerID)
@@ -1631,12 +1652,16 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 }
 
 func (dhtPeer *DHTPeer) IsAddressAnnounced(address string) bool {
+	dhtPeer.addressAnnouncedMapLock.Lock()
 	_, present := dhtPeer.addressAnnouncedMap[address]
+	dhtPeer.addressAnnouncedMapLock.Unlock()
 	return present
 }
 
 func (dhtPeer *DHTPeer) setAddressAnnounced(address string) {
+	dhtPeer.addressAnnouncedMapLock.Lock()
 	dhtPeer.addressAnnouncedMap[address] = true
+	dhtPeer.addressAnnouncedMapLock.Unlock()
 }
 
 func (dhtPeer *DHTPeer) AddAcnStatusMessage(status *acn.StatusBody, counterpartyID string) {
