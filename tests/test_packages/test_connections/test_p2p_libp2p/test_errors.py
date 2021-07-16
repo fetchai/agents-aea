@@ -422,9 +422,7 @@ async def test_send_acn_confirm_timeout():
     node_client.ACN_ACK_TIMEOUT = 0.5
     with patch.object(
         node_client, "make_acn_envelope_message", return_value=b"some_data"
-    ), patch.object(
-        node_client, "wait_for_status", side_effect=asyncio.TimeoutError()
-    ), pytest.raises(
+    ), patch("asyncio.wait_for", side_effect=asyncio.TimeoutError()), pytest.raises(
         Exception, match=r"acn status await timeout!"
     ):
         await node_client.send_envelope(Mock())

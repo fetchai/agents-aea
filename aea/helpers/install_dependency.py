@@ -20,6 +20,7 @@
 import subprocess  # nosec
 import sys
 from logging import Logger
+from subprocess import PIPE  # nosec
 from typing import List
 
 from aea.configurations.base import Dependency
@@ -27,7 +28,10 @@ from aea.exceptions import AEAException, enforce
 
 
 def install_dependency(
-    dependency_name: str, dependency: Dependency, logger: Logger
+    dependency_name: str,
+    dependency: Dependency,
+    logger: Logger,
+    install_timeout: float = 300,
 ) -> None:
     """
     Install python dependency to the current python environment.
@@ -35,25 +39,45 @@ def install_dependency(
     :param dependency_name: name of the python package
     :param dependency: Dependency specification
     :param logger: the logger
+    :param install_timeout: timeout to wait pip to install
     """
     try:
         pip_args = dependency.get_pip_install_args()
-        command = [sys.executable, "-m", "pip", "install", *pip_args]
-        logger.debug("Calling '{}'".format(" ".join(command)))
-        return_code = run_install_subprocess(command)
-        if return_code == 1:
-            # try a second time
-            return_code = run_install_subprocess(command)
-        enforce(return_code == 0, "Return code != 0.")
+        logger.debug("Calling 'pip install {}'".format(" ".join(pip_args)))
+        call_pip(["install", *pip_args], timeout=install_timeout, retry=True)
     except Exception as e:
         raise AEAException(
             f"An error occurred while installing {dependency_name}, {dependency}: {e}"
         )
 
 
+def call_pip(pip_args: List[str], timeout: float = 300, retry: bool = False) -> None:
+    """
+    Run pip install command.
+
+    :param pip_args: list strings of the command
+    :param timeout: timeout to wait pip to install
+    :param retry: bool, try one more time if command failed
+    """
+    command = [sys.executable, "-m", "pip", *pip_args]
+
+    result = subprocess.run(  # nosec
+        command, stdout=PIPE, stderr=PIPE, timeout=timeout, check=False
+    )
+    if result.returncode == 1 and retry:
+        # try a second time
+        result = subprocess.run(  # nosec
+            command, stdout=PIPE, stderr=PIPE, timeout=timeout, check=False
+        )
+    enforce(
+        result.returncode == 0,
+        f"pip install failed. Return code != 0: stderr is {str(result.stderr)}",
+    )
+
+
 def run_install_subprocess(
     install_command: List[str], install_timeout: float = 300
-) -> int:
+) -> int:  # pragma: nocover
     """
     Try executing install command.
 

@@ -607,11 +607,13 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 
 // handleAeaEnvelopeStream deals with incoming envelopes on the AeaEnvelopeStream
 // envelopes arrive from other peers (full or client) and are processed
-// by processEnvelope
+// by HandleAeaEnvelope
 func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	common.HandleAeaEnvelopeStream(dhtClient, stream)
 }
 
+// Callback to handle and route  aea envelope comes from the aea envelope stream
+// return ACNError if message routing failed, otherwise nil.
 func (dhtClient *DHTClient) HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError {
 	lerror, lwarn, _, _ := dhtClient.GetLoggers()
 	var err error
