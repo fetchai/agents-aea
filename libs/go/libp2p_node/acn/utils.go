@@ -46,7 +46,7 @@ type Register = acn_protocol.AcnMessage_Register
 type AeaEnvelope = acn_protocol.AcnMessage_AeaEnvelope
 type AeaEnvelopePerformative = acn_protocol.AcnMessage_Aea_Envelope_Performative
 
-const ERROR_SERIALIZATION = acn_protocol.AcnMessage_StatusBody_ERROR_SERIALIZATION
+const ERROR_DECODE = acn_protocol.AcnMessage_StatusBody_ERROR_DECODE
 const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
 const ERROR_UNEXPECTED_PAYLOAD = acn_protocol.AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD
 const ERROR_AGENT_NOT_READY = acn_protocol.AcnMessage_StatusBody_ERROR_AGENT_NOT_READY
@@ -92,7 +92,7 @@ func DecodeAcnMessage(buf []byte) (string, *AeaEnvelopePerformative, *StatusBody
 
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while decoding acn message")
-		return msg_type, nil, nil, &ACNError{ErrorCode: ERROR_SERIALIZATION, Err: err}
+		return msg_type, nil, nil, &ACNError{ErrorCode: ERROR_DECODE, Err: err}
 	}
 	// response is either a LookupResponse or Status
 	var aeaEnvelope *AeaEnvelopePerformative = nil
@@ -213,7 +213,7 @@ func ReadAgentRegistrationMessage(pipe Pipe) (*RegisterPerformative, error) {
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("couldn't deserialize acn registration message")
 		// TOFIX(LR) setting Msgs to err.Error is potentially a security vulnerability
-		acn_send_error := SendAcnError(pipe, err.Error(), ERROR_SERIALIZATION)
+		acn_send_error := SendAcnError(pipe, err.Error(), ERROR_DECODE)
 		ignore(acn_send_error)
 		return nil, err
 	}
@@ -276,7 +276,7 @@ func ReadLookupRequest(pipe Pipe) (string, error) {
 			Str("err", err.Error()).
 			Msgf("couldn't deserialize acn lookup request message")
 		// TOFIX(LR) setting Msgs to err.Error is potentially a security vulnerability
-		acn_send_error := SendAcnError(pipe, err.Error(), ERROR_SERIALIZATION)
+		acn_send_error := SendAcnError(pipe, err.Error(), ERROR_DECODE)
 		ignore(acn_send_error)
 		return "", err
 	}

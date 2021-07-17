@@ -806,3 +806,7 @@ how many times the sender should retry, and how it would help.
 
 Discussion on GitHub: 
 <a href="https://github.com/fetchai/agents-aea/pull/2509#discussion_r642628983" target="_blank">https://github.com/fetchai/agents-aea/pull/2509#discussion_r642628983</a>
+
+### No possibility of switching peers
+
+In case of a peer becoming unavailable, a delegate client or relay client currently has no means to automatically switch the peer. In particular, the DHT should be updated when a client switches peers.
