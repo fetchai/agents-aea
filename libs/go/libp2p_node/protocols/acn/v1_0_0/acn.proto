@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package aea.aea.acn.v1_0_0;
 
-option go_package = "libp2p_node/protocols/acn/v1_0_0";
-
 message AcnMessage{
 
   // Custom Types
