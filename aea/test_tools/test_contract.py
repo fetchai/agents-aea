@@ -20,9 +20,6 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
-from aea_ledger_ethereum import EthereumCrypto
-
-from aea.common import JSONLike
 from aea.configurations.loader import (
     ComponentType,
     ContractConfig,
@@ -37,7 +34,8 @@ class BaseContractTestCase:
     """A class to test a contract."""
 
     path_to_contract: Path = Path(".")
-    ledger_identifier: str = EthereumCrypto.identifier
+    ledger_identifier: str = ""
+    _deployment_gas: int = 5000000
     _contract: Contract
 
     ledger_api: LedgerApi
@@ -58,12 +56,15 @@ class BaseContractTestCase:
     @classmethod
     def setup(cls, **kwargs: Any) -> None:
         """Set up the contract test case."""
-        _ledger_config = cast(Dict[str, str], kwargs.pop("ledger_config", {}))
-        _deployer_private_key_path = cast(
-            Optional[Dict[str, str]], kwargs.pop("deployer_private_key_path", None)
+        if cls.ledger_identifier == "":
+            raise ValueError("ledger_identifier not set!")
+
+        _ledger_config: Dict[str, str] = kwargs.pop("ledger_config", {})
+        _deployer_private_key_path: Optional[str] = kwargs.pop(
+            "deployer_private_key_path", None
         )
-        _item_owner_private_key_path = cast(
-            Optional[Dict[str, str]], kwargs.pop("item_owner_private_key_path", None)
+        _item_owner_private_key_path: Optional[str] = kwargs.pop(
+            "item_owner_private_key_path", None
         )
 
         cls.ledger_api = ledger_apis_registry.make(
@@ -78,13 +79,13 @@ class BaseContractTestCase:
         )
 
         # register contract
-        configuration = load_component_configuration(
-            ComponentType.CONTRACT, cls.path_to_contract
+        configuration = cast(
+            ContractConfig,
+            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
         )
         configuration._directory = (  # pylint: disable=protected-access
             cls.path_to_contract
         )
-        configuration = cast(ContractConfig, configuration)
 
         if str(configuration.public_id) not in contract_registry.specs:
             # load contract into sys modules
@@ -92,30 +93,36 @@ class BaseContractTestCase:
 
         cls._contract = contract_registry.make(str(configuration.public_id))
 
-        cls.contract_address = cls._deploy_ethereum_contract(
-            cls._contract, cls.ledger_api, cls.deployer_crypto, gas=5000000
+        cls.contract_address = cls._deploy_contract(
+            cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas
         )
 
     @staticmethod
-    def _deploy_ethereum_contract(
+    def _deploy_contract(
         contract: Contract, ledger_api: LedgerApi, deployer_crypto: Crypto, gas: int
     ) -> str:
-        """Deploy contract on Ethereum."""
-        tx = cast(
-            JSONLike,
-            contract.get_deploy_transaction(
-                ledger_api=ledger_api,
-                deployer_address=deployer_crypto.address,
-                gas=gas,
-            ),
+        """Deploy contract on network."""
+        tx = contract.get_deploy_transaction(
+            ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=gas,
         )
 
-        if tx is not None:
-            gas = ledger_api.api.eth.estimateGas(transaction=tx)
-            tx["gas"] = gas
+        if tx is None:
+            raise ValueError("Deploy transaction not found!")
 
-            tx_signed = deployer_crypto.sign_transaction(tx)
-            tx_digest = cast(str, ledger_api.send_signed_transaction(tx_signed))
-            receipt = ledger_api.get_transaction_receipt(tx_digest)
+        tx_signed = deployer_crypto.sign_transaction(tx)
+        tx_digest = ledger_api.send_signed_transaction(tx_signed)
 
-        return cast(Dict, receipt)["contractAddress"]
+        if tx_digest is None:
+            raise ValueError("Transaction digest not found!")
+
+        tx_receipt = ledger_api.get_transaction_receipt(tx_digest)
+
+        if tx_receipt is None:
+            raise ValueError("Transaction receipt not found!")
+
+        address = ledger_api.get_contract_address(tx_receipt)
+
+        if address is None:
+            raise ValueError("Contract address not found!")
+
+        return address
