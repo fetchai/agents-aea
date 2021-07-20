@@ -57,9 +57,6 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
 
     path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
 
-    def __init__(self):
-        self._contract = cast(ERC1155Contract, self._contract)
-
     @classmethod
     def setup(cls):
         """Setup."""
@@ -72,16 +69,31 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
     def test_generate_token_ids(self):
         """Test the generate_token_ids method of the ERC1155 contract."""
         # setup
-        expected_toke_ids = [1, 2]
-        self.skill.skill_context._agent_context._shared_state = {
-            "is_game_finished": True
-        }
+        nft_token_type = 1
+        nb_tokens = 2
+        expected_toke_ids = [
+            340282366920938463463374607431768211456,
+            340282366920938463463374607431768211457,
+        ]
 
         # operation
-        actual_toke_ids = self.contract.generate_token_ids(1, 2)
+        actual_toke_ids = self.contract.generate_token_ids(nft_token_type, nb_tokens)
 
         # after
         assert actual_toke_ids == expected_toke_ids
+
+    def test_generate_id(self):
+        """Test the _generate_id method of the ERC1155 contract."""
+        # setup
+        ft_token_type = 2
+        index = 0
+        expected_toke_id = 680564733841876926926749214863536422912
+
+        # operation
+        actual_toke_id = self.contract._generate_id(index, ft_token_type)
+
+        # after
+        assert actual_toke_id == expected_toke_id
 
     @pytest.mark.integration
     def test_helper_methods_and_get_transactions(self):
