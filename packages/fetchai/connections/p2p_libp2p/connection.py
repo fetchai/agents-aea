@@ -143,12 +143,23 @@ class NodeClient:
         self._wait_status = asyncio.Future()
         buf = self.make_acn_envelope_message(envelope)
         await self._write(buf)
+
+        status = await self.wait_for_status()
+
+        if status.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore  # pylint: disable=no-member
+            raise ValueError(  # pragma: nocover
+                f"failed to send envelope. got error confirmation: {status.code}"
+            )
+
+    async def wait_for_status(self) -> Any:
+        """Get status."""
+        if self._wait_status is None:  # pragma: nocover
+            raise ValueError("value failed!")
         try:
-            status = await self.wait_for_status()
-            if status.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore  # pylint: disable=no-member
-                raise ValueError(  # pragma: nocover
-                    f"failed to send envelope. got error confirmation: {status.code}"
-                )
+            status = await asyncio.wait_for(
+                self._wait_status, timeout=self.ACN_ACK_TIMEOUT
+            )
+            return status
         except asyncio.TimeoutError:  # pragma: nocover
             if not self._wait_status.done():  # pragma: nocover
                 self._wait_status.set_exception(Exception("Timeout"))
@@ -156,12 +167,6 @@ class NodeClient:
             raise ValueError("acn status await timeout!")
         finally:
             self._wait_status = None
-
-    async def wait_for_status(self) -> Any:
-        """Get status."""
-        if self._wait_status is None:  # pragma: nocover
-            raise ValueError("value failed!")
-        return await asyncio.wait_for(self._wait_status, timeout=self.ACN_ACK_TIMEOUT)
 
     @staticmethod
     def make_acn_envelope_message(envelope: Envelope) -> bytes:
@@ -188,7 +193,7 @@ class NodeClient:
             except Exception as e:
                 await self.write_acn_status_error(
                     f"Failed to parse acn message {e}",
-                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
                 )
                 raise ValueError(f"Error parsing acn message: {e}") from e
 
@@ -202,7 +207,7 @@ class NodeClient:
                 except Exception as e:
                     await self.write_acn_status_error(
                         f"Failed to decode envelope: {e}",
-                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_SERIALIZATION,
+                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
                     )
                     raise
 
@@ -803,9 +808,8 @@ class P2PLibp2pConnection(Connection):
         """Set up the connection."""
         if self.is_connected:
             return  # pragma: nocover
-        try:
             # start libp2p node
-            self.state = ConnectionStates.connecting
+        with self._connect_context():
             self.node.logger = self.logger
             await self._start_node()
             # starting receiving msgs
@@ -815,10 +819,6 @@ class P2PLibp2pConnection(Connection):
                 self._receive_from_node(), loop=self.loop
             )
             self._send_task = self.loop.create_task(self._send_loop())
-            self.state = ConnectionStates.connected
-        except (CancelledError, Exception) as e:
-            self.state = ConnectionStates.disconnected
-            raise e
 
     async def _start_node(self) -> None:
         """Start node and set node client instance."""
@@ -836,23 +836,25 @@ class P2PLibp2pConnection(Connection):
             return  # pragma: nocover
 
         self.state = ConnectionStates.disconnecting
+        try:
 
-        if self._receive_from_node_task is not None:
-            self._receive_from_node_task.cancel()
-            self._receive_from_node_task = None
+            if self._receive_from_node_task is not None:
+                self._receive_from_node_task.cancel()
+                self._receive_from_node_task = None
 
-        if self._send_task is not None:
-            self._send_task.cancel()
-            self._send_task = None
+            if self._send_task is not None:
+                self._send_task.cancel()
+                self._send_task = None
 
-        await self.node.stop()
-        if self._in_queue is not None:
-            self._in_queue.put_nowait(None)
-        else:
-            self.logger.debug(  # pragma: nocover
-                "Called disconnect when input queue not initialized."
-            )
-        self.state = ConnectionStates.disconnected
+            await self.node.stop()
+            if self._in_queue is not None:
+                self._in_queue.put_nowait(None)
+            else:
+                self.logger.debug(  # pragma: nocover
+                    "Called disconnect when input queue not initialized."
+                )
+        finally:
+            self.state = ConnectionStates.disconnected
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
@@ -932,7 +934,7 @@ class P2PLibp2pConnection(Connection):
             raise  # pragma: nocover
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             self.logger.exception(
-                f"Failed to send an aenvelope {envelope}. Stop connection."
+                f"Failed to send an envelope {envelope}. Stop connection."
             )
             await asyncio.shield(self.disconnect())
 
@@ -971,6 +973,7 @@ class P2PLibp2pConnection(Connection):
 
             if not self._node_client:
                 raise ValueError("Node is not connected!")  # pragma: nocover
+
             envelope = await self._read_envelope_from_node()
             if envelope is None:
                 break

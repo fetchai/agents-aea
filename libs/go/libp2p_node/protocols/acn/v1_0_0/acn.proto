@@ -25,7 +25,7 @@ message AcnMessage{
       ERROR_UNSUPPORTED_VERSION = 1;
       ERROR_UNEXPECTED_PAYLOAD = 2;
       ERROR_GENERIC = 3;
-      ERROR_SERIALIZATION = 4;
+      ERROR_DECODE = 4;
       // register (1x)
       ERROR_WRONG_AGENT_ADDRESS = 10;
       ERROR_WRONG_PUBLIC_KEY = 11;

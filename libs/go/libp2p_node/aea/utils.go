@@ -68,7 +68,7 @@ func HandleAcnMessageFromPipe(
 				acn_err = acn.SendAcnError(
 					pipe,
 					"error on decoding envelope",
-					acn.ERROR_SERIALIZATION,
+					acn.ERROR_DECODE,
 				)
 				if acn_err != nil {
 					logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")

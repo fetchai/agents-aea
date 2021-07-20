@@ -533,6 +533,9 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
+
+    def teardown(self):
+        """Clean up after test case run."""
         self.unset_agent_context()
         self.run_cli_command("delete", self.agent_name)
 
@@ -595,10 +598,12 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
         process = self.run_agent()
         is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
-
         self.terminate_agents(process)
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
+
+    def teardown(self):
+        """Clean up after test case run."""
         self.unset_agent_context()
         self.run_cli_command("delete", self.agent_name)

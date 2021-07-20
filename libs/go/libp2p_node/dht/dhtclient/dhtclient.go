@@ -49,6 +49,7 @@ import (
 
 	acn "libp2p_node/acn"
 	aea "libp2p_node/aea"
+	common "libp2p_node/dht/common"
 	"libp2p_node/dht/dhtnode"
 	utils "libp2p_node/utils"
 )
@@ -204,7 +205,7 @@ func New(opts ...Option) (*DHTClient, error) {
 	dhtClient.relayPeer = dhtClient.bootstrapPeers[index].ID
 
 	dhtClient.setupLogger()
-	_, _, linfo, ldebug := dhtClient.getLoggers()
+	_, _, linfo, ldebug := dhtClient.GetLoggers()
 	linfo().Msg("INFO Using as relay")
 
 	/* setup libp2p node */
@@ -283,7 +284,7 @@ func New(opts ...Option) (*DHTClient, error) {
 
 // bootstrapLoopUntilTimeout loops until connection to bootstrap peers established or timeout reached
 func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
-	lerror, _, _, _ := dhtClient.getLoggers()
+	lerror, _, _, _ := dhtClient.GetLoggers()
 	ctx, cancel := context.WithTimeout(context.Background(), bootstrapTimeout)
 	defer cancel()
 	err := utils.BootstrapConnect(
@@ -320,7 +321,7 @@ func (dhtClient *DHTClient) newStreamLoopUntilTimeout(
 	streamType protocol.ID,
 	timeout time.Duration,
 ) (network.Stream, error) {
-	lerror, _, _, _ := dhtClient.getLoggers()
+	lerror, _, _, _ := dhtClient.GetLoggers()
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	stream, err := dhtClient.routedHost.NewStream(ctx, peerID, streamType)
@@ -362,8 +363,8 @@ func (dhtClient *DHTClient) setupLogger() {
 	dhtClient.logger = utils.NewDefaultLoggerWithFields(fields)
 }
 
-// getLoggers gets the various logger levels of the DHTClient
-func (dhtClient *DHTClient) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
+// GetLoggers gets the various logger levels of the DHTClient
+func (dhtClient *DHTClient) GetLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
 	ldebug := dhtClient.logger.Debug
 	linfo := dhtClient.logger.Info
 	lwarn := dhtClient.logger.Warn
@@ -383,7 +384,7 @@ func (dhtClient *DHTClient) Close() []error {
 	var err error
 	var status []error
 
-	_, _, linfo, _ := dhtClient.getLoggers()
+	_, _, linfo, _ := dhtClient.GetLoggers()
 
 	linfo().Msg("Stopping DHTClient...")
 	close(dhtClient.closing)
@@ -409,7 +410,7 @@ func (dhtClient *DHTClient) MultiAddr() string {
 
 // RouteEnvelope routes the provided envelope to its destination contact peer
 func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
-	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
+	lerror, lwarn, _, ldebug := dhtClient.GetLoggers()
 
 	// only send envelopes from own agent
 	if envel.Sender != dhtClient.myAgentAddress {
@@ -606,131 +607,65 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 
 // handleAeaEnvelopeStream deals with incoming envelopes on the AeaEnvelopeStream
 // envelopes arrive from other peers (full or client) and are processed
-// by processEnvelope
+// by HandleAeaEnvelope
 func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
-	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
+	common.HandleAeaEnvelopeStream(dhtClient, stream)
+}
 
-	//ldebug().Msgf("Got a new aea envelope stream")
-	streamPipe := utils.StreamPipe{Stream: stream}
-
-	aeaEnvelope, err := acn.ReadEnvelopeMessage(streamPipe)
-	if err != nil {
-		lerror(err).Msg("while handling acn envelope message")
-		ignore(err)
-		err = stream.Close()
-		ignore(err)
-		return
-	}
-
-	envel := &aea.Envelope{}
-	err = proto.Unmarshal(aeaEnvelope.Envelope, envel)
-	if err != nil {
-		lerror(err).Msg("while deserializing acn aea envelope message")
-		err = acn.SendAcnError(
-			streamPipe,
-			"while deserializing acn aea envelope message",
-			acn.ERROR_SERIALIZATION,
-		)
-		ignore(err)
-		err = stream.Close()
-		ignore(err)
-		return
-	}
-
-	remotePubkey, err := utils.FetchAIPublicKeyFromPubKey(stream.Conn().RemotePublicKey())
-	ignore(err)
-	status, err := dhtnode.IsValidProofOfRepresentation(
-		aeaEnvelope.Record,
-		aeaEnvelope.Record.Address,
-		remotePubkey,
-	)
-	if err != nil || status.Code != acn.SUCCESS {
-		if err == nil {
-			err = errors.New(status.Code.String() + ":" + strings.Join(status.Msgs, ":"))
-		}
-		lerror(err).Msg("incoming envelope PoR is not valid")
-		err = acn.SendAcnError(streamPipe, "incoming envelope PoR is not valid", status.Code)
-		ignore(err)
-		err = stream.Close()
-		ignore(err)
-		return
-	}
-
-	ldebug().Msgf("Received envelope from peer %s", envel.String())
-
+// Callback to handle and route  aea envelope comes from the aea envelope stream
+// return ACNError if message routing failed, otherwise nil.
+func (dhtClient *DHTClient) HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError {
+	lerror, lwarn, _, _ := dhtClient.GetLoggers()
+	var err error
 	if envel.To == dhtClient.myAgentAddress && dhtClient.processEnvelope != nil {
 		err = dhtClient.processEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while processing envelope by agent")
-			err = acn.SendAcnError(streamPipe, "agent is not ready", acn.ERROR_AGENT_NOT_READY)
-			ignore(err)
-			err = stream.Close()
-			ignore(err)
-			return
+			return &acn.ACNError{
+				Err:       errors.New("agent is not ready"),
+				ErrorCode: acn.ERROR_AGENT_NOT_READY,
+			}
 		}
 	} else {
 		lwarn().Msgf("ignored envelope from unknown agent %s", envel.String())
-		err = acn.SendAcnError(streamPipe, "unknown agent address", acn.ERROR_UNKNOWN_AGENT_ADDRESS)
-		ignore(err)
-		err = stream.Close()
-		ignore(err)
-		return
+		return &acn.ACNError{Err: errors.New("unknown agent address"), ErrorCode: acn.ERROR_UNKNOWN_AGENT_ADDRESS}
 	}
-
-	err = acn.SendAcnSuccess(streamPipe)
-	ignore(err)
-	err = stream.Close()
-	ignore(err)
+	return nil
 }
 
 // handleAeaAddressStream deals with incoming envelopes on the AeaAddressStream
 // agent record lookup requests arrive from other peers (full or client) and are
 // served with the agent record (if applicable)
 func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
-	lerror, _, _, ldebug := dhtClient.getLoggers()
+	common.HandleAeaAddressStream(dhtClient, stream)
+}
 
-	//ldebug().Msg("Got a new aea address stream")
-
-	// get LookupRequest
-	streamPipe := utils.StreamPipe{Stream: stream}
-	reqAddress, err := acn.ReadLookupRequest(streamPipe)
-	if err != nil {
-		lerror(err).Str("op", "resolve").
-			Msg("while reading message from stream")
-		err = stream.Reset()
-		ignore(err)
-		return
-	}
-
+func (dhtClient *DHTClient) HandleAeaAddressRequest(
+	reqAddress string,
+) (*acn.AgentRecord, *acn.ACNError) {
+	lerror, _, _, ldebug := dhtClient.GetLoggers()
 	ldebug().
 		Str("op", "resolve").
 		Str("target", reqAddress).
 		Msg("Received query for addr")
+
 	if reqAddress != dhtClient.myAgentAddress {
-		lerror(err).
+		lerror(errors.New("unknown agent address")).
 			Str("op", "resolve").
 			Str("target", reqAddress).
 			Msgf("requested address different from advertised one %s", dhtClient.myAgentAddress)
-		err = acn.SendAcnError(streamPipe, "unknown agent address", acn.ERROR_UNKNOWN_AGENT_ADDRESS)
-		ignore(err) // TODO(LR) stream.Reset() if err
-		err = stream.Close()
-		ignore(err)
-		return
-	} else {
-		err = acn.SendLookupResponse(streamPipe, dhtClient.myAgentRecord)
-		if err != nil {
-			lerror(err).Str("op", "resolve").Str("addr", reqAddress).
-				Msg("while sending agent record to peer")
-			err = stream.Reset()
-			ignore(err)
+		return nil, &acn.ACNError{
+			Err:       errors.New("unknown agent address"),
+			ErrorCode: acn.ERROR_UNKNOWN_AGENT_ADDRESS,
 		}
+	} else {
+		return dhtClient.myAgentRecord, nil
 	}
-
 }
 
 // registerAgentAddress registers agent address to relay peer
 func (dhtClient *DHTClient) registerAgentAddress() error {
-	lerror, _, _, ldebug := dhtClient.getLoggers()
+	lerror, _, _, ldebug := dhtClient.GetLoggers()
 
 	ldebug().
 		Str("op", "register").

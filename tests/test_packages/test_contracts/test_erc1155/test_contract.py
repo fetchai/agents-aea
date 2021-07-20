@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Dict, cast
 
 import pytest
+from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.configurations.base import ComponentType, ContractConfig
@@ -55,6 +56,7 @@ from tests.conftest import (
 class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
     """Test the ERC1155 contract on Ethereum."""
 
+    ledger_identifier = EthereumCrypto.identifier
     path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
 
     @classmethod
