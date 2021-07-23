@@ -41,6 +41,7 @@ No further configuration is needed to use the default. To use the advanced decis
 decision_maker_handler:
    dotted_path: "aea.decision_maker.gop:DecisionMakerHandler"
    file_path: null
+   config: {}
 ```
 
 The easiest way to add a custom decision maker handler is to run the following command to scaffold a custom `DecisionMakerHandler`:
