@@ -19,25 +19,15 @@
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
 
+import re
 import time
 from pathlib import Path
-from typing import Dict, cast
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
-from aea.configurations.base import ComponentType, ContractConfig
-from aea.configurations.loader import load_component_configuration
-from aea.contracts.base import Contract, contract_registry
-from aea.crypto.registries import (
-    crypto_registry,
-    faucet_apis_registry,
-    ledger_apis_registry,
-)
 from aea.test_tools.test_contract import BaseContractTestCase
-
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
@@ -45,7 +35,6 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_PRIVATE_KEY_TWO_PATH,
     ETHEREUM_TESTNET_CONFIG,
-    FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
     UseGanache,
@@ -67,6 +56,21 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             deployer_private_key_path=ETHEREUM_PRIVATE_KEY_PATH,
             item_owner_private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH,
         )
+
+        cls.token_ids_a = [
+            340282366920938463463374607431768211456,
+            340282366920938463463374607431768211457,
+            340282366920938463463374607431768211458,
+            340282366920938463463374607431768211459,
+            340282366920938463463374607431768211460,
+            340282366920938463463374607431768211461,
+            340282366920938463463374607431768211462,
+            340282366920938463463374607431768211463,
+            340282366920938463463374607431768211464,
+            340282366920938463463374607431768211465,
+        ]
+
+        cls.token_id_b = 680564733841876926926749214863536422912
 
     def test_generate_token_ids(self):
         """Test the generate_token_ids method of the ERC1155 contract."""
@@ -96,6 +100,158 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
 
         # after
         assert actual_toke_id == expected_toke_id
+
+    def test_get_create_batch_transaction(self):
+        """Test the get_create_batch_transaction method of the ERC1155 contract."""
+        # operation
+        tx = self.contract.get_create_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            token_ids=self.token_ids_a,
+        )
+
+        # after
+        assert len(tx) == 7
+        assert all(
+            key in tx
+            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
+        )
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
+
+    def test_get_create_single_transaction(self):
+        """Test the get_create_single_transaction method of the ERC1155 contract."""
+        # operation
+        tx = self.contract.get_create_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            token_id=self.token_id_b,
+        )
+
+        # after
+        assert len(tx) == 7
+        assert all(
+            key in tx
+            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
+        )
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
+
+    def test_get_mint_batch_transaction(self):
+        """Test the get_mint_batch_transaction method of the ERC1155 contract."""
+        # operation
+        tx = self.contract.get_mint_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.item_owner_crypto.address,
+            token_ids=self.token_ids_a,
+            mint_quantities=[1] * len(self.token_ids_a),
+        )
+
+        # after
+        assert len(tx) == 7
+        assert all(
+            key in tx
+            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
+        )
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
+
+    def test_validate_mint_quantities(self):
+        """Test the validate_mint_quantities method of the ERC1155 contract."""
+        # Valid NFTs
+        self.contract.validate_mint_quantities(
+            token_ids=self.token_ids_a, mint_quantities=[1] * len(self.token_ids_a),
+        )
+
+        # Valid FTs
+        token_id = 680564733841876926926749214863536422912
+        mint_quantity = 1
+        self.contract.validate_mint_quantities(
+            token_ids=[token_id], mint_quantities=[mint_quantity],
+        )
+
+        # Invalid NFTs
+        token_id = self.token_ids_a[0]
+        mint_quantity = 2
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                f"Cannot mint NFT (token_id={token_id}) with mint_quantity more than 1 (found={mint_quantity})"
+            ),
+        ):
+            self.contract.validate_mint_quantities(
+                token_ids=[token_id], mint_quantities=[mint_quantity],
+            )
+
+        # Invalid: neither NFT nor FT
+        token_id = 1020847100762815390390123822295304634368
+        mint_quantity = 1
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                f"The token type must be 1 or 2. Found type=3 for token_id={token_id}"
+            ),
+        ):
+            self.contract.validate_mint_quantities(
+                token_ids=[token_id], mint_quantities=[mint_quantity],
+            )
+
+    def test_decode_id(self):
+        """Test the decode_id method of the ERC1155 contract."""
+        # FT
+        expected_token_type = 2
+        token_id = 680564733841876926926749214863536422912
+        actual_token_type = self.contract.decode_id(token_id)
+        assert actual_token_type == expected_token_type
+
+        # NFT
+        expected_token_type = 1
+        token_id = 340282366920938463463374607431768211456
+        actual_token_type = self.contract.decode_id(token_id)
+        assert actual_token_type == expected_token_type
+
+    def test_get_mint_single_transaction(self):
+        """Test the get_mint_single_transaction method of the ERC1155 contract."""
+        # operation
+        tx = self.contract.get_mint_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.item_owner_crypto.address,
+            token_id=self.token_id_b,
+            mint_quantity=1,
+        )
+
+        # after
+        assert len(tx) == 7
+        assert all(
+            key in tx
+            for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
+        )
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
+
+    def test_get_balance(self):
+        """Test the get_balance method of the ERC1155 contract."""
+        # operation
+        result = self.contract.get_balance(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.item_owner_crypto.address,
+            token_id=self.token_id_b,
+        )
+
+        # after
+        assert "balance" in result
+        assert result["balance"][self.token_id_b] == 0
 
     @pytest.mark.integration
     def test_helper_methods_and_get_transactions(self):
@@ -387,19 +543,17 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert self.ledger_api.is_transaction_settled(receipt)
 
 
-class TestCosmWasmContract:
+class TestCosmWasmContract(BaseContractTestCase):
     """Test the cosmwasm contract."""
+
+    ledger_identifier = FetchAICrypto.identifier
+    path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
 
     def setup(self):
         """Setup."""
-        self.ledger_api = ledger_apis_registry.make(
-            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
-        )
-        self.faucet_api = faucet_apis_registry.make(FetchAICrypto.identifier)
-        self.deployer_crypto = crypto_registry.make(FetchAICrypto.identifier)
-        self.item_owner_crypto = crypto_registry.make(FetchAICrypto.identifier)
 
         # Test tokens IDs
+        super().setup()
         self.token_ids_a = [
             340282366920938463463374607431768211456,
             340282366920938463463374607431768211457,
@@ -424,9 +578,9 @@ class TestCosmWasmContract:
         self.refill_from_faucet(
             self.ledger_api, self.faucet_api, self.item_owner_crypto.address
         )
-        self.set_contract()
 
-    def refill_from_faucet(self, ledger_api, faucet_api, address):
+    @staticmethod
+    def refill_from_faucet(ledger_api, faucet_api, address):
         """Refill from faucet."""
         start_balance = ledger_api.get_balance(address)
 
@@ -441,49 +595,9 @@ class TestCosmWasmContract:
             if balance != start_balance:
                 break
 
-    def sign_send_verify_handle_transaction(self, tx: Dict[str, str], sender_crypto):
-        """
-        Sign, send and verify if HandleMsg transaction was successful.
-
-        :param tx: the transaction
-        :param sender_crypto: Crypto to sign transaction with
-        :return: Nothing - asserts pass if transaction is successful
-        """
-
-        signed_tx = sender_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
-        assert len(tx_receipt) == 8
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
-
-    def set_contract(self):
-        """Set contract."""
-        directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
-        configuration = load_component_configuration(ComponentType.CONTRACT, directory)
-        configuration._directory = directory
-        configuration = cast(ContractConfig, configuration)
-
-        if str(configuration.public_id) not in contract_registry.specs:
-            # load contract into sys modules
-            Contract.from_config(configuration)
-
-        self.contract = contract_registry.make(str(configuration.public_id))
-
-    def deploy_contract(self):
-        """Deploy contract."""
-        tx = self.contract.get_deploy_transaction(
-            ledger_api=self.ledger_api,
-            deployer_address=self.deployer_crypto.address,
-            gas=2000000,
-        )
-        assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
-        assert len(tx_receipt) == 9
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
-
-        code_id = self.ledger_api.get_code_id(tx_receipt)
+    def init_contract(self):
+        """Initialize contract."""
+        code_id = self.ledger_api.get_code_id(self.deployment_tx_receipt)
 
         assert code_id is not None
         assert code_id == self.ledger_api.get_last_code_id()
@@ -502,8 +616,8 @@ class TestCosmWasmContract:
         )
         assert len(tx) == 6
         signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
+        tx_digest = self.ledger_api.send_signed_transaction(signed_tx)
+        tx_receipt = self.ledger_api.get_transaction_receipt(tx_digest)
         assert len(tx_receipt) == 9
         assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
 
@@ -520,7 +634,7 @@ class TestCosmWasmContract:
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_cosmwasm_contract_deploy_and_interact(self):
         """Test cosmwasm contract deploy and interact."""
-        self.deploy_contract()
+        self.init_contract()
 
         # Create single token
         tx = self.contract.get_create_single_transaction(
@@ -530,7 +644,9 @@ class TestCosmWasmContract:
             token_id=self.token_id_b,
         )
         assert len(tx) == 6
-        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
 
         # Create batch of tokens
         tx = self.contract.get_create_batch_transaction(
@@ -540,7 +656,9 @@ class TestCosmWasmContract:
             token_ids=self.token_ids_a,
         )
         assert len(tx) == 6
-        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
 
         # Mint single token
         tx = self.contract.get_mint_single_transaction(
@@ -552,7 +670,9 @@ class TestCosmWasmContract:
             mint_quantity=1,
         )
         assert len(tx) == 6
-        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
 
         # Get balance of single token
         res = self.contract.get_balance(
@@ -574,7 +694,9 @@ class TestCosmWasmContract:
             mint_quantities=[1] * len(self.token_ids_a),
         )
         assert len(tx) == 6
-        self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.deployer_crypto
+        )
 
         # Get balances of multiple tokens
         res = self.contract.get_balances(
@@ -583,7 +705,6 @@ class TestCosmWasmContract:
             agent_address=self.item_owner_crypto.address,
             token_ids=self.token_ids_a,
         )
-
         assert "balances" in res
         assert res["balances"] == {token_id: 1 for token_id in self.token_ids_a}
 

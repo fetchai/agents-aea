@@ -18,16 +18,21 @@
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA contract testing."""
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Tuple, cast
 
+from aea.common import JSONLike
 from aea.configurations.loader import (
     ComponentType,
     ContractConfig,
     load_component_configuration,
 )
 from aea.contracts.base import Contract, contract_registry
-from aea.crypto.base import Crypto, LedgerApi
-from aea.crypto.registries import crypto_registry, ledger_apis_registry
+from aea.crypto.base import Crypto, FaucetApi, LedgerApi
+from aea.crypto.registries import (
+    crypto_registry,
+    faucet_apis_registry,
+    ledger_apis_registry,
+)
 
 
 class BaseContractTestCase:
@@ -41,7 +46,9 @@ class BaseContractTestCase:
     ledger_api: LedgerApi
     deployer_crypto: Crypto
     item_owner_crypto: Crypto
+    faucet_api: FaucetApi
 
+    deployment_tx_receipt: JSONLike
     contract_address: str
 
     @property
@@ -78,6 +85,8 @@ class BaseContractTestCase:
             cls.ledger_identifier, private_key_path=_item_owner_private_key_path
         )
 
+        cls.faucet_api = faucet_apis_registry.make(cls.ledger_identifier)
+
         # register contract
         configuration = cast(
             ContractConfig,
@@ -93,69 +102,23 @@ class BaseContractTestCase:
 
         cls._contract = contract_registry.make(str(configuration.public_id))
 
-        cls.contract_address = cls._deploy_contract(
+        cls.contract_address, cls.deployment_tx_receipt = cls._deploy_contract(
             cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas
         )
 
-    def _deploy_fetchai_contract(self) -> None:
-        """Deploy contract on the Fetch.ai ledger."""
-        tx = self.contract.get_deploy_transaction(
-            ledger_api=self.ledger_api,
-            deployer_address=self.deployer_crypto.address,
-            gas=2000000,
-        )
-        assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
-        assert len(tx_receipt) == 9
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
-
-        code_id = self.ledger_api.get_code_id(tx_receipt)
-
-        assert code_id is not None
-        assert code_id == self.ledger_api.get_last_code_id()
-        self.code_id = code_id
-
-        # Init contract
-        tx = self.contract.get_deploy_transaction(
-            ledger_api=self.ledger_api,
-            deployer_address=self.deployer_crypto.address,
-            code_id=self.code_id,
-            init_msg={},
-            tx_fee=0,
-            amount=0,
-            label="ERC1155",
-            gas=1000000,
-        )
-        assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
-        assert len(tx_receipt) == 9
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
-
-        contract_address = self.ledger_api.get_contract_address(tx_receipt)
-
-        assert contract_address is not None
-        assert contract_address == self.ledger_api.get_last_contract_address(
-            self.code_id
-        )
-        self.contract_address = contract_address
-
     @staticmethod
-    def _deploy_contract(
-        contract: Contract, ledger_api: LedgerApi, deployer_crypto: Crypto, gas: int
-    ) -> str:
-        """Deploy contract on network."""
-        tx = contract.get_deploy_transaction(
-            ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=gas,
-        )
+    def sign_send_confirm_receipt_transaction(
+        tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto
+    ) -> JSONLike:
+        """
+        Sign, send and confirm settlement of a transaction.
 
-        if tx is None:
-            raise ValueError("Deploy transaction not found!")
-
-        tx_signed = deployer_crypto.sign_transaction(tx)
+        :param tx: the transaction
+        :param ledger_api: the ledger api
+        :param crypto: Crypto to sign transaction with
+        :return: The transaction receipt
+        """
+        tx_signed = crypto.sign_transaction(tx)
         tx_digest = ledger_api.send_signed_transaction(tx_signed)
 
         if tx_digest is None:
@@ -166,9 +129,34 @@ class BaseContractTestCase:
         if tx_receipt is None:
             raise ValueError("Transaction receipt not found!")
 
+        if not ledger_api.is_transaction_settled(tx_receipt):
+            raise ValueError(f"Transaction receipt not valid!\n{tx_receipt['raw_log']}")
+
+        return tx_receipt
+
+    @classmethod
+    def _deploy_contract(
+        cls,
+        contract: Contract,
+        ledger_api: LedgerApi,
+        deployer_crypto: Crypto,
+        gas: int,
+    ) -> Tuple[str, JSONLike]:
+        """Deploy contract on network."""
+        tx = contract.get_deploy_transaction(
+            ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=gas,
+        )
+
+        if tx is None:
+            raise ValueError("Deploy transaction not found!")
+
+        tx_receipt = cls.sign_send_confirm_receipt_transaction(
+            tx, ledger_api, deployer_crypto
+        )
+
         address = ledger_api.get_contract_address(tx_receipt)
 
         if address is None:
             raise ValueError("Contract address not found!")
 
-        return address
+        return address, tx_receipt
