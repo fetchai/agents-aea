@@ -269,6 +269,7 @@ def _scaffold_non_package_item(
             {
                 "dotted_path": str(dotted_path),
                 "file_path": str(os.path.join(".", dest)),
+                "config": {},
             },
         )
         ctx.agent_loader.dump(
