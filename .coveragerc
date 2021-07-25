@@ -1,6 +1,9 @@
 [run]
 omit =
     */.tox/*
-    packages/fetchai/contracts/*
+    packages/fetchai/contracts/fet_erc20
+    packages/fetchai/contracts/oracle
+    packages/fetchai/contracts/oracle_client
+    packages/fetchai/contracts/staking_erc20
     packages/fetchai/skills/fipa_dummy_buyer/*
     plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py
