@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA contract testing."""
+
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, cast
 
@@ -40,6 +42,7 @@ class BaseContractTestCase:
 
     path_to_contract: Path = Path(".")
     ledger_identifier: str = ""
+    fund_from_faucet: bool = False
     _deployment_gas: int = 5000000
     _contract: Contract
 
@@ -87,6 +90,18 @@ class BaseContractTestCase:
 
         cls.faucet_api = faucet_apis_registry.make(cls.ledger_identifier)
 
+        # Fund from faucet
+        if cls.fund_from_faucet:
+            # Refill deployer account from faucet
+            cls.refill_from_faucet(
+                cls.ledger_api, cls.faucet_api, cls.deployer_crypto.address
+            )
+
+            # Refill item owner account from faucet
+            cls.refill_from_faucet(
+                cls.ledger_api, cls.faucet_api, cls.item_owner_crypto.address
+            )
+
         # register contract
         configuration = cast(
             ContractConfig,
@@ -107,8 +122,21 @@ class BaseContractTestCase:
         )
 
     @staticmethod
+    def refill_from_faucet(
+        ledger_api: LedgerApi, faucet_api: FaucetApi, address: str
+    ) -> None:
+        """Refill from faucet."""
+        start_balance = ledger_api.get_balance(address)
+
+        faucet_api.get_wealth(address)
+
+        balance = ledger_api.get_balance(address)
+        if balance == start_balance:
+            raise ValueError("Balance not increased!")
+
+    @staticmethod
     def sign_send_confirm_receipt_transaction(
-        tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto
+        tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto, sleep_time: float = 1.0
     ) -> JSONLike:
         """
         Sign, send and confirm settlement of a transaction.
@@ -116,6 +144,7 @@ class BaseContractTestCase:
         :param tx: the transaction
         :param ledger_api: the ledger api
         :param crypto: Crypto to sign transaction with
+        :param sleep_time: the time to sleep between transaction submission and receipt request
         :return: The transaction receipt
         """
         tx_signed = crypto.sign_transaction(tx)
@@ -124,6 +153,7 @@ class BaseContractTestCase:
         if tx_digest is None:
             raise ValueError("Transaction digest not found!")
 
+        time.sleep(sleep_time)
         tx_receipt = ledger_api.get_transaction_receipt(tx_digest)
 
         if tx_receipt is None:
