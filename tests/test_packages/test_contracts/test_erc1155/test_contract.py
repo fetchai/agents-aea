@@ -473,6 +473,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         )
         tx_signed = self.deployer_crypto.sign_transaction(tx)
         tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        time.sleep(1)
         receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
         assert self.ledger_api.is_transaction_settled(receipt)
 
@@ -488,6 +489,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         )
         tx_signed = self.deployer_crypto.sign_transaction(tx)
         tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        time.sleep(1)
         receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
         assert self.ledger_api.is_transaction_settled(receipt)
 
@@ -501,6 +503,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         )
         tx_signed = self.deployer_crypto.sign_transaction(tx)
         tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        time.sleep(1)
         receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
         assert self.ledger_api.is_transaction_settled(receipt)
 
@@ -539,6 +542,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         )
         tx_signed = self.deployer_crypto.sign_transaction(tx)
         tx_receipt = self.ledger_api.send_signed_transaction(tx_signed)
+        time.sleep(1)
         receipt = self.ledger_api.get_transaction_receipt(tx_receipt)
         assert self.ledger_api.is_transaction_settled(receipt)
 
@@ -548,12 +552,14 @@ class TestCosmWasmContract(BaseContractTestCase):
 
     ledger_identifier = FetchAICrypto.identifier
     path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+    fund_from_faucet = True
 
     def setup(self):
         """Setup."""
 
         # Test tokens IDs
         super().setup()
+        self.init_contract()
         self.token_ids_a = [
             340282366920938463463374607431768211456,
             340282366920938463463374607431768211457,
@@ -568,32 +574,6 @@ class TestCosmWasmContract(BaseContractTestCase):
         ]
 
         self.token_id_b = 680564733841876926926749214863536422912
-
-        # Refill deployer account from faucet
-        self.refill_from_faucet(
-            self.ledger_api, self.faucet_api, self.deployer_crypto.address
-        )
-
-        # Refill item owner account from faucet
-        self.refill_from_faucet(
-            self.ledger_api, self.faucet_api, self.item_owner_crypto.address
-        )
-
-    @staticmethod
-    def refill_from_faucet(ledger_api, faucet_api, address):
-        """Refill from faucet."""
-        start_balance = ledger_api.get_balance(address)
-
-        faucet_api.get_wealth(address)
-
-        tries = 15
-        while tries > 0:
-            tries -= 1
-            time.sleep(1)
-
-            balance = ledger_api.get_balance(address)
-            if balance != start_balance:
-                break
 
     def init_contract(self):
         """Initialize contract."""
@@ -617,6 +597,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         assert len(tx) == 6
         signed_tx = self.deployer_crypto.sign_transaction(tx)
         tx_digest = self.ledger_api.send_signed_transaction(signed_tx)
+        time.sleep(1)
         tx_receipt = self.ledger_api.get_transaction_receipt(tx_digest)
         assert len(tx_receipt) == 9
         assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
@@ -632,10 +613,8 @@ class TestCosmWasmContract(BaseContractTestCase):
     @pytest.mark.integration
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_cosmwasm_contract_deploy_and_interact(self):
-        """Test cosmwasm contract deploy and interact."""
-        self.init_contract()
-
+    def test_create_and_mint_and_balances(self):
+        """Test cosmwasm contract create, mint and balances functionalities."""
         # Create single token
         tx = self.contract.get_create_single_transaction(
             ledger_api=self.ledger_api,
