@@ -422,7 +422,7 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @classmethod
     def get_balances(
@@ -467,7 +467,7 @@ class ERC1155Contract(Contract):
                 )
             }
             return {"balances": result}
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @classmethod
     def get_atomic_swap_batch_transaction(
@@ -527,7 +527,7 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @classmethod
     def get_hash_single(
@@ -582,11 +582,11 @@ class ERC1155Contract(Contract):
                     trade_nonce,
                 ).call()
             ):
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     "On-chain and off-chain hash computation do not agree!"
                 )
             return tx_hash
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @staticmethod
     def _get_hash_single(
@@ -681,7 +681,7 @@ class ERC1155Contract(Contract):
                     "On-chain and off-chain hash computation do not agree!"
                 )
             return tx_hash
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @staticmethod
     def _get_hash_batch(
@@ -753,4 +753,4 @@ class ERC1155Contract(Contract):
             while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
                 trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
             return {"trade_nonce": trade_nonce}
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover

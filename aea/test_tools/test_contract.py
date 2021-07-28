@@ -67,7 +67,7 @@ class BaseContractTestCase:
     def setup(cls, **kwargs: Any) -> None:
         """Set up the contract test case."""
         if cls.ledger_identifier == "":
-            raise ValueError("ledger_identifier not set!")
+            raise ValueError("ledger_identifier not set!")  # pragma: nocover
 
         _ledger_config: Dict[str, str] = kwargs.pop("ledger_config", {})
         _deployer_private_key_path: Optional[str] = kwargs.pop(
@@ -132,7 +132,7 @@ class BaseContractTestCase:
 
         balance = ledger_api.get_balance(address)
         if balance == start_balance:
-            raise ValueError("Balance not increased!")
+            raise ValueError("Balance not increased!")  # pragma: nocover
 
     @staticmethod
     def sign_send_confirm_receipt_transaction(
@@ -151,16 +151,18 @@ class BaseContractTestCase:
         tx_digest = ledger_api.send_signed_transaction(tx_signed)
 
         if tx_digest is None:
-            raise ValueError("Transaction digest not found!")
+            raise ValueError("Transaction digest not found!")  # pragma: nocover
 
         time.sleep(sleep_time)
         tx_receipt = ledger_api.get_transaction_receipt(tx_digest)
 
         if tx_receipt is None:
-            raise ValueError("Transaction receipt not found!")
+            raise ValueError("Transaction receipt not found!")  # pragma: nocover
 
         if not ledger_api.is_transaction_settled(tx_receipt):
-            raise ValueError(f"Transaction receipt not valid!\n{tx_receipt['raw_log']}")
+            raise ValueError(  # pragma: nocover
+                f"Transaction receipt not valid!\n{tx_receipt['raw_log']}"
+            )
 
         return tx_receipt
 
@@ -178,7 +180,7 @@ class BaseContractTestCase:
         )
 
         if tx is None:
-            raise ValueError("Deploy transaction not found!")
+            raise ValueError("Deploy transaction not found!")  # pragma: nocover
 
         tx_receipt = cls.sign_send_confirm_receipt_transaction(
             tx, ledger_api, deployer_crypto
@@ -187,6 +189,6 @@ class BaseContractTestCase:
         address = ledger_api.get_contract_address(tx_receipt)
 
         if address is None:
-            raise ValueError("Contract address not found!")
+            raise ValueError("Contract address not found!")  # pragma: nocover
 
         return address, tx_receipt
