@@ -253,6 +253,69 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert "balance" in result
         assert result["balance"][self.token_id_b] == 0
 
+    def test_get_balances(self):
+        """Test the get_balances method of the ERC1155 contract."""
+        # operation
+        result = self.contract.get_balances(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.item_owner_crypto.address,
+            token_ids=self.token_ids_a,
+        )
+
+        # after
+        assert "balances" in result
+        assert all(result["balances"][token_id] == 0 for token_id in self.token_ids_a)
+
+    def test_get_hash_single(self):
+        """Test the get_hash_single method of the ERC1155 contract."""
+        # operation
+        result = self.contract.get_hash_single(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=self.deployer_crypto.address,
+            to_address=self.item_owner_crypto.address,
+            token_id=self.token_id_b,
+            from_supply=0,
+            to_supply=10,
+            value=1,
+            trade_nonce=1,
+        )
+
+        # after
+        assert isinstance(result, bytes)
+
+    def test_get_hash_batch(self):
+        """Test the get_hash_batch method of the ERC1155 contract."""
+        # operation
+        result = self.contract.get_hash_batch(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=self.deployer_crypto.address,
+            to_address=self.item_owner_crypto.address,
+            token_ids=self.token_ids_a,
+            from_supplies=[0, 1, 0, 0, 1, 0, 0, 0, 0, 1],
+            to_supplies=[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+            value=1,
+            trade_nonce=1,
+        )
+
+        # after
+        assert isinstance(result, bytes)
+
+    def test_generate_trade_nonce(self):
+        """Test the generate_trade_nonce method of the ERC1155 contract."""
+        # operation
+        result = self.contract.generate_trade_nonce(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.item_owner_crypto.address,
+        )
+
+        # after
+        assert "trade_nonce" in result
+        assert isinstance(result["trade_nonce"], int)
+
     @pytest.mark.integration
     def test_helper_methods_and_get_transactions(self):
         """Test helper methods and get transactions."""
