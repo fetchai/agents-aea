@@ -685,7 +685,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
         if tx is None:
             raise ValueError("Deploy transaction not found!")  # pragma: nocover
-        
+
         tx_receipt = cls.sign_send_confirm_receipt_transaction(
             tx, cls.ledger_api, cls.deployer_crypto
         )
