@@ -35,6 +35,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     ETHEREUM_PRIVATE_KEY_TWO_PATH,
     ETHEREUM_TESTNET_CONFIG,
+    FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
     UseGanache,
@@ -621,7 +622,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         """Setup."""
 
         # Test tokens IDs
-        super().setup()
+        super().setup(ledger_config=FETCHAI_TESTNET_CONFIG)
         self.init_contract()
         self.token_ids_a = [
             340282366920938463463374607431768211456,
