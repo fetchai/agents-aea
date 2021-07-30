@@ -19,8 +19,9 @@
 """This module contains test case classes based on pytest for AEA contract testing."""
 
 import time
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, Dict, Optional, cast
 
 from aea.common import JSONLike
 from aea.configurations.loader import (
@@ -37,7 +38,7 @@ from aea.crypto.registries import (
 )
 
 
-class BaseContractTestCase:
+class BaseContractTestCase(ABC):
     """A class to test a contract."""
 
     path_to_contract: Path = Path(".")
@@ -80,14 +81,12 @@ class BaseContractTestCase:
         cls.ledger_api = ledger_apis_registry.make(
             cls.ledger_identifier, **_ledger_config
         )
-
         cls.deployer_crypto = crypto_registry.make(
             cls.ledger_identifier, private_key_path=_deployer_private_key_path
         )
         cls.item_owner_crypto = crypto_registry.make(
             cls.ledger_identifier, private_key_path=_item_owner_private_key_path
         )
-
         cls.faucet_api = faucet_apis_registry.make(cls.ledger_identifier)
 
         # Fund from faucet
@@ -110,16 +109,25 @@ class BaseContractTestCase:
         configuration._directory = (  # pylint: disable=protected-access
             cls.path_to_contract
         )
-
         if str(configuration.public_id) not in contract_registry.specs:
             # load contract into sys modules
             Contract.from_config(configuration)
-
         cls._contract = contract_registry.make(str(configuration.public_id))
 
-        cls.contract_address, cls.deployment_tx_receipt = cls._deploy_contract(
+        # deploy contract
+        cls.deployment_tx_receipt = cls._deploy_contract(
             cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas
         )
+        cls.contract_address = cls.finish_contract_deployment()
+
+    @classmethod
+    @abstractmethod
+    def finish_contract_deployment(cls) -> str:
+        """
+        Finish deploying contract.
+
+        :return: contract address
+        """
 
     @staticmethod
     def refill_from_faucet(
@@ -173,8 +181,17 @@ class BaseContractTestCase:
         ledger_api: LedgerApi,
         deployer_crypto: Crypto,
         gas: int,
-    ) -> Tuple[str, JSONLike]:
-        """Deploy contract on network."""
+    ) -> JSONLike:
+        """
+        Deploy contract on network.
+
+        :param contract: the contract
+        :param ledger_api: the ledger api
+        :param deployer_crypto: the contract deployer crypto
+        :param gas: the gas amount
+
+        :return: the transaction receipt for initial transaction deployment
+        """
         tx = contract.get_deploy_transaction(
             ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=gas,
         )
@@ -186,9 +203,4 @@ class BaseContractTestCase:
             tx, ledger_api, deployer_crypto
         )
 
-        address = ledger_api.get_contract_address(tx_receipt)
-
-        if address is None:
-            raise ValueError("Contract address not found!")  # pragma: nocover
-
-        return address, tx_receipt
+        return tx_receipt

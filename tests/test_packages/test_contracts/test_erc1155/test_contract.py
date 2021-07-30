@@ -22,12 +22,15 @@
 import re
 import time
 from pathlib import Path
+from typing import cast
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
 
 from aea.test_tools.test_contract import BaseContractTestCase
+
+from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
 
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
@@ -72,6 +75,22 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ]
 
         cls.token_id_b = 680564733841876926926749214863536422912
+
+    @classmethod
+    def finish_contract_deployment(cls) -> str:
+        """
+        Finish deploying contract.
+
+        :return: contract address
+        """
+        contract_address = cls.ledger_api.get_contract_address(
+            cls.deployment_tx_receipt
+        )
+
+        if contract_address is None:
+            raise ValueError("Contract address not found!")  # pragma: nocover
+
+        return contract_address
 
     def test_generate_token_ids(self):
         """Test the generate_token_ids method of the ERC1155 contract."""
@@ -618,13 +637,12 @@ class TestCosmWasmContract(BaseContractTestCase):
     path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
     fund_from_faucet = True
 
-    def setup(self):
+    @classmethod
+    def setup(cls):
         """Setup."""
-
         # Test tokens IDs
         super().setup(ledger_config=FETCHAI_TESTNET_CONFIG)
-        self.init_contract()
-        self.token_ids_a = [
+        cls.token_ids_a = [
             340282366920938463463374607431768211456,
             340282366920938463463374607431768211457,
             340282366920938463463374607431768211458,
@@ -637,42 +655,52 @@ class TestCosmWasmContract(BaseContractTestCase):
             340282366920938463463374607431768211465,
         ]
 
-        self.token_id_b = 680564733841876926926749214863536422912
+        cls.token_id_b = 680564733841876926926749214863536422912
 
-    def init_contract(self):
-        """Initialize contract."""
-        code_id = self.ledger_api.get_code_id(self.deployment_tx_receipt)
+    @classmethod
+    def finish_contract_deployment(cls) -> str:
+        """
+        Finish deploying contract.
+
+        :return: contract address
+        """
+        code_id = cast(FetchAIApi, cls.ledger_api).get_code_id(
+            cls.deployment_tx_receipt
+        )
 
         assert code_id is not None
-        assert code_id == self.ledger_api.get_last_code_id()
-        self.code_id = code_id
+        assert code_id == cast(FetchAIApi, cls.ledger_api).get_last_code_id()
 
         # Init contract
-        tx = self.contract.get_deploy_transaction(
-            ledger_api=self.ledger_api,
-            deployer_address=self.deployer_crypto.address,
-            code_id=self.code_id,
+        tx = cast(ERC1155Contract, cls.contract).get_deploy_transaction(
+            ledger_api=cls.ledger_api,
+            deployer_address=cls.deployer_crypto.address,
+            code_id=code_id,
             init_msg={},
             tx_fee=0,
             amount=0,
             label="ERC1155",
             gas=1000000,
         )
-        assert len(tx) == 6
-        signed_tx = self.deployer_crypto.sign_transaction(tx)
-        tx_digest = self.ledger_api.send_signed_transaction(signed_tx)
-        time.sleep(1)
-        tx_receipt = self.ledger_api.get_transaction_receipt(tx_digest)
-        assert len(tx_receipt) == 9
-        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
 
-        contract_address = self.ledger_api.get_contract_address(tx_receipt)
-
-        assert contract_address is not None
-        assert contract_address == self.ledger_api.get_last_contract_address(
-            self.code_id
+        if tx is None:
+            raise ValueError("Deploy transaction not found!")  # pragma: nocover
+        
+        tx_receipt = cls.sign_send_confirm_receipt_transaction(
+            tx, cls.ledger_api, cls.deployer_crypto
         )
-        self.contract_address = contract_address
+
+        contract_address = cls.ledger_api.get_contract_address(tx_receipt)
+
+        if contract_address is None:
+            raise ValueError("Contract address not found!")  # pragma: nocover
+
+        if contract_address != cast(
+            FetchAIApi, cls.ledger_api
+        ).get_last_contract_address(code_id):
+            raise ValueError("Contract address not valid!")  # pragma: nocover
+
+        return contract_address
 
     @pytest.mark.integration
     @pytest.mark.ledger
