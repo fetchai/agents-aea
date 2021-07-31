@@ -30,8 +30,6 @@ from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
 
 from aea.test_tools.test_contract import BaseContractTestCase
 
-from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
-
 from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
@@ -672,7 +670,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         assert code_id == cast(FetchAIApi, cls.ledger_api).get_last_code_id()
 
         # Init contract
-        tx = cast(ERC1155Contract, cls.contract).get_deploy_transaction(
+        tx = cls._contract.get_deploy_transaction(
             ledger_api=cls.ledger_api,
             deployer_address=cls.deployer_crypto.address,
             code_id=code_id,
