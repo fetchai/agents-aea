@@ -63,8 +63,12 @@ class DependenciesTool:
         packages_info = list(search_packages_info([package_name]))
         if len(packages_info) == 0:
             raise Exception(f"package {package_name} not found")
-        files = packages_info[0]["files"]
-        location = packages_info[0]["location"]
+        if isinstance(packages_info[0], dict):
+            files = packages_info[0]["files"]
+            location = packages_info[0]["location"]
+        else:
+            files = packages_info[0].files
+            location = packages_info[0].location
         return [Path(location) / i for i in files]  # type: ignore
 
     @staticmethod

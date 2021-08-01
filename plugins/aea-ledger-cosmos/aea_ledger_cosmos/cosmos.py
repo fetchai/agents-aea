@@ -1329,6 +1329,7 @@ class CosmosFaucetApi(FaucetApi):
     identifier = _COSMOS
     testnet_faucet_url = DEFAULT_FAUCET_URL
     testnet_name = TESTNET_NAME
+    max_retry_attempts = 15
 
     def __init__(self, poll_interval: Optional[float] = None):
         """Initialize CosmosFaucetApi."""
@@ -1346,7 +1347,9 @@ class CosmosFaucetApi(FaucetApi):
         if uid is None:  # pragma: nocover
             raise RuntimeError("Unable to create faucet claim")
 
-        while True:
+        retry_attempts = self.max_retry_attempts
+        while retry_attempts > 0:
+            retry_attempts -= 1
 
             # lookup status form the claim uid
             status = self._try_check_faucet_claim(uid, url)
@@ -1363,6 +1366,8 @@ class CosmosFaucetApi(FaucetApi):
 
             # if the status is incomplete
             time.sleep(self._poll_interval)
+        if retry_attempts == 0:
+            raise ValueError("Faucet claim check timed out!")  # pragma: nocover
 
     @classmethod
     @try_decorator(
