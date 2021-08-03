@@ -66,6 +66,7 @@ const (
 	bootstrapTimeout          = 1 * 60 * time.Second // doesn't include peer restart
 	sleepTimeDefaultDuration  = 100 * time.Millisecond
 	sleepTimeIncreaseMFactor  = 2 // multiplicative increase
+	reconnectTimeout          = 5 * time.Second
 )
 
 // Notifee Handle DHTClient network events
@@ -107,7 +108,9 @@ func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 				"Lost connection to relay peer %s, reconnecting...",
 				pinfo.ID.Pretty(),
 			)
-			if err = notifee.myHost.Connect(context.Background(), pinfo); err == nil {
+			ctx, cancel := context.WithTimeout(context.Background(), reconnectTimeout)
+			defer cancel()
+			if err = notifee.myHost.Connect(ctx, pinfo); err == nil {
 				break
 			}
 			time.Sleep(1 * time.Second)

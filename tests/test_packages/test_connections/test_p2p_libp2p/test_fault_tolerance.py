@@ -219,6 +219,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             message=DefaultSerializer().encode(msg),
         )
 
+        time.sleep(10)
         self.multiplexer_genesis.put(envelope)
 
         delivered_envelope = self.multiplexer.get(block=True, timeout=20)
@@ -287,7 +288,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             message=DefaultSerializer().encode(msg),
         )
 
-        time.sleep(5)
+        time.sleep(10)
         self.multiplexer2.put(envelope)
         delivered_envelope = self.multiplexer.get(block=True, timeout=20)
 
@@ -411,8 +412,8 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
             message=DefaultSerializer().encode(msg),
         )
 
+        time.sleep(10)
         self.multiplexer.put(envelope)
-        time.sleep(5)
 
         # currently, multiplexer cannot be restarted
         self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
@@ -536,6 +537,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
             message=msg.encode(),
         )
 
+        time.sleep(10)
         self.multiplexer1.put(envelope)
 
         delivered_envelope = self.multiplexer2.get(block=True, timeout=20)

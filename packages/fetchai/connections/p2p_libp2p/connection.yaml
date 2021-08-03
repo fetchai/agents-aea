@@ -23,7 +23,7 @@ fingerprint:
   libp2p_node/aea/utils.go: QmbPhDuPZzzA8hrf7U5uLxsVQqY31BHJbv9fiGYEPDg1Go
   libp2p_node/common/common.go: QmeGr6xMzqkBVJMnWzCTcXJVQj2A8RK64mhTSewZJKpiJa
   libp2p_node/dht/common/handlers.go: Qmb5bvheRaddLXmcjwLNPyKq3SX5dqWUwc6aop5YjE9WMx
-  libp2p_node/dht/dhtclient/dhtclient.go: QmeMtf5KP3jzQmF1WSVSky4zkspRCquAuFg3p89F6gSB2R
+  libp2p_node/dht/dhtclient/dhtclient.go: QmfPkqCK586QB6oERUaiNDwHhe1NUQDWV6KgnKdt6pcN57
   libp2p_node/dht/dhtclient/dhtclient_test.go: QmY5YQVYPHYdHc3GXPgbMQBtMstEpYiik1KtZH9ZchJVNh
   libp2p_node/dht/dhtclient/options.go: QmbjHT3ZXFo5GaMDTFbpZVRNiq3KPeoQWuGQuDaz7QJfaU
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
