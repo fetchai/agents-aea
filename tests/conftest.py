@@ -52,6 +52,7 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import DEFAULT_CLI_COMMAND, FetchAICrypto
@@ -1493,3 +1494,21 @@ def method_scope(cls):
     cls.setup = lambda self: old_setup_class()
     cls.teardown = lambda self: old_teardown_class()
     return cls
+
+
+@pytest.fixture(scope="session", autouse=True)
+def make_logging_apply_incremental(request) -> Generator:
+    """
+    Fix for pytest flaky crash, apply logging config as incremental.
+
+    Check https://github.com/fetchai/agents-aea/issues/2431
+    """
+    original_dictConfig = logging.config.dictConfig
+
+    def new_dictConfig(config):
+        config["incremental"] = True
+        return original_dictConfig(config)
+
+    with MonkeyPatch().context() as mp:
+        mp.setattr(logging.config, "dictConfig", new_dictConfig)
+        yield
