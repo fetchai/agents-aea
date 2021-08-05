@@ -1,7 +1,7 @@
 # The values here are only for testing. These are not deployed in the production environment
 # DON'T add enything secret here and upload to the git repo
 dns:
-  enabled: true
+  enabled: false
   dnsname: agents-dht-testnet.colearn.fetch-ai.com
   publicdnsname: acn.fetch-ai.com
   ingressgw: istio-agentsig
@@ -9,7 +9,7 @@ dns:
 
 acnnodes:
   enabled: true
-  image: gcr.io/fetch-ai-colearn/acn_node:003d81c00
+  image: gcr.io/fetch-ai-colearn/acn_node:e211d5c42
   resources:
     limits:
       cpu: 500m
