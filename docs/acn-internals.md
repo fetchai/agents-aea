@@ -339,7 +339,7 @@ The following diagram explains the exchange of messages on entering an envelope 
 In the case of _direct connection_, 
 `Agent` is a Python process, whereas `Peer` is in a separate (Golang) process.
 The logic of the Python Agent client is implemented in 
-the [AEA connection `fetchai/p2p_libp2p`](https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p).
+the <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">AEA connection `fetchai/p2p_libp2p`</a>
 The communication between `Agent` and `Peer` is done through 
 an OS pipe for Inter-Process Communication (IPC) between the AEA's process and the libp2p node process;
 then, the message gets enqueued to an output queue by an input coroutine.
@@ -352,8 +352,7 @@ pipes, the communication is done through the network, i.e. TCP,
 with a peer which has the delegate service enabled.
 The logic of the `Agent` client connected with a delegate connection
 is implemented in 
-the [AEA connection `fetchai/p2p_libp2p_client`](https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client).
-
+the <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">AEA connection `fetchai/p2p_libp2p_client`</a> 
 
 <div class="mermaid">
     sequenceDiagram
