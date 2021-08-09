@@ -125,6 +125,9 @@ type DHTPeer struct {
 	monitoringPort uint16
 	enableRelay    bool
 
+	mailboxHostPort string
+	mailboxServer   *MailboxServer
+
 	registrationDelay time.Duration
 
 	key             cryptop2p.PrivKey
@@ -133,10 +136,11 @@ type DHTPeer struct {
 	publicMultiaddr multiaddr.Multiaddr
 	bootstrapPeers  []peer.AddrInfo
 
-	dht         *kaddht.IpfsDHT
-	routedHost  *routedhost.RoutedHost
-	tcpListener net.Listener
-	cert        *tls.Certificate
+	dht          *kaddht.IpfsDHT
+	routedHost   *routedhost.RoutedHost
+	tcpListener  net.Listener
+	cert         *tls.Certificate
+	sslSignature []byte
 
 	addressAnnouncedMap     map[string]bool
 	addressAnnouncedMapLock sync.RWMutex
@@ -192,6 +196,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.addressAnnouncedMapLock = sync.RWMutex{}
 	dhtPeer.enableAddressAnnouncementWg = &sync.WaitGroup{}
 	dhtPeer.enableAddressAnnouncementLock = sync.RWMutex{}
+	dhtPeer.mailboxHostPort = ""
 
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
@@ -271,6 +276,10 @@ func New(opts ...Option) (*DHTPeer, error) {
 		return nil, err
 	}
 
+	err = dhtPeer.makeSSLCertifiateAndSignature()
+	if err != nil {
+		return nil, err
+	}
 	// make the routed host
 	dhtPeer.routedHost = routedhost.Wrap(basicHost, dhtPeer.dht)
 	dhtPeer.setupLogger()
@@ -345,7 +354,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	}
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		for addr := range dhtPeer.dhtAddresses {
-			err := dhtPeer.registerAgentAddress(addr)
+			err := dhtPeer.RegisterAgentAddress(addr)
 			if err != nil {
 				lerror(err).Str("addr", addr).
 					Msg("while announcing stored client address")
@@ -364,7 +373,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 			opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 			timer := dhtPeer.monitor.Timer()
 			start := timer.NewTimer()
-			err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
+			err := dhtPeer.RegisterAgentAddress(dhtPeer.myAgentAddress)
 			if err != nil {
 				dhtPeer.Close()
 				return nil, err
@@ -391,6 +400,11 @@ func New(opts ...Option) (*DHTPeer, error) {
 		ready.Add(1)
 		go dhtPeer.handleDelegateService(ready)
 		ready.Wait()
+	}
+
+	// check mailbox uri is set
+	if len(dhtPeer.mailboxHostPort) != 0 {
+		dhtPeer.launchMailboxService()
 	}
 
 	// start monitoring
@@ -611,6 +625,10 @@ func (dhtPeer *DHTPeer) Close() []error {
 		dhtPeer.tcpAddressesLock.Unlock()
 	}
 
+	if dhtPeer.mailboxServer != nil {
+		dhtPeer.mailboxServer.stop()
+	}
+
 	err = dhtPeer.dht.Close()
 	errappend(err)
 	err = dhtPeer.routedHost.Close()
@@ -695,11 +713,6 @@ func (dhtPeer *DHTPeer) launchDelegateService() {
 	var err error
 
 	lerror, _, _, _ := dhtPeer.GetLoggers()
-	dhtPeer.cert, err = generate_x509_cert()
-	if err != nil {
-		lerror(err).Msgf("while generating tls certificate for delegate client server")
-		check(err)
-	}
 	config := &tls.Config{Certificates: []tls.Certificate{*dhtPeer.cert}}
 	uri := dhtPeer.host + ":" + strconv.FormatInt(int64(dhtPeer.delegatePort), 10)
 	listener, err := tls.Listen("tcp", uri, config)
@@ -709,13 +722,43 @@ func (dhtPeer *DHTPeer) launchDelegateService() {
 		check(err)
 	}
 
-	signature, err := makeSessionKeySignature(dhtPeer.cert, dhtPeer.key)
-
 	if err != nil {
 		lerror(err).Msgf("while generating tls signature")
 		check(err)
 	}
-	dhtPeer.tcpListener = TLSListener{Listener: listener, Signature: signature}
+	dhtPeer.tcpListener = TLSListener{Listener: listener, Signature: dhtPeer.sslSignature}
+}
+
+// launchDelegateService launches the delegate service on the configured uri
+func (dhtPeer *DHTPeer) makeSSLCertifiateAndSignature() error {
+	var err error
+
+	lerror, _, _, _ := dhtPeer.GetLoggers()
+	dhtPeer.cert, err = generate_x509_cert()
+	if err != nil {
+		lerror(err).Msgf("while generating tls certificate")
+		return err
+	}
+	dhtPeer.sslSignature, err = makeSessionKeySignature(dhtPeer.cert, dhtPeer.key)
+	if err != nil {
+		lerror(err).Msgf("while generating tls certificate server signature")
+		return err
+	}
+	return nil
+}
+
+// launchMailboxService launches the mailbox http service on the configured uri
+func (dhtPeer *DHTPeer) launchMailboxService() {
+	_, _, linfo, _ := dhtPeer.GetLoggers()
+	if len(dhtPeer.mailboxHostPort) == 0 {
+		return
+	}
+	dhtPeer.mailboxServer = &MailboxServer{
+		addr:    dhtPeer.mailboxHostPort,
+		dhtPeer: dhtPeer,
+	}
+	linfo().Msgf("Starting mailbox service on %s", dhtPeer.mailboxHostPort)
+	go dhtPeer.mailboxServer.start()
 }
 
 // Make signature for session public key using peer private key
@@ -762,6 +805,14 @@ L:
 	}
 }
 
+func (dhtPeer *DHTPeer) CheckPOR(record *acn.AgentRecord) (*acn.StatusBody, error) {
+	addr := record.Address
+	myPubKey, err := utils.FetchAIPublicKeyFromPubKey(dhtPeer.publicKey)
+	ignore(err)
+	status, err := dhtnode.IsValidProofOfRepresentation(record, addr, myPubKey)
+	return status, err
+}
+
 // handleNewDelegationConnection handles a new delegate connection
 // verifies agent record and registers agent in DHT, handles incoming envelopes
 // and forwards them for processing
@@ -804,9 +855,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		conn.RemoteAddr().String(), addr)
 
 	// check if the PoR is valid
-	myPubKey, err := utils.FetchAIPublicKeyFromPubKey(dhtPeer.publicKey)
-	ignore(err)
-	status, err := dhtnode.IsValidProofOfRepresentation(record, addr, myPubKey)
+	status, err := dhtPeer.CheckPOR(record)
 	if err != nil || status.Code != acn.SUCCESS {
 		lerror(err).Msg("PoR is not valid")
 		acn_send_error := acn.SendAcnError(conPipe, err.Error(), status.Code)
@@ -837,8 +886,8 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 	//linfo().Msgf("announcing tcp client address %s...", addr)
 	// TOFIX(LR) disconnect client?
-	if dhtPeer.isAddressAnnouncementEnabled() {
-		err = dhtPeer.registerAgentAddress(addr)
+	if dhtPeer.IsAddressAnnouncementEnabled() {
+		err = dhtPeer.RegisterAgentAddress(addr)
 		if err != nil {
 			lerror(err).Msgf("while announcing tcp client address %s to the dht", addr)
 			return
@@ -958,6 +1007,10 @@ func (dhtPeer *DHTPeer) MultiAddr() string {
 	return addrs[0].Encapsulate(multiAddr).String()
 }
 
+func (dhtPeer *DHTPeer) GetCertAndSignature() (*tls.Certificate, []byte) {
+	return dhtPeer.cert, dhtPeer.sslSignature
+}
+
 // RouteEnvelope to its destination
 func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, linfo, ldebug := dhtPeer.GetLoggers()
@@ -984,6 +1037,8 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 
 	if sender == dhtPeer.myAgentAddress {
 		envelRec = dhtPeer.myAgentRecord
+	} else if dhtPeer.mailboxServer != nil && dhtPeer.mailboxServer.IsAddrRegistered(sender) {
+		envelRec = dhtPeer.mailboxServer.GetAgentRecord(sender)
 	} else if existsLocal {
 		// TOFIX(LR) should acquire RLock
 		envelRec = localRec
@@ -999,6 +1054,14 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	dhtPeer.tcpAddressesLock.RLock()
 	connDelegate, existsDelegate := dhtPeer.tcpAddresses[target]
 	dhtPeer.tcpAddressesLock.RUnlock()
+
+	if dhtPeer.mailboxServer != nil {
+		if dhtPeer.mailboxServer.RouteEnvelope(envel) {
+			linfo().Str("op", "route").Str("addr", target).
+				Msg("route envelope destinated to mailbox registered agent...")
+			return nil
+		}
+	}
 
 	if target == dhtPeer.myAgentAddress {
 		linfo().Str("op", "route").Str("addr", target).
@@ -1295,6 +1358,14 @@ func (dhtPeer *DHTPeer) HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError {
 	connDelegate, existsDelegate := dhtPeer.tcpAddresses[envel.To]
 	dhtPeer.tcpAddressesLock.RUnlock()
 
+	if dhtPeer.mailboxServer != nil {
+		if dhtPeer.mailboxServer.RouteEnvelope(envel) {
+			linfo().Str("op", "route").Str("addr", envel.To).
+				Msg("route envelope destinated to mailbox registered agent...")
+			return nil
+		}
+	}
+
 	if existsDelegate {
 		linfo().Msgf(
 			"Sending envelope to tcp delegate client %s...",
@@ -1335,7 +1406,6 @@ func (dhtPeer *DHTPeer) HandleAeaEnvelope(envel *aea.Envelope) *acn.ACNError {
 				ErrorCode: acn.ERROR_AGENT_NOT_READY,
 			}
 		}
-
 	} else if envel.To == dhtPeer.myAgentAddress {
 		if dhtPeer.processEnvelope == nil {
 			lerror(err).Msgf("while processing envelope by agent")
@@ -1391,6 +1461,9 @@ func (dhtPeer *DHTPeer) HandleAeaAddressRequest(
 			Msg("found address in my relay clients map")
 		sPeerID = idRelay
 		sRecord = localRec
+	} else if dhtPeer.mailboxServer != nil && dhtPeer.mailboxServer.IsAddrRegistered(reqAddress) {
+		sPeerID = idRelay
+		sRecord = dhtPeer.mailboxServer.GetAgentRecord(reqAddress)
 	} else if existsDelegate {
 		linfo().Str("op", "resolve").Str("addr", reqAddress).
 			Msgf("found address in my delegate clients map")
@@ -1470,7 +1543,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	}
 
 	if dhtPeer.myAgentAddress != "" && !dhtPeer.IsAddressAnnounced(dhtPeer.myAgentAddress) {
-		err := dhtPeer.registerAgentAddress(dhtPeer.myAgentAddress)
+		err := dhtPeer.RegisterAgentAddress(dhtPeer.myAgentAddress)
 		if err != nil {
 			lerror(err).Str("op", "notif").
 				Str("addr", dhtPeer.myAgentAddress).
@@ -1481,7 +1554,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	if dhtPeer.enableRelay {
 		dhtPeer.dhtAddressesLock.RLock()
 		for addr := range dhtPeer.dhtAddresses {
-			err := dhtPeer.registerAgentAddress(addr)
+			err := dhtPeer.RegisterAgentAddress(addr)
 			if err != nil {
 				lerror(err).Str("op", "notif").
 					Str("addr", addr).
@@ -1493,7 +1566,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	if dhtPeer.delegatePort != 0 {
 		dhtPeer.tcpAddressesLock.RLock()
 		for addr := range dhtPeer.tcpAddresses {
-			err := dhtPeer.registerAgentAddress(addr)
+			err := dhtPeer.RegisterAgentAddress(addr)
 			if err != nil {
 				lerror(err).Str("op", "notif").
 					Str("addr", addr).
@@ -1512,7 +1585,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	dhtPeer.enableAddressAnnouncementLock.Unlock()
 }
 
-func (dhtPeer *DHTPeer) isAddressAnnouncementEnabled() bool {
+func (dhtPeer *DHTPeer) IsAddressAnnouncementEnabled() bool {
 	// wait if new peers connection establish in process
 	dhtPeer.enableAddressAnnouncementWg.Wait()
 	dhtPeer.enableAddressAnnouncementLock.Lock()
@@ -1598,11 +1671,11 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		Str("addr", clientAddr).
 		Msgf("peer added: %s", clientPeerID)
 
-	if dhtPeer.isAddressAnnouncementEnabled() && !dhtPeer.IsAddressAnnounced(string(clientAddr)) {
+	if dhtPeer.IsAddressAnnouncementEnabled() && !dhtPeer.IsAddressAnnounced(string(clientAddr)) {
 		linfo().Str("op", "register").
 			Str("addr", clientAddr).
 			Msgf("Announcing client address on behalf of %s...", clientPeerID)
-		err = dhtPeer.registerAgentAddress(string(clientAddr))
+		err = dhtPeer.RegisterAgentAddress(string(clientAddr))
 		if err != nil {
 			//TOFIX(LR) remove agent from map, or don't add it unless announcement done
 			lerror(err).Str("op", "register").
@@ -1616,7 +1689,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	opLatencyRegister.Observe(float64(duration.Microseconds()))
 }
 
-func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
+func (dhtPeer *DHTPeer) RegisterAgentAddress(addr string) error {
 	_, _, linfo, _ := dhtPeer.GetLoggers()
 
 	if dhtPeer.IsAddressAnnounced(addr) {

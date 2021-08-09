@@ -309,7 +309,7 @@ func benchmarkAgentRegistration(npeers uint16, b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		err = peer.registerAgentAddress(addrs[len(addrs)-1-i%len(addrs)])
+		err = peer.RegisterAgentAddress(addrs[len(addrs)-1-i%len(addrs)])
 		if err != nil {
 			b.Fail()
 		}

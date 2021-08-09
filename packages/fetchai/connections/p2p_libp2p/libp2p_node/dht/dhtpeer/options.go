@@ -114,6 +114,14 @@ func EnableDelegateService(port uint16) Option {
 	}
 }
 
+// EnableMailboxService for dhtpeer.New
+func EnableMailboxService(hostport string) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.mailboxHostPort = hostport
+		return nil
+	}
+}
+
 // EnableRelayService for dhtpeer.New
 func EnableRelayService() Option {
 	return func(dhtPeer *DHTPeer) error {

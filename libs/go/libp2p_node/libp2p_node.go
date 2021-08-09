@@ -129,6 +129,10 @@ func main() {
 		if storagePath != "" {
 			opts = append(opts, dhtpeer.StoreRecordsTo(storagePath))
 		}
+
+		if len(agent.MailboxUri()) > 0 {
+			opts = append(opts, dhtpeer.EnableMailboxService(agent.MailboxUri()))
+		}
 		node, err = dhtpeer.New(opts...)
 	}
 
