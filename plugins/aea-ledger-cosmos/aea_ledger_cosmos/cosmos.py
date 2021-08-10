@@ -56,6 +56,9 @@ from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 from aea.helpers.io import open_file
 
+from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
+from cosm.common.rest_client import RestClient
+from google.protobuf.json_format import MessageToDict, ParseDict
 
 _default_logger = logging.getLogger(__name__)
 
@@ -601,6 +604,8 @@ class _CosmosApi(LedgerApi):
         self.cosmwasm_version = kwargs.pop(
             "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
         )
+        self.rest_client = RestClient(self.network_address)
+
         valid_specifiers = list(MESSAGE_FORMAT_BY_VERSION["instantiate"].keys())
         if self.cosmwasm_version not in valid_specifiers:
             raise ValueError(  # pragma: nocover
@@ -622,23 +627,9 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def _try_get_balance(self, address: Address) -> Optional[int]:
-        """Try get the balance of a given account."""
-        balance = None  # type: Optional[int]
-        url = self.network_address + f"/bank/balances/{address}"
-        response = requests.get(url=url)
-        if response.status_code != 200:  # pragma: nocover
-            raise ValueError("Cannot get balance: {}".format(response.json()))
-        try:
-            result = response.json()["result"]
-            if len(result) == 0:
-                balance = 0
-            else:
-                balance = int(result[0]["amount"])
-        except KeyError:  # pragma: nocover
-            raise ValueError(
-                f"key `amount` or `result` not found in response_json={response.json()}"
-            )
-        return balance
+        bank = BankRestClient(self.rest_client)
+        res = bank.Balance(QueryBalanceRequest(address=address, denom=self.denom))
+        return int(res.balance.amount)
 
     def get_state(
         self, callable_name: str, *args: Any, **kwargs: Any
