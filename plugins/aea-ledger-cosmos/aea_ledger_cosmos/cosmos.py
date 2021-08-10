@@ -58,7 +58,13 @@ from aea.helpers.io import open_file
 
 from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
 from cosm.common.rest_client import RestClient
+from cosm.wasm.rest_client import WasmRestClient
+from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
+from cosm.auth.rest_client import AuthRestClient
+from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
+
 from google.protobuf.json_format import MessageToDict, ParseDict
+
 
 _default_logger = logging.getLogger(__name__)
 
@@ -970,21 +976,13 @@ class _CosmosApi(LedgerApi):
         :param query_msg: QueryMsg in JSON format.
         :return: the message receipt
         """
-        command = [
-            self.cli_command,
-            "query",
-            "wasm",
-            "contract-state",
-            "smart",
-            str(contract_address),
-            json.dumps(query_msg),
-        ]
+        wasm_client = WasmRestClient(self.rest_client)
+        request = QuerySmartContractStateRequest(
+            address=contract_address, query_data=json.dumps(query_msg).encode("UTF8")
+        )
+        res = wasm_client.SmartContractState(request)
+        return json.loads(res.data)
 
-        cli_stdout = self._execute_shell_command(command)
-        try:
-            return json.loads(cli_stdout)
-        except JSONDecodeError:  # pragma: nocover
-            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -1091,23 +1089,9 @@ class _CosmosApi(LedgerApi):
         :param address: the address
         :return: a tuple of account number and sequence
         """
-        result: Tuple[Optional[int], Optional[int]] = (None, None)
-        url = self.network_address + f"/auth/accounts/{address}"
-        response = requests.get(url=url)
-        if response.status_code != 200:  # pragma: nocover
-            raise ValueError(
-                "Cannot get account number and sequence: {}".format(response.json())
-            )
-        try:
-            result = (
-                int(response.json()["result"]["value"]["account_number"]),
-                int(response.json()["result"]["value"]["sequence"]),
-            )
-        except KeyError:  # pragma: nocover
-            raise ValueError(
-                f"keys `account_number` and `sequence` not found in response_json={response.json()}."
-            )
-        return result
+        auth = AuthRestClient(self.rest_client)
+        res = auth.Account(QueryAccountRequest(address=address))
+        return res
 
     def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
@@ -1245,37 +1229,6 @@ class _CosmosApi(LedgerApi):
         ).communicate()
 
         return stdout.decode("ascii")
-
-    def get_last_code_id(self) -> int:
-        """
-        Get ID of latest deployed .wasm bytecode.
-
-        :return: code id of last deployed .wasm bytecode
-        """
-
-        command = [self.cli_command, "query", "wasm", "list-code"]
-        res = json.loads(self._execute_shell_command(command))
-
-        return int(res[-1]["id"])
-
-    def get_last_contract_address(self, code_id: int) -> str:
-        """
-        Get contract address of latest initialised contract by its ID.
-
-        :param code_id: id of deployed CosmWasm bytecode
-        :return: contract address of last initialised contract
-        """
-
-        command = [
-            self.cli_command,
-            "query",
-            "wasm",
-            "list-contract-by-code",
-            str(code_id),
-        ]
-        res = json.loads(self._execute_shell_command(command))
-
-        return res[-1]["address"]
 
     def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
         """

@@ -640,53 +640,7 @@ def test_get_contract_instance():
     assert cosmos_api.get_contract_instance("interface") is None
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-@mock.patch("aea_ledger_fetchai.FetchAIApi._execute_shell_command")
-def test_get_contract_address(mock_api_call):
-    """Test the get_contract_address method used for interaction with CosmWasm contracts."""
 
-    mock_res = [
-        {
-            "code_id": 999,
-            "creator": "cosmos_creator_address",
-            "label": "SOME_LABEL",
-            "address": "cosmos_contract_address",
-        }
-    ]
-
-    mock_api_call.return_value = json.dumps(mock_res).encode("ascii")
-
-    cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-
-    res = cosmos_api.get_last_contract_address(code_id=999)
-    assert res == mock_res[-1]["address"]
-
-
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-@mock.patch("aea_ledger_fetchai.FetchAIApi._execute_shell_command")
-def test_get_last_code_id(mock_api_call):
-    """Test the get_last_code_id method used for interaction with CosmWasm contracts."""
-
-    mock_res = [
-        {
-            "id": 1,
-            "creator": "cosmos14xjnl2mwwfz6pztpwzj6s89npxr0e3lhxl52nv",
-            "data_hash": "59D6DD8D6034C9E97015DD9E12DAFCE404FA5C413FA81CFBE0EF3E427F0A9BA3",
-            "source": "",
-            "builder": "",
-        }
-    ]
-
-    mock_api_call.return_value = json.dumps(mock_res).encode("ascii")
-
-    cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-
-    res = cosmos_api.get_last_code_id()
-    assert res == mock_res[-1]["id"]
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

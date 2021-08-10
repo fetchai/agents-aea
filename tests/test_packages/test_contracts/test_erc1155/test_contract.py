@@ -667,7 +667,6 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
 
         assert code_id is not None
-        assert code_id == cast(FetchAIApi, cls.ledger_api).get_last_code_id()
 
         # Init contract
         tx = cls._contract.get_deploy_transaction(
@@ -692,11 +691,6 @@ class TestCosmWasmContract(BaseContractTestCase):
 
         if contract_address is None:
             raise ValueError("Contract address not found!")  # pragma: nocover
-
-        if contract_address != cast(
-            FetchAIApi, cls.ledger_api
-        ).get_last_contract_address(code_id):
-            raise ValueError("Contract address not valid!")  # pragma: nocover
 
         return contract_address
 
