@@ -640,9 +640,6 @@ def test_get_contract_instance():
     assert cosmos_api.get_contract_instance("interface") is None
 
 
-
-
-
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger

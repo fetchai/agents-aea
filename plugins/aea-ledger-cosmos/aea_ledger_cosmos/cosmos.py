@@ -39,6 +39,12 @@ from bech32 import (  # pylint: disable=wrong-import-order
     bech32_encode,
     convertbits,
 )
+from cosm.auth.rest_client import AuthRestClient
+from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
+from cosm.common.rest_client import RestClient
+from cosm.wasm.rest_client import WasmRestClient
+from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
+from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
@@ -55,15 +61,6 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 from aea.helpers.io import open_file
-
-from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
-from cosm.common.rest_client import RestClient
-from cosm.wasm.rest_client import WasmRestClient
-from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
-from cosm.auth.rest_client import AuthRestClient
-from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
-
-from google.protobuf.json_format import MessageToDict, ParseDict
 
 
 _default_logger = logging.getLogger(__name__)
@@ -982,7 +979,6 @@ class _CosmosApi(LedgerApi):
         )
         res = wasm_client.SmartContractState(request)
         return json.loads(res.data)
-
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
