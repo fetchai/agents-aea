@@ -221,7 +221,11 @@ class CosmosHelper(Helper):
         """
         code_id: Optional[int] = None
         try:
-            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "code_id"]  # type: ignore
+            res = [
+                dic_["value"]
+                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]
+                if dic_["key"] == "code_id"
+            ]  # type: ignore
             code_id = int(res[0])
         except (KeyError, IndexError):  # pragma: nocover
             code_id = None
@@ -237,7 +241,11 @@ class CosmosHelper(Helper):
         """
         contract_address: Optional[str] = None
         try:
-            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "contract_address"]  # type: ignore
+            res = [
+                dic_["value"]
+                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]
+                if dic_["key"] == "contract_address"
+            ]  # type: ignore
             contract_address = res[0]
         except (KeyError, IndexError):  # pragma: nocover
             contract_address = None
@@ -1248,23 +1256,17 @@ class CosmosApi(_CosmosApi, CosmosHelper):
 class CosmosFaucetStatus:
     tx_digest: Optional[str]
     status: str
-    status_code: int
 """
-CosmosFaucetStatus = namedtuple(
-    "CosmosFaucetStatus", ["tx_digest", "status", "status_code"]
-)
+CosmosFaucetStatus = namedtuple("CosmosFaucetStatus", ["tx_digest", "status"])
 
 
 class CosmosFaucetApi(FaucetApi):
     """Cosmos testnet faucet API."""
 
-    FAUCET_STATUS_PENDING = 1  # noqa: F841
-    FAUCET_STATUS_PROCESSING = 2  # noqa: F841
-    FAUCET_STATUS_COMPLETED = 20  # noqa: F841
-    FAUCET_STATUS_FAILED = 21  # noqa: F841
-    FAUCET_STATUS_TIMED_OUT = 22  # noqa: F841
-    FAUCET_STATUS_RATE_LIMITED = 23  # noqa: F841
-    FAUCET_STATUS_RATE_UNAVAILABLE = 99  # noqa: F841
+    FAUCET_STATUS_PENDING = "pending"  # noqa: F841
+    FAUCET_STATUS_PROCESSING = "processing"  # noqa: F841
+    FAUCET_STATUS_COMPLETED = "complete"  # noqa: F841
+    FAUCET_STATUS_FAILED = "failed"  # noqa: F841
 
     identifier = _COSMOS
     testnet_faucet_url = DEFAULT_FAUCET_URL
@@ -1297,11 +1299,14 @@ class CosmosFaucetApi(FaucetApi):
                 raise RuntimeError("Failed to check faucet claim status")
 
             # if the status is complete
-            if status.status_code == self.FAUCET_STATUS_COMPLETED:
+            if status.status == self.FAUCET_STATUS_COMPLETED:
                 break
 
             # if the status is failure
-            if status.status_code > self.FAUCET_STATUS_COMPLETED:  # pragma: nocover
+            if (
+                status.status != self.FAUCET_STATUS_PENDING
+                and status.status != self.FAUCET_STATUS_PROCESSING
+            ):  # pragma: nocover
                 raise RuntimeError(f"Failed to get wealth for {address}")
 
             # if the status is incomplete
@@ -1325,12 +1330,12 @@ class CosmosFaucetApi(FaucetApi):
         :return: None on failure, otherwise the request uid
         """
         uri = cls._faucet_request_uri(url)
-        response = requests.post(url=uri, data={"Address": address})
+        response = requests.post(url=uri, json={"address": address})
 
         uid = None
         if response.status_code == 200:
             try:
-                uid = response.json()["uid"]
+                uid = response.json()["uuid"]
             except KeyError:  # pragma: nocover
                 ValueError(f"key `uid` not found in response_json={response.json()}")
             _default_logger.info("Wealth claim generated, uid: {}".format(uid))
@@ -1365,11 +1370,11 @@ class CosmosFaucetApi(FaucetApi):
 
         # parse the response
         data = response.json()
-        return CosmosFaucetStatus(
-            tx_digest=data.get("txDigest"),
-            status=data["status"],
-            status_code=data["statusCode"],
-        )
+        tx_digest = None
+        if "txStatus" in data["claim"]:
+            tx_digest = data["claim"]["txStatus"]["hash"]
+
+        return CosmosFaucetStatus(tx_digest=tx_digest, status=data["claim"]["status"],)
 
     @classmethod
     def _faucet_request_uri(cls, url: Optional[str] = None) -> str:
