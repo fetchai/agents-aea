@@ -42,6 +42,8 @@ from bech32 import (  # pylint: disable=wrong-import-order
 from cosm.auth.rest_client import AuthRestClient
 from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
 from cosm.common.rest_client import RestClient
+from cosm.crypto.keypairs import PrivateKey
+from cosm.tx.rest_client import TxRestClient
 from cosm.wasm.rest_client import WasmRestClient
 from cosmos.auth.v1beta1.auth_pb2 import BaseAccount
 from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
@@ -49,7 +51,20 @@ from cosmos.bank.v1beta1.tx_pb2 import MsgSend
 from cosmos.base.v1beta1.coin_pb2 import Coin
 from cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
 from cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
-from cosmos.tx.v1beta1.tx_pb2 import AuthInfo, Fee, ModeInfo, SignerInfo, Tx, TxBody
+from cosmos.tx.v1beta1.service_pb2 import (
+    BroadcastMode,
+    BroadcastTxRequest,
+    GetTxRequest,
+)
+from cosmos.tx.v1beta1.tx_pb2 import (
+    AuthInfo,
+    Fee,
+    ModeInfo,
+    SignDoc,
+    SignerInfo,
+    Tx,
+    TxBody,
+)
 from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
@@ -60,7 +75,7 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
     sigencode_string_canonize,
 )
 from google.protobuf.any_pb2 import Any as ProtoAny
-from google.protobuf.json_format import MessageToDict
+from google.protobuf.json_format import MessageToDict, ParseDict
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -562,19 +577,25 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        transaction_str = json.dumps(transaction, separators=(",", ":"), sort_keys=True)
-        transaction_bytes = transaction_str.encode("utf-8")
-        signed_transaction = self.sign_message(transaction_bytes)
-        base64_pbk = base64.b64encode(bytes.fromhex(self.public_key)).decode("utf-8")
 
-        msgs = cast(list, transaction.get("msgs", []))
-        if len(msgs) == 1 and "type" in msgs[0] and "wasm" in msgs[0]["type"]:
-            return self._format_wasm_transaction(
-                transaction, signed_transaction, base64_pbk
-            )
-        return self._format_default_transaction(
-            transaction, signed_transaction, base64_pbk
-        )
+        signer = PrivateKey(bytes.fromhex(self.private_key))
+        tx = ParseDict(transaction["tx"], Tx())
+
+        current_sign_data = transaction["sign_data"][self.address]
+
+        sd = SignDoc()
+        sd.body_bytes = tx.body.SerializeToString()
+        sd.auth_info_bytes = tx.auth_info.SerializeToString()
+        sd.chain_id = current_sign_data["chain_id"]
+        sd.account_number = current_sign_data["account_number"]
+
+        data_for_signing = sd.SerializeToString()
+
+        # Generating signature:
+        signature = signer.sign(data_for_signing, canonicalise=True)
+        tx.signatures.extend([signature])
+
+        return {"tx": MessageToDict(tx), "sign_data": transaction["sign_data"]}
 
     @classmethod
     def generate_private_key(cls) -> SigningKey:
@@ -624,6 +645,7 @@ class _CosmosApi(LedgerApi):
             "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
         )
         self.rest_client = RestClient(self.network_address)
+        self.tx_client = TxRestClient(self.rest_client)
 
         valid_specifiers = list(MESSAGE_FORMAT_BY_VERSION["instantiate"].keys())
         if self.cosmwasm_version not in valid_specifiers:
@@ -1154,17 +1176,23 @@ class _CosmosApi(LedgerApi):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        if self.is_cosmwasm_transaction(tx_signed):
-            tx_digest = self._try_execute_wasm_transaction(tx_signed)
-        elif self.is_transfer_transaction(tx_signed):
-            tx_digest = self._try_send_signed_transaction(tx_signed)
-        else:  # pragma: nocover
-            _default_logger.warning(
-                "Cannot send transaction. Unknown transaction type: {}".format(
-                    tx_signed
-                )
-            )
+
+        tx = ParseDict(tx_signed["tx"], Tx())
+
+        tx_data = tx.SerializeToString()
+        broad_tx_req = BroadcastTxRequest(
+            tx_bytes=tx_data, mode=BroadcastMode.BROADCAST_MODE_SYNC
+        )
+        broad_tx_resp = self.tx_client.BroadcastTx(broad_tx_req)
+
+        if broad_tx_resp.tx_response.code != 0:
+            raw_log = broad_tx_resp.tx_response.raw_log
+
+            _default_logger.warning(f"Sending transaction failed: {raw_log}")
             tx_digest = None
+        else:
+            tx_digest = broad_tx_resp.tx_response.txhash
+
         return tx_digest
 
     def is_cosmwasm_transaction(self, tx_signed: JSONLike) -> bool:
@@ -1235,16 +1263,10 @@ class _CosmosApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        result: Optional[JSONLike] = None
-        url = self.network_address + f"/txs/{tx_digest}"
-        response = requests.get(url=url)
-        if response.status_code == 200:
-            result = response.json()
-        else:  # pragma: nocover
-            raise ValueError(
-                "Cannot get transaction receipt: {}".format(response.json())
-            )
-        return result
+
+        tx_request = GetTxRequest(hash=tx_digest)
+        tx_response = self.tx_client.GetTx(tx_request)
+        return MessageToDict(tx_response)
 
     def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
