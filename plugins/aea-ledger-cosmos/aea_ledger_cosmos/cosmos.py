@@ -43,6 +43,7 @@ from cosm.auth.rest_client import AuthRestClient
 from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
 from cosm.common.rest_client import RestClient
 from cosm.wasm.rest_client import WasmRestClient
+from cosmos.auth.v1beta1.auth_pb2 import BaseAccount
 from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
 from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
@@ -1086,8 +1087,14 @@ class _CosmosApi(LedgerApi):
         :return: a tuple of account number and sequence
         """
         auth = AuthRestClient(self.rest_client)
-        res = auth.Account(QueryAccountRequest(address=address))
-        return res
+        account_response = auth.Account(QueryAccountRequest(address=address))
+        account = BaseAccount()
+        if account_response.account.Is(BaseAccount.DESCRIPTOR):
+            account_response.account.Unpack(account)
+        else:
+            raise TypeError("Unexpected account type")
+
+        return account.account_number, account.sequence
 
     def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """

@@ -1382,7 +1382,7 @@ class CosmosFaucetApi(FaucetApi):
         if cls.testnet_faucet_url is None:  # pragma: nocover
             raise ValueError("Testnet faucet url not set.")
         url = cls.testnet_faucet_url if url is None else url
-        return f"{url}/claim/requests"
+        return f"{url}/api/v3/claims"
 
     @classmethod
     def _faucet_status_uri(cls, uid: str, url: Optional[str] = None) -> str:
