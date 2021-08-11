@@ -42,7 +42,6 @@ from bech32 import (  # pylint: disable=wrong-import-order
 from cosm.auth.rest_client import AuthRestClient
 from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
 from cosm.common.rest_client import RestClient
-from cosm.crypto.keypairs import PrivateKey
 from cosm.tx.rest_client import TxRestClient
 from cosm.wasm.rest_client import WasmRestClient
 from cosmos.auth.v1beta1.auth_pb2 import BaseAccount
@@ -488,21 +487,18 @@ class CosmosCrypto(Crypto[SigningKey]):
             ) from e
         return signing_key
 
-    def sign_message(  # pylint: disable=unused-argument
-        self, message: bytes, is_deprecated_mode: bool = False
-    ) -> str:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> bytes:
         """
         Sign a message in bytes string form.
 
         :param message: the message to be signed
         :param is_deprecated_mode: if the deprecated signing is used
-        :return: signature of the message in string form
+        :return: signature of the message in bytes form
         """
         signature_compact = self.entity.sign_deterministic(
             message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
         )
-        signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
-        return signature_base64_str
+        return signature_compact
 
     @staticmethod
     def _format_default_transaction(
@@ -578,8 +574,24 @@ class CosmosCrypto(Crypto[SigningKey]):
         :return: signed transaction
         """
 
-        signer = PrivateKey(bytes.fromhex(self.private_key))
         tx = ParseDict(transaction["tx"], Tx())
+
+        # If public key is not already part of transaction
+        if tx.auth_info.signer_infos[0].public_key.value == b"":
+            if len(transaction["sign_data"]) == 1:
+                # Insert public key to auth info
+                from_pub_key_packed = ProtoAny()
+                from_pub_key_pb = ProtoPubKey(key=bytes.fromhex(self.public_key))
+                from_pub_key_packed.Pack(from_pub_key_pb, type_url_prefix="/")
+
+                tx.auth_info.signer_infos[
+                    0
+                ].public_key.value = from_pub_key_packed.value
+            else:
+                # Fails if public key is not present in transaction with multiple signers
+                raise RuntimeError(
+                    "Public key can be added during singing only for single message transactions."
+                )
 
         current_sign_data = transaction["sign_data"][self.address]
 
@@ -592,7 +604,8 @@ class CosmosCrypto(Crypto[SigningKey]):
         data_for_signing = sd.SerializeToString()
 
         # Generating signature:
-        signature = signer.sign(data_for_signing, canonicalise=True)
+        signature = self.sign_message(data_for_signing)
+
         tx.signatures.extend([signature])
 
         return {"tx": MessageToDict(tx), "sign_data": transaction["sign_data"]}
@@ -1025,7 +1038,6 @@ class _CosmosApi(LedgerApi):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        sender_public_key: Optional[str] = None,
         denom: Optional[str] = None,
         gas: int = 80000,
         memo: str = "",
@@ -1064,14 +1076,10 @@ class _CosmosApi(LedgerApi):
         chain_id = chain_id if chain_id is not None else self.chain_id
         account_data = self._try_get_account_data(sender_address)
 
-        # This doesn't always work
-        if sender_public_key is None:
-            sender_public_key = account_data.pub_key.value
-
         tx = self._get_transaction(
             account_numbers=[account_data.account_number],
             from_addresses=[str(sender_address)],
-            pub_keys=[bytes.fromhex(sender_public_key)],
+            pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
