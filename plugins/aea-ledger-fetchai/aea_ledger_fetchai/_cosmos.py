@@ -29,7 +29,7 @@ import time
 from collections import namedtuple
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, Collection, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from Crypto.Cipher import AES  # nosec
 from Crypto.Protocol.KDF import scrypt  # nosec
@@ -45,6 +45,11 @@ from cosm.common.rest_client import RestClient
 from cosm.wasm.rest_client import WasmRestClient
 from cosmos.auth.v1beta1.auth_pb2 import BaseAccount
 from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
+from cosmos.bank.v1beta1.tx_pb2 import MsgSend
+from cosmos.base.v1beta1.coin_pb2 import Coin
+from cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
+from cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
+from cosmos.tx.v1beta1.tx_pb2 import AuthInfo, Fee, ModeInfo, SignerInfo, Tx, TxBody
 from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
@@ -54,6 +59,8 @@ from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
 from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
     sigencode_string_canonize,
 )
+from google.protobuf.any_pb2 import Any as ProtoAny
+from google.protobuf.json_format import MessageToDict
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -996,6 +1003,7 @@ class _CosmosApi(LedgerApi):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
+        sender_public_key: Optional[str] = None,
         denom: Optional[str] = None,
         gas: int = 80000,
         memo: str = "",
@@ -1010,6 +1018,7 @@ class _CosmosApi(LedgerApi):
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
+        :param sender_public_key: the public key of the payer
         :param denom: the denomination of tx fee and amount
         :param gas: the gas used.
         :param memo: memo to include in tx.
@@ -1018,76 +1027,109 @@ class _CosmosApi(LedgerApi):
         :return: the transfer transaction
         """
         denom = denom if denom is not None else self.denom
-        chain_id = chain_id if chain_id is not None else self.chain_id
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            sender_address
+
+        amount_coins = [Coin(denom=denom, amount=str(amount))]
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+
+        msg_send = MsgSend(
+            from_address=str(sender_address),
+            to_address=str(destination_address),
+            amount=amount_coins,
         )
-        if account_number is None or sequence is None:
-            return None  # pragma: nocover
-        transfer_msg = {
-            "type": "cosmos-sdk/MsgSend",
-            "value": {
-                "amount": [{"amount": str(amount), "denom": denom}],
-                "from_address": sender_address,
-                "to_address": destination_address,
-            },
-        }
+        send_msg_packed = ProtoAny()
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+        chain_id = chain_id if chain_id is not None else self.chain_id
+        account_data = self._try_get_account_data(sender_address)
+
+        # This doesn't always work
+        if sender_public_key is None:
+            sender_public_key = account_data.pub_key.value
+
         tx = self._get_transaction(
-            account_number,
-            chain_id,
-            tx_fee,
-            denom,
-            gas,
-            memo,
-            sequence,
-            msg=transfer_msg,
+            account_numbers=[account_data.account_number],
+            from_addresses=[str(sender_address)],
+            pub_keys=[bytes.fromhex(sender_public_key)],
+            chain_id=chain_id,
+            tx_fee=tx_fee_coins,
+            gas=gas,
+            memo=memo,
+            sequences=[account_data.sequence],
+            msgs=[send_msg_packed],
         )
         return tx
 
     @staticmethod
     def _get_transaction(
-        account_number: int,
+        account_numbers: List[int],
+        from_addresses: List[str],
+        pub_keys: List[bytes],
         chain_id: str,
-        tx_fee: int,
-        denom: str,
+        tx_fee: List[Coin],
         gas: int,
         memo: str,
-        sequence: int,
-        msg: Dict[str, Collection[str]],
+        sequences: [int],
+        msgs: List[ProtoAny],
     ) -> JSONLike:
         """
         Get a transaction.
 
-        :param account_number: the account number.
+        :param account_numbers: Account numbers for each signer.
+        :param from_addresses: Addresses of each sender
+        :param pub_keys: Public keys of each sender
         :param chain_id: the chain ID of the transaction.
         :param tx_fee: the transaction fee.
-        :param denom: the denomination of tx fee and amount
         :param gas: the gas used.
         :param memo: memo to include in tx.
-        :param msg: the transaction msg.
-        :param sequence: the sequence.
+        :param sequences: Sequence for each sender.
+        :param msgs: Messages to be part of transaction.
+
         :return: the transaction
         """
-        tx: JSONLike = {
-            "account_number": str(account_number),
-            "chain_id": chain_id,
-            "fee": {
-                "amount": [{"amount": str(tx_fee), "denom": denom}],
-                "gas": str(gas),
-            },
-            "memo": memo,
-            "msgs": [msg],
-            "sequence": str(sequence),
-        }
-        return tx
+
+        # Get account and signer info for each sender
+        signer_infos: List[SignerInfo] = []
+        sign_data: JSONLike = {}
+        for from_address, pub_key, sequence, account_number in zip(
+            from_addresses, pub_keys, sequences, account_numbers
+        ):
+            from_pub_key_packed = ProtoAny()
+            from_pub_key_pb = ProtoPubKey(key=pub_key)
+            from_pub_key_packed.Pack(from_pub_key_pb, type_url_prefix="/")
+
+            # Prepare auth info
+            single = ModeInfo.Single(mode=SignMode.SIGN_MODE_DIRECT)
+            mode_info = ModeInfo(single=single)
+            signer_info = SignerInfo(
+                public_key=from_pub_key_packed, mode_info=mode_info, sequence=sequence,
+            )
+            signer_infos.append(signer_info)
+
+            sign_data[from_address] = {
+                "account_number": account_number,
+                "chain_id": chain_id,
+            }
+
+        # Prepare auth info
+        auth_info = AuthInfo(
+            signer_infos=signer_infos, fee=Fee(amount=tx_fee, gas_limit=gas),
+        )
+
+        # Prepare Tx body
+        tx_body = TxBody()
+        tx_body.memo = memo
+        tx_body.messages.extend(msgs)
+
+        # Prepare Tx
+        tx = Tx(body=tx_body, auth_info=auth_info)
+
+        return {"tx": MessageToDict(tx), "sign_data": sign_data}
 
     @try_decorator(
         "Encountered exception when trying to get account number and sequence: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_account_number_and_sequence(
-        self, address: Address
-    ) -> Tuple[Optional[int], Optional[int]]:
+    def _try_get_account_data(self, address: Address) -> BaseAccount:
         """
         Try get account number and sequence for an address.
 
@@ -1103,7 +1145,7 @@ class _CosmosApi(LedgerApi):
         else:
             raise TypeError("Unexpected account type")
 
-        return account["account_number"], account["sequence"]
+        return account
 
     def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
