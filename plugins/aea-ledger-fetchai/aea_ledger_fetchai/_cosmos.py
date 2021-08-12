@@ -831,7 +831,7 @@ class _CosmosApi(LedgerApi):
         """
         store_msg = MsgStoreCode(
             sender=str(deployer_address),
-            wasm_byte_code=contract_interface[_BYTECODE],
+            wasm_byte_code=base64.b64decode(contract_interface[_BYTECODE]),
             source=source,
             builde=builder,
         )
