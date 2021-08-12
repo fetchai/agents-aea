@@ -221,7 +221,7 @@ class TestHttpHandler(BaseSkillTestCase):
             status_code=200,
             status_text="Success",
             headers=incoming_message.headers,
-            body=b"",
+            body=self.body,
         )
         assert has_attributes, error_str
 
