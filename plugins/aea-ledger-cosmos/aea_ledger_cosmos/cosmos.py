@@ -95,16 +95,6 @@ DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
 DEFAULT_CURRENCY_DENOM = "uatom"
 DEFAULT_CHAIN_ID = "cosmoshub-3"
 _BYTECODE = "wasm_byte_code"
-DEFAULT_CLI_COMMAND = "wasmcli"
-DEFAULT_COSMWASM_VERSIONS = "<0.10"
-MESSAGE_FORMAT_BY_VERSION = {
-    "store": {"<0.10": "wasm/store-code", ">=0.10": "wasm/MsgStoreCode"},
-    "instantiate": {
-        "<0.10": "wasm/instantiate",
-        ">=0.10": "wasm/MsgInstantiateContract",
-    },
-    "execute": {"<0.10": "wasm/execute", ">=0.10": "wasm/MsgExecuteContract"},
-}
 
 
 class DataEncrypt:
@@ -588,17 +578,9 @@ class _CosmosApi(LedgerApi):
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
-        self.cosmwasm_version = kwargs.pop(
-            "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
-        )
         self.rest_client = RestClient(self.network_address)
         self.tx_client = TxRestClient(self.rest_client)
-
-        valid_specifiers = list(MESSAGE_FORMAT_BY_VERSION["instantiate"].keys())
-        if self.cosmwasm_version not in valid_specifiers:
-            raise ValueError(  # pragma: nocover
-                f"Valid CosmWasm version specifiers: {valid_specifiers}. Received invalid specifier={self.cosmwasm_version}!"
-            )
+        self.auth_client = AuthRestClient(self.rest_client)
 
     @property
     def api(self) -> Any:
@@ -1067,8 +1049,9 @@ class _CosmosApi(LedgerApi):
         :param address: the address
         :return: a tuple of account number and sequence
         """
-        auth = AuthRestClient(self.rest_client)
-        account_response = auth.Account(QueryAccountRequest(address=address))
+        account_response = self.auth_client.Account(
+            QueryAccountRequest(address=address)
+        )
 
         account = BaseAccount()
         if account_response.account.Is(BaseAccount.DESCRIPTOR):
@@ -1107,10 +1090,15 @@ class _CosmosApi(LedgerApi):
     def is_cosmwasm_transaction(self, tx_signed: JSONLike) -> bool:
         """Check whether it is a cosmwasm tx."""
         try:
-            _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
+            _type = (
+                cast(dict, tx_signed.get("tx", {}))
+                .get("body", {})
+                .get("messages", [])[0]["@type"]
+            )
             result = _type in [
-                value[self.cosmwasm_version]
-                for value in MESSAGE_FORMAT_BY_VERSION.values()
+                "/cosmwasm.wasm.v1beta1.MsgStoreCode",
+                "/cosmwasm.wasm.v1beta1.MsgInstantiateContract",
+                "/cosmwasm.wasm.v1beta1.MsgExecuteContract",
             ]
         except (KeyError, IndexError):  # pragma: nocover
             result = False
@@ -1120,8 +1108,12 @@ class _CosmosApi(LedgerApi):
     def is_transfer_transaction(tx_signed: JSONLike) -> bool:
         """Check whether it is a transfer tx."""
         try:
-            _type = cast(dict, tx_signed.get("tx", {})).get("msg", [])[0]["type"]
-            result = _type in ["cosmos-sdk/MsgSend"]
+            _type = (
+                cast(dict, tx_signed.get("tx", {}))
+                .get("body", {})
+                .get("messages", [])[0]["@type"]
+            )
+            result = _type in ["/cosmos.bank.v1beta1.MsgSend"]
         except (KeyError, IndexError):  # pragma: nocover
             result = False
         return result
