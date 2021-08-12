@@ -65,6 +65,7 @@ from cosmos.tx.v1beta1.tx_pb2 import (
     TxBody,
 )
 from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
+from cosmwasm.wasm.v1beta1.tx_pb2 import MsgInstantiateContract, MsgStoreCode
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
@@ -746,10 +747,9 @@ class _CosmosApi(LedgerApi):
             if kwargs.get("chain_id", None) is not None
             else self.chain_id
         )
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            deployer_address
-        )
-        if account_number is None or sequence is None:
+        account_data = self._try_get_account_data(deployer_address)
+
+        if account_data.account_number is None or account_data.sequence is None:
             return None  # pragma: nocover
         label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
@@ -766,8 +766,8 @@ class _CosmosApi(LedgerApi):
                 deployer_address,
                 denom,
                 chain_id,
-                account_number,
-                sequence,
+                account_data.account_number,
+                account_data.sequence,
                 **kwargs,
             )
         if label is None:
@@ -790,8 +790,8 @@ class _CosmosApi(LedgerApi):
             deployer_address,
             denom,
             chain_id,
-            account_number,
-            sequence,
+            account_data.account_number,
+            account_data.sequence,
             amount,
             code_id,
             init_msg,
@@ -829,17 +829,26 @@ class _CosmosApi(LedgerApi):
         :param builder: the builder.
         :return: the unsigned CosmWasm contract deploy message
         """
-        store_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["store"][self.cosmwasm_version],
-            "value": {
-                "sender": deployer_address,
-                "wasm_byte_code": contract_interface[_BYTECODE],
-                "source": source,
-                "builder": builder,
-            },
-        }
+        store_msg = MsgStoreCode(
+            sender=str(deployer_address),
+            wasm_byte_code=contract_interface[_BYTECODE],
+            source=source,
+            builde=builder,
+        )
+        store_msg_packed = Any()
+        store_msg_packed.Pack(store_msg, type_url_prefix="/")
+
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
         tx = self._get_transaction(
-            account_number, chain_id, tx_fee, denom, gas, memo, sequence, msg=store_msg,
+            account_numbers=[account_number],
+            from_addresses=[str(deployer_address)],
+            pub_keys=[b""],
+            chain_id=chain_id,
+            tx_fee=tx_fee_coins,
+            gas=gas,
+            memo=memo,
+            sequences=[sequence],
+            msgs=[store_msg_packed],
         )
         return tx
 
@@ -875,29 +884,32 @@ class _CosmosApi(LedgerApi):
         :param memo: any string comment.
         :return: the unsigned CosmWasm InitMsg
         """
-        if self.cosmwasm_version != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+        if amount == 0:
             init_funds = []
         else:
-            init_funds = [{"amount": str(amount), "denom": denom}]
-        instantiate_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["instantiate"][self.cosmwasm_version],
-            "value": {
-                "sender": deployer_address,
-                "code_id": str(code_id),
-                "label": label,
-                "init_msg": init_msg,
-                "init_funds": init_funds,
-            },
-        }
+            init_funds = [Coin(denom=denom, amount=str(amount))]
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+
+        init_msg = MsgInstantiateContract(
+            sender=str(deployer_address),
+            code_id=code_id,
+            init_msg=json.dumps(init_msg).encode("UTF8"),
+            label=label,
+            funds=init_funds,
+        )
+        init_msg_packed = Any()
+        init_msg_packed.Pack(init_msg, type_url_prefix="/")
+
         tx = self._get_transaction(
-            account_number,
-            chain_id,
-            tx_fee,
-            denom,
-            gas,
-            memo,
-            sequence,
-            msg=instantiate_msg,
+            account_numbers=[account_number],
+            from_addresses=[str(deployer_address)],
+            pub_keys=[b""],
+            chain_id=chain_id,
+            tx_fee=tx_fee_coins,
+            gas=gas,
+            memo=memo,
+            sequences=[sequence],
+            msgs=[init_msg_packed],
         )
         return tx
 
@@ -1052,7 +1064,6 @@ class _CosmosApi(LedgerApi):
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
-        :param sender_public_key: the public key of the payer
         :param denom: the denomination of tx fee and amount
         :param gas: the gas used.
         :param memo: memo to include in tx.
@@ -1257,14 +1268,14 @@ class _CosmosApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
-        return tx_receipt
+        tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
+        return tx_with_receipt["txResponse"]
 
     @try_decorator(
         "Encountered exception when trying to get transaction receipt: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
+    def _try_get_transaction_with_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Try get the transaction receipt for a transaction digest.
 
@@ -1284,8 +1295,8 @@ class _CosmosApi(LedgerApi):
         :return: the tx, if present
         """
         # Cosmos does not distinguish between transaction receipt and transaction
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
-        return tx_receipt
+        tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
+        return tx_with_receipt["tx"]
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
