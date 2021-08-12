@@ -292,10 +292,10 @@ class CosmosHelper(Helper):
             return False  # pragma: no cover
 
         try:
-            _tx = cast(dict, tx.get("tx", {})).get("value", {}).get("msg", [])[0]
-            recovered_amount = int(_tx.get("value").get("amount")[0].get("amount"))
-            sender = _tx.get("value").get("from_address")
-            recipient = _tx.get("value").get("to_address")
+            _tx = cast(dict, tx.get("tx", {})).get("body", {}).get("messages", [])[0]
+            recovered_amount = int(_tx.get("amount")[0].get("amount"))
+            sender = _tx.get("fromAddress")
+            recipient = _tx.get("toAddress")
             is_valid = (
                 recovered_amount == amount and sender == client and recipient == seller
             )
@@ -501,72 +501,6 @@ class CosmosCrypto(Crypto[SigningKey]):
         )
         return signature_compact
 
-    @staticmethod
-    def _format_default_transaction(
-        transaction: JSONLike, signature: str, base64_pbk: str
-    ) -> JSONLike:
-        """
-        Format default CosmosSDK transaction and add signature.
-
-        :param transaction: the transaction to be formatted
-        :param signature: the transaction signature
-        :param base64_pbk: the base64 formatted public key
-
-        :return: formatted transaction with signature
-        """
-        pushable_tx: JSONLike = {
-            "tx": {
-                "msg": transaction["msgs"],
-                "fee": transaction["fee"],
-                "memo": transaction["memo"],
-                "signatures": [
-                    {
-                        "signature": signature,
-                        "pub_key": {
-                            "type": "tendermint/PubKeySecp256k1",
-                            "value": base64_pbk,
-                        },
-                        "account_number": transaction["account_number"],
-                        "sequence": transaction["sequence"],
-                    }
-                ],
-            },
-            "mode": "async",
-        }
-        return pushable_tx
-
-    @staticmethod
-    def _format_wasm_transaction(
-        transaction: JSONLike, signature: str, base64_pbk: str
-    ) -> JSONLike:
-        """
-        Format CosmWasm transaction and add signature.
-
-        :param transaction: the transaction to be formatted
-        :param signature: the transaction signature
-        :param base64_pbk: the base64 formatted public key
-
-        :return: formatted transaction with signature
-        """
-        pushable_tx: JSONLike = {
-            "type": "cosmos-sdk/StdTx",
-            "value": {
-                "msg": transaction["msgs"],
-                "fee": transaction["fee"],
-                "signatures": [
-                    {
-                        "pub_key": {
-                            "type": "tendermint/PubKeySecp256k1",
-                            "value": base64_pbk,
-                        },
-                        "signature": signature,
-                    }
-                ],
-                "memo": transaction["memo"],
-            },
-        }
-        return pushable_tx
-
     def sign_transaction(self, transaction: JSONLike) -> JSONLike:
         """
         Sign a transaction in bytes string form.
@@ -654,7 +588,6 @@ class _CosmosApi(LedgerApi):
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
-        self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
         self.cosmwasm_version = kwargs.pop(
             "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
         )
