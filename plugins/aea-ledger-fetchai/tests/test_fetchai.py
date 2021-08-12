@@ -601,25 +601,6 @@ def test_try_execute_wasm_query():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_try_execute_wasm_transaction():
-    """Test the execute wasm query method."""
-    cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    process_mock = mock.Mock()
-    hash_ = "some_hash"
-    output_raw = {"txhash": hash_}
-    output = json.dumps(output_raw).encode("ascii")
-    attrs = {"communicate.return_value": (output, "error")}
-    process_mock.configure_mock(**attrs)
-    with mock.patch("subprocess.Popen", return_value=process_mock):
-        result = cosmos_api._try_execute_wasm_transaction(
-            tx_signed="signed_transaction"
-        )
-    assert result == hash_
-
-
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
 def test_send_signed_transaction_wasm_transaction():
     """Test the send_signed_transaction method for a wasm transaction."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)

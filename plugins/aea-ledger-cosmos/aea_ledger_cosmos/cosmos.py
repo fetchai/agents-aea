@@ -22,9 +22,6 @@ import gzip
 import hashlib
 import json
 import logging
-import os
-import subprocess  # nosec
-import tempfile
 import time
 from collections import namedtuple
 from json.decoder import JSONDecodeError
@@ -65,7 +62,11 @@ from cosmos.tx.v1beta1.tx_pb2 import (
     TxBody,
 )
 from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
-from cosmwasm.wasm.v1beta1.tx_pb2 import MsgInstantiateContract, MsgStoreCode
+from cosmwasm.wasm.v1beta1.tx_pb2 import (
+    MsgExecuteContract,
+    MsgInstantiateContract,
+    MsgStoreCode,
+)
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
@@ -83,7 +84,6 @@ from aea.crypto.helpers import KeyIsIncorrect, hex_to_bytes_for_key
 from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
-from aea.helpers.io import open_file
 
 
 _default_logger = logging.getLogger(__name__)
@@ -936,73 +936,35 @@ class _CosmosApi(LedgerApi):
         """
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            sender_address
-        )
-        if account_number is None or sequence is None:
-            return None  # pragma: nocover
-        if self.cosmwasm_version != DEFAULT_COSMWASM_VERSIONS and amount == 0:
-            sent_funds = []
+        account_data = self._try_get_account_data(sender_address)
+
+        if amount == 0:
+            funds = []
         else:
-            sent_funds = [{"amount": str(amount), "denom": denom}]
-        execute_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["execute"][self.cosmwasm_version],
-            "value": {
-                "sender": sender_address,
-                "contract": contract_address,
-                "msg": handle_msg,
-                "sent_funds": sent_funds,
-            },
-        }
+            funds = [Coin(denom=denom, amount=str(amount))]
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+
+        execute_msg = MsgExecuteContract(
+            sender=str(sender_address),
+            contract=contract_address,
+            msg=json.dumps(handle_msg).encode("UTF8"),
+            funds=funds,
+        )
+        execute_msg_packed = ProtoAny()
+        execute_msg_packed.Pack(execute_msg, type_url_prefix="/")
+
         tx = self._get_transaction(
-            account_number,
-            chain_id,
-            tx_fee,
-            denom,
-            gas,
-            memo,
-            sequence,
-            msg=execute_msg,
+            account_numbers=[account_data.account_number],
+            from_addresses=[str(sender_address)],
+            pub_keys=[b""],
+            chain_id=chain_id,
+            tx_fee=tx_fee_coins,
+            gas=gas,
+            memo=memo,
+            sequences=[account_data.sequence],
+            msgs=[execute_msg_packed],
         )
         return tx
-
-    @try_decorator(
-        "Encountered exception when trying to execute wasm transaction: {}",
-        logger_method=_default_logger.warning,
-    )
-    def _try_execute_wasm_transaction(
-        self, tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
-    ) -> Optional[str]:
-        """
-        Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
-
-        :param tx_signed: the signed transaction.
-        :param signed_tx_filename: signed transaction file name.
-        :return: the transaction digest
-        """
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            with open_file(os.path.join(tmpdirname, signed_tx_filename), "w") as f:
-                f.write(json.dumps(tx_signed))
-
-            command = [
-                self.cli_command,
-                "tx",
-                "broadcast",
-                os.path.join(tmpdirname, signed_tx_filename),
-            ]
-
-            cli_stdout = self._execute_shell_command(command)
-
-        try:
-            tx_digest_json = json.loads(cli_stdout)
-            hash_ = cast(str, tx_digest_json["txhash"])
-        except JSONDecodeError:  # pragma: nocover
-            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
-        except KeyError:  # pragma: nocover
-            raise ValueError(
-                f"key `txhash` not found in tx_digest_json={tx_digest_json}"
-            )
-        return hash_
 
     def execute_contract_query(
         self, contract_address: Address, query_msg: JSONLike
@@ -1305,20 +1267,6 @@ class _CosmosApi(LedgerApi):
         """
         # Instance object not available for cosmwasm
         return None
-
-    @staticmethod
-    def _execute_shell_command(command: List[str]) -> str:
-        """
-        Execute command using subprocess and get result as JSON dict.
-
-        :param command: the shell command to be executed
-        :return: the stdout result converted to JSON dict
-        """
-        stdout, _ = subprocess.Popen(  # nosec
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ).communicate()
-
-        return stdout.decode("ascii")
 
     def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
         """
