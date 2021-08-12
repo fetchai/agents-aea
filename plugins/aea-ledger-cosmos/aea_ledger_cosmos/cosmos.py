@@ -755,11 +755,6 @@ class _CosmosApi(LedgerApi):
         code_id = kwargs.pop("code_id", None)
         amount = kwargs.pop("amount", None)
         init_msg = kwargs.pop("init_msg", None)
-        unexpected_keys = [
-            key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
-        ]
-        if len(unexpected_keys) != 0:  # pragma: nocover
-            raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
         if label is None and code_id is None and amount is None and init_msg is None:
             return self._get_storage_transaction(
                 contract_interface,
@@ -808,7 +803,7 @@ class _CosmosApi(LedgerApi):
         account_number: int,
         sequence: int,
         tx_fee: int = 0,
-        gas: int = 0,
+        gas: int = 2000000,
         memo: str = "",
         source: str = "",
         builder: str = "",
@@ -833,9 +828,9 @@ class _CosmosApi(LedgerApi):
             sender=str(deployer_address),
             wasm_byte_code=base64.b64decode(contract_interface[_BYTECODE]),
             source=source,
-            builde=builder,
+            builder=builder,
         )
-        store_msg_packed = Any()
+        store_msg_packed = ProtoAny()
         store_msg_packed.Pack(store_msg, type_url_prefix="/")
 
         tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
@@ -864,7 +859,7 @@ class _CosmosApi(LedgerApi):
         init_msg: JSONLike,
         label: str,
         tx_fee: int = 0,
-        gas: int = 0,
+        gas: int = 200000,
         memo: str = "",
     ) -> Optional[JSONLike]:
         """
@@ -897,7 +892,7 @@ class _CosmosApi(LedgerApi):
             label=label,
             funds=init_funds,
         )
-        init_msg_packed = Any()
+        init_msg_packed = ProtoAny()
         init_msg_packed.Pack(init_msg, type_url_prefix="/")
 
         tx = self._get_transaction(
@@ -921,7 +916,7 @@ class _CosmosApi(LedgerApi):
         amount: int,
         tx_fee: int,
         denom: Optional[str] = None,
-        gas: int = 0,
+        gas: int = 200000,
         memo: str = "",
         chain_id: Optional[str] = None,
     ) -> Optional[JSONLike]:
