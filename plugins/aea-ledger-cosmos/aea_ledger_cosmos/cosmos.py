@@ -967,17 +967,6 @@ class _CosmosApi(LedgerApi):
         """
         denom = denom if denom is not None else self.denom
 
-        amount_coins = [Coin(denom=denom, amount=str(amount))]
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
-
-        msg_send = MsgSend(
-            from_address=str(sender_address),
-            to_address=str(destination_address),
-            amount=amount_coins,
-        )
-        send_msg_packed = ProtoAny()
-        send_msg_packed.Pack(msg_send, type_url_prefix="/")
-
         chain_id = chain_id if chain_id is not None else self.chain_id
 
         if account_number is None or sequence is None:
@@ -986,6 +975,17 @@ class _CosmosApi(LedgerApi):
             )
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
+
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        amount_coins = [Coin(denom=denom, amount=str(amount))]
+
+        msg_send = MsgSend(
+            from_address=str(sender_address),
+            to_address=str(destination_address),
+            amount=amount_coins,
+        )
+        send_msg_packed = ProtoAny()
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")
 
         tx = self._get_transaction(
             account_numbers=[account_number],
