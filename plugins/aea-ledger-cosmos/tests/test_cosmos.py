@@ -259,4 +259,9 @@ def test_cosmos_api_get_handle_transaction(*args):
 def test_cosmos_api_get_transfer_transaction(*args):
     """Test CosmosApi.get_transfer_transaction."""
     cosmos_api = CosmosApi()
-    assert cosmos_api.get_transfer_transaction(*[Mock()] * 7) is None
+    assert (
+        cosmos_api.get_transfer_transaction(
+            sender_address="", destination_address="", amount=0, tx_fee=0, tx_nonce=""
+        )
+        is None
+    )

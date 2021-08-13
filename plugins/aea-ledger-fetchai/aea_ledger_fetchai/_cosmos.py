@@ -669,11 +669,11 @@ class _CosmosApi(LedgerApi):
         sequence = kwargs.pop("sequence", None)
 
         if account_number is None or sequence is None:
-            account_data = self._try_get_account_data(deployer_address)
-            if account_data is None:
+            account_number, sequence = self._try_get_account_number_and_sequence(
+                deployer_address
+            )
+            if account_number is None or sequence is None:
                 return None  # pragma: nocover
-            account_number = account_data.account_number
-            sequence = account_data.sequence
 
         label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
@@ -866,11 +866,11 @@ class _CosmosApi(LedgerApi):
         chain_id = chain_id if chain_id is not None else self.chain_id
 
         if account_number is None or sequence is None:
-            account_data = self._try_get_account_data(sender_address)
-            if account_data is None:
+            account_number, sequence = self._try_get_account_number_and_sequence(
+                sender_address
+            )
+            if account_number is None or sequence is None:
                 return None  # pragma: nocover
-            account_number = account_data.account_number
-            sequence = account_data.sequence
 
         if amount == 0:
             funds = []
@@ -981,11 +981,11 @@ class _CosmosApi(LedgerApi):
         chain_id = chain_id if chain_id is not None else self.chain_id
 
         if account_number is None or sequence is None:
-            account_data = self._try_get_account_data(sender_address)
-            if account_data is None:
+            account_number, sequence = self._try_get_account_number_and_sequence(
+                sender_address
+            )
+            if account_number is None or sequence is None:
                 return None  # pragma: nocover
-            account_number = account_data.account_number
-            sequence = account_data.sequence
 
         tx = self._get_transaction(
             account_numbers=[account_number],
@@ -1070,7 +1070,9 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying to get account number and sequence: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_account_data(self, address: Address) -> BaseAccount:
+    def _try_get_account_number_and_sequence(
+        self, address: Address
+    ) -> Tuple[Optional[int], Optional[int]]:
         """
         Try get account number and sequence for an address.
 
@@ -1087,7 +1089,7 @@ class _CosmosApi(LedgerApi):
         else:
             raise TypeError("Unexpected account type")
 
-        return account
+        return account.account_number, account.sequence
 
     def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
