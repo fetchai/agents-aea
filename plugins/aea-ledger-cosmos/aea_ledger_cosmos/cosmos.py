@@ -664,10 +664,16 @@ class _CosmosApi(LedgerApi):
             if kwargs.get("chain_id", None) is not None
             else self.chain_id
         )
-        account_data = self._try_get_account_data(deployer_address)
 
-        if account_data is None:
-            return None  # pragma: nocover
+        account_number = kwargs.pop("account_number", None)
+        sequence = kwargs.pop("sequence", None)
+
+        if account_number is None or sequence is None:
+            account_data = self._try_get_account_data(deployer_address)
+            if account_data is None:
+                return None  # pragma: nocover
+            account_number = account_data.account_number
+            sequence = account_data.sequence
 
         label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
@@ -679,8 +685,8 @@ class _CosmosApi(LedgerApi):
                 deployer_address,
                 denom,
                 chain_id,
-                account_data.account_number,
-                account_data.sequence,
+                account_number,
+                sequence,
                 **kwargs,
             )
         if label is None:
@@ -703,8 +709,8 @@ class _CosmosApi(LedgerApi):
             deployer_address,
             denom,
             chain_id,
-            account_data.account_number,
-            account_data.sequence,
+            account_number,
+            sequence,
             amount,
             code_id,
             init_msg,
@@ -837,6 +843,8 @@ class _CosmosApi(LedgerApi):
         gas: int = 200000,
         memo: str = "",
         chain_id: Optional[str] = None,
+        account_number: Optional[int] = None,
+        sequence: Optional[int] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm HandleMsg transaction.
@@ -850,14 +858,19 @@ class _CosmosApi(LedgerApi):
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+        :param account_number: Account number
+        :param sequence: Sequence
         :return: the unsigned CosmWasm HandleMsg
         """
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
-        account_data = self._try_get_account_data(sender_address)
 
-        if account_data is None:
-            return None  # pragma: nocover
+        if account_number is None or sequence is None:
+            account_data = self._try_get_account_data(sender_address)
+            if account_data is None:
+                return None  # pragma: nocover
+            account_number = account_data.account_number
+            sequence = account_data.sequence
 
         if amount == 0:
             funds = []
@@ -875,14 +888,14 @@ class _CosmosApi(LedgerApi):
         execute_msg_packed.Pack(execute_msg, type_url_prefix="/")
 
         tx = self._get_transaction(
-            account_numbers=[account_data.account_number],
+            account_numbers=[account_number],
             from_addresses=[str(sender_address)],
             pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
             memo=memo,
-            sequences=[account_data.sequence],
+            sequences=[sequence],
             msgs=[execute_msg_packed],
         )
         return tx
@@ -931,6 +944,8 @@ class _CosmosApi(LedgerApi):
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
+        account_number: Optional[int] = None,
+        sequence: Optional[int] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -945,6 +960,8 @@ class _CosmosApi(LedgerApi):
         :param gas: the gas used.
         :param memo: memo to include in tx.
         :param chain_id: the chain ID of the transaction.
+        :param account_number: Account number
+        :param sequence: Sequence
         :param kwargs: keyword arguments.
         :return: the transfer transaction
         """
@@ -962,20 +979,23 @@ class _CosmosApi(LedgerApi):
         send_msg_packed.Pack(msg_send, type_url_prefix="/")
 
         chain_id = chain_id if chain_id is not None else self.chain_id
-        account_data = self._try_get_account_data(sender_address)
 
-        if account_data is None:
-            return None  # pragma: nocover
+        if account_number is None or sequence is None:
+            account_data = self._try_get_account_data(sender_address)
+            if account_data is None:
+                return None  # pragma: nocover
+            account_number = account_data.account_number
+            sequence = account_data.sequence
 
         tx = self._get_transaction(
-            account_numbers=[account_data.account_number],
+            account_numbers=[account_number],
             from_addresses=[str(sender_address)],
             pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
             memo=memo,
-            sequences=[account_data.sequence],
+            sequences=[sequence],
             msgs=[send_msg_packed],
         )
         return tx

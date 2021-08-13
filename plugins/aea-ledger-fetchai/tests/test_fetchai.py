@@ -404,81 +404,27 @@ def test_format_default():
         amount=amount,
         tx_fee=1000,
         tx_nonce="something",
+        account_number=1,
+        sequence=0,
     )
 
-    signed_transaction = cc2.sign_transaction(transfer_transaction)
+    signed_transaction = account.sign_transaction(transfer_transaction)
 
     assert "tx" in signed_transaction
     assert "signatures" in signed_transaction["tx"]
     assert len(signed_transaction["tx"]["signatures"]) == 1
 
-    assert "pub_key" in signed_transaction["tx"]["signatures"][0]
-    assert "value" in signed_transaction["tx"]["signatures"][0]["pub_key"]
-    base64_pbk = signed_transaction["tx"]["signatures"][0]["pub_key"]["value"]
+    assert "publicKey" in signed_transaction["tx"]["authInfo"]["signerInfos"][0]
+    assert "key" in signed_transaction["tx"]["authInfo"]["signerInfos"][0]["publicKey"]
+    base64_pbk = signed_transaction["tx"]["authInfo"]["signerInfos"][0]["publicKey"][
+        "key"
+    ]
 
-    assert "signature" in signed_transaction["tx"]["signatures"][0]
-    signature = signed_transaction["tx"]["signatures"][0]["signature"]
-
-    default_formated_transaction = cc2._format_default_transaction(
-        transfer_transaction, signature, base64_pbk
-    )
-
-    # Compare default formatted transaction with signed transaction
-    assert signed_transaction == default_formated_transaction
-
-
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_format_cosmwasm():
-    """Test if CosmWasm transaction is correctly formatted."""
-    cc2 = FetchAICrypto()
-
-    # Dummy CosmWasm transaction
-    wasm_transaction = {
-        "account_number": "8",
-        "chain_id": "agent-land",
-        "fee": {"amount": [], "gas": "200000"},
-        "memo": "",
-        "msgs": [
-            {
-                "type": "wasm/execute",
-                "value": {
-                    "sender": "cosmos14xjnl2mwwfz6pztpwzj6s89npxr0e3lhxl52nv",
-                    "contract": "cosmos1xzlgeyuuyqje79ma6vllregprkmgwgav5zshcm",
-                    "msg": {
-                        "create_single": {
-                            "item_owner": "cosmos1fz0dcvvqv5at6dl39804jy92lnndf3d5saalx6",
-                            "id": "1234",
-                            "path": "SOME_URI",
-                        }
-                    },
-                    "sent_funds": [],
-                },
-            }
-        ],
-        "sequence": "25",
-    }
-
-    signed_transaction = cc2.sign_transaction(wasm_transaction)
-
-    assert "value" in signed_transaction
-    assert "signatures" in signed_transaction["value"]
-    assert len(signed_transaction["value"]["signatures"]) == 1
-
-    assert "pub_key" in signed_transaction["value"]["signatures"][0]
-    assert "value" in signed_transaction["value"]["signatures"][0]["pub_key"]
-    base64_pbk = signed_transaction["value"]["signatures"][0]["pub_key"]["value"]
-
-    assert "signature" in signed_transaction["value"]["signatures"][0]
-    signature = signed_transaction["value"]["signatures"][0]["signature"]
-
-    wasm_formated_transaction = cc2._format_wasm_transaction(
-        wasm_transaction, signature, base64_pbk
-    )
-
-    # Compare Wasm formatted transaction with signed transaction
-    assert signed_transaction == wasm_formated_transaction
+    pbk = base64.b64decode(base64_pbk)
+    assert pbk == bytes.fromhex(account.public_key)
+    assert len(signed_transaction["tx"]["signatures"][0]) == 88
+    signature = base64.b64decode(signed_transaction["tx"]["signatures"][0])
+    assert len(signature) == 64
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -489,29 +435,24 @@ def test_get_storage_transaction_cosmwasm():
     cc2 = FetchAICrypto()
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    contract_interface = {"wasm_byte_code": b""}
+    contract_interface = {"wasm_byte_code": "1234"}
     deployer_address = cc2.address
     deploy_transaction = cosmos_api.get_deploy_transaction(
-        contract_interface, deployer_address
+        contract_interface, deployer_address, account_number=1, sequence=0,
     )
 
-    assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
-    assert "account_number" in deploy_transaction
-    assert "chain_id" in deploy_transaction
-    assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
-        "amount": [{"amount": "0", "denom": "atestfet"}],
-        "gas": "0",
-    }
-    assert "memo" in deploy_transaction
-    assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
-    msg = deploy_transaction["msgs"][0]
-    assert "type" in msg and msg["type"] == "wasm/store-code"
-    assert (
-        "value" in msg
-        and msg["value"]["sender"] == deployer_address
-        and msg["value"]["wasm_byte_code"] == contract_interface["wasm_byte_code"]
-    )
-    assert "sequence" in deploy_transaction
+    assert type(deploy_transaction) == dict and len(deploy_transaction) == 2
+    # Check sign_data
+    assert "account_number" in deploy_transaction["sign_data"][cc2.address]
+    assert "chain_id" in deploy_transaction["sign_data"][cc2.address]
+
+    # Check msg
+    assert len(deploy_transaction["tx"]["body"]["messages"]) == 1
+    msg = deploy_transaction["tx"]["body"]["messages"][0]
+    assert "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1beta1.MsgStoreCode"
+
+    assert msg["sender"] == deployer_address
+    assert msg["wasmByteCode"] == contract_interface["wasm_byte_code"]
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -526,8 +467,9 @@ def test_get_init_transaction_cosmwasm():
     deployer_address = cc2.address
     tx_fee = 1
     amount = 10
-    contract_interface = {"wasm_byte_code": b""}
-    deploy_transaction = cosmos_api.get_deploy_transaction(
+    gas_limit = 1234
+    contract_interface = {}
+    init_transaction = cosmos_api.get_deploy_transaction(
         contract_interface,
         deployer_address,
         code_id=code_id,
@@ -535,28 +477,33 @@ def test_get_init_transaction_cosmwasm():
         amount=amount,
         tx_fee=tx_fee,
         label="",
+        account_number=1,
+        sequence=0,
+        gas=gas_limit,
     )
 
-    assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
-    assert "account_number" in deploy_transaction
-    assert "chain_id" in deploy_transaction
-    assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
-        "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
-        "gas": "0",
-    }
-    assert "memo" in deploy_transaction
-    assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
-    msg = deploy_transaction["msgs"][0]
-    assert "type" in msg and msg["type"] == "wasm/instantiate"
+    assert type(init_transaction) == dict and len(init_transaction) == 2
+
+    # Check sign_data
+    assert "account_number" in init_transaction["sign_data"][cc2.address]
+    assert "chain_id" in init_transaction["sign_data"][cc2.address]
+
+    # Check tx
+    assert init_transaction["tx"]["authInfo"]["fee"]["amount"] == [
+        {"denom": "atestfet", "amount": str(tx_fee)}
+    ]
+
+    # Check msg
+    assert len(init_transaction["tx"]["body"]["messages"]) == 1
+    msg = init_transaction["tx"]["body"]["messages"][0]
     assert (
-        "value" in msg
-        and msg["value"]["sender"] == deployer_address
-        and msg["value"]["code_id"] == str(code_id)
-        and msg["value"]["label"] == ""
-        and msg["value"]["init_msg"] == init_msg
-        and msg["value"]["init_funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+        "@type" in msg
+        and msg["@type"] == "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
     )
-    assert "sequence" in deploy_transaction
+    assert msg["sender"] == deployer_address
+    assert msg["codeId"] == str(code_id)
+    assert base64.b64decode(msg["initMsg"]).decode() == f'"{init_msg}"'
+    assert msg["funds"] == [{"denom": "atestfet", "amount": str(amount)}]
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -565,10 +512,6 @@ def test_get_init_transaction_cosmwasm():
 def test_get_handle_transaction_cosmwasm():
     """Test the get deploy transaction method."""
     cc2 = FetchAICrypto()
-
-    # Get wealth in order to get account_number
-    faucet = FetchAIFaucetApi(poll_interval=0)
-    faucet.get_wealth(cc2.address)
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     handle_msg = "handle_msg"
@@ -585,6 +528,8 @@ def test_get_handle_transaction_cosmwasm():
         tx_fee,
         gas=gas_limit,
         memo="memo",
+        account_number=1,
+        sequence=0,
     )
 
     assert type(handle_transaction) == dict and len(handle_transaction) == 2
@@ -636,12 +581,28 @@ def test_try_execute_wasm_query():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_send_signed_transaction_wasm_transaction():
-    """Test the send_signed_transaction method for a wasm transaction."""
+def test_send_signed_transaction():
+    """Test the send_signed_transaction method"""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    tx_signed = {"value": {"msg": [{"type": "wasm/store-code"}]}}
+    tx_signed = cosmos_api.get_transfer_transaction(
+        sender_address="addr1",
+        destination_address="addr2",
+        amount=123,
+        tx_fee=1000,
+        tx_nonce="something",
+        account_number=1,
+        sequence=0,
+    )
+
+    # Mock version of protobuf Tx response
+    mock_return_value = mock.Mock()
+    mock_tx_response = mock.Mock()
+    mock_tx_response.code = 0
+    mock_tx_response.txhash = "digest"
+    mock_return_value.tx_response = mock_tx_response
+
     with mock.patch.object(
-        cosmos_api, "_try_execute_wasm_transaction", return_value="digest"
+        cosmos_api.tx_client, "BroadcastTx", return_value=mock_return_value
     ):
         result = cosmos_api.send_signed_transaction(tx_signed=tx_signed)
     assert result == "digest"
@@ -764,10 +725,6 @@ def test_construct_handle_transaction():
     account2 = FetchAICrypto()
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    # Get wealth in order to get account_number
-    faucet = FetchAIFaucetApi(poll_interval=0)
-    faucet.get_wealth(account.address)
-
     transaction = fetchai_api.get_handle_transaction(
         sender_address=account.address,
         contract_address=account2.address,
@@ -775,6 +732,8 @@ def test_construct_handle_transaction():
         amount=0,
         tx_fee=100,
         denom="atestfet",
+        account_number=1,
+        sequence=0,
     )
     assert (
         isinstance(transaction, dict) and len(transaction) == 2
