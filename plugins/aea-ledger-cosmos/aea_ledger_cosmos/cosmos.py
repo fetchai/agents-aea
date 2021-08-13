@@ -665,8 +665,9 @@ class _CosmosApi(LedgerApi):
         )
         account_data = self._try_get_account_data(deployer_address)
 
-        if account_data.account_number is None or account_data.sequence is None:
+        if account_data is None:
             return None  # pragma: nocover
+
         label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
         amount = kwargs.pop("amount", None)
@@ -854,6 +855,9 @@ class _CosmosApi(LedgerApi):
         chain_id = chain_id if chain_id is not None else self.chain_id
         account_data = self._try_get_account_data(sender_address)
 
+        if account_data is None:
+            return None  # pragma: nocover
+
         if amount == 0:
             funds = []
         else:
@@ -959,6 +963,9 @@ class _CosmosApi(LedgerApi):
 
         chain_id = chain_id if chain_id is not None else self.chain_id
         account_data = self._try_get_account_data(sender_address)
+
+        if account_data is None:
+            return None  # pragma: nocover
 
         tx = self._get_transaction(
             account_numbers=[account_data.account_number],
@@ -1179,7 +1186,7 @@ class _CosmosApi(LedgerApi):
         """
         # Cosmos does not distinguish between transaction receipt and transaction
         tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
-        return tx_with_receipt["tx"]
+        return {"tx": tx_with_receipt["tx"]}
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None

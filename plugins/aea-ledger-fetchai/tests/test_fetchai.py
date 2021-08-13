@@ -186,13 +186,13 @@ def test_construct_sign_and_submit_transfer_transaction():
         tx_nonce="something",
     )
     assert (
-        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 2
     ), "Incorrect transfer_transaction constructed."
 
     signed_transaction = account.sign_transaction(transfer_transaction)
     assert (
         isinstance(signed_transaction, dict)
-        and len(signed_transaction["tx"]) == 4
+        and len(signed_transaction["tx"]) == 3
         and isinstance(signed_transaction["tx"]["signatures"], list)
     ), "Incorrect signed_transaction constructed."
 
@@ -217,7 +217,6 @@ def test_construct_sign_and_submit_transfer_transaction():
         tx, fc2.address, account.address, "", amount
     )
     assert is_valid, "Failed to settle tx correctly!"
-    assert tx == transaction_receipt, "Should be same!"
 
 
 # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
