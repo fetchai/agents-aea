@@ -582,6 +582,7 @@ class _CosmosApi(LedgerApi):
         self.rest_client = RestClient(self.network_address)
         self.tx_client = TxRestClient(self.rest_client)
         self.auth_client = AuthRestClient(self.rest_client)
+        self.wasm_client = WasmRestClient(self.rest_client)
 
     @property
     def api(self) -> Any:
@@ -913,11 +914,10 @@ class _CosmosApi(LedgerApi):
         :param query_msg: QueryMsg in JSON format.
         :return: the message receipt
         """
-        wasm_client = WasmRestClient(self.rest_client)
         request = QuerySmartContractStateRequest(
             address=contract_address, query_data=json.dumps(query_msg).encode("UTF8")
         )
-        res = wasm_client.SmartContractState(request)
+        res = self.wasm_client.SmartContractState(request)
         return json.loads(res.data)
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
@@ -1159,7 +1159,10 @@ class _CosmosApi(LedgerApi):
         :return: the tx receipt, if present
         """
         tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
-        return tx_with_receipt["txResponse"]
+
+        if tx_with_receipt is None:
+            return None
+        return tx_with_receipt.get("txResponse")
 
     @try_decorator(
         "Encountered exception when trying to get transaction receipt: {}",
@@ -1186,7 +1189,7 @@ class _CosmosApi(LedgerApi):
         """
         # Cosmos does not distinguish between transaction receipt and transaction
         tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
-        return {"tx": tx_with_receipt["tx"]}
+        return tx_with_receipt
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None

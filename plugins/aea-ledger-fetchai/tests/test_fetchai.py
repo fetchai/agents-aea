@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the fetchai module."""
+import base64
 import json
 import logging
 import shutil
@@ -548,35 +549,52 @@ def test_get_init_transaction_cosmwasm():
 def test_get_handle_transaction_cosmwasm():
     """Test the get deploy transaction method."""
     cc2 = FetchAICrypto()
+
+    # Get wealth in order to get account_number
+    faucet = FetchAIFaucetApi(poll_interval=0)
+    faucet.get_wealth(cc2.address)
+
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     handle_msg = "handle_msg"
     sender_address = cc2.address
     contract_address = "contract_address"
     tx_fee = 1
     amount = 10
+    gas_limit = 1234
     handle_transaction = cosmos_api.get_handle_transaction(
-        sender_address, contract_address, handle_msg, amount, tx_fee
+        sender_address,
+        contract_address,
+        handle_msg,
+        amount,
+        tx_fee,
+        gas=gas_limit,
+        memo="memo",
     )
 
-    assert type(handle_transaction) == dict and len(handle_transaction) == 6
-    assert "account_number" in handle_transaction
-    assert "chain_id" in handle_transaction
-    assert "fee" in handle_transaction and handle_transaction["fee"] == {
-        "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
-        "gas": "0",
+    assert type(handle_transaction) == dict and len(handle_transaction) == 2
+
+    # Check sign_data
+    assert "account_number" in handle_transaction["sign_data"][cc2.address]
+    assert "chain_id" in handle_transaction["sign_data"][cc2.address]
+
+    # Check tx
+    assert handle_transaction["tx"]["authInfo"]["fee"] == {
+        "amount": [{"denom": "atestfet", "amount": str(tx_fee)}],
+        "gasLimit": str(gas_limit),
     }
-    assert "memo" in handle_transaction
-    assert "msgs" in handle_transaction and len(handle_transaction["msgs"]) == 1
-    msg = handle_transaction["msgs"][0]
-    assert "type" in msg and msg["type"] == "wasm/execute"
+
+    assert "memo" in handle_transaction["tx"]["body"]
+
+    # Check msg
+    assert len(handle_transaction["tx"]["body"]["messages"]) == 1
+    msg = handle_transaction["tx"]["body"]["messages"][0]
     assert (
-        "value" in msg
-        and msg["value"]["sender"] == sender_address
-        and msg["value"]["contract"] == contract_address
-        and msg["value"]["msg"] == handle_msg
-        and msg["value"]["sent_funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+        "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
     )
-    assert "sequence" in handle_transaction
+    assert msg["sender"] == sender_address
+    assert msg["contract"] == contract_address
+    assert base64.b64decode(msg["msg"]).decode() == f'"{handle_msg}"'
+    assert msg["funds"] == [{"denom": "atestfet", "amount": str(amount)}]
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -585,16 +603,18 @@ def test_get_handle_transaction_cosmwasm():
 def test_try_execute_wasm_query():
     """Test the execute wasm query method."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    process_mock = mock.Mock()
-    output_raw = {"output": 1}
-    output = json.dumps(output_raw).encode("ascii")
-    attrs = {"communicate.return_value": (output, "error")}
-    process_mock.configure_mock(**attrs)
-    with mock.patch("subprocess.Popen", return_value=process_mock):
-        result = cosmos_api.execute_contract_query(
-            contract_address="contract_address", query_msg={}
-        )
-    assert result == output_raw
+    client_mock = mock.Mock()
+
+    output_raw_mock = mock.Mock()
+    output_raw_mock.data = '{"output": 1}'
+
+    attrs = {"SmartContractState.return_value": output_raw_mock}
+    client_mock.configure_mock(**attrs)
+    cosmos_api.wasm_client = client_mock
+    result = cosmos_api.execute_contract_query(
+        contract_address="contract_address", query_msg={}
+    )
+    assert result == json.loads(output_raw_mock.data)
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -618,23 +638,6 @@ def test_get_contract_instance():
     """Test the get contract instance method."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     assert cosmos_api.get_contract_instance("interface") is None
-
-
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-@mock.patch("subprocess.Popen.communicate")
-def test_execute_shell_command(mock_api_call):
-    """Test the helper _execute_shell_command method"""
-
-    mock_res = b'{"SOME": "RESULT"}', "ERROR"
-
-    mock_api_call.return_value = mock_res
-
-    cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-
-    res = json.loads(cosmos_api._execute_shell_command(["test", "command"]))
-    assert res == {"SOME": "RESULT"}
 
 
 def test_helper_get_code_id():
