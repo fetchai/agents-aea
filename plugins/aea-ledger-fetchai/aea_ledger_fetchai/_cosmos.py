@@ -478,18 +478,19 @@ class CosmosCrypto(Crypto[SigningKey]):
             ) from e
         return signing_key
 
-    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> bytes:
+    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
         """
         Sign a message in bytes string form.
 
         :param message: the message to be signed
         :param is_deprecated_mode: if the deprecated signing is used
-        :return: signature of the message in bytes form
+        :return: signature of the message in string form
         """
         signature_compact = self.entity.sign_deterministic(
             message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
         )
-        return signature_compact
+        signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
+        return signature_base64_str
 
     def sign_transaction(self, transaction: JSONLike) -> JSONLike:
         """
@@ -529,7 +530,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         data_for_signing = sd.SerializeToString()
 
         # Generating signature:
-        signature = self.sign_message(data_for_signing)
+        signature = base64.b64decode(self.sign_message(data_for_signing))
 
         tx.signatures.extend([signature])
 

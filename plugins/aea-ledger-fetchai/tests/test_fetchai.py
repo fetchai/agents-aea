@@ -713,12 +713,12 @@ def test_load_contract_interface():
 
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_construct_transfer_transaction_both_versions():
-    """Test the construction of a transfer transaction for both versions."""
+def test_construct_init_transaction():
+    """Test the construction of a contract onot transaction"""
     account = FetchAICrypto()
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    transfer_transaction = fetchai_api._get_init_transaction(
+    init_transaction = fetchai_api._get_init_transaction(
         deployer_address=account.address,
         denom="atestfet",
         chain_id="cosmoshub-3",
@@ -730,34 +730,25 @@ def test_construct_transfer_transaction_both_versions():
         label="something",
     )
     assert (
-        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
+        isinstance(init_transaction, dict) and len(init_transaction) == 2
     ), "Incorrect transfer_transaction constructed."
-    assert len(transfer_transaction["msgs"][0]["value"]["init_funds"]) == 1
-    fetchai_api.cosmwasm_version = ">=0.10"
-    transfer_transaction = fetchai_api._get_init_transaction(
-        deployer_address=account.address,
-        denom="atestfet",
-        chain_id="cosmoshub-3",
-        account_number=1,
-        sequence=1,
-        amount=0,
-        code_id=200,
-        init_msg={},
-        label="something",
-    )
     assert (
-        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
-    ), "Incorrect transfer_transaction constructed."
-    assert len(transfer_transaction["msgs"][0]["value"]["init_funds"]) == 0
+        init_transaction["tx"]["body"]["messages"][0]["@type"]
+        == "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
+    )
 
 
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_construct_handle_transaction_both_versions():
-    """Test the construction of a handle transaction for both versions."""
+def test_construct_handle_transaction():
+    """Test the construction of a transfer transaction."""
     account = FetchAICrypto()
     account2 = FetchAICrypto()
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+
+    # Get wealth in order to get account_number
+    faucet = FetchAIFaucetApi(poll_interval=0)
+    faucet.get_wealth(account.address)
 
     transaction = fetchai_api.get_handle_transaction(
         sender_address=account.address,
@@ -768,22 +759,12 @@ def test_construct_handle_transaction_both_versions():
         denom="atestfet",
     )
     assert (
-        isinstance(transaction, dict) and len(transaction) == 6
+        isinstance(transaction, dict) and len(transaction) == 2
     ), "Incorrect transfer_transaction constructed."
-    assert len(transaction["msgs"][0]["value"]["sent_funds"]) == 1
-    fetchai_api.cosmwasm_version = ">=0.10"
-    transaction = fetchai_api.get_handle_transaction(
-        sender_address=account.address,
-        contract_address=account2.address,
-        handle_msg={},
-        amount=0,
-        tx_fee=100,
-        denom="atestfet",
-    )
     assert (
-        isinstance(transaction, dict) and len(transaction) == 6
-    ), "Incorrect transfer_transaction constructed."
-    assert len(transaction["msgs"][0]["value"]["sent_funds"]) == 0
+        transaction["tx"]["body"]["messages"][0]["@type"]
+        == "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
+    )
 
 
 def test_load_errors():
