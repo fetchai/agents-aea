@@ -279,14 +279,20 @@ def test_get_wealth_positive(caplog):
 def test_successful_faucet_operation(mock_post, mock_get):
     """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
-    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
+    mock_post.return_value = MockRequestsResponse({"uuid": "a-uuid-v4-would-be-here"})
 
     mock_get.return_value = MockRequestsResponse(
         {
-            "uid": "a-uuid-v4-would-be-here",
-            "txDigest": "0x transaction hash would be here",
-            "status": "completed",
-            "statusCode": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+            "status": "ok",
+            "claim": {
+                "createdAt": "2021-08-13T15:18:50.420Z",
+                "updatedAt": "2021-08-13T15:18:58.249Z",
+                "status": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+                "txStatus": {
+                    "hash": "0x transaction hash would be here",
+                    "height": 123456,
+                },
+            },
         }
     )
 
@@ -296,15 +302,15 @@ def test_successful_faucet_operation(mock_post, mock_get):
     mock_post.assert_has_calls(
         [
             call(
-                url=f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests",
-                data={"Address": address},
+                url=f"{FetchAIFaucetApi.testnet_faucet_url}/api/v3/claims",
+                json={"address": address},
             )
         ]
     )
     mock_get.assert_has_calls(
         [
             call(
-                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+                f"{FetchAIFaucetApi.testnet_faucet_url}/api/v3/claims/a-uuid-v4-would-be-here"
             )
         ]
     )
@@ -316,31 +322,41 @@ def test_successful_faucet_operation(mock_post, mock_get):
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
-    mock_post.return_value = MockRequestsResponse({"uid": "a-uuid-v4-would-be-here"})
+    mock_post.return_value = MockRequestsResponse({"uuid": "a-uuid-v4-would-be-here"})
 
     mock_get.side_effect = [
         MockRequestsResponse(
             {
-                "uid": "a-uuid-v4-would-be-here",
-                "txDigest": None,
-                "status": "pending",
-                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_PENDING,
+                "status": "ok",
+                "claim": {
+                    "createdAt": "2021-08-13T15:18:50.420Z",
+                    "updatedAt": "2021-08-13T15:18:58.249Z",
+                    "status": FetchAIFaucetApi.FAUCET_STATUS_PENDING,
+                },
             }
         ),
         MockRequestsResponse(
             {
-                "uid": "a-uuid-v4-would-be-here",
-                "txDigest": None,
-                "status": "processing",
-                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_PROCESSING,
+                "status": "ok",
+                "claim": {
+                    "createdAt": "2021-08-13T15:18:50.420Z",
+                    "updatedAt": "2021-08-13T15:18:58.249Z",
+                    "status": FetchAIFaucetApi.FAUCET_STATUS_PENDING,
+                },
             }
         ),
         MockRequestsResponse(
             {
-                "uid": "a-uuid-v4-would-be-here",
-                "txDigest": "0x transaction hash would be here",
-                "status": "completed",
-                "statusCode": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+                "status": "ok",
+                "claim": {
+                    "createdAt": "2021-08-13T15:18:50.420Z",
+                    "updatedAt": "2021-08-13T15:18:58.249Z",
+                    "status": FetchAIFaucetApi.FAUCET_STATUS_COMPLETED,
+                    "txStatus": {
+                        "hash": "0x transaction hash would be here",
+                        "height": 123456,
+                    },
+                },
             }
         ),
     ]
@@ -351,21 +367,21 @@ def test_successful_realistic_faucet_operation(mock_post, mock_get):
     mock_post.assert_has_calls(
         [
             call(
-                url=f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests",
-                data={"Address": address},
+                url=f"{FetchAIFaucetApi.testnet_faucet_url}/api/v3/claims",
+                json={"address": address},
             )
         ]
     )
     mock_get.assert_has_calls(
         [
             call(
-                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+                f"{FetchAIFaucetApi.testnet_faucet_url}/api/v3/claims/a-uuid-v4-would-be-here"
             ),
             call(
-                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+                f"{FetchAIFaucetApi.testnet_faucet_url}/api/v3/claims/a-uuid-v4-would-be-here"
             ),
             call(
-                f"{FetchAIFaucetApi.testnet_faucet_url}/claim/requests/a-uuid-v4-would-be-here"
+                f"{FetchAIFaucetApi.testnet_faucet_url}/api/v3/claims/a-uuid-v4-would-be-here"
             ),
         ]
     )
