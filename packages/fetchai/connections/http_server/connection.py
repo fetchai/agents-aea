@@ -215,6 +215,10 @@ class Response(web.Response):
             else:
                 headers = None
 
+            # if content length header provided, it should correspond to actuyal body length
+            if headers and "Content-Length" in headers:
+                headers["Content-Length"] = str(len(http_message.body or ""))
+
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
@@ -442,7 +446,6 @@ class HTTPChannel(BaseAsyncChannel):
             response_message = await asyncio.wait_for(
                 self.pending_requests[request.id], timeout=self.timeout_window,
             )
-
             return Response.from_message(response_message)
 
         except asyncio.TimeoutError:
