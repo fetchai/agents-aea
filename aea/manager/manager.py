@@ -19,15 +19,17 @@
 """This module contains the implementation of AEA agents manager."""
 import asyncio
 import json
+import multiprocessing
 import os
 import threading
+import time
 from asyncio.tasks import FIRST_COMPLETED
 from collections import defaultdict
+from multiprocessing.synchronize import Event
 from shutil import rmtree
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-from aea.aea import AEA
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PackageIdPrefix, PublicId
@@ -85,13 +87,15 @@ class ProjectPackageConsistencyCheckError(ValueError):
 class AgentRunAsyncTask:
     """Async task wrapper for agent."""
 
-    def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
-        """Init task with agent and loop."""
+    def __init__(
+        self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
+    ) -> None:
+        """Init task with agent alias and loop."""
+        self.agent = agent_alias.get_aea_instance()
         self.run_loop: asyncio.AbstractEventLoop = loop
         self.caller_loop: asyncio.AbstractEventLoop = loop
         self._done_future: Optional[asyncio.Future] = None
         self.task: Optional[asyncio.Task] = None
-        self.agent = agent
 
     def create_run_loop(self) -> None:
         """Create run loop."""
@@ -151,9 +155,11 @@ class AgentRunAsyncTask:
 class AgentRunThreadTask(AgentRunAsyncTask):
     """Threaded wrapper to run agent."""
 
-    def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
-        """Init task with agent and loop."""
-        AgentRunAsyncTask.__init__(self, agent, loop)
+    def __init__(
+        self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
+    ) -> None:
+        """Init task with agent alias and loop."""
+        AgentRunAsyncTask.__init__(self, agent_alias, loop)
         self._thread: Optional[Thread] = None
 
     def create_run_loop(self) -> None:
@@ -175,10 +181,106 @@ class AgentRunThreadTask(AgentRunAsyncTask):
             self._thread.join()
 
 
+class AgentRunProcessTask(AgentRunAsyncTask):
+    """Subprocess wrapper to run agent."""
+
+    def __init__(  # pylint: disable=super-init-not-called
+        self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
+    ) -> None:
+        """Init task with agent alias and loop."""
+        self.caller_loop: asyncio.AbstractEventLoop = loop
+        self._manager = multiprocessing.Manager()
+        self._stop_event = self._manager.Event()
+        self.agent_alias = agent_alias
+        self.process: Optional[multiprocessing.Process] = None
+        self._wait_task: Optional[asyncio.Future] = None
+        self._result_queue = self._manager.Queue()
+
+    def start(self) -> None:
+        """Run task in a dedicated process."""
+        self._wait_task = asyncio.ensure_future(
+            self._wait_for_result(), loop=self.caller_loop
+        )
+        self.process = multiprocessing.Process(
+            target=self._run_agent,
+            args=(self.agent_alias, self._stop_event, self._result_queue),
+        )
+        self.process.start()
+
+    async def _wait_for_result(self) -> Any:
+        """Wait for the result of the function call."""
+        if not self.process:
+            raise ValueError("Task not started!")  # pragma: nocover
+
+        while self.process.is_alive():
+            await asyncio.sleep(0.005)
+
+        result = self._result_queue.get_nowait()
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    def wait(self) -> asyncio.Future:
+        """Return future to wait task completed."""
+        if not self._wait_task:
+            raise ValueError("Task not started")  # pragma: nocover
+
+        return self._wait_task
+
+    @staticmethod
+    def _run_agent(
+        agent_alias: AgentAlias, stop_event: Event, result_queue: multiprocessing.Queue,
+    ) -> None:
+        """Start an agent in a child process."""
+        t: Optional[Thread] = None
+        r: Optional[Exception] = None
+        run_stop_thread: bool = True
+        try:
+            aea = agent_alias.get_aea_instance()
+
+            def stop_event_thread() -> None:
+                try:
+                    while run_stop_thread:
+                        if stop_event.wait(0.05) is True:
+                            break
+                finally:
+                    aea.runtime.stop()
+
+            t = Thread(target=stop_event_thread, daemon=True)
+            t.start()
+            loop = asyncio.get_event_loop()
+            aea.runtime.set_loop(loop)
+            aea.start()
+        except BaseException as e:  # pylint: disable=broad-except
+            r = Exception(str(e), repr(e))
+        finally:
+            run_stop_thread = False
+            if t:
+                t.join(10)
+
+        result_queue.put(r)
+
+    def stop(self) -> None:
+        """Stop the task."""
+        if not self.process:
+            raise ValueError("Task not started!")  # pragma: nocover
+
+        self._stop_event.set()
+        self.process.join(100)
+
+    @property
+    def is_running(self) -> bool:
+        """Is agent running."""
+        if not self.process:
+            raise ValueError("Task not started!")  # pragma: nocover
+
+        return self.process.is_alive()
+
+
 class MultiAgentManager:
     """Multi agents manager."""
 
-    MODES = ["async", "threaded"]
+    MODES = ["async", "threaded", "multiprocess"]
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
     SAVE_FILENAME = "save.json"
 
@@ -700,15 +802,18 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
-        aea = agent_alias.get_aea_instance()
-
         if self._mode == "async":
-            task = AgentRunAsyncTask(aea, self._loop)
+            task = AgentRunAsyncTask(agent_alias, self._loop)
         elif self._mode == "threaded":
-            task = AgentRunThreadTask(aea, self._loop)
+            task = AgentRunThreadTask(agent_alias, self._loop)
+        elif self._mode == "multiprocess":
+            task = AgentRunProcessTask(agent_alias, self._loop)
 
         task.start()
+        time.sleep(1)
+
         self._agents_tasks[agent_name] = task
+
         self._loop.call_soon_threadsafe(self._event.set)
         return self
 
@@ -733,7 +838,6 @@ class MultiAgentManager:
                 if not self._is_agent_running(agent_name)
             ]
         )
-
         return self
 
     def stop_agent(self, agent_name: str) -> "MultiAgentManager":
