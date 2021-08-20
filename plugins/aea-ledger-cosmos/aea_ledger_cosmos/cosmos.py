@@ -36,37 +36,6 @@ from bech32 import (  # pylint: disable=wrong-import-order
     bech32_encode,
     convertbits,
 )
-from cosm.auth.rest_client import AuthRestClient
-from cosm.bank.rest_client import BankRestClient, QueryBalanceRequest
-from cosm.common.rest_client import RestClient
-from cosm.tx.rest_client import TxRestClient
-from cosm.wasm.rest_client import WasmRestClient
-from cosmos.auth.v1beta1.auth_pb2 import BaseAccount
-from cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
-from cosmos.bank.v1beta1.tx_pb2 import MsgSend
-from cosmos.base.v1beta1.coin_pb2 import Coin
-from cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
-from cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
-from cosmos.tx.v1beta1.service_pb2 import (
-    BroadcastMode,
-    BroadcastTxRequest,
-    GetTxRequest,
-)
-from cosmos.tx.v1beta1.tx_pb2 import (
-    AuthInfo,
-    Fee,
-    ModeInfo,
-    SignDoc,
-    SignerInfo,
-    Tx,
-    TxBody,
-)
-from cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
-from cosmwasm.wasm.v1beta1.tx_pb2 import (
-    MsgExecuteContract,
-    MsgInstantiateContract,
-    MsgStoreCode,
-)
 from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
@@ -77,6 +46,37 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
 )
 from google.protobuf.any_pb2 import Any as ProtoAny
 from google.protobuf.json_format import MessageToDict, ParseDict
+from pycosm.auth.rest_client import AuthRestClient
+from pycosm.bank.rest_client import BankRestClient, QueryBalanceRequest
+from pycosm.common.rest_client import RestClient
+from pycosm.cosmwasm.rest_client import CosmWasmRestClient
+from pycosm.protos.cosmos.auth.v1beta1.auth_pb2 import BaseAccount
+from pycosm.protos.cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
+from pycosm.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
+from pycosm.protos.cosmos.base.v1beta1.coin_pb2 import Coin
+from pycosm.protos.cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
+from pycosm.protos.cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
+from pycosm.protos.cosmos.tx.v1beta1.service_pb2 import (
+    BroadcastMode,
+    BroadcastTxRequest,
+    GetTxRequest,
+)
+from pycosm.protos.cosmos.tx.v1beta1.tx_pb2 import (
+    AuthInfo,
+    Fee,
+    ModeInfo,
+    SignDoc,
+    SignerInfo,
+    Tx,
+    TxBody,
+)
+from pycosm.protos.cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
+from pycosm.protos.cosmwasm.wasm.v1beta1.tx_pb2 import (
+    MsgExecuteContract,
+    MsgInstantiateContract,
+    MsgStoreCode,
+)
+from pycosm.tx.rest_client import TxRestClient
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -589,7 +589,7 @@ class _CosmosApi(LedgerApi):
         self.rest_client = RestClient(self.network_address)
         self.tx_client = TxRestClient(self.rest_client)
         self.auth_client = AuthRestClient(self.rest_client)
-        self.wasm_client = WasmRestClient(self.rest_client)
+        self.wasm_client = CosmWasmRestClient(self.rest_client)
         self.bank_client = BankRestClient(self.rest_client)
 
     @property
@@ -775,7 +775,6 @@ class _CosmosApi(LedgerApi):
         tx = self._get_transaction(
             account_numbers=[account_number],
             from_addresses=[str(deployer_address)],
-            pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
@@ -836,7 +835,6 @@ class _CosmosApi(LedgerApi):
         tx = self._get_transaction(
             account_numbers=[account_number],
             from_addresses=[str(deployer_address)],
-            pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
@@ -904,7 +902,6 @@ class _CosmosApi(LedgerApi):
         tx = self._get_transaction(
             account_numbers=[account_number],
             from_addresses=[str(sender_address)],
-            pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
@@ -1004,7 +1001,6 @@ class _CosmosApi(LedgerApi):
         tx = self._get_transaction(
             account_numbers=[account_number],
             from_addresses=[str(sender_address)],
-            pub_keys=[b""],
             chain_id=chain_id,
             tx_fee=tx_fee_coins,
             gas=gas,
@@ -1018,29 +1014,47 @@ class _CosmosApi(LedgerApi):
     def _get_transaction(
         account_numbers: List[int],
         from_addresses: List[str],
-        pub_keys: List[bytes],
         chain_id: str,
         tx_fee: List[Coin],
         gas: int,
         memo: str,
         sequences: [int],
         msgs: List[ProtoAny],
+        pub_keys: Optional[List[bytes]] = None,
     ) -> JSONLike:
         """
         Get a transaction.
 
         :param account_numbers: Account numbers for each signer.
         :param from_addresses: Addresses of each sender
-        :param pub_keys: Public keys of each sender
         :param chain_id: the chain ID of the transaction.
         :param tx_fee: the transaction fee.
         :param gas: the gas used.
         :param memo: memo to include in tx.
         :param sequences: Sequence for each sender.
         :param msgs: Messages to be part of transaction.
+        :param pub_keys: Public keys of each sender
+
+        :raises: RuntimeError
 
         :return: the transaction
         """
+
+        # Checks
+        if pub_keys is None:
+            if len(from_addresses) == 1:
+                pub_keys = [b""]
+            else:
+                # In case when pubkey is inserted during signing would make second signer to change tx and make the first signature invalid
+                raise RuntimeError(
+                    "Only transaction with one signer can be generated without pubkeys"
+                )
+        if len(account_numbers) != len(from_addresses) or len(from_addresses) != len(
+            sequences
+        ):
+            raise RuntimeError(
+                "Amount of provided from_addresses, sequences and account_numbers is not equal"
+            )
 
         # Get account and signer info for each sender
         signer_infos: List[SignerInfo] = []
