@@ -31,6 +31,39 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 from Crypto.Cipher import AES  # nosec
 from Crypto.Protocol.KDF import scrypt  # nosec
 from Crypto.Random import get_random_bytes  # nosec
+from arcturus.auth.rest_client import AuthRestClient
+from arcturus.bank.rest_client import BankRestClient, QueryBalanceRequest
+from arcturus.common.rest_client import RestClient
+from arcturus.cosmwasm.rest_client import CosmWasmRestClient
+from arcturus.protos.cosmos.auth.v1beta1.auth_pb2 import BaseAccount
+from arcturus.protos.cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
+from arcturus.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
+from arcturus.protos.cosmos.base.v1beta1.coin_pb2 import Coin
+from arcturus.protos.cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
+from arcturus.protos.cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
+from arcturus.protos.cosmos.tx.v1beta1.service_pb2 import (
+    BroadcastMode,
+    BroadcastTxRequest,
+    GetTxRequest,
+)
+from arcturus.protos.cosmos.tx.v1beta1.tx_pb2 import (
+    AuthInfo,
+    Fee,
+    ModeInfo,
+    SignDoc,
+    SignerInfo,
+    Tx,
+    TxBody,
+)
+from arcturus.protos.cosmwasm.wasm.v1beta1.query_pb2 import (
+    QuerySmartContractStateRequest,
+)
+from arcturus.protos.cosmwasm.wasm.v1beta1.tx_pb2 import (
+    MsgExecuteContract,
+    MsgInstantiateContract,
+    MsgStoreCode,
+)
+from arcturus.tx.rest_client import TxRestClient
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
     bech32_encode,
@@ -46,37 +79,6 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
 )
 from google.protobuf.any_pb2 import Any as ProtoAny
 from google.protobuf.json_format import MessageToDict, ParseDict
-from pycosm.auth.rest_client import AuthRestClient
-from pycosm.bank.rest_client import BankRestClient, QueryBalanceRequest
-from pycosm.common.rest_client import RestClient
-from pycosm.cosmwasm.rest_client import CosmWasmRestClient
-from pycosm.protos.cosmos.auth.v1beta1.auth_pb2 import BaseAccount
-from pycosm.protos.cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
-from pycosm.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
-from pycosm.protos.cosmos.base.v1beta1.coin_pb2 import Coin
-from pycosm.protos.cosmos.crypto.secp256k1.keys_pb2 import PubKey as ProtoPubKey
-from pycosm.protos.cosmos.tx.signing.v1beta1.signing_pb2 import SignMode
-from pycosm.protos.cosmos.tx.v1beta1.service_pb2 import (
-    BroadcastMode,
-    BroadcastTxRequest,
-    GetTxRequest,
-)
-from pycosm.protos.cosmos.tx.v1beta1.tx_pb2 import (
-    AuthInfo,
-    Fee,
-    ModeInfo,
-    SignDoc,
-    SignerInfo,
-    Tx,
-    TxBody,
-)
-from pycosm.protos.cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
-from pycosm.protos.cosmwasm.wasm.v1beta1.tx_pb2 import (
-    MsgExecuteContract,
-    MsgInstantiateContract,
-    MsgStoreCode,
-)
-from pycosm.tx.rest_client import TxRestClient
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
