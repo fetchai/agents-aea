@@ -94,7 +94,12 @@ DEFAULT_FAUCET_URL = "INVALID_URL"
 DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
 DEFAULT_CURRENCY_DENOM = "uatom"
 DEFAULT_CHAIN_ID = "cosmoshub-3"
+DEFAULT_GAS_AMOUNT = 2000000
 _BYTECODE = "wasm_byte_code"
+MSG_STORE_CODE = "/cosmwasm.wasm.v1beta1.MsgStoreCode"
+MSG_INSTANTIATE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
+MSG_EXECUTE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
+MSG_SEND = "/cosmos.bank.v1beta1.MsgSend"
 
 
 class DataEncrypt:
@@ -478,7 +483,9 @@ class CosmosCrypto(Crypto[SigningKey]):
             ) from e
         return signing_key
 
-    def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
+    def sign_message(
+        self, message: bytes, is_deprecated_mode: bool = False
+    ) -> str:  # pylint: disable=unused-argument
         """
         Sign a message in bytes string form.
 
@@ -583,6 +590,7 @@ class _CosmosApi(LedgerApi):
         self.tx_client = TxRestClient(self.rest_client)
         self.auth_client = AuthRestClient(self.rest_client)
         self.wasm_client = WasmRestClient(self.rest_client)
+        self.bank_client = BankRestClient(self.rest_client)
 
     @property
     def api(self) -> Any:
@@ -599,8 +607,9 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def _try_get_balance(self, address: Address) -> Optional[int]:
-        bank = BankRestClient(self.rest_client)
-        res = bank.Balance(QueryBalanceRequest(address=address, denom=self.denom))
+        res = self.bank_client.Balance(
+            QueryBalanceRequest(address=address, denom=self.denom)
+        )
         return int(res.balance.amount)
 
     def get_state(
@@ -679,6 +688,11 @@ class _CosmosApi(LedgerApi):
         code_id = kwargs.pop("code_id", None)
         amount = kwargs.pop("amount", None)
         init_msg = kwargs.pop("init_msg", None)
+        unexpected_keys = [
+            key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
+        ]
+        if len(unexpected_keys) != 0:  # pragma: nocover
+            raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
         if label is None and code_id is None and amount is None and init_msg is None:
             return self._get_storage_transaction(
                 contract_interface,
@@ -727,7 +741,7 @@ class _CosmosApi(LedgerApi):
         account_number: int,
         sequence: int,
         tx_fee: int = 0,
-        gas: int = 2000000,
+        gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
         source: str = "",
         builder: str = "",
@@ -783,7 +797,7 @@ class _CosmosApi(LedgerApi):
         init_msg: JSONLike,
         label: str,
         tx_fee: int = 0,
-        gas: int = 200000,
+        gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
     ) -> Optional[JSONLike]:
         """
@@ -840,7 +854,7 @@ class _CosmosApi(LedgerApi):
         amount: int,
         tx_fee: int,
         denom: Optional[str] = None,
-        gas: int = 200000,
+        gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
         chain_id: Optional[str] = None,
         account_number: Optional[int] = None,
@@ -941,7 +955,7 @@ class _CosmosApi(LedgerApi):
         tx_fee: int,
         tx_nonce: str,
         denom: Optional[str] = None,
-        gas: int = 80000,
+        gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
         chain_id: Optional[str] = None,
         account_number: Optional[int] = None,
@@ -967,17 +981,6 @@ class _CosmosApi(LedgerApi):
         """
         denom = denom if denom is not None else self.denom
 
-        amount_coins = [Coin(denom=denom, amount=str(amount))]
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
-
-        msg_send = MsgSend(
-            from_address=str(sender_address),
-            to_address=str(destination_address),
-            amount=amount_coins,
-        )
-        send_msg_packed = ProtoAny()
-        send_msg_packed.Pack(msg_send, type_url_prefix="/")
-
         chain_id = chain_id if chain_id is not None else self.chain_id
 
         if account_number is None or sequence is None:
@@ -986,6 +989,17 @@ class _CosmosApi(LedgerApi):
             )
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
+
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        amount_coins = [Coin(denom=denom, amount=str(amount))]
+
+        msg_send = MsgSend(
+            from_address=str(sender_address),
+            to_address=str(destination_address),
+            amount=amount_coins,
+        )
+        send_msg_packed = ProtoAny()
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")
 
         tx = self._get_transaction(
             account_numbers=[account_number],
@@ -1126,9 +1140,9 @@ class _CosmosApi(LedgerApi):
                 .get("messages", [])[0]["@type"]
             )
             result = _type in [
-                "/cosmwasm.wasm.v1beta1.MsgStoreCode",
-                "/cosmwasm.wasm.v1beta1.MsgInstantiateContract",
-                "/cosmwasm.wasm.v1beta1.MsgExecuteContract",
+                MSG_STORE_CODE,
+                MSG_INSTANTIATE_CONTRACT,
+                MSG_EXECUTE_CONTRACT,
             ]
         except (KeyError, IndexError):  # pragma: nocover
             result = False
@@ -1143,35 +1157,10 @@ class _CosmosApi(LedgerApi):
                 .get("body", {})
                 .get("messages", [])[0]["@type"]
             )
-            result = _type in ["/cosmos.bank.v1beta1.MsgSend"]
+            result = _type in [MSG_SEND]
         except (KeyError, IndexError):  # pragma: nocover
             result = False
         return result
-
-    @try_decorator(
-        "Encountered exception when trying to send tx: {}",
-        logger_method=_default_logger.warning,
-    )
-    def _try_send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
-        """
-        Try send the signed transaction.
-
-        :param tx_signed: the signed transaction
-        :return: tx_digest, if present
-        """
-        tx_digest = None  # type: Optional[str]
-        url = self.network_address + "/txs"
-        response = requests.post(url=url, json=tx_signed)
-        if response.status_code == 200:
-            try:
-                tx_digest = response.json()["txhash"]
-            except KeyError:  # pragma: nocover
-                raise ValueError(
-                    f"key `txhash` not found in response_json={response.json()}"
-                )
-        else:  # pragma: nocover
-            raise ValueError("Cannot send transaction: {}".format(response.json()))
-        return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
@@ -1211,7 +1200,9 @@ class _CosmosApi(LedgerApi):
         """
         # Cosmos does not distinguish between transaction receipt and transaction
         tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
-        return tx_with_receipt
+        if tx_with_receipt is None:
+            return None
+        return {"tx": tx_with_receipt.get("tx")}
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
