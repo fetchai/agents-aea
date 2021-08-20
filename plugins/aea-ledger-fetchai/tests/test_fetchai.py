@@ -30,6 +30,9 @@ from uuid import uuid4
 
 import pytest
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from google.protobuf.any_pb2 import Any as ProtoAny
+from pycosm.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
+from pycosm.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea.crypto.helpers import KeyIsIncorrect
 
@@ -693,7 +696,7 @@ def test_load_contract_interface():
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_construct_init_transaction():
-    """Test the construction of a contract onot transaction"""
+    """Test the construction of a contract instantiate transaction"""
     account = FetchAICrypto()
     fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
@@ -767,3 +770,90 @@ def test_decrypt_error():
     ):
         with pytest.raises(ValueError, match="bad password?"):
             ec.decrypt(encrypted_data, password + "some")
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_multiple_signatures_transaction():
+    """Test generating message with multiple signers"""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+
+    coins = [Coin(denom="DENOM", amount="1234")]
+
+    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    send_msg_packed = ProtoAny()
+    send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+    tx = fetchai_api._get_transaction(
+        account_numbers=[1, 2],
+        from_addresses=["adr1", "adr2"],
+        pub_keys=[b"1", b"2"],
+        chain_id="chain_id",
+        tx_fee=coins,
+        gas=1234,
+        memo="MEMO",
+        sequences=[1, 2],
+        msgs=[send_msg_packed, send_msg_packed],
+    )
+    assert (
+        isinstance(tx, dict) and len(tx) == 2
+    ), "Incorrect transfer_transaction constructed."
+    assert tx["tx"]["body"]["messages"][0]["@type"] == "/cosmos.bank.v1beta1.MsgSend"
+    assert tx["tx"]["body"]["messages"][1]["@type"] == "/cosmos.bank.v1beta1.MsgSend"
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_multiple_signatures_transaction_missing_pubkeys():
+    """Test if generating message with multiple signers without pubkeys fails"""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+
+    coins = [Coin(denom="DENOM", amount="1234")]
+
+    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    send_msg_packed = ProtoAny()
+    send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+    with pytest.raises(
+        RuntimeError,
+        match="Only transaction with one signer can be generated without pubkeys",
+    ):
+        fetchai_api._get_transaction(
+            account_numbers=[1, 2],
+            from_addresses=["adr1", "adr2"],
+            chain_id="chain_id",
+            tx_fee=coins,
+            gas=1234,
+            memo="MEMO",
+            sequences=[1, 2],
+            msgs=[send_msg_packed, send_msg_packed],
+        )
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_multiple_signatures_transaction_wrong_number_of_params():
+    """Test if generating message with wrong number of params fails"""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+
+    coins = [Coin(denom="DENOM", amount="1234")]
+
+    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    send_msg_packed = ProtoAny()
+    send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+    with pytest.raises(
+        RuntimeError,
+        match="Amount of provided from_addresses, sequences and account_numbers is not equal",
+    ):
+        fetchai_api._get_transaction(
+            account_numbers=[1, 2],
+            from_addresses=["adr1", "adr2"],
+            chain_id="chain_id",
+            tx_fee=coins,
+            gas=1234,
+            memo="MEMO",
+            sequences=[1, 2, 3],
+            pub_keys=[b"123"],
+            msgs=[send_msg_packed],
+        )
