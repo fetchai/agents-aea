@@ -90,7 +90,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       service_data:
-        key: stargateworld-2
+        key: agentworld-5
         value: PUT_YOUR_DEVELOPER_HANDLE_HERE
 ---
 public_id: fetchai/simple_service_search:0.9.0

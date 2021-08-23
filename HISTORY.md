@@ -521,7 +521,7 @@ Examples:
 
 ## 0.5.2 (2020-07-21)
 
-- Transitions demos to stargate-world test network, P2P and SOEF connections
+- Transitions demos to agent-land test network, P2P and SOEF connections
 - Adds full test coverage for helpers modules
 - Adds full test coverage for core modules
 - Adds CLI functionality to upload `README.md` files with packages
