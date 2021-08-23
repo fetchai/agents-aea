@@ -484,8 +484,10 @@ class CosmosCrypto(Crypto[SigningKey]):
         return signing_key
 
     def sign_message(
-        self, message: bytes, is_deprecated_mode: bool = False
-    ) -> str:  # pylint: disable=unused-argument
+        self,
+        message: bytes,
+        is_deprecated_mode: bool = False,  # pylint: disable=unused-argument
+    ) -> str:
         """
         Sign a message in bytes string form.
 
@@ -1145,7 +1147,8 @@ class _CosmosApi(LedgerApi):
 
         return tx_digest
 
-    def is_cosmwasm_transaction(self, tx_signed: JSONLike) -> bool:
+    @staticmethod
+    def is_cosmwasm_transaction(tx_signed: JSONLike) -> bool:
         """Check whether it is a cosmwasm tx."""
         try:
             _type = (
