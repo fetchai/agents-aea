@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-import contextlib
 import difflib
 import inspect
 import logging
@@ -27,7 +26,6 @@ import random
 import shutil
 import socket
 import string
-import subprocess  # nosec
 import sys
 import tempfile
 import threading
@@ -54,7 +52,12 @@ import gym
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import DEFAULT_CLI_COMMAND, FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
+from arcturus.clients.signing_cosmwasm_client import SigningCosmWasmClient
+from arcturus.common.rest_client import RestClient
+from arcturus.crypto.address import Address as ArcturusAddress
+from arcturus.crypto.keypairs import PrivateKey
+from arcturus.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -155,12 +158,12 @@ DEFAULT_GANACHE_CHAIN_ID = 1337
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.2.7"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
-DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
+DEFAULT_FETCH_LEDGER_RPC_PORT = 9090
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
-DEFAULT_FETCH_ADDR_REMOTE = "https://rpc-agent-land.fetch.ai:443"
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "agent-land"
+DEFAULT_FETCH_CHAIN_ID = "stargateworld-2"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -1363,10 +1366,17 @@ def fund_accounts_from_local_validator(
     addresses: str, amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
+    rest_client = RestClient(
+        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}"
+    )
+    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
+
+    client = SigningCosmWasmClient(pk, rest_client, DEFAULT_FETCH_CHAIN_ID)
+    coins = [Coin(amount=str(amount), denom=denom)]
+
     for address in addresses:
         time.sleep(FETCHD_INITIAL_TX_SLEEP)
-        cmd = f'sh -c "echo y | {DEFAULT_CLI_COMMAND} tx send {DEFAULT_GENESIS_ACCOUNT} {address} {amount}{denom} --chain-id {DEFAULT_FETCH_CHAIN_ID}"'
-        docker_exec_cmd(DEFAULT_FETCH_DOCKER_IMAGE_TAG, cmd)
+        client.send_tokens(ArcturusAddress(address), coins)
 
 
 @pytest.fixture()
@@ -1375,27 +1385,6 @@ def fund_fetchai_accounts(fetchd):
     fund_accounts_from_local_validator(
         [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
     )
-
-
-@contextlib.contextmanager
-def use_local_fetchcli_config():
-    """Context manager for temporarily configuring the Fetch CLI for the locally running test node"""
-    cmd = [
-        DEFAULT_CLI_COMMAND,
-        "config",
-        "node",
-        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_RPC_PORT}",
-    ]
-    logger.info(
-        f"Directing the Fetch ledger CLI to the locally running test node: {cmd}"
-    )
-    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
-    yield
-    cmd = [DEFAULT_CLI_COMMAND, "config", "node", DEFAULT_FETCH_ADDR_REMOTE]
-    logger.info(
-        f"Directing the Fetch ledger CLI back to the default remote endpoint {cmd}"
-    )
-    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
 
 
 def env_path_separator() -> str:

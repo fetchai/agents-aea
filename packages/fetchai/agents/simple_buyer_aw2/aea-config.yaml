@@ -95,5 +95,5 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-agentworld.prod.fetch-ai.com:443
-      chain_id: agentworld-1
+      address: https://faucet-stargateworld.t-v2-london-c.fetch-ai.com
+      chain_id: stargateworld-2

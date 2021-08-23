@@ -63,7 +63,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `my_weather_client` with public id `fetchai/weather_client:0.31.0`.
 
-3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-agent-land.fetch.ai" target="_blank">AgentLand block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">AgentLand block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `my_weather_station` AEA. Navigate to its logs and copy the multiaddress displayed.
 

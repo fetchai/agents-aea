@@ -35,7 +35,6 @@ FETCHAI_TESTNET_FAUCET_URL = "https://faucet-stargateworld.t-v2-london-c.fetch-a
 DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "stargateworld-2"
-DEFAULT_CLI_COMMAND = "fetchcli"
 
 
 class FetchAIHelper(CosmosHelper):
@@ -64,8 +63,6 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
             kwargs["denom"] = DEFAULT_CURRENCY_DENOM
         if "chain_id" not in kwargs:
             kwargs["chain_id"] = DEFAULT_CHAIN_ID
-        if "cli_command" not in kwargs:
-            kwargs["cli_command"] = DEFAULT_CLI_COMMAND
         super().__init__(**kwargs)
 
 

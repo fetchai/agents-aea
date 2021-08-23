@@ -135,16 +135,16 @@ Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most 
 
 | Parameter      | Value                                                                      |
 | -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | agent-land                                                                 |
+| Chain ID       | stargateworld-2                                                                 |
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
-| Version        | v0.2.x                                                                     |
-| RPC Endpoint   | https://rpc-agent-land.fetch.ai:443                            |
-| REST Endpoint  | https://rest-agent-land.fetch.ai:443                            |
-| Block Explorer | <a href="https://explore-agent-land.fetch.ai" target="_blank">https://explore-agent-land.fetch.ai</a> |
+| Version        | v0.8.x                                                                     |
+| RPC Endpoint   | https://rpc-stargateworld.fetch.ai:443                        |
+| REST Endpoint  | https://faucet-stargateworld.t-v2-london-c.fetch-ai.com                      |
+| Block Explorer | <a href="https://explore-stargateworld.fetch.ai" target="_blank">https://explore-stargateworld.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
-You can access more details on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
+You can access more details on <a href="https://github.com/fetchai/networks-stargateworld" target="_blank">GitHub</a>.
 
 The configurations can be specified for the `fetchai/ledger:0.18.0` connection.
 
@@ -171,29 +171,3 @@ cargo version
 rustup target list --installed
 rustup target add wasm32-unknown-unknown
 ```
-
-3. Install `fetchd`:
-
-``` bash
-git clone https://github.com/fetchai/fetchd.git
-cd fetchd
-git checkout release/v0.2.x
-make install
-
-# Check if fetchcli is properly installed
-fetchcli version
-# Version should be >=0.2.5
-```
-
-4. Configure `fetchcli`:
-
-``` bash
-fetchcli config chain-id agent-land
-fetchcli config trust-node false
-fetchcli config node https://rpc-agent-land.fetch.ai:443
-fetchcli config output json
-fetchcli config indent true
-fetchcli config broadcast-mode block
-```
-
-Now `fetchcli` will be ready for use on your system.

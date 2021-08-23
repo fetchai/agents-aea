@@ -90,7 +90,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       service_data:
-        key: agentworld-5
+        key: stargateworld-2
         value: PUT_YOUR_DEVELOPER_HANDLE_HERE
 ---
 public_id: fetchai/simple_service_search:0.9.0
@@ -124,8 +124,8 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-agentworld.prod.fetch-ai.com:443
-      chain_id: agentworld-1
+      address: https://faucet-stargateworld.t-v2-london-c.fetch-ai.com
+      chain_id: stargateworld-2
 ---
 public_id: fetchai/simple_seller:0.12.0
 type: skill

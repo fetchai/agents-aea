@@ -13,18 +13,5 @@ rustup target add wasm32-unknown-unknown
 ``` bash
 git clone https://github.com/fetchai/fetchd.git
 cd fetchd
-git checkout release/v0.2.x
+git checkout release/v0.8.x
 make install
-
-# Check if fetchcli is properly installed
-fetchcli version
-# Version should be >=0.2.5
-```
-``` bash
-fetchcli config chain-id agent-land
-fetchcli config trust-node false
-fetchcli config node https://rpc-agent-land.fetch.ai:443
-fetchcli config output json
-fetchcli config indent true
-fetchcli config broadcast-mode block
-```

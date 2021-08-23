@@ -460,14 +460,12 @@ class FetchLedgerDockerImage(DockerImage):
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
             f'MNEMONIC="{self._config["mnemonic"]}"',
-            "fetchcli config keyring-backend test",
-            f'echo $MNEMONIC | fetchcli keys add {self._config["genesis_account"]} --recover',
-            f'fetchd add-genesis-account $(fetchcli keys show {self._config["genesis_account"]} -a) 1152997575000000000000000000{self._config["denom"]}',
-            f'fetchd gentx --amount 100000000000000000000{self._config["denom"]} --name {self._config["genesis_account"]} --keyring-backend test',
+            "fetchd config keyring-backend test",
+            f'echo $MNEMONIC | fetchd keys add {self._config["genesis_account"]} --recover',
+            f'fetchd add-genesis-account $(fetchd keys show {self._config["genesis_account"]} -a) 1152997575000000000000000000{self._config["denom"]}',
+            f'fetchd gentx --amount 100000000000000000000{self._config["denom"]} --name {self._config["genesis_account"]} --keyring-backend test --chain-id {self._config["chain_id"]}',
             "fetchd collect-gentxs",
-            f'fetchcli config chain-id {self._config["chain_id"]}',
-            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port} &",
-            "fetchcli rest-server --trust-node=true",
+            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port}",
         ]
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
         with open(entrypoint_file, "w") as file:
