@@ -73,6 +73,8 @@ type AeaApi struct {
 	host_monitoring string
 	port_monitoring uint16
 
+	mailbox_uri string
+
 	registrationDelay  float64
 	recordsStoragePath string
 
@@ -85,6 +87,10 @@ type AeaApi struct {
 	sandbox         bool
 	standalone      bool
 	acn_status_chan chan *acn.StatusBody
+}
+
+func (aea AeaApi) MailboxUri() string {
+	return aea.mailbox_uri
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -203,6 +209,7 @@ func (aea *AeaApi) Init() error {
 		aea.agent_record = record
 	}
 
+	aea.mailbox_uri = os.Getenv("AEA_P2P_MAILBOX_URI")
 	registrationDelay := os.Getenv("AEA_P2P_CFG_REGISTRATION_DELAY")
 	aea.recordsStoragePath = os.Getenv("AEA_P2P_CFG_STORAGE_PATH")
 

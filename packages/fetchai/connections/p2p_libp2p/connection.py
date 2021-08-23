@@ -293,6 +293,7 @@ class Libp2pNode:
         records_storage_path: Optional[str] = None,
         connection_timeout: Optional[float] = None,
         max_restarts: int = 5,
+        mailbox_uri: str = "127.0.0.1:8888",
     ):
         """
         Initialize a p2p libp2p node.
@@ -314,6 +315,7 @@ class Libp2pNode:
         :param records_storage_path: the path where to store the agent records.
         :param connection_timeout: the connection timeout of the node.
         :param max_restarts: amount of node restarts during operation.
+        :param mailbox_uri: libp2p mailbox_uri ip address and port number in format ipaddress:port.
         """
 
         self.record = agent_record
@@ -337,6 +339,8 @@ class Libp2pNode:
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
+
+        self.mailbox_uri = mailbox_uri
 
         # peer configuration
         self.peer_registration_delay = peer_registration_delay
@@ -425,6 +429,8 @@ class Libp2pNode:
         config += "AEA_P2P_CFG_STORAGE_PATH={}\n".format(
             self.records_storage_path if self.records_storage_path is not None else ""
         )
+
+        config += "AEA_P2P_MAILBOX_URI={}\n".format(self.mailbox_uri)
 
         with open(self.env_file, "w") as env_file:  # overwrite if exists
             env_file.write(config)
@@ -760,6 +766,11 @@ class P2PLibp2pConnection(Connection):
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
 
+        if self.configuration.config.get("mailbox_uri"):
+            mailbox_uri = str(self.configuration.config.get("mailbox_uri"))
+        else:
+            mailbox_uri = ""
+
         module_dir = self._check_node_built()
         self.node = Libp2pNode(
             agent_record,
@@ -781,6 +792,7 @@ class P2PLibp2pConnection(Connection):
             max_restarts=self.configuration.config.get(
                 "max_node_restarts", self.DEFAULT_MAX_RESTARTS
             ),
+            mailbox_uri=mailbox_uri,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]

@@ -11,6 +11,7 @@ require (
 	github.com/ethereum/go-ethereum v1.9.25
 	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.4.2
+	github.com/google/uuid v1.3.0
 	github.com/ipfs/go-cid v0.0.5
 	github.com/joho/godotenv v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
@@ -34,5 +35,5 @@ require (
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	google.golang.org/protobuf v1.25.0
 	honnef.co/go/tools v0.1.4 // indirect
-	
+
 )
