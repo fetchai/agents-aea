@@ -93,7 +93,7 @@ config:
     ethereum:
       address: null
     fetchai:
-      address: https://faucet-stargateworld.t-v2-london-c.fetch-ai.com
+      address: https://rest-stargateworld.fetch.ai:443
       chain_id: stargateworld-2
 ---
 public_id: fetchai/confirmation_aw3:0.10.0

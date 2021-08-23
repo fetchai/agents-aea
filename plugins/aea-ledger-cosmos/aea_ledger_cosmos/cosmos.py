@@ -240,10 +240,10 @@ class CosmosHelper(Helper):
         code_id: Optional[int] = None
         try:
             res = [
-                dic_["value"]
-                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]
-                if dic_["key"] == "code_id"
-            ]  # type: ignore
+                dic_["value"]  # type: ignore
+                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]  # type: ignore
+                if dic_["key"] == "code_id"  # type: ignore
+            ]
             code_id = int(res[0])
         except (KeyError, IndexError):  # pragma: nocover
             code_id = None
@@ -260,9 +260,9 @@ class CosmosHelper(Helper):
         contract_address: Optional[str] = None
         try:
             res = [
-                dic_["value"]
-                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]
-                if dic_["key"] == "contract_address"
+                dic_["value"]  # type: ignore
+                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]  # type: ignore
+                if dic_["key"] == "contract_address"  # type: ignore
             ]  # type: ignore
             contract_address = res[0]
         except (KeyError, IndexError):  # pragma: nocover
@@ -513,11 +513,11 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         # If public key is not already part of transaction
         if tx.auth_info.signer_infos[0].public_key.value == b"":
-            if len(transaction["sign_data"]) == 1:
+            if len(transaction["sign_data"]) == 1:  # type: ignore
                 # Insert public key to auth info
                 from_pub_key_packed = ProtoAny()
                 from_pub_key_pb = ProtoPubKey(key=bytes.fromhex(self.public_key))
-                from_pub_key_packed.Pack(from_pub_key_pb, type_url_prefix="/")
+                from_pub_key_packed.Pack(from_pub_key_pb, type_url_prefix="/")  # type: ignore
 
                 tx.auth_info.signer_infos[
                     0
@@ -528,13 +528,13 @@ class CosmosCrypto(Crypto[SigningKey]):
                     "Public key can be added during singing only for single message transactions."
                 )
 
-        current_sign_data = transaction["sign_data"][self.address]
+        current_sign_data = transaction["sign_data"][self.address]  # type: ignore
 
         sd = SignDoc()
         sd.body_bytes = tx.body.SerializeToString()
         sd.auth_info_bytes = tx.auth_info.SerializeToString()
-        sd.chain_id = current_sign_data["chain_id"]
-        sd.account_number = current_sign_data["account_number"]
+        sd.chain_id = current_sign_data["chain_id"]  # type: ignore
+        sd.account_number = current_sign_data["account_number"]  # type: ignore
 
         data_for_signing = sd.SerializeToString()
 
@@ -771,7 +771,7 @@ class _CosmosApi(LedgerApi):
             builder=builder,
         )
         store_msg_packed = ProtoAny()
-        store_msg_packed.Pack(store_msg, type_url_prefix="/")
+        store_msg_packed.Pack(store_msg, type_url_prefix="/")  # type: ignore
 
         tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
         tx = self._get_transaction(
@@ -832,7 +832,7 @@ class _CosmosApi(LedgerApi):
             funds=init_funds,
         )
         init_msg_packed = ProtoAny()
-        init_msg_packed.Pack(init_msg, type_url_prefix="/")
+        init_msg_packed.Pack(init_msg, type_url_prefix="/")  # type: ignore
 
         tx = self._get_transaction(
             account_numbers=[account_number],
@@ -899,7 +899,7 @@ class _CosmosApi(LedgerApi):
             funds=funds,
         )
         execute_msg_packed = ProtoAny()
-        execute_msg_packed.Pack(execute_msg, type_url_prefix="/")
+        execute_msg_packed.Pack(execute_msg, type_url_prefix="/")  # type: ignore
 
         tx = self._get_transaction(
             account_numbers=[account_number],
@@ -998,7 +998,7 @@ class _CosmosApi(LedgerApi):
             amount=amount_coins,
         )
         send_msg_packed = ProtoAny()
-        send_msg_packed.Pack(msg_send, type_url_prefix="/")
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")  # type: ignore
 
         tx = self._get_transaction(
             account_numbers=[account_number],
@@ -1020,7 +1020,7 @@ class _CosmosApi(LedgerApi):
         tx_fee: List[Coin],
         gas: int,
         memo: str,
-        sequences: [int],
+        sequences: List[int],
         msgs: List[ProtoAny],
         pub_keys: Optional[List[bytes]] = None,
     ) -> JSONLike:
@@ -1066,7 +1066,7 @@ class _CosmosApi(LedgerApi):
         ):
             from_pub_key_packed = ProtoAny()
             from_pub_key_pb = ProtoPubKey(key=pub_key)
-            from_pub_key_packed.Pack(from_pub_key_pb, type_url_prefix="/")
+            from_pub_key_packed.Pack(from_pub_key_pb, type_url_prefix="/")  # type: ignore
 
             # Prepare auth info
             single = ModeInfo.Single(mode=SignMode.SIGN_MODE_DIRECT)
