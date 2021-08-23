@@ -53,11 +53,11 @@ import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
-from arcturus.clients.signing_cosmwasm_client import SigningCosmWasmClient
-from arcturus.common.rest_client import RestClient
-from arcturus.crypto.address import Address as ArcturusAddress
-from arcturus.crypto.keypairs import PrivateKey
-from arcturus.protos.cosmos.base.v1beta1.coin_pb2 import Coin
+from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
+from cosmpy.common.rest_client import RestClient
+from cosmpy.crypto.address import Address as CosmpyAddress
+from cosmpy.crypto.keypairs import PrivateKey
+from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -1376,7 +1376,7 @@ def fund_accounts_from_local_validator(
 
     for address in addresses:
         time.sleep(FETCHD_INITIAL_TX_SLEEP)
-        client.send_tokens(ArcturusAddress(address), coins)
+        client.send_tokens(CosmpyAddress(address), coins)
 
 
 @pytest.fixture()
