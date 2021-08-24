@@ -286,7 +286,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: "Echo Behaviour: act method called."
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=20,
+            timeout=60,
         )
 
     def test_exception_handling(self, *args):
@@ -353,7 +353,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: len(self.manager.list_agents())
             == len(self.manager.list_agents(running_only=True)),
-            timeout=20,
+            timeout=60,
             period=0.5,
         )
 
@@ -370,19 +370,19 @@ class BaseTestMultiAgentManager(TestCase):
         """Test stop agent."""
         self.test_start_all()
         wait_for_condition(
-            lambda: self.manager.list_agents(running_only=True), timeout=20
+            lambda: self.manager.list_agents(running_only=True), timeout=60
         )
 
         wait_for_condition(
             lambda: "Start processing messages"
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=20,
+            timeout=60,
         )
 
         self.manager.stop_all_agents()
 
         wait_for_condition(
-            lambda: len(self.manager.list_agents(running_only=True)) == 0, timeout=20
+            lambda: len(self.manager.list_agents(running_only=True)) == 0, timeout=60
         )
 
         assert not self.manager.list_agents(running_only=True)
@@ -396,7 +396,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: "Runtime loop stopped!"
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=20,
+            timeout=60,
         )
 
     def test_do_no_allow_override_some_fields(self, *args):
@@ -639,11 +639,15 @@ class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
 
     MODE = "multiprocess"
 
+    def test_plugin_dependencies(self, *args):
+        """Skip test cause multiprocess works another way."""
 
-class TestMultiAgentManagerMultiprocessModeЦWithPassword(BaseTestMultiAgentManager):
+
+class TestMultiAgentManagerMultiprocessModeWithPassword(
+    TestMultiAgentManagerMultiprocessMode
+):
     """Tests for MultiAgentManager in multiprocess mode with password."""
 
-    MODE = "multiprocess"
     PASSWORD = "password"  # nosec
 
 

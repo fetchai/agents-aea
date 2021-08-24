@@ -22,7 +22,7 @@ import json
 import multiprocessing
 import os
 import threading
-import time
+from abc import ABC, abstractmethod
 from asyncio.tasks import FIRST_COMPLETED
 from collections import defaultdict
 from multiprocessing.synchronize import Event
@@ -30,13 +30,19 @@ from shutil import rmtree
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
+from aea.aea import AEA
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PackageIdPrefix, PublicId
-from aea.crypto.plugin import load_all_plugins
 from aea.exceptions import enforce
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
+from aea.manager.utils import (
+    get_venv_dir_for_project,
+    project_check,
+    project_install_and_build,
+    run_in_venv,
+)
 
 
 class ProjectNotFoundError(ValueError):
@@ -84,14 +90,33 @@ class ProjectPackageConsistencyCheckError(ValueError):
         return message
 
 
-class AgentRunAsyncTask:
+class BaseAgentRunTask(ABC):
+    """Base abstract class for agent run tasks."""
+
+    @abstractmethod
+    def start(self) -> None:
+        """Start task."""
+
+    @abstractmethod
+    def wait(self) -> asyncio.Future:
+        """Return future to wait task completed."""
+
+    @abstractmethod
+    def stop(self) -> None:
+        """Stop task."""
+
+    @property
+    @abstractmethod
+    def is_running(self) -> bool:
+        """Return is task running."""
+
+
+class AgentRunAsyncTask(BaseAgentRunTask):
     """Async task wrapper for agent."""
 
-    def __init__(
-        self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
-    ) -> None:
+    def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
         """Init task with agent alias and loop."""
-        self.agent = agent_alias.get_aea_instance()
+        self.agent = agent
         self.run_loop: asyncio.AbstractEventLoop = loop
         self.caller_loop: asyncio.AbstractEventLoop = loop
         self._done_future: Optional[asyncio.Future] = None
@@ -155,11 +180,9 @@ class AgentRunAsyncTask:
 class AgentRunThreadTask(AgentRunAsyncTask):
     """Threaded wrapper to run agent."""
 
-    def __init__(
-        self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
-    ) -> None:
+    def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
         """Init task with agent alias and loop."""
-        AgentRunAsyncTask.__init__(self, agent_alias, loop)
+        AgentRunAsyncTask.__init__(self, agent, loop)
         self._thread: Optional[Thread] = None
 
     def create_run_loop(self) -> None:
@@ -181,8 +204,10 @@ class AgentRunThreadTask(AgentRunAsyncTask):
             self._thread.join()
 
 
-class AgentRunProcessTask(AgentRunAsyncTask):
+class AgentRunProcessTask(BaseAgentRunTask):
     """Subprocess wrapper to run agent."""
+
+    PROCESS_JOIN_TIMEOUT = 20  # in seconds
 
     def __init__(  # pylint: disable=super-init-not-called
         self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
@@ -266,7 +291,13 @@ class AgentRunProcessTask(AgentRunAsyncTask):
             raise ValueError("Task not started!")  # pragma: nocover
 
         self._stop_event.set()
-        self.process.join(100)
+        self.process.join(self.PROCESS_JOIN_TIMEOUT)
+        if self.is_running:  # pragma: nocover
+            self.process.terminate()
+            self.process.join(5)
+            raise ValueError(
+                f"process was not stopped withinh timeout: {self.PROCESS_JOIN_TIMEOUT} and was terminated"
+            )
 
     @property
     def is_running(self) -> bool:
@@ -277,10 +308,20 @@ class AgentRunProcessTask(AgentRunAsyncTask):
         return self.process.is_alive()
 
 
+ASYNC_MODE = "async"
+THREADED_MODE = "threaded"
+MULTIPROCESS_MODE = "multiprocess"
+
+
 class MultiAgentManager:
     """Multi agents manager."""
 
-    MODES = ["async", "threaded", "multiprocess"]
+    MODES = [ASYNC_MODE, THREADED_MODE, MULTIPROCESS_MODE]
+    _MODE_TASK_CLASS = {
+        ASYNC_MODE: AgentRunAsyncTask,
+        THREADED_MODE: AgentRunThreadTask,
+        MULTIPROCESS_MODE: AgentRunProcessTask,
+    }
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
     SAVE_FILENAME = "save.json"
 
@@ -314,7 +355,7 @@ class MultiAgentManager:
             os.path.join(self.working_dir, AEA_MANAGER_DATA_DIRNAME)
         )
         self._agents: Dict[str, AgentAlias] = {}
-        self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
+        self._agents_tasks: Dict[str, BaseAgentRunTask] = {}
 
         self._thread: Optional[Thread] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -558,14 +599,12 @@ class MultiAgentManager:
         )
 
         if not restore:
-            project.install_pypi_dependencies()
-            load_all_plugins(is_raising_exception=False)
-            project.build()
+            self._project_install_and_build(project)
 
         self._check_version_consistency(project.agent_config)
 
         try:
-            project.check()
+            self._check_project(project)
         except Exception as e:
             project.remove()
             raise ProjectCheckError(
@@ -576,6 +615,22 @@ class MultiAgentManager:
         self._versionless_projects_set.add(public_id.to_any())
         self._projects[public_id] = project
         return self
+
+    def _project_install_and_build(self, project: Project) -> None:
+        """Build and install project dependencies."""
+        if self._mode == MULTIPROCESS_MODE:
+            venv_dir = get_venv_dir_for_project(project)
+            run_in_venv(venv_dir, project_install_and_build, 120, project)
+        else:
+            venv_dir = get_venv_dir_for_project(project)
+            project_install_and_build(project)
+
+    def _check_project(self, project: Project) -> None:
+        if self._mode == MULTIPROCESS_MODE:
+            venv_dir = get_venv_dir_for_project(project)
+            run_in_venv(venv_dir, project_check, 120, project)
+        else:
+            project_check(project)
 
     def remove_project(
         self, public_id: PublicId, keep_files: bool = False
@@ -802,15 +857,14 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
-        if self._mode == "async":
-            task = AgentRunAsyncTask(agent_alias, self._loop)
-        elif self._mode == "threaded":
-            task = AgentRunThreadTask(agent_alias, self._loop)
-        elif self._mode == "multiprocess":
-            task = AgentRunProcessTask(agent_alias, self._loop)
+        task_cls = self._MODE_TASK_CLASS[self._mode]
+        if self._mode == MULTIPROCESS_MODE:
+            task = task_cls(agent_alias, self._loop)
+        else:
+            agent = agent_alias.get_aea_instance()
+            task = task_cls(agent, self._loop)
 
         task.start()
-        time.sleep(1)
 
         self._agents_tasks[agent_name] = task
 
