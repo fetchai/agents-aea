@@ -53,7 +53,7 @@ class DictProtobufStructSerializer:
         cls._patch_dict(patched_dict)
         pstruct = Struct()
         pstruct.update(patched_dict)  # pylint: disable=no-member
-        return pstruct.SerializeToString()
+        return pstruct.SerializeToString(deterministic=True)
 
     @classmethod
     def decode(cls, buffer: bytes) -> Dict[str, Any]:
