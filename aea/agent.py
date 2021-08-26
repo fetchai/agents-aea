@@ -106,6 +106,7 @@ class Agent(AbstractAgent, WithLogger):
             loop_mode=loop_mode,
             loop=loop,
             multiplexer_options=multiplexer_options,
+            task_manager_mode=self._task_manager_mode,
         )
         self._inbox = InBox(self.runtime.multiplexer)
         self._outbox = OutBox(self.runtime.multiplexer)

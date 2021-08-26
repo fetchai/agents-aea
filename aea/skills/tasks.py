@@ -16,16 +16,25 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the classes for tasks."""
 import logging
+import re
 import signal
+import sys
 import threading
 from abc import abstractmethod
 from multiprocessing.pool import AsyncResult, Pool, ThreadPool
-from typing import Any, Callable, Dict, Optional, Sequence, Type, cast
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
+from aea.components.base import perform_load_aea_package
+from aea.configurations.constants import CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS
 from aea.helpers.logging import WithLogger
+
+
+THREAD_POOL_MODE = "multithread"
+PROCESS_POOL_MODE = "multiprocess"
+DEFAULT_WORKERS_AMOUNT = 2
 
 
 class Task(WithLogger):
@@ -98,33 +107,69 @@ class Task(WithLogger):
     def teardown(self) -> None:
         """Implement the task teardown."""
 
-
-def init_worker() -> None:
+def _init_worker(mode: str, packages: Dict[str, List[Dict[str, str]]]) -> None:
     """
     Initialize a worker.
 
     Disable the SIGINT handler of process pool is using.
     Related to a well-known bug: https://bugs.python.org/issue8296
+
+    :param mode: str. mode task manager runs in
+    :param packages: dict with list of packages to load if needed
     """
-    if Pool.__class__.__name__ == "Pool":  # pragma: nocover
-        # Process worker
+    if mode == PROCESS_POOL_MODE:  # pragma: nocover
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        _populate_packages(packages)
+
+
+def _enlist_component_packages() -> Dict[str, List[Dict[str, str]]]:
+    """List all components packages already loaded."""
+    result: Dict[str, List[Dict[str, str]]] = {}
+    packages_re = re.compile(r"^packages\.(\w+)\.(\w+)\.(\w+)$", re.I)
+    for name, mod in sys.modules.items():
+        match = packages_re.match(name)
+        if not match:
+            continue
+        author, package_type, package_name = match.groups()
+        packages = result.get(package_type, [])
+        package_data = {
+            "author": author,
+            "package_type": package_type,
+            "package_name": package_name,
+            "dir": mod.__dict__["__path__"][0],
+        }
+        packages.append(package_data)
+        result[package_type] = packages
+    return result
+
+# no cover cause executed in a subprocess, not possible to track
+def _populate_packages(packages: dict) -> None:  # pragma: nocover
+    """Load packages as python modules."""
+    for package_type in [PROTOCOLS, CONTRACTS, CONNECTIONS, SKILLS]:
+        for package in packages.get(package_type, []):
+            # load package
+            perform_load_aea_package(
+                dir_=Path(package["dir"]),
+                author=package["author"],
+                package_type_plural=package["package_type"],
+                package_name=package["package_name"],
+            )
 
 
 class TaskManager(WithLogger):
     """A Task manager."""
 
     POOL_MODES: Dict[str, Type[Pool]] = {
-        "multithread": ThreadPool,
-        "multiprocess": Pool,
+        THREAD_POOL_MODE: ThreadPool,
+        PROCESS_POOL_MODE: Pool,
     }
 
     def __init__(
         self,
-        nb_workers: int = 2,
+        nb_workers: int = DEFAULT_WORKERS_AMOUNT,
         is_lazy_pool_start: bool = True,
         logger: Optional[logging.Logger] = None,
-        pool_mode: str = "multithread",
+        pool_mode: str = THREAD_POOL_MODE,
     ) -> None:
         """
         Initialize the task manager.
@@ -191,6 +236,7 @@ class TaskManager(WithLogger):
             async_result = self._pool.apply_async(
                 func, args=args, kwds=kwargs if kwargs is not None else {}
             )
+
             self._results_by_task_id[task_id] = async_result
             if self._logger:  # pragma: nocover
                 self._logger.info(f"Task <{func}{args}> set. Task id is {task_id}")
@@ -244,7 +290,13 @@ class TaskManager(WithLogger):
         pool_cls = self.POOL_MODES.get(self._pool_mode)
         if not pool_cls:  # pragma: nocover
             raise ValueError(f"Mode: `{self._pool_mode}` is not supported")
-        self._pool = pool_cls(self._nb_workers, initializer=init_worker)
+        init_args = (
+            self._pool_mode,
+            _enlist_component_packages(),
+        )
+        self._pool = pool_cls(
+            self._nb_workers, initializer=_init_worker, initargs=init_args
+        )
 
     def _stop_pool(self) -> None:
         """Stop internal task pool."""
@@ -256,3 +308,51 @@ class TaskManager(WithLogger):
         self._pool.terminate()
         self._pool.join()
         self._pool = None
+
+
+class ThreadedTaskManager(TaskManager):
+    """A threaded task manager."""
+
+    def __init__(
+        self,
+        nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+        is_lazy_pool_start: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """
+        Initialize the task manager.
+
+        :param nb_workers: the number of worker processes.
+        :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
+        :param logger: the logger.
+        """
+        super(ThreadedTaskManager, self).__init__(
+            nb_workers=nb_workers,
+            is_lazy_pool_start=is_lazy_pool_start,
+            logger=logger,
+            pool_mode=THREAD_POOL_MODE,
+        )
+
+
+class ProcessTaskManager(TaskManager):
+    """A multiprocess task manager."""
+
+    def __init__(
+        self,
+        nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+        is_lazy_pool_start: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """
+        Initialize the task manager.
+
+        :param nb_workers: the number of worker processes.
+        :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
+        :param logger: the logger.
+        """
+        super(ProcessTaskManager, self).__init__(
+            nb_workers=nb_workers,
+            is_lazy_pool_start=is_lazy_pool_start,
+            logger=logger,
+            pool_mode=PROCESS_POOL_MODE,
+        )

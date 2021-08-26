@@ -78,7 +78,7 @@ class TaskTestCase(TestCase):
 class InitWorkerTestCase(TestCase):
     """Test case for init_worker method."""
 
-    @mock.patch("aea.skills.tasks.init_worker")
+    @mock.patch("aea.skills.tasks._init_worker")
     def test_init_worker_positive(self, init_worker_mock):
         """Test init_worker method positive result."""
         task_manager = TaskManager(is_lazy_pool_start=False)

@@ -116,7 +116,7 @@ class Component(ABC, WithLogger):
 
 def load_aea_package(configuration: ComponentConfiguration) -> None:
     """
-    Load the AEA package.
+    Load the AEA package from configuration.
 
     It adds all the __init__.py modules into `sys.modules`.
 
@@ -124,16 +124,34 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     """
     dir_ = configuration.directory
     if dir_ is None:  # pragma: nocover
-        raise AEAEnforceError("configuration directory does not exists.")
+        raise AEAEnforceError(f"configuration directory `{dir_}` does not exists.")
+    author = configuration.author
+    package_type_plural = configuration.component_type.to_plural()
+    package_name = configuration.name
+    perform_load_aea_package(dir_, author, package_type_plural, package_name)
 
-    # patch sys.modules with dummy modules
+
+def perform_load_aea_package(
+    dir_: Path, author: str, package_type_plural: str, package_name: str
+) -> None:
+    """
+    Load the AEA package from values provided.
+
+    It adds all the __init__.py modules into `sys.modules`.
+
+    :param dir_: path of the component.
+    :param author: str
+    :param package_type_plural: str
+    :param package_name: str
+    """
+
+    if dir_ is None:  # pragma: nocover
+        raise AEAEnforceError(f"configuration directory `{dir_}` does not exists.")
+
     prefix_root = PACKAGES
-    prefix_author = prefix_root + f".{configuration.author}"
-    prefix_pkg_type = prefix_author + f".{configuration.component_type.to_plural()}"
-    prefix_pkg = prefix_pkg_type + f".{configuration.name}"
+    prefix_author = prefix_root + f".{author}"
+    prefix_pkg_type = prefix_author + f".{package_type_plural}"
 
-    # update modules if no registered already
-    # path is required to mark module as a package
     prefix_root_module = types.ModuleType(prefix_root)
     prefix_root_module.__path__ = None  # type: ignore
     sys.modules[prefix_root] = sys.modules.get(prefix_root, prefix_root_module)
@@ -142,10 +160,12 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     sys.modules[prefix_author] = sys.modules.get(prefix_author, author_module)
     prefix_pkg_type_module = types.ModuleType(prefix_pkg_type)
     prefix_pkg_type_module.__path__ = None  # type: ignore
-
     sys.modules[prefix_pkg_type] = sys.modules.get(
         prefix_pkg_type, prefix_pkg_type_module
     )
+
+    prefix_pkg = f"{prefix_root}.{author}.{package_type_plural}.{package_name}"
+
     for subpackage_init_file in dir_.rglob("__init__.py"):
         parent_dir = subpackage_init_file.parent
         relative_parent_dir = parent_dir.relative_to(dir_)
