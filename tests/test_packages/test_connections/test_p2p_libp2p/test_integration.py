@@ -33,6 +33,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from tests.conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    _make_libp2p_mailbox_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
@@ -96,6 +97,23 @@ class TestP2PLibp2pConnectionIntegrationTest:
         return conn
 
     @classmethod
+    def make_mailbox_connection(cls, name, **kwargs):
+        """Make a p2p mailbox connection."""
+        if name in cls.multiplexers_dict:
+            raise ValueError(f"Connection with name `{name}` already added")
+        temp_dir = os.path.join(cls.t, name)
+        os.mkdir(temp_dir)
+        conn_options = copy(kwargs)
+
+        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
+        conn = _make_libp2p_mailbox_connection(**conn_options)
+        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
+        multiplexer.connect()
+        cls.multiplexers_dict[name] = multiplexer
+        cls.connections_dict[name] = conn
+        return conn
+
+    @classmethod
     @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
@@ -122,6 +140,8 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 relay=True,
                 delegate=True,
                 delegate_port=cls.get_port(),
+                mailbox_port=cls.get_port(),
+                mailbox=True,
             )
 
             cls.delegate_2 = cls.make_connection(
@@ -130,6 +150,8 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 relay=True,
                 delegate=True,
                 delegate_port=cls.get_port(),
+                mailbox_port=cls.get_port(),
+                mailbox=True,
             )
 
             cls.agent_connection_1 = cls.make_connection(
@@ -156,13 +178,24 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 peer_public_key=cls.delegate_2.node.pub,
                 **cls.get_delegate_host_port(cls.delegate_2.node.delegate_uri),
             )
+            cls.mailbox_connection_1 = cls.make_mailbox_connection(
+                "mailbox_1",
+                peer_public_key=cls.delegate_1.node.pub,
+                **cls.get_delegate_host_port(Uri(cls.delegate_1.node.mailbox_uri)),
+            )
+
+            cls.mailbox_connection_2 = cls.make_mailbox_connection(
+                "mailbox_2",
+                peer_public_key=cls.delegate_2.node.pub,
+                **cls.get_delegate_host_port(Uri(cls.delegate_2.node.mailbox_uri)),
+            )
         except Exception:
             cls.teardown_class()
             raise
 
     @classmethod
     def get_delegate_host_port(cls, delegate_uri: Uri) -> dict:
-        """Get deegate server config dict."""
+        """Get delegate/mailbox server config dict."""
         return {"node_port": delegate_uri.port, "node_host": delegate_uri.host}
 
     def test_connection_is_established(self):
@@ -207,7 +240,15 @@ class TestP2PLibp2pConnectionIntegrationTest:
     def test_send_and_receive(self):
         """Test envelope send/received by every pair of connection."""
         for from_name, to_name in itertools.permutations(
-            ["client_1", "client_2", "agent_connection_1", "agent_connection_2"], 2
+            [
+                "client_1",
+                "client_2",
+                "agent_connection_1",
+                "agent_connection_2",
+                "mailbox_1",
+                "mailbox_2",
+            ],
+            2,
         ):
             self.send_message(from_name, to_name)
 
