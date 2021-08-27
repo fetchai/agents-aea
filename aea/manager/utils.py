@@ -72,7 +72,7 @@ def project_check(project: Project) -> None:
 
 
 def run_in_venv(env_dir: str, fn: Callable, timeout: float, *args: Any) -> Any:
-    """Run python function in a dedicated process with visrtual env specified."""
+    """Run python function in a dedicated process with virtual env specified."""
     manager = multiprocessing.Manager()
     result_queue = manager.Queue()
     process = multiprocessing.Process(
