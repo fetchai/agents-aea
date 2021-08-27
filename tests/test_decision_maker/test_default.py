@@ -22,7 +22,7 @@
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto, FetchAIFaucetApi
 
 from aea.configurations.base import PublicId
 from aea.crypto.registries import make_crypto, make_ledger_api
@@ -148,6 +148,12 @@ class BaseTestDecisionMaker:
         )
         account = make_crypto(FetchAICrypto.identifier)
         fc2 = make_crypto(FetchAICrypto.identifier)
+
+        # Fund sender's account
+        balance = fetchai_api.get_balance(account.address)
+        if balance == 0:
+            FetchAIFaucetApi().get_wealth(account.address)
+
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
             sender_address=account.address,
