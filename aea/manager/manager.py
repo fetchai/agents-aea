@@ -208,6 +208,7 @@ class AgentRunProcessTask(BaseAgentRunTask):
     """Subprocess wrapper to run agent."""
 
     PROCESS_JOIN_TIMEOUT = 20  # in seconds
+    PROCESS_ALIVE_SLEEP_TIME = 0.005  # in seconds
 
     def __init__(  # pylint: disable=super-init-not-called
         self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
@@ -238,7 +239,7 @@ class AgentRunProcessTask(BaseAgentRunTask):
             raise ValueError("Task not started!")  # pragma: nocover
 
         while self.process.is_alive():
-            await asyncio.sleep(0.005)
+            await asyncio.sleep(self.PROCESS_ALIVE_SLEEP_TIME)
 
         result = self._result_queue.get_nowait()
         if isinstance(result, Exception):
@@ -323,6 +324,7 @@ class MultiAgentManager:
         MULTIPROCESS_MODE: AgentRunProcessTask,
     }
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
+    VENV_BUILD_TIMEOUT = 240
     SAVE_FILENAME = "save.json"
 
     def __init__(
@@ -620,7 +622,9 @@ class MultiAgentManager:
         """Build and install project dependencies."""
         if self._mode == MULTIPROCESS_MODE:
             venv_dir = get_venv_dir_for_project(project)
-            run_in_venv(venv_dir, project_install_and_build, 120, project)
+            run_in_venv(
+                venv_dir, project_install_and_build, self.VENV_BUILD_TIMEOUT, project
+            )
         else:
             venv_dir = get_venv_dir_for_project(project)
             project_install_and_build(project)
