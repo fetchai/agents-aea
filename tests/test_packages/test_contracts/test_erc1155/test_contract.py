@@ -706,7 +706,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             deployer_address=self.deployer_crypto.address,
             token_id=self.token_id_b,
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
@@ -718,7 +718,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             deployer_address=self.deployer_crypto.address,
             token_ids=self.token_ids_a,
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
@@ -732,7 +732,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_id=self.token_id_b,
             mint_quantity=1,
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
@@ -756,7 +756,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_ids=self.token_ids_a,
             mint_quantities=[1] * len(self.token_ids_a),
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
