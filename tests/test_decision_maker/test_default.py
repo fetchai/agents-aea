@@ -19,6 +19,8 @@
 
 """This module contains tests for decision_maker."""
 
+import time
+
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
@@ -153,6 +155,13 @@ class BaseTestDecisionMaker:
         balance = fetchai_api.get_balance(account.address)
         if balance == 0:
             FetchAIFaucetApi().get_wealth(account.address)
+
+            timeout = 0
+            while timeout < 40 and balance == 0:
+                time.sleep(1)
+                timeout += 1
+                _balance = fetchai_api.get_balance(account.address)
+                balance = _balance if _balance is not None else 0
 
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
