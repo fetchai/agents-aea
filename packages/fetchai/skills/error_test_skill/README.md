@@ -2,7 +2,7 @@
 
 ## Description
 
-Skill raises an exception an behaviour act
+Skill raises an exception on behaviour's act
 
 ## Behaviours 
 
