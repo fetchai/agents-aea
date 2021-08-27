@@ -148,24 +148,24 @@ class BaseTestDecisionMaker:
         fetchai_api = make_ledger_api(
             FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
         )
-        account = make_crypto(FetchAICrypto.identifier)
+        sender_address = self.wallet.addresses["fetchai"]
         fc2 = make_crypto(FetchAICrypto.identifier)
 
         # Fund sender's account
-        balance = fetchai_api.get_balance(account.address)
+        balance = fetchai_api.get_balance(sender_address)
         if balance == 0:
-            FetchAIFaucetApi().get_wealth(account.address)
+            FetchAIFaucetApi().get_wealth(sender_address)
 
             timeout = 0
             while timeout < 40 and balance == 0:
                 time.sleep(1)
                 timeout += 1
-                _balance = fetchai_api.get_balance(account.address)
+                _balance = fetchai_api.get_balance(sender_address)
                 balance = _balance if _balance is not None else 0
 
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
-            sender_address=account.address,
+            sender_address=sender_address,
             destination_address=fc2.address,
             amount=amount,
             tx_fee=1000,
