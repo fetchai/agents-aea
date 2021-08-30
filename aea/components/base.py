@@ -164,7 +164,7 @@ def perform_load_aea_package(
         prefix_pkg_type, prefix_pkg_type_module
     )
 
-    prefix_pkg = f"{prefix_root}.{author}.{package_type_plural}.{package_name}"
+    prefix_pkg = prefix_pkg_type + f".{package_name}"
 
     for subpackage_init_file in dir_.rglob("__init__.py"):
         parent_dir = subpackage_init_file.parent
