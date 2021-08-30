@@ -18,17 +18,13 @@
 # ------------------------------------------------------------------------------
 """This module contains the classes for tasks."""
 import logging
-import re
 import signal
-import sys
 import threading
 from abc import abstractmethod
 from multiprocessing.pool import AsyncResult, Pool, ThreadPool
-from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
-from aea.components.base import perform_load_aea_package
-from aea.configurations.constants import CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS
+from aea.components.utils import _enlist_component_packages, _populate_packages
 from aea.helpers.logging import WithLogger
 
 
@@ -107,6 +103,20 @@ class Task(WithLogger):
     def teardown(self) -> None:
         """Implement the task teardown."""
 
+
+# for api compatability. to remove in the next release
+def init_worker() -> None:  # pragma: nocover
+    """
+    Initialize a worker.
+
+    Disable the SIGINT handler of process pool is using.
+    Related to a well-known bug: https://bugs.python.org/issue8296
+    """
+    if Pool.__class__.__name__ == "Pool":  # pragma: nocover
+        # Process worker
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
 def _init_worker(mode: str, packages: Dict[str, List[Dict[str, str]]]) -> None:
     """
     Initialize a worker.
@@ -120,40 +130,6 @@ def _init_worker(mode: str, packages: Dict[str, List[Dict[str, str]]]) -> None:
     if mode == PROCESS_POOL_MODE:  # pragma: nocover
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         _populate_packages(packages)
-
-
-def _enlist_component_packages() -> Dict[str, List[Dict[str, str]]]:
-    """List all components packages already loaded."""
-    result: Dict[str, List[Dict[str, str]]] = {}
-    packages_re = re.compile(r"^packages\.(\w+)\.(\w+)\.(\w+)$", re.I)
-    for name, mod in sys.modules.items():
-        match = packages_re.match(name)
-        if not match:
-            continue
-        author, package_type, package_name = match.groups()
-        packages = result.get(package_type, [])
-        package_data = {
-            "author": author,
-            "package_type": package_type,
-            "package_name": package_name,
-            "dir": mod.__dict__["__path__"][0],
-        }
-        packages.append(package_data)
-        result[package_type] = packages
-    return result
-
-# no cover cause executed in a subprocess, not possible to track
-def _populate_packages(packages: dict) -> None:  # pragma: nocover
-    """Load packages as python modules."""
-    for package_type in [PROTOCOLS, CONTRACTS, CONNECTIONS, SKILLS]:
-        for package in packages.get(package_type, []):
-            # load package
-            perform_load_aea_package(
-                dir_=Path(package["dir"]),
-                author=package["author"],
-                package_type_plural=package["package_type"],
-                package_name=package["package_name"],
-            )
 
 
 class TaskManager(WithLogger):
@@ -326,7 +302,7 @@ class ThreadedTaskManager(TaskManager):
         :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
         :param logger: the logger.
         """
-        super(ThreadedTaskManager, self).__init__(
+        super().__init__(
             nb_workers=nb_workers,
             is_lazy_pool_start=is_lazy_pool_start,
             logger=logger,
@@ -350,7 +326,7 @@ class ProcessTaskManager(TaskManager):
         :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
         :param logger: the logger.
         """
-        super(ProcessTaskManager, self).__init__(
+        super().__init__(
             nb_workers=nb_workers,
             is_lazy_pool_start=is_lazy_pool_start,
             logger=logger,

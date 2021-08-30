@@ -124,7 +124,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     """
     dir_ = configuration.directory
     if dir_ is None:  # pragma: nocover
-        raise AEAEnforceError(f"configuration directory `{dir_}` does not exists.")
+        raise ValueError("configuration's directory is None.")
     author = configuration.author
     package_type_plural = configuration.component_type.to_plural()
     package_name = configuration.name
@@ -145,7 +145,7 @@ def perform_load_aea_package(
     :param package_name: str
     """
 
-    if dir_ is None:  # pragma: nocover
+    if dir_ is None or not dir_.exists():  # pragma: nocover
         raise AEAEnforceError(f"configuration directory `{dir_}` does not exists.")
 
     prefix_root = PACKAGES

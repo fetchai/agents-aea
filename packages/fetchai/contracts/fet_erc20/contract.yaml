@@ -8,7 +8,6 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdksAfBj3gVPH8zmzpHjjpXsf1gtAY6z6gjrfYfiicLrr
   __init__.py: QmeJ8x6NiZjVLFbUTgpPPCMzQscqjHNBDExapiezpakksR
-  bash: QmcPNXE5zjkWkM24xQ7Bi3VAm8fRxiaNp88jFsij7kSQF1
   contract.py: QmWrxciZBUUxbwUvQVkM4AND59hk1ATpgnoNRofmgFm2Vy
 fingerprint_ignore_patterns:
 - build/*
