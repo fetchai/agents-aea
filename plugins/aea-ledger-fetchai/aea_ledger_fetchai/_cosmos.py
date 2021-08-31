@@ -1012,6 +1012,113 @@ class _CosmosApi(LedgerApi):
         )
         return tx
 
+    def get_packed_exec_msg(
+        self,
+        sender_address: Address,
+        contract_address: str,
+        msg: JSONLike,
+        funds: int = 0,
+    ) -> ProtoAny:
+        """
+        Create and pack MsgExecuteContract
+
+        :param sender_address: Address of sender
+        :param contract_address: Address of contract
+        :param msg: Paramaters to be passed to smart contract
+        :param funds: Funds to be sent to smart contract
+
+        :return: Packed MsgExecuteContract
+        """
+
+        funds_coins = [Coin(denom=self.denom, amount=str(funds))]
+
+        msg_send = MsgExecuteContract(
+            sender=str(sender_address),
+            contract=contract_address,
+            msg=json.dumps(msg).encode("UTF8"),
+            funds=funds_coins,
+        )
+        send_msg_packed = ProtoAny()
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+        return send_msg_packed
+
+    def get_packed_send_msg(
+        self, from_address: Address, to_address: Address, amount: int
+    ) -> ProtoAny:
+        """
+        Generate and pack MsgSend
+
+        :param from_address: Address of sender
+        :param to_address: Address of recipient
+        :param amount: amount of coins to be sent
+
+        :return: packer ProtoAny type message
+        """
+        amount_coins = [Coin(denom=self.denom, amount=str(amount))]
+
+        msg_send = MsgSend(
+            from_address=str(from_address),
+            to_address=str(to_address),
+            amount=amount_coins,
+        )
+        send_msg_packed = ProtoAny()
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+        return send_msg_packed
+
+    def get_multi_transaction(
+        self,
+        from_addresses: List[str],
+        pub_keys: Optional[List[bytes]],
+        msgs: List[ProtoAny],
+        gas: int,
+        tx_fee: int = 0,
+        memo: str = "",
+        chain_id: Optional[str] = None,
+        denom: Optional[str] = None,
+    ) -> JSONLike:
+        """
+        Generate transaction with multiple messages
+
+        :param from_addresses: Addresses of signers
+        :param pub_keys: Public keys of signers
+        :param msgs: Messages to be included in transaction
+        :param gas: the gas used.
+        :param tx_fee: the transaction fee.
+        :param memo: memo to include in tx.
+        :param chain_id: the chain ID of the transaction.
+        :param denom: the denomination of tx fee
+
+        :return: the transaction
+        """
+
+        denom = denom if denom is not None else self.denom
+        chain_id = chain_id if chain_id is not None else self.chain_id
+
+        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+
+        account_numbers: List[int] = []
+        sequences: List[int] = []
+        for address in from_addresses:
+            account_number, sequence = self._try_get_account_number_and_sequence(
+                address
+            )
+            account_numbers.append(account_number)
+            sequences.append(sequence)
+
+        return self._get_transaction(
+            account_numbers=account_numbers,
+            from_addresses=from_addresses,
+            chain_id=chain_id,
+            tx_fee=tx_fee_coins,
+            gas=gas,
+            memo=memo,
+            sequences=sequences,
+            msgs=msgs,
+            pub_keys=pub_keys,
+        )
+
     @staticmethod
     def _get_transaction(
         account_numbers: List[int],

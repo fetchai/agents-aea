@@ -26,6 +26,7 @@ from typing import Dict, List, Optional, cast
 from aea_ledger_cosmos import CosmosApi
 from aea_ledger_ethereum import EthereumApi
 from aea_ledger_fetchai import FetchAIApi
+from google.protobuf.any_pb2 import Any as ProtoAny
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
@@ -422,6 +423,69 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            # Need this
+            from_pubkey = b""
+            to_pubkey = b""
+
+            cosmos_api = cast(CosmosApi, ledger_api)
+
+            msgs: List[ProtoAny] = []
+
+            # FROM sends tokens and receives FET
+            if from_supply > 0:
+                contract_msg = {
+                    "transfer_single": {
+                        "operator": str(from_address),
+                        "from_address": str(from_address),
+                        "to_address": str(to_address),
+                        "id": str(token_id),
+                        "value": str(from_supply),
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=from_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+                if value > 0:
+                    msgs.append(
+                        cosmos_api.get_packed_send_msg(to_address, from_address, value)
+                    )
+
+            # TO sends tokens and receives FET
+            if to_supply > 0:
+                contract_msg = {
+                    "transfer_single": {
+                        "operator": str(to_address),
+                        "from_address": str(to_address),
+                        "to_address": str(from_address),
+                        "id": str(token_id),
+                        "value": str(to_supply),
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=to_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+                if value > 0:
+                    msgs.append(
+                        cosmos_api.get_packed_send_msg(from_address, to_address, value)
+                    )
+
+            tx = cosmos_api.get_multi_transaction(
+                from_addresses=[from_address, to_address],
+                pub_keys=[from_pubkey, to_pubkey],
+                msgs=msgs,
+                gas=gas,
+            )
+            return tx
+
         raise NotImplementedError  # pragma: nocover
 
     @classmethod
