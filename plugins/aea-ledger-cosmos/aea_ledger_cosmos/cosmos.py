@@ -1273,9 +1273,14 @@ class CosmosFaucetApi(FaucetApi):
     testnet_name = TESTNET_NAME
     max_retry_attempts = 15
 
-    def __init__(self, poll_interval: Optional[float] = None):
+    def __init__(
+        self,
+        poll_interval: Optional[float] = None,
+        final_wait_interval: Optional[float] = None,
+    ):
         """Initialize CosmosFaucetApi."""
-        self._poll_interval = float(poll_interval or 1)
+        self._poll_interval = float(poll_interval or 2)
+        self._final_wait_interval = float(final_wait_interval or 5)
 
     def get_wealth(self, address: Address, url: Optional[str] = None) -> None:
         """
@@ -1313,6 +1318,8 @@ class CosmosFaucetApi(FaucetApi):
             time.sleep(self._poll_interval)
         if retry_attempts == 0:
             raise ValueError("Faucet claim check timed out!")  # pragma: nocover
+        # Wait to ensure that balance is increased on chain
+        time.sleep(self._final_wait_interval)
 
     @classmethod
     @try_decorator(

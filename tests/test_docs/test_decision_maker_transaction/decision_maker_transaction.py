@@ -24,13 +24,12 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
-from aea_ledger_fetchai import FetchAICrypto, FetchAIFaucetApi
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
-from aea.crypto.registries import make_ledger_api
 from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
@@ -44,7 +43,7 @@ from packages.fetchai.protocols.signing.dialogues import (
 )
 from packages.fetchai.protocols.signing.message import SigningMessage
 
-from tests.conftest import FETCHAI_TESTNET_CONFIG
+from tests.conftest import get_wealth_if_needed
 
 
 logger = logging.getLogger("aea")
@@ -52,26 +51,6 @@ logging.basicConfig(level=logging.INFO)
 
 FETCHAI_PRIVATE_KEY_FILE_1 = "fetchai_private_key_1.txt"
 FETCHAI_PRIVATE_KEY_FILE_2 = "fetchai_private_key_2.txt"
-
-
-def get_wealth_if_needed(address: Address):
-    """
-     Get wealth from faucet to specific address
-
-    :param: address: Addresse to be funded from faucet
-    """
-    fetchai_api = make_ledger_api(FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG)
-
-    balance = fetchai_api.get_balance(address)
-    if balance == 0:
-        FetchAIFaucetApi().get_wealth(address)
-
-        timeout = 0
-        while timeout < 40 and balance == 0:
-            time.sleep(1)
-            timeout += 1
-            _balance = fetchai_api.get_balance(address)
-            balance = _balance if _balance is not None else 0
 
 
 def run():

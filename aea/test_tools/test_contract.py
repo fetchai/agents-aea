@@ -171,13 +171,12 @@ class BaseContractTestCase(ABC):
             tx_receipt = ledger_api.get_transaction_receipt(tx_digest)
             if tx_receipt is None:
                 continue
-            is_settled = ledger_api.is_transaction_settled(tx_receipt)
-            not_settled = not is_settled
+            not_settled = not ledger_api.is_transaction_settled(tx_receipt)
 
         if tx_receipt is None:
             raise ValueError("Transaction receipt not found!")  # pragma: nocover
 
-        if not is_settled:
+        if not_settled:
             raise ValueError(  # pragma: nocover
                 f"Transaction receipt not valid!\n{tx_receipt['raw_log']}"
             )
