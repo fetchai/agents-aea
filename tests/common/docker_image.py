@@ -493,7 +493,6 @@ class FetchLedgerDockerImage(DockerImage):
             container = self._client.containers.run(
                 self.tag,
                 detach=True,
-                # network="host",
                 volumes=volumes,
                 entrypoint=str(entrypoint),
                 ports=self.PORTS,
