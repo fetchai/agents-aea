@@ -1549,18 +1549,16 @@ def method_scope(cls):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def make_logging_apply_incremental(request) -> Generator:
+def disable_logging_handlers_cleanup(request) -> Generator:
     """
-    Fix for pytest flaky crash, apply logging config as incremental.
+    Fix for pytest flaky crash, disable handlers cleanup.
 
     Check https://github.com/fetchai/agents-aea/issues/2431
     """
-    original_dictConfig = logging.config.dictConfig
 
-    def new_dictConfig(config):
-        config["incremental"] = True
-        return original_dictConfig(config)
+    def do_nothing(*args):
+        pass
 
     with MonkeyPatch().context() as mp:
-        mp.setattr(logging.config, "dictConfig", new_dictConfig)
+        mp.setattr(logging.config, "_clearExistingHandlers", do_nothing)
         yield
