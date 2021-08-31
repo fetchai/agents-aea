@@ -152,22 +152,3 @@ The configurations can be specified for the `fetchai/ledger:0.18.0` connection.
 
 The Fetch.ai networks use <a href="https://docs.cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
 
-Currently, to use the smart contract functionality of the Fetch.ai network you have to install a CLI tool which is used by the AEA framework to perform some necessary actions for the smart contract functionality on-chain.
-
-1. Install Rust using the following command:
-
-``` bash 
-curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
-```
-
-2. Update the configuration for Rust:
-
-``` bash
-rustup default stable
-cargo version
-# If this is lower than 1.52.0+, update with:
-# rustup update stable
-
-rustup target list --installed
-rustup target add wasm32-unknown-unknown
-```
