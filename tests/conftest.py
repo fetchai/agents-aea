@@ -52,7 +52,7 @@ import gym
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto, FetchAIFaucetApi
+from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
 from cosmpy.common.rest_client import RestClient
 from cosmpy.crypto.address import Address as CosmpyAddress
@@ -1484,13 +1484,16 @@ def method_scope(cls):
     return cls
 
 
-def get_wealth_if_needed(address: Address):
+def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
     """
      Get wealth from fetch.ai faucet to specific address
 
     :param: address: Addresse to be funded from faucet
     """
-    fetchai_api = make_ledger_api(FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG)
+    if fetchai_api is None:
+        fetchai_api = make_ledger_api(
+            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        )
 
     balance = fetchai_api.get_balance(address)
     if balance == 0:

@@ -19,12 +19,10 @@
 
 """This module contains tests for decision_maker."""
 
-import time
-
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto, FetchAIFaucetApi
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.configurations.base import PublicId
 from aea.crypto.registries import make_crypto, make_ledger_api
@@ -52,6 +50,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
+    get_wealth_if_needed,
 )
 
 
@@ -151,17 +150,7 @@ class BaseTestDecisionMaker:
         sender_address = self.wallet.addresses["fetchai"]
         fc2 = make_crypto(FetchAICrypto.identifier)
 
-        # Fund sender's account
-        balance = fetchai_api.get_balance(sender_address)
-        if balance == 0:
-            FetchAIFaucetApi().get_wealth(sender_address)
-
-            timeout = 0
-            while timeout < 40 and balance == 0:
-                time.sleep(1)
-                timeout += 1
-                _balance = fetchai_api.get_balance(sender_address)
-                balance = _balance if _balance is not None else 0
+        get_wealth_if_needed(sender_address, fetchai_api)
 
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
