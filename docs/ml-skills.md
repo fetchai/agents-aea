@@ -67,7 +67,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `ml_model_trainer` with public id `fetchai/ml_model_trainer:0.29.0`.
 
-3. Copy the address from the `ml_model_trainer` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">AgentLand block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `ml_model_trainer` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">StargateWorld block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `ml_data_provider` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -179,7 +179,7 @@ aea build
 
 #### Add keys for the data provider AEA
 
-First, create the private key for the data provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the data provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -200,13 +200,13 @@ aea issue-certificates
 
 The model trainer needs to have some wealth to purchase the data from the data provider.
 
-First, create the private key for the model trainer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the model trainer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for your model trainer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
+Then, create some wealth for your model trainer based on the network you want to transact with. On the Fetch.ai `StargateWorld` network:
 ``` bash
 aea generate-wealth fetchai
 ```
