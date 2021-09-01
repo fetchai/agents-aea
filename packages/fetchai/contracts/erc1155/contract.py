@@ -398,6 +398,11 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: a ledger transaction object
         """
+        if from_supply > 0 and to_supply > 0:
+            raise RuntimeError(
+                "Can't determine direction of swap because from_supply and to_supply are both non-zero."
+            )
+
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
@@ -424,6 +429,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+
             # Need this
             from_pubkey = b""
             to_pubkey = b""
@@ -432,7 +438,7 @@ class ERC1155Contract(Contract):
 
             msgs: List[ProtoAny] = []
 
-            # FROM sends tokens and receives FET
+            # from_address sends tokens
             if from_supply > 0:
                 contract_msg = {
                     "transfer_single": {
@@ -450,12 +456,8 @@ class ERC1155Contract(Contract):
                         msg=contract_msg,
                     )
                 )
-                if value > 0:
-                    msgs.append(
-                        cosmos_api.get_packed_send_msg(to_address, from_address, value)
-                    )
 
-            # TO sends tokens and receives FET
+            # to_address sends tokens
             if to_supply > 0:
                 contract_msg = {
                     "transfer_single": {
@@ -473,10 +475,9 @@ class ERC1155Contract(Contract):
                         msg=contract_msg,
                     )
                 )
-                if value > 0:
-                    msgs.append(
-                        cosmos_api.get_packed_send_msg(from_address, to_address, value)
-                    )
+
+            # Sending native tokens from from_address to to_address
+            msgs.append(cosmos_api.get_packed_send_msg(from_address, to_address, value))
 
             tx = cosmos_api.get_multi_transaction(
                 from_addresses=[from_address, to_address],
@@ -591,6 +592,73 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            # Need this
+            from_pubkey = b""
+            to_pubkey = b""
+
+            cosmos_api = cast(CosmosApi, ledger_api)
+
+            msgs: List[ProtoAny] = []
+
+            # Split token transfers to two batch transfers for each side
+            from_tokens: List[Dict[str, str]] = []
+            to_tokens: List[Dict[str, str]] = []
+            for token_id, from_supply, to_supply in zip(
+                token_ids, from_supplies, to_supplies
+            ):
+                if from_supply > 0:
+                    from_tokens.append({"id": str(token_id), "value": str(from_supply)})
+                if to_supply > 0:
+                    to_tokens.append({"id": str(token_id), "value": str(to_supply)})
+
+            # First direction of swap
+            if len(from_tokens) != 0:
+                contract_msg = {
+                    "transfer_batch": {
+                        "operator": str(from_address),
+                        "from_address": str(from_address),
+                        "to_address": str(to_address),
+                        "tokens": from_tokens,
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=from_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+
+            # Second direction of swap
+            if len(to_tokens) != 0:
+                contract_msg = {
+                    "transfer_batch": {
+                        "operator": str(to_address),
+                        "from_address": str(to_address),
+                        "to_address": str(from_address),
+                        "tokens": to_tokens,
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=to_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+
+            # Sending native tokens from from_address to to_address
+            msgs.append(cosmos_api.get_packed_send_msg(from_address, to_address, value))
+
+            tx = cosmos_api.get_multi_transaction(
+                from_addresses=[from_address, to_address],
+                pub_keys=[from_pubkey, to_pubkey],
+                msgs=msgs,
+                gas=gas,
+            )
+            return tx
+
         raise NotImplementedError  # pragma: nocover
 
     @classmethod
