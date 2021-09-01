@@ -74,6 +74,7 @@ class IPFSHashOnly:
     """A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon."""
 
     DEFAULT_CHUNK_SIZE = 262144
+    # according to https://pkg.go.dev/github.com/ipfs/go-ipfs-chunker#pkg-constants
 
     def get(self, file_path: str) -> str:
         """
