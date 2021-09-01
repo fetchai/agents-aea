@@ -50,6 +50,7 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
@@ -104,6 +105,9 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 )
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
+)
+from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
+    P2PLibp2pMailboxConnection,
 )
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
@@ -929,9 +933,12 @@ def _make_libp2p_connection(
     host: str = "127.0.0.1",
     relay: bool = True,
     delegate: bool = False,
+    mailbox: bool = False,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
     delegate_port: int = 11234,
     delegate_host: str = "127.0.0.1",
+    mailbox_port: int = 8888,
+    mailbox_host: str = "127.0.0.1",
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
@@ -1002,6 +1009,12 @@ def _make_libp2p_connection(
             build_directory=build_directory,
             cert_requests=[cert_request],
         )
+
+    if mailbox:
+        configuration.config["mailbox_uri"] = f"{mailbox_host}:{mailbox_port}"
+    else:
+        configuration.config["mailbox_uri"] = ""
+
     if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
         build_node(build_directory)
     connection = P2PLibp2pConnection(
@@ -1049,6 +1062,46 @@ def _make_libp2p_client_connection(
         cert_requests=[cert_request],
     )
     return P2PLibp2pClientConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
+
+
+def _make_libp2p_mailbox_connection(
+    peer_public_key: str,
+    data_dir: str,
+    node_port: int = 8888,
+    node_host: str = "127.0.0.1",
+    uri: Optional[str] = None,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+) -> P2PLibp2pMailboxConnection:
+    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+        raise ValueError("Data dir must be directory and exist!")
+    crypto = make_crypto(ledger_api_id)
+    identity = Identity("identity", address=crypto.address)
+    cert_request = CertRequest(
+        peer_public_key,
+        POR_DEFAULT_SERVICE_ID,
+        ledger_api_id,
+        "2021-01-01",
+        "2021-01-02",
+        "{public_key}",
+        f"./{crypto.address}_cert.txt",
+    )
+    _process_cert(crypto, cert_request, path_prefix=data_dir)
+    configuration = ConnectionConfig(
+        tcp_key_file=None,
+        nodes=[
+            {
+                "uri": str(uri)
+                if uri is not None
+                else "{}:{}".format(node_host, node_port),
+                "public_key": peer_public_key,
+            },
+        ],
+        connection_id=P2PLibp2pMailboxConnection.connection_id,
+        cert_requests=[cert_request],
+    )
+    return P2PLibp2pMailboxConnection(
         configuration=configuration, data_dir=data_dir, identity=identity
     )
 
@@ -1505,3 +1558,19 @@ def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
             timeout += 1
             _balance = fetchai_api.get_balance(address)
             balance = _balance if _balance is not None else 0
+
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_logging_handlers_cleanup(request) -> Generator:
+    """
+    Fix for pytest flaky crash, disable handlers cleanup.
+
+    Check https://github.com/fetchai/agents-aea/issues/2431
+    """
+
+    def do_nothing(*args):
+        pass
+
+    with MonkeyPatch().context() as mp:
+        mp.setattr(logging.config, "_clearExistingHandlers", do_nothing)
+        yield

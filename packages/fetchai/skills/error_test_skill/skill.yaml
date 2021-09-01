@@ -1,0 +1,25 @@
+name: error_test_skill
+author: fetchai
+version: 0.1.0
+type: skill
+description: The error test skil for testing.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmagPotUCmCn9Ht33h3TL4VFX8g4gqB7UMTKzpXMvy6Nq9
+  __init__.py: QmaLzrddsWcfsEh25fJswftajxDXU1rhyqXTBgFHw6p1nq
+  behaviours.py: QmPhDNExYsfrdzPtPAT8Y1xeQwDiefT4QGKzkLD8oBW39o
+fingerprint_ignore_patterns: []
+connections: []
+contracts: []
+protocols: []
+skills: []
+behaviours:
+  raiseerror:
+    args:
+      tick_interval: 1.0
+    class_name: RaiseErrorBehaviour
+handlers: {}
+models: {}
+dependencies: {}
+is_abstract: false
