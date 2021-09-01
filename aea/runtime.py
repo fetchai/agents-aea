@@ -40,7 +40,7 @@ from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
 from aea.helpers.storage.generic_storage import Storage
 from aea.multiplexer import AsyncMultiplexer
-from aea.skills.tasks import TaskManager
+from aea.skills.tasks import ProcessTaskManager, TaskManager, ThreadedTaskManager
 
 
 class RuntimeStates(Enum):
@@ -62,7 +62,7 @@ class BaseRuntime(Runnable, WithLogger):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
-    TASKMANAGERS = {"threaded": TaskManager}
+    TASKMANAGERS = {"threaded": ThreadedTaskManager, "multiprocess": ProcessTaskManager}
     DEFAULT_TASKMANAGER = "threaded"
 
     def __init__(
@@ -269,6 +269,7 @@ class AsyncRuntime(BaseRuntime):
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
         threaded: bool = False,
+        task_manager_mode: Optional[str] = None,
     ) -> None:
         """
         Init runtime.
@@ -278,6 +279,7 @@ class AsyncRuntime(BaseRuntime):
         :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
         :param threaded: if True, run in threaded mode, else async
+        :param task_manager_mode: mode of the task manager.
         """
         super().__init__(
             agent=agent,
@@ -285,6 +287,7 @@ class AsyncRuntime(BaseRuntime):
             loop_mode=loop_mode,
             loop=loop,
             threaded=threaded,
+            task_manager_mode=task_manager_mode,
         )
         self._task: Optional[asyncio.Task] = None
 
