@@ -128,9 +128,9 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
-## Agent Land - Fetch.ai testnet for agents
+## Stargate World - Fetch.ai testnet for agents
 
-Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
+Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
 
 | Parameter      | Value                                                                      |
