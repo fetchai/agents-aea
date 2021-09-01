@@ -190,7 +190,7 @@ class HttpHandler(Handler):
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            body=b"",
+            body=http_msg.body,
         )
         self.context.logger.info("responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)
