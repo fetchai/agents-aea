@@ -104,17 +104,19 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Perform integration tests of cli transfer command with real transfer."""
         self.set_agent_context(self.agent_name2)
         password_option = self.get_password_args(self.PASSWORD)
-        agent2_balance = self.get_balance()
+        agent2_original_balance = self.get_balance()
         agent2_address = self.get_address()
-        assert agent2_balance == 0
 
         self.set_agent_context(self.agent_name)
+        agent1_original_balance = self.get_balance()
         self.generate_wealth(password=self.PASSWORD)
 
-        wait_for_condition(lambda: self.get_balance() > 0, timeout=15, period=1)
+        wait_for_condition(
+            lambda: self.get_balance() > agent1_original_balance, timeout=15, period=1
+        )
 
         agent1_balance = self.get_balance()
-        assert agent1_balance > 0
+        assert agent1_balance > agent1_original_balance
 
         amount = round(agent1_balance / 10)
         fee = round(agent1_balance / 20)
@@ -137,7 +139,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
 
         self.set_agent_context(self.agent_name2)
         wait_for_condition(
-            lambda: self.get_balance() == (agent2_balance + amount),
+            lambda: self.get_balance() == (agent2_original_balance + amount),
             timeout=15,
             period=1,
         )
