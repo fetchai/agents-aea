@@ -153,7 +153,7 @@ class IPFSHashOnly:
 
 
 def fix_dag_encode() -> None:
-    """Fix it to make compatible with ipfs way mof encoding: Links first."""
+    """Fix it to make compatible with ipfs way of encoding: Links first."""
     orig_list_fields = merkledag_pb2.PBNode.ListFields  # type: ignore
 
     def list_fields(self):  # type: ignore
