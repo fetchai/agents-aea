@@ -16,12 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains helper methods and classes for the 'aea' package."""
-
 import codecs
 import hashlib
 import re
+from typing import Generator, Sized, cast
 
 import base58
 
@@ -65,8 +64,16 @@ def _read(file_path: str) -> bytes:
     return file_b
 
 
+def chunks(data: Sized, size: int) -> Generator:
+    """Yield successivesize chunks from data."""
+    for i in range(0, len(data), size):
+        yield data[i : i + size]  # type: ignore
+
+
 class IPFSHashOnly:
     """A helper class which allows construction of an IPFS hash without interacting with an IPFS daemon."""
+
+    DEFAULT_CHUNK_SIZE = 262144
 
     def get(self, file_path: str) -> str:
         """
@@ -80,28 +87,58 @@ class IPFSHashOnly:
         ipfs_hash = self._generate_multihash(file_pb)
         return ipfs_hash
 
-    @staticmethod
-    def _pb_serialize_file(data: bytes) -> bytes:
+    @classmethod
+    def _make_unixfs_pb2(cls, data: bytes) -> bytes:
+        if len(data) > cls.DEFAULT_CHUNK_SIZE:
+            raise ValueError("Data is too big! use chunks!")
+        data_pb = unixfs_pb2.Data()  # type: ignore
+        data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
+        data_pb.Data = data
+        data_pb.filesize = len(data)
+        serialized_data = data_pb.SerializeToString(deterministic=True)
+        return serialized_data
+
+    @classmethod
+    def _pb_serialize_data(cls, data: bytes) -> bytes:
+        outer_node = merkledag_pb2.PBNode()  # type: ignore
+        outer_node.Data = cls._make_unixfs_pb2(data)
+        result = outer_node.SerializeToString(deterministic=True)
+        return result
+
+    @classmethod
+    def _pb_serialize_file(cls, data: bytes) -> bytes:
         """
         Serialize a bytes object representing a file.
 
         :param data: a bytes string representing a file
         :return: a bytes string representing a file in protobuf serialization
         """
-        data_pb = unixfs_pb2.Data()  # type: ignore
-        data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
-        data_pb.Data = data
-        data_pb.filesize = len(data)
-
-        serialized_data = data_pb.SerializeToString()
-
-        outer_node = merkledag_pb2.PBNode()  # type: ignore
-        outer_node.Data = serialized_data
-        result = outer_node.SerializeToString()
-        return result
+        if len(data) > cls.DEFAULT_CHUNK_SIZE:
+            outer_node = merkledag_pb2.PBNode()  # type: ignore
+            data_pb = unixfs_pb2.Data()  # type: ignore
+            data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
+            data_pb.filesize = len(data)
+            for chunk in chunks(data, cls.DEFAULT_CHUNK_SIZE):
+                link = merkledag_pb2.PBLink()
+                block = cls._pb_serialize_data(chunk)
+                link.Hash = cls._generate_multihash_bytes(block)
+                link.Tsize = len(block)
+                link.Name = ""
+                outer_node.Links.append(link)  # type: ignore # pylint: disable=no-member
+                data_pb.blocksizes.append(len(chunk))  # type: ignore # pylint: disable=no-member
+            outer_node.Data = data_pb.SerializeToString(deterministic=True)
+            return outer_node.SerializeToString()
+        return cls._pb_serialize_data(data)
 
     @staticmethod
-    def _generate_multihash(pb_data: bytes) -> str:
+    def _generate_multihash_bytes(pb_data: bytes) -> bytes:
+        sha256_hash = hashlib.sha256(pb_data).hexdigest()
+        multihash_hex = SHA256_ID + LEN_SHA256 + sha256_hash
+        multihash_bytes = codecs.decode(str.encode(multihash_hex), "hex")
+        return cast(bytes, multihash_bytes)
+
+    @classmethod
+    def _generate_multihash(cls, pb_data: bytes) -> str:
         """
         Generate an IPFS multihash.
 
@@ -110,8 +147,19 @@ class IPFSHashOnly:
         :param pb_data: the data to be hashed
         :return: string representing the hash
         """
-        sha256_hash = hashlib.sha256(pb_data).hexdigest()
-        multihash_hex = SHA256_ID + LEN_SHA256 + sha256_hash
-        multihash_bytes = codecs.decode(str.encode(multihash_hex), "hex")
+        multihash_bytes = cls._generate_multihash_bytes(pb_data)
         ipfs_hash = base58.b58encode(multihash_bytes)
         return str(ipfs_hash, "utf-8")
+
+
+def fix_dag_encode() -> None:
+    """Fix it to make compatible with ipfs way mof encoding: Links first."""
+    orig_list_fields = merkledag_pb2.PBNode.ListFields  # type: ignore
+
+    def list_fields(self):  # type: ignore
+        return list(reversed(orig_list_fields(self)))
+
+    merkledag_pb2.PBNode.ListFields = list_fields  # type: ignore
+
+
+fix_dag_encode()
