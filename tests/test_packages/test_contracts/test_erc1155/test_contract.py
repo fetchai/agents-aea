@@ -136,7 +136,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_get_create_single_transaction(self):
@@ -156,7 +156,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_get_mint_batch_transaction(self):
@@ -178,7 +178,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_validate_mint_quantities(self):
@@ -254,7 +254,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_get_balance(self):
@@ -684,7 +684,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             raise ValueError("Deploy transaction not found!")  # pragma: nocover
 
         tx_receipt = cls.sign_send_confirm_receipt_transaction(
-            tx, cls.ledger_api, cls.deployer_crypto
+            tx, cls.ledger_api, [cls.deployer_crypto]
         )
 
         contract_address = cls.ledger_api.get_contract_address(tx_receipt)
@@ -708,7 +708,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Create batch of tokens
@@ -720,7 +720,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Mint single token
@@ -734,7 +734,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Get balance of single token
@@ -758,7 +758,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Get balances of multiple tokens
@@ -775,18 +775,64 @@ class TestCosmWasmContract(BaseContractTestCase):
     @pytest.mark.ledger
     def test_cosmwasm_single_atomic_swap(self):
         """Test single atomic swap."""
+        # Create batch of tokens
+        tx = self.contract.get_create_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            token_ids=self.token_ids_a,
+        )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
+        )
+
+        # Mint single token to deployer
+        tx = self.contract.get_mint_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.deployer_crypto.address,
+            token_id=self.token_ids_a[0],
+            mint_quantity=1,
+        )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
+        )
+
+        # Atomic swap
+        # Send 1 ERC1155 token from deployer to item_owner
+        # Send 1 native token from item_owner to deployer
         tx = self.contract.get_atomic_swap_single_transaction(
             self.ledger_api,
-            contract_address=None,
-            from_address=None,
-            to_address=None,
-            token_id=0,
-            from_supply=0,
+            contract_address=self.contract_address,
+            from_address=self.deployer_crypto.address,
+            to_address=self.item_owner_crypto.address,
+            token_id=self.token_ids_a[0],
+            from_supply=1,
             to_supply=0,
-            value=123,
+            value=1,
             trade_nonce=0,
             signature="",
+            from_pubkey=self.deployer_crypto.public_key,
+            to_pubkey=self.item_owner_crypto.public_key,
         )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto, self.item_owner_crypto]
+        )
+
+        # Check ERC1155 token balance
+        result = self.contract.get_balance(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.item_owner_crypto.address,
+            token_id=self.token_ids_a[0],
+        )
+
+        assert "balance" in result
+        assert result["balance"][self.token_ids_a[0]] == 1
 
     @pytest.mark.integration
     @pytest.mark.ledger
@@ -805,3 +851,4 @@ class TestCosmWasmContract(BaseContractTestCase):
             trade_nonce=0,
             signature="",
         )
+        assert len(tx) == 2

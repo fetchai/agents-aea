@@ -380,6 +380,8 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
+        from_pubkey: bytes = b"",
+        to_pubkey: bytes = b"",
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
@@ -396,6 +398,8 @@ class ERC1155Contract(Contract):
         :param signature: the signature of the trade
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param from_pubkey: Public key associated with from_address
+        :param to_pubkey: Public key associated with to_address
         :return: a ledger transaction object
         """
         if from_supply > 0 and to_supply > 0:
@@ -429,11 +433,6 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-
-            # Need this
-            from_pubkey = b""
-            to_pubkey = b""
-
             cosmos_api = cast(CosmosApi, ledger_api)
 
             msgs: List[ProtoAny] = []
@@ -549,6 +548,8 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
+        from_pubkey: bytes = b"",
+        to_pubkey: bytes = b"",
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
@@ -565,6 +566,8 @@ class ERC1155Contract(Contract):
         :param signature: the signature of the trade
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param from_pubkey: Public key associated with from_address
+        :param to_pubkey: Public key associated with to_address
         :return: a ledger transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -593,10 +596,6 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            # Need this
-            from_pubkey = b""
-            to_pubkey = b""
-
             cosmos_api = cast(CosmosApi, ledger_api)
 
             msgs: List[ProtoAny] = []
