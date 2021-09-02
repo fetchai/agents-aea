@@ -273,3 +273,4 @@ _.Hash  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/help
 _.Tsize  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:125)
 _.Name  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:126)
 init_worker  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/skills/tasks.py:108)
+_._generate_hash  # unused method (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:161)

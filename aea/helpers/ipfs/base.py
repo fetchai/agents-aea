@@ -19,18 +19,24 @@
 """This module contains helper methods and classes for the 'aea' package."""
 import codecs
 import hashlib
+import io
 import re
 from typing import Generator, Sized, cast
 
 import base58
 
 from aea.helpers.io import open_file
-from aea.helpers.ipfs.pb import merkledag_pb2, unixfs_pb2
+from aea.helpers.ipfs.utils import _protobuf_python_implementation
 
 
 # https://github.com/multiformats/multicodec/blob/master/table.csv
 SHA256_ID = "12"  # 0x12
 LEN_SHA256 = "20"  # 0x20
+
+
+with _protobuf_python_implementation():  # pylint: disable=import-outside-toplevel
+    from aea.helpers.ipfs.pb import merkledag_pb2, unixfs_pb2
+    from aea.helpers.ipfs.pb.merkledag_pb2 import PBNode
 
 
 def _dos2unix(file_content: bytes) -> bytes:
@@ -90,7 +96,7 @@ class IPFSHashOnly:
 
     @classmethod
     def _make_unixfs_pb2(cls, data: bytes) -> bytes:
-        if len(data) > cls.DEFAULT_CHUNK_SIZE:
+        if len(data) > cls.DEFAULT_CHUNK_SIZE:  # pragma: nocover
             raise ValueError("Data is too big! use chunks!")
         data_pb = unixfs_pb2.Data()  # type: ignore
         data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
@@ -101,9 +107,9 @@ class IPFSHashOnly:
 
     @classmethod
     def _pb_serialize_data(cls, data: bytes) -> bytes:
-        outer_node = merkledag_pb2.PBNode()  # type: ignore
+        outer_node = PBNode()  # type: ignore
         outer_node.Data = cls._make_unixfs_pb2(data)
-        result = outer_node.SerializeToString(deterministic=True)
+        result = cls._serialize(outer_node)
         return result
 
     @classmethod
@@ -115,7 +121,7 @@ class IPFSHashOnly:
         :return: a bytes string representing a file in protobuf serialization
         """
         if len(data) > cls.DEFAULT_CHUNK_SIZE:
-            outer_node = merkledag_pb2.PBNode()  # type: ignore
+            outer_node = PBNode()  # type: ignore
             data_pb = unixfs_pb2.Data()  # type: ignore
             data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
             data_pb.filesize = len(data)
@@ -128,7 +134,7 @@ class IPFSHashOnly:
                 outer_node.Links.append(link)  # type: ignore # pylint: disable=no-member
                 data_pb.blocksizes.append(len(chunk))  # type: ignore # pylint: disable=no-member
             outer_node.Data = data_pb.SerializeToString(deterministic=True)
-            return outer_node.SerializeToString()
+            return cls._serialize(outer_node)
         return cls._pb_serialize_data(data)
 
     @staticmethod
@@ -152,15 +158,18 @@ class IPFSHashOnly:
         ipfs_hash = base58.b58encode(multihash_bytes)
         return str(ipfs_hash, "utf-8")
 
+    @classmethod
+    def _generate_hash(cls, data: bytes) -> str:
+        """Generate hash for data."""
+        pb_data = cls._pb_serialize_file(data)
+        return cls._generate_multihash(pb_data)
 
-def fix_dag_encode() -> None:
-    """Fix it to make compatible with ipfs way of encoding: Links first."""
-    orig_list_fields = merkledag_pb2.PBNode.ListFields  # type: ignore
-
-    def list_fields(self):  # type: ignore
-        return list(reversed(orig_list_fields(self)))
-
-    merkledag_pb2.PBNode.ListFields = list_fields  # type: ignore
-
-
-fix_dag_encode()
+    @classmethod
+    def _serialize(cls, pb_node: PBNode) -> bytes:  # type: ignore
+        """Serialize PBNode instance with fixed fields sequence."""
+        f = io.BytesIO()
+        for field_descriptor, field_value in reversed(pb_node.ListFields()):  # type: ignore
+            field_descriptor._encoder(  # pylint: disable=protected-access
+                f.write, field_value, True
+            )
+        return f.getvalue()

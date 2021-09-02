@@ -8,10 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
+  build/FetchOracle.json: QmfEMai1yxPtWoshFahBk2EyVHd9Mo8pSp1SAE83rRvQgH
+  build/oracle.wasm: QmQLohXVwGr92MwM3ciE865wKz8yD2ScbX5hqALuUDL4eq
   contract.py: QmReA4aDuQ8KS71nGUpSts6M5mTNqPfVakHbvdzoMYjbgm
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
-fingerprint_ignore_patterns:
-- build/*
+fingerprint_ignore_patterns: []
 class_name: FetchOracleContract
 contract_interface_paths:
   ethereum: build/FetchOracle.json
