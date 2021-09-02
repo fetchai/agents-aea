@@ -272,3 +272,4 @@ _.deployment_tx_receipt  # unused attribute (agents-aea/aea/test_tools/test_cont
 _.Hash  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:124)
 _.Tsize  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:125)
 _.Name  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:126)
+init_worker  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/skills/tasks.py:108)
