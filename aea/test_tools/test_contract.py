@@ -147,7 +147,7 @@ class BaseContractTestCase(ABC):
         tx: JSONLike,
         ledger_api: LedgerApi,
         cryptos: List[Crypto],
-        sleep_time: float = 1.0,
+        sleep_time: float = 2.0,
     ) -> JSONLike:
         """
         Sign, send and confirm settlement of a transaction.

@@ -475,7 +475,7 @@ class ERC1155Contract(Contract):
                     )
                 )
 
-            # Sending native tokens from from_address to to_address
+            # Sending native tokens from to_address to from_address
             msgs.append(cosmos_api.get_packed_send_msg(to_address, from_address, value))
 
             tx = cosmos_api.get_multi_transaction(
@@ -647,7 +647,7 @@ class ERC1155Contract(Contract):
                     )
                 )
 
-            # Sending native tokens from from_address to to_address
+            # Sending native tokens from to_address to from_address
             msgs.append(cosmos_api.get_packed_send_msg(to_address, from_address, value))
 
             tx = cosmos_api.get_multi_transaction(

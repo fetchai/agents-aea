@@ -1030,7 +1030,10 @@ class _CosmosApi(LedgerApi):
         :return: Packed MsgExecuteContract
         """
 
-        funds_coins = [Coin(denom=self.denom, amount=str(funds))]
+        if funds == 0:
+            funds_coins = []
+        else:
+            funds_coins = [Coin(denom=self.denom, amount=str(funds))]
 
         msg_send = MsgExecuteContract(
             sender=str(sender_address),
@@ -1106,6 +1109,8 @@ class _CosmosApi(LedgerApi):
             )
             account_numbers.append(account_number)
             sequences.append(sequence)
+            # Prevent requests overflow
+            time.sleep(1)
 
         return self._get_transaction(
             account_numbers=account_numbers,

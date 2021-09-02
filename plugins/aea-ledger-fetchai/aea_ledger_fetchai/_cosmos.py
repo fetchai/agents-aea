@@ -1030,7 +1030,10 @@ class _CosmosApi(LedgerApi):
         :return: Packed MsgExecuteContract
         """
 
-        funds_coins = [Coin(denom=self.denom, amount=str(funds))]
+        if funds == 0:
+            funds_coins = []
+        else:
+            funds_coins = [Coin(denom=self.denom, amount=str(funds))]
 
         msg_send = MsgExecuteContract(
             sender=str(sender_address),
