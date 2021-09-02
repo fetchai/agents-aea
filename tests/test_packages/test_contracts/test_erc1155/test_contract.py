@@ -801,6 +801,11 @@ class TestCosmWasmContract(BaseContractTestCase):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
+        # Store balance of deployer's native tokens before atomic swap
+        original_deployer_balance = self.ledger_api.get_balance(
+            self.deployer_crypto.address
+        )
+
         # Atomic swap
         # Send 1 ERC1155 token from deployer to item_owner
         # Send 1 native token from item_owner to deployer
@@ -823,7 +828,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             tx, self.ledger_api, [self.deployer_crypto, self.item_owner_crypto]
         )
 
-        # Check ERC1155 token balance
+        # Check item owner's ERC1155 token balance
         result = self.contract.get_balance(
             ledger_api=self.ledger_api,
             contract_address=self.contract_address,
@@ -833,6 +838,10 @@ class TestCosmWasmContract(BaseContractTestCase):
 
         assert "balance" in result
         assert result["balance"][self.token_ids_a[0]] == 1
+
+        # Check deployer's native token balance
+        deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
+        assert deployer_balance == original_deployer_balance + 1
 
     @pytest.mark.integration
     @pytest.mark.ledger
