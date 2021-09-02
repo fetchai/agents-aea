@@ -380,8 +380,8 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-        from_pubkey: bytes = b"",
-        to_pubkey: bytes = b"",
+        from_pubkey: str = "",
+        to_pubkey: str = "",
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
@@ -480,7 +480,7 @@ class ERC1155Contract(Contract):
 
             tx = cosmos_api.get_multi_transaction(
                 from_addresses=[from_address, to_address],
-                pub_keys=[from_pubkey, to_pubkey],
+                pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
                 msgs=msgs,
                 gas=gas,
             )
@@ -548,8 +548,8 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-        from_pubkey: bytes = b"",
-        to_pubkey: bytes = b"",
+        from_pubkey: str = "",
+        to_pubkey: str = "",
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
@@ -652,7 +652,7 @@ class ERC1155Contract(Contract):
 
             tx = cosmos_api.get_multi_transaction(
                 from_addresses=[from_address, to_address],
-                pub_keys=[from_pubkey, to_pubkey],
+                pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
                 msgs=msgs,
                 gas=gas,
             )
