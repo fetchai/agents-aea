@@ -158,7 +158,7 @@ DEFAULT_GANACHE_CHAIN_ID = 1337
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
-DEFAULT_FETCH_LEDGER_RPC_PORT = 9090
+DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
 DEFAULT_FETCH_ADDR_REMOTE = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
@@ -210,7 +210,7 @@ NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
     "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
 )
 FUNDED_FETCHAI_PRIVATE_KEY_1 = (
-    "f848e125edb124d7752338fdd15825cd031b8c7f38627ec50ccccb7d75ecffdb"
+    "bbaef7511f275dc15f47436d14d6d3c92d4d01befea073d23d0c2750a46f6cb3"
 )
 FUNDED_FETCHAI_PRIVATE_KEY_2 = (
     "9d6459d1f93dd153335291af940f6b5224a34a9a1e1062e2158a45fa4901ed3f"
@@ -223,7 +223,7 @@ ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
 FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
-FUNDED_FETCHAI_ADDRESS_ONE = "fetch1dm72s3yravky6t7rp3daajwwsz2vrqd86g2v47"
+FUNDED_FETCHAI_ADDRESS_ONE = "fetch1k9dns2fd74644g0q9mfpsmfeqg0h2ym2cm6wdh"
 FUNDED_FETCHAI_ADDRESS_TWO = "fetch1x2vfp8ec2yk8nnlzn52agflpmpwtucm6yj2hw4"
 
 # P2P addresses
@@ -1371,11 +1371,11 @@ def fund_accounts_from_local_validator(
     )
     pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
 
+    time.sleep(FETCHD_INITIAL_TX_SLEEP)
     client = SigningCosmWasmClient(pk, rest_client, DEFAULT_FETCH_CHAIN_ID)
     coins = [Coin(amount=str(amount), denom=denom)]
 
     for address in addresses:
-        time.sleep(FETCHD_INITIAL_TX_SLEEP)
         client.send_tokens(CosmpyAddress(address), coins)
 
 

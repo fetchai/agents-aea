@@ -424,7 +424,7 @@ class SOEFDockerImage(DockerImage):
 class FetchLedgerDockerImage(DockerImage):
     """Wrapper to Fetch ledger Docker image."""
 
-    PORTS = {9090: 9090, 1317: 1317, 26657: 26657}
+    PORTS = {1317: 1317, 26657: 26657}
 
     def __init__(
         self,
@@ -475,7 +475,7 @@ class FetchLedgerDockerImage(DockerImage):
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
             'sed -i "s/swagger = false/swagger = true/" ~/.fetchd/config/app.toml',
-            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port}",
+            'fetchd start',
         )
 
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
@@ -493,6 +493,7 @@ class FetchLedgerDockerImage(DockerImage):
             container = self._client.containers.run(
                 self.tag,
                 detach=True,
+                network="host",
                 volumes=volumes,
                 entrypoint=str(entrypoint),
                 ports=self.PORTS,

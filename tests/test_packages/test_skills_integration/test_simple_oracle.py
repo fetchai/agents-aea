@@ -53,7 +53,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
     """Test that oracle skills work."""
 
     @pytest.mark.ledger
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
+    @pytest.mark.flaky(reruns=0)  # cause possible network issues
     def test_oracle(
         self, fund_fetchai_accounts,
     ):
@@ -155,6 +155,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             setting_path,
             f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
         )
+
+        # use alternate port for prometheus connection
+        setting_path = "vendor.fetchai.connections.prometheus.config.port"
+        self.set_config(setting_path, 9091, type_="int")
 
         setting_path = "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address_file"
         self.set_config(setting_path, ORACLE_CONTRACT_ADDRESS_FILE)
