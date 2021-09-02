@@ -53,7 +53,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
     """Test that oracle skills work."""
 
     @pytest.mark.ledger
-    @pytest.mark.flaky(reruns=0)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_oracle(
         self, fund_fetchai_accounts,
     ):
