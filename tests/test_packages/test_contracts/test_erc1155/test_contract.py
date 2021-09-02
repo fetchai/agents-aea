@@ -773,11 +773,9 @@ class TestCosmWasmContract(BaseContractTestCase):
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    def test_cosmwasm_unimplemented_exception_single_atomic_swap(self):
-        """Test unimplemented exception single atomic swap."""
-        pytest.raises(
-            NotImplementedError,
-            self.contract.get_atomic_swap_single_transaction,
+    def test_cosmwasm_single_atomic_swap(self):
+        """Test single atomic swap."""
+        tx = self.contract.get_atomic_swap_single_transaction(
             self.ledger_api,
             contract_address=None,
             from_address=None,
@@ -785,26 +783,25 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_id=0,
             from_supply=0,
             to_supply=0,
-            value=0,
+            value=123,
             trade_nonce=0,
             signature="",
         )
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    def test_cosmwasm_unimplemented_exception_batch_atomic_swap(self):
-        """Test unimplemented exception batch atomic swap."""
-        pytest.raises(
-            NotImplementedError,
-            self.contract.get_atomic_swap_batch_transaction,
+    def test_cosmwasm_batch_atomic_swap(self):
+        """Test batch atomic swap."""
+
+        tx = self.contract.get_atomic_swap_batch_transaction(
             self.ledger_api,
             contract_address=None,
             from_address=None,
             to_address=None,
-            token_ids=[0],
-            from_supplies=[0],
-            to_supplies=[0],
-            value=0,
+            token_ids=[4, 3, 2, 1],
+            from_supplies=[4, 0, 5, 0],
+            to_supplies=[0, 6, 0, 7],
+            value=123,
             trade_nonce=0,
             signature="",
         )
