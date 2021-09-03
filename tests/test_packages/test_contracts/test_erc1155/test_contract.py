@@ -787,7 +787,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
-        # Mint single token to deployer
+        # Mint single ERC1155 token a[0] to Deployer
         tx = self.contract.get_mint_single_transaction(
             ledger_api=self.ledger_api,
             contract_address=self.contract_address,
@@ -801,14 +801,14 @@ class TestCosmWasmContract(BaseContractTestCase):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
-        # Store balance of deployer's native tokens before atomic swap
+        # Store balance of Deployer's native tokens before atomic swap
         original_deployer_balance = self.ledger_api.get_balance(
             self.deployer_crypto.address
         )
 
         # Atomic swap
-        # Send 1 ERC1155 token from deployer to item_owner
-        # Send 1 native token from item_owner to deployer
+        # Send 1 ERC1155 token a[0] from Deployer to Item owner
+        # Send 1 native token from Item owner to Deployer
         tx = self.contract.get_atomic_swap_single_transaction(
             self.ledger_api,
             contract_address=self.contract_address,
@@ -828,7 +828,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             tx, self.ledger_api, [self.deployer_crypto, self.item_owner_crypto]
         )
 
-        # Check item owner's ERC1155 token balance
+        # Check Item owner's ERC1155 token balance
         result = self.contract.get_balance(
             ledger_api=self.ledger_api,
             contract_address=self.contract_address,
@@ -848,16 +848,97 @@ class TestCosmWasmContract(BaseContractTestCase):
     def test_cosmwasm_batch_atomic_swap(self):
         """Test batch atomic swap."""
 
-        tx = self.contract.get_atomic_swap_batch_transaction(
-            self.ledger_api,
-            contract_address=None,
-            from_address=None,
-            to_address=None,
-            token_ids=[4, 3, 2, 1],
-            from_supplies=[4, 0, 5, 0],
-            to_supplies=[0, 6, 0, 7],
-            value=123,
-            trade_nonce=0,
-            signature="",
+        # Create batch of tokens
+        tx = self.contract.get_create_batch_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            token_ids=self.token_ids_a,
         )
         assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
+        )
+
+        # Mint single token a[0] to Deployer
+        tx = self.contract.get_mint_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.deployer_crypto.address,
+            token_id=self.token_ids_a[0],
+            mint_quantity=1,
+        )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
+        )
+
+        # Mint single token a[1] to Item owner
+        tx = self.contract.get_mint_single_transaction(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            deployer_address=self.deployer_crypto.address,
+            recipient_address=self.item_owner_crypto.address,
+            token_id=self.token_ids_a[1],
+            mint_quantity=1,
+        )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
+        )
+
+        # Store balance of Deployer's native tokens before atomic swap
+        original_deployer_balance = self.ledger_api.get_balance(
+            self.deployer_crypto.address
+        )
+
+        # Atomic swap
+        # Send 1 ERC1155 token a[0] from Deployer to Item owner
+        # Send 1 ERC1155 token a[1] from Item owner to Deployer
+        # Send 1 native token from Item owner to Deployer
+
+        tx = self.contract.get_atomic_swap_batch_transaction(
+            self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=self.deployer_crypto.address,
+            to_address=self.item_owner_crypto.address,
+            token_ids=[self.token_ids_a[0], self.token_ids_a[1]],
+            from_supplies=[1, 0],
+            to_supplies=[0, 1],
+            value=1,
+            trade_nonce=0,
+            signature="",
+            from_pubkey=self.deployer_crypto.public_key,
+            to_pubkey=self.item_owner_crypto.public_key,
+        )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, [self.deployer_crypto, self.item_owner_crypto]
+        )
+
+        # Check Item owner's ERC1155 token balance
+        result = self.contract.get_balance(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.item_owner_crypto.address,
+            token_id=self.token_ids_a[0],
+        )
+
+        assert "balance" in result
+        assert result["balance"][self.token_ids_a[0]] == 1
+
+        # Check Deployer's ERC1155 token balance
+        result = self.contract.get_balance(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.deployer_crypto.address,
+            token_id=self.token_ids_a[1],
+        )
+
+        assert "balance" in result
+        assert result["balance"][self.token_ids_a[1]] == 1
+
+        # Check deployer's native token balance
+        deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
+        assert deployer_balance == original_deployer_balance + 1
