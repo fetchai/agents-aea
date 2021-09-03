@@ -156,6 +156,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
         )
 
+        # use alternate port for prometheus connection
+        setting_path = "vendor.fetchai.connections.prometheus.config.port"
+        self.set_config(setting_path, 9091, type_="int")
+
         setting_path = "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address_file"
         self.set_config(setting_path, ORACLE_CONTRACT_ADDRESS_FILE)
 
