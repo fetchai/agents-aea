@@ -475,7 +475,7 @@ class FetchLedgerDockerImage(DockerImage):
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
             'sed -i "s/swagger = false/swagger = true/" ~/.fetchd/config/app.toml',
-            'fetchd start',
+            "fetchd start",
         )
 
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
