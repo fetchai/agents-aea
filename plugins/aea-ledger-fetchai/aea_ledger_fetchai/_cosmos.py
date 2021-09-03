@@ -1109,6 +1109,8 @@ class _CosmosApi(LedgerApi):
             )
             account_numbers.append(account_number)
             sequences.append(sequence)
+            # Prevent requests overflow
+            time.sleep(1)
 
         return self._get_transaction(
             account_numbers=account_numbers,
