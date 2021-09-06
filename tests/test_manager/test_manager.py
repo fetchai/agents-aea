@@ -18,9 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import asyncio
+import logging
 import os
+import pickle  # nosec
 import re
 from contextlib import suppress
+from copy import copy
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
@@ -68,9 +71,11 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager = MultiAgentManager(
             self.working_dir, mode=self.MODE, password=self.PASSWORD
         )
+        self._log_handlers = copy(logging.root.getChild("aea").handlers)
 
     def tearDown(self):
         """Tear down test case."""
+        logging.root.getChild("aea").handlers = self._log_handlers
         try:
             self.manager.stop_manager()
             if os.path.exists(self.working_dir):
@@ -163,6 +168,10 @@ class BaseTestMultiAgentManager(TestCase):
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
 
+    def log_file(self, agent_name: str) -> str:
+        """Get agent's log gile path."""
+        return f"{self.tmp_dir.name}/{agent_name}.log"
+
     def test_add_agent(self, *args):
         """Test add agent alias."""
         self.manager.start_manager()
@@ -178,11 +187,34 @@ class BaseTestMultiAgentManager(TestCase):
                 "behaviours": {"echo": {"args": {"tick_interval": new_tick_interval}}},
             }
         ]
+        agent_overrides = {
+            "logging_config": {
+                "version": 1,
+                "formatters": {"standard": {"format": ""}},
+                "handlers": {
+                    "console": {
+                        "class": "logging.StreamHandler",
+                        "formatter": "standard",
+                        "level": "DEBUG",
+                    },
+                    "file": {
+                        "class": "logging.FileHandler",
+                        "filename": self.log_file(self.agent_name),
+                        "mode": "w",
+                        "level": "DEBUG",
+                        "formatter": "standard",
+                    },
+                },
+                "loggers": {"aea": {"level": "DEBUG", "handlers": ["file", "console"]}},
+            }
+        }
         self.manager.add_agent(
             self.project_public_id,
             self.agent_name,
             component_overrides=component_overrides,
+            agent_overrides=agent_overrides,
         )
+
         agent_alias = self.manager.get_agent_alias(self.agent_name)
         assert agent_alias.agent_name == self.agent_name
         assert (
@@ -251,63 +283,61 @@ class BaseTestMultiAgentManager(TestCase):
         self.test_add_agent()
 
         self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
-        assert behaviour
-
-        with patch.object(behaviour, "act") as act_mock:
-            wait_for_condition(lambda: act_mock.call_count > 0, timeout=10)
+        wait_for_condition(
+            lambda: "Echo Behaviour: act method called."
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=60,
+        )
 
     def test_exception_handling(self, *args):
         """Test error callback works."""
-        self.test_add_agent()
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
         self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
-        assert behaviour
 
         callback_mock = Mock()
 
         self.manager.add_error_callback(callback_mock)
 
-        with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-            self.manager.start_all_agents()
-            wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+        self.manager.start_all_agents()
+        wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+
+    def add_agent(self, agent_name: str, project_id: PublicId) -> None:
+        """Add agent and start manager."""
+        self.manager.start_manager()
+
+        self.manager.add_project(project_id, local=True)
+
+        self.manager.add_agent(
+            project_id, agent_name,
+        )
+
+        agent_alias = self.manager.get_agent_alias(agent_name)
+        assert agent_alias
 
     def test_default_exception_handling(self, *args):
         """Test that the default error callback works."""
-        self.test_add_agent()
-        self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
-        assert behaviour
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
 
         with patch.object(
             self.manager,
             "_print_exception_occurred_but_no_error_callback",
             side_effect=self.manager._print_exception_occurred_but_no_error_callback,
         ) as callback_mock:
-            with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-                wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
-                callback_mock.assert_called_once()
+            self.manager.start_all_agents()
+            wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+            callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""
-        self.test_add_agent()
-        self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
 
         def handler(*args, **kwargs):
             self.manager.stop_manager()
 
         self.manager.add_error_callback(handler)
 
-        assert behaviour
-
-        with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-            self.manager.start_all_agents()
-            wait_for_condition(lambda: not self.manager.is_running, timeout=10)
+        self.manager.start_all_agents()
+        wait_for_condition(lambda: not self.manager.is_running, timeout=10)
 
     def test_start_all(self, *args):
         """Test MultiAgentManager start all agents."""
@@ -323,7 +353,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: len(self.manager.list_agents())
             == len(self.manager.list_agents(running_only=True)),
-            timeout=20,
+            timeout=60,
             period=0.5,
         )
 
@@ -340,16 +370,19 @@ class BaseTestMultiAgentManager(TestCase):
         """Test stop agent."""
         self.test_start_all()
         wait_for_condition(
-            lambda: self.manager.list_agents(running_only=True), timeout=20
+            lambda: self.manager.list_agents(running_only=True), timeout=60
         )
 
-        agent_task = self.manager._agents_tasks[self.agent_name]
-        wait_for_condition(lambda: agent_task.agent.is_running, timeout=20)
+        wait_for_condition(
+            lambda: "Start processing messages"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=60,
+        )
 
         self.manager.stop_all_agents()
 
         wait_for_condition(
-            lambda: len(self.manager.list_agents(running_only=True)) == 0, timeout=20
+            lambda: len(self.manager.list_agents(running_only=True)) == 0, timeout=60
         )
 
         assert not self.manager.list_agents(running_only=True)
@@ -359,6 +392,12 @@ class BaseTestMultiAgentManager(TestCase):
 
         with pytest.raises(ValueError, match=" is not running!"):
             self.manager.stop_agents([self.agent_name])
+
+        wait_for_condition(
+            lambda: "Runtime loop stopped!"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=60,
+        )
 
     def test_do_no_allow_override_some_fields(self, *args):
         """Do not allo to override some values in agent config."""
@@ -595,6 +634,23 @@ class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     MODE = "threaded"
 
 
+class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
+    """Tests for MultiAgentManager in multiprocess mode."""
+
+    MODE = "multiprocess"
+
+    def test_plugin_dependencies(self, *args):
+        """Skip test cause multiprocess works another way."""
+
+
+class TestMultiAgentManagerMultiprocessModeWithPassword(
+    TestMultiAgentManagerMultiprocessMode
+):
+    """Tests for MultiAgentManager in multiprocess mode with password."""
+
+    PASSWORD = "password"  # nosec
+
+
 class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode, with password."""
 
@@ -739,6 +795,39 @@ def test_project_auto_added_removed():
             manager.add_agent(
                 PublicId("fetchai", "my_first_aea"), agent_name, local=True
             )
+            assert manager.list_projects()
+            assert manager.list_agents()
+            manager.remove_agent(agent_name)
+            assert not manager.list_agents()
+            assert not manager.list_projects()
+        finally:
+            manager.stop_manager()
+
+
+def test_dump():
+    """Check project auto added and auto removed on agent added/removed."""
+    agent_name = "test_agent"
+    with TemporaryDirectory() as tmp_dir, patch(
+        "aea.manager.project.Project.build"
+    ), patch("aea.manager.project.Project.install_pypi_dependencies"):
+        manager = MultiAgentManager(
+            tmp_dir,
+            mode="async",
+            registry_path=PACKAGES_DIR,
+            auto_add_remove_project=True,
+        )
+        try:
+            manager.start_manager()
+            assert not manager.list_projects()
+            manager.add_agent(
+                PublicId("fetchai", "my_first_aea"), agent_name, local=True
+            )
+            alias = manager.get_agent_alias(agent_name)
+            data = pickle.dumps(alias)
+            alias2 = pickle.loads(data)  # nosec
+            assert alias.dict == alias2.dict
+            assert alias.project.public_id == alias2.project.public_id
+
             assert manager.list_projects()
             assert manager.list_agents()
             manager.remove_agent(agent_name)

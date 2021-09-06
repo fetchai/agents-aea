@@ -214,9 +214,11 @@ async def test_reconnect_on_receive_fail():
         )
         con._in_queue = Mock()
         con._node_client = Mock()
-        f = Future()
-        f.set_exception(ConnectionError("oops"))
-        con._node_client.read_envelope.return_value = f
+        exception_future = Future()
+        exception_future.set_exception(ConnectionError("oops"))
+        result = Future()
+        result.set_result(None)
+        con._node_client.read_envelope.side_effect = [exception_future, result]
 
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future

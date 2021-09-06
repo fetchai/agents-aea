@@ -54,3 +54,11 @@ def test_encode_decode_ii():
     assert isinstance(encoded, bytes)
     decoded = DictProtobufStructSerializer.decode(encoded)
     assert case == decoded
+
+
+def test_encode_dict_is_deterministic():
+    """Check DictProtobufStructSerializer.encode result is the same for the same input data."""
+    data = dict(c=3, b=2, a=1)
+    assert DictProtobufStructSerializer.encode(
+        data
+    ) == DictProtobufStructSerializer.encode(data)
