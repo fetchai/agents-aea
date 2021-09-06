@@ -1408,23 +1408,12 @@ class TestExcludeConnection(AEATestCaseEmpty):
                 cwd=self._get_cwd(),
             )
 
-    def test_fail_to_exclude_all_connection(self):
-        """Test fails to exclude all connections."""
-        with pytest.raises(Exception, match="No connections left after exclusion!"):
-            self.run_cli_command(
-                "--skip-consistency-check",
-                "run",
-                "--exclude-connections",
-                f"{self.connection_id},{self.connection2_id}",
-                cwd=self._get_cwd(),
-            )
-
     def test_fail_to_specify_connections_and_exclude_the_same_time(self):
         """Test connections specification and exclusion not permited."""
 
         with pytest.raises(
             Exception,
-            match="please use only one of --connections or --exclude-connections. not both",
+            match="Please use only one of --connections or --exclude-connections, not both!",
         ):
             self.run_cli_command(
                 "run",

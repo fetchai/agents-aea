@@ -129,8 +129,6 @@ def _calculate_connection_ids(
     connection_ids = list(
         agent_config_manager.agent_config.connections - set(exclude_connections)
     )
-    if not connection_ids:
-        raise ValueError("No connections left after exclusion!")
 
     return connection_ids
 
