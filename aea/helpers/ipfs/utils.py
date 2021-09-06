@@ -25,7 +25,15 @@ from typing import Generator
 
 @contextlib.contextmanager
 def _protobuf_python_implementation() -> Generator:
-    """Force usage of the python implementation of the protobuf modules."""
+    """
+    Makes a context manager to force usage of the python implementation of the protobuf modules.
+
+    By default cpp version of the protobuf library is loaded.
+    This library does not provide all the needed tools to customize fields serialization order.
+    Python verrsion allows to use internal methods of the protobuf objects to serialize.
+    Custom serializations is required cause ipfs uses own version to serialize data to calculate data hash.
+    # noqa: DAR301
+    """
     PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION = "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"
     # unload modules
     saved_mods = {}
