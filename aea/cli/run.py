@@ -98,7 +98,7 @@ def run(
     """Run the agent."""
     if connection_ids and exclude_connection_ids:
         raise click.ClickException(
-            "please use only one of --connections or --exclude-connections. not both"
+            "Please use only one of --connections or --exclude-connections, not both!"
         )
 
     ctx = cast(Context, click_context.obj)
@@ -123,7 +123,7 @@ def _calculate_connection_ids(
     )
     if not_existing_connections:
         raise ValueError(
-            f"Connections to exclude: {', '.join(map(str, not_existing_connections))} are not defined in agent configuration"
+            f"Connections to exclude: {', '.join(map(str, not_existing_connections))} are not defined in agent configuration!"
         )
 
     connection_ids = list(
