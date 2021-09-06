@@ -20,6 +20,7 @@
 import asyncio
 import email
 import logging
+import ssl
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
@@ -359,6 +360,8 @@ class HTTPChannel(BaseAsyncChannel):
         connection_id: PublicId,
         timeout_window: float = RESPONSE_TIMEOUT,
         logger: logging.Logger = _default_logger,
+        ssl_cert_path: Optional[str] = None,
+        ssl_key_path: Optional[str] = None,
     ):
         """
         Initialize a channel and process the initial API specification from the file path (if given).
@@ -371,12 +374,19 @@ class HTTPChannel(BaseAsyncChannel):
         :param connection_id: public id of connection using this channel.
         :param timeout_window: the timeout (in seconds) for a request to be handled.
         :param logger: the logger
+        :param ssl_cert_path:  optional path to ssl certificate
+        :param ssl_key_path: optional path to ssl key
         """
         super().__init__(address=address, connection_id=connection_id)
         self.host = host
         self.port = port
+        self.ssl_cert_path = ssl_cert_path
+        self.ssl_key_path = ssl_key_path
         self.target_skill_id = target_skill_id
-        self.server_address = "http://{}:{}".format(self.host, self.port)
+        if self.ssl_cert_path and self.ssl_key_path:
+            self.server_address = "https://{}:{}".format(self.host, self.port)
+        else:
+            self.server_address = "http://{}:{}".format(self.host, self.port)
 
         self._api_spec = APISpec(api_spec_path, self.server_address, logger)
         self.timeout_window = timeout_window
@@ -471,7 +481,13 @@ class HTTPChannel(BaseAsyncChannel):
         server = web.Server(self._http_handler)
         runner = web.ServerRunner(server)
         await runner.setup()
-        self.http_server = web.TCPSite(runner, self.host, self.port)
+        ssl_context = None
+        if self.ssl_cert_path and self.ssl_key_path:
+            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            ssl_context.load_cert_chain(self.ssl_cert_path, self.ssl_key_path)
+        self.http_server = web.TCPSite(
+            runner, self.host, self.port, ssl_context=ssl_context
+        )
         await self.http_server.start()
 
     def send(self, envelope: Envelope) -> None:
@@ -541,6 +557,12 @@ class HTTPServerConnection(Connection):
         api_spec_path = cast(
             Optional[str], self.configuration.config.get("api_spec_path")
         )
+        ssl_cert_path = cast(Optional[str], self.configuration.config.get("ssl_cert"))
+        ssl_key_path = cast(Optional[str], self.configuration.config.get("ssl_key"))
+
+        if bool(ssl_cert_path) != bool(ssl_key_path):  # pragma: nocover
+            raise ValueError("Please specify both ssl_cert and ssl_key or none of it")
+
         self.channel = HTTPChannel(
             self.address,
             host,
@@ -549,6 +571,8 @@ class HTTPServerConnection(Connection):
             api_spec_path,
             connection_id=self.connection_id,
             logger=self.logger,
+            ssl_cert_path=ssl_cert_path,
+            ssl_key_path=ssl_key_path,
         )
 
     async def connect(self) -> None:
