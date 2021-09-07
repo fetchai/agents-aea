@@ -147,7 +147,7 @@
     },
     "task_manager_mode": {
       "type": "string",
-      "enum": ["threaded"]
+      "enum": ["threaded", "multiprocess"]
     },
     "storage_uri": {
       "type": "string"
