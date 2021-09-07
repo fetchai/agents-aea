@@ -181,13 +181,10 @@ def test_get_deploy_transaction_cosmwasm(dummy_contract):
         FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
     )
     deploy_tx = dummy_contract.get_deploy_transaction(
-        ledger_api, aea_ledger_fetchai.address
+        ledger_api, aea_ledger_fetchai.address, account_number=1, sequence=0
     )
-    assert deploy_tx is not None and len(deploy_tx) == 6
-    assert all(
-        key in ["account_number", "chain_id", "fee", "memo", "msgs", "sequence"]
-        for key in deploy_tx.keys()
-    )
+    assert deploy_tx is not None and len(deploy_tx) == 2
+    assert all(key in ["tx", "sign_data"] for key in deploy_tx.keys())
 
 
 def test_scaffold():

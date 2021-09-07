@@ -31,11 +31,10 @@ from aea_ledger_fetchai._cosmos import (
 _FETCHAI = "fetchai"
 _FETCH = "fetch"
 TESTNET_NAME = "testnet"
-FETCHAI_TESTNET_FAUCET_URL = "https://faucet-agent-land.fetch.ai"
-DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
+FETCHAI_TESTNET_FAUCET_URL = "https://faucet-stargateworld.t-v2-london-c.fetch-ai.com"
+DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
-DEFAULT_CHAIN_ID = "agent-land"
-DEFAULT_CLI_COMMAND = "fetchcli"
+DEFAULT_CHAIN_ID = "stargateworld-2"
 
 
 class FetchAIHelper(CosmosHelper):
@@ -64,8 +63,6 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
             kwargs["denom"] = DEFAULT_CURRENCY_DENOM
         if "chain_id" not in kwargs:
             kwargs["chain_id"] = DEFAULT_CHAIN_ID
-        if "cli_command" not in kwargs:
-            kwargs["cli_command"] = DEFAULT_CLI_COMMAND
         super().__init__(**kwargs)
 
 

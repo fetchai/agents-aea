@@ -161,13 +161,22 @@ class BaseContractTestCase(ABC):
         if tx_digest is None:
             raise ValueError("Transaction digest not found!")  # pragma: nocover
 
-        time.sleep(sleep_time)
         tx_receipt = ledger_api.get_transaction_receipt(tx_digest)
+
+        not_settled = True
+        elapsed_time = 0
+        while not_settled and elapsed_time < 20:
+            elapsed_time += 1
+            time.sleep(sleep_time)
+            tx_receipt = ledger_api.get_transaction_receipt(tx_digest)
+            if tx_receipt is None:
+                continue
+            not_settled = not ledger_api.is_transaction_settled(tx_receipt)
 
         if tx_receipt is None:
             raise ValueError("Transaction receipt not found!")  # pragma: nocover
 
-        if not ledger_api.is_transaction_settled(tx_receipt):
+        if not_settled:
             raise ValueError(  # pragma: nocover
                 f"Transaction receipt not valid!\n{tx_receipt['raw_log']}"
             )
