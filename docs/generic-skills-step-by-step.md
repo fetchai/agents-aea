@@ -3232,7 +3232,7 @@ Then run the buyer AEA:
 aea run
 ```
 
-You will see that the AEAs negotiate and then transact using the Agentland testnet.
+You will see that the AEAs negotiate and then transact using the StargateWorld testnet.
 
 ## Delete the AEAs
 

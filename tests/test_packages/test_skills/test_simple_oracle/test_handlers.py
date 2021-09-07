@@ -395,7 +395,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
                     "label": "OracleContract",
                     "init_msg": {"fee": str(strategy.initial_fee_deploy)},
                     "gas": strategy.default_gas_deploy,
-                    "amount": 0,
+                    "amount": 1,
                     "code_id": 8888,
                     "deployer_address": "test_agent_address",
                 }

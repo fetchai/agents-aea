@@ -128,23 +128,23 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
-## Agent Land - Fetch.ai testnet for agents
+## Stargate World - Fetch.ai testnet for agents
 
-Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
+Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
 
 | Parameter      | Value                                                                      |
 | -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | agent-land                                                                 |
+| Chain ID       | stargateworld-2                                                            |
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
-| Version        | v0.2.x                                                                     |
-| RPC Endpoint   | https://rpc-agent-land.fetch.ai:443                            |
-| REST Endpoint  | https://rest-agent-land.fetch.ai:443                            |
-| Block Explorer | <a href="https://explore-agent-land.fetch.ai" target="_blank">https://explore-agent-land.fetch.ai</a> |
+| Version        | v0.8.x                                                                     |
+| RPC Endpoint   | https://rpc-stargateworld.fetch.ai:443                                     |
+| REST Endpoint  | https://rest-stargateworld.fetch.ai:443                                    |
+| Block Explorer | <a href="https://explore-stargateworld.fetch.ai" target="_blank">https://explore-stargateworld.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
-You can access more details on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
+You can access more details on <a href="https://github.com/fetchai/networks-stargateworld" target="_blank">GitHub</a>.
 
 The configurations can be specified for the `fetchai/ledger:0.18.0` connection.
 
@@ -152,48 +152,3 @@ The configurations can be specified for the `fetchai/ledger:0.18.0` connection.
 
 The Fetch.ai networks use <a href="https://docs.cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
 
-Currently, to use the smart contract functionality of the Fetch.ai network you have to install a CLI tool which is used by the AEA framework to perform some necessary actions for the smart contract functionality on-chain.
-
-1. Install Rust using the following command:
-
-``` bash 
-curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
-```
-
-2. Update the configuration for Rust:
-
-``` bash
-rustup default stable
-cargo version
-# If this is lower than 1.44.1+, update with:
-# rustup update stable
-
-rustup target list --installed
-rustup target add wasm32-unknown-unknown
-```
-
-3. Install `fetchd`:
-
-``` bash
-git clone https://github.com/fetchai/fetchd.git
-cd fetchd
-git checkout release/v0.2.x
-make install
-
-# Check if fetchcli is properly installed
-fetchcli version
-# Version should be >=0.2.5
-```
-
-4. Configure `fetchcli`:
-
-``` bash
-fetchcli config chain-id agent-land
-fetchcli config trust-node false
-fetchcli config node https://rpc-agent-land.fetch.ai:443
-fetchcli config output json
-fetchcli config indent true
-fetchcli config broadcast-mode block
-```
-
-Now `fetchcli` will be ready for use on your system.

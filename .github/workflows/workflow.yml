@@ -338,39 +338,6 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
-      - name: Install Rust
-        run: |
-          # Install rust
-          curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf > install.sh
-          sudo chmod u+x install.sh
-          ./install.sh -y
-          rustup default stable
-          cargo version
-      - name: Install fetchcli
-        run: |
-          # Update the configuration for Rust
-          rustup target list --installed
-          rustup target add wasm32-unknown-unknown
-
-          # Install fetchd
-          git clone https://github.com/fetchai/fetchd.git
-          cd fetchd
-          git checkout release/v0.2.x
-          make install
-          echo "PATH=$PATH:${HOME}/go/bin" >> $GITHUB_ENV
-      - name: Check fetchcli installation
-        run: |
-          # Check if fetchcli is properly installed
-          which fetchcli
-          fetchcli version
-      - name: Configure fetchcli
-        run: |
-          fetchcli config chain-id agent-land
-          fetchcli config trust-node false
-          fetchcli config node https://rpc-agent-land.fetch.ai:443
-          fetchcli config output json
-          fetchcli config indent true
-          fetchcli config broadcast-mode block
       - name: Configure Docker
         run: |
           gcloud auth configure-docker 
@@ -589,39 +556,6 @@ jobs:
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     # sudo apt-get install -y protobuf-compiler
-    - name: Install Rust
-      run: |
-        # Install rust
-        curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf > install.sh
-        sudo chmod u+x install.sh
-        ./install.sh -y
-        rustup default stable
-        cargo version
-    - name: Install fetchcli
-      run: |
-        # Update the configuration for Rust
-        rustup target list --installed
-        rustup target add wasm32-unknown-unknown
-
-        # Install fetchd
-        git clone https://github.com/fetchai/fetchd.git
-        cd fetchd
-        git checkout release/v0.2.x
-        make install
-        echo "PATH=$PATH:${HOME}/go/bin" >> $GITHUB_ENV
-    - name: Check fetchcli installation
-      run: |
-        # Check if fetchcli is properly installed
-        which fetchcli
-        fetchcli version
-    - name: Configure fetchcli
-      run: |
-        fetchcli config chain-id agent-land
-        fetchcli config trust-node false
-        fetchcli config node https://rpc-agent-land.fetch.ai:443
-        fetchcli config output json
-        fetchcli config indent true
-        fetchcli config broadcast-mode block
     - name: Run all tests
       run: |
         tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'

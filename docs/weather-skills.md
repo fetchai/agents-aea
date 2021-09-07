@@ -63,7 +63,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `my_weather_client` with public id `fetchai/weather_client:0.31.0`.
 
-3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-agent-land.fetch.ai" target="_blank">AgentLand block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">StargateWorld block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `my_weather_station` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -178,7 +178,7 @@ aea build
 
 #### Add keys for the weather station AEA
 
-First, create the private key for the weather station AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the weather station AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -199,13 +199,13 @@ aea issue-certificates
 
 The weather client needs to have some wealth to purchase the service from the weather station.
 
-First, create the private key for the weather client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the weather client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for your weather client based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
+Then, create some wealth for your weather client based on the network you want to transact with. On the Fetch.ai `StargateWorld` network:
 ``` bash
 aea generate-wealth fetchai
 ```

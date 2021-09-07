@@ -67,8 +67,8 @@ class DependenciesTool:
             files = packages_info[0]["files"]
             location = packages_info[0]["location"]
         else:
-            files = packages_info[0].files
-            location = packages_info[0].location
+            files = packages_info[0].files  # type: ignore
+            location = packages_info[0].location  # type: ignore
         return [Path(location) / i for i in files]  # type: ignore
 
     @staticmethod
