@@ -561,7 +561,7 @@ class HTTPServerConnection(Connection):
         ssl_key_path = cast(Optional[str], self.configuration.config.get("ssl_key"))
 
         if bool(ssl_cert_path) != bool(ssl_key_path):  # pragma: nocover
-            raise ValueError("Please specify both ssl_cert and ssl_key or none of it")
+            raise ValueError("Please specify both ssl_cert and ssl_key or neither.")
 
         self.channel = HTTPChannel(
             self.address,
