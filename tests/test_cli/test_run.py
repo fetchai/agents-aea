@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains the tests for the `aea run` sub-command."""
 import os
 import re
@@ -27,6 +25,7 @@ import tempfile
 import time
 from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -1359,3 +1358,68 @@ class BuildAEATestCase(TestCase):
         """Test _build_aea method for negative result."""
         with self.assertRaises(ClickException):
             _build_aea(connection_ids=[], skip_consistency_check=True)
+
+
+class TestExcludeConnection(AEATestCaseEmpty):
+    """Test that the command 'aea run --connections' fails when the connection is not declared."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super().setup_class()
+        cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
+        cls.connection2_id = str(STUB_CONNECTION_PUBLIC_ID)
+        cls.generate_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_item("connection", cls.connection_id)
+        cls.add_item("connection", cls.connection2_id)
+
+    def test_connection_excluded(self):
+        """Test connection excluded."""
+
+        def raise_err(*args):
+            raise Exception(args[1])
+
+        with pytest.raises(Exception, match="^None$"):
+            with patch("aea.cli.run.run_aea", raise_err):
+                self.run_cli_command(
+                    "run", cwd=self._get_cwd(),
+                )
+        with pytest.raises(Exception, match=f"^..{self.connection2_id}..$"):
+            with patch("aea.cli.run.run_aea", raise_err):
+                self.run_cli_command(
+                    "run",
+                    "--exclude-connections",
+                    self.connection_id,
+                    cwd=self._get_cwd(),
+                )
+
+    def test_fail_to_exclude_non_existing_connection(self):
+        """Test fail to exclude not defined connection."""
+        with pytest.raises(
+            Exception,
+            match="Connections to exclude: fake/connection:0.1.0 are not defined in agent configuration",
+        ):
+            self.run_cli_command(
+                "--skip-consistency-check",
+                "run",
+                "--exclude-connections",
+                "fake/connection:0.1.0",
+                cwd=self._get_cwd(),
+            )
+
+    def test_fail_to_specify_connections_and_exclude_the_same_time(self):
+        """Test connections specification and exclusion not permited."""
+
+        with pytest.raises(
+            Exception,
+            match="Please use only one of --connections or --exclude-connections, not both!",
+        ):
+            self.run_cli_command(
+                "run",
+                "--exclude-connections",
+                self.connection_id,
+                "--connections",
+                self.connection_id,
+                cwd=self._get_cwd(),
+            )
