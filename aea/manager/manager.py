@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of AEA agents manager."""
 import asyncio
+import datetime
 import json
 import multiprocessing
 import os
@@ -26,8 +27,10 @@ from abc import ABC, abstractmethod
 from asyncio.tasks import FIRST_COMPLETED
 from collections import defaultdict
 from multiprocessing.synchronize import Event
+from queue import Empty
 from shutil import rmtree
 from threading import Thread
+from traceback import format_exc
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
@@ -241,7 +244,10 @@ class AgentRunProcessTask(BaseAgentRunTask):
         while self.process.is_alive():
             await asyncio.sleep(self.PROCESS_ALIVE_SLEEP_TIME)
 
-        result = self._result_queue.get_nowait()
+        try:
+            result = self._result_queue.get_nowait()
+        except Empty:
+            return ValueError("agent process was terminated")
         if isinstance(result, Exception):
             raise result
         return result
@@ -261,13 +267,16 @@ class AgentRunProcessTask(BaseAgentRunTask):
         t: Optional[Thread] = None
         r: Optional[Exception] = None
         run_stop_thread: bool = True
+        # set a new event loop, cause it's a new process
+        asyncio.set_event_loop(asyncio.new_event_loop())
         try:
             aea = agent_alias.get_aea_instance()
 
             def stop_event_thread() -> None:
                 try:
                     while run_stop_thread:
-                        if stop_event.wait(0.05) is True:
+                        if stop_event.wait(0.01) is True:
+                            print("Stop event set!")
                             break
                 finally:
                     aea.runtime.stop()
@@ -278,6 +287,9 @@ class AgentRunProcessTask(BaseAgentRunTask):
             aea.runtime.set_loop(loop)
             aea.start()
         except BaseException as e:  # pylint: disable=broad-except
+            print(
+                f"Exception in agent subprocess task at {datetime.datetime.now()}:\n{format_exc()}"
+            )
             r = Exception(str(e), repr(e))
         finally:
             run_stop_thread = False
@@ -297,7 +309,7 @@ class AgentRunProcessTask(BaseAgentRunTask):
             self.process.terminate()
             self.process.join(5)
             raise ValueError(
-                f"process was not stopped withinh timeout: {self.PROCESS_JOIN_TIMEOUT} and was terminated"
+                f"process was not stopped within timeout: {self.PROCESS_JOIN_TIMEOUT} and was terminated"
             )
 
     @property
@@ -1092,6 +1104,7 @@ class MultiAgentManager:
         print(
             f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
             str(exception),
+            repr(exception),
             "\nHowever, since no error callback was found the exception is handled silently. Please "
             "add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
         )

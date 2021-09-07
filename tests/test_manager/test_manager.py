@@ -357,6 +357,12 @@ class BaseTestMultiAgentManager(TestCase):
             period=0.5,
         )
 
+        wait_for_condition(
+            lambda: "Start processing messages"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=60,
+        )
+
         with pytest.raises(ValueError, match="is already started!"):
             self.manager.start_agents(self.manager.list_agents())
 
@@ -457,6 +463,11 @@ class BaseTestMultiAgentManager(TestCase):
         """Test fail on remove running agent."""
         self.test_start_all()
 
+        wait_for_condition(
+            lambda: "Start processing messages"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=60,
+        )
         with pytest.raises(ValueError, match="Agent is running. stop it first!"):
             self.manager.remove_agent(self.agent_name)
 

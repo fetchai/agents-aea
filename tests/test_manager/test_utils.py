@@ -45,18 +45,18 @@ def test_process_run_in_venv_timeout_error():
     """Test timeout error raised for process running too long."""
     with TemporaryDirectory() as tmp_dir:
         with pytest.raises(TimeoutError):
-            run_in_venv(tmp_dir, _process_long, timeout=3)
+            run_in_venv(tmp_dir, _process_long, timeout=20)
 
 
 def test_process_run_in_venv_raise_custom_exception():
     """Test process returns expcetion."""
     with TemporaryDirectory() as tmp_dir:
         with pytest.raises(Exception, match="Expected"):
-            run_in_venv(tmp_dir, _process_exception, timeout=3)
+            run_in_venv(tmp_dir, _process_exception, timeout=20)
 
 
 def test_process_run_in_venv_return_value():
     """Test process return value."""
     with TemporaryDirectory() as tmp_dir:
-        ret_value = run_in_venv(tmp_dir, _process_return_value, timeout=3)
+        ret_value = run_in_venv(tmp_dir, _process_return_value, timeout=20)
         assert ret_value == RETURN_VALUE

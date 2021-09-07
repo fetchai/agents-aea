@@ -277,12 +277,12 @@ class Connection(Component, ABC):
         """
         configuration = cast(ConnectionConfig, configuration)
         directory = cast(Path, configuration.directory)
-        load_aea_package(configuration)
         connection_module_path = directory / "connection.py"
         if not (connection_module_path.exists() and connection_module_path.is_file()):
             raise AEAComponentLoadException(
                 "Connection module '{}' not found.".format(connection_module_path)
             )
+        load_aea_package(configuration)
         connection_module = load_module(
             "connection_module", directory / "connection.py"
         )
