@@ -42,7 +42,6 @@ from tests.conftest import (
     MAX_FLAKY_RERUNS_ETH,
     UseGanache,
     UseLocalFetchNode,
-    use_local_fetchcli_config,
 )
 
 
@@ -157,6 +156,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
         )
 
+        # use alternate port for prometheus connection
+        setting_path = "vendor.fetchai.connections.prometheus.config.port"
+        self.set_config(setting_path, 9091, type_="int")
+
         setting_path = "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address_file"
         self.set_config(setting_path, ORACLE_CONTRACT_ADDRESS_FILE)
 
@@ -200,83 +203,82 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
         )
 
-        with use_local_fetchcli_config():
-            # run oracle agent
-            self.set_agent_context(oracle_agent_name)
-            self.run_cli_command("build", cwd=self._get_cwd())
-            self.run_cli_command("issue-certificates", cwd=self._get_cwd())
-            oracle_aea_process = self.run_agent()
+        # run oracle agent
+        self.set_agent_context(oracle_agent_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+        oracle_aea_process = self.run_agent()
 
-            check_strings = (
-                "Starting libp2p node...",
-                "Connecting to libp2p node...",
-                "Successfully connected to libp2p node!",
-                LIBP2P_SUCCESS_MESSAGE,
-            )
-            missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
-            )
-            assert (
-                missing_strings == []
-            ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, self.stdout[oracle_aea_process.pid]
-            )
+        check_strings = (
+            "Starting libp2p node...",
+            "Connecting to libp2p node...",
+            "Successfully connected to libp2p node!",
+            LIBP2P_SUCCESS_MESSAGE,
+        )
+        missing_strings = self.missing_from_output(
+            oracle_aea_process, check_strings, timeout=60, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in aea output: \n{}".format(
+            missing_strings, self.stdout[oracle_aea_process.pid]
+        )
 
-            check_strings = (
-                "setting up HttpHandler",
-                "setting up AdvancedDataRequestBehaviour",
-                "Setting up Fetch oracle contract...",
-                "Fetching data from https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd",
-                "received raw transaction=",
-                "Observation: {'price': {'value': ",
-                "transaction was successfully submitted. Transaction digest=",
-                "requesting transaction receipt.",
-                "transaction was successfully settled. Transaction receipt=",
-                "Oracle value successfully updated!",
-            )
-            missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
-            )
-            assert (
-                missing_strings == []
-            ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, self.stdout[oracle_aea_process.pid]
-            )
+        check_strings = (
+            "setting up HttpHandler",
+            "setting up AdvancedDataRequestBehaviour",
+            "Setting up Fetch oracle contract...",
+            "Fetching data from https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd",
+            "received raw transaction=",
+            "Observation: {'price': {'value': ",
+            "transaction was successfully submitted. Transaction digest=",
+            "requesting transaction receipt.",
+            "transaction was successfully settled. Transaction receipt=",
+            "Oracle value successfully updated!",
+        )
+        missing_strings = self.missing_from_output(
+            oracle_aea_process, check_strings, timeout=60, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in aea output: \n{}".format(
+            missing_strings, self.stdout[oracle_aea_process.pid]
+        )
 
-            # Get oracle contract address from file
-            with open(ORACLE_CONTRACT_ADDRESS_FILE) as file:
-                oracle_address = file.read()
+        # Get oracle contract address from file
+        with open(ORACLE_CONTRACT_ADDRESS_FILE) as file:
+            oracle_address = file.read()
 
-            # run oracle client agent
-            self.set_agent_context(client_agent_name)
+        # run oracle client agent
+        self.set_agent_context(client_agent_name)
 
-            # set oracle contract address in oracle client
-            setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
-            self.set_config(setting_path, oracle_address)
+        # set oracle contract address in oracle client
+        setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
+        self.set_config(setting_path, oracle_address)
 
-            client_aea_process = self.run_agent()
+        client_aea_process = self.run_agent()
 
-            check_strings = (
-                "requesting contract deployment transaction...",
-                "received raw transaction=",
-                "transaction was successfully submitted. Transaction digest=",
-                "requesting transaction receipt.",
-                "transaction was successfully settled. Transaction receipt=",
-                "Oracle value successfully requested!",
-            )
-            missing_strings = self.missing_from_output(
-                client_aea_process, check_strings, timeout=60, is_terminating=False,
-            )
-            assert (
-                missing_strings == []
-            ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, self.stdout[client_aea_process.pid]
-            )
+        check_strings = (
+            "requesting contract deployment transaction...",
+            "received raw transaction=",
+            "transaction was successfully submitted. Transaction digest=",
+            "requesting transaction receipt.",
+            "transaction was successfully settled. Transaction receipt=",
+            "Oracle value successfully requested!",
+        )
+        missing_strings = self.missing_from_output(
+            client_aea_process, check_strings, timeout=60, is_terminating=False,
+        )
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in aea output: \n{}".format(
+            missing_strings, self.stdout[client_aea_process.pid]
+        )
 
-            self.terminate_agents(oracle_aea_process, client_aea_process)
-            assert (
-                self.is_successfully_terminated()
-            ), "Agents weren't successfully terminated."
+        self.terminate_agents(oracle_aea_process, client_aea_process)
+        assert (
+            self.is_successfully_terminated()
+        ), "Agents weren't successfully terminated."
 
 
 @pytest.mark.integration

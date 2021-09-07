@@ -124,8 +124,8 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-agentworld.prod.fetch-ai.com:443
-      chain_id: agentworld-1
+      address: https://rest-stargateworld.fetch.ai:443
+      chain_id: stargateworld-2
 ---
 public_id: fetchai/simple_seller:0.12.0
 type: skill

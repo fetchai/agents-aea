@@ -667,7 +667,6 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
 
         assert code_id is not None
-        assert code_id == cast(FetchAIApi, cls.ledger_api).get_last_code_id()
 
         # Init contract
         tx = cls._contract.get_deploy_transaction(
@@ -693,11 +692,6 @@ class TestCosmWasmContract(BaseContractTestCase):
         if contract_address is None:
             raise ValueError("Contract address not found!")  # pragma: nocover
 
-        if contract_address != cast(
-            FetchAIApi, cls.ledger_api
-        ).get_last_contract_address(code_id):
-            raise ValueError("Contract address not valid!")  # pragma: nocover
-
         return contract_address
 
     @pytest.mark.integration
@@ -712,7 +706,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             deployer_address=self.deployer_crypto.address,
             token_id=self.token_id_b,
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
@@ -724,7 +718,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             deployer_address=self.deployer_crypto.address,
             token_ids=self.token_ids_a,
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
@@ -738,7 +732,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_id=self.token_id_b,
             mint_quantity=1,
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )
@@ -762,7 +756,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_ids=self.token_ids_a,
             mint_quantities=[1] * len(self.token_ids_a),
         )
-        assert len(tx) == 6
+        assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
             tx, self.ledger_api, self.deployer_crypto
         )

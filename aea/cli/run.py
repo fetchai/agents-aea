@@ -32,6 +32,7 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
+from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAWalletNoAddressException
@@ -75,24 +76,61 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     default=0,
     help="Enable profiling, print profiling every amount of seconds",
 )
+@click.option(
+    "--exclude-connections",
+    "exclude_connection_ids",
+    cls=ConnectionsOption,
+    required=False,
+    default=None,
+    help="The connection names to disable for running the agent. Must be declared in the agent's configuration file.",
+)
 @click.pass_context
 @check_aea_project
 def run(
     click_context: click.Context,
     connection_ids: List[PublicId],
+    exclude_connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
     profiling: int,
     password: str,
 ) -> None:
     """Run the agent."""
+    if connection_ids and exclude_connection_ids:
+        raise click.ClickException(
+            "Please use only one of --connections or --exclude-connections, not both!"
+        )
+
     ctx = cast(Context, click_context.obj)
     profiling = int(profiling)
+    if exclude_connection_ids:
+        connection_ids = _calculate_connection_ids(ctx, exclude_connection_ids)
+
     if profiling > 0:
         with _profiling_context(period=profiling):
             run_aea(ctx, connection_ids, env_file, is_install_deps, password)
             return
     run_aea(ctx, connection_ids, env_file, is_install_deps, password)
+
+
+def _calculate_connection_ids(
+    ctx: Context, exclude_connections: List[PublicId]
+) -> List[PublicId]:
+    """Calculate resulting list of connection ids to run."""
+    agent_config_manager = AgentConfigManager.load(ctx.cwd)
+    not_existing_connections = (
+        set(exclude_connections) - agent_config_manager.agent_config.connections
+    )
+    if not_existing_connections:
+        raise ValueError(
+            f"Connections to exclude: {', '.join(map(str, not_existing_connections))} are not defined in agent configuration!"
+        )
+
+    connection_ids = list(
+        agent_config_manager.agent_config.connections - set(exclude_connections)
+    )
+
+    return connection_ids
 
 
 @contextmanager

@@ -30,7 +30,7 @@ MAX_FLAKY_RERUNS = 3
 FETCHAI = FetchAICrypto.identifier
 
 
-FETCHAI_DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
+FETCHAI_DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
 FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
-FETCHAI_DEFAULT_CHAIN_ID = "agent-land"
+FETCHAI_DEFAULT_CHAIN_ID = "stargateworld-1"
 FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
