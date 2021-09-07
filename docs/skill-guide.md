@@ -453,7 +453,7 @@ aea fetch fetchai/simple_service_registration:0.30.0 && cd simple_service_regist
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
 
-We first create the private key for the service provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+We first create the private key for the service provider AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -1072,7 +1072,7 @@ is_abstract: false
 
 ## Step 9: Run the Search AEA
 
-First, create the private key for the search AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the search AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt

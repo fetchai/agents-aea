@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-import contextlib
 import difflib
 import inspect
 import logging
@@ -27,7 +26,6 @@ import random
 import shutil
 import socket
 import string
-import subprocess  # nosec
 import sys
 import tempfile
 import threading
@@ -55,7 +53,12 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import DEFAULT_CLI_COMMAND, FetchAICrypto
+from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
+from cosmpy.common.rest_client import RestClient
+from cosmpy.crypto.address import Address as CosmpyAddress
+from cosmpy.crypto.keypairs import PrivateKey
+from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -82,7 +85,7 @@ from aea.crypto.ledger_apis import (
     ETHEREUM_DEFAULT_CURRENCY_DENOM,
     FETCHAI_DEFAULT_ADDRESS,
 )
-from aea.crypto.registries import ledger_apis_registry, make_crypto
+from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
@@ -157,14 +160,14 @@ DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 
 # URL to local Fetch ledger instance
-DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.2.7"
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
-DEFAULT_FETCH_ADDR_REMOTE = "https://rpc-agent-land.fetch.ai:443"
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "agent-land"
+DEFAULT_FETCH_CHAIN_ID = "stargateworld-2"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -211,7 +214,7 @@ NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
     "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
 )
 FUNDED_FETCHAI_PRIVATE_KEY_1 = (
-    "f848e125edb124d7752338fdd15825cd031b8c7f38627ec50ccccb7d75ecffdb"
+    "bbaef7511f275dc15f47436d14d6d3c92d4d01befea073d23d0c2750a46f6cb3"
 )
 FUNDED_FETCHAI_PRIVATE_KEY_2 = (
     "9d6459d1f93dd153335291af940f6b5224a34a9a1e1062e2158a45fa4901ed3f"
@@ -224,7 +227,7 @@ ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
 FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
-FUNDED_FETCHAI_ADDRESS_ONE = "fetch1dm72s3yravky6t7rp3daajwwsz2vrqd86g2v47"
+FUNDED_FETCHAI_ADDRESS_ONE = "fetch1k9dns2fd74644g0q9mfpsmfeqg0h2ym2cm6wdh"
 FUNDED_FETCHAI_ADDRESS_TWO = "fetch1x2vfp8ec2yk8nnlzn52agflpmpwtucm6yj2hw4"
 
 # P2P addresses
@@ -1416,10 +1419,17 @@ def fund_accounts_from_local_validator(
     addresses: str, amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
+    rest_client = RestClient(
+        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}"
+    )
+    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
+
+    time.sleep(FETCHD_INITIAL_TX_SLEEP)
+    client = SigningCosmWasmClient(pk, rest_client, DEFAULT_FETCH_CHAIN_ID)
+    coins = [Coin(amount=str(amount), denom=denom)]
+
     for address in addresses:
-        time.sleep(FETCHD_INITIAL_TX_SLEEP)
-        cmd = f'sh -c "echo y | {DEFAULT_CLI_COMMAND} tx send {DEFAULT_GENESIS_ACCOUNT} {address} {amount}{denom} --chain-id {DEFAULT_FETCH_CHAIN_ID}"'
-        docker_exec_cmd(DEFAULT_FETCH_DOCKER_IMAGE_TAG, cmd)
+        client.send_tokens(CosmpyAddress(address), coins)
 
 
 @pytest.fixture()
@@ -1428,27 +1438,6 @@ def fund_fetchai_accounts(fetchd):
     fund_accounts_from_local_validator(
         [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
     )
-
-
-@contextlib.contextmanager
-def use_local_fetchcli_config():
-    """Context manager for temporarily configuring the Fetch CLI for the locally running test node"""
-    cmd = [
-        DEFAULT_CLI_COMMAND,
-        "config",
-        "node",
-        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_RPC_PORT}",
-    ]
-    logger.info(
-        f"Directing the Fetch ledger CLI to the locally running test node: {cmd}"
-    )
-    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
-    yield
-    cmd = [DEFAULT_CLI_COMMAND, "config", "node", DEFAULT_FETCH_ADDR_REMOTE]
-    logger.info(
-        f"Directing the Fetch ledger CLI back to the default remote endpoint {cmd}"
-    )
-    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
 
 
 def env_path_separator() -> str:
@@ -1546,6 +1535,29 @@ def method_scope(cls):
     cls.setup = lambda self: old_setup_class()
     cls.teardown = lambda self: old_teardown_class()
     return cls
+
+
+def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
+    """
+     Get wealth from fetch.ai faucet to specific address
+
+    :param: address: Addresse to be funded from faucet
+    """
+    if fetchai_api is None:
+        fetchai_api = make_ledger_api(
+            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        )
+
+    balance = fetchai_api.get_balance(address)
+    if balance == 0:
+        FetchAIFaucetApi().get_wealth(address)
+
+        timeout = 0
+        while timeout < 40 and balance == 0:
+            time.sleep(1)
+            timeout += 1
+            _balance = fetchai_api.get_balance(address)
+            balance = _balance if _balance is not None else 0
 
 
 @pytest.fixture(scope="session", autouse=True)

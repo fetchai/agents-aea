@@ -35,6 +35,6 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-beaconworld.fetch.ai:443
+      address: https://rest-stargateworld.fetch.ai:443
       denom: atestfet
-      chain_id: beaconworld-1
+      chain_id: stargateworld-2

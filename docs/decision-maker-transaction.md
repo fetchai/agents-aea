@@ -27,6 +27,8 @@ from packages.fetchai.protocols.signing.dialogues import (
 )
 from packages.fetchai.protocols.signing.message import SigningMessage
 
+from tests.conftest import get_wealth_if_needed
+
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
@@ -91,6 +93,7 @@ Add a simple skill with a signing handler and the signing dialogues.
     )
 
     counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
+    get_wealth_if_needed(counterparty_wallet.addresses["fetchai"])
 
     counterparty_identity = Identity(
         name="counterparty_aea",
@@ -113,6 +116,8 @@ Next, we are creating the signing message and we send it to the decision-maker.
         nonce="some_nonce",
         fee_by_currency_id={"FET": 0},
     )
+    get_wealth_if_needed(terms.sender_address)
+
     signing_dialogues = cast(SigningDialogues, skill_context.signing_dialogues)
     stub_transaction = LedgerApis.get_transfer_transaction(
         terms.ledger_id,
@@ -319,6 +324,8 @@ from packages.fetchai.protocols.signing.dialogues import (
 )
 from packages.fetchai.protocols.signing.message import SigningMessage
 
+from tests.conftest import get_wealth_if_needed
+
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
@@ -372,6 +379,7 @@ def run():
     )
 
     counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
+    get_wealth_if_needed(counterparty_wallet.addresses["fetchai"])
 
     counterparty_identity = Identity(
         name="counterparty_aea",
@@ -389,6 +397,8 @@ def run():
         nonce="some_nonce",
         fee_by_currency_id={"FET": 0},
     )
+    get_wealth_if_needed(terms.sender_address)
+
     signing_dialogues = cast(SigningDialogues, skill_context.signing_dialogues)
     stub_transaction = LedgerApis.get_transfer_transaction(
         terms.ledger_id,

@@ -175,7 +175,7 @@ class LedgerApiHandler(Handler):
                         "label": "OracleContract",
                         "init_msg": {"fee": str(strategy.initial_fee_deploy)},
                         "gas": strategy.default_gas_deploy,
-                        "amount": 0,
+                        "amount": 1,
                         "code_id": code_id,
                         "deployer_address": self.context.agent_address,
                     }
