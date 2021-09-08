@@ -231,7 +231,9 @@ class TestGenerateKeyWithAddKeyWithoutConnection(AEATestCaseEmpty):
             assert agent_keys.get(FetchAICrypto.identifier) == FETCHAI_PRIVATE_KEY_FILE
 
 
-class TestGenerateKeyWithAddKeyWithConnection(AEATestCaseEmpty):
+class TestGenerateKeyWithAddKeyWithConnection(
+    TestGenerateKeyWithAddKeyWithoutConnection
+):
     """Test that the command 'aea generate-key --add-key' works as expected."""
 
     keys_config_path = "agent.connection_private_key_paths"
