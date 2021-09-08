@@ -16,18 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the code-blocks in the standalone-transaction.md file."""
-
 import logging
 import os
 from unittest.mock import patch
+
+import pytest
 
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from ..helper import extract_code_blocks, extract_python_code
 from .decision_maker_transaction import logger, run
-from tests.conftest import CUR_PATH, ROOT_DIR
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 MD_FILE = "docs/decision-maker-transaction.md"
@@ -71,6 +71,7 @@ class TestDecisionMakerTransaction(BaseAEATestCase):
                 blocks in self.python_file
             ), "Code-block doesn't exist in the python file."
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_run_end_to_end(self):
         """Run the transaction from the file."""
         try:

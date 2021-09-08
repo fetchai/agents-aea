@@ -21,10 +21,8 @@
 import os
 from pathlib import Path
 
-from aea.helpers.file_io import lock_file
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from tests.common.utils import wait_for_condition
 from tests.conftest import CUR_PATH, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
 from tests.test_docs.test_multiplexer_standalone.multiplexer_standalone import run
@@ -61,25 +59,10 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         message_text = (
             b"some_agent,multiplexer,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
         )
-        msg = ""
-
         path = os.path.join(str(self.t), "output.txt")
-        input_file = open(path, "rb+")
+        with open(path, "rb") as f:
+            msg = f.read()
 
-        def _read():
-            nonlocal msg
-            with lock_file(input_file):
-                data = input_file.read()
-                if data:
-                    input_file.truncate(0)
-                    input_file.seek(0)
-                    msg = data
-                    return True
-            return False
-
-        wait_for_condition(
-            _read, timeout=10, error_msg="Output file empty!", period=0.1
-        )
         assert msg == message_text, "The messages must be identical."
 
     def test_code_blocks_exist(self):

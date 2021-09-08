@@ -37,8 +37,8 @@ def _process_exception():
     raise ValueError("Expected")
 
 
-def _process_return_value():
-    return RETURN_VALUE
+def _process_return_value(value_to_return):
+    return value_to_return
 
 
 def test_process_run_in_venv_timeout_error():
@@ -58,5 +58,5 @@ def test_process_run_in_venv_raise_custom_exception():
 def test_process_run_in_venv_return_value():
     """Test process return value."""
     with TemporaryDirectory() as tmp_dir:
-        ret_value = run_in_venv(tmp_dir, _process_return_value, timeout=20)
+        ret_value = run_in_venv(tmp_dir, _process_return_value, 20, RETURN_VALUE)
         assert ret_value == RETURN_VALUE
