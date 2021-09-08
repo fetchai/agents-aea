@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea generate-key` sub-command."""
-
+import json
 import os
 import shutil
 import tempfile
@@ -29,6 +29,8 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.crypto.registries import make_crypto
+from aea.helpers.sym_link import cd
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CLI_LOG_OPTION,
@@ -189,3 +191,50 @@ class TestGenerateKeyWithFile:
         """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)
+
+
+class TestGenerateKeyWithAddKeyWithoutConnection(AEATestCaseEmpty):
+    """Test that the command 'aea generate-key --add-key' works as expected."""
+
+    keys_config_path = "agent.private_key_paths"
+    args = []  # type: ignore
+
+    def test_fetchai(self):
+        """Test that the fetch private key is created correctly."""
+
+        with cd(self._get_cwd()):
+            result = self.run_cli_command(
+                "config", "get", self.keys_config_path, cwd=self._get_cwd()
+            )
+            assert result.exit_code == 0
+            assert json.loads(result.stdout_bytes) == {}
+
+            args = [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+            result = self.run_cli_command(
+                *args, "--add-key", *self.args, cwd=self._get_cwd()
+            )
+            assert result.exit_code == 0
+            assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
+            make_crypto(
+                FetchAICrypto.identifier,
+                private_key_path=FETCHAI_PRIVATE_KEY_FILE,
+                password=None,
+            )
+
+            Path(FETCHAI_PRIVATE_KEY_FILE).unlink()
+
+            result = self.run_cli_command(
+                "config", "get", self.keys_config_path, cwd=self._get_cwd()
+            )
+            assert result.exit_code == 0
+            agent_keys = json.loads(result.stdout_bytes)
+            assert agent_keys.get(FetchAICrypto.identifier) == FETCHAI_PRIVATE_KEY_FILE
+
+
+class TestGenerateKeyWithAddKeyWithConnection(
+    TestGenerateKeyWithAddKeyWithoutConnection
+):
+    """Test that the command 'aea generate-key --add-key' works as expected."""
+
+    keys_config_path = "agent.connection_private_key_paths"
+    args = ["--connection"]  # type: ignore
