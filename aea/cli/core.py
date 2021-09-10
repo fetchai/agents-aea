@@ -60,6 +60,7 @@ from aea.cli.reset_password import reset_password
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
+from aea.cli.set_autocomplete import set_autocomplete
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
 from aea.cli.utils.click_utils import registry_path_option
@@ -139,3 +140,4 @@ cli.add_command(search)
 cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)
+cli.add_command(set_autocomplete)

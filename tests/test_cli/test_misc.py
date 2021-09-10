@@ -99,6 +99,7 @@ Commands:
   run                  Run the agent.
   scaffold             Scaffold a package for the agent.
   search               Search for packages in the registry.
+  set-autocomplete     Set autocompletition support for bash shell.
   transfer             Transfer wealth associated with a private key of the...
   upgrade              Upgrade the packages of the agent.
 """
