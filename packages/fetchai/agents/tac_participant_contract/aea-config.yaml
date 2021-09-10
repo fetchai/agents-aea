@@ -24,7 +24,7 @@ skills:
 - fetchai/tac_negotiation:0.27.0
 - fetchai/tac_participation:0.23.0
 default_connection: fetchai/p2p_libp2p:0.24.0
-default_ledger: ethereum
+default_ledger: fetchai
 required_ledgers:
 - fetchai
 - ethereum
@@ -51,7 +51,7 @@ public_id: fetchai/p2p_libp2p:0.24.0
 type: connection
 cert_requests:
 - identifier: acn
-  ledger_id: ethereum
+  ledger_id: fetchai
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai
@@ -61,7 +61,7 @@ cert_requests:
 public_id: fetchai/soef:0.25.0
 type: connection
 config:
-  chain_identifier: ethereum
+  chain_identifier: fetchai_v2_misc
 ---
 public_id: fetchai/tac_participation:0.23.0
 type: skill

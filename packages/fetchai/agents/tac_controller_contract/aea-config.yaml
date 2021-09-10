@@ -25,7 +25,7 @@ skills:
 - fetchai/tac_control:0.23.0
 - fetchai/tac_control_contract:0.25.0
 default_connection: fetchai/p2p_libp2p:0.24.0
-default_ledger: ethereum
+default_ledger: fetchai
 required_ledgers:
 - fetchai
 - ethereum
@@ -48,17 +48,26 @@ public_id: fetchai/p2p_libp2p:0.24.0
 type: connection
 cert_requests:
 - identifier: acn
-  ledger_id: ethereum
+  ledger_id: fetchai
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai
   message_format: '{public_key}'
   save_path: .certs/conn_cert.txt
+#---
+#public_id: fetchai/ledger:0.18.0
+#type: connection
+#config:
+#  ledger_apis:
+#    fetchai:
+#      address: 127.0.0.1:26657
+#      denom: atestfet
+#      chain_id: stargateworld-2
 ---
 public_id: fetchai/soef:0.25.0
 type: connection
 config:
-  chain_identifier: ethereum
+  chain_identifier: fetchai_v2_misc
 ---
 public_id: fetchai/tac_control:0.23.0
 type: skill
