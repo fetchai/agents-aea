@@ -276,7 +276,6 @@ class AgentRunProcessTask(BaseAgentRunTask):
                 try:
                     while run_stop_thread:
                         if stop_event.wait(0.01) is True:
-                            print("Stop event set!")
                             break
                 finally:
                     aea.runtime.stop()

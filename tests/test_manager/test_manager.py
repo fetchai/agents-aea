@@ -49,6 +49,9 @@ from tests.common.utils import wait_for_condition
 from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
+DEFAULT_TIMEOUT = 60
+
+
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class BaseTestMultiAgentManager(TestCase):
     """Base test class for multi-agent manager"""
@@ -286,7 +289,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: "Echo Behaviour: act method called."
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=60,
+            timeout=DEFAULT_TIMEOUT,
         )
 
     def test_exception_handling(self, *args):
@@ -299,7 +302,9 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager.add_error_callback(callback_mock)
 
         self.manager.start_all_agents()
-        wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+        wait_for_condition(
+            lambda: callback_mock.call_count > 0, timeout=DEFAULT_TIMEOUT
+        )
 
     def add_agent(self, agent_name: str, project_id: PublicId) -> None:
         """Add agent and start manager."""
@@ -324,7 +329,9 @@ class BaseTestMultiAgentManager(TestCase):
             side_effect=self.manager._print_exception_occurred_but_no_error_callback,
         ) as callback_mock:
             self.manager.start_all_agents()
-            wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+            wait_for_condition(
+                lambda: callback_mock.call_count > 0, timeout=DEFAULT_TIMEOUT
+            )
             callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
@@ -337,7 +344,7 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager.add_error_callback(handler)
 
         self.manager.start_all_agents()
-        wait_for_condition(lambda: not self.manager.is_running, timeout=10)
+        wait_for_condition(lambda: not self.manager.is_running, timeout=DEFAULT_TIMEOUT)
 
     def test_start_all(self, *args):
         """Test MultiAgentManager start all agents."""
@@ -353,14 +360,14 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: len(self.manager.list_agents())
             == len(self.manager.list_agents(running_only=True)),
-            timeout=60,
+            timeout=DEFAULT_TIMEOUT,
             period=0.5,
         )
 
         wait_for_condition(
             lambda: "Start processing messages"
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=60,
+            timeout=DEFAULT_TIMEOUT,
         )
 
         with pytest.raises(ValueError, match="is already started!"):
@@ -376,19 +383,20 @@ class BaseTestMultiAgentManager(TestCase):
         """Test stop agent."""
         self.test_start_all()
         wait_for_condition(
-            lambda: self.manager.list_agents(running_only=True), timeout=60
+            lambda: self.manager.list_agents(running_only=True), timeout=DEFAULT_TIMEOUT
         )
 
         wait_for_condition(
             lambda: "Start processing messages"
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=60,
+            timeout=DEFAULT_TIMEOUT,
         )
 
         self.manager.stop_all_agents()
 
         wait_for_condition(
-            lambda: len(self.manager.list_agents(running_only=True)) == 0, timeout=60
+            lambda: len(self.manager.list_agents(running_only=True)) == 0,
+            timeout=DEFAULT_TIMEOUT,
         )
 
         assert not self.manager.list_agents(running_only=True)
@@ -402,7 +410,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: "Runtime loop stopped!"
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=60,
+            timeout=DEFAULT_TIMEOUT,
         )
 
     def test_do_no_allow_override_some_fields(self, *args):
@@ -466,7 +474,7 @@ class BaseTestMultiAgentManager(TestCase):
         wait_for_condition(
             lambda: "Start processing messages"
             in open(self.log_file(self.agent_name), "r").read(),
-            timeout=60,
+            timeout=DEFAULT_TIMEOUT,
         )
         with pytest.raises(ValueError, match="Agent is running. stop it first!"):
             self.manager.remove_agent(self.agent_name)
@@ -476,7 +484,7 @@ class BaseTestMultiAgentManager(TestCase):
         # wait all stopped
         wait_for_condition(
             lambda: len(self.manager.list_agents(running_only=True)) == 0,
-            timeout=20,
+            timeout=DEFAULT_TIMEOUT,
             period=0.5,
         )
         assert self.agent_name not in self.manager.list_agents(running_only=True)
