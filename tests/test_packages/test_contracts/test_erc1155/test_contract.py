@@ -843,6 +843,60 @@ class TestCosmWasmContract(BaseContractTestCase):
         deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
         assert deployer_balance == original_deployer_balance + 1
 
+        # Other direction of atomic swap
+        # Send 1 ERC1155 token a[0] from Item owner to Deployer
+        # Send 1 native token from Item owner to Deployer
+        tx = self.contract.get_atomic_swap_single_transaction(
+            self.ledger_api,
+            contract_address=self.contract_address,
+            from_address=self.deployer_crypto.address,
+            to_address=self.item_owner_crypto.address,
+            token_id=self.token_ids_a[0],
+            from_supply=0,
+            to_supply=1,
+            value=1,
+            trade_nonce=0,
+            signature="",
+            from_pubkey=self.deployer_crypto.public_key,
+            to_pubkey=self.item_owner_crypto.public_key,
+        )
+        assert len(tx) == 2
+        self.sign_send_confirm_receipt_transaction(
+            tx, self.ledger_api, self.item_owner_crypto
+        )
+
+        # Check Item owner's ERC1155 token balance
+        result = self.contract.get_balance(
+            ledger_api=self.ledger_api,
+            contract_address=self.contract_address,
+            agent_address=self.deployer_crypto.address,
+            token_id=self.token_ids_a[0],
+        )
+
+        assert "balance" in result
+        assert result["balance"][self.token_ids_a[0]] == 1
+
+        # Check deployer's native token balance
+        deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
+        assert deployer_balance == original_deployer_balance + 2
+
+        # Check invalid case with from_supply > 0 and to_supply > 0
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address=self.contract_address,
+                from_address=self.deployer_crypto.address,
+                to_address=self.item_owner_crypto.address,
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=1,
+                value=1,
+                trade_nonce=0,
+                signature="",
+                from_pubkey=self.deployer_crypto.public_key,
+                to_pubkey=self.item_owner_crypto.public_key,
+            )
+
     @pytest.mark.integration
     @pytest.mark.ledger
     def test_cosmwasm_batch_atomic_swap(self):
