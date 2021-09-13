@@ -136,7 +136,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
     def test_get_create_single_transaction(self):
@@ -156,7 +156,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
     def test_get_mint_batch_transaction(self):
@@ -178,7 +178,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
     def test_validate_mint_quantities(self):
@@ -254,7 +254,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
     def test_get_balance(self):
@@ -684,7 +684,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             raise ValueError("Deploy transaction not found!")  # pragma: nocover
 
         tx_receipt = cls.sign_send_confirm_receipt_transaction(
-            tx, cls.ledger_api, [cls.deployer_crypto]
+            tx, cls.ledger_api, cls.deployer_crypto
         )
 
         contract_address = cls.ledger_api.get_contract_address(tx_receipt)
@@ -708,7 +708,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Create batch of tokens
@@ -720,7 +720,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Mint single token
@@ -734,7 +734,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Get balance of single token
@@ -758,7 +758,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Get balances of multiple tokens
@@ -784,7 +784,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Mint single ERC1155 token a[0] to Deployer
@@ -798,7 +798,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Store balance of Deployer's native tokens before atomic swap
@@ -824,7 +824,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             to_pubkey=self.item_owner_crypto.public_key,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
+        self.sign_send_confirm_receipt_multisig_transaction(
             tx, self.ledger_api, [self.deployer_crypto, self.item_owner_crypto]
         )
 
@@ -857,7 +857,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Mint single token a[0] to Deployer
@@ -871,7 +871,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Mint single token a[1] to Item owner
@@ -885,7 +885,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, [self.deployer_crypto]
+            tx, self.ledger_api, self.deployer_crypto
         )
 
         # Store balance of Deployer's native tokens before atomic swap
@@ -913,7 +913,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             to_pubkey=self.item_owner_crypto.public_key,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
+        self.sign_send_confirm_receipt_multisig_transaction(
             tx, self.ledger_api, [self.deployer_crypto, self.item_owner_crypto]
         )
 
