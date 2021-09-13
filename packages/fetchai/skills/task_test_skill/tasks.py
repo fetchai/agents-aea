@@ -16,16 +16,22 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains helper methods and classes for the 'aea' package."""
-from aea.helpers.ipfs.utils import _protobuf_python_implementation
+"""This module contains the tasks for the 'task test skill' skill."""
+import time
+from typing import Any
+
+from aea.skills.tasks import Task
 
 
-# fix for ipfs hashes, preload protobuf classes with protobuf python implementation
-with _protobuf_python_implementation():
-    from aea.helpers.ipfs.pb import (  # noqa: F401   # pylint: disable=import-outside-toplevel,unused-import
-        merkledag_pb2,
-        unixfs_pb2,
-    )
-    from aea.helpers.ipfs.pb.merkledag_pb2 import (  # noqa: F401   # pylint: disable=import-outside-toplevel,unused-import
-        PBNode,
-    )
+class SimpleTask(Task):
+    """Simple task."""
+
+    def __init__(self, data: Any):
+        """Initialize the task."""
+        super().__init__()
+        self.data = data
+
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
+        """Execute task."""
+        time.sleep(3)
+        return self.data

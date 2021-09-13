@@ -16,16 +16,21 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the classes for tasks."""
 import logging
 import signal
 import threading
 from abc import abstractmethod
 from multiprocessing.pool import AsyncResult, Pool, ThreadPool
-from typing import Any, Callable, Dict, Optional, Sequence, Type, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, cast
 
+from aea.components.utils import _enlist_component_packages, _populate_packages
 from aea.helpers.logging import WithLogger
+
+
+THREAD_POOL_MODE = "multithread"
+PROCESS_POOL_MODE = "multiprocess"
+DEFAULT_WORKERS_AMOUNT = 2
 
 
 class Task(WithLogger):
@@ -99,7 +104,8 @@ class Task(WithLogger):
         """Implement the task teardown."""
 
 
-def init_worker() -> None:
+# for api compatability. to remove in the next release
+def init_worker() -> None:  # pragma: nocover
     """
     Initialize a worker.
 
@@ -111,20 +117,35 @@ def init_worker() -> None:
         signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
+def _init_worker(mode: str, packages: Dict[str, List[Dict[str, str]]]) -> None:
+    """
+    Initialize a worker.
+
+    Disable the SIGINT handler of process pool is using.
+    Related to a well-known bug: https://bugs.python.org/issue8296
+
+    :param mode: str. mode task manager runs in
+    :param packages: dict with list of packages to load if needed
+    """
+    if mode == PROCESS_POOL_MODE:  # pragma: nocover
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        _populate_packages(packages)
+
+
 class TaskManager(WithLogger):
     """A Task manager."""
 
     POOL_MODES: Dict[str, Type[Pool]] = {
-        "multithread": ThreadPool,
-        "multiprocess": Pool,
+        THREAD_POOL_MODE: ThreadPool,
+        PROCESS_POOL_MODE: Pool,
     }
 
     def __init__(
         self,
-        nb_workers: int = 2,
+        nb_workers: int = DEFAULT_WORKERS_AMOUNT,
         is_lazy_pool_start: bool = True,
         logger: Optional[logging.Logger] = None,
-        pool_mode: str = "multithread",
+        pool_mode: str = THREAD_POOL_MODE,
     ) -> None:
         """
         Initialize the task manager.
@@ -191,6 +212,7 @@ class TaskManager(WithLogger):
             async_result = self._pool.apply_async(
                 func, args=args, kwds=kwargs if kwargs is not None else {}
             )
+
             self._results_by_task_id[task_id] = async_result
             if self._logger:  # pragma: nocover
                 self._logger.info(f"Task <{func}{args}> set. Task id is {task_id}")
@@ -244,7 +266,13 @@ class TaskManager(WithLogger):
         pool_cls = self.POOL_MODES.get(self._pool_mode)
         if not pool_cls:  # pragma: nocover
             raise ValueError(f"Mode: `{self._pool_mode}` is not supported")
-        self._pool = pool_cls(self._nb_workers, initializer=init_worker)
+        init_args = (
+            self._pool_mode,
+            _enlist_component_packages(),
+        )
+        self._pool = pool_cls(
+            self._nb_workers, initializer=_init_worker, initargs=init_args
+        )
 
     def _stop_pool(self) -> None:
         """Stop internal task pool."""
@@ -256,3 +284,51 @@ class TaskManager(WithLogger):
         self._pool.terminate()
         self._pool.join()
         self._pool = None
+
+
+class ThreadedTaskManager(TaskManager):
+    """A threaded task manager."""
+
+    def __init__(
+        self,
+        nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+        is_lazy_pool_start: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """
+        Initialize the task manager.
+
+        :param nb_workers: the number of worker processes.
+        :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
+        :param logger: the logger.
+        """
+        super().__init__(
+            nb_workers=nb_workers,
+            is_lazy_pool_start=is_lazy_pool_start,
+            logger=logger,
+            pool_mode=THREAD_POOL_MODE,
+        )
+
+
+class ProcessTaskManager(TaskManager):
+    """A multiprocess task manager."""
+
+    def __init__(
+        self,
+        nb_workers: int = DEFAULT_WORKERS_AMOUNT,
+        is_lazy_pool_start: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        """
+        Initialize the task manager.
+
+        :param nb_workers: the number of worker processes.
+        :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
+        :param logger: the logger.
+        """
+        super().__init__(
+            nb_workers=nb_workers,
+            is_lazy_pool_start=is_lazy_pool_start,
+            logger=logger,
+            pool_mode=PROCESS_POOL_MODE,
+        )

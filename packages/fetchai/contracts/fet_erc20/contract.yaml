@@ -8,9 +8,9 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdksAfBj3gVPH8zmzpHjjpXsf1gtAY6z6gjrfYfiicLrr
   __init__.py: QmeJ8x6NiZjVLFbUTgpPPCMzQscqjHNBDExapiezpakksR
+  build/FetERC20Mock.json: QmPKt6BUTUotWS7mtdHLxfg7dEw3cATzNojNBiJ1nifwF9
   contract.py: QmWrxciZBUUxbwUvQVkM4AND59hk1ATpgnoNRofmgFm2Vy
-fingerprint_ignore_patterns:
-- build/*
+fingerprint_ignore_patterns: []
 class_name: FetERC20
 contract_interface_paths:
   ethereum: build/FetERC20Mock.json
