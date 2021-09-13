@@ -57,11 +57,11 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         assert os.path.exists(Path(self.t, "output.txt"))
 
         message_text = (
-            b"some_agent,multiplexer,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
+            "some_agent,multiplexer,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
         )
         path = os.path.join(str(self.t), "output.txt")
-        with open(path, "rb") as f:
-            msg = f.read()
+        with open(path, "r", encoding="utf-8") as file:
+            msg = file.read()
 
         assert msg == message_text, "The messages must be identical."
 

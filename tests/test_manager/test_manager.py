@@ -79,17 +79,25 @@ class BaseTestMultiAgentManager(TestCase):
 
     def tearDown(self):
         """Tear down test case."""
-        for handler in logging.root.getChild("aea").handlers:
-            if getattr(handler, "baseFilename", None):
-                handler.close()
-
-        logging.root.getChild("aea").handlers = self._log_handlers
         try:
             self.manager.stop_manager()
             for task in self.manager._agents_tasks.values():
                 if isinstance(task, AgentRunProcessTask):
                     task.process.terminate()
                     task.process.join(5)
+            time.sleep(1)
+            logging.shutdown(
+                [
+                    handler
+                    for handler in logging._handlerList
+                    if getattr(handler, "baseFilename", None)
+                ]
+            )
+            logging.root.getChild("aea").handlers = [
+                handler
+                for handler in self._log_handlers
+                if not getattr(handler, "baseFilename", None)
+            ]
             time.sleep(1)
             if os.path.exists(self.working_dir):
                 rmtree(self.working_dir)
