@@ -267,4 +267,8 @@ _.last_exception  # unused attribute (/home/solarw/MyData/work/fetchai/agents-ae
 _.last_exception  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/pipe.py:649)
 run_install_subprocess  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/install_dependency.py:75)
 _.deployment_tx_receipt  # unused attribute (agents-aea/aea/test_tools/test_contract.py:105)
+_.Hash  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:124)
+_.Tsize  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:125)
+_.Name  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:126)
 init_worker  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/skills/tasks.py:108)
+_._generate_hash  # unused method (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:161)
