@@ -22,6 +22,7 @@ import logging
 import os
 import pickle  # nosec
 import re
+import time
 from contextlib import suppress
 from copy import copy
 from pathlib import Path
@@ -40,7 +41,7 @@ from aea.crypto.plugin import load_all_plugins
 from aea.crypto.registries import crypto_registry
 from aea.helpers.install_dependency import call_pip
 from aea.manager import MultiAgentManager
-from aea.manager.manager import ProjectPackageConsistencyCheckError
+from aea.manager.manager import AgentRunProcessTask, ProjectPackageConsistencyCheckError
 
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
@@ -78,9 +79,18 @@ class BaseTestMultiAgentManager(TestCase):
 
     def tearDown(self):
         """Tear down test case."""
+        for handler in logging.root.getChild("aea").handlers:
+            if getattr(handler, "baseFilename", None):
+                handler.close()
+
         logging.root.getChild("aea").handlers = self._log_handlers
         try:
             self.manager.stop_manager()
+            for task in self.manager._agents_tasks.values():
+                if isinstance(task, AgentRunProcessTask):
+                    task.process.terminate()
+                    task.process.join(5)
+            time.sleep(1)
             if os.path.exists(self.working_dir):
                 rmtree(self.working_dir)
         finally:

@@ -27,7 +27,6 @@ from abc import ABC, abstractmethod
 from asyncio.tasks import FIRST_COMPLETED
 from collections import defaultdict
 from multiprocessing.synchronize import Event
-from queue import Empty
 from shutil import rmtree
 from threading import Thread
 from traceback import format_exc
@@ -244,10 +243,8 @@ class AgentRunProcessTask(BaseAgentRunTask):
         while self.process.is_alive():
             await asyncio.sleep(self.PROCESS_ALIVE_SLEEP_TIME)
 
-        try:
-            result = self._result_queue.get_nowait()
-        except Empty:
-            return ValueError("agent process was terminated")
+        result = self._result_queue.get_nowait()
+        self.process.join(self.PROCESS_JOIN_TIMEOUT)
         if isinstance(result, Exception):
             raise result
         return result
