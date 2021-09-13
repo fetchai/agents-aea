@@ -21,6 +21,9 @@
 
 from typing import Optional, cast
 
+from aea_ledger_fetchai import FetchAIApi
+
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
@@ -370,6 +373,56 @@ class LedgerApiHandler(Handler):
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
+    def _request_init_transaction(
+        self, ledger_id: str, deployment_tx_receipt: JSONLike
+    ) -> None:
+        """
+        Send a message to request the initialisation transaction to finalise contract deployment on fetch ledger
+
+        :param ledger_id: the ledger id
+        :param deployment_tx_receipt: the transaction receipt
+        """
+        parameters = cast(Parameters, self.context.parameters)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        fetchai_api = cast(FetchAIApi, LedgerApis.get_api(ledger_id))
+        code_id = fetchai_api.get_code_id(deployment_tx_receipt)  # type: Optional[int]
+        if code_id:
+            contract_api_msg, dialogue = contract_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
+                performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+                ledger_id=parameters.ledger_id,
+                contract_id=parameters.contract_id,
+                callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
+                kwargs=ContractApiMessage.Kwargs(
+                    {
+                        "label": "TACERC1155",
+                        "init_msg": {},
+                        "gas": parameters.gas,
+                        "amount": 0,
+                        # "amount": 1, might have to send 1 token if ledger sends panic because
+                        # with 0 it may not be able to get the denom
+                        "code_id": code_id,
+                        "deployer_address": self.context.agent_address,
+                        "tx_fee": 0,
+                    }
+                ),
+            )
+            contract_api_dialogue = cast(ContractApiDialogue, dialogue)
+            contract_api_dialogue.terms = parameters.get_deploy_terms(
+                is_init_transaction=True
+            )
+            contract_api_dialogue.callable = (
+                ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
+            )
+            self.context.outbox.put_message(message=contract_api_msg)
+            self.context.logger.info(
+                "requesting contract initialisation transaction..."
+            )
+        else:  # pragma: nocover
+            self.context.logger.info("Failed to initialise contract: code_id not found")
+
     def _handle_transaction_receipt(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
@@ -379,10 +432,13 @@ class LedgerApiHandler(Handler):
         :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
+        ledger_id = ledger_api_msg.transaction_receipt.ledger_id
+        tx_receipt = ledger_api_msg.transaction_receipt.receipt
+
         is_transaction_successful = LedgerApis.is_transaction_settled(
-            ledger_api_msg.transaction_receipt.ledger_id,
-            ledger_api_msg.transaction_receipt.receipt,
+            ledger_id, tx_receipt
         )
+
         signing_dialogue = ledger_api_dialogue.associated_signing_dialogue
         contract_api_dialogue = signing_dialogue.associated_contract_api_dialogue
         if is_transaction_successful:
@@ -397,17 +453,29 @@ class LedgerApiHandler(Handler):
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
             ):
-                contract_address = cast(
-                    Optional[str],
-                    ledger_api_msg.transaction_receipt.receipt.get(
-                        "contractAddress", None
-                    ),
+                transaction_label = contract_api_dialogue.terms.kwargs.get(
+                    "label", "None"
                 )
-                if contract_address is None:
-                    raise ValueError("No contract address found.")  # pragma: nocover
-                parameters.contract_address = contract_address
-                game.phase = Phase.CONTRACT_DEPLOYED
-                self.context.logger.info("contract deployed.")
+                if game.phase != Phase.CONTRACT_DEPLOYED:
+                    if (
+                        transaction_label == "store"
+                    ):  # deploying contract on fetch ledger
+                        self._request_init_transaction(ledger_id, tx_receipt)
+                    elif transaction_label in {"deploy", "init"}:
+                        contract_address = LedgerApis.get_contract_address(
+                            ledger_id, tx_receipt
+                        )
+                        if contract_address is None:
+                            raise ValueError(
+                                "No contract address found."
+                            )  # pragma: nocover
+                        parameters.contract_address = contract_address
+                        game.phase = Phase.CONTRACT_DEPLOYED
+                        self.context.logger.info("contract deployed.")
+                    else:
+                        self.context.logger.error(
+                            f"Invalid transaction label: {transaction_label}"
+                        )  # pragma: nocover
             elif (
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
