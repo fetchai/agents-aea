@@ -17,12 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 """Helper to install python dependencies."""
+import logging
 import subprocess  # nosec
 import sys
+from io import StringIO
 from itertools import chain
 from logging import Logger
 from subprocess import PIPE  # nosec
-from typing import List
+from typing import List, Tuple
+
+from pip._internal.commands.install import InstallCommand
 
 from aea.configurations.base import Dependency
 from aea.exceptions import AEAException, enforce
@@ -62,15 +66,37 @@ def install_dependencies(
     :param logger: the logger
     :param install_timeout: timeout to wait pip to install
     """
+    del install_timeout
     try:
         pip_args = list(chain(*[d.get_pip_install_args() for d in dependencies]))
         pip_args = [("--extra-index" if i == "-i" else i) for i in pip_args]
         logger.debug("Calling 'pip install {}'".format(" ".join(pip_args)))
-        call_pip(["install", *pip_args], timeout=install_timeout, retry=True)
+        exit_code, err_logs = pip_install(*pip_args)
+        if exit_code != 0:
+            raise Exception(err_logs)
     except Exception as e:
         raise AEAException(
             f"An error occurred while installing with pip install {' '.join(pip_args)}: {e}"
         )
+
+
+def pip_install(*args: str) -> Tuple[int, str]:
+    """Use pip install command directly."""
+    buf = StringIO()
+    buf_handler = logging.StreamHandler(buf)
+    logger = logging.getLogger("pip")
+    logger.addHandler(buf_handler)
+    logger.setLevel(logging.ERROR)
+    exit_code = -100
+    try:
+        cmd = InstallCommand("install", "install")
+        exit_code = cmd.main(list(args))
+    finally:
+        error_logs = buf.getvalue()
+        logger.removeHandler(buf_handler)
+        del buf_handler
+        del buf
+    return exit_code, error_logs
 
 
 def call_pip(pip_args: List[str], timeout: float = 300, retry: bool = False) -> None:
