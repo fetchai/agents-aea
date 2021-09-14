@@ -58,8 +58,7 @@ base_deps = [
     "pyyaml>=4.2b1,<6.0",
     "requests>=2.22.0,<3.0.0",
     "python-dotenv>=0.14.0,<0.18.0",
-    "ecdsa>=0.15,<0.17.0",
-    "pip",
+    "ecdsa>=0.15,<0.17.0"
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":

@@ -58,19 +58,17 @@ class InstallDependenciesTestCase(TestCase):
 
     def test_fails(self, *mocks):
         """Test for install_dependency method fails."""
-        result = 1
-        with mock.patch(
-            "pip._internal.commands.install.InstallCommand.main", return_value=result
-        ):
+        result = mock.Mock()
+        result.returncode = 1
+        with mock.patch("subprocess.run", return_value=result):
             with self.assertRaises(AEAException):
                 install_dependencies([Dependency("test", "==10.0.0")], mock.Mock())
 
     def test_ok(self, *mocks):
         """Test for install_dependency method ok."""
-        result = 0
-        with mock.patch(
-            "pip._internal.commands.install.InstallCommand.main", return_value=result
-        ):
+        result = mock.Mock()
+        result.returncode = 0
+        with mock.patch("subprocess.run", return_value=result):
             install_dependencies([Dependency("test", "==10.0.0")], mock.Mock())
 
     def test_fails_real_pip_call(self):
