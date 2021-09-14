@@ -478,12 +478,22 @@ class ERC1155Contract(Contract):
             # Sending native tokens from to_address to from_address
             msgs.append(cosmos_api.get_packed_send_msg(to_address, from_address, value))
 
-            tx = cosmos_api.get_multi_transaction(
-                from_addresses=[from_address, to_address],
-                pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
-                msgs=msgs,
-                gas=gas,
-            )
+            # In case of the other direction of atomic swap only 1 signer is required
+            if to_supply > 0:
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[to_address],
+                    pub_keys=[bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+            else:
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[from_address, to_address],
+                    pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+
             return tx
 
         raise NotImplementedError  # pragma: nocover

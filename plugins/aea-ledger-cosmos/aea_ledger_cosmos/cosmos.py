@@ -1018,6 +1018,7 @@ class _CosmosApi(LedgerApi):
         contract_address: str,
         msg: JSONLike,
         funds: int = 0,
+        denom: Optional[str] = None,
     ) -> ProtoAny:
         """
         Create and pack MsgExecuteContract
@@ -1026,14 +1027,16 @@ class _CosmosApi(LedgerApi):
         :param contract_address: Address of contract
         :param msg: Paramaters to be passed to smart contract
         :param funds: Funds to be sent to smart contract
+        :param denom: the denomination of funds
 
         :return: Packed MsgExecuteContract
         """
+        denom = denom if denom is not None else self.denom
 
         if funds == 0:
             funds_coins = []
         else:
-            funds_coins = [Coin(denom=self.denom, amount=str(funds))]
+            funds_coins = [Coin(denom=denom, amount=str(funds))]
 
         msg_send = MsgExecuteContract(
             sender=str(sender_address),
@@ -1047,7 +1050,11 @@ class _CosmosApi(LedgerApi):
         return send_msg_packed
 
     def get_packed_send_msg(
-        self, from_address: Address, to_address: Address, amount: int
+        self,
+        from_address: Address,
+        to_address: Address,
+        amount: int,
+        denom: Optional[str] = None,
     ) -> ProtoAny:
         """
         Generate and pack MsgSend
@@ -1055,10 +1062,13 @@ class _CosmosApi(LedgerApi):
         :param from_address: Address of sender
         :param to_address: Address of recipient
         :param amount: amount of coins to be sent
+        :param denom: the denomination of and amount
 
         :return: packer ProtoAny type message
         """
-        amount_coins = [Coin(denom=self.denom, amount=str(amount))]
+        denom = denom if denom is not None else self.denom
+
+        amount_coins = [Coin(denom=denom, amount=str(amount))]
 
         msg_send = MsgSend(
             from_address=str(from_address),
@@ -1093,8 +1103,13 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the chain ID of the transaction.
         :param denom: the denomination of tx fee
 
+        :raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
+
         :return: the transaction
         """
+
+        if pub_keys is not None and len(pub_keys) != len(from_addresses):
+            raise RuntimeError("Number of pubkeys is not equal to number of addresses")
 
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
