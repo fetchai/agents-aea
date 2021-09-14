@@ -23,11 +23,18 @@ import re
 import time
 from pathlib import Path
 from typing import cast
+from unittest import mock
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
 
+from aea.configurations.loader import (
+    ComponentType,
+    ContractConfig,
+    load_component_configuration,
+)
+from aea.contracts.base import Contract, contract_registry
 from aea.test_tools.test_contract import BaseContractTestCase
 
 from tests.conftest import (
@@ -996,3 +1003,103 @@ class TestCosmWasmContract(BaseContractTestCase):
         # Check deployer's native token balance
         deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
         assert deployer_balance == original_deployer_balance + 1
+
+
+class TestContractCommon:
+    """Other tests for the contract."""
+
+    @classmethod
+    def setup(cls):
+        """Setup."""
+        cls.path_to_contract = Path(
+            ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"
+        )
+        cls.ledger_identifier: str = "dummy"
+
+        # register contract
+        configuration = cast(
+            ContractConfig,
+            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
+        )
+        configuration._directory = (  # pylint: disable=protected-access
+            cls.path_to_contract
+        )
+        if str(configuration.public_id) not in contract_registry.specs:
+            # load contract into sys modules
+            Contract.from_config(configuration)
+        cls.contract = contract_registry.make(str(configuration.public_id))
+
+        cls.ledger_api = mock.Mock()
+
+        cls.token_ids_a = [
+            340282366920938463463374607431768211456,
+        ]
+
+    @pytest.mark.ledger
+    def test_get_create_batch_transaction_wrong_identifier(self):
+        """Test if get_create_batch_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_create_batch_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                token_ids=self.token_ids_a,
+            )
+
+    @pytest.mark.ledger
+    def test_get_create_single_transaction_wrong_identifier(self):
+        """Test if get_create_single_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_create_single_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                token_id=self.token_ids_a[0],
+            )
+
+    @pytest.mark.ledger
+    def test_get_mint_batch_transaction_wrong_identifier(self):
+        """Test if get_mint_batch_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_mint_batch_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                recipient_address="address",
+                token_ids=self.token_ids_a,
+                mint_quantities=[1],
+            )
+
+    @pytest.mark.ledger
+    def test_get_mint_single_transaction_wrong_identifier(self):
+        """Test if get_mint_single_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_mint_single_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                recipient_address="address",
+                token_id=self.token_ids_a[0],
+                mint_quantity=1,
+            )
+
+    @pytest.mark.ledger
+    def test_get_balance_wrong_identifier(self):
+        """Test if get_balance with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_balance(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+                token_id=self.token_ids_a[0],
+            )
