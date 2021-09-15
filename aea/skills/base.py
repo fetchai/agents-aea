@@ -174,6 +174,11 @@ class SkillContext:
         return self._get_agent_context().address
 
     @property
+    def public_keys(self) -> Optional[Dict[str, str]]:
+        """Get address."""
+        return self._get_agent_context().public_keys
+
+    @property
     def connection_status(self) -> MultiplexerStatus:
         """Get connection status."""
         return self._get_agent_context().connection_status

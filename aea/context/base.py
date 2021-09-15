@@ -37,6 +37,7 @@ class AgentContext:
     __slots__ = (
         "_shared_state",
         "_identity",
+        "_public_keys",
         "_connection_status",
         "_outbox",
         "_decision_maker_message_queue",
@@ -69,6 +70,7 @@ class AgentContext:
         search_service_address: Address,
         decision_maker_address: Address,
         data_dir: str,
+        public_keys: Optional[Dict[str, str]] = None,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         send_to_skill: Optional[Callable] = None,
         **kwargs: Any
@@ -95,6 +97,7 @@ class AgentContext:
         """
         self._shared_state = {}  # type: Dict[str, Any]
         self._identity = identity
+        self._public_keys = public_keys
         self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
@@ -165,6 +168,11 @@ class AgentContext:
     def addresses(self) -> Dict[str, Address]:
         """Get addresses."""
         return self.identity.addresses
+
+    @property
+    def public_keys(self) -> Optional[Dict[str, str]]:
+        """Get addresses."""
+        return self._public_keys
 
     @property
     def address(self) -> Address:

@@ -220,6 +220,7 @@ class AEA(Agent):
             search_service_address,
             decision_maker_handler.self_address,
             data_dir,
+            public_keys=wallet.public_keys,
             storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
             send_to_skill=self.runtime.agent_loop.send_to_skill,

@@ -305,7 +305,7 @@ class FipaNegotiationHandler(Handler):
                     )
                     self.context.outbox.put_message(message=contract_api_msg)
                 elif strategy.ledger_id == FetchAIApi.identifier:
-                    public_key = FetchAICrypto.public_key
+                    public_key = self.context.public_keys.get(strategy.ledger_id)
                     fipa_msg = fipa_dialogue.reply(
                         performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
                         info={"public_key": public_key},
