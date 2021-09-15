@@ -1011,10 +1011,11 @@ class TestContractCommon:
     @classmethod
     def setup(cls):
         """Setup."""
+
+        # Register smart contract used for testing
         cls.path_to_contract = Path(
             ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"
         )
-        cls.ledger_identifier: str = "dummy"
 
         # register contract
         configuration = cast(
@@ -1029,8 +1030,6 @@ class TestContractCommon:
             Contract.from_config(configuration)
         cls.contract = contract_registry.make(str(configuration.public_id))
 
-        cls.ledger_api = mock.Mock()
-
         cls.token_ids_a = [
             340282366920938463463374607431768211456,
         ]
@@ -1039,10 +1038,15 @@ class TestContractCommon:
     def test_get_create_batch_transaction_wrong_identifier(self):
         """Test if get_create_batch_transaction with wrong api identifier fails."""
 
+        # Create mock ledger with unknown identifier
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "dummy"}
+        ledger_api.configure_mock(**attrs)
+
         # Test if function is not implemented for unknown ledger
         with pytest.raises(NotImplementedError):
             self.contract.get_create_batch_transaction(
-                ledger_api=self.ledger_api,
+                ledger_api=ledger_api,
                 contract_address="contract_address",
                 deployer_address="address",
                 token_ids=self.token_ids_a,
@@ -1052,10 +1056,15 @@ class TestContractCommon:
     def test_get_create_single_transaction_wrong_identifier(self):
         """Test if get_create_single_transaction with wrong api identifier fails."""
 
+        # Create mock ledger with unknown identifier
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "dummy"}
+        ledger_api.configure_mock(**attrs)
+
         # Test if function is not implemented for unknown ledger
         with pytest.raises(NotImplementedError):
             self.contract.get_create_single_transaction(
-                ledger_api=self.ledger_api,
+                ledger_api=ledger_api,
                 contract_address="contract_address",
                 deployer_address="address",
                 token_id=self.token_ids_a[0],
@@ -1065,10 +1074,15 @@ class TestContractCommon:
     def test_get_mint_batch_transaction_wrong_identifier(self):
         """Test if get_mint_batch_transaction with wrong api identifier fails."""
 
+        # Create mock ledger with unknown identifier
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "dummy"}
+        ledger_api.configure_mock(**attrs)
+
         # Test if function is not implemented for unknown ledger
         with pytest.raises(NotImplementedError):
             self.contract.get_mint_batch_transaction(
-                ledger_api=self.ledger_api,
+                ledger_api=ledger_api,
                 contract_address="contract_address",
                 deployer_address="address",
                 recipient_address="address",
@@ -1080,10 +1094,15 @@ class TestContractCommon:
     def test_get_mint_single_transaction_wrong_identifier(self):
         """Test if get_mint_single_transaction with wrong api identifier fails."""
 
+        # Create mock ledger with unknown identifier
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "dummy"}
+        ledger_api.configure_mock(**attrs)
+
         # Test if function is not implemented for unknown ledger
         with pytest.raises(NotImplementedError):
             self.contract.get_mint_single_transaction(
-                ledger_api=self.ledger_api,
+                ledger_api=ledger_api,
                 contract_address="contract_address",
                 deployer_address="address",
                 recipient_address="address",
@@ -1095,11 +1114,91 @@ class TestContractCommon:
     def test_get_balance_wrong_identifier(self):
         """Test if get_balance with wrong api identifier fails."""
 
+        # Create mock ledger with unknown identifier
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "dummy"}
+        ledger_api.configure_mock(**attrs)
+
         # Test if function is not implemented for unknown ledger
         with pytest.raises(NotImplementedError):
             self.contract.get_balance(
-                ledger_api=self.ledger_api,
+                ledger_api=ledger_api,
                 contract_address="contract_address",
                 agent_address="address",
                 token_id=self.token_ids_a[0],
             )
+
+    @pytest.mark.ledger
+    def test_get_balance_wrong_query_res(self):
+        """Test if get_balance with wrong api identifier fails."""
+
+        # Create mock fetchai ledger that returns None on execute_contract_query
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "fetchai", "execute_contract_query.return_value": None}
+        ledger_api.configure_mock(**attrs)
+
+        # Test if get balance returns ValueError when querying contract returns None
+        with pytest.raises(ValueError):
+            self.contract.get_balance(
+                ledger_api=ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+                token_id=self.token_ids_a[0],
+            )
+
+    @pytest.mark.ledger
+    def test_get_hash_batch_not_same(self):
+        """Test if get_hash_batch returns ValueError when on-chain hash is not same as computed hash."""
+
+        ledger_api = mock.Mock()
+        ledger_api.identifier = "ethereum"
+
+        # Test if get hash returns ValueError when on chain hash is not same as computed hash
+        with mock.patch.object(type(self.contract), "_get_hash_batch", new=mock.Mock()):
+            with pytest.raises(ValueError):
+                self.contract.get_hash_batch(
+                    ledger_api=ledger_api,
+                    contract_address="contract_address",
+                    from_address="address",
+                    to_address="address",
+                    token_ids=self.token_ids_a,
+                    from_supplies=[1],
+                    to_supplies=[0],
+                    value=123,
+                    trade_nonce=123,
+                )
+
+    @pytest.mark.ledger
+    def test_generate_trade_nonce_if_exist(self):
+        """Test if generate_trade_nonce retries when nonce already exist."""
+
+        # Etherem ledger api mock
+        ledger_api = mock.Mock()
+        ledger_api.identifier = "ethereum"
+
+        # instance.functions.is_nonce_used(agent_address, trade_nonce).call() -> True, False
+        is_nonce_used_mock = mock.Mock()
+        is_nonce_used_mock.configure_mock(**{"call.side_effect": [True, False]})
+
+        # instance.functions.is_nonce_used(agent_address, trade_nonce) -> is_nonce_used_mock with call method
+        instance_mock = mock.Mock()
+        instance_mock.configure_mock(
+            **{"functions.is_nonce_used.return_value": is_nonce_used_mock}
+        )
+
+        # cls.get_instance(ledger_api, contract_address) -> instance_mock
+        get_instance_mock = mock.Mock()
+        get_instance_mock.configure_mock(**{"return_value": instance_mock})
+
+        # Patch get_instance method to return get_instance_mock which returns instance of instance_mock when called
+        with mock.patch.object(
+            type(self.contract), "get_instance", new=get_instance_mock
+        ):
+            self.contract.generate_trade_nonce(
+                ledger_api=ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+            )
+
+        # Check if is_nonce_used was called twice
+        assert is_nonce_used_mock.call.call_count == 2
