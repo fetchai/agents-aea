@@ -11,7 +11,7 @@ fingerprint:
   build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE
   build/erc1155.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
   build/erc1155.wasm: QmdzRc1dnN11kTKeeFZM9iD4dVUrKut9tQevkphV71XoVN
-  contract.py: QmUaqMbw5oJuojSM92w34dK4Gqa788xHzMszNukeqdRwJX
+  contract.py: QmPx6TXy6L8CKX6yLFBfUnrBDGSfA3x1s3yqdJTA5qbCXZ
   contracts/Migrations.sol: QmbW34mYrj3uLteyHf3S46pnp9bnwovtCXHbdBHfzMkSZx
   contracts/erc1155.vy: QmXwob8G1uX7fDvtuuKW139LALWtQmGw2vvaTRBVAWRxTx
   migrations/1_initial_migration.js: QmcxaWKQ2yPkQBmnpXmcuxPZQUMuUudmPmX3We8Z9vtAf7

@@ -377,11 +377,11 @@ class ERC1155Contract(Contract):
         to_supply: int,
         value: int,
         trade_nonce: int,
-        signature: str,
+        signature: Optional[str] = None,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-        from_pubkey: str = "",
-        to_pubkey: str = "",
+        from_pubkey: Optional[str] = None,
+        to_pubkey: Optional[str] = None,
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
@@ -408,6 +408,11 @@ class ERC1155Contract(Contract):
             )
 
         if ledger_api.identifier == EthereumApi.identifier:
+            if signature is None:
+                raise RuntimeError("Signature expected for Eth based contract.")
+            if from_pubkey is not None or to_pubkey is not None:
+                raise RuntimeError("Pubkeys not expected for Eth based contract.")
+
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -433,6 +438,13 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            if signature is not None:
+                raise RuntimeError(
+                    "Signature not expected for Cosmos/Fetch based contract."
+                )
+            if from_pubkey is None or to_pubkey is None:
+                raise RuntimeError("Pubkeys requred for Cosmos/Fetch based contract.")
+
             cosmos_api = cast(CosmosApi, ledger_api)
 
             msgs: List[ProtoAny] = []
@@ -555,11 +567,11 @@ class ERC1155Contract(Contract):
         to_supplies: List[int],
         value: int,
         trade_nonce: int,
-        signature: str,
+        signature: Optional[str] = None,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-        from_pubkey: str = "",
-        to_pubkey: str = "",
+        from_pubkey: Optional[str] = None,
+        to_pubkey: Optional[str] = None,
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
@@ -573,14 +585,19 @@ class ERC1155Contract(Contract):
         :param to_supplies: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
         :param trade_nonce: the nonce of the trade, this is separate from the nonce of the transaction
-        :param signature: the signature of the trade
+        :param signature: the signature of the trade - used on Ethereum
         :param data: the data to include in the transaction
         :param gas: the gas to be used
-        :param from_pubkey: Public key associated with from_address
-        :param to_pubkey: Public key associated with to_address
+        :param from_pubkey: Public key associated with from_address - Used on Cosmos/Fetch
+        :param to_pubkey: Public key associated with to_address - Used on Cosmos/Fetch
         :return: a ledger transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            if signature is None:
+                raise RuntimeError("Signature expected for Eth based contract.")
+            if from_pubkey is not None or to_pubkey is not None:
+                raise RuntimeError("Pubkeys not expected for Eth based contract.")
+
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -606,6 +623,13 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            if signature is not None:
+                raise RuntimeError(
+                    "Signature not expected for Cosmos/Fetch based contract."
+                )
+            if from_pubkey is None or to_pubkey is None:
+                raise RuntimeError("Pubkeys requred for Cosmos/Fetch based contract.")
+
             cosmos_api = cast(CosmosApi, ledger_api)
 
             msgs: List[ProtoAny] = []
