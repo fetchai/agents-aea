@@ -199,10 +199,10 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         token_id = self.token_ids_a[0]
         mint_quantity = 2
         with pytest.raises(
-                ValueError,
-                match=re.escape(
-                    f"Cannot mint NFT (token_id={token_id}) with mint_quantity more than 1 (found={mint_quantity})"
-                ),
+            ValueError,
+            match=re.escape(
+                f"Cannot mint NFT (token_id={token_id}) with mint_quantity more than 1 (found={mint_quantity})"
+            ),
         ):
             self.contract.validate_mint_quantities(
                 token_ids=[token_id], mint_quantities=[mint_quantity],
@@ -212,10 +212,10 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         token_id = 1020847100762815390390123822295304634368
         mint_quantity = 1
         with pytest.raises(
-                ValueError,
-                match=re.escape(
-                    f"The token type must be 1 or 2. Found type=3 for token_id={token_id}"
-                ),
+            ValueError,
+            match=re.escape(
+                f"The token type must be 1 or 2. Found type=3 for token_id={token_id}"
+            ),
         ):
             self.contract.validate_mint_quantities(
                 token_ids=[token_id], mint_quantities=[mint_quantity],
@@ -475,14 +475,14 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             [
                 key in tx
                 for key in [
-                "value",
-                "chainId",
-                "gas",
-                "gasPrice",
-                "nonce",
-                "to",
-                "from",
-            ]
+                    "value",
+                    "chainId",
+                    "gas",
+                    "gasPrice",
+                    "nonce",
+                    "to",
+                    "from",
+                ]
             ]
         ), "Error, found: {}".format(tx)
 
@@ -528,14 +528,14 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             [
                 key in tx
                 for key in [
-                "value",
-                "chainId",
-                "gas",
-                "gasPrice",
-                "nonce",
-                "to",
-                "from",
-            ]
+                    "value",
+                    "chainId",
+                    "gas",
+                    "gasPrice",
+                    "nonce",
+                    "to",
+                    "from",
+                ]
             ]
         ), "Error, found: {}".format(tx)
 

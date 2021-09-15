@@ -395,11 +395,11 @@ class ERC1155Contract(Contract):
         :param to_supply: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
         :param trade_nonce: the nonce of the trade, this is separate from the nonce of the transaction
-        :param signature: the signature of the trade
+        :param signature: the signature of the trade - used on Ethereum
         :param data: the data to include in the transaction
         :param gas: the gas to be used
-        :param from_pubkey: Public key associated with from_address
-        :param to_pubkey: Public key associated with to_address
+        :param from_pubkey: Public key associated with from_address - Used on Cosmos/Fetch
+        :param to_pubkey: Public key associated with to_address - Used on Cosmos/Fetch
         :return: a ledger transaction object
         """
         if from_supply > 0 and to_supply > 0:
