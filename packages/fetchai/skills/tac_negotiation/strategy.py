@@ -540,13 +540,17 @@ class Strategy(Model):
     def kwargs_from_terms(
         terms: Terms,
         signature: Optional[str] = None,
+        sender_public_key: Optional[str] = None,
+        counterparty_public_key: Optional[str] = None,
         is_from_terms_sender: bool = True,
     ) -> Dict[str, Any]:
         """
         Get the contract api message kwargs from the terms.
 
         :param terms: the terms
-        :param signature: the signature
+        :param signature: the signature (for ethereum or non-contract-based case)
+        :param sender_public_key: the sender's public key (for fetchai ledger case)
+        :param counterparty_public_key: the counterparty's public key (for fetchai ledger case)
         :param is_from_terms_sender: whether from == terms.sender_address (i.e. agent submitting tx is the one which terms are considered)
         :return: the kwargs
         """
@@ -591,6 +595,24 @@ class Strategy(Model):
             "value": 0,
             "trade_nonce": int(terms.nonce),
         }
+        enforce(
+            sender_public_key is not None
+            and counterparty_public_key is not None
+            or sender_public_key is None
+            and counterparty_public_key is None,
+            "Either provide both sender's and counterparty's public-keys or neither's.",
+        )
+        enforce(
+            not (
+                signature is not None
+                and sender_public_key is not None
+                and counterparty_public_key is not None
+            ),
+            "Either provide signature (for Ethereum and non-contract-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC)",
+        )
         if signature is not None:
             kwargs["signature"] = signature
+        elif sender_public_key is not None:
+            kwargs["from_pubkey"] = sender_public_key
+            kwargs["to_pubkey"] = counterparty_public_key
         return kwargs

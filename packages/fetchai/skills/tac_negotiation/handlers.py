@@ -22,6 +22,9 @@
 from collections import OrderedDict
 from typing import Optional, Tuple, cast
 
+from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
+
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
@@ -102,6 +105,8 @@ class FipaNegotiationHandler(Handler):
             self._on_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._on_match_accept(fipa_msg, fipa_dialogue)
+        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
+            self._on_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """Implement the handler teardown."""
@@ -267,32 +272,55 @@ class FipaNegotiationHandler(Handler):
                 terms, role=cast(FipaDialogue.Role, fipa_dialogue.role)
             )
             if strategy.is_contract_tx:
-                contract_api_dialogues = cast(
-                    ContractApiDialogues, self.context.contract_api_dialogues
-                )
-                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
-                    counterparty=LEDGER_API_ADDRESS,
-                    performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
-                    ledger_id=strategy.ledger_id,
-                    contract_id=strategy.contract_id,
-                    contract_address=strategy.contract_address,
-                    callable="get_hash_batch",
-                    kwargs=ContractApiMessage.Kwargs(
-                        strategy.kwargs_from_terms(
-                            fipa_dialogue.terms, is_from_terms_sender=False
-                        )
-                    ),
-                )
-                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-                contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-                self.context.logger.info(
-                    "requesting batch transaction hash, sending {} to {}, message={}".format(
-                        contract_api_msg.performative,
-                        strategy.contract_id,
-                        contract_api_msg,
+                if strategy.ledger_id == EthereumApi.identifier:
+                    contract_api_dialogues = cast(
+                        ContractApiDialogues, self.context.contract_api_dialogues
                     )
-                )
-                self.context.outbox.put_message(message=contract_api_msg)
+                    (
+                        contract_api_msg,
+                        contract_api_dialogue,
+                    ) = contract_api_dialogues.create(
+                        counterparty=LEDGER_API_ADDRESS,
+                        performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
+                        ledger_id=strategy.ledger_id,
+                        contract_id=strategy.contract_id,
+                        contract_address=strategy.contract_address,
+                        callable="get_hash_batch",
+                        kwargs=ContractApiMessage.Kwargs(
+                            strategy.kwargs_from_terms(
+                                fipa_dialogue.terms, is_from_terms_sender=False
+                            )
+                        ),
+                    )
+                    contract_api_dialogue = cast(
+                        ContractApiDialogue, contract_api_dialogue
+                    )
+                    contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+                    self.context.logger.info(
+                        "requesting batch transaction hash, sending {} to {}, message={}".format(
+                            contract_api_msg.performative,
+                            strategy.contract_id,
+                            contract_api_msg,
+                        )
+                    )
+                    self.context.outbox.put_message(message=contract_api_msg)
+                elif strategy.ledger_id == FetchAIApi.identifier:
+                    public_key = FetchAICrypto.public_key
+                    fipa_msg = fipa_dialogue.reply(
+                        performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                        info={"public_key": public_key},
+                    )
+                    self.context.outbox.put_message(message=fipa_msg)
+                    self.context.logger.info(
+                        "sending {} to {} (as {}), message={}.".format(
+                            fipa_msg.performative.value,
+                            fipa_msg.to[-5:],
+                            fipa_dialogue.role,
+                            fipa_msg,
+                        )
+                    )
+                else:
+                    enforce(False, f"Unidentified ledger id: {strategy.ledger_id}")
             else:
                 signing_dialogues = cast(
                     SigningDialogues, self.context.signing_dialogues
@@ -341,42 +369,89 @@ class FipaNegotiationHandler(Handler):
         :param match_accept: the MatchAccept message
         :param fipa_dialogue: the fipa_dialogue
         """
-        counterparty_signature = match_accept.info.get("signature")
-        if counterparty_signature is None:
-            self.context.logger.info(
-                f"{match_accept.performative} did not contain counterparty signature!"
-            )
-            return
-        fipa_dialogue.counterparty_signature = counterparty_signature
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_contract_tx:
-            contract_api_dialogues = cast(
-                ContractApiDialogues, self.context.contract_api_dialogues
-            )
-            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-                ledger_id=strategy.ledger_id,
-                contract_id=strategy.contract_id,
-                contract_address=strategy.contract_address,
-                callable="get_atomic_swap_batch_transaction",
-                kwargs=ContractApiMessage.Kwargs(
-                    strategy.kwargs_from_terms(
-                        fipa_dialogue.terms, signature=counterparty_signature,
+            if strategy.ledger_id == FetchAIApi.identifier:
+                counterparty_public_key = match_accept.info.get("public_key")
+                if counterparty_public_key is None:
+                    self.context.logger.info(
+                        f"{match_accept.performative} did not contain counterparty public_key!"
                     )
-                ),
-            )
-            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-            contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            self.context.logger.info(
-                "requesting batch atomic swap transaction, sending {} to {}, message={}".format(
-                    contract_api_msg.performative,
-                    strategy.contract_id,
-                    contract_api_msg,
+                    return
+                # fipa_dialogue.counterparty_signature = counterparty_signature
+                sender_public_key = cast(Optional[str], FetchAICrypto.public_key)
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
                 )
-            )
-            self.context.outbox.put_message(message=contract_api_msg)
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+                    ledger_id=strategy.ledger_id,
+                    contract_id=strategy.contract_id,
+                    contract_address=strategy.contract_address,
+                    callable="get_atomic_swap_batch_transaction",
+                    kwargs=ContractApiMessage.Kwargs(
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms,
+                            sender_public_key=sender_public_key,
+                            counterparty_public_key=counterparty_public_key,
+                        )
+                    ),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+                self.context.logger.info(
+                    "requesting batch atomic swap transaction, sending {} to {}, message={}".format(
+                        contract_api_msg.performative,
+                        strategy.contract_id,
+                        contract_api_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=contract_api_msg)
+            elif strategy.ledger_id == EthereumApi.identifier:
+                counterparty_signature = match_accept.info.get("signature")
+                if counterparty_signature is None:
+                    self.context.logger.info(
+                        f"{match_accept.performative} did not contain counterparty signature!"
+                    )
+                    return
+                fipa_dialogue.counterparty_signature = counterparty_signature
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
+                )
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+                    ledger_id=strategy.ledger_id,
+                    contract_id=strategy.contract_id,
+                    contract_address=strategy.contract_address,
+                    callable="get_atomic_swap_batch_transaction",
+                    kwargs=ContractApiMessage.Kwargs(
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms, signature=counterparty_signature,
+                        )
+                    ),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+                self.context.logger.info(
+                    "requesting batch atomic swap transaction, sending {} to {}, message={}".format(
+                        contract_api_msg.performative,
+                        strategy.contract_id,
+                        contract_api_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=contract_api_msg)
+            else:
+                enforce(False, f"Unidentified ledger id: {strategy.ledger_id}")
         else:
+            counterparty_signature = match_accept.info.get("signature")
+            if counterparty_signature is None:
+                self.context.logger.info(
+                    f"{match_accept.performative} did not contain counterparty signature!"
+                )
+                return
+            fipa_dialogue.counterparty_signature = counterparty_signature
             transactions = cast(Transactions, self.context.transactions)
             terms = transactions.pop_pending_initial_acceptance(
                 fipa_dialogue.dialogue_label, match_accept.target
@@ -399,6 +474,41 @@ class FipaNegotiationHandler(Handler):
                 )
             )
             self.context.decision_maker_message_queue.put(signing_msg)
+
+    def _on_inform(self, inform: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
+        """
+        Handle an inform.
+
+        :param inform: the Inform message
+        :param fipa_dialogue: the fipa_dialogue
+        """
+        tx_signed_by_the_other = inform.info.get("signed_tx", None)
+        self.context.logger.info(
+            "received inform with signed_tx={}".format(tx_signed_by_the_other)
+        )
+
+        strategy = cast(Strategy, self.context.strategy)
+        enforce(
+            strategy.is_contract_tx, "Inform is only used in the contract-based TAC"
+        )
+        enforce(
+            strategy.ledger_id == FetchAIApi.identifier,
+            "Inform is only used in the fetchai-based TAC",
+        )
+
+        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty=self.context.decision_maker_address,
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            raw_transaction=tx_signed_by_the_other,
+            terms=fipa_dialogue.terms,
+        )
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+        self.context.decision_maker_message_queue.put_nowait(signing_msg)
+        self.context.logger.info(
+            "proposing the transaction to the decision maker. Waiting for confirmation ..."
+        )
 
 
 class SigningHandler(Handler):
@@ -540,6 +650,42 @@ class SigningHandler(Handler):
             last_fipa_message.performative
             == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
         ):
+            if strategy.ledger_id == EthereumApi.identifier:
+                ledger_api_dialogues = cast(
+                    LedgerApiDialogues, self.context.ledger_api_dialogues
+                )
+                ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+                    signed_transaction=signing_msg.signed_transaction,
+                )
+                ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+                ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
+                self.context.logger.info(
+                    "sending {} to ledger {}, message={}".format(
+                        ledger_api_msg.performative, strategy.ledger_id, ledger_api_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=ledger_api_msg)
+            elif strategy.ledger_id == FetchAIApi.identifier:
+                # send the constructed and signed tx to the other party to sign
+                fipa_dialogue = signing_dialogue.associated_fipa_dialogue
+                fipa_msg = fipa_dialogue.reply(
+                    performative=FipaMessage.Performative.INFORM,
+                    info={"signed_tx": signing_msg.signed_transaction},
+                )
+                self.context.logger.info(
+                    "sending {} to {} (as {}), message={}.".format(
+                        fipa_msg.performative.value,
+                        fipa_msg.to[-5:],
+                        fipa_dialogue.role,
+                        fipa_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=fipa_msg)
+            else:
+                enforce(False, f"Unidentified ledger id: {strategy.ledger_id}")
+        elif last_fipa_message.performative == FipaMessage.Performative.INFORM:
             ledger_api_dialogues = cast(
                 LedgerApiDialogues, self.context.ledger_api_dialogues
             )
