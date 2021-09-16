@@ -780,6 +780,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
     @pytest.mark.integration
     @pytest.mark.ledger
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_cosmwasm_single_atomic_swap(self):
         """Test single atomic swap."""
         # Create batch of tokens
@@ -906,6 +907,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
     @pytest.mark.integration
     @pytest.mark.ledger
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_cosmwasm_batch_atomic_swap(self):
         """Test batch atomic swap."""
 
