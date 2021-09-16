@@ -1147,6 +1147,24 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
+    def test_get_balances_wrong_query_res(self):
+        """Test if get_balances with wrong api identifier fails."""
+
+        # Create mock fetchai ledger that returns None on execute_contract_query
+        ledger_api = mock.Mock()
+        attrs = {"identifier": "fetchai", "execute_contract_query.return_value": None}
+        ledger_api.configure_mock(**attrs)
+
+        # Test if get balance returns ValueError when querying contract returns None
+        with pytest.raises(ValueError):
+            self.contract.get_balances(
+                ledger_api=ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+                token_ids=self.token_ids_a,
+            )
+
+    @pytest.mark.ledger
     def test_get_hash_batch_not_same(self):
         """Test if get_hash_batch returns ValueError when on-chain hash is not same as computed hash."""
 
