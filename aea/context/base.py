@@ -91,6 +91,7 @@ class AgentContext:
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
         :param data_dir: directory where to put local files.
+        :param public_keys: public keys of the aea.
         :param storage_callable: function that returns optional storage attached to agent.
         :param send_to_skill: callable for sending envelopes to skills.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
