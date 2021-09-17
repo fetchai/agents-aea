@@ -96,9 +96,9 @@ class DictProtobufStructSerializer:
             patched = False
             for v in value:
                 v, need_patch = cls._patch_value(v)
-                result.append(v)
-                if need_patch:
+                if need_patch or isinstance(v, dict):
                     patched = True
+                result.append(v)
             return result, patched
         if isinstance(value, dict):
             cls._patch_dict(value)
@@ -119,6 +119,7 @@ class DictProtobufStructSerializer:
     def _restore_value(cls, value: Any) -> Any:
         if isinstance(value, str):
             return cls._str_to_bytes(value)
+
         if isinstance(value, Struct):
             if value != Struct():
                 new_dict = dict(value)
@@ -150,6 +151,7 @@ class DictProtobufStructSerializer:
 
             if key in need_patch:
                 dictionary[key] = cls._restore_value(value)
+
             elif isinstance(value, (list, ListValue)):
                 # fix list of elementes not needed to be restored
                 dictionary[key] = list(value)  # type: ignore
