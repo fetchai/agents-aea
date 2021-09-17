@@ -31,10 +31,12 @@ def test_encode_decode_i():
         "key4": "some string",
         "key5": b"some bytes string",
         "key6": Struct(),
-        "_need_patch": {},
+        "list_of_bytes": [b"1234", b"234234"],
+        "list_of_ints": [1, 2, 3],
+        "list_of_str": ["1234", "234234"],
+        "list_of_floats": [1.1, 2.2, 3.0],
     }
     encoded = DictProtobufStructSerializer.encode(case)
-    case.pop("_need_patch")
     assert isinstance(encoded, bytes)
     decoded = DictProtobufStructSerializer.decode(encoded)
     assert case == decoded
