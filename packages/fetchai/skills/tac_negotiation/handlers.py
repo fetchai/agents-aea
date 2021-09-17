@@ -28,7 +28,7 @@ from aea_ledger_fetchai import FetchAIApi
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
-from aea.helpers.transaction.base import RawMessage
+from aea.helpers.transaction.base import RawMessage, RawTransaction
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.base import Handler
@@ -607,7 +607,10 @@ class CosmTradeHandler(Handler):
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
-            raw_transaction=tx_signed_by_the_other_party,
+            raw_transaction=RawTransaction(
+                ledger_id=tx_signed_by_the_other_party.ledger_id,
+                body=tx_signed_by_the_other_party.body,
+            ),
             terms=fipa_dialogue.terms,
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)

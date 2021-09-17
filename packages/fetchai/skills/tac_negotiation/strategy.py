@@ -613,6 +613,7 @@ class Strategy(Model):
         if signature is not None:
             kwargs["signature"] = signature
         elif sender_public_key is not None:
+            kwargs["value"] = 1
             kwargs["from_pubkey"] = sender_public_key
             kwargs["to_pubkey"] = counterparty_public_key
         return kwargs

@@ -8,10 +8,11 @@ description: A protocol for preparing an atomic swap bilateral transaction for c
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
+  README.md: QmeaSujBKG9328xJQ2N7nvNwKEFmCt5BuzmqJuSjhsfy7g
   __init__.py: QmRegk1xzYMX2LegXkyHjUjUo4cjyKnEzV3rd8Rz53hqY1
-  cosm_trade.proto: QmX1hcA9mw6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
+  cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
   cosm_trade_pb2.py: QmV58tzxiRXsC414VfjYWBye8JPyQ3Y5X7tc5p7HArqA9z
-  custom_types.py: QmWLjn58qRWCszMZxtvu6MenwxrfvVsLXVmPDfpFdDs2pc
+  custom_types.py: QmUweZKxravsiJNVzUypN8fiF7XWYbuN2rVURw18EHQrss
   dialogues.py: QmPcyag4gtLGgiTvumVdnURqhBVUG71B2g8XRWjbgoZBJU
   message.py: QmUNjmXAjc5FDrm86DgyjSwh8p5sdwXycCgBvUu59LyAv2
   serialization.py: QmTsEjoduW6mgWSGF1hFLobUmajPXVVVWZ7Bs4FmLWaRW8
