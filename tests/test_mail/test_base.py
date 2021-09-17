@@ -163,6 +163,9 @@ def test_outbox_put():
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
+    wait_for_condition(
+        lambda: dummy_connection.is_connected, 15, "Connection is not connected"
+    )
     envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
     outbox.put(envelope)
     wait_for_condition(

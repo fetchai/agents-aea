@@ -28,6 +28,8 @@ from aea.manager.utils import run_in_venv
 
 RETURN_VALUE = randint(0, 2000)  # nosec
 
+DEFAULT_TIMEOUT = 20
+
 
 def _process_long():
     time.sleep(70)
@@ -37,26 +39,28 @@ def _process_exception():
     raise ValueError("Expected")
 
 
-def _process_return_value():
-    return RETURN_VALUE
+def _process_return_value(value_to_return):
+    return value_to_return
 
 
 def test_process_run_in_venv_timeout_error():
     """Test timeout error raised for process running too long."""
     with TemporaryDirectory() as tmp_dir:
         with pytest.raises(TimeoutError):
-            run_in_venv(tmp_dir, _process_long, timeout=3)
+            run_in_venv(tmp_dir, _process_long, timeout=DEFAULT_TIMEOUT)
 
 
 def test_process_run_in_venv_raise_custom_exception():
     """Test process returns expcetion."""
     with TemporaryDirectory() as tmp_dir:
         with pytest.raises(Exception, match="Expected"):
-            run_in_venv(tmp_dir, _process_exception, timeout=3)
+            run_in_venv(tmp_dir, _process_exception, timeout=DEFAULT_TIMEOUT)
 
 
 def test_process_run_in_venv_return_value():
     """Test process return value."""
     with TemporaryDirectory() as tmp_dir:
-        ret_value = run_in_venv(tmp_dir, _process_return_value, timeout=3)
+        ret_value = run_in_venv(
+            tmp_dir, _process_return_value, DEFAULT_TIMEOUT, RETURN_VALUE
+        )
         assert ret_value == RETURN_VALUE
