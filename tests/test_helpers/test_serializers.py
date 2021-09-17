@@ -17,40 +17,25 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers/serializers module."""
-from google.protobuf.struct_pb2 import Struct
-
 from aea.helpers.serializers import DictProtobufStructSerializer
 
 
 def test_encode_decode_i():
     """Test encode decode logic."""
     case = {
-        "key1": True,
-        "key2": 0.12,
-        "key3": 100,
-        "key4": "some string",
-        "key5": b"some bytes string",
-        "key6": Struct(),
+        "bool_true": True,
+        "bool_False": False,
+        "none": None,
+        "float": 0.12,
+        "int": 100,
+        "str": "some string",
+        "bytes": b"some bytes string",
+        "empty dict": {},
         "list_of_bytes": [b"1234", b"234234"],
         "list_of_ints": [1, 2, 3],
         "list_of_str": ["1234", "234234"],
         "list_of_floats": [1.1, 2.2, 3.0],
-    }
-    encoded = DictProtobufStructSerializer.encode(case)
-    assert isinstance(encoded, bytes)
-    decoded = DictProtobufStructSerializer.decode(encoded)
-    assert case == decoded
-
-
-def test_encode_decode_ii():
-    """Test encode decode logic."""
-    case = {
-        "key1": True,
-        "key2": 0.12,
-        "key3": 100,
-        "key4": "some string",
-        "key5": b"some bytes string",
-        "key6": {"key1": True, "key2": 0.12},
+        "nested_dict": {"a": b"test", "b": 10, "c": [b"1", b"2"]},
     }
     encoded = DictProtobufStructSerializer.encode(case)
     assert isinstance(encoded, bytes)
