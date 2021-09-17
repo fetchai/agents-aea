@@ -106,6 +106,9 @@ class DictProtobufStructSerializer:
         if isinstance(value, tuple([bool, float, str, Struct])):
             # do nothing for supported types
             return value, False
+        if value is None:
+            return None, False
+
         raise NotImplementedError(
             "DictProtobufStructSerializer doesn't support dict value type {}".format(
                 type(value)
@@ -118,12 +121,15 @@ class DictProtobufStructSerializer:
             return cls._str_to_bytes(value)
         if isinstance(value, Struct):
             if value != Struct():
-                return dict(value)
-            return value
+                new_dict = dict(value)
+                cls._patch_dict_restore(new_dict)
+                return new_dict
+            return {}
         if isinstance(value, float):
             return int(value)
         if isinstance(value, (list, ListValue)):
             return [cls._restore_value(v) for v in value]  # type: ignore
+
         raise NotImplementedError(
             "DictProtobufStructSerializer doesn't support dict value type {}".format(
                 type(value)
