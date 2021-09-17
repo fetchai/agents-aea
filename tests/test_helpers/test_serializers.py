@@ -36,6 +36,9 @@ def test_encode_decode_i():
         "list_of_str": ["1234", "234234"],
         "list_of_floats": [1.1, 2.2, 3.0],
         "nested_dict": {"a": b"test", "b": 10, "c": [b"1", b"2"]},
+        "list_of_dict": {
+            "list": [{"a": 1, "b": {"c": 12}}, {"b": b"234", "x": [1, 2, 3]}]
+        },
     }
     encoded = DictProtobufStructSerializer.encode(case)
     assert isinstance(encoded, bytes)
