@@ -25,7 +25,7 @@ This module contains the classes required for ledger_api dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -54,7 +54,7 @@ class LedgerApiDialogue(Dialogue):
             LedgerApiMessage.Performative.ERROR,
         }
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         LedgerApiMessage.Performative.BALANCE: frozenset(),
         LedgerApiMessage.Performative.ERROR: frozenset(),
         LedgerApiMessage.Performative.GET_BALANCE: frozenset(

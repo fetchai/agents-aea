@@ -25,7 +25,7 @@ This module contains the classes required for t_protocol_no_ct dialogue manageme
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -46,7 +46,7 @@ class TProtocolNoCtDialogue(Dialogue):
             TProtocolNoCtMessage.Performative.PERFORMATIVE_O,
         }
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS: frozenset(
             {TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS}
         ),

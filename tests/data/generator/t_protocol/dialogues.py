@@ -25,7 +25,7 @@ This module contains the classes required for t_protocol dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -49,7 +49,7 @@ class TProtocolDialogue(Dialogue):
             TProtocolMessage.Performative.PERFORMATIVE_O,
         }
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TProtocolMessage.Performative.PERFORMATIVE_CT: frozenset(
             {TProtocolMessage.Performative.PERFORMATIVE_PCT}
         ),

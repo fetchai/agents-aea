@@ -25,7 +25,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -41,7 +41,7 @@ class FipaDialogue(Dialogue):
     TERMINAL_PERFORMATIVES = frozenset(
         {FipaMessage.Performative.DECLINE, FipaMessage.Performative.END}
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         FipaMessage.Performative.ACCEPT: frozenset(
             {
                 FipaMessage.Performative.DECLINE,

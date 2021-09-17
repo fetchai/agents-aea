@@ -25,7 +25,7 @@ This module contains the classes required for state_update dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -39,7 +39,7 @@ class StateUpdateDialogue(Dialogue):
 
     INITIAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.INITIALIZE})
     TERMINAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.END})
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         StateUpdateMessage.Performative.APPLY: frozenset(
             {StateUpdateMessage.Performative.APPLY, StateUpdateMessage.Performative.END}
         ),

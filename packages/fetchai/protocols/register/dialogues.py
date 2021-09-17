@@ -25,7 +25,7 @@ This module contains the classes required for register dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -41,7 +41,7 @@ class RegisterDialogue(Dialogue):
     TERMINAL_PERFORMATIVES = frozenset(
         {RegisterMessage.Performative.SUCCESS, RegisterMessage.Performative.ERROR}
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         RegisterMessage.Performative.ERROR: frozenset(),
         RegisterMessage.Performative.REGISTER: frozenset(
             {RegisterMessage.Performative.SUCCESS, RegisterMessage.Performative.ERROR}

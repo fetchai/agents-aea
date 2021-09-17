@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the ledger_api protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0`.
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.2`.
 """
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage

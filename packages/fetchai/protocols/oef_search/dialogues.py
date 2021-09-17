@@ -25,7 +25,7 @@ This module contains the classes required for oef_search dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -51,7 +51,7 @@ class OefSearchDialogue(Dialogue):
             OefSearchMessage.Performative.SUCCESS,
         }
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         OefSearchMessage.Performative.OEF_ERROR: frozenset(),
         OefSearchMessage.Performative.REGISTER_SERVICE: frozenset(
             {

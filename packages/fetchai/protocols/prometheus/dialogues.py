@@ -25,7 +25,7 @@ This module contains the classes required for prometheus dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -44,7 +44,7 @@ class PrometheusDialogue(Dialogue):
         }
     )
     TERMINAL_PERFORMATIVES = frozenset({PrometheusMessage.Performative.RESPONSE})
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         PrometheusMessage.Performative.ADD_METRIC: frozenset(
             {PrometheusMessage.Performative.RESPONSE}
         ),
