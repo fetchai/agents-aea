@@ -123,7 +123,7 @@ def request_api(
             raise click.ClickException(resp_json)
     elif resp_json is None:
         raise click.ClickException(
-            "Wrong server response. Status code: {}: Response test: {}".format(
+            "Wrong server response. Status code: {}: Response text: {}".format(
                 resp.status_code, resp.text
             )
         )
