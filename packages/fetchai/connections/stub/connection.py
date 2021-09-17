@@ -241,7 +241,7 @@ class StubConnection(Connection):
 
         self.state = ConnectionStates.disconnecting
         await self._stop_read_envelopes()
-        self._write_pool.shutdown(wait=False)
+        self._write_pool.shutdown(wait=True)  # wait write operation to complete
         self.in_queue.put_nowait(None)
         self._close_files()
         self.state = ConnectionStates.disconnected

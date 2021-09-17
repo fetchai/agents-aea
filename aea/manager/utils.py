@@ -17,11 +17,13 @@
 #
 # ------------------------------------------------------------------------------
 """Multiagent manager utils."""
+import datetime
 import multiprocessing
 import os
 import sys
 import time
 import venv  # type: ignore
+from traceback import format_exc
 from typing import Any, Callable
 
 from aea.crypto.plugin import load_all_plugins
@@ -103,5 +105,8 @@ def _run_in_venv_handler(
         make_venv(env_dir, set_env=True)
         result = fn(*args)
     except Exception as e:  # pylint: disable=broad-except
+        print(
+            f"Exception in venv runner at {datetime.datetime.now()} for {fn}:\n{format_exc()}"
+        )
         result = e
     queue.put_nowait(result)

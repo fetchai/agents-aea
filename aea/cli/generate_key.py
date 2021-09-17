@@ -17,13 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea generate_key' subcommand."""
-
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
+from aea.cli.add_key import _add_private_key
 from aea.cli.utils.click_utils import password_option
+from aea.cli.utils.decorators import _check_aea_project
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.helpers import create_private_key
 from aea.crypto.registries import crypto_registry
@@ -43,21 +44,44 @@ from aea.crypto.registries import crypto_registry
     required=False,
 )
 @password_option(confirmation_prompt=True)
-def generate_key(type_: str, file: str, password: Optional[str]) -> None:
+@click.option(
+    "--add-key", is_flag=True, help="Add key generated.",
+)
+@click.option(
+    "--connection", is_flag=True, help="For adding a private key for connections."
+)
+@click.pass_context
+def generate_key(
+    click_context: click.core.Context,
+    type_: str,
+    file: str,
+    password: Optional[str],
+    add_key: bool = False,
+    connection: bool = False,
+) -> None:
     """Generate a private key and place it in a file."""
-    _generate_private_key(type_, file, password)
+    keys_generated = _generate_private_key(type_, file, password)
+    if add_key:
+        _check_aea_project((click_context,))
+        for key_type, key_filename in keys_generated.items():
+            _add_private_key(
+                click_context, key_type, key_filename, password, connection
+            )
 
 
 def _generate_private_key(
     type_: str, file: Optional[str] = None, password: Optional[str] = None
-) -> None:
+) -> Dict[str, str]:
     """
     Generate private key.
 
     :param type_: type.
     :param file: path to file.
     :param password: the password to encrypt/decrypt the private key.
+
+    :return: dict of types and filenames of keys generated
     """
+    keys = {}
     if type_ == "all" and file is not None:
         raise click.ClickException("Type all cannot be used in combination with file.")
     types = list(crypto_registry.supported_ids) if type_ == "all" else [type_]
@@ -67,6 +91,8 @@ def _generate_private_key(
         )
         if _can_write(private_key_file):
             create_private_key(type__, private_key_file, password)
+        keys[type__] = private_key_file
+    return keys
 
 
 def _can_write(path: str) -> bool:
