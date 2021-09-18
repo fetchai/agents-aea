@@ -157,7 +157,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
     if missing_dependencies:
         for package_type, package_id in missing_dependencies:
-            click.echo(f"Error: Can not find {package_type} {package_id} in registry!")
+            click.echo(f"Error: Cannot find {package_type} {package_id} in registry!")
         raise click.ClickException("Found missing dependencies! Push canceled!")
     try:
         files = {"file": open(output_filepath, "rb")}
