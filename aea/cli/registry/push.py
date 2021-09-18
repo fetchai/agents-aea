@@ -145,20 +145,20 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     }
 
     # dependencies
-    dependecies: List[Tuple[str, PublicId]] = []
+    dependencies: List[Tuple[str, PublicId]] = []
     for key in [CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS]:
         deps_list = item_config.get(key, [])
         if deps_list:
             data.update({key: deps_list})
         for dep in deps_list:
-            dependecies.append((ITEM_TYPE_PLURAL_TO_TYPE[key], PublicId.from_str(dep)))
+            dependencies.append((ITEM_TYPE_PLURAL_TO_TYPE[key], PublicId.from_str(dep)))
 
     missing_dependencies = list_missing_packages(dependecies)
 
     if missing_dependencies:
         for package_type, package_id in missing_dependencies:
             click.echo(f"Error: Can not find {package_type} {package_id} in registry!")
-        raise click.ClickException("Found missed dependencies! Push canceled!")
+        raise click.ClickException("Found missing dependencies! Push canceled!")
     try:
         files = {"file": open(output_filepath, "rb")}
         readme_path = os.path.join(item_path, DEFAULT_README_FILE)

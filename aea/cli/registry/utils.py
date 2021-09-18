@@ -327,7 +327,7 @@ def get_latest_version_available_in_registry(
 def list_missing_packages(
     packages: List[Tuple[str, PublicId]]
 ) -> List[Tuple[str, PublicId]]:
-    """Get list of packages do not present in registry."""
+    """Get list of packages not currently present in registry."""
     result: List[Tuple[str, PublicId]] = []
 
     for package_type, package_id in packages:
