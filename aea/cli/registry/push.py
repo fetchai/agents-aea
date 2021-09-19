@@ -153,7 +153,7 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
         for dep in deps_list:
             dependencies.append((ITEM_TYPE_PLURAL_TO_TYPE[key], PublicId.from_str(dep)))
 
-    missing_dependencies = list_missing_packages(dependecies)
+    missing_dependencies = list_missing_packages(dependencies)
 
     if missing_dependencies:
         for package_type, package_id in missing_dependencies:
