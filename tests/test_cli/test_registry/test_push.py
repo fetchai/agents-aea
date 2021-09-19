@@ -19,7 +19,7 @@
 """Test module for Registry push methods."""
 import os
 from unittest import TestCase, mock
-from unittest.mock import mock_open
+from unittest.mock import mock_open, patch
 
 import pytest
 from click import ClickException
@@ -37,6 +37,7 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 @mock.patch("builtins.open", mock_open(read_data="opened_file"))
 @mock.patch("aea.cli.registry.push.check_is_author_logged_in")
+@mock.patch("aea.cli.registry.push.list_missing_packages", return_value=[])
 @mock.patch("aea.cli.registry.utils._rm_tarfiles")
 @mock.patch("aea.cli.registry.push.os.getcwd", return_value="cwd")
 @mock.patch("aea.cli.registry.push._compress_dir")
@@ -47,7 +48,7 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
         "version": PublicIdMock.DEFAULT_VERSION,
         "author": "some_author",
         "name": "some_name",
-        "protocols": ["protocol_id"],
+        "protocols": ["some/protocol:0.1.2"],
     },
 )
 @mock.patch(
@@ -68,6 +69,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
+        *_
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
@@ -83,11 +85,41 @@ class PushItemTestCase(TestCase):
                 "name": "some_name",
                 "description": "some-description",
                 "version": PublicIdMock.DEFAULT_VERSION,
-                "protocols": ["protocol_id"],
+                "protocols": ["some/protocol:0.1.2"],
             },
             is_auth=True,
             files={"file": open("file.1"), "readme": open("file.2")},
         )
+
+    @mock.patch("aea.cli.registry.push.os.path.exists", return_value=True)
+    @mock.patch("aea.cli.registry.push.is_readme_present", return_value=True)
+    def test_push_dependency_fail(
+        self,
+        is_readme_present_mock,
+        path_exists_mock,
+        request_api_mock,
+        load_yaml_mock,
+        compress_mock,
+        getcwd_mock,
+        rm_tarfiles_mock,
+        check_is_author_logged_in_mock,
+        *_
+    ):
+        """Test for push_item fails cause dependencies check."""
+        public_id = PublicIdMock(
+            name="some_name",
+            author="some_author",
+            version="{}".format(PublicIdMock.DEFAULT_VERSION),
+        )
+
+        with patch(
+            "aea.cli.registry.push.list_missing_packages",
+            return_value=[("some", PublicId.from_str("some/pack:0.1.0"))],
+        ):
+            with pytest.raises(
+                ClickException, match="Found missed dependencies! Push canceled!"
+            ):
+                push_item(ContextMock(), "some-type", public_id)
 
     @mock.patch("aea.cli.registry.push.os.path.exists", return_value=True)
     @mock.patch("aea.cli.registry.push.is_readme_present", return_value=False)
@@ -108,7 +140,7 @@ class PushItemTestCase(TestCase):
                 "name": "some_name",
                 "description": "some-description",
                 "version": PublicIdMock.DEFAULT_VERSION,
-                "protocols": ["protocol_id"],
+                "protocols": ["some/protocol:0.1.2"],
             },
             is_auth=True,
             files={"file": open("opened_file", "r")},
@@ -124,6 +156,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
+        *_
     ):
         """Test for push_item - item not found."""
         with self.assertRaises(ClickException):
