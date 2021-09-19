@@ -592,7 +592,7 @@ class SigningDialogue(BaseSigningDialogue):
         self._associated_fipa_dialogue = associated_fipa_dialogue
 
     @property
-    def associated_cosm_trade_dialogue(self) -> CosmTradeDialogue:
+    def associated_cosm_trade_dialogue(self) -> Optional[CosmTradeDialogue]:
         """Get associated_cosm_trade_dialogue."""
         return self._associated_cosm_trade_dialogue
 

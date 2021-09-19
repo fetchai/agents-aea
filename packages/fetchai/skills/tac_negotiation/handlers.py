@@ -109,8 +109,6 @@ class FipaNegotiationHandler(Handler):
             self._on_accept(fipa_msg, fipa_dialogue)
         elif fipa_msg.performative == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM:
             self._on_match_accept(fipa_msg, fipa_dialogue)
-        elif fipa_msg.performative == FipaMessage.Performative.INFORM:
-            self._on_inform(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
         """Implement the handler teardown."""
@@ -309,7 +307,13 @@ class FipaNegotiationHandler(Handler):
                     )
                     self.context.outbox.put_message(message=contract_api_msg)
                 elif strategy.ledger_id == FetchAIApi.identifier:
-                    public_key = self.context.public_keys.get(strategy.ledger_id, None)
+                    public_keys = self.context.public_keys
+                    if public_keys is None:
+                        self.context.logger.info(
+                            "The AEA does not have any public_keys!"
+                        )
+                        return
+                    public_key = public_keys.get(strategy.ledger_id, None)
                     if public_key is None:
                         self.context.logger.info(
                             "Could not retrieve my own public key."
@@ -387,7 +391,13 @@ class FipaNegotiationHandler(Handler):
                         f"{match_accept.performative} did not contain counterparty public_key!"
                     )
                     return
-                sender_public_key = self.context.public_keys.get(
+                sender_public_keys = self.context.public_keys
+                if sender_public_keys is None:
+                    self.context.logger.info(
+                        "The AEA does not have any public_keys!"
+                    )
+                    return
+                sender_public_key = sender_public_keys.get(
                     strategy.ledger_id, None
                 )
                 if sender_public_key is None:
@@ -847,7 +857,7 @@ class SigningHandler(Handler):
                 cosm_trade_dialogues = cast(
                     CosmTradeDialogues, self.context.cosm_trade_dialogues
                 )
-                cosm_trade_msg, cosm_trade_dialogue = cosm_trade_dialogues.create(
+                cosm_trade_msg, _ = cosm_trade_dialogues.create(
                     counterparty=signing_dialogue.associated_fipa_dialogue.dialogue_label.dialogue_opponent_addr,
                     performative=CosmTradeMessage.Performative.INFORM_SIGNED_TRANSACTION,
                     signed_transaction=signing_msg.signed_transaction,
