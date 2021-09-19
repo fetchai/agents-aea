@@ -393,13 +393,9 @@ class FipaNegotiationHandler(Handler):
                     return
                 sender_public_keys = self.context.public_keys
                 if sender_public_keys is None:
-                    self.context.logger.info(
-                        "The AEA does not have any public_keys!"
-                    )
+                    self.context.logger.info("The AEA does not have any public_keys!")
                     return
-                sender_public_key = sender_public_keys.get(
-                    strategy.ledger_id, None
-                )
+                sender_public_key = sender_public_keys.get(strategy.ledger_id, None)
                 if sender_public_key is None:
                     self.context.logger.info("Could not retrieve my own public key.")
                     return
