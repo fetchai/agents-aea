@@ -23,7 +23,7 @@ import tempfile
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from unittest import TestCase, mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click import ClickException
@@ -41,6 +41,7 @@ from aea.cli.registry.utils import (
     get_latest_version_available_in_registry,
     get_package_meta,
     is_auth_token_present,
+    list_missing_packages,
     request_api,
 )
 from aea.cli.utils.exceptions import AEAConfigException
@@ -394,3 +395,22 @@ def test_get_latest_version_available_in_registry_remote_mode(*_mocks):
         context_mock, "protocol", DefaultMessage.protocol_id
     )
     assert result == DefaultMessage.protocol_id
+
+
+def test_list_missing_packages():
+    """Test 'list_missing_packages'."""
+    packages = [("connection", PublicId.from_str("test/test:0.1.2"))]
+
+    resp_ok = MagicMock()
+    resp_ok.status_code = 200
+    with patch(
+        "aea.cli.registry.utils._perform_registry_request", return_value=resp_ok
+    ):
+        assert list_missing_packages(packages) == []
+
+    resp_404 = MagicMock()
+    resp_404.status_code = 404
+    with patch(
+        "aea.cli.registry.utils._perform_registry_request", return_value=resp_404
+    ):
+        assert list_missing_packages(packages) == packages
