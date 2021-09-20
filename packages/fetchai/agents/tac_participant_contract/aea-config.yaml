@@ -58,15 +58,6 @@ cert_requests:
   message_format: '{public_key}'
   save_path: .certs/conn_cert.txt
 ---
-public_id: fetchai/ledger:0.18.0
-type: connection
-config:
-  ledger_apis:
-    fetchai:
-      address: http://127.0.0.1:1317
-      denom: atestfet
-      chain_id: stargateworld-2
----
 public_id: fetchai/soef:0.25.0
 type: connection
 config:
