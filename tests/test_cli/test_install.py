@@ -70,6 +70,8 @@ class TestInstallFromRequirementFile(AEATestCase):
 class TestInstallFailsWhenDependencyDoesNotExist(AEATestCaseEmpty):
     """Test that the command 'aea install' fails when a dependency is not found."""
 
+    capture_log = True
+
     @classmethod
     def setup_class(cls):
         """Set the test up."""
@@ -94,10 +96,6 @@ class TestInstallFailsWhenDependencyDoesNotExist(AEATestCaseEmpty):
                     "version": "==0.1.0",
                     "index": "https://test.pypi.org/simple",
                 },
-                "this_is_a_test_dependency_on_git": {
-                    "git": "https://github.com/an_user/a_repo.git",
-                    "ref": "master",
-                },
             }
         )
 
@@ -108,7 +106,7 @@ class TestInstallFailsWhenDependencyDoesNotExist(AEATestCaseEmpty):
         """Assert an error occurs."""
         with pytest.raises(
             ClickException,
-            match="An error occurred while installing this_is_a_test_dependency.*",
+            match="An error occurred while installing.*this_is_a_test_dependency.*",
         ):
             self.run_cli_command("install", cwd=self._get_cwd())
 

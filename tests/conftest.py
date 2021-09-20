@@ -759,7 +759,7 @@ def soef(
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 4,
+    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 10,
 ):
     """Launch the Fetch ledger image."""
     client = docker.from_env()

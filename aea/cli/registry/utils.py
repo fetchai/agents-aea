@@ -17,11 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """Utils used for operating Registry with CLI."""
-
 import os
 import tarfile
-from json.decoder import JSONDecodeError
-from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
@@ -32,6 +30,7 @@ from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import find_item_locally
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
+from aea.configurations.constants import ITEM_TYPE_TO_PLURAL
 from aea.helpers import http_requests as requests
 
 
@@ -83,21 +82,12 @@ def request_api(
                 'Please sign in with "aea login" command.'
             )
         headers.update({"Authorization": "Token {}".format(token)})
-
-    request_kwargs = dict(
-        method=method,
-        url="{}{}".format(REGISTRY_API_URL, path),
-        params=params,
-        files=files,
-        data=data,
-        headers=headers,
-    )
     try:
-        resp = requests.request(**request_kwargs)
+        resp = _perform_registry_request(method, path, params, data, files, headers)
         resp_json = resp.json()
     except requests.exceptions.ConnectionError:
         raise click.ClickException("Registry server is not responding.")
-    except JSONDecodeError:
+    except requests.JSONDecodeError:
         resp_json = None
 
     if resp.status_code == 200:
@@ -109,7 +99,9 @@ def request_api(
             "You are not authenticated. " 'Please sign in with "aea login" command.'
         )
     elif resp.status_code == 500:
-        raise click.ClickException("Registry internal server error.")
+        raise click.ClickException(
+            "Registry internal server error: {}".format(resp_json["detail"])
+        )
     elif resp.status_code == 404:
         raise click.ClickException("Not found in Registry.")
     elif resp.status_code == 409:
@@ -119,13 +111,43 @@ def request_api(
     elif resp.status_code == 400:
         if handle_400:
             raise click.ClickException(resp_json)
+    elif resp_json is None:
+        raise click.ClickException(
+            "Wrong server response. Status code: {}: Response text: {}".format(
+                resp.status_code, resp.text
+            )
+        )
     else:
         raise click.ClickException(
-            "Wrong server response. Status code: {}".format(resp.status_code)
+            "Wrong server response. Status code: {}: Error detail: {}".format(
+                resp.status_code, resp_json.get("detail", resp_json)
+            )
         )
+
     if return_code:
         return resp_json, resp.status_code
     return resp_json
+
+
+def _perform_registry_request(
+    method: str,
+    path: str,
+    params: Optional[Dict] = None,
+    data: Optional[Dict] = None,
+    files: Optional[Dict] = None,
+    headers: Optional[Dict] = None,
+) -> requests.Response:
+    """Perform HTTP request and resturn response object."""
+    request_kwargs = dict(
+        method=method,
+        url="{}{}".format(REGISTRY_API_URL, path),
+        params=params,
+        files=files,
+        data=data,
+        headers=headers,
+    )
+    resp = requests.request(**request_kwargs)
+    return resp
 
 
 def download_file(url: str, cwd: str, timeout: float = FILE_DOWNLOAD_TIMEOUT) -> str:
@@ -311,3 +333,21 @@ def get_latest_version_available_in_registry(
         )
 
     return latest_item_public_id
+
+
+def list_missing_packages(
+    packages: List[Tuple[str, PublicId]]
+) -> List[Tuple[str, PublicId]]:
+    """Get list of packages not currently present in registry."""
+    result: List[Tuple[str, PublicId]] = []
+
+    for package_type, package_id in packages:
+        api_path = f"/{ITEM_TYPE_TO_PLURAL[package_type]}/{package_id.author}/{package_id.name}/{package_id.version}"
+        resp = _perform_registry_request("GET", api_path)
+        if resp.status_code == 404:
+            result.append((package_type, package_id))
+        elif resp.status_code == 200:
+            pass
+        else:  # pragma: nocover
+            raise ValueError("Error on registry request")
+    return result
