@@ -38,7 +38,7 @@ DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_NET_SIZE = 4
 
-LIBP2P_LAUNCH_TIMEOUT = 10  # may downloads up to ~66Mb
+LIBP2P_LAUNCH_TIMEOUT = 20  # may downloads up to ~66Mb
 
 
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
@@ -173,6 +173,8 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
+    capture_log = True
+
     @classmethod
     def setup_class(cls):
         """Set the test up"""
@@ -217,7 +219,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         assert is_running, "AEA not running within timeout!"
 
         check_strings = "Peer running in "
-        missing_strings = self.missing_from_output(process, check_strings)
+        missing_strings = self.missing_from_output(process, check_strings, timeout=30)
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in agent output.".format(missing_strings)

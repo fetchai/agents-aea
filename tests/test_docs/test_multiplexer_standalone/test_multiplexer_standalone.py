@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the code-blocks in the multiplexer-standalone.md file."""
-
 import os
 from pathlib import Path
 
@@ -63,6 +62,7 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         path = os.path.join(str(self.t), "output.txt")
         with open(path, "r", encoding="utf-8") as file:
             msg = file.read()
+
         assert msg == message_text, "The messages must be identical."
 
     def test_code_blocks_exist(self):

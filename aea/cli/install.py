@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea install' subcommand."""
 
-import pprint
 from typing import Optional, cast
 
 import click
@@ -29,7 +28,7 @@ from aea.cli.utils.loggers import logger
 from aea.configurations.data_types import Dependencies
 from aea.configurations.pypi import is_satisfiable, is_simple_dep, to_set_specifier
 from aea.exceptions import AEAException
-from aea.helpers.install_dependency import call_pip, install_dependency
+from aea.helpers.install_dependency import call_pip, install_dependencies
 
 
 @click.command()
@@ -79,10 +78,7 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
                         ]
                     )
                 )
-
-            for name, d in dependencies.items():
-                click.echo(f"Installing {pprint.pformat(name)}...")
-                install_dependency(name, d, logger)
+            install_dependencies(list(dependencies.values()), logger=logger)
     except AEAException as e:
         raise click.ClickException(str(e))
 
