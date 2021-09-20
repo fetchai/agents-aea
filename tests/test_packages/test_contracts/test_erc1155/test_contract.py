@@ -1194,3 +1194,193 @@ class TestContractCommon:
 
         # Check if is_nonce_used was called twice
         assert is_nonce_used_mock.call.call_count == 2
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_eth_no_signature(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if signature not present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is missing
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_eth_pubkeys(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if pubkeys are present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when pubkey is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="key",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_signature(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="from_pubkey",
+                to_pubkey="to_pubkey",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_valid(self):
+        """Test if get_atomic_swap_single_transaction allows one pubkey in case of only one direction of transfers."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction works with only to_pubkey
+        tx = self.contract.get_atomic_swap_single_transaction(
+            self.ledger_api,
+            contract_address="address",
+            from_address="address",
+            to_address="address",
+            token_id=self.token_ids_a[0],
+            from_supply=0,
+            to_supply=1,
+            value=1,
+            trade_nonce=0,
+            to_pubkey="deadbeef",
+        )
+        assert tx is not None
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_invalid(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing from_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_eth_pubkeys(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError if pubkeys are present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_batch_transaction returns RuntimeError when pubkey is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="key",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_signature(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
+
+        # Test if get_atomic_swap_batch_transaction returns RuntimeError when signature is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="from_pubkey",
+                to_pubkey="to_pubkey",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_valid(self):
+        """Test if get_atomic_swap_batch_transaction allows one pubkey in case of only one direction of transfers."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_batch_transaction works with only to_pubkey
+        tx = self.contract.get_atomic_swap_batch_transaction(
+            self.ledger_api,
+            contract_address="address",
+            from_address="address",
+            to_address="address",
+            token_ids=[self.token_ids_a[0]],
+            from_supplies=[0],
+            to_supplies=[1],
+            value=1,
+            trade_nonce=0,
+            to_pubkey="deadbeef",
+        )
+        assert tx is not None
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_invalid(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing from_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_batch_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                to_pubkey="deadbeef",
+            )
