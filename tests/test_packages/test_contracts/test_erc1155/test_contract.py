@@ -827,7 +827,6 @@ class TestCosmWasmContract(BaseContractTestCase):
             to_supply=0,
             value=1,
             trade_nonce=0,
-            signature="",
             from_pubkey=self.deployer_crypto.public_key,
             to_pubkey=self.item_owner_crypto.public_key,
         )
@@ -864,7 +863,6 @@ class TestCosmWasmContract(BaseContractTestCase):
             to_supply=1,
             value=1,
             trade_nonce=0,
-            signature="",
             from_pubkey=self.deployer_crypto.public_key,
             to_pubkey=self.item_owner_crypto.public_key,
         )
@@ -900,7 +898,6 @@ class TestCosmWasmContract(BaseContractTestCase):
                 to_supply=1,
                 value=1,
                 trade_nonce=0,
-                signature="",
                 from_pubkey=self.deployer_crypto.public_key,
                 to_pubkey=self.item_owner_crypto.public_key,
             )
@@ -971,7 +968,6 @@ class TestCosmWasmContract(BaseContractTestCase):
             to_supplies=[0, 1],
             value=1,
             trade_nonce=0,
-            signature="",
             from_pubkey=self.deployer_crypto.public_key,
             to_pubkey=self.item_owner_crypto.public_key,
         )
