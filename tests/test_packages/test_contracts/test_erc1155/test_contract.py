@@ -1234,7 +1234,8 @@ class TestContractCommon:
                 value=1,
                 trade_nonce=0,
                 signature="signature",
-                from_pubkey="key",
+                from_pubkey="deadbeef",
+                to_pubkey="deadbeef",
             )
 
     @pytest.mark.ledger
@@ -1254,8 +1255,8 @@ class TestContractCommon:
                 value=1,
                 trade_nonce=0,
                 signature="signature",
-                from_pubkey="from_pubkey",
-                to_pubkey="to_pubkey",
+                from_pubkey="deadbeef",
+                to_pubkey="deadbeef",
             )
 
     @pytest.mark.ledger
@@ -1319,7 +1320,7 @@ class TestContractCommon:
                 value=1,
                 trade_nonce=0,
                 signature="signature",
-                from_pubkey="key",
+                from_pubkey="deadbeef",
             )
 
     @pytest.mark.ledger
@@ -1339,8 +1340,8 @@ class TestContractCommon:
                 value=1,
                 trade_nonce=0,
                 signature="signature",
-                from_pubkey="from_pubkey",
-                to_pubkey="to_pubkey",
+                from_pubkey="deadbeef",
+                to_pubkey="deadbeef",
             )
 
     @pytest.mark.ledger
