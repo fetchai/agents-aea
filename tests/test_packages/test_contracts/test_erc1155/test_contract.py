@@ -1242,6 +1242,8 @@ class TestContractCommon:
     def test_get_atomic_swap_single_transaction_cosmos_signature(self):
         """Test if get_atomic_swap_single_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
 
+        self.ledger_api.identifier = "fetchai"
+
         # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is present
         with pytest.raises(RuntimeError):
             self.contract.get_atomic_swap_single_transaction(
@@ -1299,6 +1301,27 @@ class TestContractCommon:
                 value=1,
                 trade_nonce=0,
                 to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_to_pubkey_missing(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing to_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                from_pubkey="deadbeef",
             )
 
     @pytest.mark.ledger
@@ -1384,4 +1407,45 @@ class TestContractCommon:
                 value=1,
                 trade_nonce=0,
                 to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_ba_transaction_eth_no_signature(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if signature not present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is missing
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_to_pubkey_missing(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing to_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                from_pubkey="deadbeef",
             )
