@@ -69,6 +69,13 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         ):
             return
 
+        strategy = cast(Strategy, self.context.strategy)
+        strategy.tac_version_id = self.context.shared_state.get("tac_version_id", None)
+        if strategy.tac_version_id is None:
+            self.context.logger.error("Cannot get the tac_version_id. Stopping!")
+            self.context.is_active = False
+            return
+
         if not self.is_registered:
             self._retry_failed_registration()
             self._register_agent()

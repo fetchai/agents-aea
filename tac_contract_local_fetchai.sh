@@ -56,20 +56,20 @@ do
 agent=tac_participant_$i
 agents=$(echo $agent $agents)
 rm -rf $agent
-aea fetch --local fetchai/tac_participant_contract:latest --alias $agent
+aea -s fetch --local fetchai/tac_participant_contract:latest --alias $agent
 cd $agent
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt
-aea generate-key fetchai fetchai_connection_private_key.txt
-aea add-key fetchai fetchai_connection_private_key.txt --connection
+aea -s generate-key fetchai
+aea -s add-key fetchai fetchai_private_key.txt
+aea -s generate-key fetchai fetchai_connection_private_key.txt
+aea -s add-key fetchai fetchai_connection_private_key.txt --connection
 json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:1%0.4d", "public_uri": null}' "$PEER" "$i")
-aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
-aea config get vendor.fetchai.connections.p2p_libp2p.config
-aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $tac_name
-aea config get vendor.fetchai.skills.tac_participation.models.game.args.search_query
-aea install
-aea build
-aea issue-certificates
+aea -s config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
+aea -s config get vendor.fetchai.connections.p2p_libp2p.config
+aea -s config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $tac_name
+aea -s config get vendor.fetchai.skills.tac_participation.models.game.args.search_query
+aea -s install
+aea -s build
+aea -s issue-certificates
 cd ..
 done
 
