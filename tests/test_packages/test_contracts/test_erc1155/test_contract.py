@@ -1350,6 +1350,8 @@ class TestContractCommon:
     def test_get_atomic_swap_batch_transaction_cosmos_signature(self):
         """Test if get_atomic_swap_batch_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
 
+        self.ledger_api.identifier = "fetchai"
+
         # Test if get_atomic_swap_batch_transaction returns RuntimeError when signature is present
         with pytest.raises(RuntimeError):
             self.contract.get_atomic_swap_batch_transaction(
