@@ -23,7 +23,7 @@ import os
 import struct
 import sys
 import time
-from typing import List, Tuple, Union, cast
+from typing import Any, List, Tuple, Union, cast
 
 import click
 
@@ -39,6 +39,8 @@ from benchmark.checks.utils import (
     make_envelope,
     make_skill,
     multi_run,
+    number_of_runs_deco,
+    output_format_deco,
     print_results,
     wait_for_condition,
 )
@@ -216,7 +218,8 @@ def run(
     "--start_messages", default=100, help="Amount of messages to prepopulate."
 )
 @click.option("--num_of_agents", default=2, help="Amount of agents to run.")
-@click.option("--number_of_runs", default=10, help="How many times run test.")
+@number_of_runs_deco
+@output_format_deco
 def main(
     duration: int,
     runtime_mode: str,
@@ -224,23 +227,27 @@ def main(
     start_messages: int,
     num_of_agents: int,
     number_of_runs: int,
-) -> None:
+    output_format: str,
+) -> Any:
     """Run test."""
-    click.echo("Start test with options:")
-    click.echo(f"* Duration: {duration} seconds")
-    click.echo(f"* Runtime mode: {runtime_mode}")
-    click.echo(f"* Runner mode: {runner_mode}")
-    click.echo(f"* Start messages: {start_messages}")
-    click.echo(f"* Number of agents: {num_of_agents}")
-    click.echo(f"* Number of runs: {number_of_runs}")
 
-    print_results(
-        multi_run(
+    parameters = {
+        "Duration(seconds)": duration,
+        "Runtime mode": runtime_mode,
+        "Runner mode": runner_mode,
+        "Start messages": start_messages,
+        "Number of agents": num_of_agents,
+        "Number of runs": number_of_runs,
+    }
+
+    def result_fn() -> List[Tuple[str, Any, Any, Any]]:
+        return multi_run(
             int(number_of_runs),
             run,
             (duration, runtime_mode, runner_mode, start_messages, num_of_agents),
         )
-    )
+
+    return print_results(output_format, parameters, result_fn)
 
 
 if __name__ == "__main__":

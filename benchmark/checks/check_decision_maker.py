@@ -21,7 +21,7 @@
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
 from unittest.mock import patch
 
 import click
@@ -36,7 +36,13 @@ from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from benchmark.checks.utils import get_mem_usage_in_mb, multi_run, print_results
+from benchmark.checks.utils import (
+    get_mem_usage_in_mb,
+    multi_run,
+    number_of_runs_deco,
+    output_format_deco,
+    print_results,
+)
 
 from packages.fetchai.protocols.signing.dialogues import SigningDialogue
 from packages.fetchai.protocols.signing.dialogues import (
@@ -203,15 +209,22 @@ def run(ledger_id: str, amount_of_tx: int) -> List[Tuple[str, Union[int, float]]
 @click.command()
 @click.option("--ledger_id", default="fetchai", help="Ledger id")
 @click.option("--amount_of_tx", default=100, help="Amount of tx to sign")
-@click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(ledger_id: str, amount_of_tx: int, number_of_runs: int) -> None:
+@number_of_runs_deco
+@output_format_deco
+def main(
+    ledger_id: str, amount_of_tx: int, number_of_runs: int, output_format: str
+) -> Any:
     """Run test."""
-    click.echo("Start test with options:")
-    click.echo(f"* Ledger id: {ledger_id}")
-    click.echo(f"* Amount of txs: {amount_of_tx}")
-    click.echo(f"* Number of runs: {number_of_runs}")
+    parameters = {
+        "Ledger id": ledger_id,
+        "Amount of txs": amount_of_tx,
+        "Number of runs": number_of_runs,
+    }
 
-    print_results(multi_run(int(number_of_runs), run, (ledger_id, amount_of_tx,),))
+    def result_fn() -> List[Tuple[str, Any, Any, Any]]:
+        return multi_run(int(number_of_runs), run, (ledger_id, amount_of_tx,),)
+
+    return print_results(output_format, parameters, result_fn)
 
 
 if __name__ == "__main__":

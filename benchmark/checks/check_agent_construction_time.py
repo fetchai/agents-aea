@@ -24,14 +24,20 @@ import time
 from pathlib import Path
 from statistics import mean
 from tempfile import TemporaryDirectory
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 import click
 from click.testing import CliRunner
 
 from aea.aea_builder import AEABuilder
 from aea.cli.core import cli
-from benchmark.checks.utils import get_mem_usage_in_mb, multi_run, print_results
+from benchmark.checks.utils import (
+    get_mem_usage_in_mb,
+    multi_run,
+    number_of_runs_deco,
+    output_format_deco,
+    print_results,
+)
 
 
 PACKAGES = Path(__file__).parent / "../../packages"
@@ -81,14 +87,16 @@ def run(agents: int) -> List[Tuple[str, Union[int, float]]]:
 
 @click.command()
 @click.option("--agents", default=25, help="Amount of agents to construct.")
-@click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(agents: int, number_of_runs: int) -> None:
+@number_of_runs_deco
+@output_format_deco
+def main(agents: int, number_of_runs: int, output_format: str) -> Any:
     """Check agents construction time and memory usage."""
-    click.echo("Start test with options:")
-    click.echo(f"* Agents: {agents}")
-    click.echo(f"* Number of runs: {number_of_runs}")
+    parameters = {"Agents": agents, "Number of runs": number_of_runs}
 
-    print_results(multi_run(int(number_of_runs), run, (agents,),))
+    def result_fn() -> List[Tuple[str, Any, Any, Any]]:
+        return multi_run(int(number_of_runs), run, (agents,),)
+
+    return print_results(output_format, parameters, result_fn)
 
 
 if __name__ == "__main__":
