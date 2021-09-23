@@ -52,7 +52,7 @@ class Identity:
         address: Optional[str] = None,
         public_key: Optional[str] = None,
         addresses: Optional[Dict[str, Address]] = None,
-        public_keys: Optional[Dict[str, Address]] = None,
+        public_keys: Optional[Dict[str, str]] = None,
         default_address_key: str = DEFAULT_LEDGER,
     ) -> None:
         """
@@ -84,6 +84,7 @@ class Identity:
                 public_key is None and public_keys is not None,
                 "If you provide a dictionary of addresses, you must provide a corresponding dictionary of public keys and not a single public key.",
             )
+            public_keys = cast(Dict[str, str], public_keys)
             enforce(
                 public_keys.keys() == addresses.keys(),
                 "Keys in public keys and addresses dictionaries do not match. They must be identical.",
