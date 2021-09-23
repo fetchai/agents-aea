@@ -102,6 +102,7 @@ class RequestAPITestCase(TestCase):
         """Test for request_api method 500 server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 500
+        resp_mock.json.return_value = {"detail": "test"}
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
