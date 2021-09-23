@@ -70,7 +70,6 @@ class AgentContext:
         search_service_address: Address,
         decision_maker_address: Address,
         data_dir: str,
-        public_keys: Optional[Dict[str, str]] = None,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         send_to_skill: Optional[Callable] = None,
         **kwargs: Any
@@ -91,14 +90,12 @@ class AgentContext:
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
         :param data_dir: directory where to put local files.
-        :param public_keys: public keys of the aea.
         :param storage_callable: function that returns optional storage attached to agent.
         :param send_to_skill: callable for sending envelopes to skills.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
         self._shared_state = {}  # type: Dict[str, Any]
         self._identity = identity
-        self._public_keys = public_keys
         self._connection_status = connection_status
         self._outbox = outbox
         self._decision_maker_message_queue = decision_maker_message_queue
@@ -171,9 +168,9 @@ class AgentContext:
         return self.identity.addresses
 
     @property
-    def public_keys(self) -> Optional[Dict[str, str]]:
+    def public_keys(self) -> Dict[str, str]:
         """Get addresses."""
-        return self._public_keys
+        return self.identity.public_keys
 
     @property
     def address(self) -> Address:

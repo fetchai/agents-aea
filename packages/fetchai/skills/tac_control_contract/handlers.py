@@ -454,7 +454,7 @@ class LedgerApiHandler(Handler):
                 == ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
             ):
                 transaction_label = contract_api_dialogue.terms.kwargs.get(
-                    "label", "None"
+                    "label", None
                 )
                 if game.phase != Phase.CONTRACT_DEPLOYED:
                     if (

@@ -114,7 +114,7 @@ def _run_interaction_channel() -> None:
     agent_configuration = loader.load(open_file(DEFAULT_AEA_CONFIG_FILE))
     agent_name = agent_configuration.name
 
-    identity_stub = Identity(agent_name + "_interact", "interact")
+    identity_stub = Identity(agent_name + "_interact", "interact", "interact")
     _load_packages(identity_stub)
 
     # load agent configuration file

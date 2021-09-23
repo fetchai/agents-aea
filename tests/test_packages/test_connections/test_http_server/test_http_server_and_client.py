@@ -54,8 +54,11 @@ class TestClientServer:
     def setup_server(self):
         """Set up server connection."""
         self.server_agent_address = "server_agent_address"
+        self.server_agent_public_key = "server_agent_public_key"
         self.server_agent_identity = Identity(
-            "agent_running_server", address=self.server_agent_address
+            "agent_running_server",
+            address=self.server_agent_address,
+            public_key=self.server_agent_public_key,
         )
         self.host = get_host()
         self.port = get_unused_tcp_port()
@@ -97,9 +100,12 @@ class TestClientServer:
     def setup_client(self):
         """Set up client connection."""
         self.client_agent_address = "client_agent_address"
+        self.client_agent_public_key = "client_agent_public_key"
         self.client_agent_skill_id = "some/skill:0.1.0"
         self.client_agent_identity = Identity(
-            "agent_running_client", address=self.client_agent_address
+            "agent_running_client",
+            address=self.client_agent_address,
+            public_key=self.client_agent_public_key,
         )
         configuration = ConnectionConfig(
             host="localhost",

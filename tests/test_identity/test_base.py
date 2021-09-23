@@ -28,9 +28,12 @@ from aea.identity.base import Identity
 
 def test_init_identity_positive():
     """Test initialization of the identity object."""
-    assert Identity("some_name", address="some_address")
+    assert Identity("some_name", address="some_address", public_key="some_public_key")
     assert Identity(
-        "some_name", address="some_address", default_address_key=DEFAULT_LEDGER
+        "some_name",
+        address="some_address",
+        public_key="some_public_key",
+        default_address_key=DEFAULT_LEDGER,
     )
     assert Identity(
         "some_name",
@@ -38,12 +41,20 @@ def test_init_identity_positive():
             DEFAULT_LEDGER: "some_address",
             FetchAICrypto.identifier: "some_address",
         },
+        public_keys={
+            DEFAULT_LEDGER: "some_public_key",
+            FetchAICrypto.identifier: "some_public_key",
+        },
     )
     assert Identity(
         "some_name",
         addresses={
             DEFAULT_LEDGER: "some_address",
             FetchAICrypto.identifier: "some_address",
+        },
+        public_keys={
+            DEFAULT_LEDGER: "some_public_key",
+            FetchAICrypto.identifier: "some_public_key",
         },
         default_address_key=DEFAULT_LEDGER,
     )
@@ -53,10 +64,15 @@ def test_init_identity_negative():
     """Test initialization of the identity object."""
     name = "some_name"
     address_1 = "some_address"
+    public_key_1 = "some_public_key"
     with pytest.raises(KeyError):
         Identity(
             name,
             addresses={DEFAULT_LEDGER: address_1, FetchAICrypto.identifier: address_1},
+            public_keys={
+                DEFAULT_LEDGER: public_key_1,
+                FetchAICrypto.identifier: public_key_1,
+            },
             default_address_key="wrong_key",
         )
     with pytest.raises(ValueError):
@@ -67,7 +83,8 @@ def test_accessors():
     """Test the properties of the identity object."""
     name = "some_name"
     address = "some_address"
-    identity = Identity(name, address=address)
+    public_key = "some_public_key"
+    identity = Identity(name, address=address, public_key=public_key)
     assert identity.name == name
     assert identity.address == address
     assert identity.addresses == {DEFAULT_LEDGER: address}

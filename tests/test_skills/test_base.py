@@ -84,6 +84,7 @@ class BaseTestSkillContext:
         cls.identity = Identity(
             "name",
             addresses=cls.wallet.addresses,
+            public_keys=cls.wallet.public_keys,
             default_address_key=FetchAICrypto.identifier,
         )
         cls.my_aea = AEA(

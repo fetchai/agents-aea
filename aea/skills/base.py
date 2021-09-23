@@ -174,7 +174,7 @@ class SkillContext:
         return self._get_agent_context().address
 
     @property
-    def public_keys(self) -> Optional[Dict[str, str]]:
+    def public_keys(self) -> Dict[str, str]:
         """Get address."""
         return self._get_agent_context().public_keys
 

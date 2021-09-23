@@ -158,7 +158,8 @@ def run(
 
     for i in range(num_of_agents):
         agent_name = f"agent{i}"
-        identity = Identity(agent_name, address=agent_name)
+        public_key = f"public_key{i}"
+        identity = Identity(agent_name, address=agent_name, public_key=public_key)
         resources = Resources()
         connection = OEFLocalConnection(
             local_node,

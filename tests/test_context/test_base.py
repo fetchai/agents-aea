@@ -31,7 +31,9 @@ def test_agent_context():
     agent_name = "name"
     address = "address"
     addresses = {FetchAICrypto.identifier: address}
-    identity = Identity(agent_name, addresses)
+    public_key = "public_key"
+    public_keys = {FetchAICrypto.identifier: public_key}
+    identity = Identity(agent_name, addresses=addresses, public_keys=public_keys)
     connection_status = "connection_status_stub"
     outbox = "outbox_stub"
     decision_maker_message_queue = "decision_maker_message_queue_stub"

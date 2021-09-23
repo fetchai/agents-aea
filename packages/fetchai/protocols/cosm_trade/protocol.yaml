@@ -8,7 +8,7 @@ description: A protocol for preparing an atomic swap bilateral transaction for c
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmeaSujBKG9328xJQ2N7nvNwKEFmCt5BuzmqJuSjhsfy7g
+  README.md: QmZ7gzwMzCbmS2igbGfR98zjbYAN97pCysSEiBphhUBE8U
   __init__.py: QmRegk1xzYMX2LegXkyHjUjUo4cjyKnEzV3rd8Rz53hqY1
   cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
   cosm_trade_pb2.py: QmV58tzxiRXsC414VfjYWBye8JPyQ3Y5X7tc5p7HArqA9z

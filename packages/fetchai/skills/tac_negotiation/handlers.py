@@ -307,16 +307,10 @@ class FipaNegotiationHandler(Handler):
                     )
                     self.context.outbox.put_message(message=contract_api_msg)
                 elif strategy.ledger_id == FetchAIApi.identifier:
-                    public_keys = self.context.public_keys
-                    if public_keys is None:
-                        self.context.logger.info(
-                            "The AEA does not have any public_keys!"
-                        )
-                        return
-                    public_key = public_keys.get(strategy.ledger_id, None)
+                    public_key = self.context.public_keys.get(strategy.ledger_id, None)
                     if public_key is None:
                         self.context.logger.info(
-                            "Could not retrieve my own public key."
+                            f"Agent has no public key for {strategy.ledger_id}."
                         )
                         return
                     fipa_msg = fipa_dialogue.reply(
@@ -391,13 +385,13 @@ class FipaNegotiationHandler(Handler):
                         f"{match_accept.performative} did not contain counterparty public_key!"
                     )
                     return
-                sender_public_keys = self.context.public_keys
-                if sender_public_keys is None:
-                    self.context.logger.info("The AEA does not have any public_keys!")
-                    return
-                sender_public_key = sender_public_keys.get(strategy.ledger_id, None)
+                sender_public_key = self.context.public_keys.get(
+                    strategy.ledger_id, None
+                )
                 if sender_public_key is None:
-                    self.context.logger.info("Could not retrieve my own public key.")
+                    self.context.logger.info(
+                        f"Agent has no public key for {strategy.ledger_id}."
+                    )
                     return
                 contract_api_dialogues = cast(
                     ContractApiDialogues, self.context.contract_api_dialogues
