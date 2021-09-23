@@ -19,6 +19,7 @@
 """Helper to install python dependencies."""
 import subprocess  # nosec
 import sys
+from itertools import chain
 from logging import Logger
 from subprocess import PIPE  # nosec
 from typing import List
@@ -48,6 +49,27 @@ def install_dependency(
     except Exception as e:
         raise AEAException(
             f"An error occurred while installing {dependency_name}, {dependency}: {e}"
+        )
+
+
+def install_dependencies(
+    dependencies: List[Dependency], logger: Logger, install_timeout: float = 300,
+) -> None:
+    """
+    Install python dependencies to the current python environment.
+
+    :param dependencies: dict of dependency name and specification
+    :param logger: the logger
+    :param install_timeout: timeout to wait pip to install
+    """
+    try:
+        pip_args = list(chain(*[d.get_pip_install_args() for d in dependencies]))
+        pip_args = [("--extra-index" if i == "-i" else i) for i in pip_args]
+        logger.debug("Calling 'pip install {}'".format(" ".join(pip_args)))
+        call_pip(["install", *pip_args], timeout=install_timeout, retry=True)
+    except Exception as e:
+        raise AEAException(
+            f"An error occurred while installing with pip install {' '.join(pip_args)}: {e}"
         )
 
 

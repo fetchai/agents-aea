@@ -28,6 +28,15 @@ from aea.helpers.constants import NETWORK_REQUEST_DEFAULT_TIMEOUT
 DEFAULT_TIMEOUT = NETWORK_REQUEST_DEFAULT_TIMEOUT
 
 
+# requests can use one of these
+try:
+    from simplejson.errors import (  # type: ignore  # pylint: disable=unused-import
+        JSONDecodeError,
+    )
+except ModuleNotFoundError:  # pragma: nocover
+    from json.decoder import JSONDecodeError  # noqa  # pylint: disable=unused-import
+
+
 def add_default_timeout(fn: Callable, timeout: float) -> Callable:
     """Add default timeout for requests methods."""
 

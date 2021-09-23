@@ -21,7 +21,7 @@
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.common import JSONLike
 from aea.configurations.loader import (
@@ -143,20 +143,24 @@ class BaseContractTestCase(ABC):
             raise ValueError("Balance not increased!")  # pragma: nocover
 
     @staticmethod
-    def sign_send_confirm_receipt_transaction(
-        tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto, sleep_time: float = 1.0
+    def sign_send_confirm_receipt_multisig_transaction(
+        tx: JSONLike,
+        ledger_api: LedgerApi,
+        cryptos: List[Crypto],
+        sleep_time: float = 2.0,
     ) -> JSONLike:
         """
-        Sign, send and confirm settlement of a transaction.
+        Sign, send and confirm settlement of a transaction with multiple signatures.
 
         :param tx: the transaction
         :param ledger_api: the ledger api
-        :param crypto: Crypto to sign transaction with
+        :param cryptos: Cryptos to sign transaction with
         :param sleep_time: the time to sleep between transaction submission and receipt request
         :return: The transaction receipt
         """
-        tx_signed = crypto.sign_transaction(tx)
-        tx_digest = ledger_api.send_signed_transaction(tx_signed)
+        for crypto in cryptos:
+            tx = crypto.sign_transaction(tx)
+        tx_digest = ledger_api.send_signed_transaction(tx)
 
         if tx_digest is None:
             raise ValueError("Transaction digest not found!")  # pragma: nocover
@@ -182,6 +186,27 @@ class BaseContractTestCase(ABC):
             )
 
         return tx_receipt
+
+    @classmethod
+    def sign_send_confirm_receipt_transaction(
+        cls,
+        tx: JSONLike,
+        ledger_api: LedgerApi,
+        crypto: Crypto,
+        sleep_time: float = 2.0,
+    ) -> JSONLike:
+        """
+        Sign, send and confirm settlement of a transaction with multiple signatures.
+
+        :param tx: the transaction
+        :param ledger_api: the ledger api
+        :param crypto: Crypto to sign transaction with
+        :param sleep_time: the time to sleep between transaction submission and receipt request
+        :return: The transaction receipt
+        """
+        return cls.sign_send_confirm_receipt_multisig_transaction(
+            tx, ledger_api, [crypto], sleep_time
+        )
 
     @classmethod
     def _deploy_contract(

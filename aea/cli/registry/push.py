@@ -21,13 +21,14 @@
 import os
 import shutil
 import tarfile
-from typing import cast
+from typing import List, Tuple, cast
 
 import click
 
 from aea.cli.registry.utils import (
     check_is_author_logged_in,
     clean_tarfiles,
+    list_missing_packages,
     request_api,
 )
 from aea.cli.utils.context import Context
@@ -39,6 +40,7 @@ from aea.configurations.constants import (
     CONNECTIONS,
     CONTRACTS,
     DEFAULT_README_FILE,
+    ITEM_TYPE_PLURAL_TO_TYPE,
     PROTOCOLS,
     SKILLS,
 )
@@ -143,11 +145,20 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     }
 
     # dependencies
+    dependencies: List[Tuple[str, PublicId]] = []
     for key in [CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS]:
-        deps_list = item_config.get(key)
+        deps_list = item_config.get(key, [])
         if deps_list:
             data.update({key: deps_list})
+        for dep in deps_list:
+            dependencies.append((ITEM_TYPE_PLURAL_TO_TYPE[key], PublicId.from_str(dep)))
 
+    missing_dependencies = list_missing_packages(dependencies)
+
+    if missing_dependencies:
+        for package_type, package_id in missing_dependencies:
+            click.echo(f"Error: Cannot find {package_type} {package_id} in registry!")
+        raise click.ClickException("Found missing dependencies! Push canceled!")
     try:
         files = {"file": open(output_filepath, "rb")}
         readme_path = os.path.join(item_path, DEFAULT_README_FILE)
@@ -159,11 +170,11 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
         resp = cast(
             JSONLike, request_api("POST", path, data=data, is_auth=True, files=files)
         )
+        click.echo(
+            "Successfully pushed {} {} to the Registry. Public ID: {}".format(
+                item_type, item_id.name, resp["public_id"]
+            )
+        )
     finally:
         for fd in files.values():
             fd.close()
-            click.echo(
-                "Successfully pushed {} {} to the Registry. Public ID: {}".format(
-                    item_type, item_id.name, resp["public_id"]
-                )
-            )
