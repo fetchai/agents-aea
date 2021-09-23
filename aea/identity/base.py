@@ -19,7 +19,7 @@
 
 """This module contains the identity class."""
 
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -77,6 +77,7 @@ class Identity:
             )
 
         if address is None:
+            addresses = cast(Dict[str, Address], addresses)
             if len(addresses) == 0:  # pragma: nocover
                 raise ValueError("Provide at least one pair of addresses.")
             enforce(
@@ -97,10 +98,12 @@ class Identity:
         self._public_key = public_key
 
         if addresses is None:
+            address = cast(str, address)
             enforce(
                 public_keys is None and public_key is not None,
                 "If you provide a single address, you must provide its corresponding single public key and not a dictionary of public keys.",
             )
+            public_key = cast(str, public_key)
             addresses = {default_address_key: address}
             public_keys = {default_address_key: public_key}
         self._addresses = addresses
