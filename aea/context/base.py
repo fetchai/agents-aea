@@ -37,7 +37,6 @@ class AgentContext:
     __slots__ = (
         "_shared_state",
         "_identity",
-        "_public_keys",
         "_connection_status",
         "_outbox",
         "_decision_maker_message_queue",
