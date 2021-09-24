@@ -19,7 +19,7 @@
 
 """This module contains the identity class."""
 
-from typing import Dict, Optional, cast
+from typing import Dict, Optional
 
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -76,20 +76,13 @@ class Identity:
                 "Either provide a single address or a dictionary of addresses, and not both."
             )
 
-        if (public_key is None) == (public_keys is None):
-            raise ValueError(
-                "Either provide a single public key or a dictionary of public keys, and not both."
-            )
-
         if address is None:
-            addresses = cast(Dict[str, Address], addresses)
-            if len(addresses) == 0:  # pragma: nocover
+            if addresses is None or len(addresses) == 0:  # pragma: nocover
                 raise ValueError("Provide at least one pair of addresses.")
-            enforce(
-                public_key is None and public_keys is not None,
-                "If you provide a dictionary of addresses, you must provide a corresponding dictionary of public keys and not a single public key.",
-            )
-            public_keys = cast(Dict[str, str], public_keys)
+            if public_key is not None or public_keys is None:
+                raise ValueError(
+                    "If you provide a dictionary of addresses, you must provide a corresponding dictionary of public keys and not a single public key."
+                )
             enforce(
                 public_keys.keys() == addresses.keys(),
                 "Keys in public keys and addresses dictionaries do not match. They must be identical.",
@@ -104,12 +97,10 @@ class Identity:
         self._public_key = public_key
 
         if addresses is None:
-            address = cast(str, address)
-            enforce(
-                public_keys is None and public_key is not None,
-                "If you provide a single address, you must provide its corresponding single public key and not a dictionary of public keys.",
-            )
-            public_key = cast(str, public_key)
+            if public_keys is not None or public_key is None:
+                raise ValueError(
+                    "If you provide a single address, you must provide its corresponding single public key and not a dictionary of public keys."
+                )
             addresses = {default_address_key: address}
             public_keys = {default_address_key: public_key}
         self._addresses = addresses
