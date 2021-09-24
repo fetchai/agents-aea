@@ -76,6 +76,11 @@ class Identity:
                 "Either provide a single address or a dictionary of addresses, and not both."
             )
 
+        if (public_key is None) == (public_keys is None):
+            raise ValueError(
+                "Either provide a single public key or a dictionary of public keys, and not both."
+            )
+
         if address is None:
             if addresses is None or len(addresses) == 0:  # pragma: nocover
                 raise ValueError("Provide at least one pair of addresses.")
