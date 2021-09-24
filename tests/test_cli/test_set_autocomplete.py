@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea add-key` sub-command."""
-
+from os import environ
 from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
 from aea.cli import cli
-from aea.cli.set_autocomplete import COMPLETETION_LOAD_CMD
+from aea.cli.set_autocomplete import COMPLETETION_LOAD_CMD, SHELL_SUPPORTED
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 
@@ -31,6 +30,10 @@ from tests.conftest import CLI_LOG_OPTION, CliRunner
 def test_set_autocomplete():
     """Test set autocomplete command"""
     runner = CliRunner()
+    shell = environ.get("SHELL", "/bin/UNKNOWN").split("/")[-1]
+
+    if shell != SHELL_SUPPORTED:
+        return
 
     with patch("aea.cli.set_autocomplete.SHELL_SUPPORTED", "someothershell"):
         result = runner.invoke(

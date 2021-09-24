@@ -39,6 +39,7 @@
 | `run {using [connections, ...]}`            | Run the AEA on the Fetch.ai network with default or specified connections.   |
 | `scaffold [package_type] [name]`            | Scaffold a new connection, protocol, or skill called `name`.               |
 | `search [package_type]`                     | Search for components in the registry. `search --local [package_type] [--query searching_query]` to search in local `packages` directory. |
+| `set-autocomplete`                          | Set autocompletition support for bash shell.                                   |
 | `transfer [type] [address] [amount]`        | Transfer wealth associated with a private key of the agent to another account. |
 | `upgrade [package_type] [public_id]`        | Upgrade the packages of the agent.                               |
 | `-v DEBUG run`                              | Run with debugging.                                                          |

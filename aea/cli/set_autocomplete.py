@@ -32,7 +32,7 @@ BASHRC = "~/.bashrc"
 @click.command()
 def set_autocomplete() -> None:
     """Set autocompletition support for bash shell."""
-    shell = environ["SHELL"].split("/")[-1]
+    shell = environ.get("SHELL", "/bin/UNKNOWN").split("/")[-1]
 
     if shell != SHELL_SUPPORTED:
         raise click.ClickException(
