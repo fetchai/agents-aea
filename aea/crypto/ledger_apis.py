@@ -44,7 +44,7 @@ ETHEREUM_DEFAULT_CHAIN_ID = 1337
 ETHEREUM_DEFAULT_CURRENCY_DENOM = "wei"
 FETCHAI_DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
 FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
-FETCHAI_DEFAULT_CHAIN_ID = "stargateworld-2"
+FETCHAI_DEFAULT_CHAIN_ID = "stargateworld-3"
 
 
 DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {
