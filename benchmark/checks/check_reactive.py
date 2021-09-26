@@ -36,6 +36,8 @@ from benchmark.checks.utils import (
     make_envelope,
     make_skill,
     multi_run,
+    number_of_runs_deco,
+    output_format_deco,
     print_results,
     wait_for_condition,
 )
@@ -135,20 +137,29 @@ def run(
 @click.option(
     "--connection_mode", default="sync", help="Connection mode: sync or nonsync."
 )
-@click.option("--number_of_runs", default=10, help="How many times run test.")
+@number_of_runs_deco
+@output_format_deco
 def main(
-    duration: int, runtime_mode: str, connection_mode: str, number_of_runs: int
-) -> None:
+    duration: int,
+    runtime_mode: str,
+    connection_mode: str,
+    number_of_runs: int,
+    output_format: str,
+) -> Any:
     """Run test."""
-    click.echo("Start test with options:")
-    click.echo(f"* Duration: {duration} seconds")
-    click.echo(f"* Runtime mode: {runtime_mode}")
-    click.echo(f"* Connection mode: {connection_mode}")
-    click.echo(f"* Number of runs: {number_of_runs}")
+    parameters = {
+        "Duration(seconds)": duration,
+        "Runtime mode": runtime_mode,
+        "Connection mode": connection_mode,
+        "Number of runs": number_of_runs,
+    }
 
-    print_results(
-        multi_run(int(number_of_runs), run, (duration, runtime_mode, connection_mode),)
-    )
+    def result_fn() -> List[Tuple[str, Any, Any, Any]]:
+        return multi_run(
+            int(number_of_runs), run, (duration, runtime_mode, connection_mode),
+        )
+
+    return print_results(output_format, parameters, result_fn)
 
 
 if __name__ == "__main__":

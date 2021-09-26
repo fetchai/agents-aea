@@ -224,11 +224,11 @@ def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  #
         )(
             click.option(
                 "--password",
-                **kwargs,
                 type=str,
                 is_eager=True,
                 metavar="PASSWORD",
                 help="Set password for key encryption/decryption",
+                **kwargs,
             )(fn)
         )  # type: ignore
 
