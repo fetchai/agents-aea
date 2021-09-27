@@ -26,7 +26,7 @@ config:
     fetchai:
       address: https://rest-stargateworld.fetch.ai:443
       denom: atestfet
-      chain_id: stargateworld-2
+      chain_id: stargateworld-3
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:1.0.0

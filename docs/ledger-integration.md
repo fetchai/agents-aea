@@ -135,7 +135,7 @@ Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, m
 
 | Parameter      | Value                                                                      |
 | -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | stargateworld-2                                                            |
+| Chain ID       | stargateworld-3                                                            |
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
 | Version        | v0.8.x                                                                     |

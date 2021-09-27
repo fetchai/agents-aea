@@ -117,7 +117,7 @@ class PushItemTestCase(TestCase):
             return_value=[("some", PublicId.from_str("some/pack:0.1.0"))],
         ):
             with pytest.raises(
-                ClickException, match="Found missed dependencies! Push canceled!"
+                ClickException, match="Found missing dependencies! Push canceled!"
             ):
                 push_item(ContextMock(), "some-type", public_id)
 

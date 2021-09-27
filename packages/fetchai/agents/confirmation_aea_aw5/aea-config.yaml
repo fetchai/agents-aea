@@ -90,7 +90,7 @@ config:
       address: null
     fetchai:
       address: https://rest-stargateworld.fetch.ai:443
-      chain_id: stargateworld-2
+      chain_id: stargateworld-3
 ---
 public_id: fetchai/simple_service_registration:0.21.0
 type: skill
