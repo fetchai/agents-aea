@@ -76,11 +76,6 @@ class Identity:
                 "Either provide a single address or a dictionary of addresses, and not both."
             )
 
-        if (public_key is None) == (public_keys is None):
-            raise ValueError(
-                "Either provide a single public key or a dictionary of public keys, and not both."
-            )
-
         if address is None:
             if addresses is None or len(addresses) == 0:  # pragma: nocover
                 raise ValueError("Provide at least one pair of addresses.")
@@ -98,8 +93,6 @@ class Identity:
             )
             address = addresses[default_address_key]
             public_key = public_keys[default_address_key]
-        self._address = address
-        self._public_key = public_key
 
         if addresses is None:
             if public_keys is not None or public_key is None:
@@ -108,7 +101,10 @@ class Identity:
                 )
             addresses = {default_address_key: address}
             public_keys = {default_address_key: public_key}
+
+        self._address = address
         self._addresses = addresses
+        self._public_key = public_key
         self._public_keys = public_keys
         self._default_address_key = default_address_key
 
@@ -135,9 +131,9 @@ class Identity:
     @property
     def public_keys(self) -> Dict[str, str]:
         """Get the public keys."""
-        return self._public_keys
+        return self._public_keys  # type: ignore
 
     @property
     def public_key(self) -> str:
         """Get the default public key."""
-        return self._public_key
+        return self._public_key  # type: ignore
