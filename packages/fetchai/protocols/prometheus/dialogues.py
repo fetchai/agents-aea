@@ -37,13 +37,15 @@ from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 class PrometheusDialogue(Dialogue):
     """The prometheus dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             PrometheusMessage.Performative.ADD_METRIC,
             PrometheusMessage.Performative.UPDATE_METRIC,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset({PrometheusMessage.Performative.RESPONSE})
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {PrometheusMessage.Performative.RESPONSE}
+    )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         PrometheusMessage.Performative.ADD_METRIC: frozenset(
             {PrometheusMessage.Performative.RESPONSE}

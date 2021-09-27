@@ -37,8 +37,12 @@ from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 class MlTradeDialogue(Dialogue):
     """The ml_trade dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.CFP})
-    TERMINAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.DATA})
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {MlTradeMessage.Performative.CFP}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {MlTradeMessage.Performative.DATA}
+    )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         MlTradeMessage.Performative.ACCEPT: frozenset(
             {MlTradeMessage.Performative.DATA}

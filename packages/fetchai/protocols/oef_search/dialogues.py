@@ -37,14 +37,14 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 class OefSearchDialogue(Dialogue):
     """The oef_search dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             OefSearchMessage.Performative.REGISTER_SERVICE,
             OefSearchMessage.Performative.UNREGISTER_SERVICE,
             OefSearchMessage.Performative.SEARCH_SERVICES,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             OefSearchMessage.Performative.OEF_ERROR,
             OefSearchMessage.Performative.SEARCH_RESULT,

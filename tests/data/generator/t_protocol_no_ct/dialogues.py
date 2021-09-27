@@ -37,10 +37,10 @@ from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 class TProtocolNoCtDialogue(Dialogue):
     """The t_protocol_no_ct dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {TProtocolNoCtMessage.Performative.PERFORMATIVE_PT}
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             TProtocolNoCtMessage.Performative.PERFORMATIVE_MT,
             TProtocolNoCtMessage.Performative.PERFORMATIVE_O,

@@ -37,8 +37,10 @@ from packages.fetchai.protocols.yoti.message import YotiMessage
 class YotiDialogue(Dialogue):
     """The yoti dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({YotiMessage.Performative.GET_PROFILE})
-    TERMINAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {YotiMessage.Performative.GET_PROFILE}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {YotiMessage.Performative.PROFILE, YotiMessage.Performative.ERROR}
     )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {

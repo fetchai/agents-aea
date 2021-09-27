@@ -37,8 +37,12 @@ from packages.fetchai.protocols.gym.message import GymMessage
 class GymDialogue(Dialogue):
     """The gym dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({GymMessage.Performative.RESET})
-    TERMINAL_PERFORMATIVES = frozenset({GymMessage.Performative.CLOSE})
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {GymMessage.Performative.RESET}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {GymMessage.Performative.CLOSE}
+    )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         GymMessage.Performative.ACT: frozenset({GymMessage.Performative.PERCEPT}),
         GymMessage.Performative.CLOSE: frozenset(),

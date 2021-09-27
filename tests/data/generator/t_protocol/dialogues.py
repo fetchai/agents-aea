@@ -37,13 +37,13 @@ from tests.data.generator.t_protocol.message import TProtocolMessage
 class TProtocolDialogue(Dialogue):
     """The t_protocol dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             TProtocolMessage.Performative.PERFORMATIVE_CT,
             TProtocolMessage.Performative.PERFORMATIVE_PT,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             TProtocolMessage.Performative.PERFORMATIVE_MT,
             TProtocolMessage.Performative.PERFORMATIVE_O,

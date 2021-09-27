@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmbibRarBMgpipxzTatvtBLTURGCucegjDHWERT7aiKALt
   __init__.py: QmSYZrnQL3zndB6Dk9PwPp32J5Qybcjj4AdzmqqUvKN25w
-  dialogues.py: QmbdHHZLNnmZB3PRh3dkMM6MDiiYY6gGEdM348hYdC4TDM
+  dialogues.py: QmNnWS1noUTnGEExA1i7fXNeeme9iWDCPEJGmSW5efueXt
   message.py: QmNwi8G8APo1wPC7aUxby5xTiNeLsdtBJ3XtHxHdNbGzyK
   prometheus.proto: QmXMxMXbDH1LoFcV9QB7TvewUPu62poka43aKuujL73UN1
   prometheus_pb2.py: QmREMpXRYd9PSYW5Vpa3C3C4amZ16bgVXeHsr8NriKqMct

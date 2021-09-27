@@ -37,14 +37,14 @@ from packages.fetchai.protocols.acn.message import AcnMessage
 class AcnDialogue(Dialogue):
     """The acn dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             AcnMessage.Performative.REGISTER,
             AcnMessage.Performative.LOOKUP_REQUEST,
             AcnMessage.Performative.AEA_ENVELOPE,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {AcnMessage.Performative.STATUS, AcnMessage.Performative.LOOKUP_RESPONSE}
     )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {

@@ -37,8 +37,10 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 class FipaDialogue(Dialogue):
     """The fipa dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({FipaMessage.Performative.CFP})
-    TERMINAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {FipaMessage.Performative.CFP}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {FipaMessage.Performative.DECLINE, FipaMessage.Performative.END}
     )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {

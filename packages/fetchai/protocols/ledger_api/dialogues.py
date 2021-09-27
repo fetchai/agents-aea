@@ -37,7 +37,7 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 class LedgerApiDialogue(Dialogue):
     """The ledger_api dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             LedgerApiMessage.Performative.GET_BALANCE,
             LedgerApiMessage.Performative.GET_STATE,
@@ -46,7 +46,7 @@ class LedgerApiDialogue(Dialogue):
             LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             LedgerApiMessage.Performative.BALANCE,
             LedgerApiMessage.Performative.STATE,

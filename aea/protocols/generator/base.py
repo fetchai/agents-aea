@@ -1114,11 +1114,11 @@ class ProtocolGenerator:
         )
         cls_str += (
             self.indent
-            + "INITIAL_PERFORMATIVES = frozenset({"
+            + "INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset({"
             + initial_performatives_str
             + "})\n"
             + self.indent
-            + "TERMINAL_PERFORMATIVES = frozenset({"
+            + "TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset({"
             + terminal_performatives_str
             + "})\n"
             + self._valid_replies_str()

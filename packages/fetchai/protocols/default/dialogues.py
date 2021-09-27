@@ -37,10 +37,10 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 class DefaultDialogue(Dialogue):
     """The default dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {DefaultMessage.Performative.END, DefaultMessage.Performative.ERROR}
     )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {

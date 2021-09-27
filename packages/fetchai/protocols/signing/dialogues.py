@@ -37,13 +37,13 @@ from packages.fetchai.protocols.signing.message import SigningMessage
 class SigningDialogue(Dialogue):
     """The signing dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             SigningMessage.Performative.SIGN_TRANSACTION,
             SigningMessage.Performative.SIGN_MESSAGE,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             SigningMessage.Performative.SIGNED_TRANSACTION,
             SigningMessage.Performative.SIGNED_MESSAGE,

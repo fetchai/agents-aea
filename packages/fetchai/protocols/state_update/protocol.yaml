@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmXUyoQ3NTF9EBSSk7ENNRbCANwABKJvfbrKi2Pmoc2JkT
   __init__.py: QmX4wKopXrgPgRcGzCEAUN3SASmbVwR6yF43ZHRNiWgWuT
-  dialogues.py: QmW4N1ScRUbfgKQ5P7JPG3gK7wHhuiHbCpuUHJRPU4tgS7
+  dialogues.py: Qme4JopAfzR92biXVyNba4pJHcZUmqGc36cY61fEY9mzW1
   message.py: QmU8ETED4f5yRAgqdEd15RLQEekc6Sbb2EnFuuFfiVr8fo
   serialization.py: QmSCXm6FLqWYXPjbRYt5GYFWVJwvJeW4Zt1kRPFAUgHxF8
   state_update.proto: QmPqvqnUQtcE475C3kCctNUsmi46JkMFGYE3rqMmqvbyEz

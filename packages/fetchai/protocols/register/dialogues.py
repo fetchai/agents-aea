@@ -37,8 +37,10 @@ from packages.fetchai.protocols.register.message import RegisterMessage
 class RegisterDialogue(Dialogue):
     """The register dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({RegisterMessage.Performative.REGISTER})
-    TERMINAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {RegisterMessage.Performative.REGISTER}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {RegisterMessage.Performative.SUCCESS, RegisterMessage.Performative.ERROR}
     )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {

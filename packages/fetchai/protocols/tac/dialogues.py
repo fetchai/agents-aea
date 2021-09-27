@@ -37,8 +37,12 @@ from packages.fetchai.protocols.tac.message import TacMessage
 class TacDialogue(Dialogue):
     """The tac dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({TacMessage.Performative.REGISTER})
-    TERMINAL_PERFORMATIVES = frozenset({TacMessage.Performative.CANCELLED})
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {TacMessage.Performative.REGISTER}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {TacMessage.Performative.CANCELLED}
+    )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TacMessage.Performative.CANCELLED: frozenset(),
         TacMessage.Performative.GAME_DATA: frozenset(

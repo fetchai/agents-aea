@@ -37,13 +37,13 @@ from packages.fetchai.protocols.aggregation.message import AggregationMessage
 class AggregationDialogue(Dialogue):
     """The aggregation dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             AggregationMessage.Performative.OBSERVATION,
             AggregationMessage.Performative.AGGREGATION,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             AggregationMessage.Performative.OBSERVATION,
             AggregationMessage.Performative.AGGREGATION,

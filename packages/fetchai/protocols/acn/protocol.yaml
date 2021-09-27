@@ -12,7 +12,7 @@ fingerprint:
   acn.proto: QmVWvXETUNe7QZTvBgzwpofNP3suFthwyxbTVUqSx8mdnE
   acn_pb2.py: Qmc2Pb1WERRBm1mw5Q4iGret621bjXYKR3KwaMXVQCiAT4
   custom_types.py: QmX6XWjUc8YAWRZz5RwPP7FEpZZR9srWqRQMbfa1BbYQFD
-  dialogues.py: QmS46W9gkbm7pZVTp11FR2RQJ45wmz22toBHULP5kyV4Mi
+  dialogues.py: QmVV9PvqWZ2a6qZFty3wPZmm2KfxfHLLixusw2qgWZ6nLC
   message.py: QmVJWhpvdW6PpNAC6PMizzAnhejKXBBa21TTSPay47Mnqe
   serialization.py: QmaYfCTqKwbYrUkgnouxzd41QwnStDGhoXdvwovQXD6xr1
 fingerprint_ignore_patterns: []

@@ -37,7 +37,7 @@ from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 class ContractApiDialogue(Dialogue):
     """The contract_api dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ContractApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -45,7 +45,7 @@ class ContractApiDialogue(Dialogue):
             ContractApiMessage.Performative.GET_STATE,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             ContractApiMessage.Performative.STATE,
             ContractApiMessage.Performative.RAW_TRANSACTION,
