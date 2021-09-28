@@ -1171,7 +1171,7 @@ class _CosmosApi(LedgerApi):
         :return: the transaction
         """
 
-        # Tx fails if gas is higher than MAXIMUM_GAS_AMOUNT
+        # Txs will fail if gas is higher than MAXIMUM_GAS_AMOUNT
         if gas > MAXIMUM_GAS_AMOUNT:
             gas = MAXIMUM_GAS_AMOUNT
 
