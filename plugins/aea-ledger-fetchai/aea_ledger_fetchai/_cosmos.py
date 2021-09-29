@@ -1173,6 +1173,9 @@ class _CosmosApi(LedgerApi):
 
         # Txs will fail if gas is higher than MAXIMUM_GAS_AMOUNT
         if gas > MAXIMUM_GAS_AMOUNT:
+            _default_logger.warning(
+                f"Gas limit {gas} is above maximum gas limit {MAXIMUM_GAS_AMOUNT}. Gas limit was truncated to maximum."
+            )
             gas = MAXIMUM_GAS_AMOUNT
 
         # Checks
