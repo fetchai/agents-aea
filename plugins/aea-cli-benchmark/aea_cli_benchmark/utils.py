@@ -21,6 +21,7 @@ import asyncio
 import inspect
 import multiprocessing
 import os
+import sys
 import time
 from pathlib import Path
 from statistics import mean, stdev, variance
@@ -48,7 +49,10 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, Skill, SkillContext
 
-from packages.fetchai.protocols.default.message import (  # noqa: F402  # pylint: disable=import-outside-toplevel,unused-import
+
+sys.path.append(str(Path(__file__).parent))
+
+from packages.fetchai.protocols.default.message import (  # noqa: E402  # pylint: disable=import-outside-toplevel,unused-import
     DefaultMessage,
 )
 
@@ -97,9 +101,7 @@ def make_agent(
 ) -> AEA:
     """Make AEA instance."""
     wallet = Wallet({DEFAULT_LEDGER: None})
-    identity = identity or Identity(
-        agent_name, address=agent_name, public_key=f"public_key_for_{agent_name}"
-    )
+    identity = identity or Identity(agent_name, address=agent_name)
     resources = resources or Resources()
     datadir = os.getcwd()
     agent_context = MagicMock()
@@ -190,7 +192,7 @@ class GeneratorConnection(Connection):
         configuration = ConnectionConfig(connection_id=cls.connection_id,)
         test_connection = cls(
             configuration=configuration,
-            identity=Identity("name", "address", "public_key"),
+            identity=Identity("name", "address"),
             data_dir=".tmp",
         )
         return test_connection
