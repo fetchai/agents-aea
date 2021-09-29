@@ -497,18 +497,12 @@ class ERC1155Contract(Contract):
                 )
                 to_pubkey_required = True
 
-            if from_pubkey_required and from_pubkey is None:
-                raise RuntimeError(
-                    "from_pubkey is missing and required for Cosmos/Fetch based contract."
-                )
-            if to_pubkey_required and to_pubkey is None:
-                raise RuntimeError(
-                    "to_pubkey is missing and required for Cosmos/Fetch based contract."
-                )
-
             # Determine required signers and generate tx
             if to_pubkey_required and not from_pubkey_required:
-                assert to_pubkey is not None
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[to_address],
                     pub_keys=[bytes.fromhex(to_pubkey)],
@@ -516,7 +510,14 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             elif to_pubkey_required and from_pubkey_required:
-                assert to_pubkey is not None and from_pubkey is not None
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "from_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address, to_address],
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
@@ -524,7 +525,10 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             else:
-                assert from_pubkey is not None
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "from_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address],
                     pub_keys=[bytes.fromhex(from_pubkey)],
@@ -718,18 +722,12 @@ class ERC1155Contract(Contract):
             if len(from_tokens) == 0 and len(to_tokens) == 0 and value == 0:
                 raise RuntimeError("Invalid atomic swap with all supplies to be zero.")
 
-            if from_pubkey_required and from_pubkey is None:
-                raise RuntimeError(
-                    "from_pubkey is missing and required for Cosmos/Fetch based contract."
-                )
-            if to_pubkey_required and to_pubkey is None:
-                raise RuntimeError(
-                    "to_pubkey is missing and required for Cosmos/Fetch based contract."
-                )
-
             # Determine required signers and generate tx
             if to_pubkey_required and not from_pubkey_required:
-                assert to_pubkey is not None
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[to_address],
                     pub_keys=[bytes.fromhex(to_pubkey)],
@@ -737,7 +735,14 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             elif to_pubkey_required and from_pubkey_required:
-                assert to_pubkey is not None and from_pubkey is not None
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address, to_address],
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
@@ -745,7 +750,10 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             else:
-                from_pubkey is not None
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address],
                     pub_keys=[bytes.fromhex(from_pubkey)],
