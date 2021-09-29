@@ -508,6 +508,7 @@ class ERC1155Contract(Contract):
 
             # Determine required signers and generate tx
             if to_pubkey_required and not from_pubkey_required:
+                assert to_pubkey is not None
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[to_address],
                     pub_keys=[bytes.fromhex(to_pubkey)],
@@ -515,6 +516,7 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             elif to_pubkey_required and from_pubkey_required:
+                assert to_pubkey is not None and from_pubkey is not None
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address, to_address],
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
@@ -522,6 +524,7 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             else:
+                assert from_pubkey is not None
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address],
                     pub_keys=[bytes.fromhex(from_pubkey)],
@@ -726,6 +729,7 @@ class ERC1155Contract(Contract):
 
             # Determine required signers and generate tx
             if to_pubkey_required and not from_pubkey_required:
+                assert to_pubkey is not None
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[to_address],
                     pub_keys=[bytes.fromhex(to_pubkey)],
@@ -733,6 +737,7 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             elif to_pubkey_required and from_pubkey_required:
+                assert to_pubkey is not None and from_pubkey is not None
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address, to_address],
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
@@ -740,6 +745,7 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             else:
+                from_pubkey is not None
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address],
                     pub_keys=[bytes.fromhex(from_pubkey)],
