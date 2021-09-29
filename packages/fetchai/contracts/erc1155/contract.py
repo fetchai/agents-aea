@@ -38,6 +38,12 @@ _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.cont
 MAX_UINT_256 = 2 ^ 256 - 1
 
 PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.21.0")
+DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT = 2818111
+DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT = 1500000
+DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT = 300000
+DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT = 300000
+DEFAUT_ETH_BATCH_TASK_GAS_LIMIT = 500000
+DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT = 500000
 
 
 def keccak256(input_: bytes) -> bytes:
@@ -89,7 +95,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         token_ids: List[int],
         data: Optional[bytes] = b"",
-        gas: int = 300000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to create a batch of tokens.
@@ -103,6 +109,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_ETH_BATCH_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createBatch(
@@ -117,6 +124,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT
             tokens = []
             for token_id in token_ids:
                 tokens.append({"id": str(token_id), "path": str(token_id)})
@@ -139,7 +147,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         token_id: int,
         data: Optional[bytes] = b"",
-        gas: int = 300000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to create a single token.
@@ -153,6 +161,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createSingle(
@@ -167,6 +176,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT
             msg = {
                 "create_single": {
                     "item_owner": deployer_address,
@@ -191,7 +201,7 @@ class ERC1155Contract(Contract):
         token_ids: List[int],
         mint_quantities: List[int],
         data: Optional[bytes] = b"",
-        gas: int = 500000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to mint a batch of tokens.
@@ -208,6 +218,7 @@ class ERC1155Contract(Contract):
         """
         cls.validate_mint_quantities(token_ids, mint_quantities)
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_ETH_BATCH_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mintBatch(
@@ -222,6 +233,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT
             tokens = []
             for token_id, quantity in zip(token_ids, mint_quantities):
                 tokens.append({"id": str(token_id), "value": str(quantity)})
@@ -285,7 +297,7 @@ class ERC1155Contract(Contract):
         token_id: int,
         mint_quantity: int,
         data: Optional[bytes] = b"",
-        gas: int = 300000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to mint a single token.
@@ -301,6 +313,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mint(
@@ -315,6 +328,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT
             msg = {
                 "mint_single": {
                     "to_address": recipient_address,
@@ -379,7 +393,7 @@ class ERC1155Contract(Contract):
         trade_nonce: int,
         signature: Optional[str] = None,
         data: Optional[bytes] = b"",
-        gas: int = 2818111,
+        gas: Optional[int] = None,
         from_pubkey: Optional[str] = None,
         to_pubkey: Optional[str] = None,
     ) -> JSONLike:
@@ -416,6 +430,7 @@ class ERC1155Contract(Contract):
             if from_pubkey is not None or to_pubkey is not None:
                 raise RuntimeError("Pubkeys not expected for Eth based contract.")
 
+            gas = gas if gas is not None else DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -445,10 +460,12 @@ class ERC1155Contract(Contract):
                 raise RuntimeError(
                     "Signature not expected for Cosmos/Fetch based contract."
                 )
+
             cosmos_api = cast(CosmosApi, ledger_api)
             msgs: List[ProtoAny] = []
             from_pubkey_required: bool = False
             to_pubkey_required: bool = False
+            gas = gas if gas is not None else DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT
 
             # from_address sends tokens
             if from_supply > 0:
@@ -599,7 +616,7 @@ class ERC1155Contract(Contract):
         trade_nonce: int,
         signature: Optional[str] = None,
         data: Optional[bytes] = b"",
-        gas: int = 2818111,
+        gas: Optional[int] = None,
         from_pubkey: Optional[str] = None,
         to_pubkey: Optional[str] = None,
     ) -> JSONLike:
@@ -628,6 +645,7 @@ class ERC1155Contract(Contract):
             if from_pubkey is not None or to_pubkey is not None:
                 raise RuntimeError("Pubkeys not expected for Eth based contract.")
 
+            gas = gas if gas is not None else DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -658,6 +676,7 @@ class ERC1155Contract(Contract):
                     "Signature not expected for Cosmos/Fetch based contract."
                 )
 
+            gas = gas if gas is not None else DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT
             cosmos_api = cast(CosmosApi, ledger_api)
             msgs: List[ProtoAny] = []
             from_pubkey_required: bool = False
