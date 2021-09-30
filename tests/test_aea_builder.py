@@ -657,13 +657,16 @@ def test__build_identity_from_wallet():
 
     wallet = Mock()
     wallet.addresses = {}
+    wallet.public_keys = {}
     with pytest.raises(AEAWalletNoAddressException):
         builder._build_identity_from_wallet(wallet)
 
     wallet.addresses = {builder.get_default_ledger(): "addr1"}
+    wallet.public_keys = {builder.get_default_ledger(): "pk1"}
     builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder.get_default_ledger(): "addr1", "fetchai": "addr2"}
+    wallet.addresses = {builder.get_default_ledger(): "addr1", "some_ledger": "addr2"}
+    wallet.public_keys = {builder.get_default_ledger(): "pk11", "some_ledger": "pk2"}
     builder._build_identity_from_wallet(wallet)
 
 

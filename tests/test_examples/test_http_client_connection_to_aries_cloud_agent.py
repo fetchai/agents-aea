@@ -66,7 +66,10 @@ class TestAEAToACA:
         cls.aca_admin_port = 8020
 
         cls.aea_address = "some string"
-        cls.aea_identity = Identity("identity", address=cls.aea_address)
+        cls.aea_public_key = "some public_key"
+        cls.aea_identity = Identity(
+            "identity", address=cls.aea_address, public_key=cls.aea_public_key
+        )
 
         cls.cwd = os.getcwd()
 
@@ -170,6 +173,7 @@ class TestAEAToACA:
         identity = Identity(
             name="my_aea_1",
             address=wallet.addresses.get(DEFAULT_LEDGER),
+            public_key=wallet.public_keys.get(DEFAULT_LEDGER),
             default_address_key=DEFAULT_LEDGER,
         )
         data_dir = MagicMock()

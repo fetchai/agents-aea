@@ -115,15 +115,10 @@ class Strategy(Model):
             and "value" in self._set_classification,
             "classification must contain keys `key` and `value`",
         )
-        service_key = kwargs.pop("service_key", DEFAULT_SERVICE_KEY)
-        self._set_service_data = {"key": service_key, "value": self._register_as.value}
-        self._remove_service_data = {"key": service_key}
-        self._simple_service_data = {service_key: self._register_as.value}
-        self._search_query = {
-            "search_key": service_key,
-            "search_value": self._search_for.value,
-            "constraint_type": "==",
-        }
+        self.service_key = kwargs.pop("service_key", DEFAULT_SERVICE_KEY)
+        self.tac_version_id: Optional[str] = None
+        self._remove_service_data = {"key": self.service_key}
+        self._simple_service_data = {self.service_key: self._register_as.value}
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
         self._contract_id = str(CONTRACT_ID)
@@ -202,9 +197,11 @@ class Strategy(Model):
 
         :return: a description of the offered services
         """
-        description = Description(
-            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
-        )
+        service_data = {
+            "key": f"{self.service_key}_{self.tac_version_id}",
+            "value": self._register_as.value,
+        }
+        description = Description(service_data, data_model=AGENT_SET_SERVICE_MODEL,)
         return description
 
     def get_register_personality_description(self) -> Description:
@@ -252,11 +249,15 @@ class Strategy(Model):
                 "distance", (self._agent_location["location"], self._radius)
             ),
         )
+        search_query = {
+            "search_key": f"{self.service_key}_{self.tac_version_id}",
+            "search_value": self._search_for.value,
+            "constraint_type": "==",
+        }
         service_key_filter = Constraint(
-            self._search_query["search_key"],
+            search_query["search_key"],
             ConstraintType(
-                self._search_query["constraint_type"],
-                self._search_query["search_value"],
+                search_query["constraint_type"], search_query["search_value"],
             ),
         )
         query = Query([close_to_my_service, service_key_filter],)
@@ -540,13 +541,17 @@ class Strategy(Model):
     def kwargs_from_terms(
         terms: Terms,
         signature: Optional[str] = None,
+        sender_public_key: Optional[str] = None,
+        counterparty_public_key: Optional[str] = None,
         is_from_terms_sender: bool = True,
     ) -> Dict[str, Any]:
         """
         Get the contract api message kwargs from the terms.
 
         :param terms: the terms
-        :param signature: the signature
+        :param signature: the signature (for ethereum or non-contract-based case)
+        :param sender_public_key: the sender's public key (for fetchai ledger case)
+        :param counterparty_public_key: the counterparty's public key (for fetchai ledger case)
         :param is_from_terms_sender: whether from == terms.sender_address (i.e. agent submitting tx is the one which terms are considered)
         :return: the kwargs
         """
@@ -591,6 +596,25 @@ class Strategy(Model):
             "value": 0,
             "trade_nonce": int(terms.nonce),
         }
+        enforce(
+            sender_public_key is not None
+            and counterparty_public_key is not None
+            or sender_public_key is None
+            and counterparty_public_key is None,
+            "Either provide both sender's and counterparty's public-keys or neither's.",
+        )
+        enforce(
+            not (
+                signature is not None
+                and sender_public_key is not None
+                and counterparty_public_key is not None
+            ),
+            "Either provide signature (for Ethereum and non-contract-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC)",
+        )
         if signature is not None:
             kwargs["signature"] = signature
+        elif sender_public_key is not None:
+            kwargs["value"] = 1
+            kwargs["from_pubkey"] = sender_public_key
+            kwargs["to_pubkey"] = counterparty_public_key
         return kwargs

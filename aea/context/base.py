@@ -167,9 +167,19 @@ class AgentContext:
         return self.identity.addresses
 
     @property
+    def public_keys(self) -> Dict[str, str]:
+        """Get public keys."""
+        return self.identity.public_keys
+
+    @property
     def address(self) -> Address:
         """Get the default address."""
         return self.identity.address
+
+    @property
+    def public_key(self) -> str:
+        """Get the default public key."""
+        return self.identity.public_key
 
     @property
     def connection_status(self) -> MultiplexerStatus:

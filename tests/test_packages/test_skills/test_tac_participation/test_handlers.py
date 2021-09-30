@@ -173,6 +173,10 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         assert self.game._tac_dialogue is not None
         assert self.skill.skill_context.behaviours.tac_search.is_active is False
+        assert (
+            self.skill.skill_context.shared_state.get("tac_version_id", None)
+            == self.game.expected_version_id
+        )
 
     def test_on_controller_search_result_i(self):
         """Test the _on_controller_search_result method of the oef handler where phase is not PRE_GAME."""

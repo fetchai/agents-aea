@@ -98,6 +98,7 @@ Add a simple skill with a signing handler and the signing dialogues.
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
+        public_keys=counterparty_wallet.public_keys,
         default_address_key=FetchAICrypto.identifier,
     )
 ```
@@ -384,6 +385,7 @@ def run():
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
+        public_keys=counterparty_wallet.public_keys,
         default_address_key=FetchAICrypto.identifier,
     )
 

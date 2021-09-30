@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,18 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains tests for decision_maker."""
+"""
+This module contains the support resources for the cosm_trade protocol.
 
-import pytest
+It was created with protocol buffer compiler version `libprotoc 3.15.8` and aea version `1.0.2`.
+"""
 
-from aea.decision_maker.scaffold import DecisionMakerHandler
-from aea.identity.base import Identity
+from packages.fetchai.protocols.cosm_trade.message import CosmTradeMessage
+from packages.fetchai.protocols.cosm_trade.serialization import CosmTradeSerializer
 
 
-def test_init_and_not_implemented():
-    """Initialise the decision maker handler."""
-    decision_maker_handler = DecisionMakerHandler(
-        identity=Identity("name", "address", "public_key"), wallet="wallet", config={}
-    )
-    with pytest.raises(NotImplementedError):
-        decision_maker_handler.handle("message")
+CosmTradeMessage.serializer = CosmTradeSerializer

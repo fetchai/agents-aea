@@ -67,8 +67,8 @@ class Testp2pStubConnectionReception:
             namespace_dir=d, connection_id=P2PStubConnection.connection_id,
         )
         self.loop = asyncio.get_event_loop()
-        self.identity1 = Identity("test", "con1")
-        self.identity2 = Identity("test", "con2")
+        self.identity1 = Identity("test", "con1", "public_key_1")
+        self.identity2 = Identity("test", "con2", "public_key_2")
         self.connection1 = P2PStubConnection(
             configuration=configuration, data_dir=MagicMock(), identity=self.identity1
         )

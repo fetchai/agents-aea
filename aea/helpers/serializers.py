@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains Serializers that can be used for custom types."""
 
 import copy
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
-from google.protobuf.struct_pb2 import Struct
+from google.protobuf.struct_pb2 import ListValue, Struct
 
 
 class DictProtobufStructSerializer:
@@ -76,61 +75,83 @@ class DictProtobufStructSerializer:
     def _patch_dict(cls, dictionnary: Dict[str, Any]) -> None:
         need_patch: Dict[str, bool] = dict()
         for key, value in dictionnary.items():
-            if isinstance(value, bytes):
-                # convert bytes values to string, as protobuf.Struct does support byte fields
-                dictionnary[key] = cls._bytes_to_str(value)
-                if cls.NEED_PATCH in dictionnary:
-                    dictionnary[cls.NEED_PATCH][key] = True
-                else:
-                    need_patch[key] = True
-            elif isinstance(value, int) and not isinstance(value, bool):
-                # protobuf Struct store int as float under numeric_value type
-                if cls.NEED_PATCH in dictionnary:
-                    dictionnary[cls.NEED_PATCH][key] = True
-                else:
-                    need_patch[key] = True
-            elif isinstance(value, dict):
-                cls._patch_dict(value)  # pylint: disable=protected-access
-            elif (
-                not isinstance(value, bool)
-                and not isinstance(value, float)
-                and not isinstance(value, str)
-                and not isinstance(value, Struct)
-            ):  # pragma: nocover
-                raise NotImplementedError(
-                    "DictProtobufStructSerializer doesn't support dict value type {}".format(
-                        type(value)
-                    )
-                )
-        if len(need_patch) > 0:
+            new_value, patch_needed = cls._patch_value(value)
+            if patch_needed:
+                need_patch[key] = True
+            dictionnary[key] = new_value
+
+        if cls.NEED_PATCH in dictionnary:
+            dictionnary[cls.NEED_PATCH].update(need_patch)
+        elif need_patch:
             dictionnary[cls.NEED_PATCH] = need_patch
+
+    @classmethod
+    def _patch_value(cls, value: Any) -> Tuple[Any, bool]:
+        if isinstance(value, bytes):
+            return cls._bytes_to_str(value), True
+        if isinstance(value, int) and not isinstance(value, bool):
+            return value, True
+        if isinstance(value, list):
+            result = []
+            patched = False
+            for v in value:
+                v, need_patch = cls._patch_value(v)
+                if need_patch or isinstance(v, dict):
+                    patched = True
+                result.append(v)
+            return result, patched
+        if isinstance(value, dict):
+            cls._patch_dict(value)
+            return value, False
+        if isinstance(value, tuple([bool, float, str, Struct])):
+            # do nothing for supported types
+            return value, False
+        if value is None:
+            return None, False
+
+        raise NotImplementedError(
+            "DictProtobufStructSerializer doesn't support dict value type {}".format(
+                type(value)
+            )
+        )
+
+    @classmethod
+    def _restore_value(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return cls._str_to_bytes(value)
+
+        if isinstance(value, Struct):
+            if value != Struct():
+                new_dict = dict(value)
+                cls._patch_dict_restore(new_dict)
+                return new_dict
+            return {}
+        if isinstance(value, float):
+            return int(value)
+        if isinstance(value, (list, ListValue)):
+            return [cls._restore_value(v) for v in value]  # type: ignore
+
+        raise NotImplementedError(
+            "DictProtobufStructSerializer doesn't support dict value type {}".format(
+                type(value)
+            )
+        )
 
     @classmethod
     def _patch_dict_restore(cls, dictionary: Dict[str, Any]) -> None:
         # protobuf Struct doesn't recursively convert Struct to dict
-        need_patch = dictionary.get(cls.NEED_PATCH, {})
-        if len(need_patch) > 0:
-            dictionary[cls.NEED_PATCH] = dict(need_patch)
-
+        need_patch = dictionary.pop(cls.NEED_PATCH, {})
         for key, value in dictionary.items():
-            if key == cls.NEED_PATCH:
-                continue
-
             # protobuf struct doesn't recursively convert Struct to dict
             if isinstance(value, Struct):
-                if value != Struct():
-                    value = dict(value)
-                dictionary[key] = value
+                dictionary[key] = cls._restore_value(value)
 
             if isinstance(value, dict):
                 cls._patch_dict_restore(value)
-            elif isinstance(value, str) and dictionary.get(cls.NEED_PATCH, dict()).get(
-                key, False
-            ):
-                dictionary[key] = cls._str_to_bytes(value)
-            elif isinstance(value, float) and dictionary.get(
-                cls.NEED_PATCH, dict()
-            ).get(key, False):
-                dictionary[key] = int(value)
 
-        dictionary.pop(cls.NEED_PATCH, None)
+            if key in need_patch:
+                dictionary[key] = cls._restore_value(value)
+
+            elif isinstance(value, (list, ListValue)):
+                # fix list of elementes not needed to be restored
+                dictionary[key] = list(value)  # type: ignore

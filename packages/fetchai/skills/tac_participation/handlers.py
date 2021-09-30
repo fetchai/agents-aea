@@ -182,6 +182,7 @@ class OefSearchHandler(Handler):
         game.tac_dialogue = tac_dialogue
         self.context.outbox.put_message(message=tac_msg)
         self.context.behaviours.tac_search.is_active = False
+        self.context.shared_state["tac_version_id"] = game.expected_version_id
 
 
 class TacHandler(Handler):
