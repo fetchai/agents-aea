@@ -46,7 +46,6 @@ from packages.fetchai.protocols.cosm_trade.dialogues import (
 from packages.fetchai.protocols.cosm_trade.dialogues import (
     CosmTradeDialogues as BaseCosmTradeDialogues,
 )
-from packages.fetchai.protocols.cosm_trade.message import CosmTradeMessage
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -286,50 +285,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
         )
 
 
-class CosmTradeDialogue(BaseCosmTradeDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    __slots__ = ("_associated_fipa_dialogue",)
-
-    def __init__(
-        self,
-        dialogue_label: DialogueLabel,
-        self_address: Address,
-        role: Dialogue.Role,
-        message_class: Type[CosmTradeMessage] = CosmTradeMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class
-        """
-        BaseCosmTradeDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._associated_fipa_dialogue: Optional[FipaDialogue] = None
-
-    @property
-    def associated_fipa_dialogue(self) -> FipaDialogue:
-        """Get associated_fipa_dialogue."""
-        if self._associated_fipa_dialogue is None:
-            raise ValueError("associated_fipa_dialogue not set!")
-        return self._associated_fipa_dialogue
-
-    @associated_fipa_dialogue.setter
-    def associated_fipa_dialogue(self, associated_fipa_dialogue: FipaDialogue) -> None:
-        """Set associated_fipa_dialogue."""
-        enforce(
-            self._associated_fipa_dialogue is None,
-            "associated_fipa_dialogue already set!",
-        )
-        self._associated_fipa_dialogue = associated_fipa_dialogue
+CosmTradeDialogue = BaseCosmTradeDialogue
 
 
 class CosmTradeDialogues(Model, BaseCosmTradeDialogues):

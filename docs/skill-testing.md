@@ -65,7 +65,7 @@ _multiplexer = AsyncMultiplexer()
 _multiplexer._out_queue = (asyncio.Queue())
 
 agent_context = AgentContext(
-    identity=Identity("test_agent_name", "test_agent_address"),
+    identity=Identity("test_agent_name", "test_agent_address", "test_agent_public_key"),
     connection_status=_multiplexer.connection_status,
     outbox=OutBox(cast(Multiplexer, cls._multiplexer)),
     decision_maker_message_queue=Queue(),

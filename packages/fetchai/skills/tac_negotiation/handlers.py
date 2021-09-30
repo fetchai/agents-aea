@@ -379,7 +379,7 @@ class FipaNegotiationHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_contract_tx:
             if strategy.ledger_id == FetchAIApi.identifier:
-                counterparty_public_key = match_accept.info.get("public_key")
+                counterparty_public_key = match_accept.info.get("public_key", None)
                 if counterparty_public_key is None:
                     self.context.logger.info(
                         f"{match_accept.performative} did not contain counterparty public_key!"
