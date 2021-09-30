@@ -442,9 +442,10 @@ class ERC1155Contract(Contract):
                 raise RuntimeError(
                     "Signature not expected for Cosmos/Fetch based contract."
                 )
-            if from_pubkey is None or to_pubkey is None:
-                raise RuntimeError("Pubkeys requred for Cosmos/Fetch based contract.")
-
+            if to_pubkey is None:
+                raise RuntimeError(
+                    "to_pubkey is missing and required for Cosmos/Fetch based contract.."
+                )
             cosmos_api = cast(CosmosApi, ledger_api)
 
             msgs: List[ProtoAny] = []
@@ -499,6 +500,10 @@ class ERC1155Contract(Contract):
                     gas=gas,
                 )
             else:
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "from_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
                 tx = cosmos_api.get_multi_transaction(
                     from_addresses=[from_address, to_address],
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
@@ -627,9 +632,10 @@ class ERC1155Contract(Contract):
                 raise RuntimeError(
                     "Signature not expected for Cosmos/Fetch based contract."
                 )
-            if from_pubkey is None or to_pubkey is None:
-                raise RuntimeError("Pubkeys requred for Cosmos/Fetch based contract.")
-
+            if to_pubkey is None:
+                raise RuntimeError(
+                    "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                )
             cosmos_api = cast(CosmosApi, ledger_api)
 
             msgs: List[ProtoAny] = []
@@ -684,12 +690,26 @@ class ERC1155Contract(Contract):
             # Sending native tokens from to_address to from_address
             msgs.append(cosmos_api.get_packed_send_msg(to_address, from_address, value))
 
-            tx = cosmos_api.get_multi_transaction(
-                from_addresses=[from_address, to_address],
-                pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
-                msgs=msgs,
-                gas=gas,
-            )
+            if len(from_tokens) == 0:
+                # Transfers are done only from to_address
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[to_address],
+                    pub_keys=[bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+            else:
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "from_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[from_address, to_address],
+                    pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+
             return tx
 
         raise NotImplementedError  # pragma: nocover

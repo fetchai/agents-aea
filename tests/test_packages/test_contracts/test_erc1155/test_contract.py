@@ -23,11 +23,18 @@ import re
 import time
 from pathlib import Path
 from typing import cast
+from unittest import mock
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
 
+from aea.configurations.loader import (
+    ComponentType,
+    ContractConfig,
+    load_component_configuration,
+)
+from aea.contracts.base import Contract, contract_registry
 from aea.test_tools.test_contract import BaseContractTestCase
 
 from tests.conftest import (
@@ -135,8 +142,8 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             key in tx
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_get_create_single_transaction(self):
@@ -155,8 +162,8 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             key in tx
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_get_mint_batch_transaction(self):
@@ -177,8 +184,8 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             key in tx
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_validate_mint_quantities(self):
@@ -253,8 +260,8 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             key in tx
             for key in ["value", "chainId", "gas", "gasPrice", "nonce", "to", "data"]
         )
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
     def test_get_balance(self):
@@ -683,8 +690,8 @@ class TestCosmWasmContract(BaseContractTestCase):
         if tx is None:
             raise ValueError("Deploy transaction not found!")  # pragma: nocover
 
-        tx_receipt = cls.sign_send_confirm_receipt_transaction(
-            tx, cls.ledger_api, cls.deployer_crypto
+        tx_receipt = cls.sign_send_confirm_receipt_multisig_transaction(
+            tx, cls.ledger_api, [cls.deployer_crypto]
         )
 
         contract_address = cls.ledger_api.get_contract_address(tx_receipt)
@@ -707,8 +714,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_id=self.token_id_b,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Create batch of tokens
@@ -719,8 +726,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_ids=self.token_ids_a,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Mint single token
@@ -733,8 +740,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             mint_quantity=1,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Get balance of single token
@@ -757,8 +764,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             mint_quantities=[1] * len(self.token_ids_a),
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Get balances of multiple tokens
@@ -784,8 +791,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_ids=self.token_ids_a,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Mint single ERC1155 token a[0] to Deployer
@@ -798,8 +805,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             mint_quantity=1,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Store balance of Deployer's native tokens before atomic swap
@@ -860,8 +867,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             to_pubkey=self.item_owner_crypto.public_key,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.item_owner_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.item_owner_crypto]
         )
 
         # Check Item owner's ERC1155 token balance
@@ -909,8 +916,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             token_ids=self.token_ids_a,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Mint single token a[0] to Deployer
@@ -923,8 +930,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             mint_quantity=1,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Mint single token a[1] to Item owner
@@ -937,8 +944,8 @@ class TestCosmWasmContract(BaseContractTestCase):
             mint_quantity=1,
         )
         assert len(tx) == 2
-        self.sign_send_confirm_receipt_transaction(
-            tx, self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_multisig_transaction(
+            tx, self.ledger_api, [self.deployer_crypto]
         )
 
         # Store balance of Deployer's native tokens before atomic swap
@@ -994,3 +1001,453 @@ class TestCosmWasmContract(BaseContractTestCase):
         # Check deployer's native token balance
         deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
         assert deployer_balance == original_deployer_balance + 1
+
+
+class TestContractCommon:
+    """Other tests for the contract."""
+
+    @classmethod
+    def setup(cls):
+        """Setup."""
+
+        # Register smart contract used for testing
+        cls.path_to_contract = Path(
+            ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"
+        )
+
+        # register contract
+        configuration = cast(
+            ContractConfig,
+            load_component_configuration(ComponentType.CONTRACT, cls.path_to_contract),
+        )
+        configuration._directory = (  # pylint: disable=protected-access
+            cls.path_to_contract
+        )
+        if str(configuration.public_id) not in contract_registry.specs:
+            # load contract into sys modules
+            Contract.from_config(configuration)
+        cls.contract = contract_registry.make(str(configuration.public_id))
+
+        cls.token_ids_a = [
+            340282366920938463463374607431768211456,
+        ]
+
+        # Create mock ledger with unknown identifier
+        cls.ledger_api = mock.Mock()
+        attrs = {"identifier": "dummy"}
+        cls.ledger_api.configure_mock(**attrs)
+
+    @pytest.mark.ledger
+    def test_get_create_batch_transaction_wrong_identifier(self):
+        """Test if get_create_batch_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_create_batch_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                token_ids=self.token_ids_a,
+            )
+
+    @pytest.mark.ledger
+    def test_get_create_single_transaction_wrong_identifier(self):
+        """Test if get_create_single_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_create_single_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                token_id=self.token_ids_a[0],
+            )
+
+    @pytest.mark.ledger
+    def test_get_mint_batch_transaction_wrong_identifier(self):
+        """Test if get_mint_batch_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_mint_batch_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                recipient_address="address",
+                token_ids=self.token_ids_a,
+                mint_quantities=[1],
+            )
+
+    @pytest.mark.ledger
+    def test_get_mint_single_transaction_wrong_identifier(self):
+        """Test if get_mint_single_transaction with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_mint_single_transaction(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                deployer_address="address",
+                recipient_address="address",
+                token_id=self.token_ids_a[0],
+                mint_quantity=1,
+            )
+
+    @pytest.mark.ledger
+    def test_get_balance_wrong_identifier(self):
+        """Test if get_balance with wrong api identifier fails."""
+
+        # Test if function is not implemented for unknown ledger
+        with pytest.raises(NotImplementedError):
+            self.contract.get_balance(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+                token_id=self.token_ids_a[0],
+            )
+
+    @pytest.mark.ledger
+    def test_get_balance_wrong_query_res(self):
+        """Test if get_balance with wrong api identifier fails."""
+
+        # Create mock fetchai ledger that returns None on execute_contract_query
+        attrs = {"identifier": "fetchai", "execute_contract_query.return_value": None}
+        self.ledger_api.configure_mock(**attrs)
+
+        # Test if get balance returns ValueError when querying contract returns None
+        with pytest.raises(ValueError):
+            self.contract.get_balance(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+                token_id=self.token_ids_a[0],
+            )
+
+    @pytest.mark.ledger
+    def test_get_balances_wrong_query_res(self):
+        """Test if get_balances with wrong api identifier fails."""
+
+        # Create mock fetchai ledger that returns None on execute_contract_query
+        attrs = {"identifier": "fetchai", "execute_contract_query.return_value": None}
+        self.ledger_api.configure_mock(**attrs)
+
+        # Test if get balance returns ValueError when querying contract returns None
+        with pytest.raises(ValueError):
+            self.contract.get_balances(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+                token_ids=self.token_ids_a,
+            )
+
+    @pytest.mark.ledger
+    def test_get_hash_batch_not_same(self):
+        """Test if get_hash_batch returns ValueError when on-chain hash is not same as computed hash."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get hash returns ValueError when on chain hash is not same as computed hash
+        with mock.patch.object(type(self.contract), "_get_hash_batch", new=mock.Mock()):
+            with pytest.raises(ValueError):
+                self.contract.get_hash_batch(
+                    ledger_api=self.ledger_api,
+                    contract_address="contract_address",
+                    from_address="address",
+                    to_address="address",
+                    token_ids=self.token_ids_a,
+                    from_supplies=[1],
+                    to_supplies=[0],
+                    value=123,
+                    trade_nonce=123,
+                )
+
+    @pytest.mark.ledger
+    def test_generate_trade_nonce_if_exist(self):
+        """Test if generate_trade_nonce retries when nonce already exist."""
+
+        # Etherem ledger api mock
+        self.ledger_api.identifier = "ethereum"
+
+        # instance.functions.is_nonce_used(agent_address, trade_nonce).call() -> True, False
+        is_nonce_used_mock = mock.Mock()
+        is_nonce_used_mock.configure_mock(**{"call.side_effect": [True, False]})
+
+        # instance.functions.is_nonce_used(agent_address, trade_nonce) -> is_nonce_used_mock with call method
+        instance_mock = mock.Mock()
+        instance_mock.configure_mock(
+            **{"functions.is_nonce_used.return_value": is_nonce_used_mock}
+        )
+
+        # cls.get_instance(ledger_api, contract_address) -> instance_mock
+        get_instance_mock = mock.Mock()
+        get_instance_mock.configure_mock(**{"return_value": instance_mock})
+
+        # Patch get_instance method to return get_instance_mock which returns instance of instance_mock when called
+        with mock.patch.object(
+            type(self.contract), "get_instance", new=get_instance_mock
+        ):
+            self.contract.generate_trade_nonce(
+                ledger_api=self.ledger_api,
+                contract_address="contract_address",
+                agent_address="address",
+            )
+
+        # Check if is_nonce_used was called twice
+        assert is_nonce_used_mock.call.call_count == 2
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_eth_no_signature(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if signature not present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is missing
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_eth_pubkeys(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if pubkeys are present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when pubkey is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="deadbeef",
+                to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_signature(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="deadbeef",
+                to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_valid(self):
+        """Test if get_atomic_swap_single_transaction allows one pubkey in case of only one direction of transfers."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction works with only to_pubkey
+        tx = self.contract.get_atomic_swap_single_transaction(
+            self.ledger_api,
+            contract_address="address",
+            from_address="address",
+            to_address="address",
+            token_id=self.token_ids_a[0],
+            from_supply=0,
+            to_supply=1,
+            value=1,
+            trade_nonce=0,
+            to_pubkey="deadbeef",
+        )
+        assert tx is not None
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_invalid(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing from_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_to_pubkey_missing(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing to_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=1,
+                trade_nonce=0,
+                from_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_eth_pubkeys(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError if pubkeys are present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_batch_transaction returns RuntimeError when pubkey is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_signature(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_batch_transaction returns RuntimeError when signature is present
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                signature="signature",
+                from_pubkey="deadbeef",
+                to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_valid(self):
+        """Test if get_atomic_swap_batch_transaction allows one pubkey in case of only one direction of transfers."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_batch_transaction works with only to_pubkey
+        tx = self.contract.get_atomic_swap_batch_transaction(
+            self.ledger_api,
+            contract_address="address",
+            from_address="address",
+            to_address="address",
+            token_ids=[self.token_ids_a[0]],
+            from_supplies=[0],
+            to_supplies=[1],
+            value=1,
+            trade_nonce=0,
+            to_pubkey="deadbeef",
+        )
+        assert tx is not None
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_invalid(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing from_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_batch_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                to_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_ba_transaction_eth_no_signature(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError if signature not present on Ethereum case."""
+
+        self.ledger_api.identifier = "ethereum"
+
+        # Test if get_atomic_swap_single_transaction returns RuntimeError when signature is missing
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_to_pubkey_missing(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing to_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=1,
+                trade_nonce=0,
+                from_pubkey="deadbeef",
+            )
