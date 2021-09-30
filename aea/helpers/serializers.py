@@ -80,10 +80,10 @@ class DictProtobufStructSerializer:
                 need_patch[key] = True
             dictionnary[key] = new_value
 
-        if cls.NEED_PATCH in dictionnary:
-            dictionnary[cls.NEED_PATCH].update(need_patch)
-        elif need_patch:
-            dictionnary[cls.NEED_PATCH] = need_patch
+        if need_patch:
+            dict_need_patch = dictionnary.get(cls.NEED_PATCH, {})
+            dict_need_patch.update(need_patch)
+            dictionnary[cls.NEED_PATCH] = dict_need_patch
 
     @classmethod
     def _patch_value(cls, value: Any) -> Tuple[Any, bool]:
@@ -126,12 +126,14 @@ class DictProtobufStructSerializer:
                 cls._patch_dict_restore(new_dict)
                 return new_dict
             return {}
+
         if isinstance(value, float):
             return int(value)
+
         if isinstance(value, (list, ListValue)):
             return [cls._restore_value(v) for v in value]  # type: ignore
 
-        raise NotImplementedError(
+        raise NotImplementedError(  # pragma: nocover
             "DictProtobufStructSerializer doesn't support dict value type {}".format(
                 type(value)
             )
@@ -142,12 +144,10 @@ class DictProtobufStructSerializer:
         # protobuf Struct doesn't recursively convert Struct to dict
         need_patch = dictionary.pop(cls.NEED_PATCH, {})
         for key, value in dictionary.items():
+
             # protobuf struct doesn't recursively convert Struct to dict
             if isinstance(value, Struct):
                 dictionary[key] = cls._restore_value(value)
-
-            if isinstance(value, dict):
-                cls._patch_dict_restore(value)
 
             if key in need_patch:
                 dictionary[key] = cls._restore_value(value)
