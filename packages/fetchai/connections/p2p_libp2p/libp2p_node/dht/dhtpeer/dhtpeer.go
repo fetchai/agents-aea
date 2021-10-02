@@ -52,7 +52,7 @@ import (
 	"github.com/rs/zerolog"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/libp2p/go-libp2p"
+	libp2p "github.com/libp2p/go-libp2p"
 	cryptop2p "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
@@ -73,6 +73,7 @@ import (
 
 const AcnStatusTimeout = 5.0 * time.Second
 const AcnStatusesQueueSize = 1000
+const SlowQueueSize = 100
 
 // panics if err is not nil
 func check(err error) {
@@ -88,6 +89,7 @@ func ignore(err error) {
 
 const (
 	addressLookupTimeout                 = 20 * time.Second
+	timeoutBeforeMovingToSlowQueue       = 3 * time.Second
 	routingTableConnectionUpdateTimeout  = 5 * time.Second
 	newStreamTimeout                     = 10 * time.Second
 	addressRegisterTimeout               = 3 * time.Second
@@ -170,18 +172,21 @@ type DHTPeer struct {
 
 	monitor    monitoring.MonitoringService
 	closing    chan struct{}
+	isClosing  bool
 	goroutines *sync.WaitGroup
 	logger     zerolog.Logger
 
 	// syncMessages map[string]*sync.WaitGroup
 	syncMessagesLock sync.RWMutex
 	syncMessages     map[string](chan *aea.Envelope)
+
+	slow_queue chan *aea.Envelope
 }
 
 // New creates a new DHTPeer
 func New(opts ...Option) (*DHTPeer, error) {
 	var err error
-	dhtPeer := &DHTPeer{registrationDelay: addressRegistrationDelay}
+	dhtPeer := &DHTPeer{registrationDelay: addressRegistrationDelay, isClosing: false}
 
 	dhtPeer.dhtAddresses = map[string]string{}
 	dhtPeer.tcpAddresses = map[string]net.Conn{}
@@ -197,6 +202,8 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.enableAddressAnnouncementWg = &sync.WaitGroup{}
 	dhtPeer.enableAddressAnnouncementLock = sync.RWMutex{}
 	dhtPeer.mailboxHostPort = ""
+
+	dhtPeer.slow_queue = make(chan *aea.Envelope, SlowQueueSize)
 
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
@@ -412,7 +419,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	ready.Add(1)
 	go dhtPeer.startMonitoring(ready)
 	ready.Wait()
-
+	go dhtPeer.slowEnvelopeSendLoop()
 	return dhtPeer, nil
 }
 
@@ -606,6 +613,7 @@ func (dhtPeer *DHTPeer) Close() []error {
 
 	linfo().Msg("Stopping DHTPeer...")
 	close(dhtPeer.closing)
+	close(dhtPeer.slow_queue)
 	//return status
 
 	errappend := func(err error) {
@@ -1012,6 +1020,28 @@ func (dhtPeer *DHTPeer) GetCertAndSignature() (*tls.Certificate, []byte) {
 }
 
 // RouteEnvelope to its destination
+
+func (dhtPeer *DHTPeer) getEnvelopeAcnRecord(envel *aea.Envelope) (*acn.AgentRecord, error) {
+	sender := envel.Sender
+	dhtPeer.agentRecordsLock.RLock()
+	localRec, existsLocal := dhtPeer.agentRecords[sender]
+	dhtPeer.agentRecordsLock.RUnlock()
+
+	var envelRec *acn.AgentRecord
+	if sender == dhtPeer.myAgentAddress {
+		envelRec = dhtPeer.myAgentRecord
+	} else if dhtPeer.mailboxServer != nil && dhtPeer.mailboxServer.IsAddrRegistered(sender) {
+		envelRec = dhtPeer.mailboxServer.GetAgentRecord(sender)
+	} else if existsLocal {
+		// TOFIX(LR) should acquire RLock
+		envelRec = localRec
+	} else {
+		err := errors.New("Envelope sender is not registered locally " + sender)
+		return nil, err
+	}
+	return envelRec, nil
+}
+
 func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, linfo, ldebug := dhtPeer.GetLoggers()
 
@@ -1028,28 +1058,17 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 
 	// get sender agent envelRec
 	// TODO can change function signature to force the caller to provide the envelRec
-	var envelRec *acn.AgentRecord
-	sender := envel.Sender
+	target := envel.To
 
-	dhtPeer.agentRecordsLock.RLock()
-	localRec, existsLocal := dhtPeer.agentRecords[sender]
-	dhtPeer.agentRecordsLock.RUnlock()
+	var err error
 
-	if sender == dhtPeer.myAgentAddress {
-		envelRec = dhtPeer.myAgentRecord
-	} else if dhtPeer.mailboxServer != nil && dhtPeer.mailboxServer.IsAddrRegistered(sender) {
-		envelRec = dhtPeer.mailboxServer.GetAgentRecord(sender)
-	} else if existsLocal {
-		// TOFIX(LR) should acquire RLock
-		envelRec = localRec
-	} else {
-		err := errors.New("Envelope sender is not registered locally " + sender)
+	envelRec, err := dhtPeer.getEnvelopeAcnRecord(envel)
+
+	if err != nil {
 		lerror(err).Str("op", "route").Str("addr", envel.To).
 			Msg("")
 		return err
 	}
-
-	target := envel.To
 
 	dhtPeer.tcpAddressesLock.RLock()
 	connDelegate, existsDelegate := dhtPeer.tcpAddresses[target]
@@ -1132,97 +1151,164 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 				routeCount.Dec()
 				return err
 			}
-		} else {
-			linfo().Str("op", "route").Str("addr", target).
-				Msg("did NOT find destination address locally, looking for it in the DHT...")
-			peerID, _, err = dhtPeer.lookupAddressDHT(target) // guarantees peerID has a valid PoR
-			if err != nil {
-				lerror(err).Str("op", "route").Str("addr", target).
-					Msg("while looking up address on the DHT")
-				routeCount.Dec()
-				return err
-			}
+			return dhtPeer._routeEnvelopeWithNewStream(envel, peerID, envelRec)
 		}
-
-		//linfo().Str("op", "route").Str("addr", target).
-		//	Msgf("got peer id '%s' for agent address", peerID.Pretty())
-
-		//linfo().Str("op", "route").Str("addr", target).
-		//	Msgf("opening stream to target %s...", peerID.Pretty())
-		ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
-		defer cancel()
-		stream, err := dhtPeer.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
+		// not exists
+		err = dhtPeer._routeEnvelopeDHTLookup(envel, timeoutBeforeMovingToSlowQueue)
 		if err != nil {
+			routeCount.Dec()
 			lerror(err).Str("op", "route").Str("addr", target).
-				Msgf("timeout, couldn't open stream to target %s", peerID.Pretty())
-			routeCount.Dec()
-			return err
+				Msg("while rooting and looking up address on the DHT. moving it to she slow queue")
+			dhtPeer.slow_queue <- envel
+			return nil
 		}
-
-		duration := timer.GetTimer(start)
-		opLatencyRoute.Observe(float64(duration.Microseconds()))
-
-		linfo().Str("op", "route").Str("addr", target).
-			Msgf("sending envelope to target peer %s...", peerID.Pretty())
-
-		envelBytes, err := proto.Marshal(envel)
-		if err != nil {
-			lerror(err).
-				Str("op", "route").
-				Str("addr", target).
-				Msg("couldn't serialize envelope")
-			errReset := stream.Reset()
-			ignore(errReset)
-			routeCount.Dec()
-			return err
-		}
-
-		streamPipe := utils.StreamPipe{Stream: stream}
-		err = acn.SendEnvelopeMessage(streamPipe, envelBytes, envelRec)
-		if err != nil {
-			lerror(err).
-				Str("op", "route").
-				Str("addr", target).
-				Msg("couldn't send envelope")
-			errReset := stream.Reset()
-			ignore(errReset)
-			routeCount.Dec()
-			return err
-		}
-
-		// wait for response
-		linfo().Str("op", "route").Str("addr", target).
-			Msgf("waiting fro envelope delivery confirmation from target peer %s...", peerID.Pretty())
-
-		statusBody, err := acn.ReadAcnStatus(streamPipe)
-
-		if err != nil {
-			lerror(err).
-				Str("op", "route").
-				Str("addr", target).
-				Msg("failed to decode acn status")
-			routeCount.Dec()
-			return err
-		}
-		if statusBody.Code != acn.SUCCESS {
-			err = errors.New(statusBody.Code.String() + " : " + strings.Join(statusBody.Msgs, ":"))
-			lerror(err).
-				Str("op", "route").
-				Str("addr", target).
-				Msg("failed to deliver envelope")
-			routeCount.Dec()
-			return err
-		}
-
-		routeCount.Dec()
-		return nil
 	}
 
 	return nil
 }
+func (dhtPeer *DHTPeer) slowEnvelopeSendLoop() {
+	lerror, _, _, ldebug := dhtPeer.GetLoggers()
+	ldebug().Msg("slow envelope send loop started")
+	var err error
+	for {
+		envel := <-dhtPeer.slow_queue
+		if envel == nil {
+			ldebug().Msg("got nil envelope. exit slow envelope send loop")
+			return
+		}
+		ldebug().Str("addr", envel.To).Msgf("-> Routing slow envelope: %s", envel.String())
+		err = dhtPeer._routeEnvelopeDHTLookup(envel, addressLookupTimeout)
+		if err != nil {
+			lerror(err).Msgf("while sending slow envelope: %s", envel.String())
+		} else {
+			ldebug().Str("addr", envel.To).Msgf("sent slow envelope: %s", envel.String())
+		}
+
+		if dhtPeer.isClosing {
+			ldebug().Msg("slow envelope send loop closed")
+			return
+		}
+	}
+}
+
+func (dhtPeer *DHTPeer) _routeEnvelopeDHTLookup(
+	envel *aea.Envelope,
+	lookup_timeout time.Duration,
+) error {
+	target := envel.To
+	lerror, _, linfo, _ := dhtPeer.GetLoggers()
+	envelRec, err := dhtPeer.getEnvelopeAcnRecord(envel)
+	if err != nil {
+		return err
+	}
+	linfo().Str("op", "route").Str("addr", target).
+		Msg("did NOT find destination address locally, looking for it in the DHT...")
+	ctx, cancel_lookup := context.WithTimeout(context.Background(), lookup_timeout)
+	defer cancel_lookup()
+	peerID, _, err := dhtPeer.lookupAddressDHT(ctx, target) // guarantees peerID has a valid PoR
+	if err != nil {
+		lerror(err).Str("op", "route").Str("addr", target).
+			Msg("while looking up address on the DHT")
+		return err
+	}
+	err = dhtPeer._routeEnvelopeWithNewStream(envel, peerID, envelRec)
+	return err
+
+}
+
+func (dhtPeer *DHTPeer) _routeEnvelopeWithNewStream(
+	envel *aea.Envelope,
+	peerID peer.ID,
+	envelRec *acn.AgentRecord,
+) error {
+	//linfo().Str("op", "route").Str("addr", target).
+	//	Msgf("got peer id '%s' for agent address", peerID.Pretty())
+
+	//linfo().Str("op", "route").Str("addr", target).
+	//	Msgf("opening stream to target %s...", peerID.Pretty())
+	lerror, _, linfo, _ := dhtPeer.GetLoggers()
+
+	routeCount, _ := dhtPeer.monitor.GetGauge(metricOpRouteCount)
+	opLatencyRoute, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRoute)
+	timer := dhtPeer.monitor.Timer()
+	start := timer.NewTimer()
+
+	var err error
+	target := envel.To
+	ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeout)
+	defer cancel()
+	stream, err := dhtPeer.routedHost.NewStream(ctx, peerID, dhtnode.AeaEnvelopeStream)
+	if err != nil {
+		lerror(err).Str("op", "route").Str("addr", target).
+			Msgf("timeout, couldn't open stream to target %s", peerID.Pretty())
+		routeCount.Dec()
+		return err
+	}
+
+	duration := timer.GetTimer(start)
+	opLatencyRoute.Observe(float64(duration.Microseconds()))
+
+	linfo().Str("op", "route").Str("addr", target).
+		Msgf("sending envelope to target peer %s...", peerID.Pretty())
+
+	envelBytes, err := proto.Marshal(envel)
+	if err != nil {
+		lerror(err).
+			Str("op", "route").
+			Str("addr", target).
+			Msg("couldn't serialize envelope")
+		errReset := stream.Reset()
+		ignore(errReset)
+		routeCount.Dec()
+		return err
+	}
+
+	streamPipe := utils.StreamPipe{Stream: stream}
+	err = acn.SendEnvelopeMessage(streamPipe, envelBytes, envelRec)
+	if err != nil {
+		lerror(err).
+			Str("op", "route").
+			Str("addr", target).
+			Msg("couldn't send envelope")
+		errReset := stream.Reset()
+		ignore(errReset)
+		routeCount.Dec()
+		return err
+	}
+
+	// wait for response
+	linfo().Str("op", "route").Str("addr", target).
+		Msgf("waiting fro envelope delivery confirmation from target peer %s...", peerID.Pretty())
+
+	statusBody, err := acn.ReadAcnStatus(streamPipe)
+
+	if err != nil {
+		lerror(err).
+			Str("op", "route").
+			Str("addr", target).
+			Msg("failed to decode acn status")
+		routeCount.Dec()
+		return err
+	}
+	if statusBody.Code != acn.SUCCESS {
+		err = errors.New(statusBody.Code.String() + " : " + strings.Join(statusBody.Msgs, ":"))
+		lerror(err).
+			Str("op", "route").
+			Str("addr", target).
+			Msg("failed to deliver envelope")
+		routeCount.Dec()
+		return err
+	}
+
+	routeCount.Dec()
+	return nil
+}
 
 /// TOFIX(LR) should return (*dhtnode)
-func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, *acn.AgentRecord, error) {
+func (dhtPeer *DHTPeer) lookupAddressDHT(
+	ctx context.Context,
+	address string,
+) (peer.ID, *acn.AgentRecord, error) {
 	lerror, lwarn, linfo, _ := dhtPeer.GetLoggers()
 	var err error
 
@@ -1236,7 +1322,7 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, *acn.AgentRec
 
 	linfo().Str("op", "lookup").Str("addr", address).
 		Msgf("Querying for providers for cid %s...", addressCID.String())
-	ctx, cancel := context.WithTimeout(context.Background(), addressLookupTimeout)
+	ctx, cancel := context.WithTimeout(ctx, addressLookupTimeout)
 	defer cancel()
 	//var elapsed time.Duration
 	var provider peer.AddrInfo
@@ -1479,7 +1565,7 @@ func (dhtPeer *DHTPeer) HandleAeaAddressRequest(
 		// needed when a relay client queries for a peer ID
 		//linfo().Str("op", "resolve").Str("addr", reqAddress).
 		//	Msg("did NOT found the address locally, looking for it in the DHT...")
-		peerID, peerRecord, err := dhtPeer.lookupAddressDHT(reqAddress)
+		peerID, peerRecord, err := dhtPeer.lookupAddressDHT(context.Background(), reqAddress)
 		if err == nil {
 			linfo().Str("op", "resolve").Str("addr", reqAddress).
 				Msg("found address on the DHT")
