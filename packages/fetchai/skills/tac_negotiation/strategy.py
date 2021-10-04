@@ -609,7 +609,7 @@ class Strategy(Model):
                 and sender_public_key is not None
                 and counterparty_public_key is not None
             ),
-            "Either provide signature (for Ethereum and non-contract-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC)",
+            "Either provide signature (for Ethereum-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC), or neither (for and non-contract-based Tac)",
         )
         if signature is not None:
             kwargs["signature"] = signature
