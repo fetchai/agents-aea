@@ -371,7 +371,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
         self.add_item("connection", "fetchai/soef:0.25.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.25.0")
-        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.set_config("agent.default_ledger", FetchAICrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
             [FetchAICrypto.identifier, EthereumCrypto.identifier],
@@ -412,10 +412,24 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             ]
         )
         self.set_config(setting_path, settings, type_="list")
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": FetchAICrypto.identifier,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FetchAICrypto.identifier,
+                    "message_format": "{public_key}",
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
 
         # set SOEF configuration
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-        self.set_config(setting_path, EthereumCrypto.identifier)
+        self.set_config(setting_path, "fetchai_v2_misc")
 
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
@@ -438,6 +452,30 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
+
+        # change default ledger to Ethereum
+        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+
+        # set SOEF connection configuration
+        setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+        self.set_config(setting_path, EthereumCrypto.identifier)
+
+        # set p2p_libp2p connection config
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": EthereumCrypto.identifier,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FetchAICrypto.identifier,
+                    "message_format": "{public_key}",
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
 
         # change SOEF configuration to local
         setting_path = "vendor.fetchai.connections.soef.config.is_https"
