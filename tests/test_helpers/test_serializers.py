@@ -71,6 +71,13 @@ def test_error_type_not_supported():
         DictProtobufStructSerializer.encode(case)
 
 
+def test_list_mixed_type_not_supported():
+    """Test list mixed type not supported."""
+    case = {"list": [1, 1.0, "test", {"a": False}]}
+    with pytest.raises(Exception, match=r"Mixed data types in list are not allowed"):
+        DictProtobufStructSerializer.encode(case)
+
+
 def test_encode_dict_is_deterministic():
     """Check DictProtobufStructSerializer.encode result is the same for the same input data."""
     data = dict(c=3, b=2, a=1)

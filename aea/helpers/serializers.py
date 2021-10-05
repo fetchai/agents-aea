@@ -94,11 +94,15 @@ class DictProtobufStructSerializer:
         if isinstance(value, list):
             result = []
             patched = False
+            types = set()
             for v in value:
+                types.add(type(v))
                 v, need_patch = cls._patch_value(v)
                 if need_patch or isinstance(v, dict):
                     patched = True
                 result.append(v)
+            if len(types) > 1:
+                raise ValueError(f"Mixed data types in list are not allowed!: {value}")
             return result, patched
         if isinstance(value, dict):
             cls._patch_dict(value)
