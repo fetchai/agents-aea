@@ -240,8 +240,30 @@ class TestCheckValidity:
         description_foobar = Description(
             {"foo": 1, "bar": "baz"}, data_model=data_model_foobar
         )
-        no_constraint = Not(Constraint("foo", ConstraintType("==", 5)))
-        assert no_constraint.check(description_foobar)
+
+        no_constraint_1 = Not(Constraint("foo", ConstraintType("==", 5)))
+        assert no_constraint_1.check(description_foobar)
+
+        no_constraint_2 = Not(Constraint("bar", ConstraintType("==", "hi")))
+        assert no_constraint_2.check(description_foobar)
+
+        no_constraint_3 = Not(Constraint("foo", ConstraintType("==", 1)))
+        assert not no_constraint_3.check(description_foobar)
+
+        no_constraint_4 = Not(Constraint("bar", ConstraintType("==", "baz")))
+        assert not no_constraint_4.check(description_foobar)
+
+        no_constraint_5 = Constraint("foo", ConstraintType("!=", 98273))
+        assert no_constraint_5.check(description_foobar)
+
+        no_constraint_6 = Constraint("bar", ConstraintType("!=", "hello_again"))
+        assert no_constraint_6.check(description_foobar)
+
+        no_constraint_7 = Constraint("foo", ConstraintType("!=", 1))
+        assert not no_constraint_7.check(description_foobar)
+
+        no_constraint_8 = Constraint("bar", ConstraintType("!=", "baz"))
+        assert not no_constraint_8.check(description_foobar)
 
     def test_or_check(self):
         """Test the or().check function."""
