@@ -460,6 +460,7 @@ class ERC1155Contract(Contract):
                 raise RuntimeError(
                     "Signature not expected for Cosmos/Fetch based contract."
                 )
+
             cosmos_api = cast(CosmosApi, ledger_api)
             msgs: List[ProtoAny] = []
             from_pubkey_required: bool = False
