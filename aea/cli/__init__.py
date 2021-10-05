@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of command-line tool 'aea'."""
+import aea.cli.utils.autocompletition
 
 from .core import cli

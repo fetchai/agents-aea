@@ -24,3 +24,8 @@ from aea.crypto.registries import (  # noqa
     register_faucet_api,
     register_ledger_api,
 )
+
+
+from .plugin import load_all_plugins  # noqa # isort:skip
+
+load_all_plugins()

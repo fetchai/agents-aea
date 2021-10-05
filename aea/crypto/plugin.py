@@ -31,7 +31,11 @@ from aea.configurations.constants import (
     FAUCET_APIS_PLUGIN_GROUP,
     LEDGER_APIS_PLUGIN_GROUP,
 )
-from aea.crypto import register_crypto, register_faucet_api, register_ledger_api
+from aea.crypto.registries import (
+    register_crypto,
+    register_faucet_api,
+    register_ledger_api,
+)
 from aea.crypto.registries.base import EntryPoint as EntryPointString
 from aea.crypto.registries.base import ItemId
 from aea.exceptions import AEAException, AEAPluginError, enforce
