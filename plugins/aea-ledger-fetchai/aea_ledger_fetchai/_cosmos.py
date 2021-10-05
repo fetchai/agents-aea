@@ -227,7 +227,7 @@ class CosmosHelper(Helper):
             is_successful = code is None
             if not is_successful:
                 _default_logger.warning(  # pragma: nocover
-                    f"Transaction not settled. Raw log: {tx_receipt.get('rawLog')}"
+                    f"Transaction {tx_receipt.get('txhash')} not settled. Raw log: {tx_receipt.get('rawLog')}"
                 )
         return is_successful
 
