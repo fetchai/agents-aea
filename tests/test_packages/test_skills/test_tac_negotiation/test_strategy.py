@@ -951,7 +951,7 @@ class TestStrategy(BaseSkillTestCase):
         with pytest.raises(
             AEAEnforceError,
             match=re.escape(
-                "Either provide signature (for Ethereum and non-contract-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC)"
+                "Either provide signature (for Ethereum-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC), or neither (for and non-contract-based Tac)"
             ),
         ):
             self.strategy.kwargs_from_terms(

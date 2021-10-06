@@ -85,7 +85,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
 
         # tac name
         tac_id = uuid.uuid4().hex
-        tac_service = f"tac_service_{tac_id}"
+        tac_service = f"tac_service_{tac_id[:5]}"
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
@@ -364,7 +364,7 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # tac name
         tac_id = uuid.uuid4().hex
-        tac_service = f"tac_service_{tac_id}"
+        tac_service = f"tac_service_{tac_id[:5]}"
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
@@ -874,7 +874,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # tac name
         tac_id = uuid.uuid4().hex
-        tac_service = f"tac_service_{tac_id}"
+        tac_service = f"tac_service_{tac_id[:5]}"
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
