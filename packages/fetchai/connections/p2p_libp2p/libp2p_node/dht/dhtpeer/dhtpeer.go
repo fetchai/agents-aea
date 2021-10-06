@@ -613,7 +613,8 @@ func (dhtPeer *DHTPeer) Close() []error {
 
 	linfo().Msg("Stopping DHTPeer...")
 	close(dhtPeer.closing)
-	close(dhtPeer.slow_queue)
+	dhtPeer.isClosing = true
+
 	//return status
 
 	errappend := func(err error) {
@@ -652,6 +653,7 @@ func (dhtPeer *DHTPeer) Close() []error {
 		close(channel)
 	}
 	dhtPeer.syncMessagesLock.Unlock()
+	close(dhtPeer.slow_queue)
 
 	return status
 }
@@ -1157,9 +1159,16 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 		err = dhtPeer._routeEnvelopeDHTLookup(envel, timeoutBeforeMovingToSlowQueue)
 		if err != nil {
 			routeCount.Dec()
-			lerror(err).Str("op", "route").Str("addr", target).
-				Msg("while rooting and looking up address on the DHT. moving it to she slow queue")
-			dhtPeer.slow_queue <- envel
+
+			if !dhtPeer.isClosing {
+				lerror(err).Str("op", "route").Str("addr", target).
+					Msg("while rooting and looking up address on the DHT. moving it to she slow queue")
+				dhtPeer.slow_queue <- envel
+			} else {
+				lerror(err).Str("op", "route").Str("addr", target).
+					Msg("while rooting and looking up address on the DHT. dht peer is closing. message dropped")
+			}
+
 			return nil
 		}
 	}
@@ -1168,10 +1177,13 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 }
 func (dhtPeer *DHTPeer) slowEnvelopeSendLoop() {
 	lerror, _, _, ldebug := dhtPeer.GetLoggers()
-	ldebug().Msg("slow envelope send loop started")
 	var err error
 	for {
-		envel := <-dhtPeer.slow_queue
+		envel, ok := <-dhtPeer.slow_queue
+		if !ok || dhtPeer.isClosing {
+			ldebug().Msg("slow envelope send loop closed")
+			return
+		}
 		if envel == nil {
 			ldebug().Msg("got nil envelope. exit slow envelope send loop")
 			return
@@ -1184,10 +1196,6 @@ func (dhtPeer *DHTPeer) slowEnvelopeSendLoop() {
 			ldebug().Str("addr", envel.To).Msgf("sent slow envelope: %s", envel.String())
 		}
 
-		if dhtPeer.isClosing {
-			ldebug().Msg("slow envelope send loop closed")
-			return
-		}
 	}
 }
 

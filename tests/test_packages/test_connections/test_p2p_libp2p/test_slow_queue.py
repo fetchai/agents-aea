@@ -84,6 +84,7 @@ class TestSlowQueue:
 
             temp_dir = os.path.join(cls.t, "temp_dir_100")
             os.mkdir(temp_dir)
+
             cls.conn = _make_libp2p_connection(
                 data_dir=temp_dir, port=port_genesis + 100, entry_peers=[genesis_peer]
             )
