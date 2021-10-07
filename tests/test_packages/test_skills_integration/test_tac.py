@@ -847,7 +847,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
     """Test that tac skills work."""
 
     capture_log = True
-    LOCAL_TESTNET_CHAIN_ID = "stargateworld-2"
+    LOCAL_TESTNET_CHAIN_ID = "stargateworld-3"
 
     @pytest.mark.integration
     @pytest.mark.ledger
@@ -907,23 +907,6 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
             connection=True,
         )
-
-        # use local test-net
-        setting_path = (
-            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
-        )
-        self.set_config(
-            setting_path,
-            f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
-        )
-        setting_path = (
-            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.denom"
-        )
-        self.set_config(setting_path, DEFAULT_DENOMINATION)
-        setting_path = (
-            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.chain_id"
-        )
-        self.set_config(setting_path, self.LOCAL_TESTNET_CHAIN_ID)
 
         # fund controller account
         controller_address = self.get_address(FetchAICrypto.identifier)
@@ -989,6 +972,23 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # use local test-net
+        setting_path = (
+            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
+        )
+        self.set_config(
+            setting_path,
+            f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+        )
+        setting_path = (
+            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.denom"
+        )
+        self.set_config(setting_path, DEFAULT_DENOMINATION)
+        setting_path = (
+            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.chain_id"
+        )
+        self.set_config(setting_path, self.LOCAL_TESTNET_CHAIN_ID)
+
         # change SOEF configuration to local
         setting_path = "vendor.fetchai.connections.soef.config.is_https"
         self.set_config(setting_path, False)
@@ -1042,23 +1042,6 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
                 FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
                 connection=True,
             )
-
-            # use local test-net
-            setting_path = (
-                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
-            )
-            self.set_config(
-                setting_path,
-                f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
-            )
-            setting_path = (
-                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.denom"
-            )
-            self.set_config(setting_path, DEFAULT_DENOMINATION)
-            setting_path = (
-                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.chain_id"
-            )
-            self.set_config(setting_path, self.LOCAL_TESTNET_CHAIN_ID)
 
             # fund participant account
             participant_address = self.get_address(FetchAICrypto.identifier)
@@ -1142,6 +1125,23 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             ), "Difference between created and fetched project for files={}".format(
                 diff
             )
+
+            # use local test-net
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
+            )
+            self.set_config(
+                setting_path,
+                f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+            )
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.denom"
+            )
+            self.set_config(setting_path, DEFAULT_DENOMINATION)
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.chain_id"
+            )
+            self.set_config(setting_path, self.LOCAL_TESTNET_CHAIN_ID)
 
             # change SOEF configuration to local
             setting_path = "vendor.fetchai.connections.soef.config.is_https"
