@@ -32,6 +32,9 @@ from aea.test_tools.test_cases import AEATestCaseManyFlaky
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
+    DEFAULT_DENOMINATION,
+    DEFAULT_FETCH_LEDGER_ADDR,
+    DEFAULT_FETCH_LEDGER_REST_PORT,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
@@ -844,6 +847,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
     """Test that tac skills work."""
 
     capture_log = True
+    LOCAL_TESTNET_CHAIN_ID = "stargateworld-2"
 
     @pytest.mark.integration
     @pytest.mark.ledger
@@ -903,6 +907,23 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
             connection=True,
         )
+
+        # use local test-net
+        setting_path = (
+            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
+        )
+        self.set_config(
+            setting_path,
+            f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+        )
+        setting_path = (
+            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.denom"
+        )
+        self.set_config(setting_path, DEFAULT_DENOMINATION)
+        setting_path = (
+            "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.chain_id"
+        )
+        self.set_config(setting_path, self.LOCAL_TESTNET_CHAIN_ID)
 
         # fund controller account
         controller_address = self.get_address(FetchAICrypto.identifier)
@@ -1022,7 +1043,24 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
                 connection=True,
             )
 
-            # fund controller account
+            # use local test-net
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
+            )
+            self.set_config(
+                setting_path,
+                f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+            )
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.denom"
+            )
+            self.set_config(setting_path, DEFAULT_DENOMINATION)
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.chain_id"
+            )
+            self.set_config(setting_path, self.LOCAL_TESTNET_CHAIN_ID)
+
+            # fund participant account
             participant_address = self.get_address(FetchAICrypto.identifier)
             fund_accounts_from_local_validator(
                 [participant_address], 10000000000000000000
