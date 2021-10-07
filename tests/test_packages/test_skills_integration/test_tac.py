@@ -998,9 +998,9 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
         self.set_config(setting_path, 12002)
 
         # prepare agents for test
-        for agent_name, config, _ in (
-            (tac_aea_one, NON_GENESIS_CONFIG, FUNDED_ETH_PRIVATE_KEY_2),
-            (tac_aea_two, NON_GENESIS_CONFIG_TWO, FUNDED_ETH_PRIVATE_KEY_3),
+        for agent_name, config in (
+            (tac_aea_one, NON_GENESIS_CONFIG),
+            (tac_aea_two, NON_GENESIS_CONFIG_TWO),
         ):
             self.set_agent_context(agent_name)
 
