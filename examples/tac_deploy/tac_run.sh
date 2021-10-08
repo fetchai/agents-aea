@@ -94,7 +94,7 @@ check_options(){
 	esac
 	
 	case "$mode" in
-	  fetchai)
+	  fetchai|ethereum)
 	  	key_type=$mode
 	  	tac_controller_name="tac_controller_contract"
 	  	tac_controller_skill_name="tac_control_contract"
@@ -117,6 +117,7 @@ generate_keys(){
 	echo "Generating ${key_type} keys..."
 	aea generate-key $key_type
 	aea add-key $key_type ${key_type}_private_key.txt
+	aea config set agent.default_ledger ${key_type}
 
 	aea generate-key fetchai fetchai_connection_private_key.txt
 	aea add-key fetchai fetchai_connection_private_key.txt --connection
@@ -144,6 +145,8 @@ set_p2p_connection(){
 	json=$(printf '{"delegate_uri": null, "entry_peers": [%s], "local_uri": "127.0.0.1:1%0.4d", "public_uri": %s}' "$peer" "$port" "$public_url")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	aea config get vendor.fetchai.connections.p2p_libp2p.config
+	json=$(printf '[{"identifier": "acn", "ledger_id": "%s", "not_after": "2030-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]' "$key_type")
+	aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
 }
 
 set_tac_name(){
@@ -154,6 +157,7 @@ set_tac_name(){
 	aea config get vendor.fetchai.skills.$skill_name.models.parameters.args.service_data
 }
 set_aea(){
+	aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 	aea install
 	aea build
 	aea issue-certificates
