@@ -22,6 +22,7 @@
 import datetime
 from typing import Any, Optional, cast
 
+from aea.crypto.helpers import try_generate_testnet_wealth
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
 
@@ -278,3 +279,10 @@ class TacBehaviour(Behaviour):
                 "computed equilibrium:\n{}".format(game.equilibrium_summary)
             )
             self.context.is_active = False
+
+    def generate_wealth(self):
+        """Generate wealth."""
+        address = self.context.agent_address
+        identifier = self.context.default_ledger_id
+        self.context.logger.info("Generating wealth.")
+        try_generate_testnet_wealth(identifier, address)

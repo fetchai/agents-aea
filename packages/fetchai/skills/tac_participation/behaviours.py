@@ -35,6 +35,7 @@ class TacSearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup."""
+        self.generate_wealth()
 
     def act(self) -> None:
         """Implement the act."""

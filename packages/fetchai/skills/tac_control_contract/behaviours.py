@@ -51,6 +51,7 @@ class TacBehaviour(BaseTacBehaviour):
             game = cast(Game, self.context.game)
             game.phase = Phase.CONTRACT_DEPLOYMENT_PROPOSAL
             self._request_contract_deploy_transaction()
+        self.generate_wealth()
 
     def _request_contract_deploy_transaction(self) -> None:
         """Request contract deploy transaction"""
