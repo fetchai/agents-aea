@@ -81,7 +81,9 @@ def run():
         },
     )
     identity = Identity(
-        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
+        "my_aea",
+        address=wallet.addresses.get(FetchAICrypto.identifier),
+        public_key=wallet.public_keys.get(FetchAICrypto.identifier),
     )
     resources = Resources()
     data_dir = os.getcwd()

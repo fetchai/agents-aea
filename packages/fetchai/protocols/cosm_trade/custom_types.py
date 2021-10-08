@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,18 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains tests for decision_maker."""
+"""This module contains class representations corresponding to every custom type in the protocol specification."""
 
-import pytest
-
-from aea.decision_maker.scaffold import DecisionMakerHandler
-from aea.identity.base import Identity
+from aea.helpers.transaction.base import SignedTransaction as BaseSignedTransaction
 
 
-def test_init_and_not_implemented():
-    """Initialise the decision maker handler."""
-    decision_maker_handler = DecisionMakerHandler(
-        identity=Identity("name", "address", "public_key"), wallet="wallet", config={}
-    )
-    with pytest.raises(NotImplementedError):
-        decision_maker_handler.handle("message")
+SignedTransaction = BaseSignedTransaction

@@ -96,7 +96,9 @@ class TestHTTPClientConnect:
         """Initialise the class."""
         self.address = get_host()
         self.port = get_unused_tcp_port()
-        self.agent_identity = Identity("name", address="some string")
+        self.agent_identity = Identity(
+            "name", address="some string", public_key="some public_key"
+        )
         self.client_skill_id = "some/skill:0.1.0"
         configuration = ConnectionConfig(
             host=self.address,

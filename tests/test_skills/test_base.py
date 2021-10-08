@@ -84,6 +84,7 @@ class BaseTestSkillContext:
         cls.identity = Identity(
             "name",
             addresses=cls.wallet.addresses,
+            public_keys=cls.wallet.public_keys,
             default_address_key=FetchAICrypto.identifier,
         )
         cls.my_aea = AEA(
@@ -103,12 +104,20 @@ class BaseTestSkillContext:
         assert self.skill_context.agent_name == self.my_aea.name
 
     def test_agent_addresses(self):
-        """Test the agent's address."""
+        """Test the agent's addresses."""
         assert self.skill_context.agent_addresses == self.my_aea.identity.addresses
+
+    def test_agent_public_keys(self):
+        """Test the agent's public_keys."""
+        assert self.skill_context.public_keys == self.my_aea.identity.public_keys
 
     def test_agent_address(self):
         """Test the default agent's address."""
         assert self.skill_context.agent_address == self.my_aea.identity.address
+
+    def test_agent_public_key(self):
+        """Test the default agent's public_key."""
+        assert self.skill_context.public_key == self.my_aea.identity.public_key
 
     def test_connection_status(self):
         """Test the default agent's connection status."""

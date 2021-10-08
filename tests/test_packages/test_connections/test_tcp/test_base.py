@@ -40,7 +40,9 @@ from tests.conftest import (
 async def test_connect_twice():
     """Test that connecting twice the tcp connection works correctly."""
     port = get_unused_tcp_port()
-    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
+    tcp_connection = _make_tcp_server_connection(
+        "address", "public_key", "127.0.0.1", port
+    )
 
     await tcp_connection.connect()
     await asyncio.sleep(0.1)
@@ -55,7 +57,9 @@ async def test_connect_twice():
 async def test_connect_raises_exception():
     """Test the case that a connection attempt raises an exception."""
     port = get_unused_tcp_port()
-    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
+    tcp_connection = _make_tcp_server_connection(
+        "address", "public_key", "127.0.0.1", port
+    )
 
     with unittest.mock.patch.object(tcp_connection.logger, "error") as mock_logger:
         with unittest.mock.patch.object(
@@ -69,7 +73,9 @@ async def test_connect_raises_exception():
 async def test_disconnect_when_already_disconnected():
     """Test that disconnecting a connection already disconnected works correctly."""
     port = get_unused_tcp_port()
-    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
+    tcp_connection = _make_tcp_server_connection(
+        "address", "public_key", "127.0.0.1", port
+    )
 
     with unittest.mock.patch.object(tcp_connection.logger, "warning") as mock_logger:
         await tcp_connection.disconnect()
@@ -81,7 +87,9 @@ async def test_send_to_unknown_destination():
     """Test that a message to an unknown destination logs an error."""
     address = "address"
     port = get_unused_tcp_port()
-    tcp_connection = _make_tcp_server_connection("address", "127.0.0.1", port)
+    tcp_connection = _make_tcp_server_connection(
+        "address", "public_key", "127.0.0.1", port
+    )
     envelope = Envelope(
         to="non_existing_destination",
         sender="address",
@@ -99,8 +107,12 @@ async def test_send_to_unknown_destination():
 async def test_send_cancelled():
     """Test that cancelling a send works correctly."""
     port = get_unused_tcp_port()
-    tcp_server = _make_tcp_server_connection("address_server", "127.0.0.1", port)
-    tcp_client = _make_tcp_client_connection("address_client", "127.0.0.1", port)
+    tcp_server = _make_tcp_server_connection(
+        "address_server", "public_key", "127.0.0.1", port
+    )
+    tcp_client = _make_tcp_client_connection(
+        "address_client", "public_key_client", "127.0.0.1", port
+    )
 
     await tcp_server.connect()
     await tcp_client.connect()
