@@ -375,6 +375,19 @@ class TestGetWealth(AEATestCaseEmpty):
         self.get_wealth(FetchAICrypto.identifier)
 
 
+class TestGetAddress(AEATestCaseEmpty):
+    """Test get_address."""
+
+    def test_get_address(self):
+        """Test get_address."""
+        # just call it, network related and quite unstable
+        self.generate_private_key()
+        self.add_private_key()
+        result = self.get_address(FetchAICrypto.identifier)
+        assert len(result) == 44
+        assert result.startswith("fetch")
+
+
 class TestAEA(AEATestCase):
     """Test agent test set from path."""
 

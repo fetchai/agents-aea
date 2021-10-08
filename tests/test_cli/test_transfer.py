@@ -80,13 +80,6 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Get password arguments."""
         return [] if password is None else ["--password", password]
 
-    def get_address(self) -> str:
-        """Get current agent address."""
-        result = self.invoke(
-            "get-address", self.LEDGER_ID, *self.get_password_args(self.PASSWORD)
-        )
-        return result.stdout_bytes.decode("utf-8").strip()
-
     def get_balance(self) -> int:
         """Get balance for current agent."""
         with cd(self._get_cwd()):
@@ -105,7 +98,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self.set_agent_context(self.agent_name2)
         password_option = self.get_password_args(self.PASSWORD)
         agent2_original_balance = self.get_balance()
-        agent2_address = self.get_address()
+        agent2_address = self.get_address(self.LEDGER_ID, self.PASSWORD)
 
         self.set_agent_context(self.agent_name)
         agent1_original_balance = self.get_balance()
@@ -155,7 +148,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self.invoke(
             "transfer",
             self.LEDGER_ID,
-            self.get_address(),
+            self.get_address(self.LEDGER_ID, self.PASSWORD),
             "100000",
             "100",
             "-y",
@@ -174,7 +167,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self.invoke(
             "transfer",
             self.LEDGER_ID,
-            self.get_address(),
+            self.get_address(self.LEDGER_ID, self.PASSWORD),
             "100000",
             "100",
             *password_option,
@@ -192,7 +185,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self.invoke(
             "transfer",
             self.LEDGER_ID,
-            self.get_address(),
+            self.get_address(self.LEDGER_ID, self.PASSWORD),
             "100000",
             "100",
             "-y",
@@ -211,7 +204,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self.invoke(
             "transfer",
             self.LEDGER_ID,
-            self.get_address(),
+            self.get_address(self.LEDGER_ID, self.PASSWORD),
             "100000",
             "100",
             "-y",
@@ -230,7 +223,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             self.invoke(
                 "transfer",
                 self.LEDGER_ID,
-                self.get_address(),
+                self.get_address(self.LEDGER_ID, self.PASSWORD),
                 "100000",
                 "100",
                 *password_option,
@@ -247,7 +240,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             self.invoke(
                 "transfer",
                 self.ANOTHER_LEDGER_ID,
-                self.get_address(),
+                self.get_address(self.LEDGER_ID, self.PASSWORD),
                 "100000",
                 "100",
                 *password_option,
@@ -268,7 +261,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             self.invoke(
                 "transfer",
                 self.LEDGER_ID,
-                self.get_address(),
+                self.get_address(self.LEDGER_ID, self.PASSWORD),
                 "100000",
                 "100",
                 *password_option,
