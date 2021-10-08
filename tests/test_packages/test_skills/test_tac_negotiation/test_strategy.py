@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the strategy class of the tac negotiation skill."""
 
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -92,6 +93,8 @@ class TestStrategy(BaseSkillTestCase):
         cls.sender = "some_sender_address"
         cls.counterparty = "some_counterparty_address"
         cls.signature = "some_signature"
+        cls.sender_pk = "some_sender_public_key"
+        cls.counterparty_pk = "some_counterparty_public_key"
 
         cls.mocked_currency_id = "12"
         cls.mocked_currency_amount = 2000000
@@ -166,11 +169,19 @@ class TestStrategy(BaseSkillTestCase):
 
     def test_get_register_service_description(self):
         """Test the get_register_service_description method of the GenericStrategy class."""
+        # setup
+        self.strategy.tac_version_id = "some_tac_id"
+
+        # operation
         description = self.strategy.get_register_service_description()
 
+        # after
         assert type(description) == Description
         assert description.data_model is AGENT_SET_SERVICE_MODEL
-        assert description.values.get("key", "") == self.service_key
+        assert (
+            description.values.get("key", "")
+            == f"{self.service_key}_{self.strategy.tac_version_id}"
+        )
         assert description.values.get("value", "") == self.register_as
 
     def test_get_register_personality_description(self):
@@ -201,8 +212,13 @@ class TestStrategy(BaseSkillTestCase):
 
     def test_get_location_and_service_query(self):
         """Test the get_location_and_service_query method of the Strategy class."""
+        # setup
+        self.strategy.tac_version_id = "some_tac_id"
+
+        # operation
         query = self.strategy.get_location_and_service_query()
 
+        # after
         assert type(query) == Query
         assert len(query.constraints) == 2
         assert query.model is None
@@ -223,7 +239,8 @@ class TestStrategy(BaseSkillTestCase):
         assert query.constraints[0] == location_constraint
 
         service_key_filter = Constraint(
-            self.service_key, ConstraintType("==", self.search_for)
+            f"{self.service_key}_{self.strategy.tac_version_id}",
+            ConstraintType("==", self.search_for),
         )
         assert query.constraints[1] == service_key_filter
 
@@ -786,7 +803,7 @@ class TestStrategy(BaseSkillTestCase):
 
         assert actual_terms == expected_terms
 
-    def test_kwargs_from_terms_seller(self):
+    def test_kwargs_from_terms_seller_ethereum(self):
         """Test the kwargs_from_terms method of the Strategy class where is_seller is True."""
         is_seller = True
         terms = Terms(
@@ -833,7 +850,7 @@ class TestStrategy(BaseSkillTestCase):
 
         assert actual_kwargs == expected_kwargs
 
-    def test_kwargs_from_terms_buyer(self):
+    def test_kwargs_from_terms_buyer_fetchai(self):
         """Test the kwargs_from_terms method of the Strategy class where is_seller is False (no difference with seller)."""
         is_seller = False
         terms = Terms(
@@ -853,11 +870,94 @@ class TestStrategy(BaseSkillTestCase):
             "token_ids": [1, 2],
             "from_supplies": [0, 5],
             "to_supplies": [10, 0],
-            "value": 0,
+            "value": 1,
             "trade_nonce": 125,
-            "signature": self.signature,
+            "from_pubkey": self.sender_pk,
+            "to_pubkey": self.counterparty_pk,
         }
 
-        actual_kwargs = self.strategy.kwargs_from_terms(terms, self.signature)
+        actual_kwargs = self.strategy.kwargs_from_terms(
+            terms,
+            sender_public_key=self.sender_pk,
+            counterparty_public_key=self.counterparty_pk,
+        )
 
         assert actual_kwargs == expected_kwargs
+
+    def test_kwargs_from_terms_i(self):
+        """Test the kwargs_from_terms method of the Strategy class where sender's IS and counterparty's public key is NOT provided."""
+        is_seller = True
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.sender,
+            counterparty_address=self.counterparty,
+            amount_by_currency_id={"1": 10},
+            quantities_by_good_id={"2": -5},
+            is_sender_payable_tx_fee=not is_seller,
+            nonce=self.nonce,
+            fee_by_currency_id={"1": 1},
+        )
+
+        with pytest.raises(
+            AEAEnforceError,
+            match="Either provide both sender's and counterparty's public-keys or neither's.",
+        ):
+            self.strategy.kwargs_from_terms(
+                terms,
+                self.signature,
+                is_from_terms_sender=True,
+                sender_public_key="some_public_key",
+            )
+
+    def test_kwargs_from_terms_ii(self):
+        """Test the kwargs_from_terms method of the Strategy class where sender's is NOT and counterparty's public key IS provided."""
+        is_seller = True
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.sender,
+            counterparty_address=self.counterparty,
+            amount_by_currency_id={"1": 10},
+            quantities_by_good_id={"2": -5},
+            is_sender_payable_tx_fee=not is_seller,
+            nonce=self.nonce,
+            fee_by_currency_id={"1": 1},
+        )
+
+        with pytest.raises(
+            AEAEnforceError,
+            match="Either provide both sender's and counterparty's public-keys or neither's.",
+        ):
+            self.strategy.kwargs_from_terms(
+                terms,
+                self.signature,
+                is_from_terms_sender=True,
+                counterparty_public_key="some_public_key",
+            )
+
+    def test_kwargs_from_terms_iii(self):
+        """Test the kwargs_from_terms method of the Strategy class where signature IS and a public_key is NOT provided."""
+        is_seller = True
+        terms = Terms(
+            ledger_id=self.ledger_id,
+            sender_address=self.sender,
+            counterparty_address=self.counterparty,
+            amount_by_currency_id={"1": 10},
+            quantities_by_good_id={"2": -5},
+            is_sender_payable_tx_fee=not is_seller,
+            nonce=self.nonce,
+            fee_by_currency_id={"1": 1},
+        )
+
+        with pytest.raises(
+            AEAEnforceError,
+            match=re.escape(
+                "Either provide signature (for Ethereum-based TAC) or sender and counterparty's public keys (for Fetchai-based TAC), or neither (for and non-contract-based Tac)"
+            ),
+        ):
+            self.strategy.kwargs_from_terms(
+                terms,
+                self.signature,
+                is_from_terms_sender=True,
+                sender_public_key="some_public_key",
+                counterparty_public_key="some_other_public_key",
+            )

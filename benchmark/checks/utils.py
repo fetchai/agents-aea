@@ -58,6 +58,14 @@ ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe()))
 PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 
 
+output_format_deco = click.option(
+    "--output_format", default="text", help="Output format"
+)
+number_of_runs_deco = click.option(
+    "--number_of_runs", default=10, help="How many times run test."
+)
+
+
 def wait_for_condition(
     condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout"
 ) -> None:
@@ -236,15 +244,6 @@ def get_mem_usage_in_mb() -> float:
     return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
 
 
-def print_results(result: List[Tuple[str, Any, Any, Any]]) -> None:
-    """Print result for multi_run response."""
-    click.echo("\nResults:")
-    for msg, *values_set in result:
-        mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
-        click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
-    click.echo("Test finished.")
-
-
 def multi_run(
     num_runs: int, fn: Callable, args: Tuple
 ) -> List[Tuple[str, Any, Any, Any]]:
@@ -271,3 +270,22 @@ def multi_run(
     return list(
         zip(map(lambda x: x[0], results[0]), mean_values, stdev_values, variance_values)
     )
+
+
+def print_results(
+    output_format: str,
+    parameters: Dict,
+    result_fn: Callable[..., List[Tuple[str, Any, Any, Any]]],
+) -> Any:
+    """Print result for multi_run response."""
+    if output_format != "text":
+        raise ValueError(f"Bad output format {output_format}")
+
+    click.echo("Start test with options:")
+    for name, value in parameters.items():
+        click.echo(f"* {name}: {value}")
+    click.echo("\nResults:")
+    for msg, *values_set in result_fn():
+        mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
+        click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
+    click.echo("Test finished.")

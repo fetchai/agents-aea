@@ -79,6 +79,8 @@ def test_agent_context():
     assert ac.agent_name == identity.name
     assert ac.address == identity.address
     assert ac.addresses == identity.addresses
+    assert ac.public_key == identity.public_key
+    assert ac.public_keys == identity.public_keys
     assert ac.connection_status == connection_status
     assert ac.outbox == outbox
     assert ac.decision_maker_message_queue == decision_maker_message_queue

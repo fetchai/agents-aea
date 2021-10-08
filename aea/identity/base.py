@@ -79,9 +79,13 @@ class Identity:
         if address is None:
             if addresses is None or len(addresses) == 0:  # pragma: nocover
                 raise ValueError("Provide at least one pair of addresses.")
-            if public_key is not None or public_keys is None:
+            if public_key is not None:
                 raise ValueError(
-                    "If you provide a dictionary of addresses, you must provide a corresponding dictionary of public keys and not a single public key."
+                    "If you provide a dictionary of addresses, you must not provide a single public key."
+                )
+            if public_keys is None:
+                raise ValueError(
+                    "If you provide a dictionary of addresses, you must provide its corresponding dictionary of public keys."
                 )
             enforce(
                 public_keys.keys() == addresses.keys(),
@@ -95,9 +99,13 @@ class Identity:
             public_key = public_keys[default_address_key]
 
         if addresses is None:
-            if public_keys is not None or public_key is None:
+            if public_keys is not None:
                 raise ValueError(
-                    "If you provide a single address, you must provide its corresponding single public key and not a dictionary of public keys."
+                    "If you provide a single address, you must not provide a dictionary of public keys."
+                )
+            if public_key is None:
+                raise ValueError(
+                    "If you provide a single address, you must provide its corresponding public key."
                 )
             addresses = {default_address_key: address}
             public_keys = {default_address_key: public_key}

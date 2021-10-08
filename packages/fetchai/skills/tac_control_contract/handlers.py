@@ -401,8 +401,6 @@ class LedgerApiHandler(Handler):
                         "init_msg": {},
                         "gas": parameters.gas,
                         "amount": 0,
-                        # "amount": 1, might have to send 1 token if ledger sends panic because
-                        # with 0 it may not be able to get the denom
                         "code_id": code_id,
                         "deployer_address": self.context.agent_address,
                         "tx_fee": 0,

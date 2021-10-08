@@ -94,7 +94,9 @@ DEFAULT_FAUCET_URL = "INVALID_URL"
 DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
 DEFAULT_CURRENCY_DENOM = "uatom"
 DEFAULT_CHAIN_ID = "cosmoshub-3"
-DEFAULT_GAS_AMOUNT = 2000000
+DEFAULT_GAS_AMOUNT = 1500000
+# Txs will fail if gas_limit is higher than MAXIMUM_GAS_AMOUNT
+MAXIMUM_GAS_AMOUNT = 1500000
 _BYTECODE = "wasm_byte_code"
 MSG_STORE_CODE = "/cosmwasm.wasm.v1beta1.MsgStoreCode"
 MSG_INSTANTIATE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
@@ -225,7 +227,7 @@ class CosmosHelper(Helper):
             is_successful = code is None
             if not is_successful:
                 _default_logger.warning(  # pragma: nocover
-                    f"Transaction not settled. Raw log: {tx_receipt.get('rawLog')}"
+                    f"Transaction {tx_receipt.get('txhash')} not settled. Raw log: {tx_receipt.get('rawLog')}"
                 )
         return is_successful
 
@@ -1168,6 +1170,13 @@ class _CosmosApi(LedgerApi):
 
         :return: the transaction
         """
+
+        # Txs will fail if gas is higher than MAXIMUM_GAS_AMOUNT
+        if gas > MAXIMUM_GAS_AMOUNT:
+            _default_logger.warning(
+                f"Gas limit {gas} is above maximum gas limit {MAXIMUM_GAS_AMOUNT}. Gas limit was truncated to maximum."
+            )
+            gas = MAXIMUM_GAS_AMOUNT
 
         # Checks
         if pub_keys is None:

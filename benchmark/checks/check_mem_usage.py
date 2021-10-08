@@ -20,7 +20,7 @@
 """Memory usage check."""
 import time
 from threading import Thread
-from typing import List, Tuple, Union
+from typing import Any, List, Tuple, Union
 
 import click
 
@@ -34,6 +34,8 @@ from benchmark.checks.utils import (
     make_envelope,
     make_skill,
     multi_run,
+    number_of_runs_deco,
+    output_format_deco,
     print_results,
     wait_for_condition,
 )
@@ -94,15 +96,22 @@ def run(duration: int, runtime_mode: str) -> List[Tuple[str, Union[int, float]]]
 @click.option(
     "--runtime_mode", default="async", help="Runtime mode: async or threaded."
 )
-@click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(duration: int, runtime_mode: str, number_of_runs: int) -> None:
+@number_of_runs_deco
+@output_format_deco
+def main(
+    duration: int, runtime_mode: str, number_of_runs: int, output_format: str
+) -> Any:
     """Run test."""
-    click.echo("Start test with options:")
-    click.echo(f"* Duration: {duration} seconds")
-    click.echo(f"* Runtime mode: {runtime_mode}")
-    click.echo(f"* Number of runs: {number_of_runs}")
+    parameters = {
+        "Duration(seconds)": duration,
+        "Runtime mode": runtime_mode,
+        "Number of runs": number_of_runs,
+    }
 
-    print_results(multi_run(int(number_of_runs), run, (duration, runtime_mode),))
+    def result_fn() -> List[Tuple[str, Any, Any, Any]]:
+        return multi_run(int(number_of_runs), run, (duration, runtime_mode),)
+
+    return print_results(output_format, parameters, result_fn)
 
 
 if __name__ == "__main__":
