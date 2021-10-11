@@ -42,6 +42,7 @@ from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylin
 
 
 ADDRESS = "some_address"
+PUBLIC_KEY = "some_public_key"
 
 
 class ProxyAgent(Agent):
@@ -55,7 +56,7 @@ class ProxyAgent(Agent):
         :param gym_env: gym environment
         :param proxy_env_queue: the queue of the proxy environment
         """
-        identity = Identity(name, ADDRESS)
+        identity = Identity(name, ADDRESS, PUBLIC_KEY)
         configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
         super().__init__(
             identity,

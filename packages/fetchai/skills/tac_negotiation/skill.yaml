@@ -9,11 +9,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
   __init__.py: Qmc57bJM6xc9CNAvC7qjUq2wfNpdDmHx7XpGacZE7kStXJ
-  behaviours.py: QmTZSVxrdFVsoPGV4474tVigRE5KVuL2atp8q17EsfYhpq
-  dialogues.py: QmV7v1pjd78LLrBupsBEbH3waSfnGQdkhAeQw8QFR9kss8
-  handlers.py: Qmc9CxeLfF6AjTGUbddCgb1nom1YXwVjw2BKfnmo988L99
+  behaviours.py: Qmc3LoLwPZk2iisCcEGUzNCXYas6XHWVhuAEskz3iSfN5d
+  dialogues.py: Qma1vePef1uN8shrD1SQ9MVwaWEsRLSMQAhBLn7yyy4Xhi
+  handlers.py: QmQFgDJgg35dJUN11Zj8Vtd9QPccL5D6a6kUGnVVYeJgrm
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
-  strategy.py: QmXnjE6ARMWCv29TQzERMM5j8t6eW9qHYBz5VoemjRS4Gw
+  strategy.py: QmczZJtAhzwTR8KPtZAqNA1Y7n2aHLLvnUFMP7FL6niUUC
   transactions.py: QmeD2KQgRRw7Qtsi7KGXc7op31rD19RoLEHhstjhk9TTNE
 fingerprint_ignore_patterns: []
 connections:
@@ -22,6 +22,7 @@ contracts:
 - fetchai/erc1155:0.21.0
 protocols:
 - fetchai/contract_api:1.0.0
+- fetchai/cosm_trade:0.1.0
 - fetchai/default:1.0.0
 - fetchai/fipa:1.0.0
 - fetchai/ledger_api:1.0.0
@@ -43,6 +44,9 @@ handlers:
   contract_api:
     args: {}
     class_name: ContractApiHandler
+  cosm_trade:
+    args: {}
+    class_name: CosmTradeHandler
   fipa:
     args: {}
     class_name: FipaNegotiationHandler
@@ -59,6 +63,9 @@ models:
   contract_api_dialogues:
     args: {}
     class_name: ContractApiDialogues
+  cosm_trade_dialogues:
+    args: {}
+    class_name: CosmTradeDialogues
   default_dialogues:
     args: {}
     class_name: DefaultDialogues

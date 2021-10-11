@@ -704,6 +704,28 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
 
     @classmethod
+    def get_address(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None
+    ) -> str:
+        """
+        Get address with CLI command.
+
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+        :param password: the password to encrypt/decrypt private keys.
+
+        :return: command line output
+        """
+        password_option = _get_password_option_args(password)
+        cls.run_cli_command(
+            "get-address", ledger_api_id, *password_option, cwd=cls._get_cwd()
+        )
+        if cls.last_cli_runner_result is None:
+            raise ValueError("Runner result not set!")  # pragma: nocover
+        return str(cls.last_cli_runner_result.stdout_bytes, "utf-8").strip()
+
+    @classmethod
     def replace_file_content(cls, src: Path, dest: Path) -> None:  # pragma: nocover
         """
         Replace the content of the source file to the destination file.

@@ -100,7 +100,9 @@ class MyAgent(Agent):
         os.remove(OUTPUT_FILE)
 
     # Create an addresses identity:
-    identity = Identity(name="my_agent", address="some_address")
+    identity = Identity(
+        name="my_agent", address="some_address", public_key="public_key"
+    )
 
     # Set up the stub connection
     configuration = ConnectionConfig(
@@ -240,7 +242,9 @@ def run():
         os.remove(OUTPUT_FILE)
 
     # Create an addresses identity:
-    identity = Identity(name="my_agent", address="some_address")
+    identity = Identity(
+        name="my_agent", address="some_address", public_key="public_key"
+    )
 
     # Set up the stub connection
     configuration = ConnectionConfig(

@@ -70,8 +70,13 @@ def test_run_agent():
     with LocalNode() as node:
         agent_name = "dummyagent"
         agent_address = "some_address"
-        identity = Identity(agent_name, address=agent_address)
-        oef_local_connection = _make_local_connection(agent_address, node)
+        agent_public_key = "some_public_key"
+        identity = Identity(
+            agent_name, address=agent_address, public_key=agent_public_key
+        )
+        oef_local_connection = _make_local_connection(
+            agent_address, agent_public_key, node
+        )
         oef_local_connection._local_node = node
 
         agent = DummyAgent(
@@ -96,7 +101,8 @@ def test_runtime_modes():
     """Test runtime modes are set."""
     agent_name = "dummyagent"
     agent_address = "some_address"
-    identity = Identity(agent_name, address=agent_address)
+    agent_public_key = "some_public_key"
+    identity = Identity(agent_name, address=agent_address, public_key=agent_public_key)
     agent = DummyAgent(identity, [],)
 
     assert not agent.is_running

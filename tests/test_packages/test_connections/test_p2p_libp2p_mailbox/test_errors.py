@@ -76,7 +76,9 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
         cls.node_port = "11234"
-        cls.identity = Identity("identity", address=crypto.address)
+        cls.identity = Identity(
+            "identity", address=crypto.address, public_key=crypto.public_key
+        )
 
         cls.key_file = os.path.join(cls.t, "keyfile")
         crypto.dump(cls.key_file)

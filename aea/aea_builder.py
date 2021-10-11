@@ -1243,12 +1243,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
+                public_keys=wallet.public_keys,
                 default_address_key=default_ledger,
             )
         else:
             identity = Identity(
                 self._name,
                 address=wallet.addresses[default_ledger],
+                public_key=wallet.public_keys[default_ledger],
                 default_address_key=default_ledger,
             )
         return identity
