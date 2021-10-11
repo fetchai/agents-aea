@@ -79,7 +79,9 @@ class TestSkillError:
 
         self.connection = _make_dummy_connection()
         self.identity = Identity(
-            self.agent_name, address=self.wallet.addresses[DEFAULT_LEDGER]
+            self.agent_name,
+            address=self.wallet.addresses[DEFAULT_LEDGER],
+            public_key=self.wallet.public_keys[DEFAULT_LEDGER],
         )
         self.address = self.identity.address
         resources = Resources()

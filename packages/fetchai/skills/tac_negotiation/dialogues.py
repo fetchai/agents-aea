@@ -40,6 +40,12 @@ from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.cosm_trade.dialogues import (
+    CosmTradeDialogue as BaseCosmTradeDialogue,
+)
+from packages.fetchai.protocols.cosm_trade.dialogues import (
+    CosmTradeDialogues as BaseCosmTradeDialogues,
+)
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -279,6 +285,39 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
         )
 
 
+CosmTradeDialogue = BaseCosmTradeDialogue
+
+
+class CosmTradeDialogues(Model, BaseCosmTradeDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """
+        Initialize dialogues.
+
+        :param kwargs: keyword arguments
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return CosmTradeDialogue.Role.AGENT
+
+        BaseCosmTradeDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=CosmTradeDialogue,
+        )
+
+
 DefaultDialogue = BaseDefaultDialogue
 
 
@@ -490,6 +529,7 @@ class SigningDialogue(BaseSigningDialogue):
             message_class=message_class,
         )
         self._associated_fipa_dialogue: Optional[FipaDialogue] = None
+        self._associated_cosm_trade_dialogue: Optional[CosmTradeDialogue] = None
 
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
@@ -506,6 +546,22 @@ class SigningDialogue(BaseSigningDialogue):
             "associated_fipa_dialogue already set!",
         )
         self._associated_fipa_dialogue = associated_fipa_dialogue
+
+    @property
+    def associated_cosm_trade_dialogue(self) -> Optional[CosmTradeDialogue]:
+        """Get associated_cosm_trade_dialogue."""
+        return self._associated_cosm_trade_dialogue
+
+    @associated_cosm_trade_dialogue.setter
+    def associated_cosm_trade_dialogue(
+        self, associated_cosm_trade_dialogue: CosmTradeDialogue
+    ) -> None:
+        """Set associated_cosm_trade_dialogue."""
+        enforce(
+            self._associated_cosm_trade_dialogue is None,
+            "associated_cosm_trade_dialogue already set!",
+        )
+        self._associated_cosm_trade_dialogue = associated_cosm_trade_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):

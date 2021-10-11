@@ -454,7 +454,9 @@ class BaseSkillTestCase:
     @classmethod
     def setup(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
-        identity = Identity("test_agent_name", "test_agent_address")
+        identity = Identity(
+            "test_agent_name", "test_agent_address", "test_agent_public_key"
+        )
 
         cls._multiplexer = AsyncMultiplexer()
         cls._multiplexer._out_queue = (  # pylint: disable=protected-access

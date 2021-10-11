@@ -167,7 +167,7 @@ DEFAULT_FETCH_LEDGER_REST_PORT = 1317
 DEFAULT_FETCH_ADDR_REMOTE = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "stargateworld-2"
+DEFAULT_FETCH_CHAIN_ID = "stargateworld-3"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -839,13 +839,14 @@ def _make_dummy_connection() -> Connection:
     dummy_connection = DummyConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", "address"),
+        identity=Identity("name", "address", "public_key"),
     )
     return dummy_connection
 
 
 def _make_local_connection(
     address: Address,
+    public_key: str,
     node: LocalNode,
     restricted_to_protocols=None,
     excluded_protocols=None,
@@ -858,33 +859,35 @@ def _make_local_connection(
     oef_local_connection = OEFLocalConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
         local_node=node,
     )
     return oef_local_connection
 
 
-def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
+def _make_oef_connection(
+    address: Address, public_key: str, oef_addr: str, oef_port: int
+):
     configuration = ConnectionConfig(
         addr=oef_addr, port=oef_port, connection_id=OEFConnection.connection_id
     )
     oef_connection = OEFConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
     )
     oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
     return oef_connection
 
 
-def _make_tcp_server_connection(address: str, host: str, port: int):
+def _make_tcp_server_connection(address: str, public_key: str, host: str, port: int):
     configuration = ConnectionConfig(
         address=host, port=port, connection_id=TCPServerConnection.connection_id
     )
     tcp_connection = TCPServerConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
     )
     tcp_connection._default_logger_name = (
         "aea.packages.fetchai.connections.tcp.tcp_server"
@@ -892,14 +895,14 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
     return tcp_connection
 
 
-def _make_tcp_client_connection(address: str, host: str, port: int):
+def _make_tcp_client_connection(address: str, public_key: str, host: str, port: int):
     configuration = ConnectionConfig(
         address=host, port=port, connection_id=TCPClientConnection.connection_id
     )
     tcp_connection = TCPClientConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
     )
     tcp_connection._default_logger_name = (
         "aea.packages.fetchai.connections.tcp.tcp_client"
@@ -952,7 +955,7 @@ def _make_libp2p_connection(
     key = agent_key
     if key is None:
         key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("identity", address=key.address)
+    identity = Identity("identity", address=key.address, public_key=key.public_key)
     conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
@@ -1037,7 +1040,9 @@ def _make_libp2p_client_connection(
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
-    identity = Identity("identity", address=crypto.address)
+    identity = Identity(
+        "identity", address=crypto.address, public_key=crypto.public_key
+    )
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
@@ -1077,7 +1082,9 @@ def _make_libp2p_mailbox_connection(
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
-    identity = Identity("identity", address=crypto.address)
+    identity = Identity(
+        "identity", address=crypto.address, public_key=crypto.public_key
+    )
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
@@ -1250,7 +1257,7 @@ def check_test_threads(request):
 async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("name", crypto.address)
+    identity = Identity("name", crypto.address, crypto.public_key)
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
@@ -1416,7 +1423,7 @@ def docker_exec_cmd(image_tag: str, cmd: str, **kwargs):
 
 
 def fund_accounts_from_local_validator(
-    addresses: str, amount: int, denom: str = DEFAULT_DENOMINATION
+    addresses: List[str], amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
     rest_client = RestClient(

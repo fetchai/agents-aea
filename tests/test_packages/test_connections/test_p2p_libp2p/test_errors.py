@@ -135,7 +135,9 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
         crypto = make_crypto(DEFAULT_LEDGER)
-        cls.identity = Identity("identity", address=crypto.address)
+        cls.identity = Identity(
+            "identity", address=crypto.address, public_key=crypto.public_key
+        )
         cls.host = "localhost"
         cls.port = "10000"
 

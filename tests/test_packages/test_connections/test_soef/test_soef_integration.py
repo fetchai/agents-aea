@@ -61,7 +61,9 @@ def make_multiplexer_and_dialogues() -> Tuple[
 ]:
     """Return multplexer, dialogues and crypto instances."""
     crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("identity", address=crypto.address)
+    identity = Identity(
+        "identity", address=crypto.address, public_key=crypto.public_key
+    )
     skill_id = "some/skill:0.1.0"
     oef_search_dialogues = OefSearchDialogues(skill_id)
 

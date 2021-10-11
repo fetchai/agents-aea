@@ -111,7 +111,7 @@ class BaseContractTestCase(ABC):
         )
         if str(configuration.public_id) not in contract_registry.specs:
             # load contract into sys modules
-            Contract.from_config(configuration)
+            Contract.from_config(configuration)  # pragma: nocover
         cls._contract = contract_registry.make(str(configuration.public_id))
 
         # deploy contract
@@ -187,7 +187,7 @@ class BaseContractTestCase(ABC):
 
         return tx_receipt
 
-    @classmethod
+    @classmethod  # noqa
     def sign_send_confirm_receipt_transaction(
         cls,
         tx: JSONLike,
@@ -204,6 +204,9 @@ class BaseContractTestCase(ABC):
         :param sleep_time: the time to sleep between transaction submission and receipt request
         :return: The transaction receipt
         """
+
+        # BACKWARDS COMPATIBILITY: This method supports only 1 signer and is kept for backwards compatibility.
+        # new method sign_send_confirm_receipt_multisig_transaction should be used always instead of this one.
         return cls.sign_send_confirm_receipt_multisig_transaction(
             tx, ledger_api, [crypto], sleep_time
         )
@@ -233,8 +236,8 @@ class BaseContractTestCase(ABC):
         if tx is None:
             raise ValueError("Deploy transaction not found!")  # pragma: nocover
 
-        tx_receipt = cls.sign_send_confirm_receipt_transaction(
-            tx, ledger_api, deployer_crypto
+        tx_receipt = cls.sign_send_confirm_receipt_multisig_transaction(
+            tx, ledger_api, [deployer_crypto]
         )
 
         return tx_receipt

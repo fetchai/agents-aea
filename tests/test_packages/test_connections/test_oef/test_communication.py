@@ -72,6 +72,8 @@ logger = logging.getLogger(__name__)
 
 SOME_SKILL_ID = "some/skill:0.1.0"
 
+DUMMY_PUBLIC_KEY = "some_public_key"
+
 
 class OefSearchDialogues(BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
@@ -109,7 +111,7 @@ class TestDefault(UseOef):
     def setup_class(cls):
         """Set the test up."""
         cls.connection = _make_oef_connection(
-            FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_ONE, DUMMY_PUBLIC_KEY, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer = Multiplexer(
             [cls.connection], protocols=[FipaMessage, DefaultMessage]
@@ -146,7 +148,10 @@ class TestOEF(UseOef):
         def setup(self):
             """Set the test up."""
             self.connection = _make_oef_connection(
-                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE,
+                DUMMY_PUBLIC_KEY,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
             )
             self.multiplexer = Multiplexer(
                 [self.connection], protocols=[FipaMessage, DefaultMessage]
@@ -269,7 +274,10 @@ class TestOEF(UseOef):
         def setup_class(cls):
             """Set the test up."""
             cls.connection = _make_oef_connection(
-                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE,
+                DUMMY_PUBLIC_KEY,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
             )
             cls.multiplexer = Multiplexer(
                 [cls.connection], protocols=[FipaMessage, DefaultMessage]
@@ -341,7 +349,10 @@ class TestOEF(UseOef):
             - Check that the registration worked.
             """
             cls.connection = _make_oef_connection(
-                FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+                FETCHAI_ADDRESS_ONE,
+                DUMMY_PUBLIC_KEY,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
             )
             cls.multiplexer = Multiplexer(
                 [cls.connection], protocols=[FipaMessage, DefaultMessage]
@@ -458,10 +469,10 @@ class TestFIPA(UseOef):
     def setup_class(cls):
         """Set up the test class."""
         cls.connection1 = _make_oef_connection(
-            FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_ONE, DUMMY_PUBLIC_KEY, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.connection2 = _make_oef_connection(
-            FETCHAI_ADDRESS_TWO, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_TWO, DUMMY_PUBLIC_KEY, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer1 = Multiplexer(
             [cls.connection1], protocols=[FipaMessage, DefaultMessage]
@@ -811,7 +822,7 @@ class TestOefConnection(UseOef):
     def test_connection(self):
         """Test that an OEF connection can be established to the OEF."""
         connection = _make_oef_connection(
-            FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            FETCHAI_ADDRESS_ONE, DUMMY_PUBLIC_KEY, oef_addr="127.0.0.1", oef_port=10000,
         )
         multiplexer = Multiplexer([connection], protocols=[FipaMessage, DefaultMessage])
         multiplexer.connect()
@@ -963,7 +974,10 @@ class TestSendWithOEF(UseOef):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             oef_connection = _make_oef_connection(
-                address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+                address=FETCHAI_ADDRESS_ONE,
+                public_key=DUMMY_PUBLIC_KEY,
+                oef_addr="127.0.0.1",
+                oef_port=10000,
             )
             await oef_connection.connect()
             oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
@@ -1007,7 +1021,10 @@ class TestSendWithOEF(UseOef):
     async def test_cancelled_receive(self, pytestconfig, caplog):
         """Test the case when a receive request is cancelled."""
         oef_connection = _make_oef_connection(
-            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE,
+            public_key=DUMMY_PUBLIC_KEY,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
         )
         await oef_connection.connect()
 
@@ -1028,7 +1045,10 @@ class TestSendWithOEF(UseOef):
     async def test_exception_during_receive(self, pytestconfig):
         """Test the case when there is an exception during a receive request."""
         oef_connection = _make_oef_connection(
-            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE,
+            public_key=DUMMY_PUBLIC_KEY,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
         )
         await oef_connection.connect()
 
@@ -1044,7 +1064,10 @@ class TestSendWithOEF(UseOef):
     async def test_connecting_twice_is_ok(self, pytestconfig):
         """Test that calling 'connect' twice works as expected."""
         oef_connection = _make_oef_connection(
-            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            address=FETCHAI_ADDRESS_ONE,
+            public_key=DUMMY_PUBLIC_KEY,
+            oef_addr="127.0.0.1",
+            oef_port=10000,
         )
 
         assert not oef_connection.is_connected
@@ -1064,6 +1087,7 @@ async def test_cannot_connect_to_oef():
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
         address=FETCHAI_ADDRESS_ONE,
+        public_key=DUMMY_PUBLIC_KEY,
         oef_addr="127.0.0.1",
         oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )
@@ -1091,6 +1115,7 @@ async def test_methods_with_logging_only():
     """Test the case when we can't connect to the OEF."""
     oef_connection = _make_oef_connection(
         address=FETCHAI_ADDRESS_ONE,
+        public_key=DUMMY_PUBLIC_KEY,
         oef_addr="127.0.0.1",
         oef_port=61234,  # use addr instead of hostname to avoid name resolution
     )

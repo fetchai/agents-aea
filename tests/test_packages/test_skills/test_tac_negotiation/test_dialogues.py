@@ -38,6 +38,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.cosm_trade.message import CosmTradeMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -46,6 +47,8 @@ from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
+    CosmTradeDialogue,
+    CosmTradeDialogues,
     DefaultDialogue,
     DefaultDialogues,
     FipaDialogue,
@@ -76,6 +79,9 @@ class TestDialogues(BaseSkillTestCase):
         )
         cls.contract_api_dialogues = cast(
             ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
+        )
+        cls.cosm_trade_dialogues = cast(
+            CosmTradeDialogues, cls._skill.skill_context.cosm_trade_dialogues
         )
         cls.default_dialogues = cast(
             DefaultDialogues, cls._skill.skill_context.default_dialogues
@@ -203,6 +209,16 @@ class TestDialogues(BaseSkillTestCase):
         assert dialogue.role == ContractApiDialogue.Role.AGENT
         assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
+    def test_cosm_trade_dialogues(self):
+        """Test the CosmTradeDialogues class."""
+        _, dialogue = self.cosm_trade_dialogues.create(
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
+            performative=CosmTradeMessage.Performative.INFORM_PUBLIC_KEY,
+            public_key="some_public_key",
+        )
+        assert dialogue.role == CosmTradeDialogue.Role.AGENT
+        assert dialogue.self_address == self.skill.skill_context.agent_address
+
     def test_default_dialogues(self):
         """Test the DefaultDialogues class."""
         _, dialogue = self.default_dialogues.create(
@@ -297,7 +313,7 @@ class TestDialogues(BaseSkillTestCase):
             role=ContractApiDialogue.Role.AGENT,
         )
 
-        # associated_contract_api_dialogue
+        # associated_fipa_dialogue
         with pytest.raises(ValueError, match="associated_fipa_dialogue not set!"):
             assert signing_dialogue.associated_fipa_dialogue
         fipa_dialogue = FipaDialogue(
@@ -315,6 +331,23 @@ class TestDialogues(BaseSkillTestCase):
         ):
             signing_dialogue.associated_fipa_dialogue = fipa_dialogue
         assert signing_dialogue.associated_fipa_dialogue == fipa_dialogue
+
+        # associated_cosm_trade_dialogue
+        cosm_trade_dialogue = CosmTradeDialogue(
+            DialogueLabel(
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
+            ),
+            self.skill.skill_context.agent_address,
+            role=CosmTradeDialogue.Role.AGENT,
+        )
+        signing_dialogue.associated_cosm_trade_dialogue = cosm_trade_dialogue
+        with pytest.raises(
+            AEAEnforceError, match="associated_cosm_trade_dialogue already set!"
+        ):
+            signing_dialogue.associated_cosm_trade_dialogue = cosm_trade_dialogue
+        assert signing_dialogue.associated_cosm_trade_dialogue == cosm_trade_dialogue
 
     def test_signing_dialogues(self):
         """Test the SigningDialogues class."""

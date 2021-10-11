@@ -38,8 +38,12 @@ def test_connection():
     """Test that two OEF local connection can connect to a local node."""
     with LocalNode() as node:
 
-        multiplexer1 = Multiplexer([_make_local_connection("multiplexer1", node)])
-        multiplexer2 = Multiplexer([_make_local_connection("multiplexer2", node)])
+        multiplexer1 = Multiplexer(
+            [_make_local_connection("multiplexer1", "my_public_key_1", node)]
+        )
+        multiplexer2 = Multiplexer(
+            [_make_local_connection("multiplexer2", "my_public_key_2", node)]
+        )
 
         multiplexer1.connect()
         multiplexer2.connect()
@@ -53,7 +57,8 @@ async def test_connection_twice_return_none():
     """Test that connecting twice works."""
     with LocalNode() as node:
         address = "address"
-        connection = _make_local_connection(address, node)
+        public_key = "public_key"
+        connection = _make_local_connection(address, public_key, node)
         await connection.connect()
         await node.connect(address, connection._reader)
         message = DefaultMessage(
@@ -78,7 +83,8 @@ async def test_receiving_when_not_connected_raise_exception():
     with LocalNode() as node:
         with pytest.raises(ConnectionError):
             address = "address"
-            connection = _make_local_connection(address, node)
+            public_key = "public_key"
+            connection = _make_local_connection(address, public_key, node)
             await connection.receive()
 
 
@@ -87,7 +93,8 @@ async def test_receiving_returns_none_when_error_occurs():
     """Test that when we try to receive an envelope and an error occurs we return None."""
     with LocalNode() as node:
         address = "address"
-        connection = _make_local_connection(address, node)
+        public_key = "public_key"
+        connection = _make_local_connection(address, public_key, node)
         await connection.connect()
 
         with unittest.mock.patch.object(
@@ -103,8 +110,12 @@ def test_communication():
     """Test that two multiplexer can communicate through the node."""
     with LocalNode() as node:
 
-        multiplexer1 = Multiplexer([_make_local_connection("multiplexer1", node)])
-        multiplexer2 = Multiplexer([_make_local_connection("multiplexer2", node)])
+        multiplexer1 = Multiplexer(
+            [_make_local_connection("multiplexer1", "multiplexer1_public_key", node)]
+        )
+        multiplexer2 = Multiplexer(
+            [_make_local_connection("multiplexer2", "multiplexer1_public_key", node)]
+        )
 
         multiplexer1.connect()
         multiplexer2.connect()

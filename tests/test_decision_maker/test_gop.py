@@ -144,6 +144,7 @@ class TestDecisionMaker:
         cls.identity = Identity(
             cls.agent_name,
             addresses=cls.wallet.addresses,
+            public_keys=cls.wallet.public_keys,
             default_address_key=FetchAICrypto.identifier,
         )
         cls.decision_maker_handler = DecisionMakerHandler(

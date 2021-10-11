@@ -184,7 +184,7 @@ def test_multiplexer_connect_one_raises_error_many_connections():
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
 
-    connection_1 = _make_local_connection("my_addr", node)
+    connection_1 = _make_local_connection("my_addr", "my_public_key", node)
     connection_2 = _make_stub_connection(input_file_path, output_file_path)
     connection_3 = _make_dummy_connection()
     multiplexer = Multiplexer([connection_1, connection_2, connection_3])
@@ -256,7 +256,7 @@ async def test_multiplexer_disconnect_one_raises_error_many_connections():
         input_file_path = d / "input_file.csv"
         output_file_path = d / "input_file.csv"
 
-        connection_1 = _make_local_connection("my_addr", node)
+        connection_1 = _make_local_connection("my_addr", "my_public_key", node)
         connection_2 = _make_stub_connection(input_file_path, output_file_path)
         connection_3 = _make_dummy_connection()
         multiplexer = Multiplexer([connection_1, connection_2, connection_3])
@@ -423,9 +423,12 @@ def test_get_from_multiplexer_when_empty():
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
-        identity_1 = Identity("identity", address="address_1")
+        identity_1 = Identity(
+            "identity", address="address_1", public_key="public_key_1"
+        )
         connection_1 = _make_local_connection(
             identity_1.address,
+            identity_1.public_key,
             node,
             restricted_to_protocols={DefaultMessage.protocol_id},
             excluded_protocols={FipaMessage.protocol_id},
@@ -774,7 +777,7 @@ def test_multiplexer_setup():
     input_file_path = d / "input_file.csv"
     output_file_path = d / "input_file.csv"
 
-    connection_1 = _make_local_connection("my_addr", node)
+    connection_1 = _make_local_connection("my_addr", "my_public_key", node)
     connection_2 = _make_stub_connection(input_file_path, output_file_path)
     connection_3 = _make_dummy_connection()
     connections = [connection_1, connection_2, connection_3]

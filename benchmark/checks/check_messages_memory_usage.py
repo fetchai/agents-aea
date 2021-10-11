@@ -27,7 +27,12 @@ import click
 
 from aea.protocols.base import Message
 from benchmark.checks.utils import get_mem_usage_in_mb  # noqa: I100
-from benchmark.checks.utils import multi_run, print_results
+from benchmark.checks.utils import (
+    multi_run,
+    number_of_runs_deco,
+    output_format_deco,
+    print_results,
+)
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 
@@ -67,14 +72,16 @@ def run(messages_amount: int) -> List[Tuple[str, Union[int, float]]]:
 
 @click.command()
 @click.option("--messages", default=10 ** 6, help="Amount of messages.")
-@click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(messages: int, number_of_runs: int) -> None:
+@number_of_runs_deco
+@output_format_deco
+def main(messages: int, number_of_runs: int, output_format: str) -> Any:
     """Run test."""
-    click.echo("Start test with messages:")
-    click.echo(f"* Messages: {messages}")
-    click.echo(f"* Number of runs: {number_of_runs}")
+    parameters = {"Messages": messages, "Number of runs": number_of_runs}
 
-    print_results(multi_run(int(number_of_runs), run, (int(messages),),))
+    def result_fn() -> List[Tuple[str, Any, Any, Any]]:
+        return multi_run(int(number_of_runs), run, (int(messages),),)
+
+    return print_results(output_format, parameters, result_fn)
 
 
 if __name__ == "__main__":

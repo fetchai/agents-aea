@@ -79,7 +79,10 @@ class TestGymConnection:
         self.env = gym.GoalEnv()
         configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
         self.agent_address = "my_address"
-        identity = Identity("name", address=self.agent_address)
+        self.agent_public_key = "my_public_key"
+        identity = Identity(
+            "name", address=self.agent_address, public_key=self.agent_public_key
+        )
         self.gym_con = GymConnection(
             gym_env=self.env,
             identity=identity,
@@ -242,7 +245,9 @@ class TestGymConnection:
         configuration = ConnectionConfig(
             connection_id=GymConnection.connection_id, env=gym_env_path
         )
-        identity = Identity("name", address=self.agent_address)
+        identity = Identity(
+            "name", address=self.agent_address, public_key=self.agent_public_key
+        )
         gym_con = GymConnection(
             gym_env=None,
             identity=identity,
