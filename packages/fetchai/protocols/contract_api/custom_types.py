@@ -73,6 +73,7 @@ class Kwargs:
         kwargs_protobuf_object.kwargs = DictProtobufStructSerializer.encode(
             kwargs_object.body
         )
+        return None
 
     @classmethod
     def decode(cls, kwargs_protobuf_object: Any) -> "Kwargs":

@@ -111,6 +111,7 @@ class AgentRecord:
         agent_record_protobuf_object.signature = agent_record_object.signature
         agent_record_protobuf_object.service_id = agent_record_object.service_id
         agent_record_protobuf_object.ledger_id = agent_record_object.ledger_id
+        return None
 
     @classmethod
     def decode(cls, agent_record_protobuf_object: Any) -> "AgentRecord":
@@ -200,6 +201,7 @@ class StatusBody:
         """
         status_body_protobuf_object.code = int(status_body_object.status_code)
         status_body_protobuf_object.msgs.extend(status_body_object.msgs)
+        return None
 
     @classmethod
     def decode(cls, status_body_protobuf_object: Any) -> "StatusBody":

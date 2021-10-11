@@ -77,6 +77,7 @@ class AgentsInfo:
         agents_info_protobuf_object.agents_info = DictProtobufStructSerializer.encode(
             agents_info_object.body
         )
+        return None
 
     @classmethod
     def decode(cls, agents_info_protobuf_object: Any) -> "AgentsInfo":
@@ -130,6 +131,7 @@ class OefErrorOperation(Enum):
         :return: None
         """
         oef_error_operation_protobuf_object.oef_error = oef_error_operation_object.value
+        return None
 
     @classmethod
     def decode(cls, oef_error_operation_protobuf_object: Any) -> "OefErrorOperation":

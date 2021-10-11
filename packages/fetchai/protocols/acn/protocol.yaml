@@ -11,9 +11,9 @@ fingerprint:
   __init__.py: QmZuYFQwVmTdBB4aPBrGd8EivAVxt43E4WNVXD3YYqFVDQ
   acn.proto: QmVWvXETUNe7QZTvBgzwpofNP3suFthwyxbTVUqSx8mdnE
   acn_pb2.py: Qmc2Pb1WERRBm1mw5Q4iGret621bjXYKR3KwaMXVQCiAT4
-  custom_types.py: QmX6XWjUc8YAWRZz5RwPP7FEpZZR9srWqRQMbfa1BbYQFD
-  dialogues.py: QmeA38D21HCT99t4xPF5YYtMM9QTvTMWcgn3UXD8jENkQd
-  message.py: QmVJWhpvdW6PpNAC6PMizzAnhejKXBBa21TTSPay47Mnqe
+  custom_types.py: QmYdH7VjW6gvq4kiwzLayhRtrxVuueNEhvbktJGtFm2WWV
+  dialogues.py: QmYUdrEo9D866fBiwdH2NrSUg6fHsXJLfBKZmHJ5MgS1gM
+  message.py: QmdGN9AqAiSTkdG3W1KB4ZG28mn9f65oSmZuUWp5cdJgE1
   serialization.py: QmaYfCTqKwbYrUkgnouxzd41QwnStDGhoXdvwovQXD6xr1
 fingerprint_ignore_patterns: []
 dependencies:

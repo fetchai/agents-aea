@@ -44,6 +44,7 @@ class AnyObject:
         :return: None
         """
         any_object_protobuf_object.any = pickle.dumps(any_object_object)  # nosec
+        return None
 
     @classmethod
     def decode(cls, any_object_protobuf_object: Any) -> "AnyObject":

@@ -47,6 +47,7 @@ class ErrorCode(Enum):
         :return: None
         """
         error_code_protobuf_object.error_code = error_code_object.value
+        return None
 
     @classmethod
     def decode(cls, error_code_protobuf_object: Any) -> "ErrorCode":
