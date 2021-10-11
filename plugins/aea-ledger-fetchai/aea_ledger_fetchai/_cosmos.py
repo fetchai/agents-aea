@@ -689,7 +689,9 @@ class _CosmosApi(LedgerApi):
         amount = kwargs.pop("amount", None)
         init_msg = kwargs.pop("init_msg", None)
         unexpected_keys = [
-            key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
+            key
+            for key in kwargs.keys()
+            if key not in ["tx_fee", "gas", "memo", "tx_fee_denom"]
         ]
         if len(unexpected_keys) != 0:  # pragma: nocover
             raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
