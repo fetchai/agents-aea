@@ -755,7 +755,7 @@ class _CosmosApi(LedgerApi):
 
         :param contract_interface: the contract interface.
         :param deployer_address: the deployer address.
-        :param denom: the denomination.
+        :param denom: the denomination of tx_fee.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :param account_number: the account number.
         :param sequence: the sequence number.
@@ -802,6 +802,7 @@ class _CosmosApi(LedgerApi):
         tx_fee: int = 0,
         gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
+        tx_fee_denom: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm InitMsg transaction.
@@ -818,13 +819,16 @@ class _CosmosApi(LedgerApi):
         :param tx_fee: the tx fee accepted.
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :return: the unsigned CosmWasm InitMsg
         """
         if amount == 0:
             init_funds = []
         else:
             init_funds = [Coin(denom=denom, amount=str(amount))]
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         init_msg = MsgInstantiateContract(
             sender=str(deployer_address),
@@ -861,6 +865,7 @@ class _CosmosApi(LedgerApi):
         chain_id: Optional[str] = None,
         account_number: Optional[int] = None,
         sequence: Optional[int] = None,
+        tx_fee_denom: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm HandleMsg transaction.
@@ -876,10 +881,12 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :param account_number: Account number
         :param sequence: Sequence
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :return: the unsigned CosmWasm HandleMsg
         """
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
@@ -892,7 +899,7 @@ class _CosmosApi(LedgerApi):
             funds = []
         else:
             funds = [Coin(denom=denom, amount=str(amount))]
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         execute_msg = MsgExecuteContract(
             sender=str(sender_address),
@@ -961,6 +968,7 @@ class _CosmosApi(LedgerApi):
         chain_id: Optional[str] = None,
         account_number: Optional[int] = None,
         sequence: Optional[int] = None,
+        tx_fee_denom: Optional[str] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -977,12 +985,13 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the chain ID of the transaction.
         :param account_number: Account number
         :param sequence: Sequence
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :param kwargs: keyword arguments.
         :return: the transfer transaction
         """
         denom = denom if denom is not None else self.denom
-
         chain_id = chain_id if chain_id is not None else self.chain_id
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
@@ -991,7 +1000,7 @@ class _CosmosApi(LedgerApi):
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
 
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
         amount_coins = [Coin(denom=denom, amount=str(amount))]
 
         msg_send = MsgSend(
@@ -1092,6 +1101,7 @@ class _CosmosApi(LedgerApi):
         memo: str = "",
         chain_id: Optional[str] = None,
         denom: Optional[str] = None,
+        tx_fee_denom: Optional[str] = None,
     ) -> JSONLike:
         """
         Generate transaction with multiple messages
@@ -1104,6 +1114,7 @@ class _CosmosApi(LedgerApi):
         :param memo: memo to include in tx.
         :param chain_id: the chain ID of the transaction.
         :param denom: the denomination of tx fee
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
 
         :raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
 
@@ -1115,8 +1126,9 @@ class _CosmosApi(LedgerApi):
 
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
 
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         account_numbers: List[int] = []
         sequences: List[int] = []
