@@ -98,10 +98,6 @@ DEFAULT_GAS_AMOUNT = 1500000
 # Txs will fail if gas_limit is higher than MAXIMUM_GAS_AMOUNT
 MAXIMUM_GAS_AMOUNT = 1500000
 _BYTECODE = "wasm_byte_code"
-MSG_STORE_CODE = "/cosmwasm.wasm.v1beta1.MsgStoreCode"
-MSG_INSTANTIATE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
-MSG_EXECUTE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
-MSG_SEND = "/cosmos.bank.v1beta1.MsgSend"
 
 
 class DataEncrypt:
@@ -1294,38 +1290,6 @@ class _CosmosApi(LedgerApi):
             tx_digest = broad_tx_resp.tx_response.txhash
 
         return tx_digest
-
-    @staticmethod
-    def is_cosmwasm_transaction(tx_signed: JSONLike) -> bool:
-        """Check whether it is a cosmwasm tx."""
-        try:
-            _type = (
-                cast(dict, tx_signed.get("tx", {}))
-                .get("body", {})
-                .get("messages", [])[0]["@type"]
-            )
-            result = _type in [
-                MSG_STORE_CODE,
-                MSG_INSTANTIATE_CONTRACT,
-                MSG_EXECUTE_CONTRACT,
-            ]
-        except (KeyError, IndexError):  # pragma: nocover
-            result = False
-        return result
-
-    @staticmethod
-    def is_transfer_transaction(tx_signed: JSONLike) -> bool:
-        """Check whether it is a transfer tx."""
-        try:
-            _type = (
-                cast(dict, tx_signed.get("tx", {}))
-                .get("body", {})
-                .get("messages", [])[0]["@type"]
-            )
-            result = _type in [MSG_SEND]
-        except (KeyError, IndexError):  # pragma: nocover
-            result = False
-        return result
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
