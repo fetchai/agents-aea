@@ -42,7 +42,7 @@ A `Multiplexer` only needs a list of connections. The `StubConnection` is a simp
     stub_connection = StubConnection(
         configuration=configuration,
         data_dir=".",
-        identity=Identity("some_agent", "some_address"),
+        identity=Identity("some_agent", "some_address", "some_public_key"),
     )
     multiplexer = Multiplexer([stub_connection], protocols=[DefaultMessage])
 ```
@@ -169,7 +169,7 @@ def run():
     stub_connection = StubConnection(
         configuration=configuration,
         data_dir=".",
-        identity=Identity("some_agent", "some_address"),
+        identity=Identity("some_agent", "some_address", "some_public_key"),
     )
     multiplexer = Multiplexer([stub_connection], protocols=[DefaultMessage])
     try:

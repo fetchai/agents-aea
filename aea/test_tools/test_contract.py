@@ -111,7 +111,7 @@ class BaseContractTestCase(ABC):
         )
         if str(configuration.public_id) not in contract_registry.specs:
             # load contract into sys modules
-            Contract.from_config(configuration)
+            Contract.from_config(configuration)  # pragma: nocover
         cls._contract = contract_registry.make(str(configuration.public_id))
 
         # deploy contract

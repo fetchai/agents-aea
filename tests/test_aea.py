@@ -378,8 +378,14 @@ def test_initialize_aea_programmatically_build_resources():
             agent_name = "MyAgent"
             private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
             wallet = Wallet({DEFAULT_LEDGER: private_key_path})
-            identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
-            connection = _make_local_connection(agent_name, node)
+            identity = Identity(
+                agent_name,
+                address=wallet.addresses[DEFAULT_LEDGER],
+                public_key=wallet.public_keys[DEFAULT_LEDGER],
+            )
+            connection = _make_local_connection(
+                agent_name, agent_name + "_public_key", node
+            )
 
             resources = Resources()
             default_protocol = Protocol.from_dir(
@@ -469,8 +475,14 @@ def test_add_behaviour_dynamically():
     wallet = Wallet({DEFAULT_LEDGER: private_key_path})
     data_dir = MagicMock()
     resources = Resources()
-    identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
-    connection = _make_local_connection(identity.address, LocalNode())
+    identity = Identity(
+        agent_name,
+        address=wallet.addresses[DEFAULT_LEDGER],
+        public_key=wallet.public_keys[DEFAULT_LEDGER],
+    )
+    connection = _make_local_connection(
+        identity.address, identity.public_key, LocalNode()
+    )
     resources.add_connection(connection)
 
     agent = AEA(
@@ -550,8 +562,14 @@ class TestContextNamespace:
         data_dir = MagicMock()
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         wallet = Wallet({DEFAULT_LEDGER: private_key_path})
-        identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
-        connection = _make_local_connection(identity.address, LocalNode())
+        identity = Identity(
+            agent_name,
+            address=wallet.addresses[DEFAULT_LEDGER],
+            public_key=wallet.public_keys[DEFAULT_LEDGER],
+        )
+        connection = _make_local_connection(
+            identity.address, identity.public_key, LocalNode()
+        )
         resources = Resources()
         resources.add_connection(connection)
         cls.context_namespace = {"key1": 1, "key2": 2}

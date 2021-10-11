@@ -1437,7 +1437,7 @@ class TestContractCommon:
 
         self.ledger_api.identifier = "fetchai"
 
-        # Test if get_atomic_swap_single_transaction fails with missing from_key
+        # Test if get_atomic_swap_single_transaction fails with all amounts to be zero
         with pytest.raises(RuntimeError):
             self.contract.get_atomic_swap_batch_transaction(
                 self.ledger_api,
@@ -1451,3 +1451,175 @@ class TestContractCommon:
                 trade_nonce=0,
                 from_pubkey="deadbeef",
             )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_to_pubkey_missing_no_from_pubkey_required(
+        self,
+    ):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing to_pubkey and from_pubkey not required."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing to_pubkey
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[0],
+                to_supplies=[1],
+                value=1,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_from_pubkey_missing_no_to_pubkey_required(
+        self,
+    ):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing from_pubkey and to_pubkey not required."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_pubkey
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[1],
+                to_supplies=[0],
+                value=0,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_cosmos_from_pubkey_only(self):
+        """Test if get_atomic_swap_batch_transaction returns Tx in case with only from_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction works with only from_pubkey
+        res = self.contract.get_atomic_swap_batch_transaction(
+            self.ledger_api,
+            contract_address="address",
+            from_address="address",
+            to_address="address",
+            token_ids=[self.token_ids_a[0]],
+            from_supplies=[1],
+            to_supplies=[0],
+            value=0,
+            trade_nonce=0,
+            from_pubkey="deadbeef",
+        )
+        assert res is not None
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_amounts_missing(self):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing amounts."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with all amounts to be zero
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=0,
+                to_supply=0,
+                value=0,
+                trade_nonce=0,
+                from_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_batch_transaction_amounts_missing(self):
+        """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing amounts."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with all amounts to be zero
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_batch_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_ids=[self.token_ids_a[0]],
+                from_supplies=[0],
+                to_supplies=[0],
+                value=0,
+                trade_nonce=0,
+                from_pubkey="deadbeef",
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_to_pubkey_missing_no_from_pubkey_required(
+        self,
+    ):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing to_pubkey and from_pubkey not required."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing to_pubkey
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=0,
+                to_supply=1,
+                value=1,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_from_pubkey_missing_no_to_pubkey_required(
+        self,
+    ):
+        """Test if get_atomic_swap_single_transaction returns RuntimeError with missing from_pubkey and to_pubkey not required."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction fails with missing from_pubkey
+        with pytest.raises(RuntimeError):
+            self.contract.get_atomic_swap_single_transaction(
+                self.ledger_api,
+                contract_address="address",
+                from_address="address",
+                to_address="address",
+                token_id=self.token_ids_a[0],
+                from_supply=1,
+                to_supply=0,
+                value=0,
+                trade_nonce=0,
+            )
+
+    @pytest.mark.ledger
+    def test_get_atomic_swap_single_transaction_cosmos_from_pubkey_only(self):
+        """Test if get_atomic_swap_single_transaction returns Tx in case with only from_pubkey."""
+
+        self.ledger_api.identifier = "fetchai"
+
+        # Test if get_atomic_swap_single_transaction works with only from_pubkey
+        res = self.contract.get_atomic_swap_single_transaction(
+            self.ledger_api,
+            contract_address="address",
+            from_address="address",
+            to_address="address",
+            token_id=self.token_ids_a[0],
+            from_supply=1,
+            to_supply=0,
+            value=0,
+            trade_nonce=0,
+            from_pubkey="deadbeef",
+        )
+        assert res is not None

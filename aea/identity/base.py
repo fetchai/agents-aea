@@ -23,6 +23,7 @@ from typing import Dict, Optional
 
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.exceptions import enforce
 from aea.helpers.base import SimpleId, SimpleIdOrStr
 
 
@@ -36,13 +37,22 @@ class Identity:
     - the addresses, a map from address identifier to address (can be a single key-value pair)
     """
 
-    __slots__ = ("_name", "_address", "_addresses", "_default_address_key")
+    __slots__ = (
+        "_name",
+        "_address",
+        "_public_key",
+        "_public_keys",
+        "_addresses",
+        "_default_address_key",
+    )
 
     def __init__(
         self,
         name: SimpleIdOrStr,
         address: Optional[str] = None,
+        public_key: Optional[str] = None,
         addresses: Optional[Dict[str, Address]] = None,
+        public_keys: Optional[Dict[str, str]] = None,
         default_address_key: str = DEFAULT_LEDGER,
     ) -> None:
         """
@@ -50,7 +60,9 @@ class Identity:
 
         :param name: the name of the agent.
         :param address: the default address of the agent.
+        :param public_key: the public key of the agent.
         :param addresses: the addresses of the agent.
+        :param public_keys: the public keys of the agent.
         :param default_address_key: the key for the default address.
         """
         self._name = SimpleId(name)
@@ -58,18 +70,50 @@ class Identity:
             raise ValueError(
                 "Provide a key for the default address."
             )  # pragma: nocover
+
         if (address is None) == (addresses is None):
             raise ValueError(
-                "Either provide a single address or a dictionary of addresses, not both."
+                "Either provide a single address or a dictionary of addresses, and not both."
             )
+
         if address is None:
             if addresses is None or len(addresses) == 0:  # pragma: nocover
                 raise ValueError("Provide at least one pair of addresses.")
+            if public_key is not None:
+                raise ValueError(
+                    "If you provide a dictionary of addresses, you must not provide a single public key."
+                )
+            if public_keys is None:
+                raise ValueError(
+                    "If you provide a dictionary of addresses, you must provide its corresponding dictionary of public keys."
+                )
+            enforce(
+                public_keys.keys() == addresses.keys(),
+                "Keys in public keys and addresses dictionaries do not match. They must be identical.",
+            )
+            enforce(
+                default_address_key in addresses and default_address_key in public_keys,
+                "The default address key must exist in both addresses and public keys dictionaries.",
+            )
             address = addresses[default_address_key]
-        self._address = address
+            public_key = public_keys[default_address_key]
+
         if addresses is None:
+            if public_keys is not None:
+                raise ValueError(
+                    "If you provide a single address, you must not provide a dictionary of public keys."
+                )
+            if public_key is None:
+                raise ValueError(
+                    "If you provide a single address, you must provide its corresponding public key."
+                )
             addresses = {default_address_key: address}
+            public_keys = {default_address_key: public_key}
+
+        self._address = address
         self._addresses = addresses
+        self._public_key = public_key
+        self._public_keys = public_keys
         self._default_address_key = default_address_key
 
     @property
@@ -91,3 +135,13 @@ class Identity:
     def address(self) -> Address:
         """Get the default address."""
         return self._address
+
+    @property
+    def public_keys(self) -> Dict[str, str]:
+        """Get the public keys."""
+        return self._public_keys  # type: ignore
+
+    @property
+    def public_key(self) -> str:
+        """Get the default public key."""
+        return self._public_key  # type: ignore

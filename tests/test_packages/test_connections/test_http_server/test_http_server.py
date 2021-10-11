@@ -104,7 +104,7 @@ class TestHTTPServer:
 
     def setup(self):
         """Initialise the test case."""
-        self.identity = Identity("name", address="my_key")
+        self.identity = Identity("name", address="my_key", public_key="my_public_key")
         self.agent_address = self.identity.address
         self.host = get_host()
         self.port = get_unused_tcp_port()
@@ -492,7 +492,7 @@ class TestHTTPSServer:
 
     def setup(self):
         """Initialise the test case."""
-        self.identity = Identity("name", address="my_key")
+        self.identity = Identity("name", address="my_key", public_key="my_public_key")
         self.agent_address = self.identity.address
         self.host = "localhost"
         self.port = get_unused_tcp_port()

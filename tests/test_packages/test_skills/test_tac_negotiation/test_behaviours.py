@@ -83,6 +83,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
         cls.registration_message.to = cls._skill.skill_context.search_service_address
 
+        cls.tac_version_id = "some_tac_version_id"
+
     def test_init(self):
         """Test the __init__ method of the negotiation behaviour."""
         assert self.tac_negotiation.is_registered is False
@@ -123,10 +125,31 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
     def test_act_iii(self):
-        """Test the act method of the negotiation behaviour where is_registered is False."""
+        """Test the act method of the negotiation behaviour where tac_version_id is NOT in the shared state."""
         # setup
         self.skill.skill_context._agent_context._shared_state = {
             "is_game_finished": False
+        }
+        self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
+
+        if "tac_version_id" in self.skill.skill_context._agent_context._shared_state:
+            self.skill.skill_context._agent_context._shared_state.pop("tac_version_id")
+
+        with patch.object(self.logger, "log") as mock_logger:
+            self.tac_negotiation.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+        mock_logger.assert_any_call(
+            logging.ERROR, "Cannot get the tac_version_id. Stopping!"
+        )
+
+    def test_act_iv(self):
+        """Test the act method of the negotiation behaviour where is_registered is False."""
+        # setup
+        self.skill.skill_context._agent_context._shared_state = {
+            "is_game_finished": False,
+            "tac_version_id": self.tac_version_id,
         }
         self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
 
@@ -201,11 +224,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 f"searching for {search[1]}, search_id={message.dialogue_reference}.",
             )
 
-    def test_act_iv(self):
+    def test_act_v(self):
         """Test the act method of the negotiation behaviour where failed_registration_msg is NOT None."""
         # setup
         self.skill.skill_context._agent_context._shared_state = {
-            "is_game_finished": False
+            "is_game_finished": False,
+            "tac_version_id": self.tac_version_id,
         }
         self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
 
@@ -297,11 +321,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 f"searching for {search[1]}, search_id={message.dialogue_reference}.",
             )
 
-    def test_act_v(self):
+    def test_act_vi(self):
         """Test the act method of the negotiation behaviour where failed_registration_msg is NOT None and max retries is reached."""
         # setup
         self.skill.skill_context._agent_context._shared_state = {
-            "is_game_finished": False
+            "is_game_finished": False,
+            "tac_version_id": self.tac_version_id,
         }
         self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
 
@@ -379,11 +404,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 f"searching for {search[1]}, search_id={message.dialogue_reference}.",
             )
 
-    def test_act_vi(self):
+    def test_act_vii(self):
         """Test the act method of the negotiation behaviour where is_registered is True."""
         # setup
         self.skill.skill_context._agent_context._shared_state = {
-            "is_game_finished": False
+            "is_game_finished": False,
+            "tac_version_id": self.tac_version_id,
         }
         self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
         self.tac_negotiation.is_registered = True
