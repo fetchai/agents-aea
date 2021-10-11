@@ -24,6 +24,7 @@ from typing import Dict, Optional
 
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import ensure_dir
@@ -87,6 +88,48 @@ def try_generate_testnet_wealth(
     faucet_api = make_faucet_api(identifier)
     if faucet_api is not None:
         faucet_api.get_wealth(address, url)
+
+
+def _get_balance(type_: str, address: str) -> int:
+    """
+    Get balance by ledger type and wallet address.
+
+    :param type_: str type of ledger.
+    :param address: str address of wallet.
+
+    :return: int balance.
+    :raises ValueError: if no balance returned or ledger api for type is unavailable.
+    """
+    if not LedgerApis.has_ledger(type_):
+        raise ValueError(f"No ledger api config for {type_} available. Supported are")
+    balance = LedgerApis.get_balance(type_, address)
+    if balance is None:
+        raise ValueError("No balance returned!")
+    return balance
+
+
+def fund_wallet(skill_context, identifier: str) -> None:
+    """
+    Fund wallet by identifier and address.
+
+    :param identifier: str identifier of ledger.
+    :param address: str address of wallet.
+
+    :return: None
+    """
+    logger = skill_context.logger
+    address = skill_context.agent_address
+    ledger_type = "fetchai"  # TODO: add getting ledger_type
+
+    logger.warning("Checking balance.")
+    balance = _get_balance(ledger_type, address)  # TODO: add correct getting balance.
+    if balance > 0:
+        logger.warning("The wallet is already funded.")
+    else:
+        try_generate_testnet_wealth(address, identifier)
+        balance = _get_balance(ledger_type, address)
+        if balance > 0:
+            logger.warning("The wallet is successfully funded.")
 
 
 def private_key_verify(

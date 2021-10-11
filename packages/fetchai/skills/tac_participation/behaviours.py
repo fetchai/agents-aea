@@ -22,7 +22,7 @@
 from collections import OrderedDict
 from typing import Any, Dict, cast
 
-from aea.crypto.helpers import try_generate_testnet_wealth
+from aea.crypto.helpers import fund_wallet
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -36,11 +36,10 @@ class TacSearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup."""
-        self.generate_wealth()
-
-    address = self.context.agent_address
-    identifier = self.context.default_ledger_id
-    try_generate_testnet_wealth(address, identifier)
+        game = cast(Game, self.context.game)
+        address = self.context.agent_address
+        identifier = game.ledger_id
+        fund_wallet(self.context, identifier)
 
     def act(self) -> None:
         """Implement the act."""
