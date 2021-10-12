@@ -730,7 +730,7 @@ def ganache(
     ganache_addr,
     ganache_port,
     timeout: float = 2.0,
-    max_attempts: int = 10,
+    max_attempts: int = 40,
 ):
     """Launch the Ganache image."""
     client = docker.from_env()
@@ -746,7 +746,7 @@ def soef(
     soef_addr: str = "http://127.0.0.1",
     soef_port: int = 12002,
     timeout: float = 2.0,
-    max_attempts: int = 10,
+    max_attempts: int = 40,
 ):
     """Launch the soef image."""
     client = docker.from_env()
@@ -759,7 +759,7 @@ def soef(
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 10,
+    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 40,
 ):
     """Launch the Fetch ledger image."""
     client = docker.from_env()
