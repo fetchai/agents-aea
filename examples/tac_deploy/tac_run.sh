@@ -49,13 +49,11 @@ Start time: ${start_time}
 
 check_options(){
 	if [ -z "$minutes_to_start" ]; then
-		echo "No minutes provided.";
-		help
+		minutes_to_start=1
 	fi
 	
 	if [ -z "$participants" ]; then
-		echo "No participants provided";
-	    help
+		participants=2
 	fi
 	
 	case "$registry" in
@@ -102,6 +100,7 @@ check_options(){
 	    ;;
 	  ""|noncontract)
 	  	key_type=fetchai
+	  	mode="noncontract"
 	  	tac_controller_name="tac_controller"
 	  	tac_controller_skill_name="tac_control"
 	  	tac_participant_name="tac_participant"
