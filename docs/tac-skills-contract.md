@@ -7,7 +7,7 @@ There are two types of AEAs:
 
 ## Discussion
 
-This demo shows how agents negotiate autonomously with each other while they pursue their goals by playing a game of TAC. 
+This demo shows how agents negotiate autonomously with each other while they pursue their goals by participating in the Trading Agents Competition (TAC). 
 The demo can be run against Fetchai or Ethereum ledger.
 Transactions are validated on an ERC1155 smart contract on the Fetchai Stargateworld or a local Ganache Ethereum testnet.
 
@@ -86,9 +86,9 @@ This diagram shows the communication between two AEAs and a controller. In this 
 
 </div>
 
-In the above case, the proposal received contains a set of goods to sell, and an associated price. The buyer AEA needs to determine if this is a good deal for them, and if so, it accepts.
+In the above case, the proposal received contains a set of goods to sell and an associated price. The buyer AEA needs to determine if this is a good deal for them, and if so, it accepts.
 
-There is an equivalent diagram for seller AEAs set up to search for buyers and their interaction with AEAs which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
+There is an equivalent diagram for seller AEAs set up to search for buyers and their interaction with AEAs which are registered as buyers. In that scenario, the proposal will instead be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
 
 
 ## Preparation instructions
