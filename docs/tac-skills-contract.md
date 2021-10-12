@@ -503,6 +503,17 @@ aea build
 </p>
 </details>
 
+### Configure the agents to use Ethereum
+
+Run the following in every AEA's terminal:
+
+```bash
+aea config set agent.default_ledger ethereum
+json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
+aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
+```
+
 ### Add keys for all AEAs
 
 For every AEA in the competition (controller and participants):
