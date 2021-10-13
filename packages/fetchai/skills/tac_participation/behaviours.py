@@ -22,7 +22,7 @@
 from collections import OrderedDict
 from typing import Any, Dict, cast
 
-from aea.crypto.helpers import fund_wallet
+from aea.crypto.helpers import try_generate_testnet_wealth
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -46,7 +46,7 @@ class TacSearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup."""
-        self.fund_wallet()
+        self._fund_wallet()
 
     def act(self) -> None:
         """Implement the act."""
@@ -82,6 +82,7 @@ class TacSearchBehaviour(TickerBehaviour):
     def _put_msg_get_balance(self):
         game = cast(Game, self.context.game)
         ledger_id = game.ledger_id
+        address = self.context.agent_address
 
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
@@ -90,7 +91,7 @@ class TacSearchBehaviour(TickerBehaviour):
             counterparty=LEDGER_API_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             ledger_id=ledger_id,
-            address=self.context.agent_address,
+            address=address,
         )
         self.context.outbox.put_message(message=ledger_api_msg)
 
@@ -98,7 +99,10 @@ class TacSearchBehaviour(TickerBehaviour):
         """Fund agent wallet if it is empty."""
         self._put_msg_get_balance()
         # TODO: handle msg result
-        fund_wallet()
+        game = cast(Game, self.context.game)
+        ledger_id = game.ledger_id
+        address = self.context.agent_address
+        try_generate_testnet_wealth(ledger_id, address)
         # TODO: check is wallet funded
 
 
