@@ -23,8 +23,10 @@ import multiprocessing
 import os
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from statistics import mean, stdev, variance
+from tempfile import TemporaryDirectory
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from unittest.mock import MagicMock
 
@@ -32,6 +34,8 @@ import click
 import psutil  # type: ignore
 
 from aea.aea import AEA
+from aea.cli.registry.add import fetch_package
+from aea.cli.utils.package_utils import get_package_path
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
@@ -45,16 +49,9 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Protocol
+from aea.protocols.base import Message, Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, Skill, SkillContext
-
-
-sys.path.append(str(Path(__file__).parent))
-
-from packages.fetchai.protocols.default.message import (  # noqa: E402  # pylint: disable=import-outside-toplevel,unused-import
-    DefaultMessage,
-)
 
 
 ERROR_SKILL_NAME = "error"
@@ -70,7 +67,7 @@ output_format_deco = click.option(
     show_default=True,
 )
 number_of_runs_deco = click.option(
-    "--number_of_runs", default=10, help="How many times run test.", show_default=True
+    "--number_of_runs", default=2, help="How many times run test.", show_default=True
 )
 runtime_mode_deco = click.option(
     "--runtime_mode",
@@ -101,7 +98,9 @@ def make_agent(
 ) -> AEA:
     """Make AEA instance."""
     wallet = Wallet({DEFAULT_LEDGER: None})
-    identity = identity or Identity(agent_name, address=agent_name)
+    identity = identity or Identity(
+        agent_name, address=agent_name, public_key="somekey"
+    )
     resources = resources or Resources()
     datadir = os.getcwd()
     agent_context = MagicMock()
@@ -127,10 +126,12 @@ def make_agent(
     return AEA(identity, wallet, resources, datadir, runtime_mode=runtime_mode)
 
 
-def make_envelope(
-    sender: str, to: str, message: Optional[DefaultMessage] = None
-) -> Envelope:
+def make_envelope(sender: str, to: str, message: Optional[Message] = None) -> Envelope:
     """Make an envelope."""
+    from packages.fetchai.protocols.default.message import (  # noqa: E402  # pylint: disable=import-outside-toplevel,unused-import
+        DefaultMessage,
+    )
+
     if message is None:
         message = DefaultMessage(
             dialogue_reference=("", ""),
@@ -192,7 +193,7 @@ class GeneratorConnection(Connection):
         configuration = ConnectionConfig(connection_id=cls.connection_id,)
         test_connection = cls(
             configuration=configuration,
-            identity=Identity("name", "address"),
+            identity=Identity("name", "address", "pubkey"),
             data_dir=".tmp",
         )
         return test_connection
@@ -302,3 +303,32 @@ def print_results(
         mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
         click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
     click.echo("Test finished.")
+
+
+def _make_init_py(path: str) -> None:
+    (Path(path) / "__init__.py").write_text("")
+
+
+@contextmanager
+def with_packages(packages: List[Tuple[str, str]]):
+    """Download and install packages context manager."""
+    with TemporaryDirectory() as dir_name:
+        packages_dir = Path(dir_name) / "packages"
+        os.mkdir(packages_dir)
+        _make_init_py(dir_name)
+        _make_init_py(packages_dir)
+
+        for package_type, package in packages:
+            public_id = PublicId.from_str(package)
+            pkg_dir = get_package_path(
+                str(dir_name), package_type, public_id, vendor_dirname="packages"
+            )
+            fetch_package(package_type, public_id, str(dir_name), str(pkg_dir))
+            _make_init_py(packages_dir / public_id.author / f"{package_type}s")
+            _make_init_py(packages_dir / public_id.author)
+        sys.path.append(dir_name)
+        yield
+        sys.path.remove(dir_name)
+        for k in list(sys.modules.keys()):
+            if k.startswith("packages"):
+                sys.modules.pop(k)
