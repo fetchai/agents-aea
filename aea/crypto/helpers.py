@@ -90,24 +90,6 @@ def try_generate_testnet_wealth(
         faucet_api.get_wealth(address, url)
 
 
-def _get_balance(type_: str, address: str) -> int:
-    """
-    Get balance by ledger type and wallet address.
-
-    :param type_: str type of ledger.
-    :param address: str address of wallet.
-
-    :return: int balance.
-    :raises ValueError: if no balance returned or ledger api for type is unavailable.
-    """
-    if not LedgerApis.has_ledger(type_):
-        raise ValueError(f"No ledger api config for {type_} available. Supported are")
-    balance = LedgerApis.get_balance(type_, address)
-    if balance is None:
-        raise ValueError("No balance returned!")
-    return balance
-
-
 def fund_wallet(skill_context, identifier: str) -> None:
     """
     Fund wallet by identifier and address.
@@ -117,19 +99,8 @@ def fund_wallet(skill_context, identifier: str) -> None:
 
     :return: None
     """
-    logger = skill_context.logger
     address = skill_context.agent_address
-    ledger_type = "fetchai"  # TODO: add getting ledger_type
-
-    logger.warning("Checking balance.")
-    balance = _get_balance(ledger_type, address)  # TODO: add correct getting balance.
-    if balance > 0:
-        logger.warning("The wallet is already funded.")
-    else:
-        try_generate_testnet_wealth(address, identifier)
-        balance = _get_balance(ledger_type, address)
-        if balance > 0:
-            logger.warning("The wallet is successfully funded.")
+    try_generate_testnet_wealth(address, identifier)
 
 
 def private_key_verify(

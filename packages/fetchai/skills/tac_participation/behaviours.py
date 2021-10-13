@@ -25,10 +25,17 @@ from typing import Any, Dict, cast
 from aea.crypto.helpers import fund_wallet
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_participation.dialogues import OefSearchDialogues
+from packages.fetchai.skills.tac_participation.dialogues import LedgerApiDialogue, OefSearchDialogues
 from packages.fetchai.skills.tac_participation.game import Game, Phase
+
+
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class TacSearchBehaviour(TickerBehaviour):
@@ -127,3 +134,24 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 "sending transaction {} to controller, message={}.".format(tx_id, msg)
             )
             self.context.outbox.put_message(message=msg)
+
+    def _put_msg_get_balance(self):
+        game = cast(Game, self.context.game)
+        ledger_id = game.ledger_id
+
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, _ = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=ledger_id,
+            address=self.context.agent_address),
+        )
+        self.context.outbox.put_message(message=ledger_api_msg)
+
+    def fund_wallet(self):
+        self._put_msg_get_balance()
+        # TODO: handle msg result
+        fund_wallet()
+        # TODO: check is wallet funded
