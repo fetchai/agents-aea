@@ -90,19 +90,6 @@ def try_generate_testnet_wealth(
         faucet_api.get_wealth(address, url)
 
 
-def fund_wallet(skill_context, identifier: str) -> None:
-    """
-    Fund wallet by identifier and address.
-
-    :param identifier: str identifier of ledger.
-    :param address: str address of wallet.
-
-    :return: None
-    """
-    address = skill_context.agent_address
-    try_generate_testnet_wealth(address, identifier)
-
-
 def private_key_verify(
     aea_conf: AgentConfig, aea_project_path: Path, password: Optional[str] = None,
 ) -> None:
