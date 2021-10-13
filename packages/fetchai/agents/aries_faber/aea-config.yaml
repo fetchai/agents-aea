@@ -1,16 +1,16 @@
 agent_name: aries_faber
 author: fetchai
-version: 0.30.0
+version: 0.31.0
 description: An AEA representing Faber in the Aries demo.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.22.0
-- fetchai/p2p_libp2p:0.24.0
-- fetchai/soef:0.25.0
-- fetchai/webhook:0.18.0
+- fetchai/http_client:0.23.0
+- fetchai/p2p_libp2p:0.25.0
+- fetchai/soef:0.26.0
+- fetchai/webhook:0.19.0
 contracts: []
 protocols:
 - fetchai/default:1.0.0
@@ -19,8 +19,8 @@ protocols:
 - fetchai/signing:1.0.0
 - fetchai/state_update:1.0.0
 skills:
-- fetchai/aries_faber:0.21.0
-default_connection: fetchai/p2p_libp2p:0.24.0
+- fetchai/aries_faber:0.22.0
+default_connection: fetchai/p2p_libp2p:0.25.0
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -29,8 +29,8 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/http:1.0.0: fetchai/http_client:0.22.0
-  fetchai/oef_search:1.0.0: fetchai/soef:0.25.0
+  fetchai/http:1.0.0: fetchai/http_client:0.23.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.26.0
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:
