@@ -464,6 +464,7 @@ class LedgerApiHandler(Handler):
                 ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
+        # TODO: add setting up flags: is_balance_empty and is_balance_received
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
