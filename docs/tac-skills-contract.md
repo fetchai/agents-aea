@@ -9,7 +9,7 @@ There are two types of AEAs:
 
 This demo shows how agents negotiate autonomously with each other while they pursue their goals by participating in the Trading Agents Competition (TAC). 
 The demo can be run against Fetchai or Ethereum ledger.
-Transactions are validated on an ERC1155 smart contract on the Fetchai Stargateworld or a local Ganache Ethereum testnet.
+Transactions are validated on an ERC1155 smart contract on the Fetchai StargateWorld or a local Ganache Ethereum testnet.
 
 In the following video we discuss the framework and TAC in more detail:
 
@@ -99,7 +99,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ## Demo instructions (Fetchai):
 
-Follow this instruction to run TAC against the fetch.ai Stargateworld test-net.
+Follow this instruction to run TAC against the fetch.ai StargateWorld test-net.
 
 ### Fetch TAC controller AEA
 
