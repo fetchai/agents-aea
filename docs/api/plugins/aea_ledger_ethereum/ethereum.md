@@ -210,7 +210,6 @@ Encrypt the private key and return in json.
 
 **Arguments**:
 
-- `private_key`: the raw private key.
 - `password`: the password to decrypt.
 
 **Returns**:
@@ -257,7 +256,7 @@ Check whether a transaction is settled or not.
 
 **Arguments**:
 
-- `tx_digest`: the digest associated to the transaction.
+- `tx_receipt`: the receipt associated to the transaction.
 
 **Returns**:
 
@@ -436,7 +435,7 @@ Initialize the Ethereum ledger APIs.
 
 **Arguments**:
 
-- `address`: the endpoint for Web3 APIs.
+- `kwargs`: keyword arguments
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.api"></a>
 #### api
@@ -485,6 +484,7 @@ Submit a transfer transaction to the ledger.
 - `chain_id`: the Chain ID of the Ethereum transaction.
 - `gas_price`: the gas price (in Wei)
 - `gas_price_strategy`: the gas price strategy to be used.
+- `kwargs`: keyword arguments
 
 **Returns**:
 
@@ -593,7 +593,11 @@ Get the transaction to deploy the smart contract.
 - `gas`: the gas to be used (in Wei)
 - `gas_price`: the gas price (in Wei)
 - `gas_price_strategy`: the gas price strategy to be used.
-:returns tx: the transaction dictionary.
+- `kwargs`: keyword arguments
+
+**Returns**:
+
+the transaction dictionary.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.is_valid_address"></a>
 #### is`_`valid`_`address
@@ -608,6 +612,10 @@ Check if the address is valid.
 **Arguments**:
 
 - `address`: the address to validate
+
+**Returns**:
+
+whether the address is valid
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects
@@ -631,10 +639,6 @@ Get wealth from the faucet for the provided address.
 
 - `address`: the address.
 - `url`: the url
-
-**Returns**:
-
-None
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper"></a>
 ## LruLockWrapper Objects

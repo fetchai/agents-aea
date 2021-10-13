@@ -17,7 +17,7 @@ an easily extendible way. At import time, the framework will load
 all the crypto plug-ins available in the current Python environment.
 
 A _crypto plug-in_ is a Python package which declares some specific
-<a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entry-points" target="_blank">
+<a href="https://setuptools.pypa.io/en/latest/pkg_resources.html#entry-points" target="_blank">
 `setuptools` "entry points"</a> in its `setup.py` script.
 In particular, there are three types of entry points the framework looks up:
 

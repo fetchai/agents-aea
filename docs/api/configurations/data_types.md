@@ -731,7 +731,7 @@ Get the component type.
 
 ```python
  | @property
- | component_prefix() -> Tuple[ComponentType, str, str]
+ | component_prefix() -> PackageIdPrefix
 ```
 
 Get the component identifier without the version.
