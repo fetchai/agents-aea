@@ -24,7 +24,6 @@ from typing import Dict, Optional
 
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
-from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import ensure_dir
