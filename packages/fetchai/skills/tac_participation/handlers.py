@@ -21,8 +21,8 @@
 
 from typing import Dict, Optional, Tuple, cast
 
-from aea.configurations.base import PublicId
 from aea.common import Address
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 

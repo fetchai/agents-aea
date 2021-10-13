@@ -33,7 +33,6 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
-
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue as BaseLedgerApiDialogue,
     LedgerApiDialogues as BaseLedgerApiDialogues,
