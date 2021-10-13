@@ -51,6 +51,9 @@ models:
         search_value: v1
       search_radius: 5.0
     class_name: Game
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
