@@ -32,6 +32,9 @@ behaviours:
       tick_interval: 2
     class_name: TransactionProcessBehaviour
 handlers:
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
   oef:
     args: {}
     class_name: OefSearchHandler
