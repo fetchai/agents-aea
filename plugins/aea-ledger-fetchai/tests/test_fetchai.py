@@ -713,6 +713,7 @@ def test_construct_init_transaction():
         code_id=200,
         init_msg={},
         label="something",
+        tx_fee_denom="stake",
     )
     assert (
         isinstance(init_transaction, dict) and len(init_transaction) == 2

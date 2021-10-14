@@ -668,6 +668,13 @@ class _CosmosApi(LedgerApi):
         denom = (
             kwargs.pop("denom") if kwargs.get("denom", None) is not None else self.denom
         )
+
+        tx_fee_denom = (
+            kwargs.pop("tx_fee_denom")
+            if kwargs.get("tx_fee_denom", None) is not None
+            else denom
+        )
+
         chain_id = (
             kwargs.pop("chain_id")
             if kwargs.get("chain_id", None) is not None
@@ -689,9 +696,7 @@ class _CosmosApi(LedgerApi):
         amount = kwargs.pop("amount", None)
         init_msg = kwargs.pop("init_msg", None)
         unexpected_keys = [
-            key
-            for key in kwargs.keys()
-            if key not in ["tx_fee", "gas", "memo", "tx_fee_denom"]
+            key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
         ]
         if len(unexpected_keys) != 0:  # pragma: nocover
             raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
@@ -699,7 +704,7 @@ class _CosmosApi(LedgerApi):
             return self._get_storage_transaction(
                 contract_interface,
                 deployer_address,
-                denom,
+                tx_fee_denom,
                 chain_id,
                 account_number,
                 sequence,
@@ -731,6 +736,7 @@ class _CosmosApi(LedgerApi):
             code_id,
             init_msg,
             label,
+            tx_fee_denom,
             **kwargs,
         )
 
@@ -738,7 +744,7 @@ class _CosmosApi(LedgerApi):
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
-        denom: str,
+        tx_fee_denom: str,
         chain_id: str,
         account_number: int,
         sequence: int,
@@ -753,7 +759,7 @@ class _CosmosApi(LedgerApi):
 
         :param contract_interface: the contract interface.
         :param deployer_address: the deployer address.
-        :param denom: the denomination of tx_fee.
+        :param tx_fee_denom: the denomination of tx_fee.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :param account_number: the account number.
         :param sequence: the sequence number.
@@ -773,7 +779,7 @@ class _CosmosApi(LedgerApi):
         store_msg_packed = ProtoAny()
         store_msg_packed.Pack(store_msg, type_url_prefix="/")  # type: ignore
 
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
         tx = self._get_transaction(
             account_numbers=[account_number],
             from_addresses=[str(deployer_address)],
@@ -797,10 +803,10 @@ class _CosmosApi(LedgerApi):
         code_id: int,
         init_msg: JSONLike,
         label: str,
+        tx_fee_denom: str,
         tx_fee: int = 0,
         gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
-        tx_fee_denom: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm InitMsg transaction.
@@ -814,10 +820,10 @@ class _CosmosApi(LedgerApi):
         :param code_id: the ID of contract bytecode.
         :param init_msg: the InitMsg containing parameters for contract constructor.
         :param label: the label name of the contract.
+        :param tx_fee_denom: Denomination of tx_fee
         :param tx_fee: the tx fee accepted.
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
-        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :return: the unsigned CosmWasm InitMsg
         """
         if amount == 0:
@@ -825,7 +831,6 @@ class _CosmosApi(LedgerApi):
         else:
             init_funds = [Coin(denom=denom, amount=str(amount))]
 
-        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
         tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         init_msg = MsgInstantiateContract(
