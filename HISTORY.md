@@ -3,23 +3,66 @@
 ## 1.1.0 (2021-10-13)
 
 AEA:
-- 
+- Adds public keys to agent identity and skill context
+- Adds contract test tool
+- Adds multiprocess support for task manager
+- Adds multiprocess backed support to `MultiAgentManager`
+- Adds support for excluding connection on `aea run`
+- Adds support for adding a key that is being generated (`—add-key` option for `generate-key` command)
+- Adds check for dependencies to be present in registry on a package push
+- Makes more efficient installing of project dependencies on `aea install`
+- Adds dependency conflict detection on `aea install`
+- Improves pip install error details on `aea install`
+- Adds validation of `aea_version` when loading configuration
+- Adds a check for consistency of package versions in `MultiAgent Manager`
+- Adds better error reporting for aea registry requests
+- Fixes IPFS hash calculation for large files
+- Fixes protobuf dictionary serializer's uncovered cases and makes it deterministic
+- Fixes scaffolding of error and decision maker handlers
+- Fixes pywin32 problem when checking dependency 
+- Improves existing testing tools
+
+Benchmarks:
+- Adds agents construction and decision maker benchmark cases
 
 Plugins:
-- 
+- Upgrades fetchai plugin to use CosmPy instead of CLI calls
+- Upgrades cosmos plugin to use CosmPy instead of CLI calls
+- Upgrades fetchai plugin to use StargateWorld 
+- Upgrades cosmos plugin to Stargate
+- Sets the correct maximum Gas for fetch.ai plugin
 
 Packages:
-- 
+- Adds support for Tac to be run against fetchai StargateWorld test-net
+- Adds more informative error messages to CosmWasm ERC1155 contract
+- Adds support for atomic swap to CosmWasm ERC1155 contract
+- Adds an ACN protocol that formalises ACN communication using the framework's protocol language 
+- Adds `cosm_trade` protocol for preparing atomic swap transactions for cosmos-based networks
+- Adds https support for server connection
+- Adds parametrising of http(s) in soef connection 
+- Fixes http server content length response problem
+- Updates Oracle contract to 0.14
+- Implements the full ACN spec throughout the ACN packages
+- Implements correct error code usage in ACN packages
+- Refactors ACN packages to unify reused logic
+- Adds tests for gym skills
+- Adds dockerised SOEF
+- Adds libp2p mailbox connection
+- Multiple fixes and stability improvements for `p2p_libp2p` connections
 
 Docs:
-- 
+- Adds ACN internals documentation
+- Fixes tutorial for HTTP connection and skill
 - Multiple additional docs updates
+- Adds more context to private keys docs
 
 Chores:
-- 
+- Various development features bumped
+- Bumped Mermaid-JS, for UML diagrams to major version 8
+- Applies darglint to the code
 
 Examples:
-- 
+- Adds a unified script for running various versions/modes of Tac
 
 ## 1.0.2 (2021-06-03)
 
