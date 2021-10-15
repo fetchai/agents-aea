@@ -312,7 +312,7 @@ it start listening from a TCP socket at a configurable URI.
 
 To see a diagram of the message exchanged
 during a registration request read 
-<a href="#the-fetchaip2p_libp2p_delegate-connection" target="_blank">this section</a>.
+<a href="../acn-internals#registration-interaction" target="_blank">this section</a>.
 
 ## ACN transport
 
@@ -553,7 +553,7 @@ The same message exchange is done
 both in the case of direct connection and
 delegate connection,
 similarly for what has been described for the envelope entrance
-<a href="#acn-envelope-entrance-agent-peer">(see above)</a>.
+<a href="../acn-internals#acn-envelope-entrance-agent-peer">(see above)</a>.
 
 <div class="mermaid">
     sequenceDiagram
@@ -748,7 +748,7 @@ therefore can be used by the Multiplexer as any other connection.
 
 - The `send` method and the `receive` methods behave similarly to
   the `send` and `receive` methods of the
-  <a href="#the-fetchaip2p_libp2p-connection" target="_blank">`p2p_libp2p connection`</a>, 
+  <a href="../acn-internals#the-fetchaip2p_libp2p-connection" target="_blank">`p2p_libp2p connection`</a>, 
   in terms of message exchange;
   however, the communication is done via TCP rather than pipes.
 
