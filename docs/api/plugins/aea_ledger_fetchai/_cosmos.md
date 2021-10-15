@@ -519,7 +519,7 @@ the transaction dictionary.
 #### get`_`handle`_`transaction
 
 ```python
- | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None) -> Optional[JSONLike]
+ | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Create a CosmWasm HandleMsg transaction.
@@ -537,6 +537,7 @@ Create a CosmWasm HandleMsg transaction.
 - `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
 - `account_number`: Account number
 - `sequence`: Sequence
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
 
 **Returns**:
 
@@ -564,7 +565,7 @@ the message receipt
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -582,6 +583,7 @@ Submit a transfer transaction to the ledger.
 - `chain_id`: the chain ID of the transaction.
 - `account_number`: Account number
 - `sequence`: Sequence
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
 - `kwargs`: keyword arguments.
 
 **Returns**:
@@ -633,7 +635,7 @@ packer ProtoAny type message
 #### get`_`multi`_`transaction
 
 ```python
- | get_multi_transaction(from_addresses: List[str], pub_keys: Optional[List[bytes]], msgs: List[ProtoAny], gas: int, tx_fee: int = 0, memo: str = "", chain_id: Optional[str] = None, denom: Optional[str] = None) -> JSONLike
+ | get_multi_transaction(from_addresses: List[str], pub_keys: Optional[List[bytes]], msgs: List[ProtoAny], gas: int, tx_fee: int = 0, memo: str = "", chain_id: Optional[str] = None, denom: Optional[str] = None, tx_fee_denom: Optional[str] = None) -> JSONLike
 ```
 
 Generate transaction with multiple messages
@@ -648,6 +650,7 @@ Generate transaction with multiple messages
 - `memo`: memo to include in tx.
 - `chain_id`: the chain ID of the transaction.
 - `denom`: the denomination of tx fee
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
 
 :raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
 
@@ -671,26 +674,6 @@ Send a signed transaction and wait for confirmation.
 **Returns**:
 
 tx_digest, if present
-
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.is_cosmwasm_transaction"></a>
-#### is`_`cosmwasm`_`transaction
-
-```python
- | @staticmethod
- | is_cosmwasm_transaction(tx_signed: JSONLike) -> bool
-```
-
-Check whether it is a cosmwasm tx.
-
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.is_transfer_transaction"></a>
-#### is`_`transfer`_`transaction
-
-```python
- | @staticmethod
- | is_transfer_transaction(tx_signed: JSONLike) -> bool
-```
-
-Check whether it is a transfer tx.
 
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
