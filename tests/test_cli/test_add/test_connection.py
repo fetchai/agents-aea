@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea add connection` sub-command."""
-
 import os
 import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -539,11 +538,20 @@ class TestAddConnectionMixedWhenNoLocalRegistryExists:
         assert result.exit_code == 0
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
-            standalone_mode=False,
-        )
+        with patch("aea.cli.registry.utils.request_api"), patch(
+            "aea.cli.add.fetch_package"
+        ), patch("aea.cli.add.load_item_config"), patch(
+            "aea.cli.add.is_fingerprint_correct"
+        ), patch(
+            "aea.cli.add.register_item"
+        ):
+
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
 
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""

@@ -1,13 +1,13 @@
 name: thermometer
 author: fetchai
-version: 0.25.0
+version: 0.26.0
 type: skill
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdmXfMJB3eGNJYE71MbfdtZPWLDiWKwW4SLhxjmcH45H1
-  __init__.py: QmdVbif47hoy3uBNGycnxAmptnzeed8WpWVBSqZ7ydnbQw
+  __init__.py: QmPRTDL1bBCxXs1rmhDu6x1fPaHTSkKqsbyMSRemszQdBM
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
@@ -21,7 +21,7 @@ protocols:
 - fetchai/ledger_api:1.0.0
 - fetchai/oef_search:1.0.0
 skills:
-- fetchai/generic_seller:0.26.0
+- fetchai/generic_seller:0.27.0
 behaviours:
   service_registration:
     args:

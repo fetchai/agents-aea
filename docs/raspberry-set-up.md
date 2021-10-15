@@ -14,7 +14,7 @@ If you do not have a new Raspberry Pi SD card, you will need to make one. To do 
 
 NOOBS is a way to create an SD card for easy operating system installation on a Raspberry Pi. 
 
-First download noobs from <a href="https://www.raspberrypi.org/software/" target="_blank">this link</a>.
+First download noobs from <a href="https://www.raspberrypi.com/software/" target="_blank">this link</a>.
 
 Then follow <a href="https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up" target="_blank">this guide</a> to set up your SD card.
 

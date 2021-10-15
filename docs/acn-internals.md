@@ -584,13 +584,13 @@ there are two AEA connections available:
   that implements the delegate connection.
 
 For more information on the AEA connection package type,
-refer to <a href="../connection/ target="_blank">this guide</a>.
+refer to <a href="../connection/" target="_blank">this guide</a>.
 
 ### The `fetchai/p2p_libp2p` connection
 
 The source code of the `fetchai/p2p_libp2p` connection  
 can be downloaded from 
-<a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p/latest" target="_blank">the AEA Regsitry</a>,
+<a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p/latest" target="_blank">the AEA Registry</a>,
 or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">the main AEA framework repository.</a>
 
 The package provides the connection class `P2PLibp2pConnection`,
@@ -753,7 +753,7 @@ therefore can be used by the Multiplexer as any other connection.
   however, the communication is done via TCP rather than pipes.
 
 - The `disconnect` method interrupts the connection with the delegate peer,
-  without explicitly deregistering.
+  without explicitly unregistering.
 
 ## Known issues and limitations
 
@@ -794,7 +794,7 @@ Possible solutions: the problem requires updates on both sides and assume possib
 If connection is broken, the Python side awaits for reconnection from Golang side, 
 and restart node completely after timeout.
 
-### What a peer should do if it receives an acknowledgment with an error?
+### What a peer should do if it receives an acknowledgement with an error?
 
 If an ACN response is the `Status` with error code different from `SUCCESS`,
 the forwarding to other peers is not repeated. 

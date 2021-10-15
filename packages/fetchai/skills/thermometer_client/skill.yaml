@@ -1,6 +1,6 @@
 name: thermometer_client
 author: fetchai
-version: 0.24.0
+version: 0.25.0
 type: skill
 description: The thermometer client skill implements the skill to purchase temperature
   data.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmT1Nm7vfaUs3oxt5awfQLkezXkqkkabYaKc2q5bDgdq1K
-  __init__.py: Qmco9L4oRzZurY5DBjP4W7Kqp3zCBQ6qkEsM4J697avQ9f
+  __init__.py: QmWnGgXdw7SNm6B2bAmpPuNMyWDMGsF7CrZY8zkDk1BPUM
   behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
@@ -23,7 +23,7 @@ protocols:
 - fetchai/oef_search:1.0.0
 - fetchai/signing:1.0.0
 skills:
-- fetchai/generic_buyer:0.25.0
+- fetchai/generic_buyer:0.26.0
 behaviours:
   search:
     args:

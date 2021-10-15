@@ -159,6 +159,26 @@ Get addresses.
 
 Get address.
 
+<a name="aea.skills.base.SkillContext.public_key"></a>
+#### public`_`key
+
+```python
+ | @property
+ | public_key() -> str
+```
+
+Get public key.
+
+<a name="aea.skills.base.SkillContext.public_keys"></a>
+#### public`_`keys
+
+```python
+ | @property
+ | public_keys() -> Dict[str, str]
+```
+
+Get public keys.
+
 <a name="aea.skills.base.SkillContext.connection_status"></a>
 #### connection`_`status
 
