@@ -595,7 +595,7 @@ def test_compute_specifier_from_version():
     assert expected_range == compute_specifier_from_version(Version(version))
 
     version = "1.1.0rc1"
-    expected_range = ">=1.0.0, <2.0.0"
+    expected_range = ">=1.1.0rc1, <2.0.0"
     assert expected_range == compute_specifier_from_version(Version(version))
 
 
