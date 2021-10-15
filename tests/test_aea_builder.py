@@ -53,7 +53,7 @@ from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException, AEAWalletNoAddressException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.install_dependency import run_install_subprocess
+from aea.helpers.install_dependency import call_pip
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
@@ -657,13 +657,16 @@ def test__build_identity_from_wallet():
 
     wallet = Mock()
     wallet.addresses = {}
+    wallet.public_keys = {}
     with pytest.raises(AEAWalletNoAddressException):
         builder._build_identity_from_wallet(wallet)
 
     wallet.addresses = {builder.get_default_ledger(): "addr1"}
+    wallet.public_keys = {builder.get_default_ledger(): "pk1"}
     builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder.get_default_ledger(): "addr1", "fetchai": "addr2"}
+    wallet.addresses = {builder.get_default_ledger(): "addr1", "some_ledger": "addr2"}
+    wallet.public_keys = {builder.get_default_ledger(): "pk11", "some_ledger": "pk2"}
     builder._build_identity_from_wallet(wallet)
 
 
@@ -707,7 +710,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
-        self.add_item("connection", "fetchai/stub:0.20.0")
+        self.add_item("connection", "fetchai/stub:0.21.0")
         self.expected_input_file = "custom_input_file"
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()
@@ -859,9 +862,7 @@ class TestExtraDeps(AEATestCaseEmpty):
         package_name = "async_generator"
         dependency = Dependency(package_name, "==1.10")
         sys.modules.pop(package_name, None)
-        run_install_subprocess(
-            [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
-        )
+        call_pip(["uninstall", package_name, "-y"])
         try:
             import_module(package_name)
 
@@ -879,9 +880,7 @@ class TestExtraDeps(AEATestCaseEmpty):
         import_module(package_name)
 
         sys.modules.pop(package_name)
-        run_install_subprocess(
-            [sys.executable, "-m", "pip", "uninstall", package_name, "-y"]
-        )
+        call_pip(["uninstall", package_name, "-y"])
         try:
             import_module(package_name)
 

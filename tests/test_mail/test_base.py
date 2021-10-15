@@ -163,6 +163,9 @@ def test_outbox_put():
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
+    wait_for_condition(
+        lambda: dummy_connection.is_connected, 15, "Connection is not connected"
+    )
     envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
     outbox.put(envelope)
     wait_for_condition(
@@ -213,7 +216,8 @@ def test_multiplexer():
     """Tests if the multiplexer is connected."""
     with LocalNode() as node:
         address_1 = "address_1"
-        oef_local_connection = _make_local_connection(address_1, node)
+        public_key_1 = "public_key_1"
+        oef_local_connection = _make_local_connection(address_1, public_key_1, node)
         multiplexer = Multiplexer([oef_local_connection])
         multiplexer.connect()
         assert (

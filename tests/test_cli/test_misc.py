@@ -83,6 +83,7 @@ Commands:
   init                 Initialize your AEA configurations.
   install              Install the dependencies of the agent.
   interact             Interact with the running agent via the stub...
+  ipfs                 IPFS Commands
   issue-certificates   Issue certificates for connections that require them.
   launch               Launch many agents at the same time.
   list                 List the installed packages of the agent.

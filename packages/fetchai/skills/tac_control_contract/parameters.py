@@ -20,6 +20,9 @@
 """This package contains a class representing the game parameters."""
 from typing import Any
 
+from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
+
 from aea.helpers.transaction.base import Terms
 
 from packages.fetchai.skills.tac_control.parameters import Parameters as BaseParameters
@@ -33,12 +36,24 @@ class Parameters(BaseParameters):
         super().__init__(**kwargs)
         self.nb_completed_minting = 0
 
-    def get_deploy_terms(self) -> Terms:
+    def get_deploy_terms(self, is_init_transaction: bool = False) -> Terms:
         """
         Get deploy terms of deployment.
 
+        :param is_init_transaction: whether this is for contract initialisation stage (for fetch ledger) or not.
         :return: terms
         """
+        if self.ledger_id == EthereumApi.identifier:
+            label = "deploy"
+        elif self.ledger_id == FetchAIApi.identifier:
+            label = "store"
+            if is_init_transaction:
+                label = "init"
+        else:
+            raise ValueError(
+                f"Unidentified ledger id: {self.ledger_id}"
+            )  # pragma: nocover
+
         terms = Terms(
             ledger_id=self.ledger_id,
             sender_address=self.context.agent_address,
@@ -46,6 +61,7 @@ class Parameters(BaseParameters):
             amount_by_currency_id={},
             quantities_by_good_id={},
             nonce="",
+            label=label,
         )
         return terms
 

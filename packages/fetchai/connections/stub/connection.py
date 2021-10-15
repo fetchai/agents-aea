@@ -44,7 +44,7 @@ INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.20.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.21.0")
 
 
 class StubConnection(Connection):
@@ -132,8 +132,7 @@ class StubConnection(Connection):
         Generate input file read chunks and truncate data already read.
 
         :param delay: float, delay on empty read.
-
-        :return: async generator return file read bytes.
+        :yield: async generator return file read bytes.
         """
         if not self.input_file:  # pragma: nocover
             raise ValueError("Input file not opened! Call Connection.connect first.")
@@ -242,7 +241,7 @@ class StubConnection(Connection):
 
         self.state = ConnectionStates.disconnecting
         await self._stop_read_envelopes()
-        self._write_pool.shutdown(wait=False)
+        self._write_pool.shutdown(wait=True)  # wait write operation to complete
         self.in_queue.put_nowait(None)
         self._close_files()
         self.state = ConnectionStates.disconnected
@@ -251,7 +250,7 @@ class StubConnection(Connection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         self._ensure_connected()
         self._ensure_valid_envelope_for_external_comms(envelope)

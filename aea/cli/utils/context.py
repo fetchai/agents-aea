@@ -39,6 +39,7 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.configurations.pypi import merge_dependencies_list
 from aea.helpers.io import open_file
 
 
@@ -78,29 +79,51 @@ class Context:
         )
 
     @property
+    def skip_aea_validation(self) -> bool:
+        """
+        Get the 'skip_aea_validation' flag.
+
+        If true, validation of the AEA version for loaded configuration
+        file is skipped.
+
+        :return: the 'skip_aea_validation'
+        """
+        return self.config.get("skip_aea_validation", True)
+
+    @property
     def agent_loader(self) -> ConfigLoader:
         """Get the agent loader."""
-        return ConfigLoader.from_configuration_type(PackageType.AGENT)
+        return ConfigLoader.from_configuration_type(
+            PackageType.AGENT, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def protocol_loader(self) -> ConfigLoader:
         """Get the protocol loader."""
-        return ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+        return ConfigLoader.from_configuration_type(
+            PackageType.PROTOCOL, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def connection_loader(self) -> ConfigLoader:
         """Get the connection loader."""
-        return ConfigLoader.from_configuration_type(PackageType.CONNECTION)
+        return ConfigLoader.from_configuration_type(
+            PackageType.CONNECTION, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def skill_loader(self) -> ConfigLoader:
         """Get the skill loader."""
-        return ConfigLoader.from_configuration_type(PackageType.SKILL)
+        return ConfigLoader.from_configuration_type(
+            PackageType.SKILL, skip_aea_validation=self.skip_aea_validation
+        )
 
     @property
     def contract_loader(self) -> ConfigLoader:
         """Get the contract loader."""
-        return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
+        return ConfigLoader.from_configuration_type(
+            PackageType.CONTRACT, skip_aea_validation=self.skip_aea_validation
+        )
 
     def set_config(self, key: str, value: Any) -> None:
         """
@@ -135,27 +158,38 @@ class Context:
         return deps
 
     def get_dependencies(self) -> Dependencies:
-        """Aggregate the dependencies from every component.
+        """
+        Aggregate the dependencies from every component.
 
         :return: a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
-        dependencies = {}  # type: Dependencies
+        protocol_dependencies = [
+            self._get_item_dependencies(PROTOCOL, protocol_id)
+            for protocol_id in self.agent_config.protocols
+        ]
+        connection_dependencies = [
+            self._get_item_dependencies(CONNECTION, connection_id)
+            for connection_id in self.agent_config.connections
+        ]
+        skill_dependencies = [
+            self._get_item_dependencies(SKILL, skill_id)
+            for skill_id in self.agent_config.skills
+        ]
+        contract_dependencies = [
+            self._get_item_dependencies(CONTRACT, contract_id)
+            for contract_id in self.agent_config.contracts
+        ]
 
-        dependencies.update(self.agent_config.dependencies)
+        all_dependencies = [
+            self.agent_config.dependencies,
+            *protocol_dependencies,
+            *connection_dependencies,
+            *skill_dependencies,
+            *contract_dependencies,
+        ]
 
-        for protocol_id in self.agent_config.protocols:
-            dependencies.update(self._get_item_dependencies(PROTOCOL, protocol_id))
-
-        for connection_id in self.agent_config.connections:
-            dependencies.update(self._get_item_dependencies(CONNECTION, connection_id))
-
-        for skill_id in self.agent_config.skills:
-            dependencies.update(self._get_item_dependencies(SKILL, skill_id))
-
-        for contract_id in self.agent_config.contracts:
-            dependencies.update(self._get_item_dependencies(CONTRACT, contract_id))
-
-        return dependencies
+        result = merge_dependencies_list(*all_dependencies)
+        return result
 
     def dump_agent_config(self) -> None:
         """Dump the current agent configuration."""

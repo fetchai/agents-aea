@@ -21,6 +21,9 @@
 
 from typing import Optional, cast
 
+from aea_ledger_fetchai import FetchAIApi
+
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
@@ -70,7 +73,6 @@ class ContractApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         contract_api_msg = cast(ContractApiMessage, message)
 
@@ -98,11 +100,7 @@ class ContractApiHandler(Handler):
             self._handle_invalid(contract_api_msg, contract_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(
         self, contract_api_msg: ContractApiMessage
@@ -110,7 +108,7 @@ class ContractApiHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param contract_api_msg: the message
         """
         self.context.logger.info(
             "received invalid contract_api message={}, unidentified dialogue.".format(
@@ -126,7 +124,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of raw_transaction performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info("received raw transaction={}".format(contract_api_msg))
@@ -152,7 +150,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -169,7 +167,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -192,7 +190,6 @@ class SigningHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         signing_msg = cast(SigningMessage, message)
 
@@ -214,17 +211,13 @@ class SigningHandler(Handler):
             self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             "received invalid signing message={}, unidentified dialogue.".format(
@@ -240,7 +233,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info("transaction signing was successful.")
         ledger_api_dialogues = cast(
@@ -264,7 +256,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "transaction signing was not successful. Error_code={} in dialogue={}".format(
@@ -280,7 +271,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle signing message of performative={} in dialogue={}.".format(
@@ -302,7 +292,6 @@ class LedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -336,17 +325,13 @@ class LedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -358,7 +343,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -372,7 +357,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of transaction_digest performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -388,19 +373,70 @@ class LedgerApiHandler(Handler):
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
+    def _request_init_transaction(
+        self, ledger_id: str, deployment_tx_receipt: JSONLike
+    ) -> None:
+        """
+        Send a message to request the initialisation transaction to finalise contract deployment on fetch ledger
+
+        :param ledger_id: the ledger id
+        :param deployment_tx_receipt: the transaction receipt
+        """
+        parameters = cast(Parameters, self.context.parameters)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        fetchai_api = cast(FetchAIApi, LedgerApis.get_api(ledger_id))
+        code_id = fetchai_api.get_code_id(deployment_tx_receipt)  # type: Optional[int]
+        if code_id:
+            contract_api_msg, dialogue = contract_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
+                performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+                ledger_id=parameters.ledger_id,
+                contract_id=parameters.contract_id,
+                callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
+                kwargs=ContractApiMessage.Kwargs(
+                    {
+                        "label": "TACERC1155",
+                        "init_msg": {},
+                        "gas": parameters.gas,
+                        "amount": 0,
+                        "code_id": code_id,
+                        "deployer_address": self.context.agent_address,
+                        "tx_fee": 0,
+                    }
+                ),
+            )
+            contract_api_dialogue = cast(ContractApiDialogue, dialogue)
+            contract_api_dialogue.terms = parameters.get_deploy_terms(
+                is_init_transaction=True
+            )
+            contract_api_dialogue.callable = (
+                ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
+            )
+            self.context.outbox.put_message(message=contract_api_msg)
+            self.context.logger.info(
+                "requesting contract initialisation transaction..."
+            )
+        else:  # pragma: nocover
+            self.context.logger.info("Failed to initialise contract: code_id not found")
+
     def _handle_transaction_receipt(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
         """
         Handle a message of transaction_receipt performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
+        ledger_id = ledger_api_msg.transaction_receipt.ledger_id
+        tx_receipt = ledger_api_msg.transaction_receipt.receipt
+
         is_transaction_successful = LedgerApis.is_transaction_settled(
-            ledger_api_msg.transaction_receipt.ledger_id,
-            ledger_api_msg.transaction_receipt.receipt,
+            ledger_id, tx_receipt
         )
+
         signing_dialogue = ledger_api_dialogue.associated_signing_dialogue
         contract_api_dialogue = signing_dialogue.associated_contract_api_dialogue
         if is_transaction_successful:
@@ -415,17 +451,29 @@ class LedgerApiHandler(Handler):
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
             ):
-                contract_address = cast(
-                    Optional[str],
-                    ledger_api_msg.transaction_receipt.receipt.get(
-                        "contractAddress", None
-                    ),
+                transaction_label = contract_api_dialogue.terms.kwargs.get(
+                    "label", None
                 )
-                if contract_address is None:
-                    raise ValueError("No contract address found.")  # pragma: nocover
-                parameters.contract_address = contract_address
-                game.phase = Phase.CONTRACT_DEPLOYED
-                self.context.logger.info("contract deployed.")
+                if game.phase != Phase.CONTRACT_DEPLOYED:
+                    if (
+                        transaction_label == "store"
+                    ):  # deploying contract on fetch ledger
+                        self._request_init_transaction(ledger_id, tx_receipt)
+                    elif transaction_label in {"deploy", "init"}:
+                        contract_address = LedgerApis.get_contract_address(
+                            ledger_id, tx_receipt
+                        )
+                        if contract_address is None:
+                            raise ValueError(
+                                "No contract address found."
+                            )  # pragma: nocover
+                        parameters.contract_address = contract_address
+                        game.phase = Phase.CONTRACT_DEPLOYED
+                        self.context.logger.info("contract deployed.")
+                    else:
+                        self.context.logger.error(
+                            f"Invalid transaction label: {transaction_label}"
+                        )  # pragma: nocover
             elif (
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_CREATE_BATCH_TRANSACTION
@@ -457,7 +505,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -472,7 +520,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(

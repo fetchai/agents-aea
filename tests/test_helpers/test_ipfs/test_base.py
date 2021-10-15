@@ -44,3 +44,11 @@ def test_is_text_negative():
         side_effect=UnicodeDecodeError("foo", b"bytes", 1, 2, "Fake reason"),
     ):
         assert not _is_text("path")
+
+
+def test_hash_for_big_file():
+    """Check hash is ok for big amount of data with chunks support."""
+    VALID_HASH = "QmWt5fanMr2JbiaUAUpyLUL8FegGn95t5tHA6kgobXgWX3"  # from ipfs daemon
+    data = b"1" * int(IPFSHashOnly.DEFAULT_CHUNK_SIZE * 1.5)
+    my_hash = IPFSHashOnly._generate_hash(data)
+    assert my_hash == VALID_HASH

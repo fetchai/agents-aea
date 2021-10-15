@@ -50,6 +50,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
+    get_wealth_if_needed,
 )
 
 
@@ -104,6 +105,7 @@ class BaseTestDecisionMaker:
         cls.identity = Identity(
             cls.agent_name,
             addresses=cls.wallet.addresses,
+            public_keys=cls.wallet.public_keys,
             default_address_key=FetchAICrypto.identifier,
         )
         cls.config = {}
@@ -146,11 +148,14 @@ class BaseTestDecisionMaker:
         fetchai_api = make_ledger_api(
             FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
         )
-        account = make_crypto(FetchAICrypto.identifier)
+        sender_address = self.wallet.addresses["fetchai"]
         fc2 = make_crypto(FetchAICrypto.identifier)
+
+        get_wealth_if_needed(sender_address, fetchai_api)
+
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
-            sender_address=account.address,
+            sender_address=sender_address,
             destination_address=fc2.address,
             amount=amount,
             tx_fee=1000,

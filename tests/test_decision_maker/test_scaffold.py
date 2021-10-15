@@ -28,7 +28,7 @@ from aea.identity.base import Identity
 def test_init_and_not_implemented():
     """Initialise the decision maker handler."""
     decision_maker_handler = DecisionMakerHandler(
-        identity=Identity("name", "address"), wallet="wallet", config={}
+        identity=Identity("name", "address", "public_key"), wallet="wallet", config={}
     )
     with pytest.raises(NotImplementedError):
         decision_maker_handler.handle("message")

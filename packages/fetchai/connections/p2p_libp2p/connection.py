@@ -40,17 +40,14 @@ from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
+from packages.fetchai.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
+from packages.fetchai.protocols.acn import acn_pb2
+from packages.fetchai.protocols.acn.message import AcnMessage
+
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
-LIBP2P_NODE_MODULE_NAME = "libp2p_node"
-
-LIBP2P_NODE_MODULE = str(
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), LIBP2P_NODE_MODULE_NAME)
-)
-
-if platform.system() == "Windows":  # pragma: nocover
-    LIBP2P_NODE_MODULE_NAME += ".exe"
+ACN_CURRENT_VERSION = "0.1.0"
 
 LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
@@ -58,11 +55,10 @@ LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
 LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
-LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 
 PIPE_CONN_TIMEOUT = 10.0
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.24.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.25.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -101,6 +97,7 @@ def _golang_module_run(
     :param args: the args
     :param log_file_desc: the file descriptor of the log file.
     :param logger: the logger
+    :return: subprocess
     """
     cmd = [os.path.join(path, name)]
 
@@ -129,9 +126,13 @@ def _golang_module_run(
 class NodeClient:
     """Client to communicate with node using ipc channel(pipe)."""
 
-    def __init__(self, pipe: IPCChannel) -> None:
+    ACN_ACK_TIMEOUT = 5
+
+    def __init__(self, pipe: IPCChannel, agent_record: AgentRecord) -> None:
         """Set node client with pipe."""
         self.pipe = pipe
+        self.agent_record = agent_record
+        self._wait_status: Optional[asyncio.Future] = None
 
     async def connect(self) -> bool:
         """Connect to node with pipe."""
@@ -139,16 +140,119 @@ class NodeClient:
 
     async def send_envelope(self, envelope: Envelope) -> None:
         """Send envelope to node."""
-        await self._write(envelope.encode())
+        self._wait_status = asyncio.Future()
+        buf = self.make_acn_envelope_message(envelope)
+        await self._write(buf)
+
+        status = await self.wait_for_status()
+
+        if status.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore  # pylint: disable=no-member
+            raise ValueError(  # pragma: nocover
+                f"failed to send envelope. got error confirmation: {status.code}"
+            )
+
+    async def wait_for_status(self) -> Any:
+        """Get status."""
+        if self._wait_status is None:  # pragma: nocover
+            raise ValueError("value failed!")
+        try:
+            status = await asyncio.wait_for(
+                self._wait_status, timeout=self.ACN_ACK_TIMEOUT
+            )
+            return status
+        except asyncio.TimeoutError:  # pragma: nocover
+            if not self._wait_status.done():  # pragma: nocover
+                self._wait_status.set_exception(Exception("Timeout"))
+            await asyncio.sleep(0)
+            raise ValueError("acn status await timeout!")
+        finally:
+            self._wait_status = None
+
+    @staticmethod
+    def make_acn_envelope_message(envelope: Envelope) -> bytes:
+        """Make acn message with envelope in."""
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Aea_Envelope_Performative()  # type: ignore
+        performative.envelope = envelope.encode()
+        acn_msg.aea_envelope.CopyFrom(performative)  # pylint: disable=no-member
+        buf = acn_msg.SerializeToString()
+        return buf
 
     async def read_envelope(self) -> Optional[Envelope]:
         """Read envelope from the node."""
-        data = await self._read()
+        while True:
+            buf = await self._read()
 
-        if not data:
-            return None
+            if not buf:
+                return None
 
-        return Envelope.decode(data)
+            try:
+                acn_msg = acn_pb2.AcnMessage()
+                acn_msg.ParseFromString(buf)
+
+            except Exception as e:
+                await self.write_acn_status_error(
+                    f"Failed to parse acn message {e}",
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
+                )
+                raise ValueError(f"Error parsing acn message: {e}") from e
+
+            performative = acn_msg.WhichOneof("performative")
+            if performative == "aea_envelope":  # pragma: nocover
+                aea_envelope = acn_msg.aea_envelope  # pylint: disable=no-member
+                try:
+                    envelope = Envelope.decode(aea_envelope.envelope)
+                    await self.write_acn_status_ok()
+                    return envelope
+                except Exception as e:
+                    await self.write_acn_status_error(
+                        f"Failed to decode envelope: {e}",
+                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
+                    )
+                    raise
+
+            elif performative == "status":
+                if self._wait_status is not None:
+                    self._wait_status.set_result(
+                        acn_msg.status.body  # pylint: disable=no-member
+                    )
+            else:  # pragma: nocover
+                await self.write_acn_status_error(
+                    f"Bad acn message {performative}",
+                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_UNEXPECTED_PAYLOAD,
+                )
+
+    async def write_acn_status_ok(self) -> None:
+        """Send acn status ok."""
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
+        status = AcnMessage.StatusBody(
+            status_code=AcnMessage.StatusBody.StatusCode.SUCCESS, msgs=[]
+        )
+        AcnMessage.StatusBody.encode(
+            performative.body, status  # pylint: disable=no-member
+        )
+        acn_msg.status.CopyFrom(performative)  # pylint: disable=no-member
+        buf = acn_msg.SerializeToString()
+        await self._write(buf)
+
+    async def write_acn_status_error(
+        self,
+        msg: str,
+        status_code: AcnMessage.StatusBody.StatusCode = AcnMessage.StatusBody.StatusCode.ERROR_GENERIC,  # type: ignore
+    ) -> None:
+        """Send acn status error generic."""
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
+        status = AcnMessage.StatusBody(status_code=status_code, msgs=[msg])
+        AcnMessage.StatusBody.encode(
+            performative.body, status  # pylint: disable=no-member
+        )
+        acn_msg.status.CopyFrom(performative)  # pylint: disable=no-member
+
+        buf = acn_msg.SerializeToString()
+
+        await self._write(buf)
 
     async def _write(self, data: bytes) -> None:
         """
@@ -189,6 +293,7 @@ class Libp2pNode:
         records_storage_path: Optional[str] = None,
         connection_timeout: Optional[float] = None,
         max_restarts: int = 5,
+        mailbox_uri: str = "127.0.0.1:8888",
     ):
         """
         Initialize a p2p libp2p node.
@@ -196,6 +301,7 @@ class Libp2pNode:
         :param agent_record: the agent proof-of-representation for peer.
         :param key: secp256k1 curve private key.
         :param module_path: the module path.
+        :param data_dir: the data directory.
         :param clargs: the command line arguments for the libp2p node
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
@@ -206,8 +312,10 @@ class Libp2pNode:
         :param env_file: the env file path for the exchange of environment variables
         :param logger: the logger.
         :param peer_registration_delay: add artificial delay to agent registration in seconds
-        :param connection_timeout: the connection timeout of the node
-        :param max_restarts: amount of node restarts during operation
+        :param records_storage_path: the path where to store the agent records.
+        :param connection_timeout: the connection timeout of the node.
+        :param max_restarts: amount of node restarts during operation.
+        :param mailbox_uri: libp2p mailbox_uri ip address and port number in format ipaddress:port.
         """
 
         self.record = agent_record
@@ -231,6 +339,8 @@ class Libp2pNode:
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
+
+        self.mailbox_uri = mailbox_uri
 
         # peer configuration
         self.peer_registration_delay = peer_registration_delay
@@ -320,6 +430,8 @@ class Libp2pNode:
             self.records_storage_path if self.records_storage_path is not None else ""
         )
 
+        config += "AEA_P2P_MAILBOX_URI={}\n".format(self.mailbox_uri)
+
         with open(self.env_file, "w") as env_file:  # overwrite if exists
             env_file.write(config)
 
@@ -336,7 +448,7 @@ class Libp2pNode:
         if self.pipe is None:
             raise Exception("pipe was not set")  # pragma: nocover
 
-        return NodeClient(self.pipe)
+        return NodeClient(self.pipe, self.record)
 
     def _child_watcher_callback(self, *_) -> None:  # type: ignore # pragma: nocover
         """Log if process was terminated before stop was called."""
@@ -359,11 +471,7 @@ class Libp2pNode:
         return self.proc.returncode is None
 
     async def start(self) -> None:
-        """
-        Start the node.
-
-        :return: None
-        """
+        """Start the node."""
         self._is_on_stop = False
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -509,11 +617,7 @@ class Libp2pNode:
         return error_msg if error_msg != "" else panic_msg
 
     async def stop(self) -> None:
-        """
-        Stop the node.
-
-        :return: None
-        """
+        """Stop the node."""
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
             self._is_on_stop = True
@@ -662,6 +766,11 @@ class P2PLibp2pConnection(Connection):
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
 
+        if self.configuration.config.get("mailbox_uri"):
+            mailbox_uri = str(self.configuration.config.get("mailbox_uri"))
+        else:
+            mailbox_uri = ""
+
         module_dir = self._check_node_built()
         self.node = Libp2pNode(
             agent_record,
@@ -683,6 +792,7 @@ class P2PLibp2pConnection(Connection):
             max_restarts=self.configuration.config.get(
                 "max_node_restarts", self.DEFAULT_MAX_RESTARTS
             ),
+            mailbox_uri=mailbox_uri,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
@@ -707,16 +817,11 @@ class P2PLibp2pConnection(Connection):
         return self.configuration.build_directory
 
     async def connect(self) -> None:
-        """
-        Set up the connection.
-
-        :return: None
-        """
+        """Set up the connection."""
         if self.is_connected:
             return  # pragma: nocover
-        try:
             # start libp2p node
-            self.state = ConnectionStates.connecting
+        with self._connect_context():
             self.node.logger = self.logger
             await self._start_node()
             # starting receiving msgs
@@ -726,10 +831,6 @@ class P2PLibp2pConnection(Connection):
                 self._receive_from_node(), loop=self.loop
             )
             self._send_task = self.loop.create_task(self._send_loop())
-            self.state = ConnectionStates.connected
-        except (CancelledError, Exception) as e:
-            self.state = ConnectionStates.disconnected
-            raise e
 
     async def _start_node(self) -> None:
         """Start node and set node client instance."""
@@ -742,37 +843,37 @@ class P2PLibp2pConnection(Connection):
         await self._start_node()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:
             return  # pragma: nocover
 
         self.state = ConnectionStates.disconnecting
+        try:
 
-        if self._receive_from_node_task is not None:
-            self._receive_from_node_task.cancel()
-            self._receive_from_node_task = None
+            if self._receive_from_node_task is not None:
+                self._receive_from_node_task.cancel()
+                self._receive_from_node_task = None
 
-        if self._send_task is not None:
-            self._send_task.cancel()
-            self._send_task = None
+            if self._send_task is not None:
+                self._send_task.cancel()
+                self._send_task = None
 
-        await self.node.stop()
-        if self._in_queue is not None:
-            self._in_queue.put_nowait(None)
-        else:
-            self.logger.debug(  # pragma: nocover
-                "Called disconnect when input queue not initialized."
-            )
-        self.state = ConnectionStates.disconnected
+            await self.node.stop()
+            if self._in_queue is not None:
+                self._in_queue.put_nowait(None)
+            else:
+                self.logger.debug(  # pragma: nocover
+                    "Called disconnect when input queue not initialized."
+                )
+        finally:
+            self.state = ConnectionStates.disconnected
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         try:
@@ -845,15 +946,15 @@ class P2PLibp2pConnection(Connection):
             raise  # pragma: nocover
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             self.logger.exception(
-                f"Failed to send an aenvelope {envelope}. Stop connection."
+                f"Failed to send an envelope {envelope}. Stop connection."
             )
-            await self.disconnect()
+            await asyncio.shield(self.disconnect())
 
     async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if not self._node_client or not self._send_queue:
             raise ValueError("Node is not connected!")  # pragma: nocover
@@ -877,17 +978,14 @@ class P2PLibp2pConnection(Connection):
             return await self._node_client.read_envelope()
 
     async def _receive_from_node(self) -> None:
-        """
-        Receive data from node.
-
-        :return: None
-        """
+        """Receive data from node."""
         while True:
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
 
             if not self._node_client:
                 raise ValueError("Node is not connected!")  # pragma: nocover
+
             envelope = await self._read_envelope_from_node()
             if envelope is None:
                 break

@@ -135,7 +135,6 @@ class AEA(Agent):
         )
 
         self._resources = resources
-
         super().__init__(
             identity=identity,
             connections=[],

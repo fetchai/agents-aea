@@ -367,7 +367,7 @@ class TestResources:
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
             data_dir=MagicMock(),
-            identity=Identity("name", "address"),
+            identity=Identity("name", "address", "public_key"),
             crypto_store=MagicMock(),
         )
         self.resources.add_component(a_connection)
@@ -380,7 +380,7 @@ class TestResources:
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
             data_dir=MagicMock(),
-            identity=Identity("name", "address"),
+            identity=Identity("name", "address", "public_key"),
             crypto_store=MagicMock(),
         )
         self.resources.add_component(a_connection)
@@ -531,7 +531,11 @@ class TestFilter:
         connection = _make_dummy_connection()
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         wallet = Wallet({DEFAULT_LEDGER: private_key_path})
-        identity = Identity(cls.agent_name, address=wallet.addresses[DEFAULT_LEDGER])
+        identity = Identity(
+            cls.agent_name,
+            address=wallet.addresses[DEFAULT_LEDGER],
+            public_key=wallet.public_keys[DEFAULT_LEDGER],
+        )
         resources = Resources()
 
         resources.add_component(

@@ -57,7 +57,7 @@ version: 0.1.0
 license: Apache-2.0
 fingerprint: {}
 fingerprint_ignore_patterns: []
-aea_version: 0.3.0
+aea_version: '>=1.0.0, <2.0.0'
 description: ''
 connections: []
 contracts: []
@@ -452,12 +452,12 @@ def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
         loader.dump(agent_config, fp)
 
 
-class TestTskManagerModeConfigVariable(BaseConfigTestVariable):
+class TestTaskManagerModeConfigVariable(BaseConfigTestVariable):
     """Test `task_manager_mode` aea config option."""
 
     OPTION_NAME = "task_manager_mode"
     CONFIG_ATTR_NAME = "task_manager_mode"
-    GOOD_VALUES = ["threaded"]
+    GOOD_VALUES = ["threaded", "multiprocess"]
     INCORRECT_VALUES = [None, "sTrING?", -1]
     REQUIRED = False
     AEA_ATTR_NAME = "_task_manager_mode"

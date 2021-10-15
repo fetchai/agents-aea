@@ -40,6 +40,12 @@ from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.cosm_trade.dialogues import (
+    CosmTradeDialogue as BaseCosmTradeDialogue,
+)
+from packages.fetchai.protocols.cosm_trade.dialogues import (
+    CosmTradeDialogues as BaseCosmTradeDialogues,
+)
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -94,8 +100,7 @@ class FipaDialogue(BaseFipaDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseFipaDialogue.__init__(
             self,
@@ -157,7 +162,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -222,8 +227,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseContractApiDialogue.__init__(
             self,
@@ -258,7 +262,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -281,6 +285,39 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
         )
 
 
+CosmTradeDialogue = BaseCosmTradeDialogue
+
+
+class CosmTradeDialogues(Model, BaseCosmTradeDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """
+        Initialize dialogues.
+
+        :param kwargs: keyword arguments
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return CosmTradeDialogue.Role.AGENT
+
+        BaseCosmTradeDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+            dialogue_class=CosmTradeDialogue,
+        )
+
+
 DefaultDialogue = BaseDefaultDialogue
 
 
@@ -291,7 +328,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -331,8 +368,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseLedgerApiDialogue.__init__(
             self,
@@ -369,7 +405,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -410,8 +446,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseOefSearchDialogue.__init__(
             self,
@@ -443,8 +478,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -485,8 +519,7 @@ class SigningDialogue(BaseSigningDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseSigningDialogue.__init__(
             self,
@@ -496,6 +529,7 @@ class SigningDialogue(BaseSigningDialogue):
             message_class=message_class,
         )
         self._associated_fipa_dialogue: Optional[FipaDialogue] = None
+        self._associated_cosm_trade_dialogue: Optional[CosmTradeDialogue] = None
 
     @property
     def associated_fipa_dialogue(self) -> FipaDialogue:
@@ -513,6 +547,22 @@ class SigningDialogue(BaseSigningDialogue):
         )
         self._associated_fipa_dialogue = associated_fipa_dialogue
 
+    @property
+    def associated_cosm_trade_dialogue(self) -> Optional[CosmTradeDialogue]:
+        """Get associated_cosm_trade_dialogue."""
+        return self._associated_cosm_trade_dialogue
+
+    @associated_cosm_trade_dialogue.setter
+    def associated_cosm_trade_dialogue(
+        self, associated_cosm_trade_dialogue: CosmTradeDialogue
+    ) -> None:
+        """Set associated_cosm_trade_dialogue."""
+        enforce(
+            self._associated_cosm_trade_dialogue is None,
+            "associated_cosm_trade_dialogue already set!",
+        )
+        self._associated_cosm_trade_dialogue = associated_cosm_trade_dialogue
+
 
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
@@ -521,8 +571,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 

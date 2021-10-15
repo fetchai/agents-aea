@@ -1,6 +1,6 @@
 name: simple_data_request
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: This skill is used to request data from a HTTP endpoint and then saving
   it in the AEA's shared state for use by other skills.
@@ -8,13 +8,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTpjAtR8qUBsF9TbwDRQ6Zg3TsDu4tP9GcQpYxHXcS6Ap
-  __init__.py: QmR2sYPVs7VPEiiiNCV2M3CCPbLiUe1ePLvrB8Uxp2vZmj
-  behaviours.py: QmUPSXr9pydCKfBdqJ4SRAoevEEp4w3K5Neaij14VPNPDr
-  dialogues.py: Qmb3xFrZJeH348BquMqDVQg3yeGd9Yb2ERixKYabdGuXPK
-  handlers.py: QmZ9TUUZURqAK3cCrGD9HGAoyWuUC263zrr8L9MsddT5Wm
+  __init__.py: QmW8nJ5VeMNugWqhHnq62wYFwuTGRxoS1PfnPpYs3ar42U
+  behaviours.py: QmafqooHjWQqn2sy7aPrHjrrgwfw6n98ZKPypR9Pr6ND8j
+  dialogues.py: QmWNdhNjNZ6ETc6zYnh8eKXspsQuc9Fy3N5EQTgQmw1kxm
+  handlers.py: QmNU6JTYNThhNwKgDnLKQhn3ekk6acJHBwWNn1tDTW8g8E
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.22.0
+- fetchai/http_client:0.23.0
 contracts: []
 protocols:
 - fetchai/http:1.0.0

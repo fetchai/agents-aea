@@ -33,7 +33,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.30.0
+aea fetch fetchai/weather_station:0.31.0
 cd weather_station
 aea install
 aea build
@@ -144,7 +144,9 @@ def run():
         },
     )
     identity = Identity(
-        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
+        "my_aea",
+        address=wallet.addresses.get(FetchAICrypto.identifier),
+        public_key=wallet.public_keys.get(FetchAICrypto.identifier),
     )
     resources = Resources()
     data_dir = os.getcwd()

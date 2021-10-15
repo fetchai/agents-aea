@@ -22,7 +22,7 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, cast
 
 from aiohttp import web  # type: ignore
 
@@ -42,7 +42,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.18.0")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.19.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
@@ -56,7 +56,7 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -100,6 +100,8 @@ class WebhookChannel:
         :param webhook_port: webhook port number
         :param webhook_url_path: the url path to receive webhooks from
         :param connection_id: the connection id
+        :param target_skill_id: the skill id which should receive the http messages
+        :param logger: the logger
         """
         self.agent_address = agent_address
 
@@ -125,7 +127,6 @@ class WebhookChannel:
         Connect the webhook.
 
         Connects the webhook via the webhook_address and webhook_port parameters
-        :return: None
         """
         if self.is_stopped:
             self.app = web.Application()
@@ -145,8 +146,6 @@ class WebhookChannel:
         Disconnect.
 
         Shut-off and cleanup the webhook site, the runner and the web app, then stop the channel.
-
-        :return: None
         """
         if self.webhook_site is None or self.runner is None or self.app is None:
             raise ValueError(
@@ -251,11 +250,7 @@ class WebhookConnection(Connection):
         )
 
     async def connect(self) -> None:
-        """
-        Connect to a HTTP server.
-
-        :return: None
-        """
+        """Connect to a HTTP server."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -265,11 +260,7 @@ class WebhookConnection(Connection):
             await self.channel.connect()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from a HTTP server.
-
-        :return: None
-        """
+        """Disconnect from a HTTP server."""
         if self.is_disconnected:  # pragma: nocover
             return
 
@@ -282,19 +273,18 @@ class WebhookConnection(Connection):
         Send does nothing. Webhooks only receive.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         if self.channel.in_queue is None:
             raise ValueError("Channel in queue not set.")  # pragma: nocover
         await self.channel.send(envelope)
 
-    async def receive(
-        self, *args: Any, **kwargs: Any
-    ) -> Optional[Union["Envelope", None]]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         self._ensure_connected()

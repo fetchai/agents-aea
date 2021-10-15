@@ -21,7 +21,7 @@
 import traceback
 from functools import partial
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import mistune
 import pytest
@@ -115,6 +115,8 @@ class BaseTestMarkdownDocs:
     """Base test class for testing Markdown documents."""
 
     DOC_PATH: Path
+    blocks: List[Dict]
+    python_blocks: List[Dict]
 
     @classmethod
     def setup_class(cls):
@@ -124,6 +126,13 @@ class BaseTestMarkdownDocs:
         cls.doc_content = cls.doc_path.read_text()
         cls.blocks = markdown_parser(cls.doc_content)
         cls.code_blocks = list(filter(block_code_filter, cls.blocks))
+        cls.python_blocks = list(filter(cls._python_selector, cls.blocks))
+
+    @classmethod
+    def _python_selector(cls, block: Dict) -> bool:
+        return block["type"] == MISTUNE_BLOCK_CODE_ID and (
+            block["info"].strip() == "python" if block["info"] else False
+        )
 
 
 class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
@@ -140,18 +149,12 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         cls.locals = {}
         cls.globals = {}
 
-    @classmethod
-    def _python_selector(cls, block: Dict) -> bool:
-        return block["type"] == MISTUNE_BLOCK_CODE_ID and (
-            block["info"].strip() == "python" if block["info"] else False
-        )
-
     def _assert(self, locals_, *mocks):
         """Do assertions after Python code execution."""
 
     def test_python_blocks(self, *mocks):
         """Run Python code block in sequence."""
-        python_blocks = list(filter(self._python_selector, self.blocks))
+        python_blocks = self.python_blocks
 
         globals_, locals_ = self.globals, self.locals
         for python_block in python_blocks:

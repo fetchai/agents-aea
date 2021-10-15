@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea install' subcommand."""
 
-import pprint
-import sys
 from typing import Optional, cast
 
 import click
@@ -27,8 +25,10 @@ import click
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
-from aea.exceptions import AEAException, enforce
-from aea.helpers.install_dependency import install_dependency, run_install_subprocess
+from aea.configurations.data_types import Dependencies
+from aea.configurations.pypi import is_satisfiable, is_simple_dep, to_set_specifier
+from aea.exceptions import AEAException
+from aea.helpers.install_dependency import call_pip, install_dependencies
 
 
 @click.command()
@@ -64,11 +64,40 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
         else:
             logger.debug("Installing all the dependencies...")
             dependencies = ctx.get_dependencies()
-            for name, d in dependencies.items():
-                click.echo(f"Installing {pprint.pformat(name)}...")
-                install_dependency(name, d, logger)
+
+            logger.debug("Preliminary check on satisfiability of version specifiers...")
+            unsat_dependencies = _find_unsatisfiable_dependencies(dependencies)
+            if len(unsat_dependencies) != 0:
+                raise AEAException(
+                    "cannot install the following dependencies "
+                    + "as the joint version specifier is unsatisfiable:\n - "
+                    + "\n -".join(
+                        [
+                            f"{name}: {to_set_specifier(dep)}"
+                            for name, dep in unsat_dependencies.items()
+                        ]
+                    )
+                )
+            install_dependencies(list(dependencies.values()), logger=logger)
     except AEAException as e:
         raise click.ClickException(str(e))
+
+
+def _find_unsatisfiable_dependencies(dependencies: Dependencies) -> Dependencies:
+    """
+    Find unsatisfiable dependencies.
+
+    It only checks among 'simple' dependencies (i.e. if it has no field specified,
+    or only the 'version' field set.)
+
+    :param dependencies: the dependencies to check.
+    :return: the unsatisfiable dependencies.
+    """
+    return {
+        name: dep
+        for name, dep in dependencies.items()
+        if is_simple_dep(dep) and not is_satisfiable(to_set_specifier(dep))
+    }
 
 
 def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
@@ -81,10 +110,7 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
     :raises AEAException: if an error occurs during installation.
     """
     try:
-        returncode = run_install_subprocess(
-            [sys.executable, "-m", "pip", "install", "-r", file], install_timeout
-        )
-        enforce(returncode == 0, "Return code != 0.")
+        call_pip(["install", "-r", file], timeout=install_timeout)
     except Exception:
         raise AEAException(
             "An error occurred while installing requirement file {}. Stopping...".format(

@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for the aea.helpers.pypi module."""
+import pytest
 from packaging.specifiers import SpecifierSet
 
 from aea.configurations.base import Dependency
@@ -24,6 +25,7 @@ from aea.configurations.pypi import (
     is_satisfiable,
     is_simple_dep,
     merge_dependencies,
+    merge_dependencies_list,
     to_set_specifier,
 )
 
@@ -78,10 +80,43 @@ def test_merge_dependencies():
     expected_merged_dependencies = {
         "package_1": Dependency("package_1", "==0.1.0"),
         "package_2": Dependency("package_2", "==0.2.0,==0.3.0"),
+        "package_3": Dependency("package_3", "==0.2.0", "https://pypi.org"),
+        "package_4": Dependency("package_4", "==0.1.0", "https://pypi.org"),
     }
     assert expected_merged_dependencies == merge_dependencies(
         dependencies_a, dependencies_b
     )
+    assert expected_merged_dependencies == merge_dependencies_list(
+        dependencies_a, dependencies_b
+    )
+
+
+def test_merge_dependencies_fails_not_simple():
+    """Test we can't merge dependencies if at least one of the overlapping dependency is not 'simple'."""
+    dependencies_a = {
+        "package_1": Dependency("package_1", "==0.1.0", index="https://pypi.org"),
+    }
+    dependencies_b = {
+        "package_1": Dependency("package_1", "==0.1.0", index="https://test.pypi.org"),
+    }
+
+    with pytest.raises(
+        ValueError, match="cannot trivially merge these two PyPI dependencies:.*"
+    ):
+        merge_dependencies(dependencies_a, dependencies_b)
+
+
+def test_merge_dependencies_succeeds_not_simple_but_the_same():
+    """Test we can't merge dependencies if conflicting deps are not 'simple' but equal."""
+    dependencies_a = {
+        "package_1": Dependency("package_1", "==0.1.0", index="https://pypi.org"),
+    }
+    dependencies_b = {
+        "package_1": Dependency("package_1", "==0.1.0", index="https://pypi.org"),
+    }
+
+    expected_merged_dependencies = merge_dependencies(dependencies_a, dependencies_b)
+    assert dependencies_a == dependencies_b == expected_merged_dependencies
 
 
 def test_is_simple_dep():

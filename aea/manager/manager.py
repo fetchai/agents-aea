@@ -18,21 +18,33 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of AEA agents manager."""
 import asyncio
+import datetime
 import json
+import multiprocessing
 import os
 import threading
+from abc import ABC, abstractmethod
 from asyncio.tasks import FIRST_COMPLETED
 from collections import defaultdict
+from multiprocessing.synchronize import Event
 from shutil import rmtree
 from threading import Thread
+from traceback import format_exc
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
+from aea.configurations.base import AgentConfig
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
-from aea.configurations.data_types import PublicId
-from aea.crypto.plugin import load_all_plugins
+from aea.configurations.data_types import PackageIdPrefix, PublicId
+from aea.exceptions import enforce
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
+from aea.manager.utils import (
+    get_venv_dir_for_project,
+    project_check,
+    project_install_and_build,
+    run_in_venv,
+)
 
 
 class ProjectNotFoundError(ValueError):
@@ -48,16 +60,69 @@ class ProjectCheckError(ValueError):
         self.source_exception = source_exception
 
 
-class AgentRunAsyncTask:
+class ProjectPackageConsistencyCheckError(ValueError):
+    """Check consistency of package versions against already added project."""
+
+    def __init__(
+        self,
+        agent_project_id: PublicId,
+        conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]],
+    ):
+        """
+        Initialize the exception.
+
+        :param agent_project_id: the agent project id whose addition has failed.
+        :param conflicting_packages: the conflicting packages.
+        """
+        self.agent_project_id = agent_project_id
+        self.conflicting_packages = conflicting_packages
+        super().__init__(self._build_error_message())
+
+    def _build_error_message(self) -> str:
+        """Build the error message."""
+        conflicting_packages = sorted(self.conflicting_packages, key=str)
+        message = f"cannot add project '{self.agent_project_id}': the following AEA dependencies have conflicts with previously added projects:\n"
+        for (
+            (type_, author, name),
+            existing_version,
+            new_version,
+            agents,
+        ) in conflicting_packages:
+            message += f"- '{author}/{name}' of type {type_}: the new version '{new_version}' conflicts with existing version '{existing_version}' of the same package required by agents: {list(agents)}\n"
+        return message
+
+
+class BaseAgentRunTask(ABC):
+    """Base abstract class for agent run tasks."""
+
+    @abstractmethod
+    def start(self) -> None:
+        """Start task."""
+
+    @abstractmethod
+    def wait(self) -> asyncio.Future:
+        """Return future to wait task completed."""
+
+    @abstractmethod
+    def stop(self) -> None:
+        """Stop task."""
+
+    @property
+    @abstractmethod
+    def is_running(self) -> bool:
+        """Return is task running."""
+
+
+class AgentRunAsyncTask(BaseAgentRunTask):
     """Async task wrapper for agent."""
 
     def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
-        """Init task with agent and loop."""
+        """Init task with agent alias and loop."""
+        self.agent = agent
         self.run_loop: asyncio.AbstractEventLoop = loop
         self.caller_loop: asyncio.AbstractEventLoop = loop
         self._done_future: Optional[asyncio.Future] = None
         self.task: Optional[asyncio.Task] = None
-        self.agent = agent
 
     def create_run_loop(self) -> None:
         """Create run loop."""
@@ -118,7 +183,7 @@ class AgentRunThreadTask(AgentRunAsyncTask):
     """Threaded wrapper to run agent."""
 
     def __init__(self, agent: AEA, loop: asyncio.AbstractEventLoop) -> None:
-        """Init task with agent and loop."""
+        """Init task with agent alias and loop."""
         AgentRunAsyncTask.__init__(self, agent, loop)
         self._thread: Optional[Thread] = None
 
@@ -141,11 +206,133 @@ class AgentRunThreadTask(AgentRunAsyncTask):
             self._thread.join()
 
 
+class AgentRunProcessTask(BaseAgentRunTask):
+    """Subprocess wrapper to run agent."""
+
+    PROCESS_JOIN_TIMEOUT = 20  # in seconds
+    PROCESS_ALIVE_SLEEP_TIME = 0.005  # in seconds
+
+    def __init__(  # pylint: disable=super-init-not-called
+        self, agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop
+    ) -> None:
+        """Init task with agent alias and loop."""
+        self.caller_loop: asyncio.AbstractEventLoop = loop
+        self._manager = multiprocessing.Manager()
+        self._stop_event = self._manager.Event()
+        self.agent_alias = agent_alias
+        self.process: Optional[multiprocessing.Process] = None
+        self._wait_task: Optional[asyncio.Future] = None
+        self._result_queue = self._manager.Queue()
+
+    def start(self) -> None:
+        """Run task in a dedicated process."""
+        self._wait_task = asyncio.ensure_future(
+            self._wait_for_result(), loop=self.caller_loop
+        )
+        self.process = multiprocessing.Process(
+            target=self._run_agent,
+            args=(self.agent_alias, self._stop_event, self._result_queue),
+        )
+        self.process.start()
+
+    async def _wait_for_result(self) -> Any:
+        """Wait for the result of the function call."""
+        if not self.process:
+            raise ValueError("Task not started!")  # pragma: nocover
+
+        while self.process.is_alive():
+            await asyncio.sleep(self.PROCESS_ALIVE_SLEEP_TIME)
+
+        result = self._result_queue.get_nowait()
+        self.process.join(self.PROCESS_JOIN_TIMEOUT)
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+    def wait(self) -> asyncio.Future:
+        """Return future to wait task completed."""
+        if not self._wait_task:
+            raise ValueError("Task not started")  # pragma: nocover
+
+        return self._wait_task
+
+    @staticmethod
+    def _run_agent(
+        agent_alias: AgentAlias, stop_event: Event, result_queue: multiprocessing.Queue,
+    ) -> None:
+        """Start an agent in a child process."""
+        t: Optional[Thread] = None
+        r: Optional[Exception] = None
+        run_stop_thread: bool = True
+        # set a new event loop, cause it's a new process
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        try:
+            aea = agent_alias.get_aea_instance()
+
+            def stop_event_thread() -> None:
+                try:
+                    while run_stop_thread:
+                        if stop_event.wait(0.01) is True:
+                            break
+                finally:
+                    aea.runtime.stop()
+
+            t = Thread(target=stop_event_thread, daemon=True)
+            t.start()
+            loop = asyncio.get_event_loop()
+            aea.runtime.set_loop(loop)
+            aea.start()
+        except BaseException as e:  # pylint: disable=broad-except
+            print(
+                f"Exception in agent subprocess task at {datetime.datetime.now()}:\n{format_exc()}"
+            )
+            r = Exception(str(e), repr(e))
+        finally:
+            run_stop_thread = False
+            if t:
+                t.join(10)
+
+        result_queue.put(r)
+
+    def stop(self) -> None:
+        """Stop the task."""
+        if not self.process:
+            raise ValueError("Task not started!")  # pragma: nocover
+
+        self._stop_event.set()
+        self.process.join(self.PROCESS_JOIN_TIMEOUT)
+        if self.is_running:  # pragma: nocover
+            self.process.terminate()
+            self.process.join(5)
+            raise ValueError(
+                f"process was not stopped within timeout: {self.PROCESS_JOIN_TIMEOUT} and was terminated"
+            )
+
+    @property
+    def is_running(self) -> bool:
+        """Is agent running."""
+        if not self.process:
+            raise ValueError("Task not started!")  # pragma: nocover
+
+        return self.process.is_alive()
+
+
+ASYNC_MODE = "async"
+THREADED_MODE = "threaded"
+MULTIPROCESS_MODE = "multiprocess"
+
+
 class MultiAgentManager:
     """Multi agents manager."""
 
-    MODES = ["async", "threaded"]
+    MODES = [ASYNC_MODE, THREADED_MODE, MULTIPROCESS_MODE]
+    _MODE_TASK_CLASS = {
+        ASYNC_MODE: AgentRunAsyncTask,
+        THREADED_MODE: AgentRunThreadTask,
+        MULTIPROCESS_MODE: AgentRunProcessTask,
+    }
     DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS = 60
+    VENV_BUILD_TIMEOUT = 240
     SAVE_FILENAME = "save.json"
 
     def __init__(
@@ -178,7 +365,7 @@ class MultiAgentManager:
             os.path.join(self.working_dir, AEA_MANAGER_DATA_DIRNAME)
         )
         self._agents: Dict[str, AgentAlias] = {}
-        self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
+        self._agents_tasks: Dict[str, BaseAgentRunTask] = {}
 
         self._thread: Optional[Thread] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
@@ -207,6 +394,15 @@ class MultiAgentManager:
         # this flags will control whether we have already printed the warning message
         # for a certain agent
         self._warning_message_printed_for_agent: Dict[str, bool] = {}
+
+        # the dictionary keeps track of the AEA packages used across
+        # AEA projects in the same MAM.
+        # It maps package prefixes to a pair: (version, agent_ids)
+        # where agent_ids is the set of agent ids whose projects
+        # have the package in the key at the specific version.
+        self._package_id_prefix_to_version: Dict[
+            PackageIdPrefix, Tuple[str, Set[PublicId]]
+        ] = {}
 
     @property
     def data_dir(self) -> str:
@@ -409,24 +605,44 @@ class MultiAgentManager:
             remote,
             registry_path=self.registry_path,
             is_restore=restore,
+            skip_aea_validation=False,
         )
 
         if not restore:
-            project.install_pypi_dependencies()
-            load_all_plugins(is_raising_exception=False)
-            project.build()
+            self._project_install_and_build(project)
+
+        self._check_version_consistency(project.agent_config)
 
         try:
-            project.check()
+            self._check_project(project)
         except Exception as e:
             project.remove()
             raise ProjectCheckError(
                 f"Failed to load project: {public_id} Error: {str(e)}", e
             )
 
+        self._add_new_package_versions(project.agent_config)
         self._versionless_projects_set.add(public_id.to_any())
         self._projects[public_id] = project
         return self
+
+    def _project_install_and_build(self, project: Project) -> None:
+        """Build and install project dependencies."""
+        if self._mode == MULTIPROCESS_MODE:
+            venv_dir = get_venv_dir_for_project(project)
+            run_in_venv(
+                venv_dir, project_install_and_build, self.VENV_BUILD_TIMEOUT, project
+            )
+        else:
+            venv_dir = get_venv_dir_for_project(project)
+            project_install_and_build(project)
+
+    def _check_project(self, project: Project) -> None:
+        if self._mode == MULTIPROCESS_MODE:
+            venv_dir = get_venv_dir_for_project(project)
+            run_in_venv(venv_dir, project_check, 120, project)
+        else:
+            project_check(project)
 
     def remove_project(
         self, public_id: PublicId, keep_files: bool = False
@@ -441,6 +657,7 @@ class MultiAgentManager:
             )
 
         project = self._projects.pop(public_id)
+        self._remove_package_versions(project.agent_config)
         self._versionless_projects_set.remove(public_id.to_any())
         if not keep_files:
             project.remove()
@@ -652,20 +869,22 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
-        aea = agent_alias.get_aea_instance()
-
-        if self._mode == "async":
-            task = AgentRunAsyncTask(aea, self._loop)
-        elif self._mode == "threaded":
-            task = AgentRunThreadTask(aea, self._loop)
+        task_cls = self._MODE_TASK_CLASS[self._mode]
+        if self._mode == MULTIPROCESS_MODE:
+            task = task_cls(agent_alias, self._loop)
+        else:
+            agent = agent_alias.get_aea_instance()
+            task = task_cls(agent, self._loop)
 
         task.start()
+
         self._agents_tasks[agent_name] = task
+
         self._loop.call_soon_threadsafe(self._event.set)
         return self
 
     def _is_agent_running(self, agent_name: str) -> bool:
-        """Return is agent running state."""
+        """Return is agent task in running state."""
         if agent_name not in self._agents_tasks:
             return False
 
@@ -685,7 +904,6 @@ class MultiAgentManager:
                 if not self._is_agent_running(agent_name)
             ]
         )
-
         return self
 
     def stop_agent(self, agent_name: str) -> "MultiAgentManager":
@@ -722,6 +940,9 @@ class MultiAgentManager:
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()
         event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
+
+        if agent_task.is_running:  # pragma: nocover
+            raise ValueError(f"cannot stop task of agent {agent_name}")
 
         return self
 
@@ -835,7 +1056,6 @@ class MultiAgentManager:
                 break
 
             for agent_settings in agents_settings:
-
                 self.add_agent_with_config(
                     public_id=PublicId.from_str(agent_settings["public_id"]),
                     agent_name=agent_settings["agent_name"],
@@ -880,6 +1100,104 @@ class MultiAgentManager:
         print(
             f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
             str(exception),
+            repr(exception),
             "\nHowever, since no error callback was found the exception is handled silently. Please "
             "add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
         )
+
+    def _check_version_consistency(self, agent_config: AgentConfig) -> None:
+        """
+        Check that the agent dependencies in input are consistent with the other projects.
+
+        :param agent_config: the agent configuration we are going to add.
+        :return: None
+        :raises ProjectPackageConsistencyCheckError: if a version conflict is detected.
+        """
+        existing_packages = set(self._package_id_prefix_to_version.keys())
+        prefix_to_version = {
+            component_id.component_prefix: component_id.version
+            for component_id in agent_config.package_dependencies
+        }
+        component_prefixes_to_be_added = set(prefix_to_version.keys())
+
+        potentially_conflicting_packages = existing_packages.intersection(
+            component_prefixes_to_be_added
+        )
+        if len(potentially_conflicting_packages) == 0:
+            return
+
+        # conflicting_packages is a list of tuples whose elements are:
+        # - package id prefix: the triple (component type, author, name)
+        # - current_version: the version currently present in the MAM, across all projects
+        # - new_version: the version of the package in the new project
+        # - agents: the set of agents in the MAM that have the package;
+        #           used to provide a better error message
+        conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]] = []
+        for package_prefix in potentially_conflicting_packages:
+            existing_version, agents = self._package_id_prefix_to_version[
+                package_prefix
+            ]
+            new_version = prefix_to_version[package_prefix]
+            if existing_version != new_version:
+                conflicting_packages.append(
+                    (package_prefix, existing_version, new_version, agents)
+                )
+
+        if len(conflicting_packages) == 0:
+            return
+
+        raise ProjectPackageConsistencyCheckError(
+            agent_config.public_id, conflicting_packages
+        )
+
+    def _add_new_package_versions(self, agent_config: AgentConfig) -> None:
+        """
+        Add new package versions.
+
+        This method is called whenever a project agent is added.
+        It updates an internal data structure that it is used to
+        check inconsistencies of AEA package versions across projects.
+        In particular, all the AEA packages with the same "prefix" must
+        be of the same version.
+
+        :param agent_config: the agent configuration.
+        """
+        for component_id in agent_config.package_dependencies:
+            if component_id.component_prefix not in self._package_id_prefix_to_version:
+                self._package_id_prefix_to_version[component_id.component_prefix] = (
+                    component_id.version,
+                    set(),
+                )
+            version, agents = self._package_id_prefix_to_version[
+                component_id.component_prefix
+            ]
+            enforce(
+                version == component_id.version,
+                f"internal consistency error: expected version '{version}', found {component_id.version}",
+            )
+            agents.add(agent_config.public_id)
+
+    def _remove_package_versions(self, agent_config: AgentConfig) -> None:
+        """
+        Remove package versions.
+
+        This method is called whenever a project agent is removed.
+        It updates an internal data structure that it is used to
+        check inconsistencies of AEA package versions across projects.
+        In particular, all the AEA packages with the same "prefix" must
+        be of the same version.
+
+        :param agent_config: the agent configuration.
+        """
+        package_prefix_to_remove = set()
+        for (
+            package_prefix,
+            (_version, agents),
+        ) in self._package_id_prefix_to_version.items():
+            if agent_config.public_id in agents:
+                agents.remove(agent_config.public_id)
+                if len(agents) == 0:
+                    package_prefix_to_remove.add(package_prefix)
+
+        for package_prefix in package_prefix_to_remove:
+            self._package_id_prefix_to_version.pop(package_prefix)

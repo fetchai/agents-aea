@@ -16,12 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the HTTP Server connection module."""
-
 import asyncio
 import logging
 import os
+import ssl
 from traceback import print_exc
 from typing import Tuple, cast
 from unittest.mock import MagicMock, Mock, patch
@@ -105,7 +104,7 @@ class TestHTTPServer:
 
     def setup(self):
         """Initialise the test case."""
-        self.identity = Identity("name", address="my_key")
+        self.identity = Identity("name", address="my_key", public_key="my_public_key")
         self.agent_address = self.identity.address
         self.host = get_host()
         self.port = get_unused_tcp_port()
@@ -463,3 +462,104 @@ def test_bad_api_spec():
 def test_apispec_verify_if_no_validator_set():
     """Test api spec ok if no spec file provided."""
     assert APISpec().verify(Mock())
+
+
+@pytest.mark.asyncio
+class TestHTTPSServer:
+    """Tests for HTTPServer connection."""
+
+    async def request(self, method: str, path: str, **kwargs) -> ClientResponse:
+        """
+        Make a http request.
+
+        :param method: HTTP method: GET, POST etc
+        :param path: path to request on server. full url constructed automatically
+
+        :return: http response
+        """
+        try:
+            url = f"https://{self.host}:{self.port}{path}"
+            sslcontext = ssl.create_default_context(cafile=self.ssl_cert)
+            async with aiohttp.ClientSession() as session:
+                async with session.request(
+                    method, url, **kwargs, ssl=sslcontext
+                ) as resp:
+                    await resp.read()
+                    return resp
+        except Exception:
+            print_exc()
+            raise
+
+    def setup(self):
+        """Initialise the test case."""
+        self.identity = Identity("name", address="my_key", public_key="my_public_key")
+        self.agent_address = self.identity.address
+        self.host = "localhost"
+        self.port = get_unused_tcp_port()
+        self.api_spec_path = os.path.join(
+            ROOT_DIR, "tests", "data", "petstore_sim.yaml"
+        )
+        self.connection_id = HTTPServerConnection.connection_id
+        self.protocol_id = HttpMessage.protocol_id
+        self.target_skill_id = "some_author/some_skill:0.1.0"
+        self.ssl_cert = os.path.join(ROOT_DIR, "tests", "data", "certs", "server.crt")
+        self.ssl_key = os.path.join(ROOT_DIR, "tests", "data", "certs", "server.key")
+        self.configuration = ConnectionConfig(
+            host=self.host,
+            port=self.port,
+            target_skill_id=self.target_skill_id,
+            api_spec_path=self.api_spec_path,
+            connection_id=HTTPServerConnection.connection_id,
+            restricted_to_protocols={HttpMessage.protocol_id},
+            ssl_cert=self.ssl_cert,
+            ssl_key=self.ssl_key,
+        )
+        self.http_connection = HTTPServerConnection(
+            configuration=self.configuration,
+            data_dir=MagicMock(),
+            identity=self.identity,
+        )
+        self.loop = asyncio.get_event_loop()
+        self.loop.run_until_complete(self.http_connection.connect())
+        self.connection_address = str(HTTPServerConnection.connection_id)
+        self._dialogues = HttpDialogues(self.target_skill_id)
+        self.original_timeout = self.http_connection.channel.timeout_window
+
+    @pytest.mark.asyncio
+    async def test_get_200(self):
+        """Test send get request w/ 200 response."""
+        request_task = self.loop.create_task(self.request("get", "/pets"))
+        envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
+        assert envelope
+        incoming_message, dialogue = self._get_message_and_dialogue(envelope)
+        message = dialogue.reply(
+            target_message=incoming_message,
+            performative=HttpMessage.Performative.RESPONSE,
+            version=incoming_message.version,
+            status_code=200,
+            status_text="Success",
+            body=b"Response body",
+        )
+        response_envelope = Envelope(
+            to=envelope.sender,
+            sender=envelope.to,
+            context=envelope.context,
+            message=message,
+        )
+        await self.http_connection.send(response_envelope)
+
+        response = await asyncio.wait_for(request_task, timeout=20,)
+
+        assert (
+            response.status == 200
+            and response.reason == "Success"
+            and await response.text() == "Response body"
+        )
+
+    def _get_message_and_dialogue(
+        self, envelope: Envelope
+    ) -> Tuple[HttpMessage, HttpDialogue]:
+        message = cast(HttpMessage, envelope.message)
+        dialogue = cast(HttpDialogue, self._dialogues.update(message))
+        assert dialogue is not None
+        return message, dialogue

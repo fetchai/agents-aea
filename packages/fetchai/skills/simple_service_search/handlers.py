@@ -45,7 +45,6 @@ class OefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -72,7 +71,7 @@ class OefSearchHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -88,7 +87,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -100,8 +98,7 @@ class OefSearchHandler(Handler):
         """
         Handle the search response.
 
-        :param agents: the agents returned by the search
-        :return: None
+        :param oef_search_msg: the oef search message
         """
         agents = list(oef_search_msg.agents)
         nb_agents = len(agents)
@@ -128,7 +125,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
@@ -137,8 +133,4 @@ class OefSearchHandler(Handler):
         )
 
     def teardown(self) -> None:
-        """
-        Teardown the handler.
-
-        :return: None
-        """
+        """Teardown the handler."""

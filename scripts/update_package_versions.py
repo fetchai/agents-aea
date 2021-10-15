@@ -225,6 +225,7 @@ def get_public_id_from_yaml(configuration_file_path: Path) -> PublicId:
     Get the public id from yaml.
 
     :param configuration_file_path: the path to the config yaml
+    :return: public id
     """
     data = unified_yaml_load(configuration_file_path)
     author = data["author"]
@@ -273,6 +274,8 @@ def get_all_protocol_spec_ids() -> Set[PublicId]:
         PACKAGES_DIR.rglob("**/**/protocols")
     )
     for protocol_package_path in protocol_packages:
+        if "connections" in str(protocol_package_path):
+            continue
         content = get_protocol_specification_from_readme(protocol_package_path)
         spec_id = get_protocol_specification_id_from_specification(content)
         result.add(PublicId.from_str(spec_id))
@@ -305,6 +308,8 @@ def get_public_ids_to_update() -> Set[PackageId]:
     - the package hasn't change since the last release;
     - the public ids of the local package and the package in the registry
       are already the same.
+
+    :return: set of package ids to update
     """
     result: Set[PackageId] = set()
     last = get_hashes_from_last_release()
@@ -377,6 +382,9 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
     0.1.0 and 0.2.0, respectively. If we bump first the former and then the latter,
     the new replacements associated to the first updated are taken into account in
     the second update.
+
+    :param package_ids: set of package ids
+    :return: sorted list of package ids
     """
     return sorted(
         package_ids,
@@ -434,6 +442,11 @@ def bump_package_version(
     Bump the version references of the package in the repo.
 
     Includes, bumping the package itself.
+
+    :param current_public_id: the current public id
+    :param configuration_file_path: the path to the configuration file
+    :param type_: the type of package
+    :param is_ambiguous: whether or not the package id is ambiguous
     """
     ver = semver.VersionInfo.parse(current_public_id.version)
     new_version = str(ver.bump_minor())
@@ -461,6 +474,9 @@ def _can_disambiguate_from_context(
     - whether the public id appears in a line of the form 'aea add ...' (we know the component type)
     - whether the type appears in the same line where the public id occurs.
 
+    :param line: the line
+    :param old_string: the old string
+    :param type_: the type of package
     :return: if True/False, the old string can/cannot be replaced. If None, we don't know.
     """
     match = re.search(
@@ -592,8 +608,13 @@ def replace_in_yamls(
         |author: package_author
         |version: package_version -> bump up
         |type: package_type
-    """
 
+    :param content: the content
+    :param old_public_id: the old public id
+    :param new_public_id: the new public id
+    :param type_: the type of the package
+    :return: replaced content
+    """
     # case 1:
     regex = re.compile(f"({type_}:\n(-.*\n)*)(- *{str(old_public_id)})", re.MULTILINE)
     content = regex.sub(rf"\g<1>- {str(new_public_id)}", content)

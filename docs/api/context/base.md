@@ -124,6 +124,16 @@ Get agent name.
 
 Get addresses.
 
+<a name="aea.context.base.AgentContext.public_keys"></a>
+#### public`_`keys
+
+```python
+ | @property
+ | public_keys() -> Dict[str, str]
+```
+
+Get public keys.
+
 <a name="aea.context.base.AgentContext.address"></a>
 #### address
 
@@ -133,6 +143,16 @@ Get addresses.
 ```
 
 Get the default address.
+
+<a name="aea.context.base.AgentContext.public_key"></a>
+#### public`_`key
+
+```python
+ | @property
+ | public_key() -> str
+```
+
+Get the default public key.
 
 <a name="aea.context.base.AgentContext.connection_status"></a>
 #### connection`_`status

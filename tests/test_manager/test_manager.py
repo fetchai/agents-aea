@@ -18,13 +18,17 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import asyncio
+import logging
 import os
+import pickle  # nosec
 import re
-import sys
+import time
 from contextlib import suppress
+from copy import copy
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
+from textwrap import dedent
 from typing import Optional
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
@@ -35,14 +39,18 @@ from aea.configurations.base import PublicId
 from aea.crypto.helpers import create_private_key
 from aea.crypto.plugin import load_all_plugins
 from aea.crypto.registries import crypto_registry
-from aea.helpers.install_dependency import run_install_subprocess
+from aea.helpers.install_dependency import call_pip
 from aea.manager import MultiAgentManager
+from aea.manager.manager import AgentRunProcessTask, ProjectPackageConsistencyCheckError
 
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
+
+
+DEFAULT_TIMEOUT = 60
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
@@ -57,8 +65,9 @@ class BaseTestMultiAgentManager(TestCase):
     def setUp(self):
         """Set test case."""
         self.agent_name = "test_what_ever12"
-        self.working_dir = "MultiAgentManager_dir"
         self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
         self.project_path = os.path.join(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
@@ -66,24 +75,42 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager = MultiAgentManager(
             self.working_dir, mode=self.MODE, password=self.PASSWORD
         )
+        self._log_handlers = copy(logging.root.getChild("aea").handlers)
 
     def tearDown(self):
         """Tear down test case."""
-        self.manager.stop_manager()
-        if os.path.exists(self.working_dir):
-            rmtree(self.working_dir)
+        try:
+            self.manager.stop_manager()
+            for task in self.manager._agents_tasks.values():
+                if isinstance(task, AgentRunProcessTask):
+                    task.process.terminate()
+                    task.process.join(5)
+            time.sleep(1)
+            logging.shutdown(
+                [
+                    handler
+                    for handler in logging._handlerList
+                    if getattr(handler, "baseFilename", None)
+                ]
+            )
+            logging.root.getChild("aea").handlers = [
+                handler
+                for handler in self._log_handlers
+                if not getattr(handler, "baseFilename", None)
+            ]
+            time.sleep(1)
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
 
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
-        install_cmd = f"{sys.executable} -m pip install --no-deps {plugin_path}".split(
-            " "
-        )
+        install_cmd = f"install --no-deps {plugin_path}".split(" ")
         try:
             self.manager.start_manager()
-            run_install_subprocess(
-                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
-            )
+            call_pip("uninstall aea-ledger-fetchai -y".split(" "))
             from aea.crypto.registries import ledger_apis_registry
 
             ledger_apis_registry.specs.pop("fetchai", None)
@@ -96,7 +123,7 @@ class BaseTestMultiAgentManager(TestCase):
             self.manager.remove_project(self.project_public_id)
 
             def install_deps(*_):
-                assert run_install_subprocess(install_cmd) == 0, install_cmd
+                call_pip(install_cmd)
 
             with patch(
                 "aea.aea_builder.AEABuilder.install_pypi_dependencies", install_deps
@@ -105,10 +132,8 @@ class BaseTestMultiAgentManager(TestCase):
 
             assert "fetchai" in ledger_apis_registry.specs
         finally:
-            run_install_subprocess(
-                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
-            )
-            run_install_subprocess(install_cmd)
+            call_pip("uninstall aea-ledger-fetchai -y".split(" "))
+            call_pip(install_cmd)
 
     def test_workdir_created_removed(self, *args):
         """Check work dit created removed on MultiAgentManager start and stop."""
@@ -164,6 +189,10 @@ class BaseTestMultiAgentManager(TestCase):
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
 
+    def log_file(self, agent_name: str) -> str:
+        """Get agent's log gile path."""
+        return f"{self.tmp_dir.name}/{agent_name}.log"
+
     def test_add_agent(self, *args):
         """Test add agent alias."""
         self.manager.start_manager()
@@ -179,11 +208,34 @@ class BaseTestMultiAgentManager(TestCase):
                 "behaviours": {"echo": {"args": {"tick_interval": new_tick_interval}}},
             }
         ]
+        agent_overrides = {
+            "logging_config": {
+                "version": 1,
+                "formatters": {"standard": {"format": ""}},
+                "handlers": {
+                    "console": {
+                        "class": "logging.StreamHandler",
+                        "formatter": "standard",
+                        "level": "DEBUG",
+                    },
+                    "file": {
+                        "class": "logging.FileHandler",
+                        "filename": self.log_file(self.agent_name),
+                        "mode": "w",
+                        "level": "DEBUG",
+                        "formatter": "standard",
+                    },
+                },
+                "loggers": {"aea": {"level": "DEBUG", "handlers": ["file", "console"]}},
+            }
+        }
         self.manager.add_agent(
             self.project_public_id,
             self.agent_name,
             component_overrides=component_overrides,
+            agent_overrides=agent_overrides,
         )
+
         agent_alias = self.manager.get_agent_alias(self.agent_name)
         assert agent_alias.agent_name == self.agent_name
         assert (
@@ -252,63 +304,65 @@ class BaseTestMultiAgentManager(TestCase):
         self.test_add_agent()
 
         self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
-        assert behaviour
-
-        with patch.object(behaviour, "act") as act_mock:
-            wait_for_condition(lambda: act_mock.call_count > 0, timeout=10)
+        wait_for_condition(
+            lambda: "Echo Behaviour: act method called."
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=DEFAULT_TIMEOUT,
+        )
 
     def test_exception_handling(self, *args):
         """Test error callback works."""
-        self.test_add_agent()
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
         self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
-        assert behaviour
 
         callback_mock = Mock()
 
         self.manager.add_error_callback(callback_mock)
 
-        with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-            self.manager.start_all_agents()
-            wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+        self.manager.start_all_agents()
+        wait_for_condition(
+            lambda: callback_mock.call_count > 0, timeout=DEFAULT_TIMEOUT
+        )
+
+    def add_agent(self, agent_name: str, project_id: PublicId) -> None:
+        """Add agent and start manager."""
+        self.manager.start_manager()
+
+        self.manager.add_project(project_id, local=True)
+
+        self.manager.add_agent(
+            project_id, agent_name,
+        )
+
+        agent_alias = self.manager.get_agent_alias(agent_name)
+        assert agent_alias
 
     def test_default_exception_handling(self, *args):
         """Test that the default error callback works."""
-        self.test_add_agent()
-        self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
-        assert behaviour
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
 
         with patch.object(
             self.manager,
             "_print_exception_occurred_but_no_error_callback",
             side_effect=self.manager._print_exception_occurred_but_no_error_callback,
         ) as callback_mock:
-            with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-                wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
-                callback_mock.assert_called_once()
+            self.manager.start_all_agents()
+            wait_for_condition(
+                lambda: callback_mock.call_count > 0, timeout=DEFAULT_TIMEOUT
+            )
+            callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""
-        self.test_add_agent()
-        self.manager.start_all_agents()
-        agent = self.manager._agents_tasks[self.agent_name].agent
-        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
 
         def handler(*args, **kwargs):
             self.manager.stop_manager()
 
         self.manager.add_error_callback(handler)
 
-        assert behaviour
-
-        with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-            self.manager.start_all_agents()
-            wait_for_condition(lambda: not self.manager.is_running, timeout=10)
+        self.manager.start_all_agents()
+        wait_for_condition(lambda: not self.manager.is_running, timeout=DEFAULT_TIMEOUT)
 
     def test_start_all(self, *args):
         """Test MultiAgentManager start all agents."""
@@ -319,6 +373,20 @@ class BaseTestMultiAgentManager(TestCase):
         assert self.agent_name in self.manager.list_agents(running_only=True)
 
         self.manager.start_all_agents()
+
+        # check every agent started
+        wait_for_condition(
+            lambda: len(self.manager.list_agents())
+            == len(self.manager.list_agents(running_only=True)),
+            timeout=DEFAULT_TIMEOUT,
+            period=0.5,
+        )
+
+        wait_for_condition(
+            lambda: "Start processing messages"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=DEFAULT_TIMEOUT,
+        )
 
         with pytest.raises(ValueError, match="is already started!"):
             self.manager.start_agents(self.manager.list_agents())
@@ -333,9 +401,21 @@ class BaseTestMultiAgentManager(TestCase):
         """Test stop agent."""
         self.test_start_all()
         wait_for_condition(
-            lambda: self.manager.list_agents(running_only=True), timeout=10
+            lambda: self.manager.list_agents(running_only=True), timeout=DEFAULT_TIMEOUT
         )
+
+        wait_for_condition(
+            lambda: "Start processing messages"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=DEFAULT_TIMEOUT,
+        )
+
         self.manager.stop_all_agents()
+
+        wait_for_condition(
+            lambda: len(self.manager.list_agents(running_only=True)) == 0,
+            timeout=DEFAULT_TIMEOUT,
+        )
 
         assert not self.manager.list_agents(running_only=True)
 
@@ -344,6 +424,12 @@ class BaseTestMultiAgentManager(TestCase):
 
         with pytest.raises(ValueError, match=" is not running!"):
             self.manager.stop_agents([self.agent_name])
+
+        wait_for_condition(
+            lambda: "Runtime loop stopped!"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=DEFAULT_TIMEOUT,
+        )
 
     def test_do_no_allow_override_some_fields(self, *args):
         """Do not allo to override some values in agent config."""
@@ -402,14 +488,25 @@ class BaseTestMultiAgentManager(TestCase):
     def test_remove_running_agent(self, *args):
         """Test fail on remove running agent."""
         self.test_start_all()
+
+        wait_for_condition(
+            lambda: "Start processing messages"
+            in open(self.log_file(self.agent_name), "r").read(),
+            timeout=DEFAULT_TIMEOUT,
+        )
         with pytest.raises(ValueError, match="Agent is running. stop it first!"):
             self.manager.remove_agent(self.agent_name)
 
         self.manager.stop_all_agents()
+
+        # wait all stopped
         wait_for_condition(
-            lambda: self.agent_name not in self.manager.list_agents(running_only=True),
-            timeout=5,
+            lambda: len(self.manager.list_agents(running_only=True)) == 0,
+            timeout=DEFAULT_TIMEOUT,
+            period=0.5,
         )
+        assert self.agent_name not in self.manager.list_agents(running_only=True)
+
         self.manager.remove_agent(self.agent_name)
         assert self.agent_name not in self.manager.list_agents()
 
@@ -574,11 +671,147 @@ class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     MODE = "threaded"
 
 
+class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
+    """Tests for MultiAgentManager in multiprocess mode."""
+
+    MODE = "multiprocess"
+
+    def test_plugin_dependencies(self, *args):
+        """Skip test cause multiprocess works another way."""
+
+
+class TestMultiAgentManagerMultiprocessModeWithPassword(
+    TestMultiAgentManagerMultiprocessMode
+):
+    """Tests for MultiAgentManager in multiprocess mode with password."""
+
+    PASSWORD = "password"  # nosec
+
+
 class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode, with password."""
 
     MODE = "threaded"
     PASSWORD = "password"  # nosec
+
+
+class TestMultiAgentManagerPackageConsistencyError:
+    """
+    Test that the MultiAgentManager (MAM) raises an error on package version inconsistency.
+
+    In particular, an invariant to keep for the MAM state is that
+    there are no two AEA package dependencies across all the projects
+    that have different versions. This is due to a known limitation
+    in the package loading system.
+
+    This test checks that when the invariant is violated when
+    the method "add_project" is called, the framework raises an
+    exception with a descriptive error message.
+    """
+
+    EXPECTED_ERROR_MESSAGE = dedent(
+        """    cannot add project 'fetchai/weather_client:0.27.0': the following AEA dependencies have conflicts with previously added projects:
+    - 'fetchai/ledger' of type connection: the new version '0.17.0' conflicts with existing version '0.18.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/p2p_libp2p' of type connection: the new version '0.20.0' conflicts with existing version '0.21.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/soef' of type connection: the new version '0.21.0' conflicts with existing version '0.22.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/contract_api' of type protocol: the new version '0.14.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/default' of type protocol: the new version '0.15.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/fipa' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/ledger_api' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/oef_search' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/state_update' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    """
+    )
+
+    def setup(self):
+        """Set up the test case."""
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
+        self.project_path = os.path.join(
+            self.working_dir, self.project_public_id.author, self.project_public_id.name
+        )
+        assert not os.path.exists(self.working_dir)
+        self.manager = MultiAgentManager(self.working_dir)
+
+    def test_run(self):
+        """
+        Run the test.
+
+        First add agent project "fetchai/weather_station:0.27.0",
+        and then add "fetchai/weather_client:0.27.0".
+        The second addition will fail because the projects
+        contain conflicting AEA package versions.
+        """
+        self.manager.start_manager()
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
+        self.manager.add_project(weather_station_id)
+        weather_client_id = PublicId.from_str("fetchai/weather_client:0.27.0")
+        with pytest.raises(
+            ProjectPackageConsistencyCheckError,
+            match=re.escape(self.EXPECTED_ERROR_MESSAGE),
+        ):
+            self.manager.add_project(weather_client_id)
+
+    def teardown(self):
+        """Tear down test case."""
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
+
+
+class TestMultiAgentManagerWithPotentiallyConflictingPackages:
+    """
+    Test that the MultiAgentManager (MAM) handles correctly potentially conflicting packages.
+
+    "Potentially conflicting packages" are packages that have the same
+    package id prefix. The reason why they are "potentially conflicting"
+    is that their version may be different, i.e. conflicting,
+    and therefore are incompatible within the same MAM.
+
+    This test checks that, when adding a new project,
+    in case there are potentially conflicting packages but that
+    are not in fact conflicting, the operation is completed successfully.
+    """
+
+    def setup(self):
+        """Set up the test case."""
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
+        self.project_path = os.path.join(
+            self.working_dir, self.project_public_id.author, self.project_public_id.name
+        )
+        assert not os.path.exists(self.working_dir)
+        self.manager = MultiAgentManager(self.working_dir)
+
+    def test_run(self):
+        """
+        Run the test.
+
+        First add agent project "fetchai/weather_station:0.27.0",
+        and then add "fetchai/weather_client:0.27.0".
+        The second addition will fail because the projects
+        contain conflicting AEA package versions.
+        """
+        self.manager.start_manager()
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
+        self.manager.add_project(weather_station_id)
+        weather_client_id = PublicId.from_str("fetchai/weather_client:0.28.0")
+        self.manager.add_project(weather_client_id)
+
+    def teardown(self):
+        """Tear down test case."""
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
 
 
 def test_project_auto_added_removed():
@@ -599,6 +832,39 @@ def test_project_auto_added_removed():
             manager.add_agent(
                 PublicId("fetchai", "my_first_aea"), agent_name, local=True
             )
+            assert manager.list_projects()
+            assert manager.list_agents()
+            manager.remove_agent(agent_name)
+            assert not manager.list_agents()
+            assert not manager.list_projects()
+        finally:
+            manager.stop_manager()
+
+
+def test_dump():
+    """Check project auto added and auto removed on agent added/removed."""
+    agent_name = "test_agent"
+    with TemporaryDirectory() as tmp_dir, patch(
+        "aea.manager.project.Project.build"
+    ), patch("aea.manager.project.Project.install_pypi_dependencies"):
+        manager = MultiAgentManager(
+            tmp_dir,
+            mode="async",
+            registry_path=PACKAGES_DIR,
+            auto_add_remove_project=True,
+        )
+        try:
+            manager.start_manager()
+            assert not manager.list_projects()
+            manager.add_agent(
+                PublicId("fetchai", "my_first_aea"), agent_name, local=True
+            )
+            alias = manager.get_agent_alias(agent_name)
+            data = pickle.dumps(alias)
+            alias2 = pickle.loads(data)  # nosec
+            assert alias.dict == alias2.dict
+            assert alias.project.public_id == alias2.project.public_id
+
             assert manager.list_projects()
             assert manager.list_agents()
             manager.remove_agent(agent_name)
@@ -683,7 +949,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.18.0 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.19.0 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

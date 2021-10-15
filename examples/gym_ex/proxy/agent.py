@@ -42,6 +42,7 @@ from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylin
 
 
 ADDRESS = "some_address"
+PUBLIC_KEY = "some_public_key"
 
 
 class ProxyAgent(Agent):
@@ -54,9 +55,8 @@ class ProxyAgent(Agent):
         :param name: the name of the agent
         :param gym_env: gym environment
         :param proxy_env_queue: the queue of the proxy environment
-        :return: None
         """
-        identity = Identity(name, ADDRESS)
+        identity = Identity(name, ADDRESS, PUBLIC_KEY)
         configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
         super().__init__(
             identity,
@@ -73,32 +73,19 @@ class ProxyAgent(Agent):
         self.proxy_env_queue = proxy_env_queue
 
     def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
+        """Set up the agent."""
 
     def act(self) -> None:
-        """
-        Perform actions.
-
-        :return: None
-        """
+        """Perform actions."""
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
         Handle envelope.
 
         :param envelope: the envelope
-        :return: None
         """
         if envelope is not None:
             self.proxy_env_queue.put(envelope)
 
     def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
+        """Tear down the agent."""

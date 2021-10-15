@@ -523,6 +523,27 @@ Run from agent's directory.
 
 command line output
 
+<a name="aea.test_tools.test_cases.BaseAEATestCase.get_address"></a>
+#### get`_`address
+
+```python
+ | @classmethod
+ | get_address(cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None) -> str
+```
+
+Get address with CLI command.
+
+Run from agent's directory.
+
+**Arguments**:
+
+- `ledger_api_id`: ledger API ID.
+- `password`: the password to encrypt/decrypt private keys.
+
+**Returns**:
+
+command line output
+
 <a name="aea.test_tools.test_cases.BaseAEATestCase.replace_file_content"></a>
 #### replace`_`file`_`content
 

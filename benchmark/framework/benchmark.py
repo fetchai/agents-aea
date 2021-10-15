@@ -30,11 +30,7 @@ class BenchmarkControl:
         self._queue: Queue = Queue(2)
 
     def start(self) -> None:
-        """
-        Notify executor to start measure resources.
-
-        :return: None
-        """
+        """Notify executor to start measure resources."""
         self._queue.put(self.START_MSG)
 
     def wait_msg(self) -> str:

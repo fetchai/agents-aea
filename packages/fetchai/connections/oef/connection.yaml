@@ -1,6 +1,6 @@
 name: oef
 author: fetchai
-version: 0.20.0
+version: 0.21.0
 type: connection
 description: The oef connection provides a wrapper around the OEF SDK for connection
   with the OEF search and communication node.
@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTGRKWFkzNa8xxetpHSNCgnN31d2RTRBH5fhZM9e3uazB
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez
-  connection.py: QmPvt4dBndt1iCi246WugW2gDygVUy4c6FMYxhWoyXs2zi
+  connection.py: QmPMnEjsB4AkXVQu3QkgfeRzZKJUyp5W3nHMFVLWvsqTkG
   object_translator.py: QmaYDT6k6xBPmWs7PKxkbKrBhcNr3NpGeBJ4rp5JJTgK38
 fingerprint_ignore_patterns: []
 connections: []

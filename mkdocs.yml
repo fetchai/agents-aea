@@ -87,6 +87,7 @@ nav:
       - Limitations of v1: 'limits.md'
     - Agent Communication:
       - Agent Communication Network: 'acn.md'
+      - ACN Internals: 'acn-internals.md'
     - Search & Discovery:
       - Simple OEF: 'simple-oef.md'
       - Defining Data Models: 'defining-data-models.md'
@@ -115,6 +116,7 @@ nav:
       - Components:
         - Base: 'api/components/base.md'
         - Loader: 'api/components/loader.md'
+        - Utils: 'api/components/utils.md'
       - Configurations:
         - Base: 'api/configurations/base.md'
         - Constants: 'api/configurations/constants.md'
@@ -162,6 +164,7 @@ nav:
         - IO: 'api/helpers/io.md'
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'
+          - Utils: 'api/helpers/ipfs/utils.md'
         - Logging: 'api/helpers/logging.md'
         - MultiAddress:
           - Base: 'api/helpers/multiaddr/base.md'
@@ -189,6 +192,7 @@ nav:
       - Manager:
         - Manager: 'api/manager/manager.md'
         - Project: 'api/manager/project.md'
+        - Utils: 'api/manager/utils.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
         - Dialogue:
@@ -225,6 +229,7 @@ nav:
         - Exceptions: 'api/test_tools/exceptions.md'
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
+        - Test Contract: 'api/test_tools/test_contract.md'
         - Test Skill: 'api/test_tools/test_skill.md'
       - Plugins:
         - CLI:
@@ -262,4 +267,4 @@ extra_css:
     - css/my-styles.css
 
 extra_javascript:
-    - https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js
+    - https://unpkg.com/mermaid@8.10.1/dist/mermaid.min.js

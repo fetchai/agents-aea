@@ -26,6 +26,7 @@ from typing import Dict, List, Optional, cast
 from aea_ledger_cosmos import CosmosApi
 from aea_ledger_ethereum import EthereumApi
 from aea_ledger_fetchai import FetchAIApi
+from google.protobuf.any_pb2 import Any as ProtoAny
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
@@ -36,7 +37,13 @@ from aea.crypto.base import LedgerApi
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.21.0")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.22.0")
+DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT = 2818111
+DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT = 1500000
+DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT = 300000
+DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT = 300000
+DEFAUT_ETH_BATCH_TASK_GAS_LIMIT = 500000
+DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT = 500000
 
 
 def keccak256(input_: bytes) -> bytes:
@@ -88,7 +95,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         token_ids: List[int],
         data: Optional[bytes] = b"",
-        gas: int = 300000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to create a batch of tokens.
@@ -102,6 +109,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_ETH_BATCH_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createBatch(
@@ -116,6 +124,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT
             tokens = []
             for token_id in token_ids:
                 tokens.append({"id": str(token_id), "path": str(token_id)})
@@ -138,7 +147,7 @@ class ERC1155Contract(Contract):
         deployer_address: Address,
         token_id: int,
         data: Optional[bytes] = b"",
-        gas: int = 300000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to create a single token.
@@ -152,6 +161,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createSingle(
@@ -166,6 +176,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT
             msg = {
                 "create_single": {
                     "item_owner": deployer_address,
@@ -190,7 +201,7 @@ class ERC1155Contract(Contract):
         token_ids: List[int],
         mint_quantities: List[int],
         data: Optional[bytes] = b"",
-        gas: int = 500000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to mint a batch of tokens.
@@ -207,6 +218,7 @@ class ERC1155Contract(Contract):
         """
         cls.validate_mint_quantities(token_ids, mint_quantities)
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_ETH_BATCH_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mintBatch(
@@ -221,6 +233,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_COSMOS_BATCH_TASK_GAS_LIMIT
             tokens = []
             for token_id, quantity in zip(token_ids, mint_quantities):
                 tokens.append({"id": str(token_id), "value": str(quantity)})
@@ -284,7 +297,7 @@ class ERC1155Contract(Contract):
         token_id: int,
         mint_quantity: int,
         data: Optional[bytes] = b"",
-        gas: int = 300000,
+        gas: Optional[int] = None,
     ) -> JSONLike:
         """
         Get the transaction to mint a single token.
@@ -300,6 +313,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            gas = gas if gas is not None else DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mint(
@@ -314,6 +328,7 @@ class ERC1155Contract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            gas = gas if gas is not None else DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT
             msg = {
                 "mint_single": {
                     "to_address": recipient_address,
@@ -376,9 +391,11 @@ class ERC1155Contract(Contract):
         to_supply: int,
         value: int,
         trade_nonce: int,
-        signature: str,
+        signature: Optional[str] = None,
         data: Optional[bytes] = b"",
-        gas: int = 2818111,
+        gas: Optional[int] = None,
+        from_pubkey: Optional[str] = None,
+        to_pubkey: Optional[str] = None,
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
@@ -392,12 +409,28 @@ class ERC1155Contract(Contract):
         :param to_supply: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
         :param trade_nonce: the nonce of the trade, this is separate from the nonce of the transaction
-        :param signature: the signature of the trade
+        :param signature: the signature of the trade - used on Ethereum
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param from_pubkey: Public key associated with from_address - Used on Cosmos/Fetch
+        :param to_pubkey: Public key associated with to_address - Used on Cosmos/Fetch
         :return: a ledger transaction object
         """
+        if from_supply > 0 and to_supply > 0:
+            raise RuntimeError(
+                "Can't determine direction of swap because from_supply and to_supply are both non-zero."
+            )
+
+        if from_supply == 0 and to_supply == 0 and value == 0:
+            raise RuntimeError("Invalid atomic swap with all supplies to be zero.")
+
         if ledger_api.identifier == EthereumApi.identifier:
+            if signature is None:
+                raise RuntimeError("Signature expected for Eth based contract.")
+            if from_pubkey is not None or to_pubkey is not None:
+                raise RuntimeError("Pubkeys not expected for Eth based contract.")
+
+            gas = gas if gas is not None else DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -422,7 +455,107 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        raise NotImplementedError
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            if signature is not None:
+                raise RuntimeError(
+                    "Signature not expected for Cosmos/Fetch based contract."
+                )
+
+            cosmos_api = cast(CosmosApi, ledger_api)
+            msgs: List[ProtoAny] = []
+            from_pubkey_required: bool = False
+            to_pubkey_required: bool = False
+            gas = gas if gas is not None else DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT
+
+            # from_address sends tokens
+            if from_supply > 0:
+                contract_msg = {
+                    "transfer_single": {
+                        "operator": str(from_address),
+                        "from_address": str(from_address),
+                        "to_address": str(to_address),
+                        "id": str(token_id),
+                        "value": str(from_supply),
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=from_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+                from_pubkey_required = True
+
+            # to_address sends tokens
+            if to_supply > 0:
+                contract_msg = {
+                    "transfer_single": {
+                        "operator": str(to_address),
+                        "from_address": str(to_address),
+                        "to_address": str(from_address),
+                        "id": str(token_id),
+                        "value": str(to_supply),
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=to_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+                to_pubkey_required = True
+
+            # Sending native tokens from to_address to from_address
+            if value > 0:
+                msgs.append(
+                    cosmos_api.get_packed_send_msg(to_address, from_address, value)
+                )
+                to_pubkey_required = True
+
+            # Determine required signers and generate tx
+            if to_pubkey_required and not from_pubkey_required:
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[to_address],
+                    pub_keys=[bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+            elif to_pubkey_required and from_pubkey_required:
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "from_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[from_address, to_address],
+                    pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+            else:
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "from_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[from_address],
+                    pub_keys=[bytes.fromhex(from_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+
+            return tx
+
+        raise NotImplementedError  # pragma: nocover
 
     @classmethod
     def get_balances(
@@ -467,7 +600,7 @@ class ERC1155Contract(Contract):
                 )
             }
             return {"balances": result}
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @classmethod
     def get_atomic_swap_batch_transaction(
@@ -481,9 +614,11 @@ class ERC1155Contract(Contract):
         to_supplies: List[int],
         value: int,
         trade_nonce: int,
-        signature: str,
+        signature: Optional[str] = None,
         data: Optional[bytes] = b"",
-        gas: int = 2818111,
+        gas: Optional[int] = None,
+        from_pubkey: Optional[str] = None,
+        to_pubkey: Optional[str] = None,
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
@@ -492,17 +627,25 @@ class ERC1155Contract(Contract):
         :param contract_address: the address of the contract
         :param from_address: the address of the agent sending tokens, receiving ether
         :param to_address: the address of the agent receiving tokens, sending ether
-        :param token_id: the token id
-        :param from_supply: the supply of tokens by the sender
-        :param to_supply: the supply of tokens by the receiver
+        :param token_ids: the token ids
+        :param from_supplies: the supply of tokens by the sender
+        :param to_supplies: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
         :param trade_nonce: the nonce of the trade, this is separate from the nonce of the transaction
-        :param signature: the signature of the trade
+        :param signature: the signature of the trade - used on Ethereum
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param from_pubkey: Public key associated with from_address - Used on Cosmos/Fetch
+        :param to_pubkey: Public key associated with to_address - Used on Cosmos/Fetch
         :return: a ledger transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
+            if signature is None:
+                raise RuntimeError("Signature expected for Eth based contract.")
+            if from_pubkey is not None or to_pubkey is not None:
+                raise RuntimeError("Pubkeys not expected for Eth based contract.")
+
+            gas = gas if gas is not None else DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -527,7 +670,119 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        raise NotImplementedError
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            if signature is not None:
+                raise RuntimeError(
+                    "Signature not expected for Cosmos/Fetch based contract."
+                )
+
+            gas = gas if gas is not None else DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT
+            cosmos_api = cast(CosmosApi, ledger_api)
+            msgs: List[ProtoAny] = []
+            from_pubkey_required: bool = False
+            to_pubkey_required: bool = False
+
+            # Split token transfers to two batch transfers for each side
+            from_tokens: List[Dict[str, str]] = []
+            to_tokens: List[Dict[str, str]] = []
+            for token_id, from_supply, to_supply in zip(
+                token_ids, from_supplies, to_supplies
+            ):
+                if from_supply > 0:
+                    from_tokens.append({"id": str(token_id), "value": str(from_supply)})
+                if to_supply > 0:
+                    to_tokens.append({"id": str(token_id), "value": str(to_supply)})
+
+            # First direction of swap
+            if len(from_tokens) != 0:
+                contract_msg = {
+                    "transfer_batch": {
+                        "operator": str(from_address),
+                        "from_address": str(from_address),
+                        "to_address": str(to_address),
+                        "tokens": from_tokens,
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=from_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+                from_pubkey_required = True
+
+            # Second direction of swap
+            if len(to_tokens) != 0:
+                contract_msg = {
+                    "transfer_batch": {
+                        "operator": str(to_address),
+                        "from_address": str(to_address),
+                        "to_address": str(from_address),
+                        "tokens": to_tokens,
+                    }
+                }
+                msgs.append(
+                    cosmos_api.get_packed_exec_msg(
+                        sender_address=to_address,
+                        contract_address=contract_address,
+                        msg=contract_msg,
+                    )
+                )
+                to_pubkey_required = True
+
+            # Sending native tokens from to_address to from_address
+            if value > 0:
+                msgs.append(
+                    cosmos_api.get_packed_send_msg(to_address, from_address, value)
+                )
+                to_pubkey_required = True
+
+            if len(from_tokens) == 0 and len(to_tokens) == 0 and value == 0:
+                raise RuntimeError("Invalid atomic swap with all supplies to be zero.")
+
+            # Determine required signers and generate tx
+            if to_pubkey_required and not from_pubkey_required:
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[to_address],
+                    pub_keys=[bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+            elif to_pubkey_required and from_pubkey_required:
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                if to_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[from_address, to_address],
+                    pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+            else:
+                if from_pubkey is None:
+                    raise RuntimeError(
+                        "to_pubkey is missing and required for Cosmos/Fetch based contract."
+                    )
+                tx = cosmos_api.get_multi_transaction(
+                    from_addresses=[from_address],
+                    pub_keys=[bytes.fromhex(from_pubkey)],
+                    msgs=msgs,
+                    gas=gas,
+                )
+
+            return tx
+
+        raise NotImplementedError  # pragma: nocover
 
     @classmethod
     def get_hash_single(
@@ -553,7 +808,7 @@ class ERC1155Contract(Contract):
         :param from_supply: the supply of tokens by the sender
         :param to_supply: the supply of tokens by the receiver
         :param value: the amount of ether sent from the to_address to the from_address
-        :param ledger_api: the ledger API
+        :param trade_nonce: the nonce used in the trade
         :return: the transaction hash in a dict
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -582,11 +837,11 @@ class ERC1155Contract(Contract):
                     trade_nonce,
                 ).call()
             ):
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     "On-chain and off-chain hash computation do not agree!"
                 )
             return tx_hash
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @staticmethod
     def _get_hash_single(
@@ -603,7 +858,7 @@ class ERC1155Contract(Contract):
 
         :param _from: the from address hashed
         :param _to: the to address hashed
-        :param _ids: the token ids
+        :param _id: the token id
         :param _from_value: the from value
         :param _to_value: the to value
         :param _value_eth_wei: the value eth (in wei)
@@ -681,7 +936,7 @@ class ERC1155Contract(Contract):
                     "On-chain and off-chain hash computation do not agree!"
                 )
             return tx_hash
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover
 
     @staticmethod
     def _get_hash_batch(
@@ -753,4 +1008,4 @@ class ERC1155Contract(Contract):
             while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
                 trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
             return {"trade_nonce": trade_nonce}
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: nocover

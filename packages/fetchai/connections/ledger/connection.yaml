@@ -1,17 +1,17 @@
 name: ledger
 author: fetchai
-version: 0.18.0
+version: 0.19.0
 type: connection
 description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmPVRejvuQ5UaXviF81nUdgGZaumEkxao91Cbex1JchGSo
+  README.md: QmVgyK1CoqvZ3veizsasgiBxA8Se2RzrkYn4XQgQ1twKTH
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmSfxBihjamyVbv5z2h2Vt7ivXrrPzgu7QpahppFrpx35j
-  connection.py: QmaB1Febh2XKZUNQBiohdXJHUfaTTB2rhkUEprHbzwZkYh
-  contract_dispatcher.py: Qmc6hu7MhaQtBvkGie2cjMTwo6mtqKmq9NEiZPHKX9DcBA
-  ledger_dispatcher.py: QmVBTPs5yX5TyidQMLfiWV976EyuSFm4orsQsLeHJs1iRp
+  base.py: QmcHfS1mKvtxuTZTgiXDcwbCDHumUVZ4QMNQso9LkiXNF5
+  connection.py: QmXmJpYEBs88v5s9q7DeUJjzTKadfD3Fnqzpdz4iJtZ47M
+  contract_dispatcher.py: QmVcSfTsYsg8MtXKx9pFa9hsZwFdTsc6RdAjDcLoZkM1qE
+  ledger_dispatcher.py: QmXdsDXWCHd9cqBDsQRc1npBwuSTbz6bqTSQk5ETxioqJk
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -24,9 +24,9 @@ config:
       address: http://127.0.0.1:8545
       gas_price_api_key: null
     fetchai:
-      address: https://rest-agent-land.fetch.ai:443
+      address: https://rest-stargateworld.fetch.ai:443
       denom: atestfet
-      chain_id: agent-land
+      chain_id: stargateworld-3
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:1.0.0

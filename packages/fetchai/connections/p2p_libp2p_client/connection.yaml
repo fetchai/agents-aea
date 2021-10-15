@@ -1,6 +1,6 @@
 name: p2p_libp2p_client
 author: fetchai
-version: 0.18.0
+version: 0.19.0
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
@@ -8,14 +8,13 @@ description: The libp2p client connection implements a tcp connection to a runni
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmXqYJSYyymih236DJY7q28vaspHxvxkrFqYiYaAHXfDWo
+  README.md: QmNNPgnbPCLcT8v3P8eurXya3wdDhX92Z6dmyamV7BYxcS
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  acn_message.proto: QmQtqmAqRM6KhYyfXGPYbYLBLuwfTRwTbvt5Rmt1ghS33J
-  acn_message_pb2.py: QmRmTieVDVaRoiynFx9YJbXEf41JfTTWdqTWuRYWFpM8iw
-  connection.py: QmU17X7GXtUcoN41Kf79KkFytSaqcitgaHJzC8dJ671ivu
+  connection.py: QmPFWMoyC71rrVr9LZo9ucgmdSzpkqXKN76pBXK6Rur118
 fingerprint_ignore_patterns: []
 connections: []
-protocols: []
+protocols:
+- fetchai/acn:1.0.0
 class_name: P2PLibp2pClientConnection
 config:
   connect_retries: 3
@@ -25,6 +24,7 @@ config:
     public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
   - uri: acn.fetch.ai:11001
     public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
+  tls_connection_signature_timeout: 5.0
 cert_requests:
 - identifier: acn
   ledger_id: fetchai
@@ -42,5 +42,7 @@ cert_requests:
   save_path: .certs/acn_fetch_ai_11001.txt
 excluded_protocols: []
 restricted_to_protocols: []
-dependencies: {}
+dependencies:
+  asn1crypto:
+    version: <1.5.0,>=1.4.0
 is_abstract: false

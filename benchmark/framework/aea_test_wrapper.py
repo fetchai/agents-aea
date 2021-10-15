@@ -44,7 +44,7 @@ class AEATestWrapper:
         Make an agency with optional name and skills.
 
         :param name: name of the agent
-        :param skills: dict of skills to add to agent
+        :param components: dict of components to add to agent
         """
         self.components = components or []
         self.name = name
@@ -165,35 +165,23 @@ class AEATestWrapper:
         """
         Set agent's loop timeout.
 
-        :param timeout: idle sleep timeout for agent's loop
-
-        :return: None
+        :param period: idle sleep timeout for agent's loop
         """
         self.aea._period = period  # pylint: disable=protected-access
 
     def setup(self) -> None:
-        """
-        Set up agent: start multiplexer etc.
-
-        :return: None
-        """
+        """Set up agent: start multiplexer etc."""
         self.aea.setup()
 
     def stop(self) -> None:
-        """
-        Stop the agent.
-
-        :return: None
-        """
+        """Stop the agent."""
         self.aea.stop()
 
     def put_inbox(self, envelope: Envelope) -> None:
         """
         Add an envelope to agent's inbox.
 
-        :params envelope: envelope to process by agent
-
-        :return: None
+        :param envelope: envelope to process by agent
         """
         self.aea.runtime.multiplexer.in_queue.put(envelope)
 
@@ -201,7 +189,7 @@ class AEATestWrapper:
         """
         Check there is no messages in inbox.
 
-        :return: None
+        :return: boolean indicating whether inbox is empty
         """
         return self.aea.runtime.multiplexer.in_queue.empty()
 
@@ -212,20 +200,12 @@ class AEATestWrapper:
     def __exit__(  # type: ignore # pylint: disable=useless-return
         self, exc_type=None, exc=None, traceback=None
     ) -> None:
-        """
-        Context manager exit, stop agent.
-
-        :return: None
-        """
+        """Context manager exit, stop agent."""
         self.stop_loop()
         return None
 
     def start_loop(self) -> None:
-        """
-        Start agents loop in dedicated thread.
-
-        :return: None
-        """
+        """Start agents loop in dedicated thread."""
         self._thread = Thread(target=self.aea.start)
         self._thread.start()
 
@@ -252,8 +232,6 @@ class AEATestWrapper:
 
         :param inbox_num: number of messages to generate by connection.
         :param envelope: envelope to generate. dummy one created by default.
-
-        :return: None
         """
         if self._fake_connection:
             raise Exception("Fake connection is already set!")

@@ -219,7 +219,6 @@ def name_version_pair(s: str) -> Tuple[str, str]:
 
 def parse_args() -> argparse.Namespace:
     """Parse arguments."""
-
     parser = argparse.ArgumentParser("bump_aea_version")
     parser.add_argument(
         "--update",

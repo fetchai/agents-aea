@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -128,6 +129,10 @@ func main() {
 		if storagePath != "" {
 			opts = append(opts, dhtpeer.StoreRecordsTo(storagePath))
 		}
+
+		if len(agent.MailboxUri()) > 0 {
+			opts = append(opts, dhtpeer.EnableMailboxService(agent.MailboxUri()))
+		}
 		node, err = dhtpeer.New(opts...)
 	}
 
@@ -166,6 +171,11 @@ func main() {
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
+
+	// SIGTERM for k8s graceful stop support
+	signal.Notify(c, syscall.SIGTERM)
+
+	//wait for termination
 	<-c
 
 	logger.Info().Msg("node stopped")

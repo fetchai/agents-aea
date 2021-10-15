@@ -20,6 +20,9 @@
 
 from pathlib import Path
 
+from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
+
 from aea.helpers.transaction.base import Terms
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -71,13 +74,37 @@ class TestParameters(BaseSkillTestCase):
 
     def test_get_deploy_terms(self):
         """Test the get_deploy_terms of Parameters."""
+        self.parameters._ledger_id = FetchAIApi.identifier
         assert self.parameters.get_deploy_terms() == Terms(
-            "some_ledger_id",
+            FetchAIApi.identifier,
             self.skill.skill_context.agent_address,
             self.skill.skill_context.agent_address,
             {},
             {},
             "",
+            label="store",
+        )
+
+        self.parameters._ledger_id = FetchAIApi.identifier
+        assert self.parameters.get_deploy_terms(True) == Terms(
+            FetchAIApi.identifier,
+            self.skill.skill_context.agent_address,
+            self.skill.skill_context.agent_address,
+            {},
+            {},
+            "",
+            label="init",
+        )
+
+        self.parameters._ledger_id = EthereumApi.identifier
+        assert self.parameters.get_deploy_terms() == Terms(
+            EthereumApi.identifier,
+            self.skill.skill_context.agent_address,
+            self.skill.skill_context.agent_address,
+            {},
+            {},
+            "",
+            label="deploy",
         )
 
     def test_get_create_token_terms(self):

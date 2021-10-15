@@ -1,0 +1,21 @@
+name: cosm_trade
+author: fetchai
+version: 0.1.0
+protocol_specification_id: fetchai/cosm_trade:1.0.0
+type: protocol
+description: A protocol for preparing an atomic swap bilateral transaction for cosmos-based
+  ledgers, including fetchai's.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: Qma73sRRcS4iUqVCkjLmTmtREEuNKsDEuBiVg8AeZMTeey
+  __init__.py: QmRegk1xzYMX2LegXkyHjUjUo4cjyKnEzV3rd8Rz53hqY1
+  cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
+  cosm_trade_pb2.py: QmVZWhxWmqr3WKPx2HQWPENavv8754BmiLuh6hTukuWRxX
+  custom_types.py: QmUweZKxravsiJNVzUypN8fiF7XWYbuN2rVURw18EHQrss
+  dialogues.py: QmPcyag4gtLGgiTvumVdnURqhBVUG71B2g8XRWjbgoZBJU
+  message.py: QmUNjmXAjc5FDrm86DgyjSwh8p5sdwXycCgBvUu59LyAv2
+  serialization.py: QmTsEjoduW6mgWSGF1hFLobUmajPXVVVWZ7Bs4FmLWaRW8
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

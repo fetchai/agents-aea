@@ -263,7 +263,7 @@ class PackageConfiguration(Configuration, ABC):
         )
         self.build_entrypoint = build_entrypoint
         self._aea_version = aea_version if aea_version != "" else __aea_version__
-        self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
+        self._aea_version_specifiers = self.parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
 
@@ -295,9 +295,7 @@ class PackageConfiguration(Configuration, ABC):
     @aea_version.setter
     def aea_version(self, new_aea_version: str) -> None:
         """Set the 'aea_version' attribute."""
-        self._aea_version_specifiers = self._parse_aea_version_specifier(
-            new_aea_version
-        )
+        self._aea_version_specifiers = self.parse_aea_version_specifier(new_aea_version)
         self._aea_version = new_aea_version
 
     def check_aea_version(self) -> None:
@@ -326,7 +324,16 @@ class PackageConfiguration(Configuration, ABC):
         return PackageId(package_type=self.package_type, public_id=self.public_id)
 
     @staticmethod
-    def _parse_aea_version_specifier(aea_version_specifiers: str) -> SpecifierSet:
+    def parse_aea_version_specifier(aea_version_specifiers: str) -> SpecifierSet:
+        """
+        Parse an 'aea_version' field.
+
+        If 'aea_version' is a version, then output the specifier set "==${version}"
+        Else, interpret it as specifier set.
+
+        :param aea_version_specifiers: the AEA version, or a specifier set.
+        :return: A specifier set object.
+        """
         try:
             Version(aea_version_specifiers)
             return SpecifierSet("==" + aea_version_specifiers)

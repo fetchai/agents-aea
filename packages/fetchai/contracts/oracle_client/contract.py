@@ -31,7 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.9.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.10.0")
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.oracle_client.contract"
@@ -59,7 +59,9 @@ class FetchOracleClientContract(Contract):
         :param contract_address: the contract address.
         :param from_address: the address of the transaction sender.
         :param query_function: the query oracle value function.
+        :param amount: the amount to transfer as part of the transaction.
         :param gas: the gas limit for the transaction.
+        :param tx_fee: the transaction fee.
         :return: the query transaction
         """
         if ledger_api.identifier == EthereumApi.identifier:

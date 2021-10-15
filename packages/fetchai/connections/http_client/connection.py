@@ -25,7 +25,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Union, cast
+from typing import Any, Optional, Set, Tuple, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
@@ -48,7 +48,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.22.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.23.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -78,11 +78,7 @@ class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
     def __init__(self) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
+        """Initialize dialogues."""
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
@@ -121,8 +117,7 @@ class HTTPClientAsyncChannel:
         :param agent_address: the address of the agent.
         :param address: server hostname / IP address
         :param port: server port number
-        :param excluded_protocols: this connection cannot handle messages adhering to any of the protocols in this set
-        :param restricted_to_protocols: this connection can only handle messages adhering to protocols in this set
+        :param connection_id: the id of the connection
         """
         self.agent_address = agent_address
         self.address = address
@@ -145,8 +140,6 @@ class HTTPClientAsyncChannel:
         Connect channel using loop.
 
         :param loop: asyncio event loop to use
-
-        :return: None
         """
         self._loop = loop
         self._in_queue = asyncio.Queue()
@@ -170,9 +163,7 @@ class HTTPClientAsyncChannel:
         """
         Perform http request and send back response.
 
-        :param request_http_message: HttpMessage with http request constructed.
-
-        :return: None
+        :param request_envelope: request envelope.
         """
         if not self._loop:  # pragma: nocover
             raise ValueError("Channel is not connected")
@@ -259,8 +250,6 @@ class HTTPClientAsyncChannel:
         Send the response envelope to the in-queue.
 
         :param request_envelope: the envelope containing an http request
-
-        :return: None
         """
         if self._loop is None or self.is_stopped:
             raise ValueError("Can not send a message! Channel is not started!")
@@ -294,13 +283,11 @@ class HTTPClientAsyncChannel:
         Removes tasks from _tasks.
 
         :param task: Task completed.
-
-        :return: None
         """
         self._tasks.remove(task)
         self.logger.debug(f"Task completed: {task}")
 
-    async def get_message(self) -> Union["Envelope", None]:
+    async def get_message(self) -> Optional["Envelope"]:
         """
         Get http response from in-queue.
 
@@ -331,6 +318,7 @@ class HTTPClientAsyncChannel:
         :param headers: dict of http response headers
         :param status_text: the http status_text, str
         :param body: bytes of http response content
+        :param dialogue: the http dialogue
 
         :return: Envelope with http response data.
         """
@@ -378,7 +366,11 @@ class HTTPClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize a HTTP client connection."""
+        """
+        Initialize a HTTP client connection.
+
+        :param kwargs: keyword arguments
+        """
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
@@ -389,11 +381,7 @@ class HTTPClientConnection(Connection):
         )
 
     async def connect(self) -> None:
-        """
-        Connect to a HTTP server.
-
-        :return: None
-        """
+        """Connect to a HTTP server."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -402,11 +390,7 @@ class HTTPClientConnection(Connection):
             await self.channel.connect(self.loop)
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from a HTTP server.
-
-        :return: None
-        """
+        """Disconnect from a HTTP server."""
         if self.is_disconnected:
             return  # pragma: nocover
         self.state = ConnectionStates.disconnecting
@@ -418,17 +402,16 @@ class HTTPClientConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(
-        self, *args: Any, **kwargs: Any
-    ) -> Optional[Union["Envelope", None]]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         self._ensure_connected()

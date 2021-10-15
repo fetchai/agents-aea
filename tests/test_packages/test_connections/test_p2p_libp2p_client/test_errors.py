@@ -34,6 +34,7 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
+    NodeClient,
     P2PLibp2pClientConnection,
     POR_DEFAULT_SERVICE_ID,
 )
@@ -73,7 +74,9 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
         cls.node_port = "11234"
-        cls.identity = Identity("identity", address=crypto.address)
+        cls.identity = Identity(
+            "identity", address=crypto.address, public_key=crypto.public_key
+        )
 
         cls.key_file = os.path.join(cls.t, "keyfile")
         crypto.dump(cls.key_file)
@@ -213,9 +216,11 @@ async def test_reconnect_on_receive_fail():
         )
         con._in_queue = Mock()
         con._node_client = Mock()
-        f = Future()
-        f.set_exception(ConnectionError("oops"))
-        con._node_client.read_envelope.return_value = f
+        exception_future = Future()
+        exception_future.set_exception(ConnectionError("oops"))
+        result = Future()
+        result.set_result(None)
+        con._node_client.read_envelope.side_effect = [exception_future, result]
 
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
@@ -234,7 +239,7 @@ async def test_reconnect_on_send_fail():
         con._node_client = Mock()
         f = Future()
         f.set_exception(Exception("oops"))
-        con._node_client.send_envelope.return_value = f
+        con._node_client.send_envelope.side_effect = Exception("oops")
         # test reconnect on send fails
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
@@ -242,5 +247,73 @@ async def test_reconnect_on_send_fail():
             con, "_ensure_valid_envelope_for_external_comms"
         ):
             with pytest.raises(Exception, match="oops"):
-                await con.send(Mock())
+                await con._send_envelope_with_node_client(Mock())
             connect_mock.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_acn_decode_error_on_read():
+    """Test nodeclient send fails on read."""
+    f = Future()
+    f.set_result(b"some_data")
+    pipe = Mock()
+    pipe.connect = Mock(return_value=f)
+
+    node_client = NodeClient(pipe, Mock())
+    with patch.object(node_client, "_read", lambda: f), patch.object(
+        node_client, "write_acn_status_error", return_value=f
+    ) as mocked_write_acn_status_error, pytest.raises(
+        Exception, match=r"Error parsing acn message:"
+    ):
+        await node_client.read_envelope()
+
+    mocked_write_acn_status_error.assert_called_once()
+
+
+@pytest.mark.asyncio
+class TestLibp2pClientConnectionCheckSignature:
+    """Test that TLS signature is checked properly."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        temp_dir = os.path.join(cls.t, "temp_dir_node")
+        os.mkdir(temp_dir)
+        cls.connection_node = _make_libp2p_connection(data_dir=temp_dir, delegate=True)
+        temp_dir_client = os.path.join(cls.t, "temp_dir_client")
+        os.mkdir(temp_dir_client)
+        cls.connection = _make_libp2p_client_connection(
+            data_dir=temp_dir_client, peer_public_key=cls.connection_node.node.pub
+        )
+
+    @pytest.mark.asyncio
+    async def test_signature_check_fail(self):
+        """Test signature check failed."""
+        key = make_crypto(DEFAULT_LEDGER)
+
+        assert self.connection.is_connected is False
+        await self.connection_node.connect()
+        self.connection.connect_retries = 1
+        try:
+            self.connection.node_por._representative_public_key = key.public_key
+            with pytest.raises(
+                ValueError,
+                match=".*Invalid TLS session key signature: Signature verification failed.*",
+            ):
+                await self.connection.connect()
+            assert self.connection.is_connected is False
+        finally:
+            await self.connection_node.disconnect()
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

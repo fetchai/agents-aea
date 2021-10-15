@@ -33,6 +33,8 @@ class FakeConnection(Connection):
 
         :param envelope: any envelope
         :param num: amount of envelopes to generate
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         """
         Connection.__init__(self, *args, **kwargs)
         self.num = num
@@ -40,18 +42,10 @@ class FakeConnection(Connection):
         self.state = ConnectionStates.connected
 
     async def connect(self) -> None:
-        """
-        Do nothing. always connected.
-
-        :return: None
-        """
+        """Do nothing. always connected."""
 
     async def disconnect(self) -> None:
-        """
-        Disconnect. just set a flag.
-
-        :return: None
-        """
+        """Disconnect. just set a flag."""
         self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
@@ -67,6 +61,8 @@ class FakeConnection(Connection):
         """
         Return envelope set `num` times.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: incoming envelope
         """
         if self.num <= 0:

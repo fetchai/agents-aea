@@ -1,6 +1,6 @@
 name: oracle
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: contract
 description: Fetch oracle contract
 license: Apache-2.0
@@ -8,10 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmWhHt4fHzMmpdN8Jxh1zUve4tNjWutWoV1QT4aX9jjjRK
+  build/FetchOracle.json: QmfEMai1yxPtWoshFahBk2EyVHd9Mo8pSp1SAE83rRvQgH
+  build/oracle.wasm: QmQkLLG2jwEfri3KDX2iM6xp5adVjAkGg4mF7SxHKbamDj
+  contract.py: QmPGajDbvfCa5W12M4iqBB69mg1rF8QNSEFHJdemHJ2xnv
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
-fingerprint_ignore_patterns:
-- build/*
+fingerprint_ignore_patterns: []
 class_name: FetchOracleContract
 contract_interface_paths:
   ethereum: build/FetchOracle.json

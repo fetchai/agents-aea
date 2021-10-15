@@ -39,10 +39,7 @@ class Strategy(GenericStrategy):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
-        :return: None
+        :param kwargs: keyword arguments
         """
         db_is_rel_to_cwd = kwargs.pop("db_is_rel_to_cwd", DEFAULT_DB_IS_REL_TO_CWD)
         db_rel_dir = kwargs.pop("db_rel_dir", DEFAULT_DB_REL_DIR)

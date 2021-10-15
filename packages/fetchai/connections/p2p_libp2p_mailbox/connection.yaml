@@ -1,0 +1,48 @@
+name: p2p_libp2p_mailbox
+author: fetchai
+version: 0.1.0
+type: connection
+description: The libp2p client connection implements a tcp connection to a running
+  libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
+  DHT.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmNNPgnbPCLcT8v3P8eurXya3wdDhX92Z6dmyamV7BYxcS
+  __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
+  connection.py: QmYxrh9qmiDf99yttGVDTPKh9a2SjVA5WAxSUyYAYefzdY
+fingerprint_ignore_patterns: []
+connections: []
+protocols:
+- fetchai/acn:1.0.0
+class_name: P2PLibp2pMailboxConnection
+config:
+  connect_retries: 3
+  ledger_id: fetchai
+  nodes:
+  - uri: acn.fetch.ai:8888
+    public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
+  tls_connection_signature_timeout: 5.0
+cert_requests:
+- identifier: acn
+  ledger_id: fetchai
+  message_format: '{public_key}'
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
+  save_path: .certs/acn_fetch_ai_11000.txt
+- identifier: acn
+  ledger_id: fetchai
+  message_format: '{public_key}'
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
+  save_path: .certs/acn_fetch_ai_11001.txt
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  aiohttp:
+    version: <3.8,>=3.7.4
+  asn1crypto:
+    version: <1.5.0,>=1.4.0
+is_abstract: false

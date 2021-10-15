@@ -337,8 +337,94 @@ class GanacheDockerImage(DockerImage):
         return False
 
 
+class SOEFDockerImage(DockerImage):
+    """Wrapper to SOEF Docker image."""
+
+    PORT = 12002
+    SOEF_MOUNT_PATH = os.path.abspath(os.path.join(os.sep, "etc", "soef"))
+    SOEF_CONFIG_FILE_NAME = "soef.conf"
+
+    def __init__(
+        self, client: DockerClient, addr: str, port: int = PORT,
+    ):
+        """
+        Initialize the SOEF Docker image.
+
+        :param client: the Docker client.
+        :param addr: the address.
+        :param port: the port.
+        """
+        super().__init__(client)
+        self._addr = addr
+        self._port = port
+
+    @property
+    def tag(self) -> str:
+        """Get the image tag."""
+        return "gcr.io/fetch-ai-images/soef:9e78611"
+
+    def _make_soef_config_file(self, tmpdirname) -> None:
+        """Make a temporary soef_config file to setup and run the an soef instance."""
+        soef_config_lines = [
+            "# SIMPLE OEF CONFIGURATION FILE",
+            "# Save as /etc/soef/soef.conf",
+            "#",
+            "# 27th May 2020",
+            "# (Author Toby Simpson)",
+            "#",
+            "# Port we're listening on",
+            f"port {self._port}",
+            "#",
+            "# Our declared location",
+            "latitude 52.205278",
+            "longitude 0.119167",
+            "#",
+            "# Various API keys",
+            "agent_registration_api_key TwiCIriSl0mLahw17pyqoA",
+            "get_log_api_key TwigsriSl0mLahw48pyqoA",
+            "get_agent_partial_list_api_key SnakesiSl0mLahw48pyqoA",
+            "#",
+            "# Start cold being 1 means 'do not load agents'",
+            "start_cold 0",
+            "#",
+            "# End.",
+        ]
+        soef_config_file = os.path.join(tmpdirname, self.SOEF_CONFIG_FILE_NAME)
+        with open(soef_config_file, "w") as file:
+            file.writelines(line + "\n" for line in soef_config_lines)
+        os.chmod(soef_config_file, 400)  # nosec
+
+    def _make_ports(self) -> Dict:
+        """Make ports dictionary for Docker."""
+        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
+
+    def create(self) -> Container:
+        """Create the container."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            self._make_soef_config_file(tmpdirname)
+            volumes = {tmpdirname: {"bind": self.SOEF_MOUNT_PATH, "mode": "ro"}}
+            container = self._client.containers.run(
+                self.tag, detach=True, volumes=volumes, ports=self._make_ports()
+            )
+        return container
+
+    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
+        """Wait until the image is up."""
+        for i in range(max_attempts):
+            try:
+                response = requests.get(f"{self._addr}:{self._port}")
+                enforce(response.status_code == 200, "")
+                return True
+            except Exception:
+                logger.info(f"Attempt {i} failed. Retrying in {sleep_rate} seconds...")
+                time.sleep(sleep_rate)
+        return False
+
+
 class FetchLedgerDockerImage(DockerImage):
     """Wrapper to Fetch ledger Docker image."""
+
+    PORTS = {1317: 1317, 26657: 26657}
 
     def __init__(
         self,
@@ -369,22 +455,29 @@ class FetchLedgerDockerImage(DockerImage):
 
     def _make_entrypoint_file(self, tmpdirname) -> None:
         """Make a temporary entrypoint file to setup and run the test ledger node"""
-        run_node_lines = [
+        run_node_lines = (
             "#!/usr/bin/env bash",
-            "set -e",
-            f'fetchd init {self._config["moniker"]} --chain-id {self._config["chain_id"]}',
+            # variables
+            f'export VALIDATOR_KEY_NAME={self._config["genesis_account"]}',
+            f'export VALIDATOR_MNEMONIC="{self._config["mnemonic"]}"',
+            'export PASSWORD="12345678"',
+            f'export CHAIN_ID={self._config["chain_id"]}',
+            f'export MONIKER={self._config["moniker"]}',
+            f'export DENOM={self._config["denom"]}',
+            # Add key
+            '( echo "$VALIDATOR_MNEMONIC"; echo "$PASSWORD"; echo "$PASSWORD"; ) |fetchd keys add $VALIDATOR_KEY_NAME --recover',
+            # Configure node
+            "fetchd init --chain-id=$CHAIN_ID $MONIKER",
+            'echo "$PASSWORD" |fetchd add-genesis-account $(fetchd keys show $VALIDATOR_KEY_NAME -a) 100000000000000000000000$DENOM',
+            'echo "$PASSWORD" |fetchd gentx $VALIDATOR_KEY_NAME 10000000000000000000000$DENOM --chain-id $CHAIN_ID',
+            "fetchd collect-gentxs",
+            # Enable rest-api
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
-            f'MNEMONIC="{self._config["mnemonic"]}"',
-            "fetchcli config keyring-backend test",
-            f'echo $MNEMONIC | fetchcli keys add {self._config["genesis_account"]} --recover',
-            f'fetchd add-genesis-account $(fetchcli keys show {self._config["genesis_account"]} -a) 1152997575000000000000000000{self._config["denom"]}',
-            f'fetchd gentx --amount 100000000000000000000{self._config["denom"]} --name {self._config["genesis_account"]} --keyring-backend test',
-            "fetchd collect-gentxs",
-            f'fetchcli config chain-id {self._config["chain_id"]}',
-            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port} &",
-            "fetchcli rest-server --trust-node=true",
-        ]
+            'sed -i "s/swagger = false/swagger = true/" ~/.fetchd/config/app.toml',
+            "fetchd start",
+        )
+
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
         with open(entrypoint_file, "w") as file:
             file.writelines(line + "\n" for line in run_node_lines)
@@ -403,15 +496,16 @@ class FetchLedgerDockerImage(DockerImage):
                 network="host",
                 volumes=volumes,
                 entrypoint=str(entrypoint),
+                ports=self.PORTS,
             )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
         """Wait until the image is up."""
-        request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
         for i in range(max_attempts):
             try:
-                response = requests.post(f"{self._addr}:{self._port}", json=request)
+                url = f"{self._addr}:{self._port}/net_info?"
+                response = requests.get(url)
                 enforce(response.status_code == 200, "")
                 return True
             except Exception:

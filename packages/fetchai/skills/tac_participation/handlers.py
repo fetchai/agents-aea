@@ -45,18 +45,13 @@ class OefSearchHandler(Handler):
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the handler setup.
-
-        :return: None
-        """
+        """Implement the handler setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -80,17 +75,13 @@ class OefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.warning(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -106,7 +97,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search msg
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
@@ -123,7 +113,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the search result
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.debug(
             "on search result: dialogue_reference={} agents={}".format(
@@ -141,7 +130,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
@@ -156,8 +144,6 @@ class OefSearchHandler(Handler):
         Process the search result for a controller.
 
         :param agent_addresses: list of agent addresses
-
-        :return: None
         """
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.PRE_GAME.value:
@@ -182,8 +168,6 @@ class OefSearchHandler(Handler):
         Register to active TAC Controller.
 
         :param controller_addr: the address of the controller.
-
-        :return: None
         """
         game = cast(Game, self.context.game)
         game.update_expected_controller_addr(controller_addr)
@@ -198,6 +182,7 @@ class OefSearchHandler(Handler):
         game.tac_dialogue = tac_dialogue
         self.context.outbox.put_message(message=tac_msg)
         self.context.behaviours.tac_search.is_active = False
+        self.context.shared_state["tac_version_id"] = game.expected_version_id
 
 
 class TacHandler(Handler):
@@ -206,18 +191,13 @@ class TacHandler(Handler):
     SUPPORTED_PROTOCOL = TacMessage.protocol_id
 
     def setup(self) -> None:
-        """
-        Implement the handler setup.
-
-        :return: None
-        """
+        """Implement the handler setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         tac_msg = cast(TacMessage, message)
 
@@ -250,11 +230,7 @@ class TacHandler(Handler):
             self._handle_invalid(tac_msg, tac_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, tac_msg: TacMessage) -> None:
         """
@@ -272,7 +248,6 @@ class TacHandler(Handler):
 
         :param tac_msg: The tac message.
         :param tac_dialogue: the tac dialogue
-        :return: None
         """
         error_code = tac_msg.error_code
         self.context.logger.debug(
@@ -296,7 +271,6 @@ class TacHandler(Handler):
         Handle the 'start' event emitted by the controller.
 
         :param tac_msg: the game data
-        :return: None
         """
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.GAME_REGISTRATION.value:
@@ -336,7 +310,6 @@ class TacHandler(Handler):
         Update ownership and preferences.
 
         :param tac_msg: the game data
-        :return: None
         """
         self.context.logger.info("processing game data, message={}".format(tac_msg))
         state_update_dialogues = cast(
@@ -361,7 +334,6 @@ class TacHandler(Handler):
         Handle the cancellation of the competition from the TAC controller.
 
         :param tac_msg: the TacMessage.
-        :return: None
         """
         game = cast(Game, self.context.game)
         if game.phase.value not in [Phase.GAME_REGISTRATION.value, Phase.GAME.value]:
@@ -383,7 +355,6 @@ class TacHandler(Handler):
         Handle 'on transaction confirmed' event emitted by the controller.
 
         :param tac_msg: the TacMessage.
-        :return: None
         """
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.GAME.value:
@@ -420,7 +391,6 @@ class TacHandler(Handler):
 
         :param tac_msg: the tac message
         :param tac_dialogue: the tac dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle tac message of performative={} in dialogue={}.".format(

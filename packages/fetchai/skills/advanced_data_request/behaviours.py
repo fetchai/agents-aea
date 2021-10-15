@@ -50,11 +50,7 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
         super().__init__(**kwargs)
 
     def send_http_request_message(self) -> None:
-        """
-        Send an http request message.
-
-        :return: None
-        """
+        """Send an http request message."""
 
         # context
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
@@ -86,10 +82,9 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
         Add a prometheus metric.
 
         :param metric_name: the name of the metric to add.
-        :param type: the type of the metric.
+        :param metric_type: the type of the metric.
         :param description: a description of the metric.
         :param labels: the metric labels.
-        :return: None
         """
 
         # context
@@ -118,7 +113,6 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
         :param update_func: the name of the update function (e.g. inc, dec, set, ...).
         :param value: the value to provide to the update function.
         :param labels: the metric labels.
-        :return: None
         """
 
         # context
@@ -138,11 +132,7 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         self.context.logger.info("setting up AdvancedDataRequestBehaviour")
 
         prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
@@ -159,19 +149,11 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
                 )
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         model = cast(AdvancedDataRequestModel, self.context.advanced_data_request_model)
         self.context.logger.info(f"Fetching data from {model.url}")
         self.send_http_request_message()
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
         self.context.logger.info("tearing down AdvancedDataRequestBehaviour")

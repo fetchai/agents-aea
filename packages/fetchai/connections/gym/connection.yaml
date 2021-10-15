@@ -1,14 +1,14 @@
 name: gym
 author: fetchai
-version: 0.18.0
+version: 0.19.0
 type: connection
 description: The gym connection wraps an OpenAI gym.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQn8aaipEDzB34inpVtPvrr1TPvpWYhvc6DJozMteyUbF
+  README.md: QmUp6pFGZJ3KwqfG3owDEMTUyscn9J9Gzyh2VvgFw2o3RV
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
-  connection.py: QmSUJGxPxQhDroern4G3kxPV4NzDcCMegF5brM6KjGStrg
+  connection.py: QmRHCgy7wJADTxQyWo1imjhg7VxCfBNdTTBxGULggMe99y
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

@@ -41,6 +41,7 @@ def generate_good_ids(nb_goods: int, starting_index: int) -> List[int]:
 
     :param nb_goods: the number of things.
     :param starting_index: the index to start creating from.
+    :return: list of good ids
     """
     good_ids = ERC1155Contract.generate_token_ids(FT_ID, nb_goods, starting_index)
     enforce(
@@ -55,6 +56,7 @@ def generate_currency_ids(nb_currencies: int, starting_index: int) -> List[int]:
 
     :param nb_currencies: the number of currencies.
     :param starting_index: the index to start creating from.
+    :return: list of currency ids
     """
     currency_ids = ERC1155Contract.generate_token_ids(
         FT_ID, nb_currencies, starting_index
@@ -74,6 +76,7 @@ def generate_currency_id_to_name(
 
     :param nb_currencies: the number of currencies.
     :param currency_ids: the currency ids
+    :param starting_index: the starting index
     :return: a dictionary mapping currency's ids to names.
     """
     if currency_ids != []:
@@ -98,6 +101,7 @@ def generate_good_id_to_name(
 
     :param nb_goods: the number of things.
     :param good_ids: a list of good ids
+    :param starting_index: the starting index
     :return: a dictionary mapping goods' ids to names.
     """
     if good_ids != []:

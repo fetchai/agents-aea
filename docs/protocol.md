@@ -130,7 +130,7 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.16.0` skill utilises the `fetchai/default:1.0.0` protocol for error handling.
+Each AEA's `fetchai/error:0.17.0` skill utilises the `fetchai/default:1.0.0` protocol for error handling.
 
 ## `fetchai/oef_search:1.0.0` protocol
 

@@ -59,7 +59,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         # config
         self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)

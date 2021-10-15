@@ -20,6 +20,7 @@
 import asyncio
 import email
 import logging
+import ssl
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
@@ -65,7 +66,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.21.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.22.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -75,7 +76,8 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: address of the dialogues maintainer.
+        :param kwargs: keyword arguments.
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -151,7 +153,7 @@ class Request(OpenAPIRequest):
         query_params = parse_qs(parsed_path.query, keep_blank_values=True)
 
         parameters = RequestParameters(
-            query=ImmutableMultiDict(query_params),
+            query=ImmutableMultiDict(query_params),  # type: ignore
             header=headers_to_string(dict(http_request.headers)),
             path={},
         )
@@ -171,7 +173,7 @@ class Request(OpenAPIRequest):
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
-        :param dialogue_reference: new dialog reference for envelope
+        :param dialogues: the http dialogues
         :param target_skill_id: the target skill id
 
         :return: envelope
@@ -214,6 +216,10 @@ class Response(web.Response):
             else:
                 headers = None
 
+            # if content length header provided, it should correspond to actuyal body length
+            if headers and "Content-Length" in headers:
+                headers["Content-Length"] = str(len(http_message.body or ""))
+
             response = cls(
                 status=http_message.status_code,
                 reason=http_message.status_text,
@@ -238,6 +244,8 @@ class APISpec:
         Initialize the API spec.
 
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
+        :param server: the server url
+        :param logger: the logger
         """
         self._validator = None  # type: Optional[RequestValidator]
         self.logger = logger
@@ -280,7 +288,7 @@ class APISpec:
 class BaseAsyncChannel(ABC):
     """Base asynchronous channel class."""
 
-    def __init__(self, address: Address, connection_id: PublicId,) -> None:
+    def __init__(self, address: Address, connection_id: PublicId) -> None:
         """
         Initialize a channel.
 
@@ -301,8 +309,6 @@ class BaseAsyncChannel(ABC):
         Upon HTTP Channel connection, start the HTTP Server in its own thread.
 
         :param loop: asyncio event loop
-
-        :return: None
         """
         self._loop = loop
         self._in_queue = asyncio.Queue()
@@ -328,7 +334,6 @@ class BaseAsyncChannel(ABC):
         Send the envelope in_queue.
 
         :param envelope: the envelope
-        :return: None
         """
 
     @abstractmethod
@@ -355,6 +360,8 @@ class HTTPChannel(BaseAsyncChannel):
         connection_id: PublicId,
         timeout_window: float = RESPONSE_TIMEOUT,
         logger: logging.Logger = _default_logger,
+        ssl_cert_path: Optional[str] = None,
+        ssl_key_path: Optional[str] = None,
     ):
         """
         Initialize a channel and process the initial API specification from the file path (if given).
@@ -365,14 +372,21 @@ class HTTPChannel(BaseAsyncChannel):
         :param target_skill_id: the skill id which handles the requests
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
         :param connection_id: public id of connection using this channel.
-        :param restricted_to_protocols: set of restricted protocols
         :param timeout_window: the timeout (in seconds) for a request to be handled.
+        :param logger: the logger
+        :param ssl_cert_path:  optional path to ssl certificate
+        :param ssl_key_path: optional path to ssl key
         """
         super().__init__(address=address, connection_id=connection_id)
         self.host = host
         self.port = port
+        self.ssl_cert_path = ssl_cert_path
+        self.ssl_key_path = ssl_key_path
         self.target_skill_id = target_skill_id
-        self.server_address = "http://{}:{}".format(self.host, self.port)
+        if self.ssl_cert_path and self.ssl_key_path:
+            self.server_address = "https://{}:{}".format(self.host, self.port)
+        else:
+            self.server_address = "http://{}:{}".format(self.host, self.port)
 
         self._api_spec = APISpec(api_spec_path, self.server_address, logger)
         self.timeout_window = timeout_window
@@ -393,8 +407,6 @@ class HTTPChannel(BaseAsyncChannel):
         Upon HTTP Channel connection, start the HTTP Server in its own thread.
 
         :param loop: asyncio event loop
-
-        :return: None
         """
         if self.is_stopped:
             await super().connect(loop)
@@ -415,7 +427,7 @@ class HTTPChannel(BaseAsyncChannel):
         """
         Verify the request then send the request to Agent as an envelope.
 
-        :param request: the request object
+        :param http_request: the request object
 
         :return: a tuple of response code and response description
         """
@@ -444,7 +456,6 @@ class HTTPChannel(BaseAsyncChannel):
             response_message = await asyncio.wait_for(
                 self.pending_requests[request.id], timeout=self.timeout_window,
             )
-
             return Response.from_message(response_message)
 
         except asyncio.TimeoutError:
@@ -470,7 +481,13 @@ class HTTPChannel(BaseAsyncChannel):
         server = web.Server(self._http_handler)
         runner = web.ServerRunner(server)
         await runner.setup()
-        self.http_server = web.TCPSite(runner, self.host, self.port)
+        ssl_context = None
+        if self.ssl_cert_path and self.ssl_key_path:
+            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            ssl_context.load_cert_chain(self.ssl_cert_path, self.ssl_key_path)
+        self.http_server = web.TCPSite(
+            runner, self.host, self.port, ssl_context=ssl_context
+        )
         await self.http_server.start()
 
     def send(self, envelope: Envelope) -> None:
@@ -478,7 +495,6 @@ class HTTPChannel(BaseAsyncChannel):
         Send the envelope in_queue.
 
         :param envelope: the envelope
-        :return: None
         """
         if self.http_server is None:  # pragma: nocover
             raise ValueError("Server not connected, call connect first!")
@@ -541,6 +557,12 @@ class HTTPServerConnection(Connection):
         api_spec_path = cast(
             Optional[str], self.configuration.config.get("api_spec_path")
         )
+        ssl_cert_path = cast(Optional[str], self.configuration.config.get("ssl_cert"))
+        ssl_key_path = cast(Optional[str], self.configuration.config.get("ssl_key"))
+
+        if bool(ssl_cert_path) != bool(ssl_key_path):  # pragma: nocover
+            raise ValueError("Please specify both ssl_cert and ssl_key or neither.")
+
         self.channel = HTTPChannel(
             self.address,
             host,
@@ -549,14 +571,12 @@ class HTTPServerConnection(Connection):
             api_spec_path,
             connection_id=self.connection_id,
             logger=self.logger,
+            ssl_cert_path=ssl_cert_path,
+            ssl_key_path=ssl_key_path,
         )
 
     async def connect(self) -> None:
-        """
-        Connect to the http.
-
-        :return: None
-        """
+        """Connect to the http channel."""
         if self.is_connected:
             return
 
@@ -569,11 +589,7 @@ class HTTPServerConnection(Connection):
             self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from HTTP.
-
-        :return: None
-        """
+        """Disconnect from HTTP channel."""
         if self.is_disconnected:
             return
 
@@ -586,7 +602,6 @@ class HTTPServerConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         self.channel.send(envelope)
@@ -595,6 +610,8 @@ class HTTPServerConnection(Connection):
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
         self._ensure_connected()

@@ -43,7 +43,7 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.18.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.19.0")
 
 
 class GymDialogues(BaseGymDialogues):
@@ -53,7 +53,7 @@ class GymDialogues(BaseGymDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -129,7 +129,7 @@ class GymChannel:
         """
         Process the envelopes to the gym.
 
-        :return: None
+        :param envelope: the envelope
         """
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
@@ -149,7 +149,6 @@ class GymChannel:
         Forward a message to gym.
 
         :param envelope: the envelope
-        :return: None
         """
         enforce(
             isinstance(envelope.message, GymMessage), "Message not of type GymMessage"
@@ -196,16 +195,11 @@ class GymChannel:
         """Send a message.
 
         :param envelope: the envelope
-        :return: None
         """
         await self.queue.put(envelope)
 
     async def disconnect(self) -> None:
-        """
-        Disconnect.
-
-        :return: None
-        """
+        """Disconnect."""
         if self._queue is not None:
             await self._queue.put(None)
             self._queue = None
@@ -238,11 +232,7 @@ class GymConnection(Connection):
         self._connection = None  # type: Optional[asyncio.Queue]
 
     async def connect(self) -> None:
-        """
-        Connect to the gym.
-
-        :return: None
-        """
+        """Connect to the gym."""
         if self.is_connected:  # pragma: nocover
             return
 
@@ -251,11 +241,7 @@ class GymConnection(Connection):
             await self.channel.connect()
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the gym.
-
-        :return: None
-        """
+        """Disconnect from the gym."""
         if self.is_disconnected:  # pragma: nocover
             return
 
@@ -268,7 +254,6 @@ class GymConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelop
-        :return: None
         """
         self._ensure_connected()
         await self.channel.send(envelope)

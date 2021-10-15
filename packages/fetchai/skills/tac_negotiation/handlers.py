@@ -22,17 +22,22 @@
 from collections import OrderedDict
 from typing import Optional, Tuple, cast
 
+from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
+
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
-from aea.helpers.transaction.base import RawMessage
+from aea.helpers.transaction.base import RawMessage, RawTransaction
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.base import Handler
 
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.fetchai.protocols.cosm_trade.message import CosmTradeMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -44,6 +49,8 @@ from packages.fetchai.skills.tac_negotiation.behaviours import (
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
+    CosmTradeDialogue,
+    CosmTradeDialogues,
     DefaultDialogues,
     FipaDialogue,
     FipaDialogues,
@@ -67,18 +74,13 @@ class FipaNegotiationHandler(Handler):
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :return: None
         """
         fipa_msg = cast(FipaMessage, message)
 
@@ -109,11 +111,7 @@ class FipaNegotiationHandler(Handler):
             self._on_match_accept(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, fipa_msg: FipaMessage) -> None:
         """
@@ -121,9 +119,7 @@ class FipaNegotiationHandler(Handler):
 
         Respond to the sender with a default message containing the appropriate error information.
 
-        :param msg: the message
-
-        :return: None
+        :param fipa_msg: the message
         """
         self.context.logger.info(
             "received invalid fipa message={}, unidentified dialogue.".format(fipa_msg)
@@ -144,8 +140,6 @@ class FipaNegotiationHandler(Handler):
 
         :param cfp: the fipa message containing the CFP
         :param fipa_dialogue: the fipa_dialogue
-
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         proposal = strategy.get_proposal_for_query(
@@ -188,7 +182,6 @@ class FipaNegotiationHandler(Handler):
 
         :param propose: the message containing the Propose
         :param fipa_dialogue: the fipa_dialogue
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         fipa_dialogue.terms = strategy.terms_from_proposal(
@@ -231,7 +224,6 @@ class FipaNegotiationHandler(Handler):
 
         :param decline: the Decline message
         :param fipa_dialogue: the fipa_dialogue
-        :return: None
         """
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
 
@@ -269,7 +261,6 @@ class FipaNegotiationHandler(Handler):
 
         :param accept: the Accept message
         :param fipa_dialogue: the fipa_dialogue
-        :return: None
         """
         transactions = cast(Transactions, self.context.transactions)
         terms = transactions.pop_pending_proposal(
@@ -283,32 +274,60 @@ class FipaNegotiationHandler(Handler):
                 terms, role=cast(FipaDialogue.Role, fipa_dialogue.role)
             )
             if strategy.is_contract_tx:
-                contract_api_dialogues = cast(
-                    ContractApiDialogues, self.context.contract_api_dialogues
-                )
-                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
-                    counterparty=LEDGER_API_ADDRESS,
-                    performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
-                    ledger_id=strategy.ledger_id,
-                    contract_id=strategy.contract_id,
-                    contract_address=strategy.contract_address,
-                    callable="get_hash_batch",
-                    kwargs=ContractApiMessage.Kwargs(
-                        strategy.kwargs_from_terms(
-                            fipa_dialogue.terms, is_from_terms_sender=False
-                        )
-                    ),
-                )
-                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-                contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-                self.context.logger.info(
-                    "requesting batch transaction hash, sending {} to {}, message={}".format(
-                        contract_api_msg.performative,
-                        strategy.contract_id,
-                        contract_api_msg,
+                if strategy.ledger_id == EthereumApi.identifier:
+                    contract_api_dialogues = cast(
+                        ContractApiDialogues, self.context.contract_api_dialogues
                     )
-                )
-                self.context.outbox.put_message(message=contract_api_msg)
+                    (
+                        contract_api_msg,
+                        contract_api_dialogue,
+                    ) = contract_api_dialogues.create(
+                        counterparty=LEDGER_API_ADDRESS,
+                        performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
+                        ledger_id=strategy.ledger_id,
+                        contract_id=strategy.contract_id,
+                        contract_address=strategy.contract_address,
+                        callable="get_hash_batch",
+                        kwargs=ContractApiMessage.Kwargs(
+                            strategy.kwargs_from_terms(
+                                fipa_dialogue.terms, is_from_terms_sender=False
+                            )
+                        ),
+                    )
+                    contract_api_dialogue = cast(
+                        ContractApiDialogue, contract_api_dialogue
+                    )
+                    contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+                    self.context.logger.info(
+                        "requesting batch transaction hash, sending {} to {}, message={}".format(
+                            contract_api_msg.performative,
+                            strategy.contract_id,
+                            contract_api_msg,
+                        )
+                    )
+                    self.context.outbox.put_message(message=contract_api_msg)
+                elif strategy.ledger_id == FetchAIApi.identifier:
+                    public_key = self.context.public_keys.get(strategy.ledger_id, None)
+                    if public_key is None:
+                        self.context.logger.info(
+                            f"Agent has no public key for {strategy.ledger_id}."
+                        )
+                        return
+                    fipa_msg = fipa_dialogue.reply(
+                        performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
+                        info={"public_key": public_key},
+                    )
+                    self.context.outbox.put_message(message=fipa_msg)
+                    self.context.logger.info(
+                        "sending {} to {} (as {}), message={}.".format(
+                            fipa_msg.performative.value,
+                            fipa_msg.to[-5:],
+                            fipa_dialogue.role,
+                            fipa_msg,
+                        )
+                    )
+                else:
+                    enforce(False, f"Unidentified ledger id: {strategy.ledger_id}")
             else:
                 signing_dialogues = cast(
                     SigningDialogues, self.context.signing_dialogues
@@ -356,44 +375,96 @@ class FipaNegotiationHandler(Handler):
 
         :param match_accept: the MatchAccept message
         :param fipa_dialogue: the fipa_dialogue
-        :return: None
         """
-        counterparty_signature = match_accept.info.get("signature")
-        if counterparty_signature is None:
-            self.context.logger.info(
-                f"{match_accept.performative} did not contain counterparty signature!"
-            )
-            return
-        fipa_dialogue.counterparty_signature = counterparty_signature
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_contract_tx:
-            contract_api_dialogues = cast(
-                ContractApiDialogues, self.context.contract_api_dialogues
-            )
-            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
-                ledger_id=strategy.ledger_id,
-                contract_id=strategy.contract_id,
-                contract_address=strategy.contract_address,
-                callable="get_atomic_swap_batch_transaction",
-                kwargs=ContractApiMessage.Kwargs(
-                    strategy.kwargs_from_terms(
-                        fipa_dialogue.terms, signature=counterparty_signature,
+            if strategy.ledger_id == FetchAIApi.identifier:
+                counterparty_public_key = match_accept.info.get("public_key", None)
+                if counterparty_public_key is None:
+                    self.context.logger.info(
+                        f"{match_accept.performative} did not contain counterparty public_key!"
                     )
-                ),
-            )
-            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-            contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            self.context.logger.info(
-                "requesting batch atomic swap transaction, sending {} to {}, message={}".format(
-                    contract_api_msg.performative,
-                    strategy.contract_id,
-                    contract_api_msg,
+                    return
+                sender_public_key = self.context.public_keys.get(
+                    strategy.ledger_id, None
                 )
-            )
-            self.context.outbox.put_message(message=contract_api_msg)
+                if sender_public_key is None:
+                    self.context.logger.info(
+                        f"Agent has no public key for {strategy.ledger_id}."
+                    )
+                    return
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
+                )
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+                    ledger_id=strategy.ledger_id,
+                    contract_id=strategy.contract_id,
+                    contract_address=strategy.contract_address,
+                    callable="get_atomic_swap_batch_transaction",
+                    kwargs=ContractApiMessage.Kwargs(
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms,
+                            sender_public_key=sender_public_key,
+                            counterparty_public_key=counterparty_public_key,
+                        )
+                    ),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+                self.context.logger.info(
+                    "requesting batch atomic swap transaction, sending {} to {}, message={}".format(
+                        contract_api_msg.performative,
+                        strategy.contract_id,
+                        contract_api_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=contract_api_msg)
+            elif strategy.ledger_id == EthereumApi.identifier:
+                counterparty_signature = match_accept.info.get("signature")
+                if counterparty_signature is None:
+                    self.context.logger.info(
+                        f"{match_accept.performative} did not contain counterparty signature!"
+                    )
+                    return
+                fipa_dialogue.counterparty_signature = counterparty_signature
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
+                )
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+                    ledger_id=strategy.ledger_id,
+                    contract_id=strategy.contract_id,
+                    contract_address=strategy.contract_address,
+                    callable="get_atomic_swap_batch_transaction",
+                    kwargs=ContractApiMessage.Kwargs(
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms, signature=counterparty_signature,
+                        )
+                    ),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                contract_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+                self.context.logger.info(
+                    "requesting batch atomic swap transaction, sending {} to {}, message={}".format(
+                        contract_api_msg.performative,
+                        strategy.contract_id,
+                        contract_api_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=contract_api_msg)
+            else:
+                enforce(False, f"Unidentified ledger id: {strategy.ledger_id}")
         else:
+            counterparty_signature = match_accept.info.get("signature")
+            if counterparty_signature is None:
+                self.context.logger.info(
+                    f"{match_accept.performative} did not contain counterparty signature!"
+                )
+                return
+            fipa_dialogue.counterparty_signature = counterparty_signature
             transactions = cast(Transactions, self.context.transactions)
             terms = transactions.pop_pending_initial_acceptance(
                 fipa_dialogue.dialogue_label, match_accept.target
@@ -418,24 +489,194 @@ class FipaNegotiationHandler(Handler):
             self.context.decision_maker_message_queue.put(signing_msg)
 
 
-class SigningHandler(Handler):
-    """This class implements the transaction handler."""
+class CosmTradeHandler(Handler):
+    """This class implements the cosm_trade negotiation handler."""
 
-    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
+    SUPPORTED_PROTOCOL = CosmTradeMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Dispatch message to relevant handler and respond.
 
         :param message: the message
-        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        enforce(
+            strategy.is_contract_tx,
+            "A cosm_trade dialogue is only used in the contract-based TAC",
+        )
+        enforce(
+            strategy.ledger_id == FetchAIApi.identifier,
+            "A cosm_trade dialogue is only used in the fetchai-based TAC",
+        )
+
+        cosm_trade_msg = cast(CosmTradeMessage, message)
+
+        # recover dialogue
+        cosm_trade_dialogues = cast(
+            CosmTradeDialogues, self.context.cosm_trade_dialogues
+        )
+        cosm_trade_dialogue = cast(
+            CosmTradeDialogue, cosm_trade_dialogues.update(cosm_trade_msg)
+        )
+        if cosm_trade_dialogue is None:
+            self._handle_unidentified_dialogue(cosm_trade_msg)
+            return
+
+        self.context.logger.info(
+            "received {} from {} (as {}), message={}".format(
+                cosm_trade_msg.performative.value,
+                cosm_trade_msg.sender[-5:],
+                cosm_trade_dialogue.role,
+                cosm_trade_msg,
+            )
+        )
+        if (
+            cosm_trade_msg.performative
+            == CosmTradeMessage.Performative.INFORM_SIGNED_TRANSACTION
+        ):
+            self._on_signed_tx(cosm_trade_msg, cosm_trade_dialogue)
+        elif cosm_trade_msg.performative == CosmTradeMessage.Performative.ERROR:
+            self._on_error(cosm_trade_msg, cosm_trade_dialogue)
+        elif cosm_trade_msg.performative == CosmTradeMessage.Performative.END:
+            self._on_end(cosm_trade_msg, cosm_trade_dialogue)
+
+    def teardown(self) -> None:
+        """Implement the handler teardown."""
+
+    def _handle_unidentified_dialogue(self, cosm_trade_msg: CosmTradeMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        Respond to the sender with a default message containing the appropriate error information.
+
+        :param cosm_trade_msg: the message
+        """
+        self.context.logger.info(
+            "received invalid cosm_trade message={}, unidentified dialogue.".format(
+                cosm_trade_msg
+            )
+        )
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+        default_msg, _ = default_dialogues.create(
+            counterparty=cosm_trade_msg.sender,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
+            error_msg="Invalid dialogue.",
+            error_data={"cosm_trade_message": cosm_trade_msg.encode()},
+        )
+        self.context.outbox.put_message(message=default_msg)
+
+    def _on_signed_tx(
+        self, inform_signed_tx: CosmTradeMessage, cosm_trade_dialogue: CosmTradeDialogue
+    ) -> None:
+        """
+        Handle a Propose.
+
+        :param inform_signed_tx: the message containing the signed transaction
+        :param cosm_trade_dialogue: the cosm_trade_dialogue
+        """
+        tx_signed_by_the_other_party = inform_signed_tx.signed_transaction
+        self.context.logger.info(
+            "received inform_signed_tx with signed_tx={}".format(
+                tx_signed_by_the_other_party
+            )
+        )
+
+        fipa_dialogue_ref = inform_signed_tx.fipa_dialogue_id
+        if fipa_dialogue_ref is None:
+            self.context.logger.info(
+                "inform_signed_tx must contain fipa dialogue reference."
+            )
+            return
+
+        fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
+        dialogue_label = DialogueLabel(
+            cast(Tuple[str, str], fipa_dialogue_ref),
+            inform_signed_tx.sender,
+            inform_signed_tx.sender,
+        )
+        fipa_dialogue = cast(
+            FipaDialogue, fipa_dialogues.get_dialogue_from_label(dialogue_label)
+        )
+
+        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+        signing_msg, signing_dialogue = signing_dialogues.create(
+            counterparty=self.context.decision_maker_address,
+            performative=SigningMessage.Performative.SIGN_TRANSACTION,
+            raw_transaction=RawTransaction(
+                ledger_id=tx_signed_by_the_other_party.ledger_id,
+                body=tx_signed_by_the_other_party.body,
+            ),
+            terms=fipa_dialogue.terms,
+        )
+        signing_dialogue = cast(SigningDialogue, signing_dialogue)
+        signing_dialogue.associated_fipa_dialogue = fipa_dialogue
+        signing_dialogue.associated_cosm_trade_dialogue = cosm_trade_dialogue
+        self.context.decision_maker_message_queue.put_nowait(signing_msg)
+        self.context.logger.info(
+            "proposing the transaction to the decision maker. Waiting for confirmation ..."
+        )
+
+    def _on_error(
+        self, error_msg: CosmTradeMessage, cosm_trade_dialogue: CosmTradeDialogue
+    ) -> None:
+        """
+        Handle an Error.
+
+        :param error_msg: the Error message
+        :param cosm_trade_dialogue: the cosm_trade_dialogue
+        """
+        self.context.logger.info(
+            "received cosm_trade_api error message={} in dialogue={}.".format(
+                error_msg, cosm_trade_dialogue
+            )
+        )
+        cosm_trade_dialogues = cast(
+            CosmTradeDialogues, self.context.cosm_trade_dialogues
+        )
+        cosm_trade_dialogues.dialogue_stats.add_dialogue_endstate(
+            CosmTradeDialogue.EndState.FAILED, cosm_trade_dialogue.is_self_initiated
+        )
+
+    def _on_end(
+        self, end_msg: CosmTradeMessage, cosm_trade_dialogue: CosmTradeDialogue
+    ) -> None:
+        """
+        Handle an End.
+
+        :param end_msg: the Accept message
+        :param cosm_trade_dialogue: the fipa_dialogue
+        """
+        self.context.logger.info(
+            "received cosm_trade_api end message={} in dialogue={}.".format(
+                end_msg, cosm_trade_dialogue
+            )
+        )
+        cosm_trade_dialogues = cast(
+            CosmTradeDialogues, self.context.cosm_trade_dialogues
+        )
+        cosm_trade_dialogues.dialogue_stats.add_dialogue_endstate(
+            CosmTradeDialogue.EndState.SUCCESSFUL, cosm_trade_dialogue.is_self_initiated
+        )
+
+
+class SigningHandler(Handler):
+    """This class implements the transaction handler."""
+
+    SUPPORTED_PROTOCOL = SigningMessage.protocol_id  # type: Optional[PublicId]
+
+    def setup(self) -> None:
+        """Implement the setup."""
+
+    def handle(self, message: Message) -> None:
+        """
+        Dispatch message to relevant handler and respond.
+
+        :param message: the message
         """
         signing_msg = cast(SigningMessage, message)
 
@@ -464,17 +705,13 @@ class SigningHandler(Handler):
             self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             "received invalid signing message={}, unidentified dialogue.".format(
@@ -490,7 +727,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
@@ -538,7 +774,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
         if not strategy.is_contract_tx:
@@ -546,6 +781,28 @@ class SigningHandler(Handler):
                 "signed transaction handler only for contract case."
             )
             return
+
+        cosm_trade_dialogue = signing_dialogue.associated_cosm_trade_dialogue
+        if cosm_trade_dialogue is not None:
+            # tx is now signed by both parties, submit to ledger
+            ledger_api_dialogues = cast(
+                LedgerApiDialogues, self.context.ledger_api_dialogues
+            )
+            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                counterparty=LEDGER_API_ADDRESS,
+                performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+                signed_transaction=signing_msg.signed_transaction,
+            )
+            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+            ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
+            self.context.logger.info(
+                "sending {} to ledger {}, message={}".format(
+                    ledger_api_msg.performative, strategy.ledger_id, ledger_api_msg,
+                )
+            )
+            self.context.outbox.put_message(message=ledger_api_msg)
+            return
+
         fipa_dialogue = signing_dialogue.associated_fipa_dialogue
         last_fipa_message = cast(FipaMessage, fipa_dialogue.last_incoming_message)
         enforce(last_fipa_message is not None, "last message not recovered.")
@@ -568,22 +825,44 @@ class SigningHandler(Handler):
             last_fipa_message.performative
             == FipaMessage.Performative.MATCH_ACCEPT_W_INFORM
         ):
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
-            )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-                signed_transaction=signing_msg.signed_transaction,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-            self.context.logger.info(
-                "sending {} to ledger {}, message={}".format(
-                    ledger_api_msg.performative, strategy.ledger_id, ledger_api_msg,
+            if strategy.ledger_id == EthereumApi.identifier:
+                ledger_api_dialogues = cast(
+                    LedgerApiDialogues, self.context.ledger_api_dialogues
                 )
-            )
-            self.context.outbox.put_message(message=ledger_api_msg)
+                ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+                    signed_transaction=signing_msg.signed_transaction,
+                )
+                ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+                ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
+                self.context.logger.info(
+                    "sending {} to ledger {}, message={}".format(
+                        ledger_api_msg.performative, strategy.ledger_id, ledger_api_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=ledger_api_msg)
+            elif strategy.ledger_id == FetchAIApi.identifier:
+                # send the constructed and signed tx to the other party to sign
+                cosm_trade_dialogues = cast(
+                    CosmTradeDialogues, self.context.cosm_trade_dialogues
+                )
+                cosm_trade_msg, _ = cosm_trade_dialogues.create(
+                    counterparty=signing_dialogue.associated_fipa_dialogue.dialogue_label.dialogue_opponent_addr,
+                    performative=CosmTradeMessage.Performative.INFORM_SIGNED_TRANSACTION,
+                    signed_transaction=signing_msg.signed_transaction,
+                    fipa_dialogue_id=signing_dialogue.associated_fipa_dialogue.dialogue_label.dialogue_reference,
+                )
+                self.context.logger.info(
+                    "sending {} to {}, message={}.".format(
+                        cosm_trade_msg.performative.value,
+                        cosm_trade_msg.to[-5:],
+                        cosm_trade_msg,
+                    )
+                )
+                self.context.outbox.put_message(message=cosm_trade_msg)
+            else:
+                enforce(False, f"Unidentified ledger id: {strategy.ledger_id}")
         else:
             enforce(
                 False, "last message should be of performative accept or match accept."
@@ -597,7 +876,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "transaction signing was not successful. Error_code={} in dialogue={}".format(
@@ -613,7 +891,6 @@ class SigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle signing message of performative={} in dialogue={}.".format(
@@ -635,7 +912,6 @@ class LedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -669,17 +945,13 @@ class LedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -691,7 +963,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -705,7 +977,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of transaction_digest performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -725,7 +997,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of transaction_receipt performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         is_transaction_successful = LedgerApis.is_transaction_settled(
             ledger_api_msg.transaction_receipt.ledger_id,
@@ -750,7 +1022,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -765,7 +1037,7 @@ class LedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -781,18 +1053,13 @@ class OefSearchHandler(Handler):
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -818,17 +1085,13 @@ class OefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.warning(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -846,7 +1109,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_success_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search success message={} in dialogue={}.".format(
@@ -899,7 +1161,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_error_msg: the oef search msg
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "received OEF Search error: dialogue_reference={}, oef_error_operation={}".format(
@@ -929,7 +1190,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the search result
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         agents = list(oef_search_msg.agents)
         search_id = oef_search_msg.dialogue_reference[0]
@@ -949,8 +1209,8 @@ class OefSearchHandler(Handler):
         Handle the search response.
 
         :param agents: the agents returned by the search
+        :param search_id: the search id
         :param is_searching_for_sellers: whether the agent is searching for sellers
-        :return: None
         """
         searched_for = "sellers" if is_searching_for_sellers else "buyers"
         if len(agents) > 0:
@@ -988,7 +1248,6 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
@@ -1010,7 +1269,6 @@ class ContractApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         contract_api_msg = cast(ContractApiMessage, message)
 
@@ -1040,11 +1298,7 @@ class ContractApiHandler(Handler):
             self._handle_invalid(contract_api_msg, contract_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(
         self, contract_api_msg: ContractApiMessage
@@ -1052,7 +1306,7 @@ class ContractApiHandler(Handler):
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param contract_api_msg: the message
         """
         self.context.logger.info(
             "received invalid contract_api message={}, unidentified dialogue.".format(
@@ -1068,7 +1322,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of raw_message performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info("received raw message={}".format(contract_api_msg))
@@ -1100,7 +1354,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of raw_transaction performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info("received raw transaction={}".format(contract_api_msg))
@@ -1128,7 +1382,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -1145,7 +1399,7 @@ class ContractApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param contract_api_message: the ledger api message
+        :param contract_api_msg: the ledger api message
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(

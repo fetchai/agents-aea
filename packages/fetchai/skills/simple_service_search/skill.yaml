@@ -1,17 +1,17 @@
 name: simple_service_search
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdwNVXwPsrA2sYiGae2koQjETVTfxLe6VXyfS3ya5KnyG
-  __init__.py: QmdarQtg7nP3omi3i5pD2A4ks3jzjPdGWovMtwXerwH977
-  behaviours.py: QmR8TNUk3ZsjpWqimohoQr9e1txN5D3AWntjky8mBxdiRZ
-  dialogues.py: QmVJ1fffYf48Sa7bqMVE8dLeeEeV9P5g8Lbs62qCiz56Js
-  handlers.py: QmXdXaT8HUUMHHVU7zyYvxbuhK7AuVPYJDKr1n1XRkkFCE
-  strategy.py: QmYpHUZ1pbMxucUC4m9PYrFe4jG5Y7cdQsED6A1xUvRQDp
+  __init__.py: QmR6qmvojcetrdbB1zQTrCv3g5gh4cwZS3U2Yz7T5EQX6m
+  behaviours.py: QmTYCpZK1cbyyY1C6xB47V8kXYRb8oPnEgJxuSs1o3MSNj
+  dialogues.py: QmS9AHkRVpVn6nBZsXWwEyBDZDyqeE57oxsbyQ4bNuuboY
+  handlers.py: QmSZ4ejqR5xgysDfZsAsyEwomrHByUq5c2akFpQpKVWv2T
+  strategy.py: QmfT9otNcPdbJKe1bG6gUL9ZCoWvD5ZokH1f1MNXC9Eufc
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []

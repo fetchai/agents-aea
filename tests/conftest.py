@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-import contextlib
 import difflib
 import inspect
 import logging
@@ -27,7 +26,6 @@ import random
 import shutil
 import socket
 import string
-import subprocess  # nosec
 import sys
 import tempfile
 import threading
@@ -52,9 +50,15 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import DEFAULT_CLI_COMMAND, FetchAICrypto
+from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
+from cosmpy.common.rest_client import RestClient
+from cosmpy.crypto.address import Address as CosmpyAddress
+from cosmpy.crypto.keypairs import PrivateKey
+from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -81,7 +85,7 @@ from aea.crypto.ledger_apis import (
     ETHEREUM_DEFAULT_CURRENCY_DENOM,
     FETCHAI_DEFAULT_ADDRESS,
 )
-from aea.crypto.registries import ledger_apis_registry, make_crypto
+from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
@@ -102,6 +106,9 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
+from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
+    P2PLibp2pMailboxConnection,
+)
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
 from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
@@ -111,6 +118,7 @@ from tests.common.docker_image import (
     FetchLedgerDockerImage,
     GanacheDockerImage,
     OEFSearchDockerImage,
+    SOEFDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -152,14 +160,14 @@ DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 
 # URL to local Fetch ledger instance
-DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.2.7"
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
-DEFAULT_FETCH_ADDR_REMOTE = "https://rpc-agent-land.fetch.ai:443"
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-stargateworld.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "agent-land"
+DEFAULT_FETCH_CHAIN_ID = "stargateworld-3"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -206,7 +214,7 @@ NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
     "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
 )
 FUNDED_FETCHAI_PRIVATE_KEY_1 = (
-    "f848e125edb124d7752338fdd15825cd031b8c7f38627ec50ccccb7d75ecffdb"
+    "bbaef7511f275dc15f47436d14d6d3c92d4d01befea073d23d0c2750a46f6cb3"
 )
 FUNDED_FETCHAI_PRIVATE_KEY_2 = (
     "9d6459d1f93dd153335291af940f6b5224a34a9a1e1062e2158a45fa4901ed3f"
@@ -219,7 +227,7 @@ ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
 FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
-FUNDED_FETCHAI_ADDRESS_ONE = "fetch1dm72s3yravky6t7rp3daajwwsz2vrqd86g2v47"
+FUNDED_FETCHAI_ADDRESS_ONE = "fetch1k9dns2fd74644g0q9mfpsmfeqg0h2ym2cm6wdh"
 FUNDED_FETCHAI_ADDRESS_TWO = "fetch1x2vfp8ec2yk8nnlzn52agflpmpwtucm6yj2hw4"
 
 # P2P addresses
@@ -274,7 +282,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.26.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.27.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -716,7 +724,7 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
 
 @pytest.mark.integration
 @pytest.mark.ledger
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def ganache(
     ganache_configuration,
     ganache_addr,
@@ -733,11 +741,25 @@ def ganache(
 
 
 @pytest.mark.integration
+@pytest.fixture(scope="class")
+def soef(
+    soef_addr: str = "http://127.0.0.1",
+    soef_port: int = 12002,
+    timeout: float = 2.0,
+    max_attempts: int = 50,
+):
+    """Launch the soef image."""
+    client = docker.from_env()
+    image = SOEFDockerImage(client, soef_addr, soef_port)
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+@pytest.mark.integration
 @pytest.mark.ledger
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 4,
+    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20,
 ):
     """Launch the Fetch ledger image."""
     client = docker.from_env()
@@ -769,12 +791,14 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
     else:
-        logger.info("Done!")
-        time.sleep(timeout)
-        yield
-        logger.info(f"Stopping the image {image.tag}...")
-        container.stop()
-        container.remove()
+        try:
+            logger.info("Done!")
+            time.sleep(timeout)
+            yield
+        finally:
+            logger.info(f"Stopping the image {image.tag}...")
+            container.stop()
+            container.remove()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -817,13 +841,14 @@ def _make_dummy_connection() -> Connection:
     dummy_connection = DummyConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", "address"),
+        identity=Identity("name", "address", "public_key"),
     )
     return dummy_connection
 
 
 def _make_local_connection(
     address: Address,
+    public_key: str,
     node: LocalNode,
     restricted_to_protocols=None,
     excluded_protocols=None,
@@ -836,33 +861,35 @@ def _make_local_connection(
     oef_local_connection = OEFLocalConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
         local_node=node,
     )
     return oef_local_connection
 
 
-def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
+def _make_oef_connection(
+    address: Address, public_key: str, oef_addr: str, oef_port: int
+):
     configuration = ConnectionConfig(
         addr=oef_addr, port=oef_port, connection_id=OEFConnection.connection_id
     )
     oef_connection = OEFConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
     )
     oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
     return oef_connection
 
 
-def _make_tcp_server_connection(address: str, host: str, port: int):
+def _make_tcp_server_connection(address: str, public_key: str, host: str, port: int):
     configuration = ConnectionConfig(
         address=host, port=port, connection_id=TCPServerConnection.connection_id
     )
     tcp_connection = TCPServerConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
     )
     tcp_connection._default_logger_name = (
         "aea.packages.fetchai.connections.tcp.tcp_server"
@@ -870,14 +897,14 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
     return tcp_connection
 
 
-def _make_tcp_client_connection(address: str, host: str, port: int):
+def _make_tcp_client_connection(address: str, public_key: str, host: str, port: int):
     configuration = ConnectionConfig(
         address=host, port=port, connection_id=TCPClientConnection.connection_id
     )
     tcp_connection = TCPClientConnection(
         configuration=configuration,
         data_dir=MagicMock(),
-        identity=Identity("name", address),
+        identity=Identity("name", address, public_key),
     )
     tcp_connection._default_logger_name = (
         "aea.packages.fetchai.connections.tcp.tcp_client"
@@ -911,9 +938,12 @@ def _make_libp2p_connection(
     host: str = "127.0.0.1",
     relay: bool = True,
     delegate: bool = False,
+    mailbox: bool = False,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
     delegate_port: int = 11234,
     delegate_host: str = "127.0.0.1",
+    mailbox_port: int = 8888,
+    mailbox_host: str = "127.0.0.1",
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
@@ -927,7 +957,7 @@ def _make_libp2p_connection(
     key = agent_key
     if key is None:
         key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("identity", address=key.address)
+    identity = Identity("identity", address=key.address, public_key=key.public_key)
     conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
@@ -984,6 +1014,12 @@ def _make_libp2p_connection(
             build_directory=build_directory,
             cert_requests=[cert_request],
         )
+
+    if mailbox:
+        configuration.config["mailbox_uri"] = f"{mailbox_host}:{mailbox_port}"
+    else:
+        configuration.config["mailbox_uri"] = ""
+
     if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
         build_node(build_directory)
     connection = P2PLibp2pConnection(
@@ -1006,7 +1042,9 @@ def _make_libp2p_client_connection(
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
-    identity = Identity("identity", address=crypto.address)
+    identity = Identity(
+        "identity", address=crypto.address, public_key=crypto.public_key
+    )
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
@@ -1031,6 +1069,48 @@ def _make_libp2p_client_connection(
         cert_requests=[cert_request],
     )
     return P2PLibp2pClientConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
+
+
+def _make_libp2p_mailbox_connection(
+    peer_public_key: str,
+    data_dir: str,
+    node_port: int = 8888,
+    node_host: str = "127.0.0.1",
+    uri: Optional[str] = None,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+) -> P2PLibp2pMailboxConnection:
+    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+        raise ValueError("Data dir must be directory and exist!")
+    crypto = make_crypto(ledger_api_id)
+    identity = Identity(
+        "identity", address=crypto.address, public_key=crypto.public_key
+    )
+    cert_request = CertRequest(
+        peer_public_key,
+        POR_DEFAULT_SERVICE_ID,
+        ledger_api_id,
+        "2021-01-01",
+        "2021-01-02",
+        "{public_key}",
+        f"./{crypto.address}_cert.txt",
+    )
+    _process_cert(crypto, cert_request, path_prefix=data_dir)
+    configuration = ConnectionConfig(
+        tcp_key_file=None,
+        nodes=[
+            {
+                "uri": str(uri)
+                if uri is not None
+                else "{}:{}".format(node_host, node_port),
+                "public_key": peer_public_key,
+            },
+        ],
+        connection_id=P2PLibp2pMailboxConnection.connection_id,
+        cert_requests=[cert_request],
+    )
+    return P2PLibp2pMailboxConnection(
         configuration=configuration, data_dir=data_dir, identity=identity
     )
 
@@ -1179,7 +1259,7 @@ def check_test_threads(request):
 async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("name", crypto.address)
+    identity = Identity("name", crypto.address, crypto.public_key)
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
@@ -1345,13 +1425,20 @@ def docker_exec_cmd(image_tag: str, cmd: str, **kwargs):
 
 
 def fund_accounts_from_local_validator(
-    addresses: str, amount: int, denom: str = DEFAULT_DENOMINATION
+    addresses: List[str], amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
+    rest_client = RestClient(
+        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}"
+    )
+    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
+
+    time.sleep(FETCHD_INITIAL_TX_SLEEP)
+    client = SigningCosmWasmClient(pk, rest_client, DEFAULT_FETCH_CHAIN_ID)
+    coins = [Coin(amount=str(amount), denom=denom)]
+
     for address in addresses:
-        time.sleep(FETCHD_INITIAL_TX_SLEEP)
-        cmd = f'sh -c "echo y | {DEFAULT_CLI_COMMAND} tx send {DEFAULT_GENESIS_ACCOUNT} {address} {amount}{denom} --chain-id {DEFAULT_FETCH_CHAIN_ID}"'
-        docker_exec_cmd(DEFAULT_FETCH_DOCKER_IMAGE_TAG, cmd)
+        client.send_tokens(CosmpyAddress(address), coins)
 
 
 @pytest.fixture()
@@ -1360,27 +1447,6 @@ def fund_fetchai_accounts(fetchd):
     fund_accounts_from_local_validator(
         [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
     )
-
-
-@contextlib.contextmanager
-def use_local_fetchcli_config():
-    """Context manager for temporarily configuring the Fetch CLI for the locally running test node"""
-    cmd = [
-        DEFAULT_CLI_COMMAND,
-        "config",
-        "node",
-        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_RPC_PORT}",
-    ]
-    logger.info(
-        f"Directing the Fetch ledger CLI to the locally running test node: {cmd}"
-    )
-    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
-    yield
-    cmd = [DEFAULT_CLI_COMMAND, "config", "node", DEFAULT_FETCH_ADDR_REMOTE]
-    logger.info(
-        f"Directing the Fetch ledger CLI back to the default remote endpoint {cmd}"
-    )
-    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
 
 
 def env_path_separator() -> str:
@@ -1419,6 +1485,15 @@ class UseGanache:
     @pytest.fixture(autouse=True)
     def _start_ganache(self, ganache):
         """Start a Ganache image."""
+
+
+@pytest.mark.integration
+class UseSOEF:
+    """Inherit from this class to use SOEF."""
+
+    @pytest.fixture(autouse=True)
+    def _start_soef(self, soef):
+        """Start an SOEF image."""
 
 
 @pytest.mark.integration
@@ -1469,3 +1544,42 @@ def method_scope(cls):
     cls.setup = lambda self: old_setup_class()
     cls.teardown = lambda self: old_teardown_class()
     return cls
+
+
+def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
+    """
+     Get wealth from fetch.ai faucet to specific address
+
+    :param: address: Addresse to be funded from faucet
+    """
+    if fetchai_api is None:
+        fetchai_api = make_ledger_api(
+            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        )
+
+    balance = fetchai_api.get_balance(address)
+    if balance == 0:
+        FetchAIFaucetApi().get_wealth(address)
+
+        timeout = 0
+        while timeout < 40 and balance == 0:
+            time.sleep(1)
+            timeout += 1
+            _balance = fetchai_api.get_balance(address)
+            balance = _balance if _balance is not None else 0
+
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_logging_handlers_cleanup(request) -> Generator:
+    """
+    Fix for pytest flaky crash, disable handlers cleanup.
+
+    Check https://github.com/fetchai/agents-aea/issues/2431
+    """
+
+    def do_nothing(*args):
+        pass
+
+    with MonkeyPatch().context() as mp:
+        mp.setattr(logging.config, "_clearExistingHandlers", do_nothing)
+        yield

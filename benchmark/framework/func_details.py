@@ -108,8 +108,6 @@ class BenchmarkFuncDetails(BaseFuncDetails):
         Check for docstring and arguments have default values set.
 
         Raises exception if function definition does not contain docstring or default values.
-
-        :return: None
         """
         if not self.doc:
             raise ValueError("Function docstring is missing")

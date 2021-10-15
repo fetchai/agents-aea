@@ -78,11 +78,7 @@ class Transactions(Model):
         return str(self._nonce)
 
     def update_confirmed_transactions(self) -> None:
-        """
-        Update model wrt to confirmed transactions.
-
-        :return: None
-        """
+        """Update model wrt to confirmed transactions."""
         confirmed_tx_ids = self.context.shared_state.pop(
             "confirmed_tx_ids", []
         )  # type: List[str]
@@ -93,11 +89,7 @@ class Transactions(Model):
             self._locked_txs_as_seller.pop(transaction_id, None)
 
     def cleanup_pending_transactions(self) -> None:
-        """
-        Remove all the pending messages (i.e. either proposals or acceptances) that have been stored for an amount of time longer than the timeout.
-
-        :return: None
-        """
+        """Remove all the pending messages (i.e. either proposals or acceptances) that have been stored for an amount of time longer than the timeout."""
         queue = self._last_update_for_transactions
         timeout = datetime.timedelta(0, self._pending_transaction_timeout)
 
@@ -136,9 +128,6 @@ class Transactions(Model):
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
         :param terms: the terms
-        :raise AEAEnforceError: if the pending proposal is already present.
-
-        :return: None
         """
         enforce(
             dialogue_label not in self._pending_proposals
@@ -155,9 +144,7 @@ class Transactions(Model):
 
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
-        :raise AEAEnforceError: if the pending proposal is not present.
-
-        :return: the transaction message
+        :return: terms
         """
         enforce(
             dialogue_label in self._pending_proposals
@@ -176,9 +163,6 @@ class Transactions(Model):
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
         :param terms: the terms
-        :raise AEAEnforceError: if the pending acceptance is already present.
-
-        :return: None
         """
         enforce(
             dialogue_label not in self._pending_initial_acceptances
@@ -195,8 +179,6 @@ class Transactions(Model):
 
         :param dialogue_label: the dialogue label associated with the proposal
         :param proposal_id: the message id of the proposal
-        :raise AEAEnforceError: if the pending acceptance is not present.
-
         :return: the transaction message
         """
         enforce(
@@ -212,8 +194,6 @@ class Transactions(Model):
         Register a transaction with a creation datetime.
 
         :param transaction_id: the transaction id
-
-        :return: None
         """
         now = datetime.datetime.now()
         self._last_update_for_transactions.append((now, transaction_id))
@@ -224,9 +204,6 @@ class Transactions(Model):
 
         :param terms: the terms
         :param role: the role of the agent (seller or buyer)
-        :raise AEAEnforceError: if the transaction is already present.
-
-        :return: None
         """
         as_seller = role == FipaDialogue.Role.SELLER
 
@@ -247,8 +224,6 @@ class Transactions(Model):
         Remove a lock (in the form of a transaction).
 
         :param terms: the terms
-        :raise AEAEnforceError: if the transaction with the given transaction id has not been found.
-
         :return: the transaction
         """
         transaction_id = terms.id
@@ -268,7 +243,6 @@ class Transactions(Model):
         This assumes, that all the locked transactions will be successful.
 
         :param is_seller: Boolean indicating the role of the agent.
-
         :return: the agent state with the locks applied to current state
         """
         all_terms = (

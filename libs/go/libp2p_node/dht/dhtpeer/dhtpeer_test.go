@@ -22,6 +22,9 @@ package dhtpeer
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"math/rand"
@@ -32,6 +35,7 @@ import (
 	"testing"
 	"time"
 
+	"libp2p_node/acn"
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
 	"libp2p_node/dht/dhtnode"
@@ -50,7 +54,7 @@ const (
 	DefaultLocalPort    = 2000
 	DefaultDelegatePort = 3000
 
-	EnvelopeDeliveryTimeout = 20 * time.Second
+	EnvelopeDeliveryTimeout = 1 * time.Second
 	DHTPeerSetupTimeout     = 5 * time.Second
 
 	DefaultLedger = dhtnode.DefaultLedger
@@ -135,7 +139,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
 
-	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = AgentsTestAddresses[0]
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = FetchAITestPublicKeys[0]
@@ -722,7 +726,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer peerCleanup2()
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	client, clientCleanup, err := SetupDelegateClient(
 		AgentsTestKeys[2],
 		DefaultLocalHost,
@@ -734,7 +738,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer1 := make(chan *aea.Envelope, 2)
+	rxPeer1 := make(chan *aea.Envelope, 20)
 	peer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		return nil
@@ -749,7 +753,6 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
 	}
-
 	expectEnvelope(t, rxPeer1)
 
 	err = peer1.RouteEnvelope(&aea.Envelope{
@@ -759,7 +762,6 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
 	}
-
 	expectEnvelope(t, client.Rx)
 }
 
@@ -809,7 +811,7 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
-	max := 100
+	max := 10
 	i := 0
 	for x := 0; x < max; x++ {
 		envelope := &aea.Envelope{
@@ -1265,7 +1267,8 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
+
 	err = delegateClient.Send(&aea.Envelope{
 		To:     AgentsTestAddresses[2],
 		Sender: AgentsTestAddresses[3],
@@ -1353,6 +1356,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	rxs = append(rxs, rxPeerDHT2)
+
 	send = append(send, func(envel *aea.Envelope) error {
 		return dhtPeer2.RouteEnvelope(envel)
 	})
@@ -1618,7 +1622,342 @@ func TestRoutingAllToAll(t *testing.T) {
 
 }
 
-// Crypto operations
+/*
+	Helpers
+	TOFIX(LR) how to share test helpers between packages tests
+	 without having circular dependencies
+*/
+
+func randSeq(n int) string {
+	rand.Seed(time.Now().UnixNano())
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func SetupLocalDHTPeer(
+	key string,
+	agentKey string,
+	dhtPort uint16,
+	delegatePort uint16,
+	entry []string,
+) (*DHTPeer, func(), error) {
+	opts := []Option{
+		LocalURI(DefaultLocalHost, dhtPort),
+		PublicURI(DefaultLocalHost, dhtPort),
+		IdentityFromFetchAIKey(key),
+		EnableRelayService(),
+		BootstrapFrom(entry),
+		StoreRecordsTo(path.Join(os.TempDir(), "agents_records_"+randSeq(5))),
+	}
+
+	if agentKey != "" {
+		agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		record := &acn.AgentRecord{LedgerId: DefaultLedger}
+		record.Address = agentAddress
+		record.PublicKey = agentPubKey
+		record.PeerPublicKey = peerPubKey
+		record.Signature = signature
+
+		opts = append(opts, RegisterAgentAddress(record, func() bool { return true }))
+	}
+
+	if delegatePort != 0 {
+		opts = append(opts, EnableDelegateService(delegatePort))
+	}
+
+	dhtPeer, err := New(opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return dhtPeer, func() { dhtPeer.Close() }, nil
+
+}
+
+// DHTClient
+
+func SetupDHTClient(
+	key string,
+	agentKey string,
+	entry []string,
+) (*dhtclient.DHTClient, func(), error) {
+
+	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
+	record.Address = agentAddress
+	record.PublicKey = agentPubKey
+	record.PeerPublicKey = peerPubKey
+	record.Signature = signature
+
+	opts := []dhtclient.Option{
+		dhtclient.IdentityFromFetchAIKey(key),
+		dhtclient.RegisterAgentAddress(record, func() bool { return true }),
+		dhtclient.BootstrapFrom(entry),
+	}
+
+	dhtClient, err := dhtclient.New(opts...)
+	if err != nil {
+		println("dhtclient.New:", err.Error())
+		return nil, nil, err
+	}
+
+	return dhtClient, func() { dhtClient.Close() }, nil
+}
+
+// Delegate tcp client for tests only
+
+type DelegateClient struct {
+	AgentAddress    string
+	AgentKey        string
+	AgentPubKey     string
+	PeerPubKey      string
+	PoR             string
+	Rx              chan *aea.Envelope
+	Conn            net.Conn
+	processEnvelope func(*aea.Envelope) error
+	acn_status_chan chan *acn.StatusBody
+}
+
+func (client *DelegateClient) AddAcnStatusMessage(status *acn.StatusBody, counterpartyID string) {
+	//client.acn_status_chan <- status
+}
+
+func (client *DelegateClient) Close() error {
+	return client.Conn.Close()
+}
+
+func (client *DelegateClient) Send(envelope *aea.Envelope) error {
+	data, err := aea.MakeAcnMessageFromEnvelope(envelope)
+	if err != nil {
+		println("while serializing envelope:", err.Error())
+		return err
+	}
+	err = utils.WriteBytesConn(client.Conn, data)
+	if err != nil {
+		println("while sending envelope:", err.Error())
+		return err
+	}
+	return err
+}
+
+func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
+	client.processEnvelope = fn
+}
+
+func ValidateTLSSignature(
+	tlsSignature []byte,
+	sessionPubKey *ecdsa.PublicKey,
+	peerPubKey string,
+) error {
+	sessionPubKeyBytes := elliptic.Marshal(sessionPubKey.Curve, sessionPubKey.X, sessionPubKey.Y)
+	verifyKey, err := utils.PubKeyFromFetchAIPublicKey(peerPubKey)
+	if err != nil {
+		return err
+	}
+	ok, err := verifyKey.Verify(sessionPubKeyBytes, tlsSignature)
+
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("error on signature validation for tls start")
+	}
+	return nil
+}
+
+func SetupDelegateClient(
+	key string,
+	host string,
+	port uint16,
+	peerPubKey string,
+) (*DelegateClient, func(), error) {
+	var err error
+	client := &DelegateClient{}
+	client.AgentKey = key
+
+	client.acn_status_chan = make(chan *acn.StatusBody, 10000)
+
+	pubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	client.AgentPubKey = pubKey
+
+	address, err := utils.FetchAIAddressFromPublicKey(pubKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	client.AgentAddress = address
+
+	signature, err := utils.SignFetchAI([]byte(peerPubKey), key)
+	if err != nil {
+		return nil, nil, err
+	}
+	client.PoR = signature
+
+	client.Rx = make(chan *aea.Envelope, 2)
+	conf := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	client.Conn, err = tls.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10), conf)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	certPubKey := client.Conn.(*tls.Conn).ConnectionState().PeerCertificates[0].PublicKey.(*ecdsa.PublicKey)
+
+	tlsSignature, _ := utils.ReadBytesConn(client.Conn)
+	err = ValidateTLSSignature(tlsSignature, certPubKey, peerPubKey)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
+	record.Address = address
+	record.PublicKey = pubKey
+	record.PeerPublicKey = peerPubKey
+	record.Signature = signature
+	registration := &acn.RegisterPerformative{Record: record}
+	msg := &acn.AcnMessage{
+		Performative: &acn.Register{Register: registration},
+	}
+	data, err := proto.Marshal(msg)
+	ignore(err)
+	err = utils.WriteBytesConn(client.Conn, data)
+	ignore(err)
+	data, err = utils.ReadBytesConn(client.Conn)
+	if err != nil {
+		return nil, nil, err
+	}
+	response := &acn.AcnMessage{}
+	err = proto.Unmarshal(data, response)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get Status message
+	var status *acn.StatusPerformative
+	switch pl := response.Performative.(type) {
+	case *acn.Status:
+		status = pl.Status
+	default:
+		return nil, nil, err
+	}
+
+	if status.Body.Code != acn.SUCCESS {
+		println("Registration error:", status.Body.String())
+		return nil, nil, errors.New(status.Body.String())
+	}
+
+	pipe := utils.ConnPipe{Conn: client.Conn}
+	go func() {
+		for {
+			envel, err := aea.HandleAcnMessageFromPipe(pipe, client, "")
+			if err != nil {
+				break
+			}
+			if envel == nil {
+				continue
+			}
+			_ = acn.SendAcnSuccess(pipe)
+
+			if client.processEnvelope != nil {
+				err = client.processEnvelope(envel)
+				ignore(err)
+			} else {
+				client.Rx <- envel
+			}
+		}
+	}()
+
+	return client, func() { client.Close() }, nil
+}
+
+func expectEnvelope(t *testing.T, rx chan *aea.Envelope) {
+	timeout := time.After(EnvelopeDeliveryTimeout)
+	select {
+	case envel := <-rx:
+		t.Log("Received envelope", envel)
+	case <-timeout:
+		t.Error("Failed to receive envelope before timeout")
+	}
+}
+
+func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
+	timeout := time.After(EnvelopeDeliveryTimeout)
+	select {
+	case envel := <-rx:
+		t.Log("Received envelope", envel)
+		if envel == nil {
+			t.Log("Empty envelope. exit")
+			return
+		}
+		message, _ := strconv.Atoi(string(envel.Message))
+		if message != counter {
+			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))
+		}
+	case <-timeout:
+		t.Error("Failed to receive envelope before timeout")
+	}
+}
+
+func ensureAddressAnnounced(peers ...*DHTPeer) {
+	for _, peer := range peers {
+		ctx, cancel := context.WithTimeout(context.Background(), DHTPeerSetupTimeout)
+		defer cancel()
+	L:
+		for !peer.IsAddressAnnounced(peer.myAgentAddress) {
+			select {
+			case <-ctx.Done():
+				break L
+			case <-time.After(5 * time.Millisecond):
+			}
+		}
+	}
+}
 
 func TestFetchAICrypto(t *testing.T) {
 	publicKey := "02358e3e42a6ba15cf6b2ba6eb05f02b8893acf82b316d7dd9cda702b0892b8c71"
@@ -1693,279 +2032,36 @@ func TestEthereumCrypto(t *testing.T) {
 	}
 }
 
-/*
-	Helpers
-	TOFIX(LR) how to share test helpers between packages tests
-	 without having circular dependencies
-*/
+// Perform tests for tls signature generation and checking
+func TestTLSSignatureValidation(t *testing.T) {
+	key1, pubKey, _ := utils.KeyPairFromFetchAIKey(FetchAITestKeys[0])
+	key2, _, _ := utils.KeyPairFromFetchAIKey(FetchAITestKeys[1])
+	peerPubKey, _ := utils.FetchAIPublicKeyFromPubKey(pubKey)
 
-func randSeq(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
-}
+	cert, err := generate_x509_cert()
+	sessionPubKey := cert.PrivateKey.(*ecdsa.PrivateKey).Public().(*ecdsa.PublicKey)
 
-func SetupLocalDHTPeer(
-	key string,
-	agentKey string,
-	dhtPort uint16,
-	delegatePort uint16,
-	entry []string,
-) (*DHTPeer, func(), error) {
-	opts := []Option{
-		LocalURI(DefaultLocalHost, dhtPort),
-		PublicURI(DefaultLocalHost, dhtPort),
-		IdentityFromFetchAIKey(key),
-		EnableRelayService(),
-		BootstrapFrom(entry),
-		StoreRecordsTo(path.Join(os.TempDir(), "agents_records_"+randSeq(5))),
-	}
-
-	if agentKey != "" {
-		agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		record := &aea.AgentRecord{LedgerId: DefaultLedger}
-		record.Address = agentAddress
-		record.PublicKey = agentPubKey
-		record.PeerPublicKey = peerPubKey
-		record.Signature = signature
-
-		opts = append(opts, RegisterAgentAddress(record, func() bool { return true }))
-	}
-
-	if delegatePort != 0 {
-		opts = append(opts, EnableDelegateService(delegatePort))
-	}
-
-	dhtPeer, err := New(opts...)
 	if err != nil {
-		return nil, nil, err
+		t.Fatal("Failed to generate certificate")
 	}
 
-	return dhtPeer, func() { dhtPeer.Close() }, nil
-
-}
-
-// DHTClient
-
-func SetupDHTClient(
-	key string,
-	agentKey string,
-	entry []string,
-) (*dhtclient.DHTClient, func(), error) {
-
-	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
+	// valid
+	tlsSignature, err := makeSessionKeySignature(cert, key1)
 	if err != nil {
-		return nil, nil, err
+		t.Fatal("Failed to make signature")
 	}
-
-	agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
+	err = ValidateTLSSignature(tlsSignature, sessionPubKey, peerPubKey)
 	if err != nil {
-		return nil, nil, err
+		t.Fatal("Signature is invalid, but expected to be ok")
 	}
 
-	peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+	//invalid
+	tlsSignature, err = makeSessionKeySignature(cert, key2)
 	if err != nil {
-		return nil, nil, err
+		t.Fatal("Failed to make signature")
 	}
-
-	signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	record := &aea.AgentRecord{LedgerId: DefaultLedger}
-	record.Address = agentAddress
-	record.PublicKey = agentPubKey
-	record.PeerPublicKey = peerPubKey
-	record.Signature = signature
-
-	opts := []dhtclient.Option{
-		dhtclient.IdentityFromFetchAIKey(key),
-		dhtclient.RegisterAgentAddress(record, func() bool { return true }),
-		dhtclient.BootstrapFrom(entry),
-	}
-
-	dhtClient, err := dhtclient.New(opts...)
-	if err != nil {
-		println("dhtclient.New:", err.Error())
-		return nil, nil, err
-	}
-
-	return dhtClient, func() { dhtClient.Close() }, nil
-}
-
-// Delegate tcp client for tests only
-
-type DelegateClient struct {
-	AgentAddress    string
-	AgentKey        string
-	AgentPubKey     string
-	PeerPubKey      string
-	PoR             string
-	Rx              chan *aea.Envelope
-	Conn            net.Conn
-	processEnvelope func(*aea.Envelope) error
-}
-
-func (client *DelegateClient) Close() error {
-	return client.Conn.Close()
-}
-
-func (client *DelegateClient) Send(envel *aea.Envelope) error {
-	return utils.WriteEnvelopeConn(client.Conn, envel)
-}
-
-func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
-	client.processEnvelope = fn
-}
-
-func SetupDelegateClient(
-	key string,
-	host string,
-	port uint16,
-	peerPubKey string,
-) (*DelegateClient, func(), error) {
-	var err error
-	client := &DelegateClient{}
-	client.AgentKey = key
-
-	pubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
-	if err != nil {
-		return nil, nil, err
-	}
-	client.AgentPubKey = pubKey
-
-	address, err := utils.FetchAIAddressFromPublicKey(pubKey)
-	if err != nil {
-		return nil, nil, err
-	}
-	client.AgentAddress = address
-
-	signature, err := utils.SignFetchAI([]byte(peerPubKey), key)
-	if err != nil {
-		return nil, nil, err
-	}
-	client.PoR = signature
-
-	client.Rx = make(chan *aea.Envelope, 2)
-	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	record := &dhtnode.AgentRecord{LedgerId: DefaultLedger}
-	record.Address = address
-	record.PublicKey = pubKey
-	record.PeerPublicKey = peerPubKey
-	record.Signature = signature
-	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{
-		Version: dhtnode.CurrentVersion,
-		Payload: &dhtnode.AcnMessage_Register{Register: registration},
-	}
-	data, err := proto.Marshal(msg)
-	ignore(err)
-	err = utils.WriteBytesConn(client.Conn, data)
-	ignore(err)
-	data, err = utils.ReadBytesConn(client.Conn)
-	if err != nil {
-		return nil, nil, err
-	}
-	response := &dhtnode.AcnMessage{}
-	err = proto.Unmarshal(data, response)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Get Status message
-	var status *dhtnode.Status
-	switch pl := response.Payload.(type) {
-	case *dhtnode.AcnMessage_Status:
-		status = pl.Status
-	default:
-		return nil, nil, err
-	}
-
-	if status.Code != dhtnode.Status_SUCCESS {
-		println("Registration error:", status.String())
-		return nil, nil, errors.New(status.String())
-	}
-
-	go func() {
-		for {
-			envel, err := utils.ReadEnvelopeConn(client.Conn)
-			if err != nil {
-				break
-			}
-			if client.processEnvelope != nil {
-				err = client.processEnvelope(envel)
-				ignore(err)
-			} else {
-				client.Rx <- envel
-			}
-		}
-	}()
-
-	return client, func() { client.Close() }, nil
-}
-
-func expectEnvelope(t *testing.T, rx chan *aea.Envelope) {
-	timeout := time.After(EnvelopeDeliveryTimeout)
-	select {
-	case envel := <-rx:
-		t.Log("Received envelope", envel)
-	case <-timeout:
-		t.Error("Failed to receive envelope before timeout")
-	}
-}
-
-func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
-	timeout := time.After(EnvelopeDeliveryTimeout)
-	select {
-	case envel := <-rx:
-		t.Log("Received envelope", envel)
-		message, _ := strconv.Atoi(string(envel.Message))
-		if message != counter {
-			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))
-		}
-	case <-timeout:
-		t.Error("Failed to receive envelope before timeout")
-	}
-}
-
-func ensureAddressAnnounced(peers ...*DHTPeer) {
-	for _, peer := range peers {
-		ctx, cancel := context.WithTimeout(context.Background(), DHTPeerSetupTimeout)
-		defer cancel()
-	L:
-		for !peer.addressAnnounced {
-			select {
-			case <-ctx.Done():
-				break L
-			case <-time.After(5 * time.Millisecond):
-			}
-		}
+	err = ValidateTLSSignature(tlsSignature, sessionPubKey, peerPubKey)
+	if err == nil {
+		t.Fatal("Signature is valid, but shoud not")
 	}
 }

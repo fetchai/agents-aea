@@ -41,6 +41,7 @@ WHITELIST_URL_TO_CODE = {
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
     "https://colab.research.google.com": 403,
+    "https://github.com/fetchai/networks-stargateworld": 404,
 }
 
 IGNORE: Set[str] = {"https://faucet.metamask.io/"}
@@ -61,8 +62,8 @@ def is_url_reachable(url: str) -> bool:
         response = requests.head(url, timeout=3)
         if response.status_code == 200:
             return True
-        if response.status_code in [403, 405, 302]:
-            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302]
+        if response.status_code in [403, 405, 302, 404]:
+            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
         return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)
@@ -91,7 +92,6 @@ def validate_internal_url(file: Path, url: str, all_files: Set[Path]) -> None:
     :param file: the file path
     :param url: the url to check
     :param all_files: all the docs files.
-    :return: None
     """
     is_index_file = file == INDEX_FILE_PATH
 
@@ -153,7 +153,6 @@ def validate_external_url(url: str, file: Path) -> None:
 
     :param url: the URL.
     :param file: the file where the URL is found.
-    :return: None
     """
     if not is_url_reachable(url):
         raise ValueError("Could not reach url={} in file={}!".format(url, str(file)))
@@ -183,7 +182,6 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
     Checks a file for matches to a pattern.
 
     :param file: the file path
-    :param all_files: all the doc file paths
     :param regex: the regex to check for in the file.
     """
     if file == Path("docs/version.md"):
@@ -214,7 +212,6 @@ def _checks_target_blank(file: Path) -> None:
     Check target blank.
 
     :param file: the file.
-    :return: None
     """
     matches = re.finditer("<a.*?>(.+?)</a>", file.read_text())
     for match in matches:
@@ -233,7 +230,6 @@ def check_file(file: Path, all_files: Set[Path]) -> None:
 
     :param file: the file path
     :param all_files: all the doc file paths
-    :return: None
     """
     _checks_all_html(file)
     _checks_link(file, all_files)

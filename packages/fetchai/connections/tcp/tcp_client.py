@@ -48,6 +48,7 @@ class TCPClientConnection(TCPConnection):
         Initialize a TCP client connection.
 
         :param configuration: the configuration object.
+        :param kwargs: keyword arguments.
         """
         address = cast(str, configuration.config.get("address"))
         port = cast(int, configuration.config.get("port"))
@@ -84,6 +85,8 @@ class TCPClientConnection(TCPConnection):
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the received envelope, or None if an error occurred.
         """
         try:

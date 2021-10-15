@@ -31,7 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.11.0")
 
 
 def keccak256(input_: bytes) -> bytes:
@@ -63,6 +63,7 @@ class FetchOracleContract(Contract):
         :param contract_address: the contract address
         :param oracle_address: the address of the oracle
         :param gas: the gas limit
+        :param tx_fee: the transaction fee
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -108,7 +109,9 @@ class FetchOracleContract(Contract):
         :param oracle_address: the oracle address.
         :param update_function: the oracle value update function.
         :param update_kwargs: the arguments to the contract's update function.
-        :return: None
+        :param gas: the gas limit
+        :param tx_fee: the transaction fee
+        :return: transaction json
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(oracle_address)

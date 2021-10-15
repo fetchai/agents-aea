@@ -57,10 +57,7 @@ class Strategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
-        :return: None
+        :param kwargs: keyword arguments
         """
         # config
         self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)

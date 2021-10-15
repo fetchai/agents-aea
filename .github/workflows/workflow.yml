@@ -23,7 +23,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install pipenv
-      - name: Pipenv lock
+      - name: Pipenv install requirements and check it can be locked
         run: |
           pipenv install --dev --skip-lock --clear
           pipenv run pip install -e .[all]
@@ -284,6 +284,11 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
+    - name: Setup GCloud - production
+      uses: google-github-actions/setup-gcloud@master
+      with:
+          project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
+          service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
     - name: Install dependencies (ubuntu-latest)
       run: |
         sudo apt-get update --fix-missing
@@ -294,6 +299,12 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker 
+    - name: Pull SOEF Image
+      run: |
+        docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
     - name: Sync AEA loop integration tests
       run: |
         tox -e py3.8 -- -m 'sync'  # --aea-loop sync
@@ -316,45 +327,23 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.8
+      - name: Setup GCloud - production
+        uses: google-github-actions/setup-gcloud@master
+        with:
+            project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
+            service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
-      - name: Install Rust
+      - name: Configure Docker
         run: |
-          # Install rust
-          curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf > install.sh
-          sudo chmod u+x install.sh
-          ./install.sh -y
-          rustup default stable
-          cargo version
-      - name: Install fetchcli
+          gcloud auth configure-docker 
+      - name: Pull SOEF Image
         run: |
-          # Update the configuration for Rust
-          rustup target list --installed
-          rustup target add wasm32-unknown-unknown
-
-          # Install fetchd
-          git clone https://github.com/fetchai/fetchd.git
-          cd fetchd
-          git checkout release/v0.2.x
-          make install
-          echo "PATH=$PATH:${HOME}/go/bin" >> $GITHUB_ENV
-      - name: Check fetchcli installation
-        run: |
-          # Check if fetchcli is properly installed
-          which fetchcli
-          fetchcli version
-      - name: Configure fetchcli
-        run: |
-          fetchcli config chain-id agent-land
-          fetchcli config trust-node false
-          fetchcli config node https://rpc-agent-land.fetch.ai:443
-          fetchcli config output json
-          fetchcli config indent true
-          fetchcli config broadcast-mode block
+          docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
 
@@ -372,7 +361,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python_version: [3.6, 3.7, 3.8, 3.9]
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -508,7 +497,6 @@ jobs:
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
-
   libp2p_coverage:
     name: libp2p_coverage
     runs-on: ubuntu-latest
@@ -538,7 +526,6 @@ jobs:
         working-directory: ./libs/go/libp2p_node/
         run: |
           go tool cover -func=coverage.txt
-
   coverage_checks:
     continue-on-error: True
     needs:
@@ -571,7 +558,7 @@ jobs:
     # sudo apt-get install -y protobuf-compiler
     - name: Run all tests
       run: |
-        tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+        tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
         tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
       continue-on-error: true
     - name: Show full coverage report

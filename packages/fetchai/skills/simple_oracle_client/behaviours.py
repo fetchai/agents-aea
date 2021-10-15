@@ -54,12 +54,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         super().__init__(tick_interval=query_interval, **kwargs)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-
+        """Implement the setup."""
         self.context.logger.info("Setting up Fetch oracle client contract...")
         strategy = cast(Strategy, self.context.strategy)
 
@@ -71,12 +66,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
             )
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-
+        """Implement the act."""
         strategy = cast(Strategy, self.context.strategy)
 
         if not strategy.is_client_contract_deployed:
@@ -97,11 +87,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         self._request_query_transaction()
 
     def _request_contract_deploy_transaction(self) -> None:
-        """
-        Request contract deployment transaction
-
-        :return: None
-        """
+        """Request contract deployment transaction"""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -121,11 +107,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_approve_transaction(self) -> None:
-        """
-        Request transaction that approves client contract to spend tokens on behalf of sender
-
-        :return: None
-        """
+        """Request transaction that approves client contract to spend tokens on behalf of sender."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -153,11 +135,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         self.context.logger.info("requesting query transaction...")
 
     def _request_query_transaction(self) -> None:
-        """
-        Request transaction that requests value from Fetch oracle contract
-
-        :return: None
-        """
+        """Request transaction that requests value from Fetch oracle contract."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -185,8 +163,4 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         self.context.logger.info("requesting query transaction...")
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

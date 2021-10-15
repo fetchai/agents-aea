@@ -30,7 +30,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.stub.connection import StubConnection, write_envelope
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.17.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.18.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -52,6 +52,7 @@ class P2PStubConnection(StubConnection):
 
         :param configuration: the connection configuration
         :param identity: the identity
+        :param kwargs: positional arguments
         """
         namespace_dir_path = cast(
             Union[str, Path],
@@ -73,7 +74,7 @@ class P2PStubConnection(StubConnection):
         """
         Send messages.
 
-        :return: None
+        :param envelope: the envelope
         """
         if self.loop is None:
             raise ValueError("Loop not initialized.")  # pragma: nocover

@@ -26,7 +26,11 @@ from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
-from tests.conftest import FETCHAI_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+from tests.conftest import (
+    FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+    UseSOEF,
+)
 
 
 MAX_RERUNS = 1
@@ -47,7 +51,7 @@ SERVICE_ID = "generic_aggregation_service"
 
 
 @pytest.mark.integration
-class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
+class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
     """Test that simple aggregation skill works."""
 
     @pytest.mark.flaky(reruns=MAX_RERUNS)  # cause possible network issues
@@ -67,17 +71,17 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
         for (i, agent) in enumerate(agents):
             # add packages for agent
             self.set_agent_context(agent)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.24.0")
-            self.add_item("connection", "fetchai/http_client:0.22.0")
-            self.add_item("connection", "fetchai/http_server:0.21.0")
-            self.add_item("connection", "fetchai/soef:0.25.0")
-            self.add_item("connection", "fetchai/prometheus:0.7.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.24.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.25.0")
+            self.add_item("connection", "fetchai/http_client:0.23.0")
+            self.add_item("connection", "fetchai/http_server:0.22.0")
+            self.add_item("connection", "fetchai/soef:0.26.0")
+            self.add_item("connection", "fetchai/prometheus:0.8.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.25.0")
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
             )
-            self.add_item("skill", "fetchai/advanced_data_request:0.5.0")
-            self.add_item("skill", "fetchai/simple_aggregation:0.1.0")
+            self.add_item("skill", "fetchai/advanced_data_request:0.6.0")
+            self.add_item("skill", "fetchai/simple_aggregation:0.2.0")
 
             self.set_config(
                 "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals",
@@ -92,7 +96,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             setting_path = (
                 "vendor.fetchai.connections.http_server.config.target_skill_id"
             )
-            self.set_config(setting_path, "fetchai/advanced_data_request:0.5.0")
+            self.set_config(setting_path, "fetchai/advanced_data_request:0.6.0")
             self.set_config(
                 "vendor.fetchai.skills.simple_aggregation.models.strategy.args.quantity_name",
                 "price",
@@ -141,7 +145,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
 
             if i == 0:
                 diff = self.difference_to_fetched_agent(
-                    "fetchai/simple_aggregator:0.3.0", agent
+                    "fetchai/simple_aggregator:0.4.0", agent
                 )
                 assert (
                     diff == []
@@ -169,6 +173,14 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 self.set_config(setting_path, 20000 + i)
                 setting_path = "vendor.fetchai.connections.http_server.config.port"
                 self.set_config(setting_path, 8000 + i)
+
+            # set SOEF configuration
+            setting_path = "vendor.fetchai.connections.soef.config.is_https"
+            self.set_config(setting_path, False)
+            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+            self.set_config(setting_path, "127.0.0.1")
+            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+            self.set_config(setting_path, 12002)
 
             # set up data request skill to fetch coin price
             self.set_config(

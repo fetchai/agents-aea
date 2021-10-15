@@ -56,12 +56,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         super().__init__(tick_interval=update_interval, **kwargs)
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
-
+        """Implement the setup."""
         self.context.logger.info("Setting up Fetch oracle contract...")
         strategy = cast(Strategy, self.context.strategy)
 
@@ -87,12 +82,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
                 )
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-
+        """Implement the act."""
         strategy = cast(Strategy, self.context.strategy)
 
         # Request account balance
@@ -121,11 +111,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self._request_update_transaction(oracle_data)
 
     def _request_contract_deploy_transaction(self) -> None:
-        """
-        Request contract deployment transaction
-
-        :return: None
-        """
+        """Request contract deployment transaction."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -145,11 +131,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_grant_role_transaction(self) -> None:
-        """
-        Request transaction that grants oracle role in a Fetch oracle contract
-
-        :return: None
-        """
+        """Request transaction that grants oracle role in a Fetch oracle contract."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -175,11 +157,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.logger.info("requesting grant role transaction...")
 
     def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
-        """
-        Request transaction that updates value in Fetch oracle contract
-
-        :return: None
-        """
+        """Request transaction that updates value in Fetch oracle contract."""
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_behaviour_active = False
         contract_api_dialogues = cast(
@@ -207,11 +185,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.logger.info("requesting update transaction...")
 
     def _get_balance(self) -> None:
-        """
-        Request balance of agent account by sending a message to the ledger API
-
-        :return: None
-        """
+        """Request balance of agent account by sending a message to the ledger API."""
         strategy = cast(Strategy, self.context.strategy)
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
@@ -235,12 +209,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
         Add a prometheus metric.
 
         :param metric_name: the name of the metric to add.
-        :param type: the type of the metric.
+        :param metric_type: the type of the metric.
         :param description: a description of the metric.
         :param labels: the metric labels.
-        :return: None
         """
-
         # context
         prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
 
@@ -267,9 +239,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         :param update_func: the name of the update function (e.g. inc, dec, set, ...).
         :param value: the value to provide to the update function.
         :param labels: the metric labels.
-        :return: None
         """
-
         # context
         prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
 
@@ -287,8 +257,4 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message)
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""

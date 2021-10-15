@@ -74,9 +74,9 @@ class DependencyNotFound(Exception):
         Initialize DependencyNotFound exception.
 
         :param configuration_file: path to the checked file.
-        :param expected_dependencies: expected dependencies.
+        :param expected_deps: expected dependencies.
         :param missing_dependencies: missing dependencies.
-        :param kwargs: super class args.
+        :param args: super class args.
         """
         super().__init__(*args)
         self.configuration_file = configuration_file
@@ -92,7 +92,7 @@ class EmptyPackageDescription(Exception):
         Initialize EmptyPackageDescription exception.
 
         :param configuration_file: path to the checked file.
-        :param kwargs: super class args.
+        :param args: super class args.
         """
         super().__init__(*args)
         self.configuration_file = configuration_file
@@ -120,6 +120,7 @@ def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     Get the public id from yaml.
 
     :param configuration_file: the path to the config yaml
+    :return: public id
     """
     data = unified_yaml_load(configuration_file)
     author = data.get("author", None)
@@ -193,7 +194,6 @@ def check_dependencies(
 
     :param configuration_file: path to a package configuration file.
     :param all_packages_ids: all the package ids.
-    :return: None
     """
     data = unified_yaml_load(configuration_file)
 

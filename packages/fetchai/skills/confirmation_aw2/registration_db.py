@@ -152,6 +152,7 @@ class RegistrationDB(Model):
         """
         Check if address has completed two trades.
 
+        :param address: the address to check
         :return: bool
         """
         record = self.get_trade_table(address)

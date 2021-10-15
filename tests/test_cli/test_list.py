@@ -152,10 +152,11 @@ class TestListSkills:
 
         with mock.patch(
             "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
-        ):
+        ) as format_items_mock:
             cls.result = cls.runner.invoke(
                 cli, [*CLI_LOG_OPTION, "list", "skills"], standalone_mode=False
             )
+        format_items_mock.assert_called()
 
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""

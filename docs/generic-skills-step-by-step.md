@@ -11,16 +11,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.27.0
+aea fetch fetchai/generic_seller:0.28.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.26.0
+aea eject skill fetchai/generic_seller:0.27.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.28.0
+aea fetch fetchai/generic_buyer:0.29.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.25.0
+aea eject skill fetchai/generic_buyer:0.26.0
 cd ..
 ```
 
@@ -101,11 +101,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self._nb_retries = 0
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         strategy = cast(GenericStrategy, self.context.strategy)
         if strategy.is_ledger_tx:
             ledger_api_dialogues = cast(
@@ -121,28 +117,16 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self._register_agent()
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         self._retry_failed_registration()
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
         self._unregister_service()
         self._unregister_agent()
 
     def _retry_failed_registration(self) -> None:
-        """
-        Retry a failed registration.
-
-        :return: None
-        """
+        """Retry a failed registration."""
         if self.failed_registration_msg is not None:
             self._nb_retries += 1
             if self._nb_retries > self._max_soef_registration_retries:
@@ -170,8 +154,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :param description: the description of what is being registered
         :param logger_msg: the logger message to print after the registration
-
-        :return: None
         """
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -185,31 +167,19 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info(logger_msg)
 
     def _register_agent(self) -> None:
-        """
-        Register the agent's location.
-
-        :return: None
-        """
+        """Register the agent's location."""
         strategy = cast(GenericStrategy, self.context.strategy)
         description = strategy.get_location_description()
         self._register(description, "registering agent on SOEF.")
 
     def register_service(self) -> None:
-        """
-        Register the agent's service.
-
-        :return: None
-        """
+        """Register the agent's service."""
         strategy = cast(GenericStrategy, self.context.strategy)
         description = strategy.get_register_service_description()
         self._register(description, "registering agent's service on the SOEF.")
 
     def register_genus(self) -> None:
-        """
-        Register the agent's personality genus.
-
-        :return: None
-        """
+        """Register the agent's personality genus."""
         strategy = cast(GenericStrategy, self.context.strategy)
         description = strategy.get_register_personality_description()
         self._register(
@@ -217,11 +187,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         )
 
     def register_classification(self) -> None:
-        """
-        Register the agent's personality classification.
-
-        :return: None
-        """
+        """Register the agent's personality classification."""
         strategy = cast(GenericStrategy, self.context.strategy)
         description = strategy.get_register_classification_description()
         self._register(
@@ -229,11 +195,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         )
 
     def _unregister_service(self) -> None:
-        """
-        Unregister service from the SOEF.
-
-        :return: None
-        """
+        """Unregister service from the SOEF."""
         strategy = cast(GenericStrategy, self.context.strategy)
         description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
@@ -248,11 +210,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering service from SOEF.")
 
     def _unregister_agent(self) -> None:
-        """
-        Unregister agent from the SOEF.
-
-        :return: None
-        """
+        """Unregister agent from the SOEF."""
         strategy = cast(GenericStrategy, self.context.strategy)
         description = strategy.get_location_description()
         oef_search_dialogues = cast(
@@ -368,7 +326,6 @@ class GenericFipaHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         fipa_msg = cast(FipaMessage, message)
 
@@ -392,11 +349,7 @@ class GenericFipaHandler(Handler):
             self._handle_invalid(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 ```
 The code above contains the logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this <a href="../generic-skills-step-by-step/#step-5-create-the-dialogues">below</a>) to keep track of the progress of the negotiation dialogue between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
 
@@ -438,7 +391,6 @@ The next code block handles `CFP` (call-for-proposal) negotiation messages. Past
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received CFP from sender={}".format(fipa_msg.sender[-5:])
@@ -489,7 +441,7 @@ The next code-block  handles the decline message we receive from the buyer. Add 
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
+        :param fipa_dialogues: the dialogues object
         """
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
@@ -513,7 +465,6 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received ACCEPT from sender={}".format(fipa_msg.sender[-5:])
@@ -530,6 +481,7 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
             )
         )
         self.context.outbox.put_message(message=match_accept_msg)
+
 ```
 When `my_generic_buyer` accepts the `Proposal` we send it and sends an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM`) to match the acceptance of the terms of trade and to inform the buyer of the address we would like it to send the funds to. 
 
@@ -547,7 +499,6 @@ Lastly, we must handle an `INFORM` message, which the buyer uses to inform us th
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received INFORM from sender={}".format(fipa_msg.sender[-5:])
@@ -614,7 +565,6 @@ The remaining handlers are as follows:
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle fipa message of performative={} in dialogue={}.".format(
@@ -636,7 +586,6 @@ class GenericLedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -665,17 +614,13 @@ class GenericLedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -687,7 +632,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
@@ -701,7 +646,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
@@ -750,7 +695,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -765,7 +710,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -788,7 +733,6 @@ class GenericOefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -812,17 +756,13 @@ class GenericOefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -840,7 +780,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_success_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search success message={} in dialogue={}.".format(
@@ -892,7 +831,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -921,7 +859,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
@@ -978,10 +915,7 @@ class GenericStrategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :param register_as: determines whether the agent registers as seller, buyer or both
-        :param search_for: determines whether the agent searches for sellers, buyers or both
-
-        :return: None
+        :param kwargs: keyword arguments
         """
         ledger_id = kwargs.pop("ledger_id", None)
         currency_id = kwargs.pop("currency_id", None)
@@ -1245,7 +1179,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -1285,8 +1219,7 @@ class FipaDialogue(BaseFipaDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseFipaDialogue.__init__(
             self,
@@ -1319,7 +1252,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -1360,8 +1293,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseLedgerApiDialogue.__init__(
             self,
@@ -1393,7 +1325,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -1426,8 +1358,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -1475,7 +1406,7 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.18.0
+- fetchai/ledger:0.19.0
 contracts: []
 protocols:
 - fetchai/default:1.0.0
@@ -1625,11 +1556,7 @@ class GenericSearchBehaviour(TickerBehaviour):
             strategy.is_searching = True
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         strategy = cast(GenericStrategy, self.context.strategy)
         if not strategy.is_searching:
             return
@@ -1655,11 +1582,7 @@ class GenericSearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
 
 
 class GenericTransactionBehaviour(TickerBehaviour):
@@ -1683,11 +1606,7 @@ class GenericTransactionBehaviour(TickerBehaviour):
         """Setup behaviour."""
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         if self.processing is not None:
             if self.processing_time <= self.max_processing:
                 # already processing
@@ -1815,18 +1734,13 @@ class GenericFipaHandler(Handler):
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
 
     def handle(self, message: Message) -> None:
         """
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         fipa_msg = cast(FipaMessage, message)
 
@@ -1850,11 +1764,7 @@ class GenericFipaHandler(Handler):
             self._handle_invalid(fipa_msg, fipa_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 ```
 You will see that we are following similar logic to the `generic_seller` when we develop the `generic_buyer`’s side of the negotiation. First, we create a new dialogue and store it in the dialogues class. Then we are checking what kind of message we received by checking its performative. So lets start creating our handlers:
 
@@ -1889,7 +1799,6 @@ The above code handles messages referencing unidentified dialogues and responds 
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received proposal={} from sender={}".format(
@@ -1923,7 +1832,7 @@ When we receive a proposal, we have to check if we have the funds to complete th
 The next code-block handles the `DECLINE` message that we may receive from the seller as a response to our `CFP` or `ACCEPT` messages:
 
 ``` python
-	def _handle_decline(
+    def _handle_decline(
         self,
         fipa_msg: FipaMessage,
         fipa_dialogue: FipaDialogue,
@@ -1935,7 +1844,6 @@ The next code-block handles the `DECLINE` message that we may receive from the s
         :param fipa_msg: the message
         :param fipa_dialogue: the fipa dialogue
         :param fipa_dialogues: the fipa dialogues
-        :return: None
         """
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
@@ -1969,7 +1877,6 @@ If `my_generic_seller` AEA wants to move on with the sale, it will send a `MATCH
 
         :param fipa_msg: the message
         :param fipa_dialogue: the dialogue object
-        :return: None
         """
         self.context.logger.info(
             "received MATCH_ACCEPT_W_INFORM from sender={} with info={}".format(
@@ -2016,7 +1923,6 @@ Lastly, we need to handle `INFORM` messages. This is the message that will have 
         :param fipa_msg: the message
         :param fipa_dialogue: the fipa dialogue
         :param fipa_dialogues: the fipa dialogues
-        :return: None
         """
         self.context.logger.info(
             "received INFORM from sender={}".format(fipa_msg.sender[-5:])
@@ -2043,7 +1949,6 @@ Lastly, we need to handle `INFORM` messages. This is the message that will have 
 
         :param fipa_msg: the message
         :param fipa_dialogue: the fipa dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle fipa message of performative={} in dialogue={}.".format(
@@ -2070,7 +1975,6 @@ class GenericOefSearchHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         oef_search_msg = cast(OefSearchMessage, message)
 
@@ -2094,17 +1998,13 @@ class GenericOefSearchHandler(Handler):
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param oef_search_msg: the message
         """
         self.context.logger.info(
             "received invalid oef_search message={}, unidentified dialogue.".format(
@@ -2120,7 +2020,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
@@ -2134,8 +2033,8 @@ class GenericOefSearchHandler(Handler):
         """
         Handle the search response.
 
-        :param agents: the agents returned by the search
-        :return: None
+        :param oef_search_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
         """
         if len(oef_search_msg.agents) == 0:
             self.context.logger.info(
@@ -2178,7 +2077,6 @@ class GenericOefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
@@ -2204,7 +2102,6 @@ class GenericSigningHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         signing_msg = cast(SigningMessage, message)
 
@@ -2226,17 +2123,13 @@ class GenericSigningHandler(Handler):
             self._handle_invalid(signing_msg, signing_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param signing_msg: the message
         """
         self.context.logger.info(
             "received invalid signing message={}, unidentified dialogue.".format(
@@ -2252,7 +2145,6 @@ class GenericSigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info("transaction signing was successful.")
         ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
@@ -2275,7 +2167,6 @@ class GenericSigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.info(
             "transaction signing was not successful. Error_code={} in dialogue={}".format(
@@ -2304,7 +2195,6 @@ class GenericSigningHandler(Handler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the dialogue
-        :return: None
         """
         self.context.logger.warning(
             "cannot handle signing message of performative={} in dialogue={}.".format(
@@ -2326,7 +2216,6 @@ class GenericLedgerApiHandler(Handler):
         Implement the reaction to a message.
 
         :param message: the message
-        :return: None
         """
         ledger_api_msg = cast(LedgerApiMessage, message)
 
@@ -2364,17 +2253,13 @@ class GenericLedgerApiHandler(Handler):
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
     def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
+        """Implement the handler teardown."""
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param msg: the message
+        :param ledger_api_msg: the message
         """
         self.context.logger.info(
             "received invalid ledger_api message={}, unidentified dialogue.".format(
@@ -2386,7 +2271,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         """
         strategy = cast(GenericStrategy, self.context.strategy)
         if ledger_api_msg.balance > 0:
@@ -2409,7 +2294,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of raw_transaction performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info("received raw transaction={}".format(ledger_api_msg))
@@ -2433,7 +2318,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of transaction_digest performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -2455,7 +2340,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of balance performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
@@ -2502,7 +2387,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of error performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
@@ -2529,7 +2414,7 @@ class GenericLedgerApiHandler(Handler):
         """
         Handle a message of invalid performative.
 
-        :param ledger_api_message: the ledger api message
+        :param ledger_api_msg: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
         self.context.logger.warning(
@@ -2586,7 +2471,7 @@ class GenericStrategy(Model):
         """
         Initialize the strategy of the agent.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         ledger_id = kwargs.pop("ledger_id", None)
         currency_id = kwargs.pop("currency_id", None)
@@ -2712,6 +2597,7 @@ The following code block checks if the proposal that we received is acceptable a
         """
         Check whether it is an acceptable proposal.
 
+        :param proposal: a description
         :return: whether it is acceptable
         """
         result = (
@@ -2749,6 +2635,7 @@ The `is_affordable_proposal` method in the following code block checks if we can
         """
         Check whether it is an affordable proposal.
 
+        :param proposal: a description
         :return: whether it is affordable
         """
         if self.is_ledger_tx:
@@ -2764,6 +2651,7 @@ The `is_affordable_proposal` method in the following code block checks if we can
         """
         Process counterparties and drop unacceptable ones.
 
+        :param counterparties: a tuple of counterparties
         :return: list of counterparties
         """
         valid_counterparties: List[str] = []
@@ -2779,6 +2667,7 @@ The `is_affordable_proposal` method in the following code block checks if we can
         Get the terms from a proposal.
 
         :param proposal: the proposal
+        :param counterparty_address: the counterparty
         :return: terms
         """
         buyer_address = self.context.agent_addresses[proposal.values["ledger_id"]]
@@ -2806,15 +2695,10 @@ The `is_affordable_proposal` method in the following code block checks if we can
 
         :param counterparty: the counterparty address
         :param data: the data
-        :return: False
         """
 
     def update_search_query_params(self) -> None:
-        """
-        Update agent location and query for search.
-
-        :return: None
-        """
+        """Update agent location and query for search."""
 ```
 
 ### Step 5: Create the dialogues
@@ -2822,7 +2706,6 @@ The `is_affordable_proposal` method in the following code block checks if we can
 As mentioned during the creation of the seller AEA, we should keep track of the various interactions an AEA has with others and this is done via dialogues. Create a new file and name it `dialogues.py` (in `my_generic_buyer/skills/generic_buyer/`). Inside this file add the following code:
 
 ``` python
-
 from typing import Any, Optional, Type
 
 from aea.common import Address
@@ -2874,7 +2757,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -2917,8 +2800,7 @@ class FipaDialogue(BaseFipaDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseFipaDialogue.__init__(
             self,
@@ -2950,7 +2832,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -2991,8 +2873,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseLedgerApiDialogue.__init__(
             self,
@@ -3024,7 +2905,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -3057,8 +2938,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -3098,8 +2978,7 @@ class SigningDialogue(BaseSigningDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseSigningDialogue.__init__(
             self,
@@ -3136,8 +3015,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         """
         Initialize dialogues.
 
-        :param agent_address: the address of the agent for whom dialogues are maintained
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 
@@ -3183,7 +3061,7 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.18.0
+- fetchai/ledger:0.19.0
 contracts: []
 protocols:
 - fetchai/default:1.0.0
@@ -3289,8 +3167,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0"
+  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.19.0",
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.26.0"
 }'
 ```
 
@@ -3307,13 +3185,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.24.0
-aea add connection fetchai/soef:0.25.0
-aea add connection fetchai/ledger:0.18.0
+aea add connection fetchai/p2p_libp2p:0.25.0
+aea add connection fetchai/soef:0.26.0
+aea add connection fetchai/ledger:0.19.0
 aea add protocol fetchai/fipa:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.25.0
 aea run
 ```
 
@@ -3324,14 +3202,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.24.0
-aea add connection fetchai/soef:0.25.0
-aea add connection fetchai/ledger:0.18.0
+aea add connection fetchai/p2p_libp2p:0.25.0
+aea add connection fetchai/soef:0.26.0
+aea add connection fetchai/ledger:0.19.0
 aea add protocol fetchai/fipa:1.0.0
 aea add protocol fetchai/signing:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.25.0
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:
@@ -3354,7 +3232,7 @@ Then run the buyer AEA:
 aea run
 ```
 
-You will see that the AEAs negotiate and then transact using the Agentland testnet.
+You will see that the AEAs negotiate and then transact using the StargateWorld testnet.
 
 ## Delete the AEAs
 

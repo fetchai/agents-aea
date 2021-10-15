@@ -59,7 +59,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.20.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.21.0")
 
 OefSearchDialogue = BaseOefSearchDialogue
 
@@ -68,11 +68,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
+        """Initialize dialogues."""
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address
@@ -115,6 +111,7 @@ class OEFChannel(OEFAgent):
         :param address: the address of the agent.
         :param oef_addr: the OEF IP address.
         :param oef_port: the OEF port.
+        :param logger: the logger.
         """
         super().__init__(
             address,
@@ -165,7 +162,6 @@ class OEFChannel(OEFAgent):
         :param dialogue_id: the dialogue id.
         :param origin: the address of the sender.
         :param content: the bytes content.
-        :return: None
         """
         # We are not using the 'msg_id', 'dialogue_id' and 'origin' parameters because 'content' contains a
         # serialized instance of 'Envelope', hence it already contains this information.
@@ -189,7 +185,6 @@ class OEFChannel(OEFAgent):
         :param origin: the address of the sender.
         :param target: the message target.
         :param query: the query.
-        :return: None
         """
         self._check_loop_and_queue()
         self.aea_logger.warning(
@@ -214,7 +209,6 @@ class OEFChannel(OEFAgent):
         :param origin: the address of the sender.
         :param target: the message target.
         :param proposals: the proposals.
-        :return: None
         """
         self._check_loop_and_queue()
         self.aea_logger.warning(
@@ -233,7 +227,6 @@ class OEFChannel(OEFAgent):
         :param dialogue_id: the dialogue id.
         :param origin: the address of the sender.
         :param target: the message target.
-        :return: None
         """
         self._check_loop_and_queue()
         self.aea_logger.warning(
@@ -252,7 +245,6 @@ class OEFChannel(OEFAgent):
         :param dialogue_id: the dialogue id.
         :param origin: the address of the sender.
         :param target: the message target.
-        :return: None
         """
         self._check_loop_and_queue()
         self.aea_logger.warning(
@@ -267,7 +259,6 @@ class OEFChannel(OEFAgent):
 
         :param search_id: the search id.
         :param agents: the list of agents.
-        :return: None
         """
         self._check_loop_and_queue()
         oef_search_dialogue = self.oef_msg_id_to_dialogue.pop(search_id, None)
@@ -296,7 +287,6 @@ class OEFChannel(OEFAgent):
 
         :param answer_id: the answer id.
         :param operation: the error operation.
-        :return: None
         """
         self._check_loop_and_queue()
         try:
@@ -330,7 +320,6 @@ class OEFChannel(OEFAgent):
         :param answer_id: the answer id.
         :param dialogue_id: the dialogue id.
         :param origin: the message sender.
-        :return: None
         """
         self._check_loop_and_queue()
         msg = DefaultMessage(
@@ -350,7 +339,6 @@ class OEFChannel(OEFAgent):
         Send message handler.
 
         :param envelope: the message.
-        :return: None
         """
         if (
             envelope.protocol_specification_id
@@ -371,7 +359,6 @@ class OEFChannel(OEFAgent):
         Send oef message handler.
 
         :param envelope: the message.
-        :return: None
         """
         enforce(
             isinstance(envelope.message, OefSearchMessage),
@@ -488,8 +475,6 @@ class OEFConnection(Connection):
         """
         Initialize.
 
-        :param oef_addr: the OEF IP address.
-        :param oef_port: the OEF port.
         :param kwargs: the keyword arguments (check the parent constructor)
         """
         super().__init__(**kwargs)
@@ -506,7 +491,6 @@ class OEFConnection(Connection):
         """
         Connect to the channel.
 
-        :return: None
         :raises Exception if the connection to the OEF fails.
         """
         if self.is_connected:
@@ -524,8 +508,6 @@ class OEFConnection(Connection):
         Check for connection to the channel.
 
         Try to reconnect if connection is dropped.
-
-        :return: None
         """
         while self.is_connected:
             await asyncio.sleep(2.0)
@@ -541,11 +523,7 @@ class OEFConnection(Connection):
                 )
 
     async def disconnect(self) -> None:
-        """
-        Disconnect from the channel.
-
-        :return: None
-        """
+        """Disconnect from the channel."""
         if self.is_disconnected:
             return
         self.state = ConnectionStates.disconnecting
@@ -560,6 +538,8 @@ class OEFConnection(Connection):
         """
         Receive an envelope. Blocking.
 
+        :param args: the positional arguments
+        :param kwargs: the keyword arguments
         :return: the envelope received, or None.
         """
         try:
@@ -581,7 +561,6 @@ class OEFConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         if self.is_connected:
             self.channel.send(envelope)

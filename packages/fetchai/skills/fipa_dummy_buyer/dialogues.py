@@ -45,7 +45,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param kwargs: keyword arguments
         """
         Model.__init__(self, **kwargs)
 

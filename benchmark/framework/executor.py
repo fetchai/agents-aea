@@ -47,7 +47,7 @@ def timeit_context() -> Generator:
     """
     Context manager to measure execution time of code in context.
 
-    :return TimeItResult
+    :yield: TimeItResult
 
     example:
     with timeit_context() as result:

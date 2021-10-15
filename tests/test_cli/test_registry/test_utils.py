@@ -23,7 +23,7 @@ import tempfile
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from unittest import TestCase, mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click import ClickException
@@ -41,6 +41,7 @@ from aea.cli.registry.utils import (
     get_latest_version_available_in_registry,
     get_package_meta,
     is_auth_token_present,
+    list_missing_packages,
     request_api,
 )
 from aea.cli.utils.exceptions import AEAConfigException
@@ -101,6 +102,7 @@ class RequestAPITestCase(TestCase):
         """Test for request_api method 500 server response."""
         resp_mock = mock.Mock()
         resp_mock.status_code = 500
+        resp_mock.json.return_value = {"detail": "test"}
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
@@ -144,11 +146,19 @@ class RequestAPITestCase(TestCase):
     def test_request_api_unexpected_response(self, request_mock):
         """Test for request_api method unexpected server response."""
         resp_mock = mock.Mock()
-        resp_mock.status_code = 501  # not implemented status
+        status_code = 501
+        resp_mock.status_code = status_code  # not implemented status
         resp_mock.json = _raise_json_decode_error
         request_mock.return_value = resp_mock
         with self.assertRaises(ClickException):
             request_api("GET", "/path")
+
+        error_msg = "Error occured."
+        resp_mock.json = mock.Mock(return_value={"detail": error_msg})
+        with self.assertRaises(ClickException) as execinfo:
+            request_api("GET", "/path")
+        expected_exception = f"Wrong server response. Status code: {status_code}: Error detail: {error_msg}"
+        self.assertEqual(str(execinfo.exception), expected_exception)
 
     @mock.patch("aea.cli.registry.utils.get_or_create_cli_config", return_value={})
     def test_request_api_no_auth_data(
@@ -394,3 +404,22 @@ def test_get_latest_version_available_in_registry_remote_mode(*_mocks):
         context_mock, "protocol", DefaultMessage.protocol_id
     )
     assert result == DefaultMessage.protocol_id
+
+
+def test_list_missing_packages():
+    """Test 'list_missing_packages'."""
+    packages = [("connection", PublicId.from_str("test/test:0.1.2"))]
+
+    resp_ok = MagicMock()
+    resp_ok.status_code = 200
+    with patch(
+        "aea.cli.registry.utils._perform_registry_request", return_value=resp_ok
+    ):
+        assert list_missing_packages(packages) == []
+
+    resp_404 = MagicMock()
+    resp_404.status_code = 404
+    with patch(
+        "aea.cli.registry.utils._perform_registry_request", return_value=resp_404
+    ):
+        assert list_missing_packages(packages) == packages

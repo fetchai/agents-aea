@@ -27,6 +27,7 @@ import (
 	"os"
 	"testing"
 
+	"libp2p_node/acn"
 	"libp2p_node/aea"
 	"libp2p_node/utils"
 
@@ -229,7 +230,7 @@ func setupLocalDHTPeerForBench(
 			return nil, nil, err
 		}
 
-		record := &aea.AgentRecord{}
+		record := &acn.AgentRecord{}
 		record.Address = agentAddress
 		record.PublicKey = agentPubKey
 		record.PeerPublicKey = peerPubKey
@@ -308,7 +309,7 @@ func benchmarkAgentRegistration(npeers uint16, b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		err = peer.registerAgentAddress(addrs[len(addrs)-1-i%len(addrs)])
+		err = peer.RegisterAgentAddress(addrs[len(addrs)-1-i%len(addrs)])
 		if err != nil {
 			b.Fail()
 		}
