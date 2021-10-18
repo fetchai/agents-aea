@@ -133,7 +133,6 @@ def _get_plugins(group: str) -> List[Plugin]:
     :param group: the plugin group.
     :return: a mapping from plugin name to Plugin objects.
     """
-
     entry_points: List[EntryPoint] = list(WorkingSet().iter_entry_points(group=group))
     _check_no_duplicates(entry_points)
     return [Plugin(group, entry_point) for entry_point in entry_points]

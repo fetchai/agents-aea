@@ -246,6 +246,10 @@ Check if the address is valid.
 
 - `address`: the address to validate
 
+**Returns**:
+
+whether address is valid or not
+
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.load_contract_interface"></a>
 #### load`_`contract`_`interface
 
@@ -404,7 +408,6 @@ Encrypt the private key and return in json.
 
 **Arguments**:
 
-- `private_key`: the raw private key.
 - `password`: the password to decrypt.
 
 **Returns**:
@@ -481,6 +484,16 @@ API specification, which takes a path (strings separated by '/'). The
 convention here is to define the root of the path (txs, blocks, etc.)
 as the callable_name and the rest of the path as args.
 
+**Arguments**:
+
+- `callable_name`: name of the callable
+- `args`: positional arguments
+- `kwargs`: keyword arguments
+
+**Returns**:
+
+the transaction dictionary
+
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_deploy_transaction"></a>
 #### get`_`deploy`_`transaction
 
@@ -496,13 +509,17 @@ Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs
 
 - `contract_interface`: the contract interface.
 - `deployer_address`: The address that will deploy the contract.
-:returns tx: the transaction dictionary.
+- `kwargs`: keyword arguments.
+
+**Returns**:
+
+the transaction dictionary.
 
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_handle_transaction"></a>
 #### get`_`handle`_`transaction
 
 ```python
- | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = 0, memo: str = "", chain_id: Optional[str] = None) -> Optional[JSONLike]
+ | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Create a CosmWasm HandleMsg transaction.
@@ -518,6 +535,9 @@ Create a CosmWasm HandleMsg transaction.
 - `gas`: Maximum amount of gas to be used on executing command.
 - `memo`: any string comment.
 - `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+- `account_number`: Account number
+- `sequence`: Sequence
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
 
 **Returns**:
 
@@ -545,7 +565,7 @@ the message receipt
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -561,10 +581,82 @@ Submit a transfer transaction to the ledger.
 - `gas`: the gas used.
 - `memo`: memo to include in tx.
 - `chain_id`: the chain ID of the transaction.
+- `account_number`: Account number
+- `sequence`: Sequence
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
+- `kwargs`: keyword arguments.
 
 **Returns**:
 
 the transfer transaction
+
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_exec_msg"></a>
+#### get`_`packed`_`exec`_`msg
+
+```python
+ | get_packed_exec_msg(sender_address: Address, contract_address: str, msg: JSONLike, funds: int = 0, denom: Optional[str] = None) -> ProtoAny
+```
+
+Create and pack MsgExecuteContract
+
+**Arguments**:
+
+- `sender_address`: Address of sender
+- `contract_address`: Address of contract
+- `msg`: Paramaters to be passed to smart contract
+- `funds`: Funds to be sent to smart contract
+- `denom`: the denomination of funds
+
+**Returns**:
+
+Packed MsgExecuteContract
+
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_send_msg"></a>
+#### get`_`packed`_`send`_`msg
+
+```python
+ | get_packed_send_msg(from_address: Address, to_address: Address, amount: int, denom: Optional[str] = None) -> ProtoAny
+```
+
+Generate and pack MsgSend
+
+**Arguments**:
+
+- `from_address`: Address of sender
+- `to_address`: Address of recipient
+- `amount`: amount of coins to be sent
+- `denom`: the denomination of and amount
+
+**Returns**:
+
+packer ProtoAny type message
+
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_multi_transaction"></a>
+#### get`_`multi`_`transaction
+
+```python
+ | get_multi_transaction(from_addresses: List[str], pub_keys: Optional[List[bytes]], msgs: List[ProtoAny], gas: int, tx_fee: int = 0, memo: str = "", chain_id: Optional[str] = None, denom: Optional[str] = None, tx_fee_denom: Optional[str] = None) -> JSONLike
+```
+
+Generate transaction with multiple messages
+
+**Arguments**:
+
+- `from_addresses`: Addresses of signers
+- `pub_keys`: Public keys of signers
+- `msgs`: Messages to be included in transaction
+- `gas`: the gas used.
+- `tx_fee`: the transaction fee.
+- `memo`: memo to include in tx.
+- `chain_id`: the chain ID of the transaction.
+- `denom`: the denomination of tx fee
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
+
+:raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
+
+**Returns**:
+
+the transaction
 
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
@@ -582,25 +674,6 @@ Send a signed transaction and wait for confirmation.
 **Returns**:
 
 tx_digest, if present
-
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.is_cosmwasm_transaction"></a>
-#### is`_`cosmwasm`_`transaction
-
-```python
- | is_cosmwasm_transaction(tx_signed: JSONLike) -> bool
-```
-
-Check whether it is a cosmwasm tx.
-
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.is_transfer_transaction"></a>
-#### is`_`transfer`_`transaction
-
-```python
- | @staticmethod
- | is_transfer_transaction(tx_signed: JSONLike) -> bool
-```
-
-Check whether it is a transfer tx.
 
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
@@ -654,36 +727,6 @@ Get the instance of a contract.
 
 the contract instance
 
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_last_code_id"></a>
-#### get`_`last`_`code`_`id
-
-```python
- | get_last_code_id() -> int
-```
-
-Get ID of latest deployed .wasm bytecode.
-
-**Returns**:
-
-code id of last deployed .wasm bytecode
-
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_last_contract_address"></a>
-#### get`_`last`_`contract`_`address
-
-```python
- | get_last_contract_address(code_id: int) -> str
-```
-
-Get contract address of latest initialised contract by its ID.
-
-**Arguments**:
-
-- `code_id`: id of deployed CosmWasm bytecode
-
-**Returns**:
-
-contract address of last initialised contract
-
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate
 
@@ -696,10 +739,7 @@ Attempts to update the transaction with a gas estimate
 **Arguments**:
 
 - `transaction`: the transaction
-
-**Returns**:
-
-the updated transaction
+:raises: NotImplementedError
 
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosApi"></a>
 ## CosmosApi Objects
@@ -723,7 +763,7 @@ Cosmos testnet faucet API.
 #### `__`init`__`
 
 ```python
- | __init__(poll_interval: Optional[float] = None)
+ | __init__(poll_interval: Optional[float] = None, final_wait_interval: Optional[float] = None)
 ```
 
 Initialize CosmosFaucetApi.
@@ -741,9 +781,5 @@ Get wealth from the faucet for the provided address.
 
 - `address`: the address.
 - `url`: the url
-
-**Returns**:
-
-None
 :raises: RuntimeError of explicit faucet failures
 

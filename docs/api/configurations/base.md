@@ -236,6 +236,27 @@ Set directory if not already set.
 
 Get package id.
 
+<a name="aea.configurations.base.PackageConfiguration.parse_aea_version_specifier"></a>
+#### parse`_`aea`_`version`_`specifier
+
+```python
+ | @staticmethod
+ | parse_aea_version_specifier(aea_version_specifiers: str) -> SpecifierSet
+```
+
+Parse an 'aea_version' field.
+
+If 'aea_version' is a version, then output the specifier set "==${version}"
+Else, interpret it as specifier set.
+
+**Arguments**:
+
+- `aea_version_specifiers`: the AEA version, or a specifier set.
+
+**Returns**:
+
+A specifier set object.
+
 <a name="aea.configurations.base.PackageConfiguration.aea_version_specifiers"></a>
 #### aea`_`version`_`specifiers
 

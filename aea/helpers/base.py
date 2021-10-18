@@ -911,17 +911,7 @@ def compute_specifier_from_version(version: Version) -> str:
     """
     Compute the specifier set from a version.
 
-    Varying only on the patch number for versions with major 0.
-
-    I.e. from "{major}.{minor}.{patch}.{extra}", return
-
-    ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
-
-    Varying on the patch and minor number for versions with major >= 1.
-
-    I.e. from "{major}.{minor}.{patch}.{extra}", return
-
-    ">=min({major}.0.0, {major}.{minor}.{patch}.{extra}), <{major+1}.0.0"
+    version specifier is:  >=major.minor.0, <next_major.0.0
 
     :param version: the version
     :return: the specifier set
@@ -935,7 +925,7 @@ def compute_specifier_from_version(version: Version) -> str:
         lower_bound = lower_bound if lower_bound < version else version
         upper_bound = Version(f"{new_major_low}.{new_minor_high}.0")
     else:
-        lower_bound = Version(f"{new_major_low}.0.0")
+        lower_bound = Version(f"{new_major_low}.{version.minor}.0")
         lower_bound = lower_bound if lower_bound < version else version
         upper_bound = Version(f"{new_major_high}.0.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
