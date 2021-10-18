@@ -3,6 +3,15 @@
 
 This module contains helper methods and classes for the 'aea' package.
 
+<a name="aea.helpers.ipfs.base.chunks"></a>
+#### chunks
+
+```python
+chunks(data: Sized, size: int) -> Generator
+```
+
+Yield successivesize chunks from data.
+
 <a name="aea.helpers.ipfs.base.IPFSHashOnly"></a>
 ## IPFSHashOnly Objects
 

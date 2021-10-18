@@ -133,7 +133,7 @@ A Task manager.
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = 2, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None, pool_mode: str = "multithread") -> None
+ | __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None, pool_mode: str = THREAD_POOL_MODE) -> None
 ```
 
 Initialize the task manager.
@@ -230,4 +230,52 @@ Start the task manager.
 ```
 
 Stop the task manager.
+
+<a name="aea.skills.tasks.ThreadedTaskManager"></a>
+## ThreadedTaskManager Objects
+
+```python
+class ThreadedTaskManager(TaskManager)
+```
+
+A threaded task manager.
+
+<a name="aea.skills.tasks.ThreadedTaskManager.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
+```
+
+Initialize the task manager.
+
+**Arguments**:
+
+- `nb_workers`: the number of worker processes.
+- `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
+- `logger`: the logger.
+
+<a name="aea.skills.tasks.ProcessTaskManager"></a>
+## ProcessTaskManager Objects
+
+```python
+class ProcessTaskManager(TaskManager)
+```
+
+A multiprocess task manager.
+
+<a name="aea.skills.tasks.ProcessTaskManager.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
+```
+
+Initialize the task manager.
+
+**Arguments**:
+
+- `nb_workers`: the number of worker processes.
+- `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
+- `logger`: the logger.
 

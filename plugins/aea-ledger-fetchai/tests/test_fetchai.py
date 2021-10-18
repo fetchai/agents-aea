@@ -458,7 +458,6 @@ def test_get_storage_transaction_cosmwasm():
     assert msg["wasmByteCode"] == contract_interface["wasm_byte_code"]
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_init_transaction_cosmwasm():
@@ -483,6 +482,8 @@ def test_get_init_transaction_cosmwasm():
         account_number=1,
         sequence=0,
         gas=gas_limit,
+        denom="abc",
+        tx_fee_denom="def",
     )
 
     assert type(init_transaction) == dict and len(init_transaction) == 2
@@ -493,7 +494,7 @@ def test_get_init_transaction_cosmwasm():
 
     # Check tx
     assert init_transaction["tx"]["authInfo"]["fee"]["amount"] == [
-        {"denom": "atestfet", "amount": str(tx_fee)}
+        {"denom": "def", "amount": str(tx_fee)}
     ]
 
     # Check msg
@@ -506,7 +507,7 @@ def test_get_init_transaction_cosmwasm():
     assert msg["sender"] == deployer_address
     assert msg["codeId"] == str(code_id)
     assert base64.b64decode(msg["initMsg"]).decode() == f'"{init_msg}"'
-    assert msg["funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+    assert msg["funds"] == [{"denom": "abc", "amount": str(amount)}]
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -533,6 +534,8 @@ def test_get_handle_transaction_cosmwasm():
         memo="memo",
         account_number=1,
         sequence=0,
+        denom="abc",
+        tx_fee_denom="def",
     )
 
     assert type(handle_transaction) == dict and len(handle_transaction) == 2
@@ -543,7 +546,7 @@ def test_get_handle_transaction_cosmwasm():
 
     # Check tx
     assert handle_transaction["tx"]["authInfo"]["fee"] == {
-        "amount": [{"denom": "atestfet", "amount": str(tx_fee)}],
+        "amount": [{"denom": "def", "amount": str(tx_fee)}],
         "gasLimit": str(gas_limit),
     }
 
@@ -558,7 +561,7 @@ def test_get_handle_transaction_cosmwasm():
     assert msg["sender"] == sender_address
     assert msg["contract"] == contract_address
     assert base64.b64decode(msg["msg"]).decode() == f'"{handle_msg}"'
-    assert msg["funds"] == [{"denom": "atestfet", "amount": str(amount)}]
+    assert msg["funds"] == [{"denom": "abc", "amount": str(amount)}]
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -710,6 +713,7 @@ def test_construct_init_transaction():
         code_id=200,
         init_msg={},
         label="something",
+        tx_fee_denom="stake",
     )
     assert (
         isinstance(init_transaction, dict) and len(init_transaction) == 2
