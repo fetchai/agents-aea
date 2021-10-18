@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUjEQqcfDm1F1ARmG2fVp9J6nBdeHrXQiFAPKawtgR1g6
-  __init__.py: QmXHf2s4KFQS7QB91BT7zrG7g58VdrhS2m5HWkd3GBfRgd
+  __init__.py: QmQHbL5BFzkQxoWzkWy6eT1xcr95MpcbroRKH4nf79KiM1
   custom_types.py: QmVVqcX2WoBL787seX1y5X4GnLD9EjrjRZ9jtAjTuoUZSU
   dialogues.py: QmPYasVDqy1yfkkHjxqH2kUhPcH9fsNhbBW2jrvG15kJS6
   ledger_api.proto: QmdSbtU1eXT1ZLFZkdCzTpBD8NyDMWgiA4MJBoHJLdCkz3

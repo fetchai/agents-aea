@@ -274,6 +274,8 @@ def get_all_protocol_spec_ids() -> Set[PublicId]:
         PACKAGES_DIR.rglob("**/**/protocols")
     )
     for protocol_package_path in protocol_packages:
+        if "connections" in str(protocol_package_path):
+            continue
         content = get_protocol_specification_from_readme(protocol_package_path)
         spec_id = get_protocol_specification_id_from_specification(content)
         result.add(PublicId.from_str(spec_id))
