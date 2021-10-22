@@ -50,7 +50,9 @@ class TacBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._registered_description = None  # type: Optional[Description]
         self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
-        self.failed_registration_reason = None  # type: Optional[int]
+        self.failed_registration_reason = (
+            None
+        )  # type: Optional[OefSearchMessage.OefErrorOperation]
         self._nb_retries = 0
 
     def setup(self) -> None:
