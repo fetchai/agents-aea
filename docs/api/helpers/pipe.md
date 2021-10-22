@@ -213,6 +213,16 @@ Initialize the tcp socket protocol.
 - `logger`: the logger
 - `loop`: the event loop
 
+<a name="aea.helpers.pipe.TCPSocketProtocol.writer"></a>
+#### writer
+
+```python
+ | @property
+ | writer() -> StreamWriter
+```
+
+Get a writer associated with  protocol.
+
 <a name="aea.helpers.pipe.TCPSocketProtocol.write"></a>
 #### write
 

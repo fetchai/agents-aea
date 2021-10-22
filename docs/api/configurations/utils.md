@@ -80,7 +80,7 @@ Replace references in a skill configuration.
 #### get`_`latest`_`component`_`id`_`from`_`prefix
 
 ```python
-get_latest_component_id_from_prefix(agent_config: AgentConfig, component_prefix: Tuple[ComponentType, str, str]) -> Optional[ComponentId]
+get_latest_component_id_from_prefix(agent_config: AgentConfig, component_prefix: PackageIdPrefix) -> Optional[ComponentId]
 ```
 
 Get component id with the greatest version in an agent configuration given its prefix.

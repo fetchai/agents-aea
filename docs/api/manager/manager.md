@@ -30,11 +30,84 @@ Project check error exception.
 
 Init exception.
 
+<a name="aea.manager.manager.ProjectPackageConsistencyCheckError"></a>
+## ProjectPackageConsistencyCheckError Objects
+
+```python
+class ProjectPackageConsistencyCheckError(ValueError)
+```
+
+Check consistency of package versions against already added project.
+
+<a name="aea.manager.manager.ProjectPackageConsistencyCheckError.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(agent_project_id: PublicId, conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]])
+```
+
+Initialize the exception.
+
+**Arguments**:
+
+- `agent_project_id`: the agent project id whose addition has failed.
+- `conflicting_packages`: the conflicting packages.
+
+<a name="aea.manager.manager.BaseAgentRunTask"></a>
+## BaseAgentRunTask Objects
+
+```python
+class BaseAgentRunTask(ABC)
+```
+
+Base abstract class for agent run tasks.
+
+<a name="aea.manager.manager.BaseAgentRunTask.start"></a>
+#### start
+
+```python
+ | @abstractmethod
+ | start() -> None
+```
+
+Start task.
+
+<a name="aea.manager.manager.BaseAgentRunTask.wait"></a>
+#### wait
+
+```python
+ | @abstractmethod
+ | wait() -> asyncio.Future
+```
+
+Return future to wait task completed.
+
+<a name="aea.manager.manager.BaseAgentRunTask.stop"></a>
+#### stop
+
+```python
+ | @abstractmethod
+ | stop() -> None
+```
+
+Stop task.
+
+<a name="aea.manager.manager.BaseAgentRunTask.is_running"></a>
+#### is`_`running
+
+```python
+ | @property
+ | @abstractmethod
+ | is_running() -> bool
+```
+
+Return is task running.
+
 <a name="aea.manager.manager.AgentRunAsyncTask"></a>
 ## AgentRunAsyncTask Objects
 
 ```python
-class AgentRunAsyncTask()
+class AgentRunAsyncTask(BaseAgentRunTask)
 ```
 
 Async task wrapper for agent.
@@ -46,7 +119,7 @@ Async task wrapper for agent.
  | __init__(agent: AEA, loop: asyncio.AbstractEventLoop) -> None
 ```
 
-Init task with agent and loop.
+Init task with agent alias and loop.
 
 <a name="aea.manager.manager.AgentRunAsyncTask.create_run_loop"></a>
 #### create`_`run`_`loop
@@ -119,7 +192,7 @@ Threaded wrapper to run agent.
  | __init__(agent: AEA, loop: asyncio.AbstractEventLoop) -> None
 ```
 
-Init task with agent and loop.
+Init task with agent alias and loop.
 
 <a name="aea.manager.manager.AgentRunThreadTask.create_run_loop"></a>
 #### create`_`run`_`loop
@@ -147,6 +220,61 @@ Run task in a dedicated thread.
 ```
 
 Stop the task.
+
+<a name="aea.manager.manager.AgentRunProcessTask"></a>
+## AgentRunProcessTask Objects
+
+```python
+class AgentRunProcessTask(BaseAgentRunTask)
+```
+
+Subprocess wrapper to run agent.
+
+<a name="aea.manager.manager.AgentRunProcessTask.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(agent_alias: AgentAlias, loop: asyncio.AbstractEventLoop) -> None
+```
+
+Init task with agent alias and loop.
+
+<a name="aea.manager.manager.AgentRunProcessTask.start"></a>
+#### start
+
+```python
+ | start() -> None
+```
+
+Run task in a dedicated process.
+
+<a name="aea.manager.manager.AgentRunProcessTask.wait"></a>
+#### wait
+
+```python
+ | wait() -> asyncio.Future
+```
+
+Return future to wait task completed.
+
+<a name="aea.manager.manager.AgentRunProcessTask.stop"></a>
+#### stop
+
+```python
+ | stop() -> None
+```
+
+Stop the task.
+
+<a name="aea.manager.manager.AgentRunProcessTask.is_running"></a>
+#### is`_`running
+
+```python
+ | @property
+ | is_running() -> bool
+```
+
+Is agent running.
 
 <a name="aea.manager.manager.MultiAgentManager"></a>
 ## MultiAgentManager Objects

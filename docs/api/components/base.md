@@ -124,11 +124,29 @@ Get build directory for the component.
 load_aea_package(configuration: ComponentConfiguration) -> None
 ```
 
-Load the AEA package.
+Load the AEA package from configuration.
 
 It adds all the __init__.py modules into `sys.modules`.
 
 **Arguments**:
 
 - `configuration`: the configuration object.
+
+<a name="aea.components.base.perform_load_aea_package"></a>
+#### perform`_`load`_`aea`_`package
+
+```python
+perform_load_aea_package(dir_: Path, author: str, package_type_plural: str, package_name: str) -> None
+```
+
+Load the AEA package from values provided.
+
+It adds all the __init__.py modules into `sys.modules`.
+
+**Arguments**:
+
+- `dir_`: path of the component.
+- `author`: str
+- `package_type_plural`: str
+- `package_name`: str
 

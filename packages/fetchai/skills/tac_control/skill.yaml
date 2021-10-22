@@ -1,6 +1,6 @@
 name: tac_control
 author: fetchai
-version: 0.23.0
+version: 0.24.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
@@ -18,7 +18,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- fetchai/erc1155:0.21.0
+- fetchai/erc1155:0.22.0
 protocols:
 - fetchai/default:1.0.0
 - fetchai/oef_search:1.0.0
