@@ -44,6 +44,8 @@ ct:OefErrorOperation: |
         UNREGISTER_SERVICE = 1;
         SEARCH_SERVICES = 2;
         SEND_MESSAGE = 3;
+        ALREADY_IN_LOBBY = 4;
+        ALREADY_REGISTERED = 5;
       }
   OefErrorEnum oef_error = 1;
 ...

@@ -521,9 +521,9 @@ class SOEFChannel:
             pass
         except Exception as e:  # pylint: disable=broad-except # pragma: nocover
             if "<reason>Forbidden</reason><detail>already in lobby" in str(e):
-                raise ValueError(
-                    "Could not register with SOEF. Agent address already registered from elsewhere."
-                )
+                oef_error_operation = err_ops.ALREADY_IN_LOBBY
+            elif "<reason>Forbidden</reason><detail>already an agent" in str(e):
+                oef_error_operation = err_ops.ALREADY_REGISTERED
             self.logger.exception(f"Exception during envelope processing: {e}")
             await self._send_error_response(
                 oef_message,
