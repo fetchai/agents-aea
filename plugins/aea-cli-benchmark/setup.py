@@ -17,11 +17,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """Setup script for the plug-in."""
 
-
+from setuptools import find_packages  # type: ignore
 from setuptools import setup  # type: ignore
 
 
@@ -31,7 +29,9 @@ setup(
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="CLI extension for AEA framework benchmarking.",
-    packages=["aea_cli_benchmark"],
+    packages=find_packages(
+        where=".", include=["aea_cli_benchmark", "aea_cli_benchmark.*"]
+    ),
     entry_points={"aea.cli": ["benchmark = aea_cli_benchmark.core:benchmark"]},
     install_requires=["aea>=1.0.0, <2.0.0", "psutil==5.7.0"],
     classifiers=[

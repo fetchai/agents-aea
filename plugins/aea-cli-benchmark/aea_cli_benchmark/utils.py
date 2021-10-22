@@ -94,10 +94,20 @@ def make_agent(
     agent_name: str = "my_agent",
     runtime_mode: str = "threaded",
     resources: Optional[Resources] = None,
+    wallet: Optional[Wallet] = None,
     identity: Optional[Identity] = None,
+    packages_dir=PACKAGES_DIR,
+    default_ledger=None,
 ) -> AEA:
     """Make AEA instance."""
-    wallet = Wallet({DEFAULT_LEDGER: None})
+    if not wallet:
+        wallet = Wallet({DEFAULT_LEDGER: None})
+
+    if wallet and not identity:
+        identity = make_identity_from_wallet(
+            agent_name, wallet, default_ledger or list(wallet.addresses.keys())[0]
+        )
+
     identity = identity or Identity(
         agent_name, address=agent_name, public_key="somekey"
     )
@@ -109,14 +119,14 @@ def make_agent(
 
     resources.add_skill(
         Skill.from_dir(
-            str(PACKAGES_DIR / _FETCHAI_IDENTIFIER / SKILLS / ERROR_SKILL_NAME),
+            str(Path(packages_dir) / _FETCHAI_IDENTIFIER / SKILLS / ERROR_SKILL_NAME),
             agent_context=agent_context,
         )
     )
     resources.add_protocol(
         Protocol.from_dir(
             str(
-                PACKAGES_DIR
+                Path(packages_dir)
                 / _FETCHAI_IDENTIFIER
                 / PROTOCOLS
                 / PublicId.from_str(DEFAULT_PROTOCOL).name
@@ -236,11 +246,15 @@ def make_skill(
     agent: AEA,
     handlers: Optional[Dict[str, Type[Handler]]] = None,
     behaviours: Optional[Dict[str, Type[Behaviour]]] = None,
+    skill_id: Optional[PublicId] = None,
 ) -> Skill:
     """Construct skill instance for agent from behaviours."""
+    skill_id = skill_id or PublicId.from_str("fetchai/benchmark:0.1.0")
     handlers = handlers or {}
     behaviours = behaviours or {}
-    config = SkillConfig(name="test_skill", author="fetchai")
+    config = SkillConfig(
+        name=skill_id.name, author=skill_id.author, version=skill_id.version
+    )
     skill_context = SkillContext(agent.context)
     skill = Skill(configuration=config, skill_context=skill_context)
     for name, handler_cls in handlers.items():
@@ -306,7 +320,18 @@ def print_results(
 
 
 def _make_init_py(path: str) -> None:
+    """Make init.py file in a directory."""
     (Path(path) / "__init__.py").write_text("")
+
+
+def make_identity_from_wallet(name, wallet, default_ledger):
+    """Make indentity for ledger id and wallet specified."""
+    return Identity(
+        name,
+        address=wallet.addresses[default_ledger],
+        public_key=wallet.public_keys[default_ledger],
+        default_address_key=default_ledger,
+    )
 
 
 @contextmanager
