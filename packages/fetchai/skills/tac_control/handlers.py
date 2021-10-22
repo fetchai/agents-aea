@@ -446,6 +446,10 @@ class OefSearchHandler(Handler):
         ):
             registration_behaviour = cast(TacBehaviour, self.context.behaviours.tac,)
             registration_behaviour.failed_registration_msg = target_message
+            registration_behaviour.failed_registration_reason = (
+                oef_search_error_msg.oef_error_operation
+            )
+            registration_behaviour.retry_failed_registration()
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

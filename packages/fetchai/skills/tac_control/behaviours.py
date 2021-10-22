@@ -20,6 +20,7 @@
 """This package contains a the behaviours."""
 
 import datetime
+from time import sleep
 from typing import Any, Optional, cast
 
 from aea.helpers.search.models import Description
@@ -49,6 +50,7 @@ class TacBehaviour(Behaviour):
         super().__init__(**kwargs)
         self._registered_description = None  # type: Optional[Description]
         self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self.failed_registration_reason = None  # type: Optional[int]
         self._nb_retries = 0
 
     def setup(self) -> None:
@@ -57,8 +59,6 @@ class TacBehaviour(Behaviour):
 
     def act(self) -> None:
         """Implement the act."""
-        self._retry_failed_registration()
-
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
@@ -95,13 +95,39 @@ class TacBehaviour(Behaviour):
         self._unregister_tac()
         self._unregister_agent()
 
-    def _retry_failed_registration(self) -> None:
+    def retry_failed_registration(self) -> None:
         """Retry a failed registration."""
         if self.failed_registration_msg is not None:
             self._nb_retries += 1
             if self._nb_retries > self._max_soef_registration_retries:
                 self.context.is_active = False
                 return
+
+            if (
+                self.failed_registration_reason
+                == OefSearchMessage.OefErrorOperation.ALREADY_IN_LOBBY
+            ):
+                parameters = cast(Parameters, self.context.parameters)
+                self.context.logger.info(
+                    "Already in OEF lobby from previous registration attempt."
+                )
+                self.context.logger.info(
+                    f"Retrying registion in {parameters.registration_retry_interval} seconds."
+                )
+                sleep(parameters.registration_retry_interval)
+
+            elif (
+                self.failed_registration_reason
+                == OefSearchMessage.OefErrorOperation.ALREADY_REGISTERED
+            ):
+                self.context.logger.info("Already registered in OEF.")
+                return
+
+            parameters = cast(Parameters, self.context.parameters)
+            self.context.logger.info(
+                f"Retrying registion in {parameters.registration_retry_interval} seconds."
+            )
+            sleep(parameters.registration_retry_interval)
 
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
