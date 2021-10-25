@@ -22,8 +22,6 @@
 import datetime
 from typing import List, cast
 
-from aea.crypto.helpers import try_generate_testnet_wealth
-
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
@@ -53,10 +51,6 @@ class TacBehaviour(BaseTacBehaviour):
             game = cast(Game, self.context.game)
             game.phase = Phase.CONTRACT_DEPLOYMENT_PROPOSAL
             self._request_contract_deploy_transaction()
-
-        address = self.context.agent_address
-        identifier = self.context.default_ledger_id
-        try_generate_testnet_wealth(address, identifier)
 
     def _request_contract_deploy_transaction(self) -> None:
         """Request contract deploy transaction"""
