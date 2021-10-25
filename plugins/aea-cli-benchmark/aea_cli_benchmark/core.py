@@ -24,6 +24,10 @@ from copy import deepcopy
 from typing import Dict, List, Optional
 
 import click
+from aea_cli_benchmark.case_acn_communication.command import (
+    main as case_acn_communication,
+)
+from aea_cli_benchmark.case_acn_startup.command import main as case_acn_startup
 from aea_cli_benchmark.case_agent_construction_time.command import (
     main as case_agent_construction_time,
 )
@@ -70,6 +74,8 @@ benchmark.add_command(case_proactive)
 
 benchmark.add_command(case_reactive)
 benchmark.add_command(case_tx_generate)
+benchmark.add_command(case_acn_startup)
+benchmark.add_command(case_acn_communication)
 
 INTERNAL_COMMANDS = ["make-config", "run"]
 

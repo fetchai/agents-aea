@@ -17,6 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+from pprint import pprint
 """Check aea dependencies."""
 import copy
 import dis
@@ -139,6 +140,7 @@ class ImportsTool:
             mods = list(cls.get_third_part_imports_for_file(root_path / pyfile))
             if not mods:
                 continue
+            print(Path(str(pyfile)), list(set([i[0] for i in mods])))
             yield Path(pyfile), list(set(mods))
 
 
@@ -190,8 +192,8 @@ class CheckTool:
         files_and_modules = ImportsTool.list_all_pyfiles_with_3rdpart_imports(
             AEA_ROOT_DIR, pattern="aea/**/*.py"
         )
-
         sections_dependencies = cls.get_section_dependencies_from_setup()
+
         sections_imports = cls.make_sections_with_3rdpart_imports(
             files_and_modules, set(sections_dependencies.keys())
         )
