@@ -465,6 +465,9 @@ class LedgerApiHandler(Handler):
             )
         )
         # TODO: add setting up flags: is_balance_empty and is_balance_received
+        game = cast(Game, self.context.game)
+        game.is_balance_received = True
+        self.context.logger.warning(f"BALANCE: {ledger_api_msg.balance}")
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue

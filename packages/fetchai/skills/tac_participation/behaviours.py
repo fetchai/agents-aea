@@ -113,10 +113,9 @@ class TacSearchBehaviour(TickerBehaviour):
             return
 
         game = cast(Game, self.context.game)
-        ledger_id = game.ledger_id
-        address = self.context.agent_address
-        try_generate_testnet_wealth(ledger_id, address)
-        # TODO: check is wallet funded
+        if self._is_balance_empty():
+            # TODO: replace with creating a message
+            try_generate_testnet_wealth(game.ledger_id, self.context.agent_address)
 
 
 class TransactionProcessBehaviour(TickerBehaviour):
