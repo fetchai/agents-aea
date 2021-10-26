@@ -84,13 +84,14 @@ async def test_sync_connection():
         await asyncio.wait_for(con.send(envelope), timeout=10)
 
     await asyncio.sleep(con.PAUSE * 1.5)
+    assert con.send_counter == con.MAX_WORKER_THREADS
+
     await asyncio.wait_for(con.disconnect(), timeout=10)
     assert con.is_disconnected
 
     assert con.on_connect_called
     assert con.on_disconnect_called
     assert con.main_called
-    assert con.send_counter == con.MAX_WORKER_THREADS
 
     with patch.object(con, "_ensure_connected"):
         envelope = await con.receive()
