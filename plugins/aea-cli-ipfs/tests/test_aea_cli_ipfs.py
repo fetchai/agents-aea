@@ -37,7 +37,7 @@ from aea_cli_ipfs.core import (  # noqa # type: ignore  # pylint: disable=wrong-
 )
 
 
-cli.add_command("ipfs", ipfs)
+cli.add_command(ipfs)
 
 
 def test_ipfs():
