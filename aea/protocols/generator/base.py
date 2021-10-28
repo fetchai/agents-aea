@@ -1164,7 +1164,6 @@ class ProtocolGenerator:
         cls_str += self.indent + "self_address=self_address,\n"
         cls_str += self.indent + "role=role,\n"
         cls_str += self.indent + ")\n"
-        cls_str += self.indent + "return None\n"
         self._change_indent(-2)
 
         # dialogues class
@@ -1224,7 +1223,6 @@ class ProtocolGenerator:
             self.indent
             + ":param role_from_first_message: the callable determining role from first message\n"
         )
-        cls_str += self.indent + ":return: None\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogues.__init__(\n"
         self._change_indent(1)
@@ -1241,7 +1239,6 @@ class ProtocolGenerator:
         cls_str += self.indent + "role_from_first_message=role_from_first_message,\n"
         self._change_indent(-1)
         cls_str += self.indent + ")\n"
-        cls_str += self.indent + "return None\n"
         self._change_indent(-2)
         cls_str += self.indent + "\n"
 
@@ -1312,7 +1309,6 @@ class ProtocolGenerator:
                     _camel_case_to_snake_case(custom_type)
                 )
             )
-            cls_str += self.indent + ":return: None\n"
             cls_str += self.indent + '"""\n'
             cls_str += self.indent + "raise NotImplementedError\n\n"
             self._change_indent(-1)

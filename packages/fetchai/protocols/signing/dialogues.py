@@ -103,7 +103,6 @@ class SigningDialogue(Dialogue):
             self_address=self_address,
             role=role,
         )
-        return None
 
 
 class SigningDialogues(Dialogues, ABC):
@@ -127,7 +126,6 @@ class SigningDialogues(Dialogues, ABC):
         :param self_address: the address of the entity for whom dialogues are maintained
         :param dialogue_class: the dialogue class used
         :param role_from_first_message: the callable determining role from first message
-        :return: None
         """
         Dialogues.__init__(
             self,
@@ -137,4 +135,3 @@ class SigningDialogues(Dialogues, ABC):
             dialogue_class=dialogue_class,
             role_from_first_message=role_from_first_message,
         )
-        return None

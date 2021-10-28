@@ -178,7 +178,7 @@ Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loo
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, multiplexer_options: Dict, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False) -> None
+ | __init__(agent: AbstractAgent, multiplexer_options: Dict, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False, task_manager_mode: Optional[str] = None) -> None
 ```
 
 Init runtime.
@@ -190,6 +190,7 @@ Init runtime.
 - `loop_mode`: agent main loop mode.
 - `loop`: optional event loop. if not provided a new one will be created.
 - `threaded`: if True, run in threaded mode, else async
+- `task_manager_mode`: mode of the task manager.
 
 <a name="aea.runtime.AsyncRuntime.set_loop"></a>
 #### set`_`loop

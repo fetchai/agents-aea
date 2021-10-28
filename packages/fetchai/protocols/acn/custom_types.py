@@ -101,7 +101,6 @@ class AgentRecord:
 
         :param agent_record_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param agent_record_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         agent_record_protobuf_object.address = agent_record_object.address
         agent_record_protobuf_object.public_key = agent_record_object.public_key
@@ -111,7 +110,6 @@ class AgentRecord:
         agent_record_protobuf_object.signature = agent_record_object.signature
         agent_record_protobuf_object.service_id = agent_record_object.service_id
         agent_record_protobuf_object.ledger_id = agent_record_object.ledger_id
-        return None
 
     @classmethod
     def decode(cls, agent_record_protobuf_object: Any) -> "AgentRecord":

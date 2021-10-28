@@ -72,12 +72,10 @@ class AgentsInfo:
 
         :param agents_info_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param agents_info_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         agents_info_protobuf_object.agents_info = DictProtobufStructSerializer.encode(
             agents_info_object.body
         )
-        return None
 
     @classmethod
     def decode(cls, agents_info_protobuf_object: Any) -> "AgentsInfo":

@@ -8,12 +8,12 @@ description: A protocol for preparing an atomic swap bilateral transaction for c
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZ7gzwMzCbmS2igbGfR98zjbYAN97pCysSEiBphhUBE8U
-  __init__.py: QmQCk1PZvRuMJxYe6RcFWjQ2hRtC88EmsWSE3QVvQ6q9w4
+  README.md: Qma73sRRcS4iUqVCkjLmTmtREEuNKsDEuBiVg8AeZMTeey
+  __init__.py: QmRQvxvHu7Y82umQBHaUURWkCETQ51N9DeW752tPxnwdcT
   cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
   cosm_trade_pb2.py: QmVZWhxWmqr3WKPx2HQWPENavv8754BmiLuh6hTukuWRxX
   custom_types.py: QmUweZKxravsiJNVzUypN8fiF7XWYbuN2rVURw18EHQrss
-  dialogues.py: QmcdchNnNXLN5ivNtuHkaPPL4yeWrfr21bmdec3hRw5ERa
+  dialogues.py: QmTBnscbaqnSK9hHyWL8jAFVoJtP9DK4V6dtoMjCikLSfd
   message.py: QmXAP7uckdGW4T5Gb8xMuyaWQ73cGhCspa4AHCcq65j8uR
   serialization.py: QmTsEjoduW6mgWSGF1hFLobUmajPXVVVWZ7Bs4FmLWaRW8
 fingerprint_ignore_patterns: []

@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the default protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.2`.
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.1.0`.
 """
 
 from packages.fetchai.protocols.default.message import DefaultMessage
