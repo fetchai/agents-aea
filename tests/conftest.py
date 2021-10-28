@@ -282,7 +282,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.26.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.27.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -724,7 +724,7 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
 
 @pytest.mark.integration
 @pytest.mark.ledger
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def ganache(
     ganache_configuration,
     ganache_addr,
@@ -756,7 +756,7 @@ def soef(
 
 @pytest.mark.integration
 @pytest.mark.ledger
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 @action_for_platform("Linux", skip=False)
 def fetchd(
     fetchd_configuration, timeout: float = 2.0, max_attempts: int = 40,
@@ -791,12 +791,14 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
     else:
-        logger.info("Done!")
-        time.sleep(timeout)
-        yield
-        logger.info(f"Stopping the image {image.tag}...")
-        container.stop()
-        container.remove()
+        try:
+            logger.info("Done!")
+            time.sleep(timeout)
+            yield
+        finally:
+            logger.info(f"Stopping the image {image.tag}...")
+            container.stop()
+            container.remove()
 
 
 @pytest.fixture(scope="session", autouse=True)

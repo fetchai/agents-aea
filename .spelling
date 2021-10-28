@@ -214,6 +214,18 @@ choco
 utc-0
 docstring
 utils
+kademlia
+StargateWorld
+stargateworld-3
+v0.8.x
+fetch.ai
+RaiseError
+serializer's
+pywin32
+CosmPy
+dockerised
+Mermaid-JS
+darglint
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

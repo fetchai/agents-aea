@@ -3,7 +3,7 @@
 ## Description
 
 This is a protocol for preparing an atomic swap bilateral transaction for cosmos-based ledgers, including fetchai's. 
-For two parties A and B to atomically swap tokens on cosmos-based networks, A has to send its public_key to B.
+For two parties A and B to atomically swap tokens on cosmos-based networks, A has to send its public key to B.
 Then B constructs the transaction using both his public key and A's, signs the transaction, adds its signature to the list of signatures in the transaction and sends this to A. 
 After receiving, A signs the transaction, adds its signature to the list of signatures in the transaction and broadcasts it to the network for processing.
 

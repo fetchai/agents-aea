@@ -52,7 +52,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
-from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
+from tests.conftest import MAX_FLAKY_RERUNS, MY_FIRST_AEA_PUBLIC_ID
 from tests.test_cli import test_generate_wealth, test_interact
 
 
@@ -368,6 +368,7 @@ class TestGenerateAndAddKey(AEATestCaseEmpty):
 class TestGetWealth(AEATestCaseEmpty):
     """Test get_wealth."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_get_wealth(self):
         """Test get_wealth."""
         # just call it, network related and quite unstable

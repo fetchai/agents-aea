@@ -17,7 +17,7 @@ an easily extendible way. At import time, the framework will load
 all the crypto plug-ins available in the current Python environment.
 
 A _crypto plug-in_ is a Python package which declares some specific
-<a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entry-points" target="_blank">
+<a href="https://setuptools.pypa.io/en/latest/pkg_resources.html#entry-points" target="_blank">
 `setuptools` "entry points"</a> in its `setup.py` script.
 In particular, there are three types of entry points the framework looks up:
 
@@ -146,7 +146,7 @@ Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, m
 
 You can access more details on <a href="https://github.com/fetchai/networks-stargateworld" target="_blank">GitHub</a>.
 
-The configurations can be specified for the `fetchai/ledger:0.18.0` connection.
+The configurations can be specified for the `fetchai/ledger:0.19.0` connection.
 
 ## CosmWasm supporting chains
 

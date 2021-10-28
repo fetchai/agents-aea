@@ -630,17 +630,7 @@ compute_specifier_from_version(version: Version) -> str
 
 Compute the specifier set from a version.
 
-Varying only on the patch number for versions with major 0.
-
-I.e. from "{major}.{minor}.{patch}.{extra}", return
-
-">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
-
-Varying on the patch and minor number for versions with major >= 1.
-
-I.e. from "{major}.{minor}.{patch}.{extra}", return
-
-">=min({major}.0.0, {major}.{minor}.{patch}.{extra}), <{major+1}.0.0"
+version specifier is:  >=major.minor.0, <next_major.0.0
 
 **Arguments**:
 
