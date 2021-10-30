@@ -172,31 +172,31 @@ jobs:
       - name: Check spelling
         run: tox -e spell_check
 
-  dependencies_checks:
-    continue-on-error: False
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.6]
-    timeout-minutes: 10
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@master
-        with:
-          python-version: ${{ matrix.python_version }}
-      - name: Install tox
-        run : |
-          pip install tox
-      - name: Check Pipfile and tox.ini consistency
-        run : |
-          python ./scripts/check_pipfile_and_toxini.py
-      - name: Install current aea
-        run: |
-          pip install -e .[all]
-      - name: Check aea dependenices and imports
-        run: |
-          tox -e dependencies_check
+  # dependencies_checks:
+  #   continue-on-error: False
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macos-latest, windows-latest]
+  #       python_version: [3.6]
+  #   timeout-minutes: 10
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: actions/setup-python@master
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
+  #     - name: Install tox
+  #       run : |
+  #         pip install tox
+  #     - name: Check Pipfile and tox.ini consistency
+  #       run : |
+  #         python ./scripts/check_pipfile_and_toxini.py
+  #     - name: Install current aea
+  #       run: |
+  #         pip install -e .[all]
+  #     - name: Check aea dependenices and imports
+  #       run: |
+  #         tox -e dependencies_check
 
   plugins_install_check:
     continue-on-error: False
