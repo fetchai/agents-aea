@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2021 open_aea
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,23 +27,25 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.signing.custom_types import ErrorCode as CustomErrorCode
-from packages.fetchai.protocols.signing.custom_types import (
+from packages.open_aea.protocols.signing.custom_types import (
+    ErrorCode as CustomErrorCode,
+)
+from packages.open_aea.protocols.signing.custom_types import (
     RawMessage as CustomRawMessage,
 )
-from packages.fetchai.protocols.signing.custom_types import (
+from packages.open_aea.protocols.signing.custom_types import (
     RawTransaction as CustomRawTransaction,
 )
-from packages.fetchai.protocols.signing.custom_types import (
+from packages.open_aea.protocols.signing.custom_types import (
     SignedMessage as CustomSignedMessage,
 )
-from packages.fetchai.protocols.signing.custom_types import (
+from packages.open_aea.protocols.signing.custom_types import (
     SignedTransaction as CustomSignedTransaction,
 )
-from packages.fetchai.protocols.signing.custom_types import Terms as CustomTerms
+from packages.open_aea.protocols.signing.custom_types import Terms as CustomTerms
 
 
-_default_logger = logging.getLogger("aea.packages.fetchai.protocols.signing.message")
+_default_logger = logging.getLogger("aea.packages.open_aea.protocols.signing.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -51,8 +53,8 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:1.0.0")
-    protocol_specification_id = PublicId.from_str("fetchai/signing:1.0.0")
+    protocol_id = PublicId.from_str("open_aea/signing:1.0.0")
+    protocol_specification_id = PublicId.from_str("open_aea/signing:1.0.0")
 
     ErrorCode = CustomErrorCode
 

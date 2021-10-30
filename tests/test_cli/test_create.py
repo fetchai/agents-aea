@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,8 +42,8 @@ from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,

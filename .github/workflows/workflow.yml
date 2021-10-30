@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: 3.7
       - uses: actions/setup-go@master
         with:
           go-version: '^1.14.0'
@@ -91,7 +91,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -110,7 +110,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -177,7 +177,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.6]
+        python_version: [3.7]
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     steps:
@@ -207,7 +207,7 @@ jobs:
           - { os: windows-latest, shell: 'msys2 {0}' }
           - { os: ubuntu-latest,  shell: bash  }
           - { os: macos-latest,   shell: bash  }
-        python_version: [3.6]
+        python_version: [3.7]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
@@ -240,7 +240,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: 3.7
       - uses: actions/setup-go@master
         with:
           go-version: '^1.14.0'
@@ -291,9 +291,6 @@ jobs:
     - name: Configure Docker
       run: |
         gcloud auth configure-docker 
-    - name: Pull SOEF Image
-      run: |
-        docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
     - name: Sync AEA loop integration tests
       run: |
         tox -e py3.8 -- -m 'sync'  # --aea-loop sync
@@ -330,9 +327,6 @@ jobs:
       - name: Configure Docker
         run: |
           gcloud auth configure-docker 
-      - name: Pull SOEF Image
-        run: |
-          docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
 
@@ -349,7 +343,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.6, 3.7, 3.8, 3.9]
+        python_version: [3.7, 3.8, 3.9]
     timeout-minutes: 90
     steps:
     - uses: actions/checkout@master
@@ -460,7 +454,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6]
+        python-version: [3.7]
     timeout-minutes: 45
     steps:
     - uses: actions/checkout@master
@@ -470,7 +464,7 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
-    - if: matrix.python-version == '3.6'
+    - if: matrix.python-version == '3.7'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...

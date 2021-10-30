@@ -14,8 +14,8 @@ protocols:
 - fetchai/default:1.0.0
 - fetchai/fipa:1.0.0
 - fetchai/oef_search:1.0.0
-- fetchai/signing:1.0.0
 - fetchai/state_update:1.0.0
+- open_aea/signing:1.0.0
 skills:
 - dummy_author/dummy:0.1.0
 - fetchai/error:0.17.0

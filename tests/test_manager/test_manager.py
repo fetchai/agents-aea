@@ -719,7 +719,7 @@ class TestMultiAgentManagerPackageConsistencyError:
     - 'fetchai/fipa' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
     - 'fetchai/ledger_api' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
     - 'fetchai/oef_search' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'open_aea/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
     - 'fetchai/state_update' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
     """
     )

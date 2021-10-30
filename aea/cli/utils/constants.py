@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,4 +57,3 @@ NOT_PERMITTED_AUTHORS = [
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
 
 REQUIREMENTS = "requirements.txt"
-STUB_CONNECTION = "fetchai/stub:latest"

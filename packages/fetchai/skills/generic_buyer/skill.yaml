@@ -9,8 +9,8 @@ fingerprint:
   README.md: Qmd7hF4eNgxUoGaxkPEKVPQNxpLG2aG4DvovSLKkwKxVYt
   __init__.py: QmaA7KhZpXWJAVPbyiZB7AL7Cg1dCsjsLWMb563ZzhyXEM
   behaviours.py: QmWPowGDGZKovjzBKEZuPoDhZb5yXhtCuWDQfazntsGWAS
-  dialogues.py: Qmbnx31GVz4mBaGP6f6wR9oRkjb3KYMHYKMqKy7p2MXJHL
-  handlers.py: QmP2itgPryxwXAKdtJFGEf5rT6WPQeFCGHCfe2L6waVoZT
+  dialogues.py: QmcvxFzt2Z2oYbxzdbCPPXuds6rRi5o4mh2fghX1srgNtw
+  handlers.py: QmXWqHV2xL1RSAEw4L4kde1V2VoHMHLkGtJpT9srPz14my
   strategy.py: QmUYA98L4kdkv64yBt4M1BLMqr5JgzqTwUgT9FYnjatdHs
 fingerprint_ignore_patterns: []
 connections:
@@ -21,7 +21,7 @@ protocols:
 - fetchai/fipa:1.0.0
 - fetchai/ledger_api:1.0.0
 - fetchai/oef_search:1.0.0
-- fetchai/signing:1.0.0
+- open_aea/signing:1.0.0
 skills: []
 behaviours:
   search:

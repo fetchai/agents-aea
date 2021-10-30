@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,7 +83,6 @@ Commands:
   get-wealth           Get the wealth associated with the private key of the...
   init                 Initialize your AEA configurations.
   install              Install the dependencies of the agent.
-  interact             Interact with the running agent via the stub...
   ipfs                 IPFS Commands
   issue-certificates   Issue certificates for connections that require them.
   launch               Launch many agents at the same time.

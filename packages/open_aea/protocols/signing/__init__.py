@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2021 open_aea
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@
 """
 This module contains the support resources for the signing protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0`.
+It was created with protocol buffer compiler version `libprotoc 3.17.3` and aea version `1.1.0`.
 """
 
-from packages.fetchai.protocols.signing.message import SigningMessage
-from packages.fetchai.protocols.signing.serialization import SigningSerializer
+from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.serialization import SigningSerializer
 
 
 SigningMessage.serializer = SigningSerializer

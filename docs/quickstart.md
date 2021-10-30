@@ -296,29 +296,7 @@ The framework first calls the `setup` methods in the skill's `Handler` and `Beha
 
 #### Add a message to the input file
 
-You can send the AEA a message wrapped in an envelope using the CLI's `interact` command.
-
-From a different terminal and same directory (ensure you are in the same virtual environment: `pipenv shell`):
-
-``` bash
-cd my_first_aea
-aea interact
-```
-
-You can now send messages to this AEA via an interactive tool by typing anything into the prompt and hitting enter twice (once to send the message and once more to check for a response). 
-
-Let us send `hello` to this AEA (type `hello` and press enter twice). In the original terminal, you will see the `Echo Handler` dealing with this envelope and its contained message. You should see an output similar to the one below but with a different `dialogue_reference`.
-
-``` bash
-info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=my_first_aea_interact
-info: Echo Behaviour: act method called.
-info: Echo Behaviour: act method called.
-```
-
-<details><summary>Manual approach</summary>
-
-Optionally, from a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
+From a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
 echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
@@ -334,8 +312,6 @@ info: Echo Behaviour: act method called.
 ```
 
 Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the <code>aea interact</code> command.
-
-</details>
 
 ### Stop the AEA
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,11 +54,10 @@ from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
-from tests.test_cli import test_generate_wealth, test_interact
+from tests.test_cli import test_generate_wealth
 
 
 TestWealthCommandsPositive = test_generate_wealth.TestWealthCommandsPositive
-TestInteractCommand = test_interact.TestInteractCommand
 
 
 class TestConfigCases(AEATestCaseEmpty):

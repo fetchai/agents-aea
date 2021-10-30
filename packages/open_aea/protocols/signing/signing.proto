@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.signing.v1_0_0;
+package aea.open_aea.signing.v1_0_0;
 
 message SigningMessage{
 

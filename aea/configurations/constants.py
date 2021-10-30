@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +25,16 @@ from typing import Dict, List
 _FETCHAI_IDENTIFIER = "fetchai"
 _ETHEREUM_IDENTIFIER = "ethereum"
 _COSMOS_IDENTIFIER = "cosmos"
-DEFAULT_PROTOCOL = "fetchai/default:latest"
-SIGNING_PROTOCOL = "fetchai/signing:latest"
-STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
-LEDGER_CONNECTION = "fetchai/ledger:latest"
+SIGNING_PROTOCOL = "open_aea/signing:latest"
 DEFAULT_LEDGER = _FETCHAI_IDENTIFIER
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_LICENSE = "Apache-2.0"
 DISTRIBUTED_PACKAGES: List[str] = []
-DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:any"
+DEFAULT_SEARCH_SERVICE_ADDRESS = "open_aea/soef:any"
 DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
-SCAFFOLD_PUBLIC_ID = "fetchai/scaffold:0.1.0"
+SCAFFOLD_PUBLIC_ID = "open_aea/scaffold:0.1.0"
 PACKAGES = "packages"
 REGISTRY_PATH_KEY = "registry_path"
 DEFAULT_REGISTRY_NAME = PACKAGES

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2021 open_aea
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ from aea.mail.base_pb2 import DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
-from packages.fetchai.protocols.signing import signing_pb2
-from packages.fetchai.protocols.signing.custom_types import (
+from packages.open_aea.protocols.signing import signing_pb2
+from packages.open_aea.protocols.signing.custom_types import (
     ErrorCode,
     RawMessage,
     RawTransaction,
@@ -35,7 +35,7 @@ from packages.fetchai.protocols.signing.custom_types import (
     SignedTransaction,
     Terms,
 )
-from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 
 class SigningSerializer(Serializer):

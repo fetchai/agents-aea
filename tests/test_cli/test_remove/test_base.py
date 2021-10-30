@@ -36,7 +36,6 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
@@ -46,6 +45,7 @@ from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
 from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -92,7 +92,7 @@ class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
     @pytest.mark.parametrize(
         ["type_", "public_id"],
         [
-            ("protocol", PublicId.from_str(DEFAULT_PROTOCOL)),
+            ("protocol", DefaultMessage.protocol_id),
             ("connection", PublicId("fetchai", "stub").to_latest()),
             ("contract", PublicId("fetchai", "erc1155").to_latest()),
         ],

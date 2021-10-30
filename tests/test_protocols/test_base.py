@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,13 +44,13 @@ from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogues,
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.signing.dialogues import (
-    SigningDialogue,
-    SigningDialogues,
-)
 from packages.fetchai.protocols.state_update.dialogues import (
     StateUpdateDialogue,
     StateUpdateDialogues,
+)
+from packages.open_aea.protocols.signing.dialogues import (
+    SigningDialogue,
+    SigningDialogues,
 )
 
 from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID

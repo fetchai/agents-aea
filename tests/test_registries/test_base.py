@@ -52,9 +52,9 @@ from aea.skills.base import Skill
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.state_update import StateUpdateMessage
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
