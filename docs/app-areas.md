@@ -8,11 +8,11 @@ The <a href="../index">introduction</a> and the <a href="../agent-oriented-devel
 
 In light of those discussions, on this page we identify a number of application areas for AEA-based solutions. This list is by no means comprehensive. In fact, we are most excited about applications which we have not thought of before.
 
-* **Inhabitants**: agents representing objects in the IoT (Internet of Things) space. For examples, AEAs paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example is a <a href="../thermometer-skills"> thermometer agent </a>.
+* **Inhabitants**: agents representing objects in the IoT (Internet of Things) space. For examples, AEAs paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example is a <a href="https://docs.fetch.ai/aea/thermometer-skills" target="_blank"> thermometer agent </a>.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between existing (Web 2.0) and new (Web 3.0) economic models. An example is an AEA with <a href="../http-connection-and-skill"> HTTP connection and skill </a> who has the capability to communicate using HTTP.
 * **Pure software**: software agents _living_ in the digital space that interact with interface agents and others.
-* **Digital data sales agents**: software agents that attach to data sources and sell it via the open economic framework. An example can be found <a href="../ml-skills">here</a>.
-* **Representative**: an agent which represents an individual's activities on the Fetch.ai network. An example can be found <a href="../tac-skills">here</a>.
+* **Digital data sales agents**: software agents that attach to data sources and sell it via the open economic framework. An example can be found <a href="https://docs.fetch.ai/aea/ml-skills" target="_blank">here</a>.
+* **Representative**: an agent which represents an individual's activities on the Fetch.ai network. An example can be found <a href="https://docs.fetch.ai/aea/tac-skills" target="_blank">here</a>.
 
 ## Likely short-term applications
 

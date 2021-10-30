@@ -1,5 +1,5 @@
 <h1 align="center">
-    <b>AEA Framework</b>
+    <b>Open AEA Framework</b>
 </h1>
 
 <p align="center">
@@ -17,9 +17,6 @@
   </a>
   <a href="https://pypi.org/project/aea/">
     <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
-  </a>
-  <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY">
-    <img alt="Slack" src="https://img.shields.io/badge/slack-fetchai-purple.svg">
   </a>
 </p>
 <p align="center">
@@ -44,10 +41,10 @@
 </p>
 
 <p align="center">
-A framework for autonomous economic agent (AEA) development
+A framework for autonomous economic agent (AEA) development with no vendor lock-in
 </p>
 
-This is a fork of <a href="https://github.com/fetchai/agents-aea">this project</a> with the benefit that all vendor lock-in is removed. This means, there are no dependencies on centrally hosted registries for agent packages and the AEA itself does not prefer any package vendor over another. Where feasible, compatibility is maintained.
+This is a fork of <a href="https://github.com/fetchai/agents-aea">the original AEA project</a> with the benefit that all vendor lock-in at the package level is removed. This means, there are no dependencies on centrally hosted registries for agent packages and the AEA itself does not prefer any package vendor over another. Where feasible, compatibility with the original AEA framework is maintained.
 
 ## Get started developing AEAs
 
