@@ -43,10 +43,10 @@ from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.test_tools.click_testing import CliRunner
 
-from packages.fetchai.connections.local.connection import LocalNode
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    PUBLIC_ID as P2P_PUBLIC_ID,
+from packages.fetchai.connections.http_server.connection import (
+    PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
 )
+from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -910,7 +910,14 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
     def test_multiplexer_disconnected_on_early_interruption(self):
         """Test multiplexer disconnected properly on termination before connected."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "add",
+                "--local",
+                "connection",
+                str(HTTP_SERVER_PUBLIC_ID),
+            ],
         )
         assert result.exit_code == 0, result.stdout_bytes
 
@@ -946,7 +953,7 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Starting libp2p node..."], timeout=50,
+            ["HTTP Server has connected to port"], timeout=50,
         )
         self.proc.control_c()
         self.proc.expect_all(

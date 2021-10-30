@@ -12,7 +12,7 @@
   <a>
     <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
   </a>
-  <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
+  <a href="https://github.com/valory-xyz/open-aea/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
   </a>
   <a href="https://pypi.org/project/aea/">
@@ -23,11 +23,11 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
-    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
+  <a href="https://github.com/valory-xyz/open-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
+    <img alt="AEA framework sanity checks and tests" src="https://github.com/valory-xyz/open-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
-    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/valory-xyz/open-aea">
   </a>
   <a href="https://img.shields.io/badge/lint-flake8-blueviolet">
     <img alt="flake8" src="https://img.shields.io/badge/lint-flake8-yellow" >
@@ -47,9 +47,7 @@
 A framework for autonomous economic agent (AEA) development
 </p>
 
-<p align="center">
-  <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
-</p>
+This is a fork of <a href="https://github.com/fetchai/agents-aea">this project</a> with the benefit that all vendor lock-in is removed. This means, there are no dependencies on centrally hosted registries for agent packages and the AEA itself does not prefer any package vendor over another. Where feasible, compatibility is maintained.
 
 ## Get started developing AEAs
 
@@ -57,13 +55,13 @@ A framework for autonomous economic agent (AEA) development
 
        pipenv --python 3.7 && pipenv shell
 
-2. Install the package from [PyPI](https://pypi.org/project/aea/):
+2. Install the package from [PyPI](https://pypi.org/project/open-aea/):
 
-       pip install aea[all]
+       pip install open-aea[all]
 
     Or, if you use `zsh` rather than `bash`:
 
-       pip install "aea[all]"
+       pip install "open-aea[all]"
 
 3. Then, build your agent as described in the [docs](https://docs.fetch.ai/aea/).
 
@@ -79,7 +77,7 @@ A framework for autonomous economic agent (AEA) development
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-       pipx install aea[all]
+       pipx install open-aea[all]
 
 3. Run AEA CLI e.g.:
 
@@ -93,7 +91,7 @@ This approach is not recommended!
 
 This repository contains submodules. Clone with recursive strategy:
 
-    git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+    git clone https://github.com/valory-xyz/open-aea.git --recursive && cd agents-aea
 
 - To fetch/update submodules (for existing local repo):
 
@@ -131,7 +129,7 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 ## Contributing
 
-We welcome contributions to the framework, its plugins, related tools and packages. Please consult the [contributing guide](https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md) for details.
+We welcome contributions to the framework, its plugins, related tools and packages. Please consult the [contributing guide](https://github.com/valory-xyz/open-aea/blob/main/CONTRIBUTING.md) for details.
 
 ## Cite
 

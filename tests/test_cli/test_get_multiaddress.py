@@ -25,9 +25,6 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
-)
 from packages.fetchai.connections.stub.connection import (
     PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
 )
@@ -162,44 +159,44 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
         base58.b58decode(base58_addr)
 
 
-class TestGetMultiAddressCommandConnectionIdURIAgentOverridesPositive(AEATestCaseEmpty):
-    """Test case for CLI get-multiaddress command with --connection flag and --uri for agent overrides."""
+# class TestGetMultiAddressCommandConnectionIdURIAgentOverridesPositive(AEATestCaseEmpty):  # noqa: E800
+#     """Test case for CLI get-multiaddress command with --connection flag and --uri for agent overrides."""  # noqa: E800
 
-    def test_run(self, *mocks):
-        """Run the test."""
-        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.generate_private_key(FetchAICrypto.identifier)
-        self.add_private_key(FetchAICrypto.identifier, connection=True)
+#     def test_run(self, *mocks):  # noqa: E800
+#         """Run the test."""  # noqa: E800
+#         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))  # noqa: E800
+#         self.generate_private_key(FetchAICrypto.identifier)  # noqa: E800
+#         self.add_private_key(FetchAICrypto.identifier, connection=True)  # noqa: E800
 
-        port = 10101
-        host = "127.0.0.1"
-        self.run_cli_command(
-            "config",
-            "set",
-            "--type",
-            "dict",
-            "vendor.fetchai.connections.p2p_libp2p.config",
-            f'{{"public_uri": "{host}:{port}"}}',
-            cwd=self.current_agent_context,
-        )
+#         port = 10101  # noqa: E800
+#         host = "127.0.0.1"  # noqa: E800
+#         self.run_cli_command(  # noqa: E800
+#             "config",  # noqa: E800
+#             "set",  # noqa: E800
+#             "--type",  # noqa: E800
+#             "dict",  # noqa: E800
+#             "vendor.fetchai.connections.p2p_libp2p.config",  # noqa: E800
+#             f'{{"public_uri": "{host}:{port}"}}',  # noqa: E800
+#             cwd=self.current_agent_context,  # noqa: E800
+#         )  # noqa: E800
 
-        result = self.run_cli_command(
-            "get-multiaddress",
-            FetchAICrypto.identifier,
-            "--connection",
-            "--connection-id",
-            str(P2P_CONNECTION_PUBLIC_ID),
-            "--uri-field",
-            "public_uri",
-            cwd=self.current_agent_context,
-        )
+#         result = self.run_cli_command(  # noqa: E800
+#             "get-multiaddress",  # noqa: E800
+#             FetchAICrypto.identifier,  # noqa: E800
+#             "--connection",  # noqa: E800
+#             "--connection-id",  # noqa: E800
+#             str(P2P_CONNECTION_PUBLIC_ID),  # noqa: E800
+#             "--uri-field",  # noqa: E800
+#             "public_uri",  # noqa: E800
+#             cwd=self.current_agent_context,  # noqa: E800
+#         )  # noqa: E800
 
-        assert result.exit_code == 0
-        # multiaddr test
-        expected_multiaddr_prefix = f"/dns4/{host}/tcp/{port}/p2p/"
-        assert expected_multiaddr_prefix in result.stdout
-        base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")
-        base58.b58decode(base58_addr)
+#         assert result.exit_code == 0  # noqa: E800
+#         # multiaddr test  # noqa: E800
+#         expected_multiaddr_prefix = f"/dns4/{host}/tcp/{port}/p2p/"  # noqa: E800
+#         assert expected_multiaddr_prefix in result.stdout  # noqa: E800
+#         base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")  # noqa: E800
+#         base58.b58decode(base58_addr)  # noqa: E800
 
 
 @method_scope

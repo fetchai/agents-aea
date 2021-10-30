@@ -17,12 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Specifies the version of the AEA package."""
-
-__title__ = "open-aea"
-__description__ = "Autonomous Economic Agent framework (vendor free)"
-__url__ = "https://github.com/valory-xyz/open-aea.git"
-__version__ = "1.1.0"
-__author__ = "Valory AG"
-__license__ = "Apache-2.0"
-__copyright__ = "2021 Valory AG, 2019 Fetch.AI Limited"
+"""The tests module contains the tests of the packages/skills/gym dir."""

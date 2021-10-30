@@ -59,12 +59,12 @@ from aea.registries.resources import Resources
 from aea.skills.base import Skill
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
-from packages.fetchai.connections.oef.connection import (
-    PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
+from packages.fetchai.connections.http_server.connection import (
+    PUBLIC_ID as HTTP_SERVER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
@@ -121,8 +121,8 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        f"Package '{str(OEF_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
-        f"Missing dependencies: ['(protocol, {str(OefSearchMessage.protocol_id)})']"
+        f"Package '{str(HTTP_SERVER_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
+        f"Missing dependencies: ['(protocol, {str(HttpMessage.protocol_id)})']"
     )
     with pytest.raises(AEAException, match=expected_message):
         # connection "fetchai/oef" requires

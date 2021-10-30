@@ -4,14 +4,14 @@ Contributions to the framework, its plugins, related tools and packages are welc
 
 There are various ways to contribute:
 
-- If you need support, want to report a bug or ask for features, you can check the [Issues page](https://github.com/fetchai/agents-aea/issues) and raise an issue, if applicable.
+- If you need support, want to report a bug or ask for features, you can check the [Issues page](https://github.com/valory-xyz/open-aea/issues) and raise an issue, if applicable.
 
-- If you would like to contribute a bug fix of feature then [submit a Pull request](https://github.com/fetchai/agents-aea/pulls).
+- If you would like to contribute a bug fix of feature then [submit a Pull request](https://github.com/valory-xyz/open-aea/pulls).
 
 For other kinds of feedback, you can contact one of the
-[authors](https://github.com/fetchai/agents-aea/blob/main/AUTHORS.md) by email.
+[authors](https://github.com/valory-xyz/open-aea/blob/main/AUTHORS.md) by email.
 
-Before reading on, please have a look at the [code of conduct](https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md).
+Before reading on, please have a look at the [code of conduct](https://github.com/valory-xyz/open-aea/blob/main/CODE_OF_CONDUCT.md).
 
 ## A few simple rules
 

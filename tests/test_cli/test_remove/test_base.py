@@ -45,7 +45,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
-from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -129,7 +129,7 @@ class TestRemoveConfig(
     """Test component configuration also removed from agent config."""
 
     ITEM_TYPE = "connection"
-    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
+    ITEM_PUBLIC_ID = LOCAL_PUBLIC_ID
 
     @staticmethod
     def loader() -> ConfigLoader:
@@ -158,7 +158,7 @@ class TestRemoveConfig(
                 [
                     "config",
                     "set",
-                    "vendor.fetchai.connections.soef.config.api_key",
+                    "vendor.fetchai.connections.local.config.api_key",
                     "some_api_key",
                 ],
                 standalone_mode=False,
