@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,8 +91,6 @@ from tests.common.docker_image import (
     DockerImage,
     FetchLedgerDockerImage,
     GanacheDockerImage,
-    OEFSearchDockerImage,
-    SOEFDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -270,7 +269,6 @@ PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
     os.path.join(FETCHAI_PREF, "contracts", "erc1155", CONTRACT_YAML),
-    os.path.join(FETCHAI_PREF, "contracts", "staking_erc20", CONTRACT_YAML),
     os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
 ]
 
@@ -282,9 +280,7 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "http", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "ledger_api", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "ml_trade", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "register", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
@@ -298,25 +294,13 @@ connection_config_files = [
     os.path.join(FETCHAI_PREF, "connections", "http_server", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "oef", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_stub", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "soef", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "stub", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "tcp", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "webhook", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "dummy_connection", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
 
 skill_config_files = [
     os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "aries_alice", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "aries_faber", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "carpark_client", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "carpark_detection", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "confirmation_aw1", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "echo", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "erc1155_client", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "erc1155_deploy", SKILL_YAML),
@@ -325,19 +309,6 @@ skill_config_files = [
     os.path.join(FETCHAI_PREF, "skills", "generic_seller", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "gym", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "http_echo", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "ml_data_provider", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "ml_train", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "registration_aw1", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "simple_service_registration", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "simple_service_search", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_control", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_control_contract", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_negotiation", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_participation", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "thermometer", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "thermometer_client", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "weather_client", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "weather_station", SKILL_YAML),
     DUMMY_SKILL_PATH,
     os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
@@ -349,29 +320,7 @@ agent_config_files = [
     os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_multipage.yaml"),
-    os.path.join(FETCHAI_PREF, "agents", "aries_alice", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "aries_faber", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "car_data_buyer", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "car_detector", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "confirmation_aea_aw1", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "erc1155_client", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "erc1155_deployer", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "generic_buyer", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "generic_seller", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "gym_aea", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "ml_data_provider", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "ml_model_trainer", AGENT_YAML),
     os.path.join(FETCHAI_PREF, "agents", "my_first_aea", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "registration_aea_aw1", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "simple_service_registration", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_controller", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_controller_contract", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_participant", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_participant_contract", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "thermometer_aea", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "thermometer_client", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "weather_client", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "weather_station", AGENT_YAML),
 ]
 
 protocol_specification_files = [
@@ -638,16 +587,6 @@ def apply_aea_loop(request) -> None:
 
 
 @pytest.fixture(scope="session")
-def network_node(
-    oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
-):
-    """Network node initialization."""
-    client = docker.from_env()
-    image = OEFSearchDockerImage(client, oef_addr, oef_port)
-    yield from _launch_image(image, timeout, max_attempts)
-
-
-@pytest.fixture(scope="session")
 def ganache_configuration():
     """Get the Ganache configuration for testing purposes."""
     return dict(
@@ -710,20 +649,6 @@ def ganache(
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration
     )
-    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
-
-
-@pytest.mark.integration
-@pytest.fixture(scope="class")
-def soef(
-    soef_addr: str = "http://127.0.0.1",
-    soef_port: int = 12002,
-    timeout: float = 2.0,
-    max_attempts: int = 50,
-):
-    """Launch the soef image."""
-    client = docker.from_env()
-    image = SOEFDockerImage(client, soef_addr, soef_port)
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
@@ -1228,8 +1153,9 @@ def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
     :param: address: Addresse to be funded from faucet
     """
     if fetchai_api is None:
-        fetchai_api = make_ledger_api(
-            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        fetchai_api = cast(
+            FetchAIApi,
+            make_ledger_api(FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG),
         )
 
     balance = fetchai_api.get_balance(address)

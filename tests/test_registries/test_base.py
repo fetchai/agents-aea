@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2018-2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -365,7 +366,7 @@ class TestResources:
     def test_add_remove_connection(self):
         """Test that the 'add connection' and 'remove connection' methods work correctly."""
         a_connection = Connection.from_dir(
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
             data_dir=MagicMock(),
             identity=Identity("name", "address", "public_key"),
             crypto_store=MagicMock(),
@@ -378,7 +379,7 @@ class TestResources:
     def test_get_all_connections(self):
         """Test get all connections."""
         a_connection = Connection.from_dir(
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
             data_dir=MagicMock(),
             identity=Identity("name", "address", "public_key"),
             crypto_store=MagicMock(),

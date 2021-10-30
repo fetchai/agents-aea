@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -1059,7 +1060,7 @@ class _CosmosApi(LedgerApi):
             funds=funds_coins,
         )
         send_msg_packed = ProtoAny()
-        send_msg_packed.Pack(msg_send, type_url_prefix="/")
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")  # type: ignore
 
         return send_msg_packed
 
@@ -1090,7 +1091,7 @@ class _CosmosApi(LedgerApi):
             amount=amount_coins,
         )
         send_msg_packed = ProtoAny()
-        send_msg_packed.Pack(msg_send, type_url_prefix="/")
+        send_msg_packed.Pack(msg_send, type_url_prefix="/")  # type: ignore
 
         return send_msg_packed
 

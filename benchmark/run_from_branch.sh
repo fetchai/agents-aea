@@ -1,5 +1,5 @@
 #!/bin/bash
-REPO=https://github.com/fetchai/agents-aea.git
+REPO=https://github.com/valory-xyz/open-aea.git
 BRANCH=main
 TMP_DIR=$(mktemp -d -t bench-XXXXXXXXXX)
 git clone --branch $BRANCH $REPO $TMP_DIR

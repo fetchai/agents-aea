@@ -1,0 +1,27 @@
+agent_name: error_test
+author: fetchai
+version: 0.1.0
+description: A simple agent to test error raised in skill.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/stub:0.21.0
+contracts: []
+protocols: []
+skills:
+- fetchai/error_test_skill:0.1.0
+default_connection: fetchai/stub:0.21.0
+default_ledger: fetchai
+required_ledgers:
+- fetchai
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: {}
+default_routing: {}
+connection_private_key_paths: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0

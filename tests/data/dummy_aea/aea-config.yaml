@@ -8,11 +8,9 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/local:0.20.0
-- fetchai/p2p_libp2p:0.25.0
 contracts:
 - fetchai/erc1155:0.22.0
 protocols:
-- fetchai/acn:1.0.0
 - fetchai/default:1.0.0
 - fetchai/fipa:1.0.0
 - fetchai/oef_search:1.0.0

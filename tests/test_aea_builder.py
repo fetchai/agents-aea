@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2018-2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -125,11 +126,11 @@ def test_when_package_has_missing_dependency():
         f"Missing dependencies: ['(protocol, {str(HttpMessage.protocol_id)})']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef" requires
-        # "fetchai/oef_search" and "fetchai/fipa" protocols.
+        # connection "fetchai/http_server" requires
+        # "fetchai/http" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
-            Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
+            Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_server",
         )
 
 
@@ -157,7 +158,7 @@ class TestReentrancy:
             ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
         )
         connection_path = os.path.join(
-            ROOT_DIR, "packages", "fetchai", "connections", "soef"
+            ROOT_DIR, "packages", "fetchai", "connections", "local"
         )
 
         builder = AEABuilder()

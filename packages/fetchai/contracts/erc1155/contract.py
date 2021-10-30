@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -482,7 +483,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=from_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 from_pubkey_required = True
@@ -502,7 +503,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=to_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 to_pubkey_required = True
@@ -707,7 +708,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=from_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 from_pubkey_required = True
@@ -726,7 +727,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=to_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 to_pubkey_required = True

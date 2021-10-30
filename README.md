@@ -65,12 +65,6 @@ This is a fork of <a href="https://github.com/fetchai/agents-aea">this project</
 
 3. Then, build your agent as described in the [docs](https://docs.fetch.ai/aea/).
 
-<p align="center">
-  <a href="https://www.youtube.com/embed/xpJA4IT5X88">
-    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
-  </a>
-</p>
-
 ## Alternatively (1): Use `pipx` (CLI usage only)
 
 1. Install [pipx](https://github.com/pipxproject/pipx)
@@ -139,7 +133,7 @@ consider to cite it with the following BibTex entry:
 ```
 @misc{agents-aea,
   Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál and James Riehl},
-  Title = {Autonomous Economic Agent (AEA) Framework},
-  Year = {2019},
+  Title = {Open Autonomous Economic Agent (AEA) Framework},
+  Year = {2021},
 }
 ```

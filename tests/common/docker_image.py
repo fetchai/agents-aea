@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,25 +19,20 @@
 # ------------------------------------------------------------------------------
 
 """This module contains testing utilities."""
-import asyncio
 import logging
 import os
 import re
 import shutil
 import subprocess  # nosec
-import sys
 import tempfile
 import time
 from abc import ABC, abstractmethod
-from threading import Timer
 from typing import Dict, List, Optional
 
 import docker
 import pytest
 from docker import DockerClient
 from docker.models.containers import Container
-from oef.agents import OEFAgent
-from oef.core import AsyncioCore
 
 from aea.exceptions import enforce
 from aea.helpers import http_requests as requests
@@ -115,161 +111,6 @@ class DockerImage(ABC):
         return True
 
 
-class OEFHealthCheck(object):
-    """A health check class."""
-
-    def __init__(
-        self,
-        oef_addr: str,
-        oef_port: int,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-    ):
-        """
-        Initialize.
-
-        :param oef_addr: IP address of the OEF node.
-        :param oef_port: Port of the OEF node.
-        """
-        self.oef_addr = oef_addr
-        self.oef_port = oef_port
-
-        self._result = False
-        self._stop = False
-        self._core = AsyncioCore()
-        self.agent = OEFAgent(
-            "check", core=self._core, oef_addr=self.oef_addr, oef_port=self.oef_port
-        )
-        self.agent.on_connect_success = self.on_connect_ok
-        self.agent.on_connection_terminated = self.on_connect_terminated
-        self.agent.on_connect_failed = self.exception_handler
-
-    def exception_handler(self, url=None, ex=None):
-        """Handle exception during a connection attempt."""
-        print("An error occurred. Exception: {}".format(ex))
-        self._stop = True
-
-    def on_connect_ok(self, url=None):
-        """Handle a successful connection."""
-        print("Connection OK!")
-        self._result = True
-        self._stop = True
-
-    def on_connect_terminated(self, url=None):
-        """Handle a connection failure."""
-        print("Connection terminated.")
-        self._stop = True
-
-    def run(self) -> bool:
-        """
-        Run the check, asynchronously.
-
-        :return: True if the check is successful, False otherwise.
-        """
-        self._result = False
-        self._stop = False
-
-        def stop_connection_attempt(self):
-            if self.agent.state == "connecting":
-                self.agent.state = "failed"
-
-        t = Timer(1.5, stop_connection_attempt, args=(self,))
-
-        try:
-            print("Connecting to {}:{}...".format(self.oef_addr, self.oef_port))
-            self._core.run_threaded()
-
-            t.start()
-            self._result = self.agent.connect()
-            self._stop = True
-
-            if self._result:
-                print("Connection established. Tearing down connection...")
-                self.agent.disconnect()
-                t.cancel()
-            else:
-                print("A problem occurred. Exiting...")
-            return self._result
-
-        except Exception as e:
-            print(str(e))
-            return self._result
-        finally:
-            t.join()
-            self.agent.stop()
-            self.agent.disconnect()
-            self._core.stop()
-
-
-class OEFSearchDockerImage(DockerImage):
-    """Wrapper to OEF Search Docker image."""
-
-    def __init__(self, client: DockerClient, oef_addr: str, oef_port: int):
-        """Initialize the OEF Search Docker image."""
-        super().__init__(client)
-        self._oef_addr = oef_addr
-        self._oef_port = oef_port
-
-    @property
-    def tag(self) -> str:
-        """Get the image tag."""
-        return "fetchai/oef-search:0.7"
-
-    def check_skip(self):
-        """Check if the test should be skipped."""
-        super().check_skip()
-        if sys.version_info < (3, 7):
-            pytest.skip("Python version < 3.7 not supported by the OEF.")
-            return
-
-    def create(self) -> Container:
-        """Create an instance of the OEF Search image."""
-        from tests.conftest import ROOT_DIR  # pylint: disable
-
-        logger.info(ROOT_DIR + "/tests/common/oef_search_pluto_scripts")
-        ports = {
-            "20000/tcp": ("0.0.0.0", 20000),  # nosec
-            "30000/tcp": ("0.0.0.0", 30000),  # nosec
-            "{}/tcp".format(self._oef_port): ("0.0.0.0", self._oef_port),  # nosec
-        }
-        volumes = {
-            ROOT_DIR
-            + "/tests/common/oef_search_pluto_scripts": {
-                "bind": "/config",
-                "mode": "rw",
-            },
-            ROOT_DIR + "/data/oef-logs": {"bind": "/logs", "mode": "rw"},
-        }
-        c = self._client.containers.run(
-            self.tag,
-            "/config/node_config.json",
-            detach=True,
-            ports=ports,
-            volumes=volumes,
-        )
-        return c
-
-    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
-        """Wait until the image is up."""
-        success = False
-        attempt = 0
-        while not success and attempt < max_attempts:
-            attempt += 1
-            logger.info("Attempt {}...".format(attempt))
-            oef_healthcheck = OEFHealthCheck("127.0.0.1", 10000)
-            result = oef_healthcheck.run()
-            if result:
-                success = True
-            else:
-                logger.info(
-                    "OEF not available yet - sleeping for {} second...".format(
-                        sleep_rate
-                    )
-                )
-                time.sleep(sleep_rate)
-
-        return success
-
-
 class GanacheDockerImage(DockerImage):
     """Wrapper to Ganache Docker image."""
 
@@ -333,90 +174,6 @@ class GanacheDockerImage(DockerImage):
                 logger.info(
                     "Attempt %s failed. Retrying in %s seconds...", i, sleep_rate
                 )
-                time.sleep(sleep_rate)
-        return False
-
-
-class SOEFDockerImage(DockerImage):
-    """Wrapper to SOEF Docker image."""
-
-    PORT = 12002
-    SOEF_MOUNT_PATH = os.path.abspath(os.path.join(os.sep, "etc", "soef"))
-    SOEF_CONFIG_FILE_NAME = "soef.conf"
-
-    def __init__(
-        self, client: DockerClient, addr: str, port: int = PORT,
-    ):
-        """
-        Initialize the SOEF Docker image.
-
-        :param client: the Docker client.
-        :param addr: the address.
-        :param port: the port.
-        """
-        super().__init__(client)
-        self._addr = addr
-        self._port = port
-
-    @property
-    def tag(self) -> str:
-        """Get the image tag."""
-        return "gcr.io/fetch-ai-images/soef:9e78611"
-
-    def _make_soef_config_file(self, tmpdirname) -> None:
-        """Make a temporary soef_config file to setup and run the an soef instance."""
-        soef_config_lines = [
-            "# SIMPLE OEF CONFIGURATION FILE",
-            "# Save as /etc/soef/soef.conf",
-            "#",
-            "# 27th May 2020",
-            "# (Author Toby Simpson)",
-            "#",
-            "# Port we're listening on",
-            f"port {self._port}",
-            "#",
-            "# Our declared location",
-            "latitude 52.205278",
-            "longitude 0.119167",
-            "#",
-            "# Various API keys",
-            "agent_registration_api_key TwiCIriSl0mLahw17pyqoA",
-            "get_log_api_key TwigsriSl0mLahw48pyqoA",
-            "get_agent_partial_list_api_key SnakesiSl0mLahw48pyqoA",
-            "#",
-            "# Start cold being 1 means 'do not load agents'",
-            "start_cold 0",
-            "#",
-            "# End.",
-        ]
-        soef_config_file = os.path.join(tmpdirname, self.SOEF_CONFIG_FILE_NAME)
-        with open(soef_config_file, "w") as file:
-            file.writelines(line + "\n" for line in soef_config_lines)
-        os.chmod(soef_config_file, 400)  # nosec
-
-    def _make_ports(self) -> Dict:
-        """Make ports dictionary for Docker."""
-        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
-
-    def create(self) -> Container:
-        """Create the container."""
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            self._make_soef_config_file(tmpdirname)
-            volumes = {tmpdirname: {"bind": self.SOEF_MOUNT_PATH, "mode": "ro"}}
-            container = self._client.containers.run(
-                self.tag, detach=True, volumes=volumes, ports=self._make_ports()
-            )
-        return container
-
-    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
-        """Wait until the image is up."""
-        for i in range(max_attempts):
-            try:
-                response = requests.get(f"{self._addr}:{self._port}")
-                enforce(response.status_code == 200, "")
-                return True
-            except Exception:
-                logger.info(f"Attempt {i} failed. Retrying in {sleep_rate} seconds...")
                 time.sleep(sleep_rate)
         return False
 
