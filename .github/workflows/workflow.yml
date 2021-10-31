@@ -194,9 +194,9 @@ jobs:
       - name: Install current aea
         run: |
           pip install -e .[all]
-      - name: Check aea dependenices and imports
-        run: |
-          tox -e dependencies_check
+      # - name: Check aea dependenices and imports
+      #   run: |
+      #     tox -e dependencies_check
 
   plugins_install_check:
     continue-on-error: False
