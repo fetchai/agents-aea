@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,7 +62,7 @@ from scripts.common import (
 )
 
 
-LIBPROTOC_VERSION = "libprotoc 3.11.4"
+LIBPROTOC_VERSION = "libprotoc 3.17.3"
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PACKAGES_DIR = Path("packages")
