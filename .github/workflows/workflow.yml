@@ -185,18 +185,18 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: ${{ matrix.python_version }}
-      # - name: Install tox
-      #   run : |
-      #     pip install tox
-      # - name: Check Pipfile and tox.ini consistency
-      #   run : |
-      #     python ./scripts/check_pipfile_and_toxini.py
-      # - name: Install current aea
-      #   run: |
-      #     pip install -e .[all]
-      # - name: Check aea dependenices and imports
-      #   run: |
-      #     tox -e dependencies_check
+      - name: Install tox
+        run : |
+          pip install tox
+      - name: Check Pipfile and tox.ini consistency
+        run : |
+          python ./scripts/check_pipfile_and_toxini.py
+      - name: Install current aea
+        run: |
+          pip install -e .[all]
+      - name: Check aea dependenices and imports
+        run: |
+          tox -e dependencies_check
 
   plugins_install_check:
     continue-on-error: False

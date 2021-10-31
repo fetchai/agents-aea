@@ -1014,7 +1014,7 @@ def test_builder_pypi_dependencies():
     dependencies = builder._package_dependency_manager.pypi_dependencies
     assert set(dependencies.keys()) == {
         "protobuf",
-        "aea-ledger-fetchai",
-        "aea-ledger-ethereum",
-        "aea-ledger-cosmos",
+        "open-aea-ledger-fetchai",
+        "open-aea-ledger-ethereum",
+        "open-aea-ledger-cosmos",
     }

@@ -34,7 +34,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 * `Dialogues`, which define rules over `Message` sequences.
 
-The framework provides one default `Protocol`, called `default` (current version `fetchai/default:1.0.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides one default `Protocol`, called `signing` (current version `open_aea/signing:1.0.0`). This `Protocol` provides an implementation for an AEA `Protocol` which includes a <a href="../api/protocols/signing/message#packages.open_aea.protocols.default.message">`SigningMessage`</a>  class and associated <a href="../api/protocols/signing/serialization#packages.open_aea.protocols.default.serialization">`SigningSerializer`</a> and <a href="../api/protocols/signing/dialogues#packages.open_aea.protocols.default.dialogues">`SigningDialogue`</a> classes.
 
 Additional `Protocols`, for new types of interactions, can be added as packages. For more details on `Protocols` you can read the <a href="../protocol">protocol guide</a>. To learn how you can easily automate protocol definition, head to the guide for the <a href="../protocol-generator">protocol generator</a>.
 

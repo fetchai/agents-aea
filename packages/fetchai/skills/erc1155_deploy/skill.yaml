@@ -99,6 +99,6 @@ models:
       value: 0
     class_name: Strategy
 dependencies:
-  aea-ledger-ethereum:
+  open-aea-ledger-ethereum:
     version: <2.0.0,>=1.0.0
 is_abstract: false

@@ -18,7 +18,7 @@ Usually, an interaction involves three types of framework packages: <a href="../
 
 ### Example 1: negotiation
 
-The <a href="../generic-skills">generic buyer/seller skills</a> use the `fetchai/fipa` protocol which defines the negotiation dialogue between two AEAs. The `fetchai/generic_buyer` and `fetchai/generic_seller` skills implement specific strategies for engaging in such negotiations, by providing the logic for producing negotiation messages to be sent, handling negotiation messages received. The `fetchai/p2p_libp2p` connection is then used for connecting to the <a href="../acn">agent communication network</a> enabling two AEAs with these skills to deliver negotiation messages to each other.
+The <a href="https://docs.fetch.ai/aea/generic-skills/" target="_blank">generic buyer/seller skills</a> use the `fetchai/fipa` protocol which defines the negotiation dialogue between two AEAs. The `fetchai/generic_buyer` and `fetchai/generic_seller` skills implement specific strategies for engaging in such negotiations, by providing the logic for producing negotiation messages to be sent, handling negotiation messages received. The `fetchai/p2p_libp2p` connection is then used for connecting to the <a href="../acn">agent communication network</a> enabling two AEAs with these skills to deliver negotiation messages to each other.
 
 ### Example 2: AEA <> web client 
 
@@ -33,11 +33,11 @@ Note that in general, third party SDKs can be wrapped in a connection and shared
 
 ## Next steps
 
-### Recommended
+### Recommended
 
 We recommend you continue with the next step in the 'Getting Started' series:
 
-- <a href="../generic-skills-step-by-step/">Trade between two AEAs</a>
+- <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank">Trade between two AEAs</a>
 
 ### Relevant deep-dives
 

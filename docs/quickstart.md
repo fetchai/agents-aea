@@ -440,10 +440,4 @@ To gain an understanding of the core components of the framework, please continu
 
 - <a href="../core-components-1/">Core components - Part 1</a>
 
-For more demos, use cases or step by step guides, please check the following:
-
-- <a href="../generic-skills">Generic skill use case</a>
-- <a href='../weather-skills/'>Weather skill demo</a>
-- <a href='../generic-skills-step-by-step/'> Generic step by step guide </a>
-
 <br />

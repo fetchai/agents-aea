@@ -140,10 +140,10 @@ new_env: clean
 		pipenv --python 3.7;\
 		pipenv install --dev --skip-lock --clear;\
 		pipenv run pip install -e .[all];\
-		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
-		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
-		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
-		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\
+		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum --use-feature=in-tree-build;\
+		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos --use-feature=in-tree-build;\
+		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai --use-feature=in-tree-build;\
+		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs --use-feature=in-tree-build;\
 		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 	else\
 		echo "In a virtual environment! Exit first: 'exit'.";\

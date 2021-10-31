@@ -89,6 +89,7 @@ class RemoveItemBadConfigurationTestCase(TestCase):
 class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
     """Test case for remove package with latest version."""
 
+    @pytest.mark.skip  # need remote registry
     @pytest.mark.parametrize(
         ["type_", "public_id"],
         [

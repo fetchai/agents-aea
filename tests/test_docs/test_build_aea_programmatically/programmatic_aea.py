@@ -58,6 +58,9 @@ def run():
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 
+    # Add the default protocol (assuming it is present in the local directory 'packages')
+    builder.add_protocol("./packages/fetchai/protocols/default")
+
     # Add the stub connection (assuming it is present in the local directory 'packages')
     builder.add_connection("./packages/fetchai/connections/stub")
 

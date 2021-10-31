@@ -74,6 +74,6 @@ models:
       unit_price: 10
     class_name: GenericStrategy
 dependencies:
-  aea-ledger-fetchai:
+  open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 is_abstract: true

@@ -23,9 +23,9 @@ contract_interface_paths:
   ethereum: build/erc1155.json
   fetchai: build/erc1155.wasm
 dependencies:
-  aea-ledger-cosmos:
+  open-aea-ledger-cosmos:
     version: <2.0.0,>=1.0.0
-  aea-ledger-ethereum:
+  open-aea-ledger-ethereum:
     version: <2.0.0,>=1.0.0
-  aea-ledger-fetchai:
+  open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,14 +27,14 @@ from setuptools import setup  # type: ignore
 
 
 setup(
-    name="aea-cli-ipfs",
+    name="open-aea-cli-ipfs",
     version="1.0.1",
-    author="Fetch.AI Limited",
+    author="Valory AG",
     license="Apache-2.0",
-    description="CLI extension for AEA framework wrapping IPFS functionality.",
+    description="CLI extension for open AEA framework wrapping IPFS functionality.",
     packages=["aea_cli_ipfs"],
     entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
-    install_requires=["aea>=1.0.0, <2.0.0", "ipfshttpclient>=0.6.1,<0.8.0"],
+    install_requires=["open-aea>=1.0.0, <2.0.0", "ipfshttpclient>=0.6.1,<0.8.0"],
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",

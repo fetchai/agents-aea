@@ -77,7 +77,7 @@ IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
 DEFAULT_BUILD_DIR_NAME = ".build"
-DEFAULT_DEPENDENCIES: Dict[str, Dict] = {"aea-ledger-fetchai": {}}
+DEFAULT_DEPENDENCIES: Dict[str, Dict] = {"open-aea-ledger-fetchai": {}}
 
 CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_SKILL_CONFIG_FILE: SKILL,

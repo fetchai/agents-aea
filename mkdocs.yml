@@ -1,8 +1,8 @@
-site_name: aea
+site_name: open-aea
 site_url: https://docs.fetch.ai/
-site_description: Everything you need to know about AEAs.
-repo_url: https://github.com/agents-aea/docs
-site_author: developer@fetch.ai
+site_description: Everything you need to know about (open) AEAs.
+repo_url: https://github.com/valory-xyz/open-aea
+site_author: developer@fetch.ai,info@valory.xyz
 
 theme:
   name: 'material'
@@ -129,7 +129,6 @@ nav:
       - Decision Maker:
         - Base: 'api/decision_maker/base.md'
         - Default: 'api/decision_maker/default.md'
-        - GOP: 'api/decision_maker/gop.md'
       - Error Handler:
         - Base: 'api/error_handler/base.md'
         - Default: 'api/error_handler/default.md'
@@ -189,20 +188,11 @@ nav:
           - Common: 'api/protocols/generator/common.md'
           - Extract Specification: 'api/protocols/generator/extract_specification.md'
           - Validate: 'api/protocols/generator/validate.md'
-        - Default Protocol:
-          - Custom Types: 'api/protocols/default/custom_types.md'
-          - Dialogues: 'api/protocols/default/dialogues.md'
-          - Message: 'api/protocols/default/message.md'
-          - Serialization: 'api/protocols/default/serialization.md'
         - Signing Protocol:
           - Custom Types: 'api/protocols/signing/custom_types.md'
           - Dialogues: 'api/protocols/signing/dialogues.md'
           - Message: 'api/protocols/signing/message.md'
           - Serialization: 'api/protocols/signing/serialization.md'
-        - State Update Protocol:
-          - Dialogues: 'api/protocols/state_update/dialogues.md'
-          - Message: 'api/protocols/state_update/message.md'
-          - Serialization: 'api/protocols/state_update/serialization.md'
       - Registries:
         - Base: 'api/registries/base.md'
         - Filter: 'api/registries/filter.md'

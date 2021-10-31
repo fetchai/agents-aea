@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -512,6 +513,7 @@ class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
+@pytest.mark.skip  # need remote registry
 class TestAddConnectionMixedWhenNoLocalRegistryExists:
     """Test that the command 'aea add connection' works in mixed mode when the local registry does not exists (it swaps to remote)."""
 
@@ -571,6 +573,7 @@ class TestAddConnectionMixedWhenNoLocalRegistryExists:
             pass
 
 
+@pytest.mark.skip  # need remote registry
 class TestAddConnectionLocalWhenNoLocalRegistryExists:
     """Test that the command 'aea add connection' fails in local mode when the local registry does not exists."""
 

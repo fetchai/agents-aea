@@ -25,7 +25,7 @@ Bump the versions of AEA plugins throughout the code base.
 
 Example of usage:
 
-    python scripts/update_plugin_versions.py --update "aea-ledger-fetchai,0.2.0" --update "aea-ledger-ethereum,0.3.0"
+    python scripts/update_plugin_versions.py --update "open-aea-ledger-fetchai,0.2.0" --update "open-aea-ledger-ethereum,0.3.0"
 
 """
 

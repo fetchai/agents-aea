@@ -20,7 +20,7 @@
 """Specifies the version of the AEA package."""
 
 __title__ = "open-aea"
-__description__ = "Autonomous Economic Agent framework (vendor free)"
+__description__ = "Open Autonomous Economic Agent framework (without vendor lock-in)"
 __url__ = "https://github.com/valory-xyz/open-aea.git"
 __version__ = "1.1.0"
 __author__ = "Valory AG"

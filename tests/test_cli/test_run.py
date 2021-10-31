@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -271,6 +272,7 @@ def test_run_with_default_connection():
             pass
 
 
+@pytest.mark.skip  # need remote registry
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
@@ -555,6 +557,7 @@ def test_run_ethereum_private_key_config():
         pass
 
 
+@pytest.mark.skip  # need remote registry
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # install depends on network
 def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
@@ -1153,6 +1156,7 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             )
 
 
+@pytest.mark.skip  # need remote registry
 class TestRunFailsWhenProtocolConfigFileNotFound:
     """Test that the command 'aea run' fails when a protocol configuration file is not found."""
 
