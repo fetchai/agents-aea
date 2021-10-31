@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,6 @@ from typing import cast
 
 import pytest
 
-from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Address
 from aea.protocols.base import Message
@@ -64,16 +64,10 @@ class TestSkillTestCase(BaseSkillTestCase):
         cls.shared_state_value = "some_shared_state_value"
         cls.shared_state = {cls.shared_state_key: cls.shared_state_value}
 
-        tac_dm_context_kwargs = {
-            "goal_pursuit_readiness": GoalPursuitReadiness(),
-            "ownership_state": OwnershipState(),
-            "preferences": Preferences(),
-        }
-
         super().setup(
             config_overrides=config_overrides,
             shared_state=cls.shared_state,
-            dm_context_kwargs=tac_dm_context_kwargs,
+            dm_context_kwargs={},
         )
 
     def test_setup(self):
@@ -105,23 +99,6 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert (
             self.skill.skill_context.behaviours.dummy.kwargs["behaviour_arg_2"]
             == self.behaviour_arg_2
-        )
-
-        assert (
-            type(
-                self.skill.skill_context.decision_maker_handler_context.goal_pursuit_readiness
-            )
-            == GoalPursuitReadiness
-        )
-        assert (
-            type(
-                self.skill.skill_context.decision_maker_handler_context.ownership_state
-            )
-            == OwnershipState
-        )
-        assert (
-            type(self.skill.skill_context.decision_maker_handler_context.preferences)
-            == Preferences
         )
 
     def test_properties(self):

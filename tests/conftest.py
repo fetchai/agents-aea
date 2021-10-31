@@ -264,6 +264,7 @@ MAX_FLAKY_RERUNS_INTEGRATION = 1
 
 PACKAGES_DIR = os.path.join(ROOT_DIR, "packages")
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
+OPEN_AEA_REF = os.path.join(ROOT_DIR, "packages", "open_aea")
 PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
@@ -281,7 +282,7 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "http", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "ledger_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
+    os.path.join(OPEN_AEA_REF, "protocols", "signing", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
     os.path.join(CUR_PATH, "data", "dummy_protocol", PROTOCOL_YAML),

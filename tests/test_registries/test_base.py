@@ -235,7 +235,7 @@ class TestResources:
         )
         cls.resources.add_component(
             Protocol.from_dir(
-                Path(ROOT_DIR, "packages", "fetchai", "protocols", "signing")
+                Path(ROOT_DIR, "packages", "open_aea", "protocols", "signing")
             )
         )
         cls.resources.add_component(

@@ -39,9 +39,9 @@ PACKAGES_DIR = Path(PACKAGES)
 PLUGIN_DIR = Path("plugins")
 FETCHAI_PACKAGES = PACKAGES_DIR / _FETCHAI_IDENTIFIER
 DEFAULT_PACKAGES = {
-    (ComponentType.PROTOCOL, PublicId.from_str("fetchai/default:latest")),
+    (ComponentType.PROTOCOL, "fetchai/default:latest"),
     (ComponentType.PROTOCOL, SIGNING_PROTOCOL),
-    (ComponentType.PROTOCOL, PublicId.from_str("fetchai/state_update:latest")),
+    (ComponentType.PROTOCOL, "fetchai/state_update:latest"),
 }
 
 IGNORE_NAMES = {r"^__init__\.py$", r"^__version__\.py$", r"^py\.typed$", r"^.*_pb2.py$"}

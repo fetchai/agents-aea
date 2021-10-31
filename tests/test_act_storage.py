@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +25,7 @@ import pytest
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import SkillConfig
+from aea.configurations.base import ComponentType, SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.mail.base import Envelope
 from aea.protocols.base import Address, Message
@@ -46,6 +47,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
+from tests.conftest import ROOT_DIR
 
 
 class TBehaviour(TickerBehaviour):
@@ -131,6 +133,8 @@ def test_storage_access_from_handler():
     builder = AEABuilder()
     builder.set_name("aea_1")
     builder.add_private_key(DEFAULT_LEDGER)
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
 
     skill_context = SkillContext()
     handler = THandler(name="behaviour", skill_context=skill_context)

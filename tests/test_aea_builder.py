@@ -165,6 +165,12 @@ class TestReentrancy:
         builder.set_name("aea1")
         builder.add_private_key(DEFAULT_LEDGER)
         builder.add_protocol(protocol_path)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_contract(contract_path)
         builder.add_connection(connection_path)
         builder.add_skill(dummy_skill_path)
@@ -429,6 +435,12 @@ def test_remove_skill():
     builder.add_private_key("fetchai")
 
     skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(skill)
     assert len(builder._package_dependency_manager.all_dependencies) == num_deps + 1
@@ -602,6 +614,12 @@ def test_load_abstract_component():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_component(ComponentType.SKILL, dummy_skill_path)
     with mock.patch("aea.aea_builder.load_aea_package"), mock.patch.object(
         builder,

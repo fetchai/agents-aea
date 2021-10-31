@@ -67,7 +67,6 @@ from aea.configurations.constants import (
     PROTOCOLS,
     SIGNING_PROTOCOL,
     SKILLS,
-    _FETCHAI_IDENTIFIER,
 )
 from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
@@ -729,7 +728,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         signing_protocol = PublicId.from_str(SIGNING_PROTOCOL)
         self.add_protocol(
             Path(
-                self.registry_dir, signing_protocol.author, PROTOCOLS, signing_protocol.name
+                self.registry_dir,
+                signing_protocol.author,
+                PROTOCOLS,
+                signing_protocol.name,
             )
         )
 
