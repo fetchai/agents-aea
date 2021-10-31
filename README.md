@@ -3,20 +3,20 @@
 </h1>
 
 <p align="center">
-  <a href="https://pypi.org/project/aea/">
-    <img alt="PyPI" src="https://img.shields.io/pypi/v/aea">
+  <a href="https://pypi.org/project/open-aea/">
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/open-aea">
   </a>
-  <a href="https://pypi.org/project/aea/">
-    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/aea">
+  <a href="https://pypi.org/project/open-aea/">
+    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/open-aea">
   </a>
   <a>
-    <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
+    <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/open-aea">
   </a>
   <a href="https://github.com/valory-xyz/open-aea/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/l/open-aea"> 
   </a>
-  <a href="https://pypi.org/project/aea/">
-    <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
+  <a href="https://pypi.org/project/open-aea/">
+    <img alt="License" src="https://img.shields.io/pypi/dm/open-aea"> 
   </a>
 </p>
 <p align="center">
