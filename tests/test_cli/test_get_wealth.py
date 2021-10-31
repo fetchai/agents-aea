@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,7 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner, method_scope
@@ -75,9 +77,19 @@ class TestGetWealth(AEATestCaseEmpty):
     @mock.patch("click.echo")
     def test_get_wealth(self, _echo_mock, password_or_none):
         """Run the main test."""
-        self.generate_private_key(password=password_or_none)
-        self.add_private_key(password=password_or_none)
-        self.get_wealth(password=password_or_none)
+        self.generate_private_key(
+            ledger_api_id=FetchAICrypto.identifier, password=password_or_none,
+        )
+        self.add_private_key(
+            ledger_api_id=FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            password=password_or_none,
+        )
+        self.get_wealth(
+            ledger_api_id=FetchAICrypto.identifier, password=password_or_none
+        )
 
         expected_wealth = 0
         _echo_mock.assert_called_with(expected_wealth)

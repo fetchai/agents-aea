@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,7 @@ import base58
 import pytest
 from aea_ledger_fetchai import FetchAICrypto
 
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
 from packages.fetchai.connections.stub.connection import (
@@ -40,7 +42,12 @@ class TestGetMultiAddressCommandPositive(AEATestCaseEmpty):
         """Run the test."""
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=False, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=False,
+            password=password_or_none,
         )
 
         password_options = _get_password_option_args(password_or_none)
@@ -64,7 +71,12 @@ class TestGetMultiAddressCommandConnectionPositive(AEATestCaseEmpty):
         """Run the test."""
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         password_options = _get_password_option_args(password_or_none)
@@ -89,7 +101,12 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         self.nested_set_config(
@@ -129,7 +146,12 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         port = 10101
@@ -207,7 +229,12 @@ class TestGetMultiAddressCommandConnectionNegative(AEATestCaseEmpty):
         """Run the test."""
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         password_options = _get_password_option_args(password_or_none)
@@ -258,7 +285,12 @@ class TestGetMultiAddressCommandNegativePeerId(AEATestCaseEmpty):
         """Run the test."""
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=False, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=False,
+            password=password_or_none,
         )
 
         # this will cause exception because no key is added to the AEA project.
@@ -281,7 +313,12 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         # this will cause exception because no host configuration is in stub connection by default.
@@ -314,7 +351,12 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         self.nested_set_config(
@@ -350,7 +392,12 @@ class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
         """Run the test."""
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         # this will cause exception because a bad public id is provided.
@@ -384,7 +431,12 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         self.nested_set_config(
@@ -422,7 +474,12 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         # this will cause exception because only the host, and not the port, are specified.
@@ -453,7 +510,12 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         # this will cause exception because only the host, and not the port, are specified.
@@ -484,7 +546,12 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FetchAICrypto.identifier, password=password_or_none)
         self.add_private_key(
-            FetchAICrypto.identifier, connection=True, password=password_or_none
+            FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
         )
 
         self.nested_set_config(

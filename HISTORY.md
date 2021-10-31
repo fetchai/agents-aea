@@ -1,4 +1,31 @@
-# Release History
+# Release History - open AEA
+
+## 1.1.0 (2021-10-31)
+
+AEA:
+- Forks 1.1.0 of legacy AEA with the aim of maintaining backwards compatibility where possible
+- Removes GOP decision maker handler to reduce dependencies
+- Removes hard-coded registry API URL
+- Changes default ledger to ethereum
+- Removes dependency on fetchai packages
+- Removes interact command
+
+Plugins:
+- Forks plugins, unfortunately cannot maintain plugin support for legacy aea plugins due to their dependency on legacy aea
+- Fixes typing issues
+
+Packages:
+- Removes most fetchai packages apart from those currently used in tests
+- Adds `open_aea/signing:1.0.0` protocol
+
+Docs:
+- Removes most demos
+
+Chores:
+- Makes all necessary changes to move to `open-aea`
+
+
+# Release History - legacy AEA
 
 ## 1.1.0 (2021-10-13)
 

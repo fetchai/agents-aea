@@ -6,7 +6,7 @@ These instructions detail the Python code you need for running an AEA outside th
 Get the packages directory from the AEA repository:
 
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 
 Also, install `open-aea-ledger-fetchai` plug-in:

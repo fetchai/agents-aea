@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +21,10 @@
 import pytest
 from click.exceptions import ClickException
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import FETCHAI_PRIVATE_KEY_PATH
+from tests.conftest import ETHEREUM_PRIVATE_KEY_PATH
 
 
 class BaseTestRemovePrivateKey(AEATestCaseEmpty):
@@ -35,7 +37,7 @@ class BaseTestRemovePrivateKey(AEATestCaseEmpty):
         """Set up class."""
         super().setup_class()
         cls.add_private_key(
-            private_key_filepath=FETCHAI_PRIVATE_KEY_PATH,
+            private_key_filepath=ETHEREUM_PRIVATE_KEY_PATH,
             connection=cls.WITH_CONNECTION,
         )
 
@@ -73,11 +75,13 @@ class TestRemoveCryptoPrivateKeyNegative(BaseTestRemovePrivateKeyNegative):
     """Test removing a crypto private key."""
 
     WITH_CONNECTION = False
-    EXPECTED_ERROR_MSG = "There is no key registered with id fetchai."
+    EXPECTED_ERROR_MSG = f"There is no key registered with id {DEFAULT_LEDGER}."
 
 
 class TestRemoveConnectionPrivateKeyNegative(BaseTestRemovePrivateKeyNegative):
     """Test removing a connection private key."""
 
     WITH_CONNECTION = True
-    EXPECTED_ERROR_MSG = "There is no connection key registered with id fetchai."
+    EXPECTED_ERROR_MSG = (
+        f"There is no connection key registered with id {DEFAULT_LEDGER}."
+    )

@@ -18,10 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests behaviour storage access."""
+import json
 import os
 from typing import List, Set
 
 import pytest
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -197,6 +199,12 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
         self.generate_private_key("fetchai", pkey_file)
         self.add_private_key("fetchai", pkey_file, False)
         self.add_private_key("fetchai", pkey_file, True)
+        self.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            type_="list",
+        )
 
         def role_from_first_message(  # pylint: disable=unused-argument
             message: Message, receiver_address: Address

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,6 +93,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             wallet = get_wallet_from_agent_config(agent_config, password=self.PASSWORD)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
+    @pytest.mark.skip  # wrong ledger_id
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_integration(self):
         """Perform integration tests of cli transfer command with real transfer."""

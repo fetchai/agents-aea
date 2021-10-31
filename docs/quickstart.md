@@ -59,12 +59,12 @@ We provide a script to automatically install all framework dependencies and the 
 On MacOS or Ubuntu run the following commands to download and install:
 
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```
 
-On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
+On Windows: download <a href="https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
 
 </details>
 
@@ -339,7 +339,7 @@ The following test class replicates the preceding demo and tests it's correct be
 First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 
 Then write the test:

@@ -30,7 +30,7 @@
 
 14. Repeat 11. & 12. for each plugin.
 
-15. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
+15. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
 16. Release packages into registry: `python scripts/deploy_to_registry.py`.
 

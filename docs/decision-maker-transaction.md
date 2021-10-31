@@ -1,6 +1,6 @@
 This guide can be considered as a part 2 of the <a href="../standalone-transaction/">the stand-alone transaction demo</a>. The main difference is that now we are going to use the decision-maker to sign the transaction.
 
-First, import the libraries and the set the constant values. (Get the packages directory from the AEA repository `svn export https://github.com/fetchai/agents-aea.git/trunk/packages`.)
+First, import the libraries and the set the constant values. (Get the packages directory from the AEA repository `svn export https://github.com/valory-xyz/open-aea.git/trunk/packages`.)
 
 ``` python
 import logging
