@@ -807,7 +807,7 @@ This class represents a PyPI dependency.
 It contains the following information:
 - version: a version specifier(s) (e.g. '==0.1.0').
 - index: the PyPI index where to download the package from (default: https://pypi.org)
-- git: the URL to the Git repository (e.g. https://github.com/valory-xyz/open-aea.git)
+- git: the URL to the Git repository (e.g. https://github.com/fetchai/agents-aea.git)
 - ref: either the branch name, the tag, the commit number or a Git reference (default: 'master'.)
 
 If the 'git' field is set, the 'version' field will be ignored.
