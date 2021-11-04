@@ -138,7 +138,7 @@ new_env: clean
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
-		pipenv install --dev --skip-lock --clear;\
+		pipenv install --dev --skip-lock;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum --use-feature=in-tree-build;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos --use-feature=in-tree-build;\
