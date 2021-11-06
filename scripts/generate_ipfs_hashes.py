@@ -222,7 +222,7 @@ class IPFSDaemon:
     def __enter__(self) -> None:
         """Run the ipfs daemon."""
         self.process = subprocess.Popen(  # nosec
-            ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
+            ["ipfs", "daemon", "--offline"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
         print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
         time.sleep(self.timeout)
