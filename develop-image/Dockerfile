@@ -48,7 +48,7 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 RUN apt-get install -y tox
-RUN python3 -m pip install -U pipenv
+RUN python3 -m pip install -U pipenv==2021.5.29
 
 ENV PATH="/usr/local/bin:${PATH}"
 USER default
