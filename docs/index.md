@@ -57,7 +57,7 @@ If you want to run a demo, check out the <a href="demos">demo guides</a>.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/valory-xyz/open-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.</p>
+  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/valory-xyz/open-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/eRa5e9c6zh" target="_blank">developer Discord channel</a>.</p>
 </div>
 
 <br />
