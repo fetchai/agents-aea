@@ -60,7 +60,7 @@ This is a fork of <a href="https://github.com/fetchai/agents-aea">the original A
 
        pip install "open-aea[all]"
 
-3. Then, build your agent as described in the [docs](https://docs.fetch.ai/aea/).
+3. Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
 
 ## Alternatively (1): Use `pipx` (CLI usage only)
 
@@ -108,11 +108,11 @@ You can have more control on the installed dependencies by leveraging the setupt
 
       pip install ".[all]"
 
-- Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
+- Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
 
 ## Documentation
 
-- All documentation is hosted [here](https://docs.fetch.ai/aea).
+- All documentation is hosted [here](https://valory-xyz.github.io/open-aea/).
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
