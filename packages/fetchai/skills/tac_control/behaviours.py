@@ -122,7 +122,7 @@ class TacBehaviour(Behaviour):
                 self.failed_registration_reason
                 == OefSearchMessage.OefErrorOperation.ALREADY_REGISTERED
             ):
-                self.context.logger.info("Already registered in OEF.")
+                self.context.logger.info("Already registered with sOEF.")
                 return
 
             parameters = cast(Parameters, self.context.parameters)
