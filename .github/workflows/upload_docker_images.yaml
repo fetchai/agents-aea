@@ -1,0 +1,34 @@
+name: Build and upload develop-image to docker hub
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    env:
+     BASE_TAG: fetchai/aea-develop
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up tag
+      run: echo export TAG=${BASE_TAG}:$(python3 -c "from setup import about; print(about[\"__version__\"])") > env.sh
+    - name: docker login
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+    - name: Build the Docker image
+      run: |
+        source env.sh
+        docker build . -f ./develop-image/Dockerfile --tag $TAG
+    - name: Tag to latest
+      run:  |
+        source env.sh
+        docker tag $TAG $BASE_TAG:latest
+    - name: Docker Push
+      run: |
+        source env.sh
+        docker push $TAG
+        docker push $BASE_TAG:latest
