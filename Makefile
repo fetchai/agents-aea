@@ -137,7 +137,7 @@ new_env: clean
 	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
-		pipenv --python 3.7;\
+		pipenv --python 3.9;\
 		pipenv install --dev --skip-lock --clear;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
