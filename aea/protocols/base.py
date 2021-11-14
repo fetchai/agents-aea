@@ -213,7 +213,12 @@ class Message:
         :param value: the value.
         """
         try:
-            setattr(self._slots, key, value)
+            if value is None and not hasattr(self._slots, key):
+                return
+            elif value is None and hasattr(self._slots, key):
+                delattr(self._slots, key)
+            else:
+                setattr(self._slots, key, value)
         except AttributeError as e:  # pragma: nocover
             raise ValueError(f"Field `{key}` is not supported {e}")
 
