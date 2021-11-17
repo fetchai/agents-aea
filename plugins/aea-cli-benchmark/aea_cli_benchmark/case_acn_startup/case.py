@@ -100,7 +100,7 @@ def run(connection: str, run_times: int = 10) -> List[Tuple[str, Union[int, floa
             connect_time = asyncio.get_event_loop().run_until_complete(coro)
 
             return [
-                ("connect time (seconds)", connect_time),
+                ("Connection time (seconds)", connect_time),
             ]
     finally:
         os.chdir(cwd)

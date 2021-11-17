@@ -42,21 +42,21 @@ PACKAGES = [("protocol", "fetchai/signing")]
     show_default=True,
 )
 @click.option(
-    "--amount_of_tx", default=100, help="Amount of tx to sign", show_default=True
+    "--number_of_tx", default=100, help="Number of transactions to sign.", show_default=True
 )
 @number_of_runs_deco
 @output_format_deco
 def main(
     ledger_id: str, amount_of_tx: int, number_of_runs: int, output_format: str
 ) -> Any:
-    """Check performance of decision maker on signature signing."""
+    """Decision maker speed of singing transactions."""
 
     with with_packages(PACKAGES):
         from aea_cli_benchmark.case_decision_maker.case import run
 
         parameters = {
             "Ledger id": ledger_id,
-            "Amount of txs": amount_of_tx,
+            "Number of txs": amount_of_tx,
             "Number of runs": number_of_runs,
         }
 

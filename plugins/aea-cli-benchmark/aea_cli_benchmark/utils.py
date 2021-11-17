@@ -67,7 +67,7 @@ output_format_deco = click.option(
     show_default=True,
 )
 number_of_runs_deco = click.option(
-    "--number_of_runs", default=2, help="How many times run test.", show_default=True
+    "--number_of_runs", default=2, help="Number of times to run the case.", show_default=True
 )
 runtime_mode_deco = click.option(
     "--runtime_mode",
@@ -309,14 +309,14 @@ def print_results(
     if output_format != "text":
         raise ValueError(f"Bad output format {output_format}")
 
-    click.echo("Start test with options:")
+    click.echo("Start benchmark run with options:")
     for name, value in parameters.items():
         click.echo(f"* {name}: {value}")
     click.echo("\nResults:")
     for msg, *values_set in result_fn():
         mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
         click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
-    click.echo("Test finished.")
+    click.echo("Benchmark run finished.")
 
 
 def _make_init_py(path: str) -> None:

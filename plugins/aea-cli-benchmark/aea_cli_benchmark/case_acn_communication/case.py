@@ -201,8 +201,8 @@ def run(connection: str, run_times: int = 10) -> List[Tuple[str, Union[int, floa
             first_time, second_time = asyncio.get_event_loop().run_until_complete(coro)
 
             return [
-                ("first time (seconds)", first_time),
-                ("second time (seconds)", second_time),
+                ("First envelope (seconds)", first_time),
+                ("Second envelope (seconds)", second_time),
             ]
     finally:
         os.chdir(cwd)

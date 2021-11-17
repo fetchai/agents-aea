@@ -77,8 +77,8 @@ def run(agents: int) -> List[Tuple[str, Union[int, float]]]:
         mem_usage = get_mem_usage_in_mb()
 
     return [
-        ("avg config load time", mean(load_times)),
-        ("avg full construction", mean(full_times)),
-        ("avg build time", mean(full_times) - mean(load_times)),
-        ("agent mem usage (Mb)", mem_usage - env_mem_usage),
+        ("Average configuration load time", mean(load_times)),
+        ("Average full construction", mean(full_times)),
+        ("Average build time", mean(full_times) - mean(load_times)),
+        ("Agent memory usage (Mb)", mem_usage - env_mem_usage),
     ]

@@ -32,15 +32,15 @@ from aea_cli_benchmark.utils import (
 
 @click.command(name="agent_construction_time")
 @click.option(
-    "--agents", default=25, help="Amount of agents to construct.", show_default=True
+    "--agents", default=25, help="Number of agents to construct.", show_default=True
 )
 @number_of_runs_deco
 @output_format_deco
 def main(agents: int, number_of_runs: int, output_format: str) -> Any:
-    """Check agents construction time and memory usage."""
+    """Agent's construction time and memory usage."""
     from aea_cli_benchmark.case_agent_construction_time.case import run
 
-    parameters = {"Agents": agents, "Number of runs": number_of_runs}
+    parameters = {"Number of agents": agents, "Number of runs": number_of_runs}
 
     def result_fn() -> List[Tuple[str, Any, Any, Any]]:
         return multi_run(int(number_of_runs), run, (agents,),)

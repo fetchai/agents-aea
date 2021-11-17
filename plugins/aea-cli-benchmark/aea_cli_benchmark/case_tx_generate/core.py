@@ -49,7 +49,7 @@ from aea.helpers.yaml_utils import yaml_dump_all, yaml_load_all
 @click.group()
 @click.pass_context
 def benchmark(click_context: click.Context) -> None:  # pylint: disable=unused-argument
-    """Run one of performance benchmark."""
+    """Run a benchmark case."""
 
 
 benchmark.add_command(case_agent_construction_time)

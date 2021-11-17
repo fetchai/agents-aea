@@ -99,10 +99,15 @@ def make_desc_maker_wallet(
 def sign_txs(
     decision_maker: DecisionMaker, wallet: Wallet, num_runs: int, ledger_id: str
 ) -> float:
-    """Sign txs sprcified amount fo runs and return time taken (seconds)."""
+    """Sign specified number of transactions and return time taken (seconds)."""
 
-    amount = 10000
-    fc2 = make_crypto(ledger_id)
+    tx_amount = 10000
+    tx_fee = 0
+    tx_nonce = "some_nonce"
+    ether_nonce = 1
+    gas = 30
+    ether_gas = 20000
+    receiver_crypto = make_crypto(ledger_id)
     sender_address = wallet.addresses[ledger_id]
     ledger_api = make_ledger_api(ledger_id)
 
@@ -115,10 +120,10 @@ def sign_txs(
         ):
             transfer_transaction = ledger_api.get_transfer_transaction(
                 sender_address=sender_address,
-                destination_address=fc2.address,
-                amount=amount,
-                tx_fee=1000,
-                tx_nonce="something",
+                destination_address=receiver_crypto.address,
+                amount=tx_amount,
+                tx_fee=tx_fee,
+                tx_nonce=tx_nonce,
             )
     elif ledger_id == "cosmos":
         with patch(
@@ -129,13 +134,13 @@ def sign_txs(
         ):
             transfer_transaction = ledger_api.get_transfer_transaction(
                 sender_address=sender_address,
-                destination_address=fc2.address,
-                amount=amount,
-                tx_fee=1000,
-                tx_nonce="something",
+                destination_address=receiver_crypto.address,
+                amount=tx_amount,
+                tx_fee=tx_fee,
+                tx_nonce=tx_nonce,
             )
     elif ledger_id == "ethereum":
-        transfer_transaction = {"gasPrice": 30, "nonce": 1, "gas": 20000}
+        transfer_transaction = {"gasPrice": gas, "nonce": ether_nonce, "gas": ether_gas}
     else:
         raise ValueError("Ledger not supported!")
 
@@ -150,7 +155,7 @@ def sign_txs(
             amount_by_currency_id={"FET": -1},
             is_sender_payable_tx_fee=True,
             quantities_by_good_id={"good_id": 10},
-            nonce="transaction nonce",
+            nonce=tx_nonce,
         ),
         raw_transaction=RawTransaction(ledger_id, transfer_transaction),  # type: ignore
     )
@@ -197,7 +202,7 @@ def run(ledger_id: str, amount_of_tx: int) -> List[Tuple[str, Union[int, float]]
         rate = running_time / amount_of_tx
 
         return [
-            ("run_time (seconds)", running_time),
-            ("rate (envelopes/second)", rate),
-            ("mem usage (Mb)", mem_usage),
+            ("Overall time (seconds)", running_time),
+            ("Rate (envelopes/second)", rate),
+            ("Memory usage (Mb)", mem_usage),
         ]

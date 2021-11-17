@@ -50,7 +50,7 @@ PACKAGES = [
 @click.option(
     "--connect-times",
     default=10,
-    help="How many time perform connection.",
+    help="Number of times to perform connection.",
     show_default=True,
 )
 @number_of_runs_deco
@@ -58,7 +58,7 @@ PACKAGES = [
 def main(
     connection: str, connect_times: int, number_of_runs: int, output_format: str
 ) -> Any:
-    """Check connection connect time."""
+    """p2p_libp2p connection's connect time."""
     with with_packages(PACKAGES):
         from aea_cli_benchmark.case_acn_startup.case import run
 
