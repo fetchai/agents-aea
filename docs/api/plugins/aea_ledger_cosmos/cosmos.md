@@ -281,7 +281,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None) -> None
+ | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -290,6 +290,7 @@ Instantiate an ethereum crypto object.
 
 - `private_key_path`: the private key path of the agent
 - `password`: the password to encrypt/decrypt the private key.
+- `extra_entropy`: add extra randomness to whatever randomness your OS can provide
 
 <a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.private_key"></a>
 #### private`_`key
@@ -392,7 +393,7 @@ signed transaction
 
 ```python
  | @classmethod
- | generate_private_key(cls) -> SigningKey
+ | generate_private_key(cls, extra_entropy: Union[str, bytes, int] = "") -> SigningKey
 ```
 
 Generate a key pair for cosmos network.

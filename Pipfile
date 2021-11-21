@@ -10,7 +10,7 @@ name = "test-pypi"
 
 [dev-packages]
 # we fix exact versions as it's sufficient to have at least one set of compatible dependencies for development
-aiohttp = "==3.7.4"
+aiohttp = "==3.7.4.post0"
 asn1crypto = "==1.4.0"
 bandit = "==1.7.0"
 bech32 = "==1.2.0"
@@ -58,7 +58,7 @@ pytest-randomly = "==3.4.0"
 pytest-rerunfailures = "==9.0"
 requests = ">=2.22.0"
 safety = "==1.10.3"
-tox = "==3.15.1"
+tox = "==3.24.4"
 vulture = "==2.3"
 isort = "==5.7.0"
 web3 = "==5.25.0"
