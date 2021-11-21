@@ -8,21 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmfZxjMzApLKdff7s77G6RKqsmXLdc18yLoMLpDsoV2C8c
-<<<<<<< HEAD
-  __init__.py: Qmbqt24D3vwQYL6kkdFw1B6VwzHFBgabgSk6LvPJ8mbEth
-=======
   __init__.py: QmUZT223juWrBaUF2emA6zsJcFNthZg4ThA1qC4tV8Pb3B
->>>>>>> develop
   custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
-  dialogues.py: QmbCDnifJZLqfjE7LzQG5fmoi5re2iDUYcnjHtR5of7Sfo
+  dialogues.py: QmTYBS7q8ZNkSVcEEtHi9Cufprri5HgQucRjAU6bKgwWA9
   fipa.proto: QmS7aXZ2JoG3oyMHWiPYoP9RJ7iChsoTC9KQLsj6vi3ejR
-<<<<<<< HEAD
-  fipa_pb2.py: QmPNJfKCA5dHA8Uh5wNN6fYKsGyc5FcWevEqyqa6eTjKH4
-  message.py: QmXZPGXLtPcxQuGD2q5c4RYUYaeVYt69fWzr3G6uAHWpah
-=======
   fipa_pb2.py: Qmf2oQvgYe2Bc6w4yKYwFDt6KpepVaiyCEXMN4NchdJNFf
-  message.py: Qmep6hLp3yzvQigAwFw7ww5kkBqBWEGjg8hEfd2PMckFVS
->>>>>>> develop
+  message.py: QmXZPGXLtPcxQuGD2q5c4RYUYaeVYt69fWzr3G6uAHWpah
   serialization.py: Qmamy2aSw5HEVvArTumXqkxvCR7ePgxnVaJVPic8uniZVU
 fingerprint_ignore_patterns: []
 dependencies:

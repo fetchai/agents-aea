@@ -109,7 +109,6 @@ class TacDialogue(Dialogue):
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :param message_class: the message class used
-        :return: None
         """
         Dialogue.__init__(
             self,

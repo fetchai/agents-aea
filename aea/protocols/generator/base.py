@@ -1155,7 +1155,6 @@ class ProtocolGenerator:
             + ":param role: the role of the agent this dialogue is maintained for\n"
         )
         cls_str += self.indent + ":param message_class: the message class used\n"
-        cls_str += self.indent + ":return: None\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogue.__init__(\n"
         cls_str += self.indent + "self,\n"
@@ -1223,7 +1222,6 @@ class ProtocolGenerator:
             self.indent
             + ":param role_from_first_message: the callable determining role from first message\n"
         )
-        cls_str += self.indent + ":return: None\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogues.__init__(\n"
         self._change_indent(1)

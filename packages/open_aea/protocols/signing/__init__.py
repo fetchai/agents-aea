@@ -20,11 +20,7 @@
 """
 This module contains the support resources for the signing protocol.
 
-<<<<<<< HEAD:packages/fetchai/protocols/signing/__init__.py
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.1.0`.
-=======
 It was created with protocol buffer compiler version `libprotoc 3.17.3` and aea version `1.1.0`.
->>>>>>> develop:packages/open_aea/protocols/signing/__init__.py
 """
 
 from packages.open_aea.protocols.signing.message import SigningMessage

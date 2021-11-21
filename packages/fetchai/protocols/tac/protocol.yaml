@@ -9,17 +9,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRKpjkcyW9vQUfVQFAZqTc8tXj6MeKQvwFseCaZcMt4AK
-<<<<<<< HEAD
-  __init__.py: QmYBmHogY2sQpYGDisRBy8CqKX9qfy2GN9tDAnE7Yt1mn3
-  custom_types.py: QmNzs8yaVU3xL7XKA7WZWHyuEctAdj5UJLnZfompFvXf1i
-  dialogues.py: QmNQzabcd6iTRpFc6977Ay9qz7VV1M9ArZAofBKk7GQb66
-  message.py: Qma3nHkMpvh2fhZJY1SGCgLXmB4LBDbKQSMiYe2Si7oFt5
-=======
   __init__.py: QmUEPioCSwtEsfaS99rC7FpLdyWoGBGX2wu82eumED13E9
-  custom_types.py: QmUTqKdxXv3S4fG6PyA4nqETcoWL2cGPauDkwuhX5Atpvz
-  dialogues.py: QmRjWdedEm43231zPpSad7R97BZ567qNSjjjtPnabrziRd
-  message.py: QmYhTgtjR2c49bCMZoX8Xz1KgyiNdBtmxQBYeR5Z3FFNJb
->>>>>>> develop
+  custom_types.py: QmNzs8yaVU3xL7XKA7WZWHyuEctAdj5UJLnZfompFvXf1i
+  dialogues.py: QmScgLSLwufJGDhibLMpuo7BPfydceEnqLDmBdBFLV1QjE
+  message.py: Qma3nHkMpvh2fhZJY1SGCgLXmB4LBDbKQSMiYe2Si7oFt5
   serialization.py: Qmax63CfRq2zYAF9jqrCEZynS6taNjsBE1dcXSaGDmdRgM
   tac.proto: QmTjxGkEoMdvdDvBMoKhjkBV4CNNgsn6JWt6rJEwXfnq7Z
   tac_pb2.py: Qma7PAWmAe2N3e7ds6VV3pPnyo7oKyEsigcNC44XaJTBCD

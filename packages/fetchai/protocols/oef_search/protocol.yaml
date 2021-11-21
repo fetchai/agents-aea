@@ -8,17 +8,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRzU4RAYqfnDKxHv6iH9hmbG59uEJequ6CA4rwwbvgjuW
-<<<<<<< HEAD
-  __init__.py: QmVSSB1YsXWHYHcvBR6Rwbn5cTN5e5BoY2nFa3ZQNVaY9U
-  custom_types.py: QmY77KDssqi91n1Y42fcTE4h4hhDGA1wAdi9E63BHZ74Af
-  dialogues.py: Qmf37XGgEAuh5gPtLsTA5bvSw9xYCkuKkFaG73UbJYnhKh
-  message.py: QmdJi8UD943NRTfwXQmxExkqH9crZFneRMBWvvcRYGRBPi
-=======
   __init__.py: QmQzjRdHRn7NRnBZVjPztnPDSuhnz3RyLfbtQ7SHaeMkgy
-  custom_types.py: Qmddg9WmPzedoJnfNPDuDx8R67ZZnrSZQruSGg8kgAf6tm
-  dialogues.py: QmSs2nefhrSMXE13QUT9U1q3JVSjzr3dPgsHBqYkCw2fUB
-  message.py: QmU4prx2n9qnr7fAsCCgcdm4avaGWrQWkXXt6jkpr2tLce
->>>>>>> develop
+  custom_types.py: QmeyJUULbC8HuNbaU8kmQYau9BJo6gBkTTsZPFmk8ngtPf
+  dialogues.py: QmYbkA39RfCM5BGLbct1jJvUpTqEDfsDFp2SeEM1PHYPV5
+  message.py: QmdJi8UD943NRTfwXQmxExkqH9crZFneRMBWvvcRYGRBPi
   oef_search.proto: QmaYkawAXEeeNuCcjmwcvdsttnE3owtuP9ouAYVyRu7M2J
   oef_search_pb2.py: QmYbfjGakjkftEjCsfetwNJLSBGk9vejTKkhG7PdfZJPyo
   serialization.py: QmVv7oVKQvWsA576Jjyg3sGR8iVshTpPct2TGhKLZKYCcm
