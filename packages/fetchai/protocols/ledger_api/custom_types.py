@@ -74,7 +74,6 @@ class Kwargs:
 
         :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param kwargs_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         kwargs_protobuf_object.kwargs = DictProtobufStructSerializer.encode(
             kwargs_object.body
