@@ -25,7 +25,7 @@ This module contains the classes required for gym dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,9 +37,13 @@ from packages.fetchai.protocols.gym.message import GymMessage
 class GymDialogue(Dialogue):
     """The gym dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({GymMessage.Performative.RESET})
-    TERMINAL_PERFORMATIVES = frozenset({GymMessage.Performative.CLOSE})
-    VALID_REPLIES = {
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {GymMessage.Performative.RESET}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {GymMessage.Performative.CLOSE}
+    )
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         GymMessage.Performative.ACT: frozenset({GymMessage.Performative.PERCEPT}),
         GymMessage.Performative.CLOSE: frozenset(),
         GymMessage.Performative.PERCEPT: frozenset(

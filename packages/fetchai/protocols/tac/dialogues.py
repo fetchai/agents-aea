@@ -25,7 +25,7 @@ This module contains the classes required for tac dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,9 +37,13 @@ from packages.fetchai.protocols.tac.message import TacMessage
 class TacDialogue(Dialogue):
     """The tac dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({TacMessage.Performative.REGISTER})
-    TERMINAL_PERFORMATIVES = frozenset({TacMessage.Performative.CANCELLED})
-    VALID_REPLIES = {
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {TacMessage.Performative.REGISTER}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {TacMessage.Performative.CANCELLED}
+    )
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TacMessage.Performative.CANCELLED: frozenset(),
         TacMessage.Performative.GAME_DATA: frozenset(
             {
