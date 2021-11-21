@@ -11,14 +11,14 @@ fingerprint:
   dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
   dummy_subpackage/__init__.py: QmfDrbsUewXFcF3afdhCnzsZYrzDTUbQH69MHPnEpzp5qP
   dummy_subpackage/foo.py: QmNrarFAJ1KDopGVz5Co8YtnRj6Q7CP29x7ywUMjnMr6KV
-  handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
+  handlers.py: QmTi2esLM7kvu69RBhriACA45YwGpfrAkva6MLTbmy8cxr
   tasks.py: Qmb1T8irsgmXE5vWi6davaESTzJv8Z9DmNmHhDqvfPQUEZ
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:1.0.0
-- fetchai/signing:1.0.0
 - fetchai/state_update:1.0.0
+- open_aea/signing:1.0.0
 skills: []
 behaviours:
   dummy:

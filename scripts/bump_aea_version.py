@@ -38,7 +38,7 @@ optional arguments:
 
 Example of usage:
 
-python scripts/bump_aea_version.py --new-version 1.1.0 -p aea-ledger-fetchai=2.0.0 -p aea-ledger-ethereum=3.0.0
+python scripts/bump_aea_version.py --new-version 1.1.0 -p open-aea-ledger-fetchai=2.0.0 -p open-aea-ledger-ethereum=3.0.0
 python scripts/bump_aea_version.py --only-check
 """
 
@@ -82,7 +82,7 @@ of an AEA package configuration file, e.g.:
 
 dependencies:
     ...
-    aea-ledger-fetchai:
+    open-aea-ledger-fetchai:
         version: >=1.0.0,<2.0.0
 """
 YAML_DEPENDENCY_SPECIFIER_SET_PATTERN = (
@@ -94,7 +94,7 @@ This pattern captures a specifier set for PyPI dependencies
 in JSON format.
 
 e.g.:
-"aea-ledger-fetchai": {"version": ">=2.0.0, <3.0.0"}
+"open-aea-ledger-fetchai": {"version": ">=2.0.0, <3.0.0"}
 """
 JSON_DEPENDENCY_SPECIFIER_SET_PATTERN = (
     '(?<="{package_name}": ."version": ")({specifier_set})(?=".)'

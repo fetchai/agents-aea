@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -110,7 +111,7 @@ class ERC1155Contract(Contract):
         """
         if ledger_api.identifier == EthereumApi.identifier:
             gas = gas if gas is not None else DEFAUT_ETH_BATCH_TASK_GAS_LIMIT
-            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            nonce = ledger_api.api.eth.get_transaction_count(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createBatch(
                 deployer_address, token_ids
@@ -162,7 +163,7 @@ class ERC1155Contract(Contract):
         """
         if ledger_api.identifier == EthereumApi.identifier:
             gas = gas if gas is not None else DEFAUT_COSMOS_SINGLE_TASK_GAS_LIMIT
-            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            nonce = ledger_api.api.eth.get_transaction_count(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createSingle(
                 deployer_address, token_id, data
@@ -219,7 +220,7 @@ class ERC1155Contract(Contract):
         cls.validate_mint_quantities(token_ids, mint_quantities)
         if ledger_api.identifier == EthereumApi.identifier:
             gas = gas if gas is not None else DEFAUT_ETH_BATCH_TASK_GAS_LIMIT
-            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            nonce = ledger_api.api.eth.get_transaction_count(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mintBatch(
                 recipient_address, token_ids, mint_quantities, data
@@ -314,7 +315,7 @@ class ERC1155Contract(Contract):
         """
         if ledger_api.identifier == EthereumApi.identifier:
             gas = gas if gas is not None else DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT
-            nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+            nonce = ledger_api.api.eth.get_transaction_count(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mint(
                 recipient_address, token_id, mint_quantity, data
@@ -431,7 +432,7 @@ class ERC1155Contract(Contract):
                 raise RuntimeError("Pubkeys not expected for Eth based contract.")
 
             gas = gas if gas is not None else DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT
-            nonce = ledger_api.api.eth.getTransactionCount(from_address)
+            nonce = ledger_api.api.eth.get_transaction_count(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
             tx = instance.functions.trade(
@@ -482,7 +483,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=from_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 from_pubkey_required = True
@@ -502,7 +503,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=to_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 to_pubkey_required = True
@@ -646,7 +647,7 @@ class ERC1155Contract(Contract):
                 raise RuntimeError("Pubkeys not expected for Eth based contract.")
 
             gas = gas if gas is not None else DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT
-            nonce = ledger_api.api.eth.getTransactionCount(from_address)
+            nonce = ledger_api.api.eth.get_transaction_count(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
             tx = instance.functions.tradeBatch(
@@ -707,7 +708,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=from_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 from_pubkey_required = True
@@ -726,7 +727,7 @@ class ERC1155Contract(Contract):
                     cosmos_api.get_packed_exec_msg(
                         sender_address=to_address,
                         contract_address=contract_address,
-                        msg=contract_msg,
+                        msg=contract_msg,  # type: ignore
                     )
                 )
                 to_pubkey_required = True

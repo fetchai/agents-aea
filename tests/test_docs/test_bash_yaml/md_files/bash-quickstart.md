@@ -5,7 +5,7 @@ python3 --version
 sudo apt-get install python3.7-dev
 ```
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```
@@ -29,9 +29,9 @@ which pipenv
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+svn export https://github.com/valory-xyz/open-aea.git/trunk/examples
+svn export https://github.com/valory-xyz/open-aea.git/trunk/scripts
+svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 ``` bash
 pip install aea[all]

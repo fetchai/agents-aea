@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,13 +124,13 @@ class ItemRemoveHelper:
 
         Return example:
         {
-            PackageId(protocol, fetchai/pck1:0.1.0): {
-                PackageId(skill, fetchai/pck2:0.2.0),
-                PackageId(skill, fetchai/pck3:0.3.0)
+            PackageId(protocol, open_aea/pck1:0.1.0): {
+                PackageId(skill, open_aea/pck2:0.2.0),
+                PackageId(skill, open_aea/pck3:0.3.0)
             },
-            PackageId(connection, fetchai/pck4:0.1.0): set(),
-            PackageId(skill, fetchai/pck5:0.1.0): set(),
-            PackageId(skill, fetchai/pck6:0.2.0): set()}
+            PackageId(connection, open_aea/pck4:0.1.0): set(),
+            PackageId(skill, open_aea/pck5:0.1.0): set(),
+            PackageId(skill, open_aea/pck6:0.2.0): set()}
         )
         """
         return self.get_item_dependencies_with_reverse_dependencies(

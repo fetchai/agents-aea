@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,20 +32,9 @@ import tempfile
 import threading
 import time
 from contextlib import contextmanager
-from functools import WRAPPER_ASSIGNMENTS, wraps
+from functools import wraps
 from pathlib import Path
-from types import FunctionType, MethodType
-from typing import (
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import Callable, Dict, Generator, List, Optional, Tuple, cast
 from unittest.mock import MagicMock, patch
 
 import docker as docker
@@ -88,37 +78,19 @@ from aea.crypto.ledger_apis import (
 from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
-from aea.helpers.base import CertRequest, SimpleId, cd
+from aea.helpers.base import CertRequest, cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.fetchai.connections.oef.connection import OEFConnection
-from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    LIBP2P_NODE_MODULE_NAME,
-    MultiAddr,
-    P2PLibp2pConnection,
-    POR_DEFAULT_SERVICE_ID,
-)
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
-    P2PLibp2pClientConnection,
-)
-from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
-    P2PLibp2pMailboxConnection,
-)
 from packages.fetchai.connections.stub.connection import StubConnection
-from packages.fetchai.connections.tcp.tcp_client import TCPClientConnection
-from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
 from tests.common.docker_image import (
     DockerImage,
     FetchLedgerDockerImage,
     GanacheDockerImage,
-    OEFSearchDockerImage,
-    SOEFDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -158,6 +130,8 @@ DUMMY_ENV = gym.GoalEnv
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
+DEFAULT_MAX_PRIORITY_FEE_PER_GAS = 1_000_000_000
+DEFAULT_MAX_FEE_PER_GAS = 1_000_000_000
 
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
@@ -292,12 +266,12 @@ MAX_FLAKY_RERUNS_INTEGRATION = 1
 
 PACKAGES_DIR = os.path.join(ROOT_DIR, "packages")
 FETCHAI_PREF = os.path.join(ROOT_DIR, "packages", "fetchai")
+OPEN_AEA_REF = os.path.join(ROOT_DIR, "packages", "open_aea")
 PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
 contract_config_files = [
     os.path.join(FETCHAI_PREF, "contracts", "erc1155", CONTRACT_YAML),
-    os.path.join(FETCHAI_PREF, "contracts", "staking_erc20", CONTRACT_YAML),
     os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
 ]
 
@@ -309,10 +283,8 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "http", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "ledger_api", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "ml_trade", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "register", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "signing", PROTOCOL_YAML),
+    os.path.join(OPEN_AEA_REF, "protocols", "signing", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
     os.path.join(CUR_PATH, "data", "dummy_protocol", PROTOCOL_YAML),
@@ -325,25 +297,13 @@ connection_config_files = [
     os.path.join(FETCHAI_PREF, "connections", "http_server", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "oef", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_stub", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "soef", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "stub", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "tcp", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "webhook", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "dummy_connection", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
 
 skill_config_files = [
     os.path.join(ROOT_DIR, "aea", "skills", "scaffold", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "aries_alice", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "aries_faber", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "carpark_client", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "carpark_detection", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "confirmation_aw1", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "echo", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "erc1155_client", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "erc1155_deploy", SKILL_YAML),
@@ -352,19 +312,6 @@ skill_config_files = [
     os.path.join(FETCHAI_PREF, "skills", "generic_seller", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "gym", SKILL_YAML),
     os.path.join(FETCHAI_PREF, "skills", "http_echo", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "ml_data_provider", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "ml_train", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "registration_aw1", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "simple_service_registration", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "simple_service_search", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_control", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_control_contract", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_negotiation", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "tac_participation", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "thermometer", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "thermometer_client", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "weather_client", SKILL_YAML),
-    os.path.join(FETCHAI_PREF, "skills", "weather_station", SKILL_YAML),
     DUMMY_SKILL_PATH,
     os.path.join(CUR_PATH, "data", "dummy_aea", "skills", "dummy", SKILL_YAML),
     os.path.join(CUR_PATH, "data", "dependencies_skill", SKILL_YAML),
@@ -376,29 +323,7 @@ agent_config_files = [
     os.path.join(CUR_PATH, "data", "aea-config.example.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_w_keys.yaml"),
     os.path.join(CUR_PATH, "data", "aea-config.example_multipage.yaml"),
-    os.path.join(FETCHAI_PREF, "agents", "aries_alice", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "aries_faber", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "car_data_buyer", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "car_detector", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "confirmation_aea_aw1", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "erc1155_client", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "erc1155_deployer", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "generic_buyer", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "generic_seller", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "gym_aea", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "ml_data_provider", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "ml_model_trainer", AGENT_YAML),
     os.path.join(FETCHAI_PREF, "agents", "my_first_aea", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "registration_aea_aw1", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "simple_service_registration", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_controller", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_controller_contract", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_participant", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "tac_participant_contract", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "thermometer_aea", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "thermometer_client", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "weather_client", AGENT_YAML),
-    os.path.join(FETCHAI_PREF, "agents", "weather_station", AGENT_YAML),
 ]
 
 protocol_specification_files = [
@@ -665,16 +590,6 @@ def apply_aea_loop(request) -> None:
 
 
 @pytest.fixture(scope="session")
-def network_node(
-    oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
-):
-    """Network node initialization."""
-    client = docker.from_env()
-    image = OEFSearchDockerImage(client, oef_addr, oef_port)
-    yield from _launch_image(image, timeout, max_attempts)
-
-
-@pytest.fixture(scope="session")
 def ganache_configuration():
     """Get the Ganache configuration for testing purposes."""
     return dict(
@@ -737,20 +652,6 @@ def ganache(
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration
     )
-    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
-
-
-@pytest.mark.integration
-@pytest.fixture(scope="class")
-def soef(
-    soef_addr: str = "http://127.0.0.1",
-    soef_port: int = 12002,
-    timeout: float = 2.0,
-    max_attempts: int = 50,
-):
-    """Launch the soef image."""
-    client = docker.from_env()
-    image = SOEFDockerImage(client, soef_addr, soef_port)
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
@@ -867,51 +768,6 @@ def _make_local_connection(
     return oef_local_connection
 
 
-def _make_oef_connection(
-    address: Address, public_key: str, oef_addr: str, oef_port: int
-):
-    configuration = ConnectionConfig(
-        addr=oef_addr, port=oef_port, connection_id=OEFConnection.connection_id
-    )
-    oef_connection = OEFConnection(
-        configuration=configuration,
-        data_dir=MagicMock(),
-        identity=Identity("name", address, public_key),
-    )
-    oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
-    return oef_connection
-
-
-def _make_tcp_server_connection(address: str, public_key: str, host: str, port: int):
-    configuration = ConnectionConfig(
-        address=host, port=port, connection_id=TCPServerConnection.connection_id
-    )
-    tcp_connection = TCPServerConnection(
-        configuration=configuration,
-        data_dir=MagicMock(),
-        identity=Identity("name", address, public_key),
-    )
-    tcp_connection._default_logger_name = (
-        "aea.packages.fetchai.connections.tcp.tcp_server"
-    )
-    return tcp_connection
-
-
-def _make_tcp_client_connection(address: str, public_key: str, host: str, port: int):
-    configuration = ConnectionConfig(
-        address=host, port=port, connection_id=TCPClientConnection.connection_id
-    )
-    tcp_connection = TCPClientConnection(
-        configuration=configuration,
-        data_dir=MagicMock(),
-        identity=Identity("name", address, public_key),
-    )
-    tcp_connection._default_logger_name = (
-        "aea.packages.fetchai.connections.tcp.tcp_client"
-    )
-    return tcp_connection
-
-
 def _make_stub_connection(input_file_path: str, output_file_path: str):
     configuration = ConnectionConfig(
         input_file=input_file_path,
@@ -930,259 +786,6 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     Path(cert.get_absolute_save_path(path_prefix)).write_bytes(
         signature.encode("ascii")
     )
-
-
-def _make_libp2p_connection(
-    data_dir: str,
-    port: int = 10234,
-    host: str = "127.0.0.1",
-    relay: bool = True,
-    delegate: bool = False,
-    mailbox: bool = False,
-    entry_peers: Optional[Sequence[MultiAddr]] = None,
-    delegate_port: int = 11234,
-    delegate_host: str = "127.0.0.1",
-    mailbox_port: int = 8888,
-    mailbox_host: str = "127.0.0.1",
-    node_key_file: Optional[str] = None,
-    agent_key: Optional[Crypto] = None,
-    build_directory: Optional[str] = None,
-    peer_registration_delay: str = "0.0",
-) -> P2PLibp2pConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
-        raise ValueError("Data dir must be directory and exist!")
-    log_file = os.path.join(data_dir, "libp2p_node_{}.log".format(port))
-    if os.path.exists(log_file):
-        os.remove(log_file)
-    key = agent_key
-    if key is None:
-        key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("identity", address=key.address, public_key=key.public_key)
-    conn_crypto_store = None
-    if node_key_file is not None:
-        conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
-    else:
-        node_key = make_crypto(DEFAULT_LEDGER)
-        node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
-        node_key.dump(node_key_path)
-        conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_path})
-    cert_request = CertRequest(
-        conn_crypto_store.public_keys[DEFAULT_LEDGER],
-        POR_DEFAULT_SERVICE_ID,
-        key.identifier,
-        "2021-01-01",
-        "2021-01-02",
-        "{public_key}",
-        f"./{key.address}_cert.txt",
-    )
-    _process_cert(key, cert_request, path_prefix=data_dir)
-    if not build_directory:
-        build_directory = os.getcwd()
-    if relay and delegate:
-        configuration = ConnectionConfig(
-            node_key_file=node_key_file,
-            local_uri="{}:{}".format(host, port),
-            public_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            delegate_uri="{}:{}".format(delegate_host, delegate_port),
-            peer_registration_delay=peer_registration_delay,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-            cert_requests=[cert_request],
-        )
-    elif relay and not delegate:
-        configuration = ConnectionConfig(
-            node_key_file=node_key_file,
-            local_uri="{}:{}".format(host, port),
-            public_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            peer_registration_delay=peer_registration_delay,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-            cert_requests=[cert_request],
-        )
-    else:
-        configuration = ConnectionConfig(
-            node_key_file=node_key_file,
-            local_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            peer_registration_delay=peer_registration_delay,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-            cert_requests=[cert_request],
-        )
-
-    if mailbox:
-        configuration.config["mailbox_uri"] = f"{mailbox_host}:{mailbox_port}"
-    else:
-        configuration.config["mailbox_uri"] = ""
-
-    if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
-        build_node(build_directory)
-    connection = P2PLibp2pConnection(
-        configuration=configuration,
-        data_dir=data_dir,
-        identity=identity,
-        crypto_store=conn_crypto_store,
-    )
-    return connection
-
-
-def _make_libp2p_client_connection(
-    peer_public_key: str,
-    data_dir: str,
-    node_port: int = 11234,
-    node_host: str = "127.0.0.1",
-    uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-) -> P2PLibp2pClientConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
-        raise ValueError("Data dir must be directory and exist!")
-    crypto = make_crypto(ledger_api_id)
-    identity = Identity(
-        "identity", address=crypto.address, public_key=crypto.public_key
-    )
-    cert_request = CertRequest(
-        peer_public_key,
-        POR_DEFAULT_SERVICE_ID,
-        ledger_api_id,
-        "2021-01-01",
-        "2021-01-02",
-        "{public_key}",
-        f"./{crypto.address}_cert.txt",
-    )
-    _process_cert(crypto, cert_request, path_prefix=data_dir)
-    configuration = ConnectionConfig(
-        tcp_key_file=None,
-        nodes=[
-            {
-                "uri": str(uri)
-                if uri is not None
-                else "{}:{}".format(node_host, node_port),
-                "public_key": peer_public_key,
-            },
-        ],
-        connection_id=P2PLibp2pClientConnection.connection_id,
-        cert_requests=[cert_request],
-    )
-    return P2PLibp2pClientConnection(
-        configuration=configuration, data_dir=data_dir, identity=identity
-    )
-
-
-def _make_libp2p_mailbox_connection(
-    peer_public_key: str,
-    data_dir: str,
-    node_port: int = 8888,
-    node_host: str = "127.0.0.1",
-    uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-) -> P2PLibp2pMailboxConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
-        raise ValueError("Data dir must be directory and exist!")
-    crypto = make_crypto(ledger_api_id)
-    identity = Identity(
-        "identity", address=crypto.address, public_key=crypto.public_key
-    )
-    cert_request = CertRequest(
-        peer_public_key,
-        POR_DEFAULT_SERVICE_ID,
-        ledger_api_id,
-        "2021-01-01",
-        "2021-01-02",
-        "{public_key}",
-        f"./{crypto.address}_cert.txt",
-    )
-    _process_cert(crypto, cert_request, path_prefix=data_dir)
-    configuration = ConnectionConfig(
-        tcp_key_file=None,
-        nodes=[
-            {
-                "uri": str(uri)
-                if uri is not None
-                else "{}:{}".format(node_host, node_port),
-                "public_key": peer_public_key,
-            },
-        ],
-        connection_id=P2PLibp2pMailboxConnection.connection_id,
-        cert_requests=[cert_request],
-    )
-    return P2PLibp2pMailboxConnection(
-        configuration=configuration, data_dir=data_dir, identity=identity
-    )
-
-
-def libp2p_log_on_failure(fn: Callable) -> Callable:
-    """
-    Decorate a pytest method running a libp2p node to print its logs in case test fails.
-
-    :return: decorated method.
-    """
-
-    # for pydcostyle
-    @wraps(fn)
-    def wrapper(self, *args, **kwargs):
-        try:
-            return fn(self, *args, **kwargs)
-        except Exception:
-            for log_file in self.log_files:
-                print("libp2p log file ======================= {}".format(log_file))
-                try:
-                    with open(log_file, "r") as f:
-                        print(f.read())
-                except FileNotFoundError:
-                    pass
-                print("=======================================")
-            raise
-
-    return wrapper
-
-
-def libp2p_log_on_failure_all(cls):
-    """
-    Decorate every method of a class with `libp2p_log_on_failure`.
-
-    :return: class with decorated methods.
-    """
-    for name, fn in inspect.getmembers(cls):
-        if isinstance(fn, FunctionType):
-            setattr(cls, name, libp2p_log_on_failure(fn))
-        continue
-        if isinstance(fn, MethodType):
-            if fn.im_self is None:
-                wrapped_fn = libp2p_log_on_failure(fn.im_func)
-                method = MethodType(wrapped_fn, None, cls)
-                setattr(cls, name, method)
-            else:
-                wrapped_fn = libp2p_log_on_failure(fn.im_func)
-                clsmethod = MethodType(wrapped_fn, cls, type)
-                setattr(cls, name, clsmethod)
-    return cls
-
-
-def _do_for_all(method_decorator):
-    def class_decorator(cls):
-        class GetAttributeMetaClass(type):
-            def __getattribute__(cls, name):
-                attr = super().__getattribute__(name)
-                return method_decorator(attr)
-
-        class DecoratedClass(cls, metaclass=GetAttributeMetaClass):
-            def __getattribute__(self, name):
-                attr = super().__getattribute__(name)
-                return method_decorator(attr)
-
-        for attr in WRAPPER_ASSIGNMENTS:
-            if not hasattr(cls, attr):
-                continue
-            setattr(DecoratedClass, attr, getattr(cls, attr))
-        DecoratedClass.__wrapped__ = cls
-        return DecoratedClass
-
-    return class_decorator
 
 
 class CwdException(Exception):
@@ -1317,11 +920,12 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api, deployer_address=crypto.address, gas=5000000
     )
-    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    gas = ledger_api.api.eth.estimate_gas(transaction=tx)
     tx["gas"] = gas
     tx_signed = crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    tx_digest = ledger_api.send_signed_transaction(tx_signed)
+    time.sleep(0.5)
+    receipt = ledger_api.get_transaction_receipt(tx_digest)
     contract_address = cast(Dict, receipt)["contractAddress"]
     yield contract, contract_address
 
@@ -1357,7 +961,7 @@ def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
         initialSupply=int(1e23),
         decimals_=18,
     )
-    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    gas = ledger_api.api.eth.estimate_gas(transaction=tx)
     tx["gas"] = gas
     tx_signed = account1.sign_transaction(tx)
     tx_receipt = ledger_api.send_signed_transaction(tx_signed)
@@ -1553,8 +1157,9 @@ def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
     :param: address: Addresse to be funded from faucet
     """
     if fetchai_api is None:
-        fetchai_api = make_ledger_api(
-            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        fetchai_api = cast(
+            FetchAIApi,
+            make_ledger_api(FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG),
         )
 
     balance = fetchai_api.get_balance(address)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +21,10 @@
 import json
 import logging
 import threading
-import time
 import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from uuid import uuid4
 
 import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
@@ -31,6 +32,7 @@ from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import _hash_eip191_message, encode_defunct
+from eth_account.signers.local import LocalAccount
 from eth_keys import keys
 from eth_typing import HexStr
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
@@ -90,7 +92,6 @@ def get_gas_price_strategy(
         Get gas price from Eth Gas Station api.
 
         Visit `https://docs.ethgasstation.info/gas-price` for documentation.
-
         :param web3: web3 instance
         :param transaction_params: transaction parameters
         :return: wei
@@ -118,12 +119,12 @@ class SignedTransactionTranslator:
     @staticmethod
     def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]:
         """Write SignedTransaction to dict."""
-        signed_transaction_dict = {
-            "raw_transaction": signed_transaction.rawTransaction.hex(),
-            "hash": signed_transaction.hash.hex(),
-            "r": signed_transaction.r,
-            "s": signed_transaction.s,
-            "v": signed_transaction.v,
+        signed_transaction_dict: Dict[str, Union[str, int]] = {
+            "raw_transaction": cast(str, signed_transaction.rawTransaction.hex()),
+            "hash": cast(str, signed_transaction.hash.hex()),
+            "r": cast(int, signed_transaction.r),
+            "s": cast(int, signed_transaction.s),
+            "v": cast(int, signed_transaction.v),
         }
         return signed_transaction_dict
 
@@ -138,11 +139,13 @@ class SignedTransactionTranslator:
                 f"Invalid for conversion. Found object: {signed_transaction_dict}."
             )
         signed_transaction = SignedTransaction(
-            rawTransaction=HexBytes(signed_transaction_dict["raw_transaction"]),
-            hash=HexBytes(signed_transaction_dict["hash"]),
-            r=signed_transaction_dict["r"],
-            s=signed_transaction_dict["s"],
-            v=signed_transaction_dict["v"],
+            rawTransaction=HexBytes(
+                cast(str, signed_transaction_dict["raw_transaction"])
+            ),
+            hash=HexBytes(cast(str, signed_transaction_dict["hash"])),
+            r=cast(int, signed_transaction_dict["r"]),
+            s=cast(int, signed_transaction_dict["s"]),
+            v=cast(int, signed_transaction_dict["v"]),
         )
         return signed_transaction
 
@@ -222,31 +225,42 @@ class AttributeDictTranslator:
         return AttributeDict(processed_dict)
 
 
-class EthereumCrypto(Crypto[Account]):
+class EthereumCrypto(Crypto[LocalAccount]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
     identifier = _ETHEREUM
 
     def __init__(
-        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+        self,
+        private_key_path: Optional[str] = None,
+        password: Optional[str] = None,
+        extra_entropy: Union[str, bytes, int] = "",
     ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
         :param password: the password to encrypt/decrypt the private key.
+        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
         """
-        super().__init__(private_key_path=private_key_path, password=password)
+        super().__init__(
+            private_key_path=private_key_path,
+            password=password,
+            extra_entropy=extra_entropy,
+        )
+
         bytes_representation = Web3.toBytes(hexstr=self.entity.key.hex())
         self._public_key = str(keys.PrivateKey(bytes_representation).public_key)
-        self._address = str(self.entity.address)
+        self._address = self.entity.address
 
     @property
     def private_key(self) -> str:
         """
         Return a private key.
 
-        :return: a private key string
+        64 random hex characters (i.e. 32 bytes) + "0x" prefix.
+
+        :return: a private key string in hex format
         """
         return self.entity.key.hex()
 
@@ -254,6 +268,8 @@ class EthereumCrypto(Crypto[Account]):
     def public_key(self) -> str:
         """
         Return a public key in hex format.
+
+        128 hex characters (i.e. 64 bytes) + "0x" prefix.
 
         :return: a public key string in hex format
         """
@@ -264,14 +280,16 @@ class EthereumCrypto(Crypto[Account]):
         """
         Return the address for the key pair.
 
-        :return: a display_address str
+        40 hex characters (i.e. 20 bytes) + "0x" prefix.
+
+        :return: an address string in hex format
         """
         return self._address
 
     @classmethod
     def load_private_key_from_path(
         cls, file_name: str, password: Optional[str] = None
-    ) -> Account:
+    ) -> LocalAccount:
         """
         Load a private key in hex format from a file.
 
@@ -323,17 +341,27 @@ class EthereumCrypto(Crypto[Account]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
-        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
+        signed_transaction = cast(Account, self.entity).sign_transaction(
+            transaction_dict=transaction
+        )
         signed_transaction_dict = SignedTransactionTranslator.to_dict(
             signed_transaction
         )
         return cast(JSONLike, signed_transaction_dict)
 
     @classmethod
-    def generate_private_key(cls) -> Account:
-        """Generate a key pair for ethereum network."""
-        account = Account.create()  # pylint: disable=no-value-for-parameter
+    def generate_private_key(
+        cls, extra_entropy: Union[str, bytes, int] = ""
+    ) -> LocalAccount:
+        """
+        Generate a key pair for ethereum network.
+
+        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :return: account object
+        """
+        account = Account.create(
+            extra_entropy
+        )  # pylint: disable=no-value-for-parameter
         return account
 
     def encrypt(self, password: str) -> str:
@@ -353,7 +381,7 @@ class EthereumCrypto(Crypto[Account]):
 
         :param keyfile_json: json str containing encrypted private key.
         :param password: the password to decrypt.
-        :return: the raw private key.
+        :return: the raw private key (without leading "0x").
         """
         try:
             private_key = Account.decrypt(keyfile_json, password)
@@ -424,9 +452,8 @@ class EthereumHelper(Helper):
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        time_stamp = int(time.time())
         aggregate_hash = Web3.keccak(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+            b"".join([seller.encode(), client.encode(), uuid4().bytes])
         )
         return aggregate_hash.hex()
 
@@ -439,7 +466,7 @@ class EthereumHelper(Helper):
         :return: str
         """
         keccak_hash = Web3.keccak(hexstr=public_key)
-        raw_address = keccak_hash[-20:].hex().upper()
+        raw_address = keccak_hash[-20:].hex()
         address = Web3.toChecksumAddress(raw_address)
         return address
 
@@ -500,7 +527,7 @@ class EthereumHelper(Helper):
         Get the hash of a message.
 
         :param message: the message to be hashed.
-        :return: the hash of the message.
+        :return: the hash of the message as a hex string.
         """
         digest = Web3.keccak(message).hex()
         return digest
@@ -537,6 +564,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self._gas_price_api_key = kwargs.pop("gas_price_api_key", None)
+        self._is_gas_estimation_enabled = kwargs.pop("is_gas_estimation_enabled", False)
 
     @property
     def api(self) -> Web3:
@@ -551,7 +579,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
         check_address = self._api.toChecksumAddress(address)
-        return self._api.eth.getBalance(check_address)  # pylint: disable=no-member
+        return self._api.eth.get_balance(check_address)  # pylint: disable=no-member
 
     def get_state(
         self, callable_name: str, *args: Any, **kwargs: Any
@@ -588,6 +616,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_fee: int,
         tx_nonce: str,
         chain_id: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[str] = None,
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
         **kwargs: Any,
@@ -601,6 +631,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_fee: the transaction fee (gas) to be used (in Wei).
         :param tx_nonce: verifies the authenticity of the tx.
         :param chain_id: the Chain ID of the Ethereum transaction.
+        :param max_fee_per_gas: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
+        :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
         :param kwargs: keyword arguments
@@ -608,13 +640,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         transaction: Optional[JSONLike] = None
         chain_id = chain_id if chain_id is not None else self._chain_id
-        gas_price = (
-            self._try_get_gas_price(gas_price_strategy)
-            if gas_price is None
-            else gas_price
-        )
-        if gas_price is None:
-            return transaction  # pragma: nocover
+        destination_address = self._api.toChecksumAddress(destination_address)
+        sender_address = self._api.toChecksumAddress(sender_address)
         nonce = self._try_get_transaction_count(sender_address)
         if nonce is None:
             return transaction
@@ -624,10 +651,31 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "to": destination_address,
             "value": amount,
             "gas": tx_fee,
-            "gasPrice": gas_price,
             "data": tx_nonce,
         }
-        transaction = self.update_with_gas_estimate(transaction)
+        if self._is_gas_estimation_enabled:
+            transaction = self.update_with_gas_estimate(transaction)
+        if max_fee_per_gas is not None:
+            max_priority_fee_per_gas = (
+                self._try_get_max_priority_fee()
+                if max_priority_fee_per_gas is None
+                else max_priority_fee_per_gas
+            )
+            transaction.update(
+                {
+                    "maxFeePerGas": max_fee_per_gas,
+                    "maxPriorityFeePerGas": max_priority_fee_per_gas,
+                }
+            )
+        else:
+            gas_price = (
+                self._try_get_gas_price(gas_price_strategy)
+                if gas_price is None
+                else gas_price
+            )
+            if gas_price is None:
+                return transaction  # pragma: nocover
+            transaction.update({"gasPrice": gas_price})
         return transaction
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
@@ -640,17 +688,17 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
-            self._api.eth.setGasPriceStrategy(gas_price_strategy_callable)
-            gas_price = self._api.eth.generateGasPrice()
+            self._api.eth.set_gas_price_strategy(gas_price_strategy_callable)
+            gas_price = self._api.eth.generate_gas_price()
         finally:
             if prior_strategy is not None:
-                self._api.eth.setGasPriceStrategy(prior_strategy)  # pragma: nocover
+                self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
         return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
         """Try get the transaction count."""
-        nonce = self._api.eth.getTransactionCount(  # pylint: disable=no-member
+        nonce = self._api.eth.get_transaction_count(  # pylint: disable=no-member
             self._api.toChecksumAddress(address)
         )
         return nonce
@@ -664,19 +712,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         gas_estimate = self._try_get_gas_estimate(transaction)
         if gas_estimate is not None:
-            specified_gas = transaction["gas"]
-            if specified_gas < gas_estimate:
-                # eventually; there should be some specifiable strategy
-                _default_logger.warning(  # pragma: nocover
-                    f"Needed to increase gas to cover the gas consumption of the transaction. Estimated gas consumption is: {gas_estimate}. Specified gas was: {specified_gas}."
-                )
             transaction["gas"] = gas_estimate
         return transaction
 
     @try_decorator("Unable to retrieve gas estimate: {}", logger_method="warning")
     def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
         """Try get the gas estimate."""
-        gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
+        gas_estimate = self._api.eth.estimate_gas(  # pylint: disable=no-member
             transaction=cast(TxParams, AttributeDictTranslator.from_dict(transaction))
         )
         return gas_estimate
@@ -700,7 +742,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: tx_digest, if present
         """
         signed_transaction = SignedTransactionTranslator.from_dict(tx_signed)
-        hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
+        hex_value = self._api.eth.send_raw_transaction(  # pylint: disable=no-member
             signed_transaction.rawTransaction
         )
         tx_digest = hex_value.hex()
@@ -729,7 +771,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
+        tx_receipt = self._api.eth.get_transaction_receipt(  # pylint: disable=no-member
             cast(HexStr, tx_digest)
         )
         return AttributeDictTranslator.to_dict(tx_receipt)
@@ -752,7 +794,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the transaction digest.
         :return: the tx, if found
         """
-        tx = self._api.eth.getTransaction(
+        tx = self._api.eth.get_transaction(
             cast(HexStr, tx_digest)
         )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
@@ -785,7 +827,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         contract_interface: Dict[str, str],
         deployer_address: Address,
         value: int = 0,
-        gas: int = 0,
+        gas: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[str] = None,
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
         **kwargs: Any,
@@ -797,6 +841,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param deployer_address: The address that will deploy the contract.
         :param value: value to send to contract (in Wei)
         :param gas: the gas to be used (in Wei)
+        :param max_fee_per_gas: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
+        :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
         :param kwargs: keyword arguments
@@ -804,28 +850,52 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         transaction: Optional[JSONLike] = None
         _deployer_address = self.api.toChecksumAddress(deployer_address)
-        nonce = self.api.eth.getTransactionCount(_deployer_address)
+        nonce = self._try_get_transaction_count(_deployer_address)
         if nonce is None:
             return transaction
-        gas_price = (
-            self._try_get_gas_price(gas_price_strategy)
-            if gas_price is None
-            else gas_price
-        )
-        if gas_price is None:
-            return transaction  # pragma: nocover
         instance = self.get_contract_instance(contract_interface)
-        data = instance.constructor(**kwargs).buildTransaction().get("data", "0x")
         transaction = {
-            "from": _deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,
-            "gas": gas,
-            "gasPrice": gas_price,
             "nonce": nonce,
-            "data": data,
         }
-        transaction = self.update_with_gas_estimate(transaction)
+        if max_fee_per_gas is not None:
+            max_priority_fee_per_gas = (
+                self._try_get_max_priority_fee()
+                if max_priority_fee_per_gas is None
+                else max_priority_fee_per_gas
+            )
+            if max_priority_fee_per_gas is None:
+                return None  # pragma: nocover
+            transaction.update(
+                {
+                    "maxFeePerGas": max_fee_per_gas,
+                    "maxPriorityFeePerGas": max_priority_fee_per_gas,
+                }
+            )
+        else:
+            gas_price = (
+                self._try_get_gas_price(gas_price_strategy)
+                if gas_price is None
+                else gas_price
+            )
+            if gas_price is None:
+                return None  # pragma: nocover
+            transaction.update({"gasPrice": gas_price})
+        transaction = instance.constructor(**kwargs).buildTransaction(transaction)
+        if transaction is None:
+            return None  # pragma: nocover
+        transaction.pop("to", None)  # only 'from' address, don't insert 'to' address!
+        transaction.update({"from": _deployer_address})
+        if gas is not None:
+            transaction.update({"gas": gas})
+        if self._is_gas_estimation_enabled:
+            transaction = self.update_with_gas_estimate(transaction)
         return transaction
+
+    @try_decorator("Unable to retrieve max_priority_fee: {}", logger_method="warning")
+    def _try_get_max_priority_fee(self) -> str:
+        """Try get the gas estimate."""
+        return cast(str, self.api.eth.max_priority_fee)
 
     @classmethod
     def is_valid_address(cls, address: Address) -> bool:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +31,7 @@ from aea.crypto.base import LedgerApi
 class MyScaffoldContract(Contract):
     """The scaffold contract class for a smart contract."""
 
-    contract_id = PublicId.from_str("fetchai/scaffold:0.1.0")
+    contract_id = PublicId.from_str("open_aea/scaffold:0.1.0")
 
     @classmethod
     def get_raw_transaction(

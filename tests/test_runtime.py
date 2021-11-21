@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +27,13 @@ from unittest.mock import patch
 import pytest
 
 from aea.aea_builder import AEABuilder
+from aea.configurations.base import ComponentType
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.exceptions import _StopRuntime
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
@@ -47,6 +49,12 @@ class TestAsyncRuntime:
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         builder.set_storage_uri("sqlite://:memory:")
         self.agent = builder.build()

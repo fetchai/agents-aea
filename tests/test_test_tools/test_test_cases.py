@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +26,15 @@ from unittest import TestCase, mock
 
 import pytest
 import yaml
+from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 import aea
 from aea.configurations.base import AgentConfig
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
@@ -53,11 +58,10 @@ from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import MAX_FLAKY_RERUNS, MY_FIRST_AEA_PUBLIC_ID
-from tests.test_cli import test_generate_wealth, test_interact
+from tests.test_cli import test_generate_wealth
 
 
 TestWealthCommandsPositive = test_generate_wealth.TestWealthCommandsPositive
-TestInteractCommand = test_interact.TestInteractCommand
 
 
 class TestConfigCases(AEATestCaseEmpty):
@@ -372,8 +376,11 @@ class TestGetWealth(AEATestCaseEmpty):
     def test_get_wealth(self):
         """Test get_wealth."""
         # just call it, network related and quite unstable
-        self.generate_private_key()
-        self.add_private_key()
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        )
         self.get_wealth(FetchAICrypto.identifier)
 
 
@@ -385,9 +392,9 @@ class TestGetAddress(AEATestCaseEmpty):
         # just call it, network related and quite unstable
         self.generate_private_key()
         self.add_private_key()
-        result = self.get_address(FetchAICrypto.identifier)
-        assert len(result) == 44
-        assert result.startswith("fetch")
+        result = self.get_address(EthereumCrypto.identifier)
+        assert len(result) == 42
+        assert result.startswith("0x")
 
 
 class TestAEA(AEATestCase):

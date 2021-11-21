@@ -37,11 +37,11 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue
 from aea.skills.base import Handler, Model, Skill, SkillContext
 
-from packages.fetchai.protocols.signing.dialogues import SigningDialogue
-from packages.fetchai.protocols.signing.dialogues import (
+from packages.open_aea.protocols.signing.dialogues import SigningDialogue
+from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
-from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import get_wealth_if_needed
 

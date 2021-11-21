@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,6 +44,7 @@ def _import_module_mock(arg):
     return import_module(arg)
 
 
+@pytest.mark.skip  # need remote registry
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # flaky on Windows
 class TestMultiAgentManager(BasePythonMarkdownDocs):
     """Test the ledger integration code snippets."""

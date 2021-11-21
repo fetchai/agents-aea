@@ -23,7 +23,7 @@ Try validate a private key path.
 #### create`_`private`_`key
 
 ```python
-create_private_key(ledger_id: str, private_key_file: str, password: Optional[str] = None) -> None
+create_private_key(ledger_id: str, private_key_file: str, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Create a private key for the specified ledger identifier.
@@ -33,6 +33,7 @@ Create a private key for the specified ledger identifier.
 - `ledger_id`: the ledger identifier.
 - `private_key_file`: the private key file.
 - `password`: the password to encrypt/decrypt the private key.
+- `extra_entropy`: add extra randomness to whatever randomness your OS can provide
 :raises: ValueError if the identifier is invalid.
 
 <a name="aea.crypto.helpers.try_generate_testnet_wealth"></a>

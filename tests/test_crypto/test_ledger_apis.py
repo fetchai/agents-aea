@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -191,6 +192,6 @@ class TestLedgerApis:
 
 def test_is_valid_address():
     """Test LedgerApis.is_valid_address."""
-    assert LedgerApis.is_valid_address(DEFAULT_LEDGER, FETCHAI_ADDRESS_ONE)
-    assert LedgerApis.is_valid_address(EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(DEFAULT_LEDGER, ETHEREUM_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE)
     assert LedgerApis.is_valid_address(CosmosCrypto.identifier, COSMOS_ADDRESS_ONE)

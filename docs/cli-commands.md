@@ -22,7 +22,6 @@
 | `get-wealth [ledger_id]`                    | Get the wealth associated with the private key.                              |
 | `init`                                      | Initialize your AEA configurations. (With `--author` to define author.)      |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
-| `interact`                                  | Interact with a running AEA via the stub connection.                         |
 | `ipfs`                                      | IPFS Commands                                                                |
 | `issue-certificates`                        | Issue the connection certificates.                                           |
 | `launch [path_to_agent_project]...`         | Launch many agents at the same time.                                         |

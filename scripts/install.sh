@@ -1,6 +1,6 @@
 #!/bin/bash
 ### usage
-# mac/linux: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh)"
+# mac/linux: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.sh)"
 
 function bad_os_type() {
 	echo "OS $OSTYPE is not supported!"
@@ -42,7 +42,7 @@ function is_python_version_ok() {
 
 function install_aea (){
 	echo "Install AEA"
-	output=$(pip3 install --user aea[all]==1.1.0 --force --no-cache-dir)
+	output=$(pip3 install --user open-aea[all]==1.1.0 --force --no-cache-dir)
 	if [[  $? -ne 0 ]];
 	then
 		echo "$output"

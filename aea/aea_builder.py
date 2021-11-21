@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,7 +57,6 @@ from aea.configurations.constants import (
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
     DEFAULT_LOGGING_CONFIG,
-    DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_NAME,
 )
 from aea.configurations.constants import (
@@ -67,8 +67,6 @@ from aea.configurations.constants import (
     PROTOCOLS,
     SIGNING_PROTOCOL,
     SKILLS,
-    STATE_UPDATE_PROTOCOL,
-    _FETCHAI_IDENTIFIER,
 )
 from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
@@ -726,28 +724,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def _add_default_packages(self) -> None:
         """Add default packages."""
-        # add default protocol
-        default_protocol = PublicId.from_str(DEFAULT_PROTOCOL)
-        self.add_protocol(
-            Path(
-                self.registry_dir, _FETCHAI_IDENTIFIER, PROTOCOLS, default_protocol.name
-            )
-        )
         # add signing protocol
         signing_protocol = PublicId.from_str(SIGNING_PROTOCOL)
         self.add_protocol(
             Path(
-                self.registry_dir, _FETCHAI_IDENTIFIER, PROTOCOLS, signing_protocol.name
-            )
-        )
-        # add state update protocol
-        state_update_protocol = PublicId.from_str(STATE_UPDATE_PROTOCOL)
-        self.add_protocol(
-            Path(
                 self.registry_dir,
-                _FETCHAI_IDENTIFIER,
+                signing_protocol.author,
                 PROTOCOLS,
-                state_update_protocol.name,
+                signing_protocol.name,
             )
         )
 

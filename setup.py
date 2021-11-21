@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,7 +76,7 @@ def parse_readme():
         readme = f.read()
 
     # replace relative links of images
-    raw_url_root = "https://raw.githubusercontent.com/fetchai/agents-aea/main/"
+    raw_url_root = "https://raw.githubusercontent.com/valory-xyz/open-aea/main/"
     replacement = raw_url_root + r"\g<0>"
     readme = re.sub(r"(?<=<img src=\")(/.*)(?=\")", replacement, readme, re.DOTALL)
 
@@ -124,9 +125,9 @@ if __name__ == "__main__":
         include_package_data=True,
         license=about["__license__"],
         python_requires=">=3.6",
-        keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
+        keywords="aea open-aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network",
         project_urls={
-            "Bug Reports": "https://github.com/fetchai/agents-aea/issues",
-            "Source": "https://github.com/fetchai/agents-aea",
+            "Bug Reports": "https://github.com/valory-xyz/open-aea/issues",
+            "Source": "https://github.com/valory-xyz/open-aea",
         },
     )

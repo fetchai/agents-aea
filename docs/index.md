@@ -1,6 +1,6 @@
 
 
-The AEA framework provides the tools for creating Autonomous Economic Agents (AEA).
+The (open) AEA framework provides the tools for creating Autonomous Economic Agents (AEA). It is a fork of the <a href="https://github.com/fetchai/agents-aea" target="_blank">legacy AEA framework</a> that gives no priority to any package vendor.
 
 ## What are AEAs?
 
@@ -28,7 +28,7 @@ An AEA represents an individual, organisation or object and looks after its inte
 
 The AEA framework is a development suite, currently implemented in Python, which equips you with an efficient and accessible set of tools for building and running AEAs. The framework is modular, extensible, and composable. It attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
 
-AEAs achieve their goals with the help of a search & discovery service for AEAs -- the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a> -- a decentralized agent communication system -- the <a href="acn">Agent Communication Network (ACN)</a> -- and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+AEAs achieve their goals with the help of a search & discovery service for AEAs -- the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a> -- a decentralized agent communication system -- the <a href="acn">Agent Communication Network (ACN)</a> -- and using blockchains as a financial settlement and commitment layer, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
 
 
 ## Why build with the AEA Framework?
@@ -39,7 +39,7 @@ The AEA framework provides the developer with a number of features, which combin
 * The search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs to find other AEAs.
 * The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
 * The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
-* The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts in Fetch.ai and other third-party decentralised ledgers. 
+* The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts on various decentralised ledgers. 
 
 
 ## Next steps
@@ -53,11 +53,11 @@ If you would like to develop an AEA in a language different to Python then check
 If you want to run a demo, check out the <a href="demos">demo guides</a>.
 
 
-## Help us improve
+## Help us improve
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.</p>
+  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/valory-xyz/open-aea" target="_blank">Github</a> or contact us in the <a href="https://discord.com/invite/eRa5e9c6zh" target="_blank">developer Discord channel</a>.</p>
 </div>
 
 <br />

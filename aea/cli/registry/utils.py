@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
-from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
+from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL_KEY
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -138,9 +139,15 @@ def _perform_registry_request(
     headers: Optional[Dict] = None,
 ) -> requests.Response:
     """Perform HTTP request and resturn response object."""
+    config = get_or_create_cli_config()
+    registry_api_url = config.get(REGISTRY_API_URL_KEY, None)
+    if registry_api_url is None:
+        raise click.ClickException(
+            "The remote registry is not initialized. Remote registry command currently not supported - manually edit config file!"
+        )
     request_kwargs = dict(
         method=method,
-        url="{}{}".format(REGISTRY_API_URL, path),
+        url="{}{}".format(registry_api_url, path),
         params=params,
         files=files,
         data=data,

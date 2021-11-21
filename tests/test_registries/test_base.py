@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,9 +52,9 @@ from aea.skills.base import Skill
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.state_update import StateUpdateMessage
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
@@ -234,7 +235,7 @@ class TestResources:
         )
         cls.resources.add_component(
             Protocol.from_dir(
-                Path(ROOT_DIR, "packages", "fetchai", "protocols", "signing")
+                Path(ROOT_DIR, "packages", "open_aea", "protocols", "signing")
             )
         )
         cls.resources.add_component(
@@ -365,7 +366,7 @@ class TestResources:
     def test_add_remove_connection(self):
         """Test that the 'add connection' and 'remove connection' methods work correctly."""
         a_connection = Connection.from_dir(
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
             data_dir=MagicMock(),
             identity=Identity("name", "address", "public_key"),
             crypto_store=MagicMock(),
@@ -378,7 +379,7 @@ class TestResources:
     def test_get_all_connections(self):
         """Test get all connections."""
         a_connection = Connection.from_dir(
-            Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            Path(ROOT_DIR, "packages", "fetchai", "connections", "local"),
             data_dir=MagicMock(),
             identity=Identity("name", "address", "public_key"),
             crypto_store=MagicMock(),
