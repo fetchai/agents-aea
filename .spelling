@@ -228,6 +228,7 @@ Mermaid-JS
 darglint
 open_aea
 ethereum
+EIP1159-style
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

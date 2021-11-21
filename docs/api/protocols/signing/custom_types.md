@@ -29,10 +29,6 @@ The protocol buffer object in the error_code_protobuf_object argument is matched
 - `error_code_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `error_code_object`: an instance of this class to be encoded in the protocol buffer object.
 
-**Returns**:
-
-None
-
 <a name="packages.open_aea.protocols.signing.custom_types.ErrorCode.decode"></a>
 #### decode
 

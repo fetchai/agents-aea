@@ -45,6 +45,7 @@ Initialise an instance of SigningMessage.
 - `dialogue_reference`: the dialogue reference.
 - `target`: the message target.
 - `performative`: the message performative.
+:param **kwargs: extra options.
 
 <a name="packages.open_aea.protocols.signing.message.SigningMessage.valid_performatives"></a>
 #### valid`_`performatives
