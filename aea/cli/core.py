@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +44,6 @@ from aea.cli.get_public_key import get_public_key
 from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
-from aea.cli.interact import interact
 from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
@@ -122,7 +122,6 @@ cli.add_command(get_multiaddress)
 cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
-cli.add_command(interact)
 cli.add_command(issue_certificates)
 cli.add_command(launch)
 cli.add_command(login)

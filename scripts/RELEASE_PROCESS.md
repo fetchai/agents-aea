@@ -28,9 +28,9 @@
 13. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
-14. Repeat 11. & 12. for each plugin.
+14. Repeat 11. & 12. for each plugin (use `python setup.py sdist bdist_wheel`).
 
-15. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
+15. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
 16. Release packages into registry: `python scripts/deploy_to_registry.py`.
 

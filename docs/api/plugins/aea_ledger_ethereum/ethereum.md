@@ -74,7 +74,7 @@ Get back attribute dict.
 ## EthereumCrypto Objects
 
 ```python
-class EthereumCrypto(Crypto[Account])
+class EthereumCrypto(Crypto[LocalAccount])
 ```
 
 Class wrapping the Account Generation from Ethereum ledger.
@@ -83,7 +83,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None) -> None
+ | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -92,6 +92,7 @@ Instantiate an ethereum crypto object.
 
 - `private_key_path`: the private key path of the agent
 - `password`: the password to encrypt/decrypt the private key.
+- `extra_entropy`: add extra randomness to whatever randomness your OS can provide
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.private_key"></a>
 #### private`_`key
@@ -103,9 +104,11 @@ Instantiate an ethereum crypto object.
 
 Return a private key.
 
+64 random hex characters (i.e. 32 bytes) + "0x" prefix.
+
 **Returns**:
 
-a private key string
+a private key string in hex format
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.public_key"></a>
 #### public`_`key
@@ -116,6 +119,8 @@ a private key string
 ```
 
 Return a public key in hex format.
+
+128 hex characters (i.e. 64 bytes) + "0x" prefix.
 
 **Returns**:
 
@@ -131,16 +136,18 @@ a public key string in hex format
 
 Return the address for the key pair.
 
+40 hex characters (i.e. 20 bytes) + "0x" prefix.
+
 **Returns**:
 
-a display_address str
+an address string in hex format
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.load_private_key_from_path"></a>
 #### load`_`private`_`key`_`from`_`path
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> Account
+ | load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> LocalAccount
 ```
 
 Load a private key in hex format from a file.
@@ -194,10 +201,18 @@ signed transaction
 
 ```python
  | @classmethod
- | generate_private_key(cls) -> Account
+ | generate_private_key(cls, extra_entropy: Union[str, bytes, int] = "") -> LocalAccount
 ```
 
 Generate a key pair for ethereum network.
+
+**Arguments**:
+
+- `extra_entropy`: add extra randomness to whatever randomness your OS can provide
+
+**Returns**:
+
+account object
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.encrypt"></a>
 #### encrypt
@@ -233,7 +248,7 @@ Decrypt the private key and return in raw form.
 
 **Returns**:
 
-the raw private key.
+the raw private key (without leading "0x").
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper"></a>
 ## EthereumHelper Objects
@@ -395,7 +410,7 @@ Get the hash of a message.
 
 **Returns**:
 
-the hash of the message.
+the hash of the message as a hex string.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.load_contract_interface"></a>
 #### load`_`contract`_`interface
@@ -469,7 +484,7 @@ Call a specified function on the ledger API.
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -482,6 +497,8 @@ Submit a transfer transaction to the ledger.
 - `tx_fee`: the transaction fee (gas) to be used (in Wei).
 - `tx_nonce`: verifies the authenticity of the tx.
 - `chain_id`: the Chain ID of the Ethereum transaction.
+- `max_fee_per_gas`: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
+- `max_priority_fee_per_gas`: the part of the fee that goes to the miner (in Wei).
 - `gas_price`: the gas price (in Wei)
 - `gas_price_strategy`: the gas price strategy to be used.
 - `kwargs`: keyword arguments
@@ -580,7 +597,7 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -591,6 +608,8 @@ Get the transaction to deploy the smart contract.
 - `deployer_address`: The address that will deploy the contract.
 - `value`: value to send to contract (in Wei)
 - `gas`: the gas to be used (in Wei)
+- `max_fee_per_gas`: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
+- `max_priority_fee_per_gas`: the part of the fee that goes to the miner (in Wei).
 - `gas_price`: the gas price (in Wei)
 - `gas_price_strategy`: the gas price strategy to be used.
 - `kwargs`: keyword arguments

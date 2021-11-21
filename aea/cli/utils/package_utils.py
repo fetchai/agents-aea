@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +55,6 @@ from aea.configurations.constants import (
 from aea.configurations.constants import (
     IMPORT_TEMPLATE_1,
     IMPORT_TEMPLATE_2,
-    LEDGER_CONNECTION,
     PACKAGES,
     PACKAGE_PUBLIC_ID_VAR_NAME,
     SKILL,
@@ -611,7 +611,7 @@ def is_distributed_item(item_public_id: PublicId) -> bool:
 def _override_ledger_configurations(agent_config: AgentConfig) -> None:
     """Override LedgerApis configurations with agent override configurations."""
     ledger_component_id = ComponentId(
-        ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)
+        ComponentType.CONNECTION, PublicId.from_str("fetchai/ledger:latest")
     )
     prefix_to_component_configuration = {
         key.component_prefix: value

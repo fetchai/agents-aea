@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ethereum module."""
-
+import time
 from pathlib import Path
 from typing import Dict, cast
 
@@ -37,13 +38,24 @@ def test_get_contract_instance(ethereum_testnet_config, ganache):
     full_path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
     contract_interface = ethereum_api.load_contract_interface(full_path)
     tx = ethereum_api.get_deploy_transaction(
-        contract_interface, ec.address, gas=5000000
+        contract_interface,
+        ec.address,
+        0,
+        max_priority_fee_per_gas=1000000000,
+        max_fee_per_gas=1000000000,
     )
-    gas = ethereum_api.api.eth.estimateGas(transaction=tx)
-    tx["gas"] = gas
+    tx = ethereum_api.get_deploy_transaction(
+        contract_interface,
+        ec.address,
+        0,
+        gas=1000000,
+        max_priority_fee_per_gas=1000000000,
+        max_fee_per_gas=1000000000,
+    )
     tx_signed = ec.sign_transaction(tx)
-    tx_receipt = ethereum_api.send_signed_transaction(tx_signed)
-    receipt = ethereum_api.get_transaction_receipt(tx_receipt)
+    tx_digest = ethereum_api.send_signed_transaction(tx_signed)
+    time.sleep(1)
+    receipt = ethereum_api.get_transaction_receipt(tx_digest)
     erc1155_contract_address = cast(Dict, receipt)["contractAddress"]
     interface = {"abi": [], "bytecode": b""}
     instance = ethereum_api.get_contract_instance(

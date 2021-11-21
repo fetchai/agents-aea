@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +21,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
@@ -59,7 +60,10 @@ def try_validate_private_key_path(
 
 
 def create_private_key(
-    ledger_id: str, private_key_file: str, password: Optional[str] = None
+    ledger_id: str,
+    private_key_file: str,
+    password: Optional[str] = None,
+    extra_entropy: Union[str, bytes, int] = "",
 ) -> None:
     """
     Create a private key for the specified ledger identifier.
@@ -67,9 +71,10 @@ def create_private_key(
     :param ledger_id: the ledger identifier.
     :param private_key_file: the private key file.
     :param password: the password to encrypt/decrypt the private key.
+    :param extra_entropy: add extra randomness to whatever randomness your OS can provide
     :raises: ValueError if the identifier is invalid.
     """
-    crypto = make_crypto(ledger_id)
+    crypto = make_crypto(ledger_id, extra_entropy=extra_entropy)
     crypto.dump(private_key_file, password)
 
 

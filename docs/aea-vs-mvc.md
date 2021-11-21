@@ -25,6 +25,6 @@ The `View` concept is probably best compared to the `Message` of a given `Protoc
 
 We recommend you continue with the next step in the 'Getting Started' series:
 
-- <a href="../skill-guide">Build a skill for an AEA</a>
+- <a href="../core-components-2">Core components 2</a>
 
 <br />

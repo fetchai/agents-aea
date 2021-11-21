@@ -1,6 +1,6 @@
 # usage
-# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1'))"
-# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1'))
+# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.ps1'))"
+# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.ps1'))
 
 function install_python {
 	echo "Installing python"
@@ -34,7 +34,7 @@ function instal_choco_golang_gcc {
 }
 function install_aea {
 	echo "Install aea"
-    $output=pip install aea[all]==1.1.0 --force --no-cache-dir 2>&1 |out-string;
+    $output=pip install open-aea[all]==1.1.0 --force --no-cache-dir 2>&1 |out-string;
     if ($LastExitCode -ne 0) {
         echo $output
         echo "AEA install failed!"

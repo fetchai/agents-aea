@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,12 +60,12 @@ from aea.registries.resources import Resources
 from aea.skills.base import Skill
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
 
-from packages.fetchai.connections.oef.connection import (
-    PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
+from packages.fetchai.connections.http_server.connection import (
+    PUBLIC_ID as HTTP_SERVER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
@@ -121,15 +122,15 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        f"Package '{str(OEF_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
-        f"Missing dependencies: ['(protocol, {str(OefSearchMessage.protocol_id)})']"
+        f"Package '{str(HTTP_SERVER_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
+        f"Missing dependencies: ['(protocol, {str(HttpMessage.protocol_id)})']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef" requires
-        # "fetchai/oef_search" and "fetchai/fipa" protocols.
+        # connection "fetchai/http_server" requires
+        # "fetchai/http" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
-            Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
+            Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_server",
         )
 
 
@@ -157,13 +158,19 @@ class TestReentrancy:
             ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
         )
         connection_path = os.path.join(
-            ROOT_DIR, "packages", "fetchai", "connections", "soef"
+            ROOT_DIR, "packages", "fetchai", "connections", "local"
         )
 
         builder = AEABuilder()
         builder.set_name("aea1")
         builder.add_private_key(DEFAULT_LEDGER)
         builder.add_protocol(protocol_path)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_contract(contract_path)
         builder.add_connection(connection_path)
         builder.add_skill(dummy_skill_path)
@@ -428,6 +435,12 @@ def test_remove_skill():
     builder.add_private_key("fetchai")
 
     skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(skill)
     assert len(builder._package_dependency_manager.all_dependencies) == num_deps + 1
@@ -601,6 +614,12 @@ def test_load_abstract_component():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_component(ComponentType.SKILL, dummy_skill_path)
     with mock.patch("aea.aea_builder.load_aea_package"), mock.patch.object(
         builder,
@@ -995,7 +1014,7 @@ def test_builder_pypi_dependencies():
     dependencies = builder._package_dependency_manager.pypi_dependencies
     assert set(dependencies.keys()) == {
         "protobuf",
-        "aea-ledger-fetchai",
-        "aea-ledger-ethereum",
-        "aea-ledger-cosmos",
+        "open-aea-ledger-fetchai",
+        "open-aea-ledger-ethereum",
+        "open-aea-ledger-cosmos",
     }

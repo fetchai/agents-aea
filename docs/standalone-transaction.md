@@ -1,8 +1,8 @@
 In this guide, we will generate some wealth for the Fetch.ai testnet and create a standalone transaction. After the completion of the transaction, we get the transaction digest. With this we can search for the transaction on the <a href='https://explore-stargateworld.fetch.ai/' target="_blank">block explorer</a>
 
-This guide requires the `aea-ledger-fetchai` plug-in installed in your Python environment:
+This guide requires the `open-aea-ledger-fetchai` plug-in installed in your Python environment:
 ```bash
-pip install aea-ledger-fetchai
+pip install open-aea-ledger-fetchai
 ```
 
 First, import the python and application specific libraries and set the static variables.

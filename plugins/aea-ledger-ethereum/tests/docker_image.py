@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,7 +118,7 @@ class GanacheDockerImage(DockerImage):
         addr: str,
         port: int,
         config: Optional[Dict] = None,
-        gas_limit: int = 10000000000000,
+        gas_limit: str = "0x9184e72a000",  # 10000000000000,
     ):
         """
         Initialize the Ganache Docker image.
@@ -137,7 +138,7 @@ class GanacheDockerImage(DockerImage):
     @property
     def tag(self) -> str:
         """Get the image tag."""
-        return "trufflesuite/ganache-cli:latest"
+        return "trufflesuite/ganache:beta"
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
@@ -145,11 +146,12 @@ class GanacheDockerImage(DockerImage):
 
     def _build_command(self) -> List[str]:
         """Build command."""
-        cmd = ["ganache-cli"]
-        cmd += ["--gasLimit=" + str(self._gas_limit)]
+        # cmd = ["--chain.hardfork=london"]  # noqa: E800
+        cmd = ["--miner.blockGasLimit=" + str(self._gas_limit)]
+        # cmd += ["--miner.callGasLimit=" + "0x1fffffffffffff"]  # noqa: E800
         accounts_balances = self._config.get("accounts_balances", [])
         for account, balance in accounts_balances:
-            cmd += [f"--account='{account},{balance}'"]
+            cmd += [f"--wallet.accounts='{account},{balance}'"]
         return cmd
 
     def create(self) -> Container:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -177,6 +178,7 @@ class IsVersionCorrectTestCase(TestCase):
         self.assertFalse(result)
 
 
+@pytest.mark.skip  # need remote registry
 class TestFetchFromRemoteRegistry(AEATestCaseManyFlaky):
     """Test case for fetch agent command from Registry."""
 
@@ -220,6 +222,7 @@ class TestFetchLatestVersion(AEATestCaseMany):
 class TestFetchAgentMixed(BaseAEATestCase):
     """Test 'aea fetch' in mixed mode."""
 
+    @pytest.mark.skip  # need remote registry
     @pytest.mark.integration
     @mock.patch(
         "aea.cli.registry.add.fetch_package", wraps=aea.cli.registry.add.fetch_package
@@ -295,6 +298,7 @@ class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
     MODE = "--remote"
 
 
+@pytest.mark.skip  # need remote registry
 def test_fetch_mixed_no_local_registry():
     """Test that mixed becomes remote when no local registry."""
     with TemporaryDirectory() as tmp_dir:

@@ -10,7 +10,7 @@ Protocols in the AEA world provide definitions for:
 
 <img src="../assets/protocol.jpg" alt="Protocol simplified" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
-The framework provides a `default` protocol. This protocol provides a bare-bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides a `default` protocol. This protocol provides a bare-bones implementation for an AEA protocol which includes a <a href="https://docs.fetch.ai/aea/api/protocols/default/message/#packages.fetchai.protocols.default.message" target="_blank">`DefaultMessage`</a>  class and associated <a href="https://docs.fetch.ai/aea/api/protocols/default/serialization/#packages.fetchai.protocols.default.serialization" target="_blank">`DefaultSerializer`</a> and <a href="https://docs.fetch.ai/aea/api/protocols/default/dialogues/#packages.fetchai.protocols.default.dialogues" target="_blank">`DefaultDialogue`</a> classes.
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
 
@@ -297,7 +297,7 @@ def __init__(
 
 The `fetchai/fipa:1.0.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:1.0.0` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:1.0.0` protocol check out the <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank"> generic skills step by step guide</a>.
 
 
 ### Fipa dialogue

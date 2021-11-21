@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea run` sub-command."""
+import json
 import os
 import re
 import shutil
@@ -39,6 +41,7 @@ from aea.configurations.base import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
 )
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.exceptions import AEAPackageLoadingError
 from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
@@ -90,7 +93,40 @@ def test_run(password_or_none):
     assert result.exit_code == 0
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_options]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add-key",
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+            *password_options,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_ledger",
+            FetchAICrypto.identifier,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            "--type",
+            "list",
+        ],
     )
     assert result.exit_code == 0
 
@@ -168,7 +204,41 @@ def test_run_with_profiling():
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add-key",
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_ledger",
+            FetchAICrypto.identifier,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            "--type",
+            "list",
+        ],
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(
@@ -242,7 +312,41 @@ def test_run_with_default_connection():
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add-key",
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_ledger",
+            FetchAICrypto.identifier,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            "--type",
+            "list",
+        ],
+    )
     assert result.exit_code == 0
 
     try:
@@ -271,6 +375,7 @@ def test_run_with_default_connection():
             pass
 
 
+@pytest.mark.skip  # need remote registry
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
@@ -304,7 +409,15 @@ def test_run_multiple_connections(connection_ids):
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add-key",
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        ],
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(
@@ -555,6 +668,7 @@ def test_run_ethereum_private_key_config():
         pass
 
 
+@pytest.mark.skip  # need remote registry
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # install depends on network
 def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
@@ -583,7 +697,15 @@ def test_run_with_install_deps():
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add-key",
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        ],
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(
@@ -663,7 +785,41 @@ def test_run_with_install_deps_and_requirement_file():
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "add-key",
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.default_ledger",
+            FetchAICrypto.identifier,
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "config",
+            "set",
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            "--type",
+            "list",
+        ],
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(
@@ -968,7 +1124,16 @@ class TestRunFailsWhenConnectionNotDeclared(AEATestCaseEmpty):
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
         cls.generate_private_key(FetchAICrypto.identifier)
-        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        )
+        cls.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        cls.set_config(
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            type_="list",
+        )
 
     def test_run(self):
         """Run the test."""
@@ -1083,8 +1248,17 @@ class TestRunFailsWhenConnectionNotComplete(AEATestCaseEmpty):
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
         cls.generate_private_key(FetchAICrypto.identifier)
-        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        )
         cls.add_item("connection", str(cls.connection_id))
+        cls.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        cls.set_config(
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            type_="list",
+        )
         cls.set_config("agent.default_connection", str(HTTP_ClIENT_PUBLIC_ID))
         connection_module_path = Path(
             cls.t,
@@ -1125,8 +1299,17 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
         cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection_name = "http_client"
         cls.generate_private_key(FetchAICrypto.identifier)
-        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        )
         cls.add_item("connection", cls.connection_id)
+        cls.set_config("agent.default_ledger", FetchAICrypto.identifier)
+        cls.set_config(
+            "agent.required_ledgers",
+            json.dumps([FetchAICrypto.identifier]),
+            type_="list",
+        )
         cls.set_config("agent.default_connection", cls.connection_id)
         Path(
             cls.t,
@@ -1153,6 +1336,7 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             )
 
 
+@pytest.mark.skip  # need remote registry
 class TestRunFailsWhenProtocolConfigFileNotFound:
     """Test that the command 'aea run' fails when a protocol configuration file is not found."""
 
@@ -1370,7 +1554,10 @@ class TestExcludeConnection(AEATestCaseEmpty):
         cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
         cls.connection2_id = str(STUB_CONNECTION_PUBLIC_ID)
         cls.generate_private_key(FetchAICrypto.identifier)
-        cls.add_private_key(FetchAICrypto.identifier)
+        cls.add_private_key(
+            FetchAICrypto.identifier,
+            PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier),
+        )
         cls.add_item("connection", cls.connection_id)
         cls.add_item("connection", cls.connection2_id)
 

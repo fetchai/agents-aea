@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,11 +45,11 @@ from benchmark.checks.utils import (
     print_results,
 )
 
-from packages.fetchai.protocols.signing.dialogues import SigningDialogue
-from packages.fetchai.protocols.signing.dialogues import (
+from packages.open_aea.protocols.signing.dialogues import SigningDialogue
+from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
-from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 
 class SigningDialogues(BaseSigningDialogues):

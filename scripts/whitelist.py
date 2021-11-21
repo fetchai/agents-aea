@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,6 +74,18 @@ _.has_ledger  # unused method (aea/crypto/ledger_apis.py:55)
 _.get_api  # unused method (aea/crypto/ledger_apis.py:60)
 _.has_spec  # unused method (aea/crypto/registries/base.py:236)
 _.main_cryptos  # unused property (aea/crypto/wallet.py:130)
+apply_delta  # unused method (aea/decision_maker/base.py:60)
+is_initialized  # unused property (aea/decision_maker/base.py:70)
+is_affordable_transaction  # unused method (aea/decision_maker/base.py:75)
+apply_transactions  # unused method (aea/decision_maker/base.py:84)
+list_of_terms  # unused variable (aea/decision_maker/base.py:85)
+Preferences  # unused class (aea/decision_maker/base.py:98)
+marginal_utility  # unused method (aea/decision_maker/base.py:118)
+ownership_state  # unused variable (aea/decision_maker/base.py:119)
+utility_diff_from_transaction  # unused method (aea/decision_maker/base.py:128)
+ownership_state  # unused variable (aea/decision_maker/base.py:130)
+logarithmic_utility  # unused function (/aea/helpers/preference_representations/base.py:28)
+linear_utility  # unused function (/aea/helpers/preference_representations/base.py:55)
 locate  # unused function (aea/helpers/base.py:139)
 sigint_crossplatform  # unused function (aea/helpers/base.py:236)
 _.dwFlags  # unused attribute (aea/helpers/base.py:269)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -518,6 +519,7 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
+@pytest.mark.skip  # need remote registry
 class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
     """Test add skill in mixed mode that fails with local falls back to remote registry."""
 
@@ -539,6 +541,7 @@ class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
+@pytest.mark.skip  # need remote registry
 class TestAddSkillRemoteMode(AEATestCaseEmpty):
     """Test case for add skill, --remote mode."""
 

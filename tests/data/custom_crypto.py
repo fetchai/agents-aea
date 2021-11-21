@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a custom crypto class for testing purposes."""
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
 from aea.common import Address
 from aea.crypto.base import Crypto, EntityClass
@@ -28,7 +29,9 @@ class CustomCrypto(Crypto):
     """This is a custom crypto class for testing purposes.."""
 
     @classmethod
-    def generate_private_key(cls) -> EntityClass:
+    def generate_private_key(
+        cls, extra_entropy: Union[str, bytes, int] = ""
+    ) -> EntityClass:
         """Generare private key."""
         pass
 

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +37,7 @@ ROOT_PATH = SCRIPTS_PATH.parent.absolute()
 TEST_DATA = ROOT_PATH / "tests" / "data"
 TEST_DUMMY_AEA_DIR = TEST_DATA / "dummy_aea"
 FETCHAI_PACKAGES = ROOT_PATH / "packages" / "fetchai"
+OPEN_AEA_PACKAGES = ROOT_PATH / "packages" / "open_aea"
 
 SYMLINKS = [
     (TEST_DUMMY_AEA_DIR / "skills" / "dummy", TEST_DATA / "dummy_skill"),
@@ -44,8 +46,8 @@ SYMLINKS = [
         FETCHAI_PACKAGES / "protocols" / "default",
     ),
     (
-        TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "protocols" / "signing",
-        FETCHAI_PACKAGES / "protocols" / "signing",
+        TEST_DUMMY_AEA_DIR / "vendor" / "open_aea" / "protocols" / "signing",
+        OPEN_AEA_PACKAGES / "protocols" / "signing",
     ),
     (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "protocols" / "state_update",
@@ -62,10 +64,6 @@ SYMLINKS = [
     (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "connections" / "local",
         FETCHAI_PACKAGES / "connections" / "local",
-    ),
-    (
-        TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "connections" / "p2p_libp2p",
-        FETCHAI_PACKAGES / "connections" / "p2p_libp2p",
     ),
     (
         TEST_DUMMY_AEA_DIR / "vendor" / "fetchai" / "contracts" / "erc1155",

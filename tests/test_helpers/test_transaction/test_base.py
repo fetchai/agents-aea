@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +22,7 @@
 
 import pytest
 
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import DEFAULT_LEDGER, _FETCHAI_IDENTIFIER
 from aea.exceptions import AEAEnforceError
 from aea.helpers.transaction.base import (
     RawMessage,
@@ -37,7 +38,7 @@ from aea.helpers.transaction.base import (
 
 def test_init_terms():
     """Test the terms object initialization."""
-    ledger_id = DEFAULT_LEDGER
+    ledger_id = _FETCHAI_IDENTIFIER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": -10}
@@ -93,7 +94,7 @@ def test_init_terms():
 
 def test_init_terms_w_fee():
     """Test the terms object initialization with fee."""
-    ledger_id = DEFAULT_LEDGER
+    ledger_id = _FETCHAI_IDENTIFIER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": -10}
@@ -127,7 +128,7 @@ def test_init_terms_w_fee():
 
 def test_init_terms_w_fee_counterparty():
     """Test the terms object initialization with fee."""
-    ledger_id = DEFAULT_LEDGER
+    ledger_id = _FETCHAI_IDENTIFIER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": 10}
@@ -163,7 +164,7 @@ def test_init_terms_w_fee_counterparty():
 
 def test_init_terms_strict_positive():
     """Test the terms object initialization in strict mode."""
-    ledger_id = DEFAULT_LEDGER
+    ledger_id = _FETCHAI_IDENTIFIER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": -10}
@@ -184,7 +185,7 @@ def test_init_terms_strict_positive():
 
 def test_init_terms_strict_negative():
     """Test the terms object initialization in strict mode."""
-    ledger_id = DEFAULT_LEDGER
+    ledger_id = _FETCHAI_IDENTIFIER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": 10}
@@ -206,7 +207,7 @@ def test_init_terms_strict_negative():
 
 def test_init_terms_multiple_goods():
     """Test the terms object initialization with multiple goods."""
-    ledger_id = DEFAULT_LEDGER
+    ledger_id = _FETCHAI_IDENTIFIER
     sender_addr = "SenderAddress"
     counterparty_addr = "CounterpartyAddress"
     amount_by_currency_id = {"FET": -10}

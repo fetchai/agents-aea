@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,8 +38,6 @@ from aea.configurations.base import PublicId, SkillComponentConfiguration, Skill
 from aea.configurations.data_types import ComponentType
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
-from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
@@ -215,35 +214,6 @@ class BaseTestSkillContext:
 
 class TestSkillContextDefault(BaseTestSkillContext):
     """Test skill context with default dm."""
-
-
-class TestSkillContextGOP(BaseTestSkillContext):
-    """Test skill context with GOP dm."""
-
-    @classmethod
-    def setup_class(cls, decision_maker_handler_class=GOPDecisionMakerHandler):
-        """Setup test class."""
-        super().setup_class(decision_maker_handler_class)
-
-    def test_agent_ownership_state(self):
-        """Test the ownership state."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.ownership_state,
-            OwnershipState,
-        )
-
-    def test_agent_preferences(self):
-        """Test the agents_preferences."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.preferences, Preferences
-        )
-
-    def test_agent_is_ready_to_pursuit_goals(self):
-        """Test if the agent is ready to pursuit his goals."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
-            GoalPursuitReadiness,
-        )
 
 
 class SkillContextTestCase(TestCase):

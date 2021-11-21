@@ -1,10 +1,10 @@
 # Security Policy
 
-This document outlines security procedures and general policies for the `aea` project.
+This document outlines security procedures and general policies for the `open-aea` project.
 
 ## Supported Versions
 
-The following table shows which versions of `aea` are currently being supported with security updates.
+The following table shows which versions of `open-aea` are currently being supported with security updates.
 
 | Version   | Supported          |
 | --------- | ------------------ |
@@ -13,9 +13,9 @@ The following table shows which versions of `aea` are currently being supported 
 
 ## Reporting a Vulnerability
 
-The `aea` team and community take all security bugs in `aea` seriously. Thank you for improving the security of `aea`. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
+The `open-aea` team and community take all security bugs in `open-aea` seriously. Thank you for improving the security of `open-aea`. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
 
-Report security bugs by emailing `developer@fetch.ai`.
+Report security bugs by emailing `info@valory.xyz`.
 
 The lead maintainer will acknowledge your email within 48 hours, and will send a more detailed response within 48 hours indicating the next steps in handling your report. After the initial reply to your report, the security team will endeavour to keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -181,13 +182,13 @@ def test_get_balance(ethereum_testnet_config, ganache, ethereum_private_key_file
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_get_state(ethereum_testnet_config, ganache):
-    """Test that get_state() with 'getBlock' function returns something containing the block number."""
+    """Test that get_state() with 'get_block' function returns something containing the block number."""
     ethereum_api = EthereumApi(**ethereum_testnet_config)
-    callable_name = "getBlock"
+    callable_name = "get_block"
     args = ("latest",)
     block = ethereum_api.get_state(callable_name, *args)
-    assert block is not None, "response to getBlock is empty."
-    assert "number" in block, "response to getBlock() does not contain 'number'"
+    assert block is not None, "response to get_block is empty."
+    assert "number" in block, "response to get_block() does not contain 'number'"
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -203,6 +204,8 @@ def test_construct_sign_and_submit_transfer_transaction(
 
     amount = 40000
     tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, account.address)
+    max_priority_fee_per_gas = 1_000_000_000
+    max_fee_per_gas = 1_000_000_000
     transfer_transaction = ethereum_api.get_transfer_transaction(
         sender_address=account.address,
         destination_address=ec2.address,
@@ -210,9 +213,11 @@ def test_construct_sign_and_submit_transfer_transaction(
         tx_fee=30000,
         tx_nonce=tx_nonce,
         chain_id=DEFAULT_GANACHE_CHAIN_ID,
+        max_priority_fee_per_gas=max_priority_fee_per_gas,
+        max_fee_per_gas=max_fee_per_gas,
     )
     assert (
-        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 7
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 8
     ), "Incorrect transfer_transaction constructed."
 
     signed_transaction = account.sign_transaction(transfer_transaction)
@@ -266,12 +271,28 @@ def test_get_deploy_transaction(ethereum_testnet_config, ganache):
     ethereum_api = EthereumApi(**ethereum_testnet_config)
     ec2 = EthereumCrypto()
     interface = {"abi": [], "bytecode": b""}
+    max_priority_fee_per_gas = 1000000000
+    max_fee_per_gas = 1000000000
     deploy_tx = ethereum_api.get_deploy_transaction(
-        contract_interface=interface, deployer_address=ec2.address,
+        contract_interface=interface,
+        deployer_address=ec2.address,
+        value=0,
+        max_priority_fee_per_gas=max_priority_fee_per_gas,
+        max_fee_per_gas=max_fee_per_gas,
     )
-    assert type(deploy_tx) == dict and len(deploy_tx) == 6
+    assert type(deploy_tx) == dict and len(deploy_tx) == 8
     assert all(
-        key in ["from", "value", "gas", "gasPrice", "nonce", "data"]
+        key
+        in [
+            "from",
+            "value",
+            "gas",
+            "nonce",
+            "data",
+            "maxPriorityFeePerGas",
+            "maxFeePerGas",
+            "chainId",
+        ]
         for key in deploy_tx.keys()
     )
 
@@ -287,17 +308,72 @@ def test_load_contract_interface():
 @patch.object(EthereumApi, "_try_get_transaction_count", return_value=None)
 def test_ethereum_api_get_transfer_transaction(*args):
     """Test EthereumApi.get_transfer_transaction."""
+    ec1 = EthereumCrypto()
+    ec2 = EthereumCrypto()
     ethereum_api = EthereumApi()
-    assert ethereum_api.get_transfer_transaction(*[MagicMock()] * 7) is None
+    args = {
+        "sender_address": ec1.address,
+        "destination_address": ec2.address,
+        "amount": 1,
+        "tx_fee": 0,
+        "tx_nonce": "",
+        "max_fee_per_gas": 20,
+    }
+    assert ethereum_api.get_transfer_transaction(**args) is None
+
+
+@patch.object(EthereumApi, "_try_get_transaction_count", return_value=1)
+@patch.object(EthereumApi, "_try_get_max_priority_fee", return_value=1)
+def test_ethereum_api_get_transfer_transaction_2(*args):
+    """Test EthereumApi.get_transfer_transaction."""
+    ec1 = EthereumCrypto()
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi()
+    ethereum_api._is_gas_estimation_enabled = True
+    args = {
+        "sender_address": ec1.address,
+        "destination_address": ec2.address,
+        "amount": 1,
+        "tx_fee": 0,
+        "tx_nonce": "",
+        "max_fee_per_gas": 10,
+    }
+    with patch.object(ethereum_api.api.eth, "estimate_gas", return_value=1):
+        assert len(ethereum_api.get_transfer_transaction(**args)) == 8
+
+
+@patch.object(EthereumApi, "_try_get_transaction_count", return_value=1)
+def test_ethereum_api_get_transfer_transaction_3(*args):
+    """Test EthereumApi.get_transfer_transaction."""
+    ec1 = EthereumCrypto()
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi()
+    ethereum_api._is_gas_estimation_enabled = True
+    args = {
+        "sender_address": ec1.address,
+        "destination_address": ec2.address,
+        "amount": 1,
+        "tx_fee": 0,
+        "tx_nonce": "",
+        "max_fee_per_gas": 10,
+    }
+    with patch.object(ethereum_api.api.eth, "_max_priority_fee", return_value=1):
+        assert len(ethereum_api.get_transfer_transaction(**args)) == 8
 
 
 def test_ethereum_api_get_deploy_transaction(*args):
     """Test EthereumApi.get_deploy_transaction."""
     ethereum_api = EthereumApi()
-    with patch.object(ethereum_api.api.eth, "getTransactionCount", return_value=None):
+    ec1 = EthereumCrypto()
+    with patch.object(ethereum_api.api.eth, "get_transaction_count", return_value=None):
         assert (
             ethereum_api.get_deploy_transaction(
-                {"acc": "acc"}, "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+                **{
+                    "contract_interface": {"": ""},
+                    "deployer_address": ec1.address,
+                    "value": 1,
+                    "max_fee_per_gas": 10,
+                }
             )
             is None
         )

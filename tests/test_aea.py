@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +33,7 @@ import pytest
 import aea  # noqa: F401
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.configurations.base import SkillConfig
+from aea.configurations.base import ComponentType, SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAActException, AEAException, AEAHandleException
@@ -99,6 +100,12 @@ def test_act():
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -118,6 +125,12 @@ def test_start_stop():
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -133,6 +146,12 @@ def test_double_start():
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -164,6 +183,12 @@ def test_react():
         )
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         agent = builder.build(connection_ids=[local_connection_id])
         # This is a temporary workaround to feed the local node to the OEF Local connection
@@ -217,6 +242,12 @@ def test_handle():
         )
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         an_aea = builder.build(connection_ids=[local_connection_id])
         # This is a temporary workaround to feed the local node to the OEF Local connection
@@ -314,6 +345,12 @@ def test_initialize_aea_programmatically():
         )
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         an_aea = builder.build(connection_ids=[local_connection_id])
         local_connection = an_aea.resources.get_connection(local_connection_id)
@@ -525,6 +562,8 @@ def test_no_handlers_registered():
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     an_aea = builder.build()
 
     with patch.object(an_aea.logger, "warning") as mock_logger:
@@ -600,6 +639,12 @@ def test_start_stop_and_start_stop_again():
     builder = AEABuilder()
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
     agent = builder.build()
 
@@ -645,6 +690,8 @@ class TestAeaExceptionPolicy:
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
 
         self.handler_called = 0
 
@@ -820,6 +867,8 @@ class BaseTimeExecutionCase(TestCase):
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
 
         self.function_finished = False
 
@@ -931,6 +980,14 @@ def test_skill2skill_message():
             builder = AEABuilder(registry_dir=Path(ROOT_DIR, "packages"))
             builder.set_name(agent_name)
             builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+            protocol = os.path.join(
+                ROOT_DIR, "packages", "fetchai", "protocols", "default"
+            )
+            builder.add_component(ComponentType.PROTOCOL, protocol)
+            protocol = os.path.join(
+                ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+            )
+            builder.add_component(ComponentType.PROTOCOL, protocol)
             builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
             builder.add_connection(
                 Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")

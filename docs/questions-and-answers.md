@@ -21,7 +21,7 @@ The framework supports the use of third-party libraries hosted on <a href="https
 <details><summary>How does one connect to a database?</summary>
 You have two options to connect to a database: using the built-in storage solution or using a custom ORM (object-relational mapping) library and backend.
 <br><br>
-The use of the built-in storage is explained <a href="../generic-storage/">here</a>. For a detailed example of how to use an ORM, follow the <a href="../orm-integration/">ORM guide</a>.
+The use of the built-in storage is explained <a href="../generic-storage/">here</a>. For a detailed example of how to use an ORM, follow the <a href="https://docs.fetch.ai/aea/orm-integration/" target="_blank">ORM guide</a>.
 </details>
 
 <details><summary>How does one connect a frontend?</summary>
@@ -37,7 +37,7 @@ You can find more details on the application areas of the AEA framework <a href=
 </details>
 
 <details><summary>When a new AEA is created, is the <code>vendor</code> folder populated with some default packages?</summary>
-All AEA projects by default hold the <code>fetchai/default:1.0.0</code>, <code>fetchai/state_update:1.0.0</code> and <code>fetchai/signing:1.0.0</code> protocols. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder. 
+All AEA projects by default hold the <code>open_aea/signing:1.0.0</code> protocols. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder. 
 <br><br>
 You can find more details about the file structure <a href="../package-imports/">here</a>.
 </details>

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +57,9 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
+    DEFAULT_GANACHE_CHAIN_ID,
+    DEFAULT_MAX_FEE_PER_GAS,
+    DEFAULT_MAX_PRIORITY_FEE_PER_GAS,
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
@@ -72,7 +76,17 @@ ledger_ids = pytest.mark.parametrize(
         (EthereumCrypto.identifier, EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH).address),
     ],
 )
-gas_price_strategies = pytest.mark.parametrize("gas_price_strategy", [None, "average"],)
+gas_strategies = pytest.mark.parametrize(
+    "gas_strategies",
+    [
+        {"gas_price_strategy": None},
+        {"gas_price_strategy": "average"},
+        {
+            "max_fee_per_gas": DEFAULT_MAX_FEE_PER_GAS,
+            "max_priority_fee_per_gas": DEFAULT_MAX_PRIORITY_FEE_PER_GAS,
+        },
+    ],
+)
 
 SOME_SKILL_ID = "some/skill:0.1.0"
 
@@ -210,9 +224,9 @@ async def test_get_state(
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
-@gas_price_strategies
+@gas_strategies
 async def test_send_signed_transaction_ethereum(
-    gas_price_strategy,
+    gas_strategies,
     ledger_apis_connection: Connection,
     update_default_ethereum_ledger_api,
     ganache,
@@ -241,8 +255,8 @@ async def test_send_signed_transaction_ethereum(
             is_sender_payable_tx_fee=True,
             nonce="",
             fee_by_currency_id={"ETH": fee},
-            chain_id=3,
-            gas_price_strategy=gas_price_strategy,
+            chain_id=DEFAULT_GANACHE_CHAIN_ID,
+            **gas_strategies,
         ),
     )
     request = cast(LedgerApiMessage, request)
