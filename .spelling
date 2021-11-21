@@ -226,6 +226,8 @@ CosmPy
 dockerised
 Mermaid-JS
 darglint
+open_aea
+ethereum
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

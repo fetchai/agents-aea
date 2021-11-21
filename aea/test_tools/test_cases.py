@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -449,7 +450,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             if process.returncode is None:  # stop only pending processes
                 send_control_c(process)
         for process in subprocesses:
-            process.wait(timeout=timeout)
+            try:
+                process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                process.kill()
 
     @classmethod
     def is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool:

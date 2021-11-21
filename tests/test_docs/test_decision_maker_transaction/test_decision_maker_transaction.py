@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +37,7 @@ PY_FILE = "test_docs/test_decision_maker_transaction/decision_maker_transaction.
 test_logger = logging.getLogger(__name__)
 
 
+@pytest.mark.skip  # wrong ledger_id
 class TestDecisionMakerTransaction(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,7 @@
 """Settings for operating Registry with CLI."""
 
 
-REGISTRY_API_URL = "https://agents-registry.prod.fetch-ai.com/api/v1"
+REGISTRY_API_URL_KEY = "registry_api_url"
 # we ignore issue B105 because this is not an hard-coded authentication token,
 # but the name of the field in the configuration file.
 AUTH_TOKEN_KEY = "auth_token"  # nosec

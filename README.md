@@ -1,33 +1,30 @@
 <h1 align="center">
-    <b>AEA Framework</b>
+    <b>Open AEA Framework</b>
 </h1>
 
 <p align="center">
-  <a href="https://pypi.org/project/aea/">
-    <img alt="PyPI" src="https://img.shields.io/pypi/v/aea">
+  <a href="https://pypi.org/project/open-aea/">
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/open-aea">
   </a>
-  <a href="https://pypi.org/project/aea/">
-    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/aea">
+  <a href="https://pypi.org/project/open-aea/">
+    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/open-aea">
   </a>
   <a>
-    <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
+    <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/open-aea">
   </a>
-  <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
+  <a href="https://github.com/valory-xyz/open-aea/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/pypi/l/open-aea"> 
   </a>
-  <a href="https://pypi.org/project/aea/">
-    <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
-  </a>
-  <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY">
-    <img alt="Slack" src="https://img.shields.io/badge/slack-fetchai-purple.svg">
+  <a href="https://pypi.org/project/open-aea/">
+    <img alt="License" src="https://img.shields.io/pypi/dm/open-aea"> 
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
-    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
+  <a href="https://github.com/valory-xyz/open-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
+    <img alt="AEA framework sanity checks and tests" src="https://github.com/valory-xyz/open-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
-    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/valory-xyz/open-aea">
   </a>
   <a href="https://img.shields.io/badge/lint-flake8-blueviolet">
     <img alt="flake8" src="https://img.shields.io/badge/lint-flake8-yellow" >
@@ -44,12 +41,10 @@
 </p>
 
 <p align="center">
-A framework for autonomous economic agent (AEA) development
+A framework for autonomous economic agent (AEA) development with no vendor lock-in
 </p>
 
-<p align="center">
-  <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
-</p>
+This is a fork of <a href="https://github.com/fetchai/agents-aea">the original AEA project</a> with the benefit that all vendor lock-in at the package level is removed. This means, there are no dependencies on centrally hosted registries for agent packages and the AEA itself does not prefer any package vendor over another. Where feasible, compatibility with the original AEA framework is maintained.
 
 ## Get started developing AEAs
 
@@ -57,21 +52,15 @@ A framework for autonomous economic agent (AEA) development
 
        pipenv --python 3.7 && pipenv shell
 
-2. Install the package from [PyPI](https://pypi.org/project/aea/):
+2. Install the package from [PyPI](https://pypi.org/project/open-aea/):
 
-       pip install aea[all]
+       pip install open-aea[all]
 
     Or, if you use `zsh` rather than `bash`:
 
-       pip install "aea[all]"
+       pip install "open-aea[all]"
 
-3. Then, build your agent as described in the [docs](https://docs.fetch.ai/aea/).
-
-<p align="center">
-  <a href="https://www.youtube.com/embed/xpJA4IT5X88">
-    <img src="/data/video-aea.png?raw=true" alt="AEA Video" width="70%"/>
-  </a>
-</p>
+3. Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
 
 ## Alternatively (1): Use `pipx` (CLI usage only)
 
@@ -79,7 +68,7 @@ A framework for autonomous economic agent (AEA) development
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
-       pipx install aea[all]
+       pipx install open-aea[all]
 
 3. Run AEA CLI e.g.:
 
@@ -93,7 +82,7 @@ This approach is not recommended!
 
 This repository contains submodules. Clone with recursive strategy:
 
-    git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+    git clone https://github.com/valory-xyz/open-aea.git --recursive && cd agents-aea
 
 - To fetch/update submodules (for existing local repo):
 
@@ -119,11 +108,11 @@ You can have more control on the installed dependencies by leveraging the setupt
 
       pip install ".[all]"
 
-- Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
+- Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
 
 ## Documentation
 
-- All documentation is hosted [here](https://docs.fetch.ai/aea).
+- All documentation is hosted [here](https://valory-xyz.github.io/open-aea/).
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
@@ -131,7 +120,7 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 ## Contributing
 
-We welcome contributions to the framework, its plugins, related tools and packages. Please consult the [contributing guide](https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md) for details.
+We welcome contributions to the framework, its plugins, related tools and packages. Please consult the [contributing guide](https://github.com/valory-xyz/open-aea/blob/main/CONTRIBUTING.md) for details.
 
 ## Cite
 
@@ -141,7 +130,7 @@ consider to cite it with the following BibTex entry:
 ```
 @misc{agents-aea,
   Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál and James Riehl},
-  Title = {Autonomous Economic Agent (AEA) Framework},
-  Year = {2019},
+  Title = {Open Autonomous Economic Agent (AEA) Framework},
+  Year = {2021},
 }
 ```

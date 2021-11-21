@@ -60,7 +60,7 @@ from aea.helpers.base import (
     win_popen_kwargs,
 )
 
-from packages.fetchai.connections.oef.connection import OEFConnection
+from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
@@ -86,9 +86,9 @@ class TestHelpersBase:
         """Test the locate function to locate classes."""
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
-        expected_class = OEFConnection
+        expected_class = HTTPServerConnection
         actual_class = locate(
-            "packages.fetchai.connections.oef.connection.OEFConnection"
+            "packages.fetchai.connections.http_server.connection.HTTPServerConnection"
         )
         os.chdir(cwd)
         # although they are the same class, they are different instances in memory

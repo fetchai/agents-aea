@@ -13,8 +13,8 @@ contracts: []
 protocols:
 - fetchai/default:1.0.0
 - fetchai/gym:1.0.0
-- fetchai/signing:1.0.0
 - fetchai/state_update:1.0.0
+- open_aea/signing:1.0.0
 skills:
 - fetchai/gym:0.20.0
 default_connection: fetchai/gym:0.19.0
@@ -28,5 +28,5 @@ private_key_paths: {}
 default_routing: {}
 connection_private_key_paths: {}
 dependencies:
-  aea-ledger-fetchai:
+  open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0

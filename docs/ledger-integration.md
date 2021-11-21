@@ -25,14 +25,14 @@ In particular, there are three types of entry points the framework looks up:
 - `aea.cryptos`, which points to instantiable classes implementing the `Crypto` interface;
 - `aea.faucet_apis`, which points to instantiable classes implementing the `FaucetApi` interface.
 
-This is an example of `setup.py` script for a ledger plug-in `aea-ledger-myledger`:
+This is an example of `setup.py` script for a ledger plug-in `open-aea-ledger-myledger`:
 
 ```python
 # sample ./setup.py file
 from setuptools import setup
 
 setup(
-    name="aea-ledger-myledger",
+    name="open-aea-ledger-myledger",
     packages=["aea_ledger_myledger"],
     # plugins must depend on 'aea'  
     install_requires=["aea"], # add other dependencies...
@@ -47,9 +47,9 @@ setup(
 )
 ```
 
-By convention, such plug-in packages should be named `aea-ledger-${LEDGER_ID}`,
+By convention, such plug-in packages should be named `open-aea-ledger-${LEDGER_ID}`,
 and the importable package name `aea_ledger_${LEDGER_ID}`.
-In the example above, the package name is `aea-ledger-myledger`,
+In the example above, the package name is `open-aea-ledger-myledger`,
 and the importable package name is `aea_ledger_myledger`.
 
 You can search for AEA ledger plug-ins on PyPI:
@@ -59,9 +59,9 @@ You can search for AEA ledger plug-ins on PyPI:
 
 At the moment, the framework natively supports the following three ledgers:
 
-- Fetch.ai: <a href="https://pypi.org/project/aea-ledger-fetchai/" target="_blank">PyPI package: `aea-ledger-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai" target="_blank">source code</a>.
-- Ethereum: <a href="https://pypi.org/project/aea-ledger-ethereum/" target="_blank">PyPI package: `aea-ledger-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum" target="_blank">source code</a>.
-- Cosmos: <a href="https://pypi.org/project/aea-ledger-cosmos/" target="_blank">PyPI package: `aea-ledger-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos" target="_blank">source code</a>.
+- Fetch.ai: <a href="https://pypi.org/project/open-aea-ledger-fetchai/" target="_blank">PyPI package: `open-aea-ledger-fetchai`</a>, and <a href="https://github.com/valory-xyz/open-aea/tree/main/plugins/aea-ledger-fetchai" target="_blank">source code</a>.
+- Ethereum: <a href="https://pypi.org/project/open-aea-ledger-ethereum/" target="_blank">PyPI package: `open-aea-ledger-ethereum`</a>, and <a href="https://github.com/valory-xyz/open-aea/tree/main/plugins/aea-ledger-ethereum" target="_blank">source code</a>.
+- Cosmos: <a href="https://pypi.org/project/open-aea-ledger-cosmos/" target="_blank">PyPI package: `open-aea-ledger-cosmos`</a>, and <a href="https://github.com/valory-xyz/open-aea/tree/main/plugins/aea-ledger-cosmos" target="_blank">source code</a>.
 
 However, support for additional ledgers can be added to the framework at runtime.
 

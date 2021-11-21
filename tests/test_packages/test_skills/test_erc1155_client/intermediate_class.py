@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +39,6 @@ from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.erc1155_client.behaviours import SearchBehaviour
 from packages.fetchai.skills.erc1155_client.dialogues import (
     ContractApiDialogues,
@@ -56,6 +56,7 @@ from packages.fetchai.skills.erc1155_client.handlers import (
     SigningHandler,
 )
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import ROOT_DIR
 

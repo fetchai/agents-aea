@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,7 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 
 class DummyHandler(Handler):

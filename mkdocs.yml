@@ -1,8 +1,8 @@
-site_name: aea
-site_url: https://docs.fetch.ai/
-site_description: Everything you need to know about AEAs.
-repo_url: https://github.com/agents-aea/docs
-site_author: developer@fetch.ai
+site_name: open-aea
+site_url: https://valory-xyz.github.io/open-aea/
+site_description: Everything you need to know about (open) AEAs.
+repo_url: https://github.com/valory-xyz/open-aea
+site_author: developer@fetch.ai,info@valory.xyz
 
 theme:
   name: 'material'
@@ -27,26 +27,15 @@ nav:
     - Trust minimisation: 'trust.md'
   - Demos:
     - Demos: 'demos.md'
-    - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
-    - Car park skills: 'car-park-skills.md'
     - Gym example: 'gym-example.md'
     - Gym skill: 'gym-skill.md'
-    - ML skills: 'ml-skills.md'
-    - Oracle skills: 'oracle-demo.md'
-    - Aggegation skill: 'aggregation-demo.md'
-    - TAC skills: 'tac-skills.md'
-    - TAC skills ledger-based: 'tac-skills-contract.md'
     - TAC external app: 'tac.md'
-    - Thermometer skills: 'thermometer-skills.md'
-    - Weather skills: 'weather-skills.md'
   - Development - Beginner:
     - AEA quick start: 'quickstart.md'
     - Core components - Part 1: 'core-components-1.md'
     - AEA and web frameworks: 'aea-vs-mvc.md'
-    - Build your first skill - search & discovery: 'skill-guide.md'
     - Core components - Part 2: 'core-components-2.md'
     - How AEAs talk to each other - interaction protocols: 'interaction-protocol.md'
-    - Trade between two AEAs: 'generic-skills-step-by-step.md'
     - Development setup: 'development-setup.md'
   - Development - Advanced:
     - Topic guides:
@@ -61,10 +50,8 @@ nav:
       - Testing Skills: 'skill-testing.md'
       - Deployment: 'deployment.md'
       - 12-Factor app and AEAs: '12-factor.md'
-      - Prometheus monitoring: 'prometheus.md'
       - Known limitations: 'known-limits.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
-      - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
       - AEAs vs agents: 'agent-vs-aea.md'
       - Modes of running an AEA: 'modes.md'
       - Generic Storage: 'generic-storage.md'
@@ -142,7 +129,6 @@ nav:
       - Decision Maker:
         - Base: 'api/decision_maker/base.md'
         - Default: 'api/decision_maker/default.md'
-        - GOP: 'api/decision_maker/gop.md'
       - Error Handler:
         - Base: 'api/error_handler/base.md'
         - Default: 'api/error_handler/default.md'
@@ -202,20 +188,11 @@ nav:
           - Common: 'api/protocols/generator/common.md'
           - Extract Specification: 'api/protocols/generator/extract_specification.md'
           - Validate: 'api/protocols/generator/validate.md'
-        - Default Protocol:
-          - Custom Types: 'api/protocols/default/custom_types.md'
-          - Dialogues: 'api/protocols/default/dialogues.md'
-          - Message: 'api/protocols/default/message.md'
-          - Serialization: 'api/protocols/default/serialization.md'
         - Signing Protocol:
           - Custom Types: 'api/protocols/signing/custom_types.md'
           - Dialogues: 'api/protocols/signing/dialogues.md'
           - Message: 'api/protocols/signing/message.md'
           - Serialization: 'api/protocols/signing/serialization.md'
-        - State Update Protocol:
-          - Dialogues: 'api/protocols/state_update/dialogues.md'
-          - Message: 'api/protocols/state_update/message.md'
-          - Serialization: 'api/protocols/state_update/serialization.md'
       - Registries:
         - Base: 'api/registries/base.md'
         - Filter: 'api/registries/filter.md'
@@ -245,12 +222,8 @@ nav:
             - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
             - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Development - Use Case:
-    - Generic skills: 'generic-skills.md'
     - Front-end intergration: 'connect-a-frontend.md'
     - HTTP Connection: 'http-connection-and-skill.md'
-    - ORM integration: 'orm-integration.md'
-    - Contract deploy and interact: 'erc1155-skills.md'
-    - P2P Connection: 'p2p-connection.md'
     - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
   - Glossary: 'glossary.md'
   - Q&A: 'questions-and-answers.md'

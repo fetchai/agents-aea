@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,8 @@ import os
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+import pytest
+
 from aea.cli.core import cli
 from aea.cli.local_registry_sync import enlist_packages
 from aea.cli.registry.add import fetch_package
@@ -29,6 +32,7 @@ from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
 
 
+@pytest.mark.skip  # need remote registry
 def test_local_registry_update():
     """Test local-registry-sync cli command."""
     PACKAGES = [

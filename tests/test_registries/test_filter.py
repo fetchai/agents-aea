@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +29,7 @@ from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
-from packages.fetchai.protocols.signing import SigningMessage
+from packages.open_aea.protocols.signing import SigningMessage
 
 from tests.data.dummy_skill.behaviours import DummyBehaviour
 from tests.data.dummy_skill.handlers import DummyHandler

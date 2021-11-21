@@ -166,7 +166,7 @@ class MyContract(Contract):
         :return: the transaction object
         """
         # create the transaction dict
-        nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
+        nonce = ledger_api.api.eth.get_transaction_count(deployer_address)
         instance = cls.get_instance(ledger_api, contract_address)
         tx = instance.functions.createBatch(
             deployer_address, token_ids

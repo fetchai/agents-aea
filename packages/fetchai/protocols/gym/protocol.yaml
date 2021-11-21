@@ -8,12 +8,21 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSrL3oujtXaSgrbxQzYD12oHjb5d55kNSFiZ4SA3jSNj1
+<<<<<<< HEAD
   __init__.py: QmPE862VDVyhz2DLx1HNzc8fDXrRgFDCTDSHJNEcJ2cz9W
   custom_types.py: QmTQSizkRh6awSk4J2cPGjidMcZ356bTyYxNG2HSgfkj9B
   dialogues.py: QmU1fj58sijXwT2u3UkpUAt3pmkie3oFg6Gx6WeMcepFMi
   gym.proto: QmSYD1qtmNwKnfuTUtPGzbfW3kww4viJ714aRTPupLdV62
   gym_pb2.py: Qme3KgpxmLJihio9opNK9NHJtacdrkivafAZKvpQ2HGaqE
   message.py: Qmds3cP2ku2B8e7kuDng2q7xQFXaypa4knnomDVknmWEek
+=======
+  __init__.py: QmcHQQi4HFLB2vN7htbosHWAqeKey1rSppgX7BP9FnRfY5
+  custom_types.py: QmbLYSBTMMshVBvcCNRBPXCNngFVssVLBh9V6xGkquX64N
+  dialogues.py: QmUx8de3kabB45rkbpddSpYHfmCnw74QjCjeuP7hC522Yb
+  gym.proto: QmSYD1qtmNwKnfuTUtPGzbfW3kww4viJ714aRTPupLdV62
+  gym_pb2.py: QmYA3MNmLow4WoaT9KNrBTAds8MttTttMjz6tZdunkuQTU
+  message.py: QmcVxLCNJ6JJBxZBNAkSTn4L78EZ7pumJ7NnU3igdv4SYo
+>>>>>>> develop
   serialization.py: QmVouHyTqWNbtaTMW1s1MEPUrhKdLgYN5mNBAMMkPoKddX
 fingerprint_ignore_patterns: []
 dependencies:

@@ -34,14 +34,57 @@ import sys
 from pathlib import Path
 
 
-SUPPORTED_YEARS = ["2019", "2020", "2021"]
+SUPPORTED_YEARS_FETCHAI = ["2019", "2020", "2021"]
 
 
-HEADER_REGEX = fr"""(#!/usr/bin/env python3
+HEADER_REGEX_FETCHAI = fr"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
-#   (Copyright 2018-({"|".join(SUPPORTED_YEARS)}) Fetch.AI Limited|Copyright [0-9]{{4}}(-[0-9]{{4}})? [a-zA-Z_]+)
+#   (Copyright 2018-({"|".join(SUPPORTED_YEARS_FETCHAI)}) Fetch.AI Limited|Copyright [0-9]{{4}}(-[0-9]{{4}})? [a-zA-Z_]+)
+#
+#   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
+#   you may not use this file except in compliance with the License\.
+#   You may obtain a copy of the License at
+#
+#       http://www\.apache\.org/licenses/LICENSE-2\.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an \"AS IS\" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\.
+#   See the License for the specific language governing permissions and
+#   limitations under the License\.
+#
+# ------------------------------------------------------------------------------
+"""
+
+HEADER_REGEX_VALORY = r"""(#!/usr/bin/env python3
+)?# -\*- coding: utf-8 -\*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2021 Valory AG
+#
+#   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
+#   you may not use this file except in compliance with the License\.
+#   You may obtain a copy of the License at
+#
+#       http://www\.apache\.org/licenses/LICENSE-2\.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an \"AS IS\" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied\.
+#   See the License for the specific language governing permissions and
+#   limitations under the License\.
+#
+# ------------------------------------------------------------------------------
+"""
+
+HEADER_REGEX_MIXED = fr"""(#!/usr/bin/env python3
+)?# -\*- coding: utf-8 -\*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2021 Valory AG
+#   (Copyright 2018-({"|".join(SUPPORTED_YEARS_FETCHAI)}) Fetch.AI Limited|Copyright [0-9]{{4}}(-[0-9]{{4}})? [a-zA-Z_]+)
 #
 #   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
 #   you may not use this file except in compliance with the License\.
@@ -70,8 +113,14 @@ def check_copyright(file: Path) -> bool:
     :return: True if the file is compliant with the checks, False otherwise.
     """
     content = file.read_text()
-    header_regex = re.compile(HEADER_REGEX, re.MULTILINE)
-    return re.match(header_regex, content) is not None
+    header_regex_fetchai = re.compile(HEADER_REGEX_FETCHAI, re.MULTILINE)
+    if re.match(header_regex_fetchai, content) is not None:
+        return True
+    header_regex_valory = re.compile(HEADER_REGEX_VALORY, re.MULTILINE)
+    if re.match(header_regex_valory, content) is not None:
+        return True
+    header_regex_mixed = re.compile(HEADER_REGEX_MIXED, re.MULTILINE)
+    return re.match(header_regex_mixed, content) is not None
 
 
 if __name__ == "__main__":

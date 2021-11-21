@@ -4,7 +4,7 @@ All the commands must be executed from the parent directory, if not stated other
 
 ## Build
 
-    ./develop-image/scripts/docker-build-img.sh -t fetchai/aea-deploy:latest --
+    ./develop-image/scripts/docker-build-img.sh -t valory/open-aea-deploy:latest --
     
 
 To pass immediate parameters to the `docker build` command:
@@ -29,15 +29,15 @@ As before, to pass parameters to the `docker run` command:
 
 First, be sure you tagged the image with the `latest` tag: 
 
-    docker tag fetchai/aea-develop:<latest-version-number> fetchai/aea-develop:latest
+    docker tag valory/open-aea-develop:<latest-version-number> valory/open-aea-develop:latest
 
-Then, publish the images. First, the `fetchai/aea-develop:<latest-version-number>`
+Then, publish the images. First, the `valory/open-aea-develop:<latest-version-number>`
 
     ./develop-image/scripts/docker-publish-img.sh
 
-And then, the `fetchai/aea-develop:latest` image:
+And then, the `valory/open-aea-develop:latest` image:
 
-- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-develop:latest`  
+- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=valory/open-aea-develop:latest`  
 
 - Run the publish command again: 
 

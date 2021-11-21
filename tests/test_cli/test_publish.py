@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -159,6 +160,7 @@ class TestPublishMixedMode(AEATestCaseEmpty):
         self.run_cli_command("publish", cwd=self._get_cwd())
 
 
+@pytest.mark.skip  # need remote registry
 def test_negative_check_is_item_in_remote_registry():
     """Test the utility function (negative) to check if an item is in the remote registry"""
     with pytest.raises(click.ClickException, match="Not found in Registry."):
@@ -182,6 +184,7 @@ def test_negative_check_is_item_in_registry_mixed():
         )
 
 
+@pytest.mark.skip  # need remote registry
 def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
     """Check if item in registry, mixed mode, when not in local registry but only in remote."""
     ctx = mock.Mock()

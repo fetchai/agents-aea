@@ -1223,6 +1223,7 @@ class ProtocolGenerator:
             self.indent
             + ":param role_from_first_message: the callable determining role from first message\n"
         )
+        cls_str += self.indent + ":return: None\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogues.__init__(\n"
         self._change_indent(1)

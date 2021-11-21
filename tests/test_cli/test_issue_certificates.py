@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,7 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli.utils.config import dump_item_config
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
@@ -98,9 +100,24 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
     def test_issue_certificate(self, password_or_none):
         """Test 'aea issue-certificates' in case of success."""
         # setup: add private key with password
-        self.generate_private_key(password=password_or_none)
-        self.add_private_key(password=password_or_none)
-        self.add_private_key(connection=True, password=password_or_none)
+        self.generate_private_key(
+            ledger_api_id=FetchAICrypto.identifier, password=password_or_none
+        )
+        self.add_private_key(
+            ledger_api_id=FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            password=password_or_none,
+        )
+        self.add_private_key(
+            ledger_api_id=FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+            password=password_or_none,
+        )
 
         # issue certificates and check
         password_options = _get_password_option_args(password_or_none)
@@ -112,8 +129,8 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
 
         # teardown: remove private key
         Path(self._get_cwd(), FETCHAI_PRIVATE_KEY_FILE).unlink()
-        self.remove_private_key()
-        self.remove_private_key(connection=True)
+        self.remove_private_key(ledger_api_id=FetchAICrypto.identifier)
+        self.remove_private_key(ledger_api_id=FetchAICrypto.identifier, connection=True)
 
     def _check_signature(self, cert_id, filename, stdout):
         """Check signature has been generated correctly."""
@@ -253,9 +270,20 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
         )
         cls.add_cert_requests([cls.cert_request_1], DummyConnection.connection_id.name)
         # add fetchai key and connection key
-        cls.generate_private_key()
-        cls.add_private_key()
-        cls.add_private_key(connection=True)
+        cls.generate_private_key(ledger_api_id=FetchAICrypto.identifier)
+        cls.add_private_key(
+            ledger_api_id=FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+        )
+        cls.add_private_key(
+            ledger_api_id=FetchAICrypto.identifier,
+            private_key_filepath=PRIVATE_KEY_PATH_SCHEMA.format(
+                FetchAICrypto.identifier
+            ),
+            connection=True,
+        )
 
     def test_run(self):
         """Run the test."""

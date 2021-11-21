@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,13 +43,11 @@ from aea.configurations.constants import (
     DEFAULT_DEPENDENCIES,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
-    DEFAULT_PROTOCOL,
     DEFAULT_VERSION,
     PROTOCOL,
     PROTOCOLS,
     SIGNING_PROTOCOL,
     SKILLS,
-    STATE_UPDATE_PROTOCOL,
     VENDOR,
 )
 from aea.exceptions import enforce
@@ -172,9 +171,7 @@ def create_aea(
 
         if not empty:
             click.echo("Adding default packages ...")
-            add_item(ctx, PROTOCOL, PublicId.from_str(DEFAULT_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
-            add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
 
     except Exception as e:
         raise click.ClickException(str(e))

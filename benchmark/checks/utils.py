@@ -36,7 +36,6 @@ from aea.aea import AEA
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
-    DEFAULT_PROTOCOL,
     PACKAGES,
     PROTOCOLS,
     SKILLS,
@@ -107,7 +106,7 @@ def make_agent(
                 PACKAGES_DIR
                 / _FETCHAI_IDENTIFIER
                 / PROTOCOLS
-                / PublicId.from_str(DEFAULT_PROTOCOL).name
+                / DefaultMessage.protocol_id.name
             )
         )
     )

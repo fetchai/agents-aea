@@ -64,8 +64,8 @@ security:
 
 .PHONY: static
 static:
-	mypy aea benchmark examples packages plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs scripts --disallow-untyped-defs
-	mypy tests
+	mypy aea benchmark examples --disallow-untyped-defs
+	mypy packages tests plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs
 
 .PHONY: package_checks
 package_checks:
@@ -99,6 +99,9 @@ test-sub-p:
 	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
+.PHONY: hashes
+hashes:
+	python scripts/generate_ipfs_hashes.py
 
 .PHONY: test-all
 test-all:
@@ -138,7 +141,7 @@ new_env: clean
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
-		pipenv install --dev --skip-lock --clear;\
+		pipenv install --dev --skip-lock;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
