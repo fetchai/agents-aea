@@ -1,5 +1,30 @@
 # Release History - open AEA
 
+## 1.2.0 (2021-11-21)
+
+AEA:
+- Adds type hint for dialogue valid replies in protocol generator
+- Adds generator fixes to pass darglint checks
+- Adds various test fixes and fixes on MAM
+- Allows additional entropy to be passed to key generation in plugins (including. via CLI)
+- Fixes an issue with message key-value setter
+- Fixes an issue with improper termination of subprocesses in the test tools
+- Fixes typing issues
+- Miscellaneous minor fixes
+
+Plugins:
+- Updates aea-ledger-ethereum for EIP1159 compatibility
+- Bumps aea-ledger-ethereum dependencies
+
+Packages:
+- Miscellaneous minor fixes
+
+Docs:
+- Updates API documentation
+
+Chores:
+- Enables darglint for protocols
+
 ## 1.1.0 (2021-10-31)
 
 AEA:

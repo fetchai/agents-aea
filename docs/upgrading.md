@@ -7,6 +7,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.1.0` to `v1.2.0`
+
+No backwards incompatible changes.
+
+The `open-aea-ledger-ethereum` plugin now supports EIP1159-style transactions.
+
 ## `aea==v1.1.0` to `open-aea==v1.1.0`
 
 Backwards incompatible changes:
