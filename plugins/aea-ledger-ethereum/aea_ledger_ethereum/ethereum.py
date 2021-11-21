@@ -38,7 +38,8 @@ from eth_typing import HexStr
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
-from web3.types import TxData, TxParams, TxReceipt
+from web3.gas_strategies.rpc import rpc_gas_price_strategy
+from web3.types import TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -56,8 +57,60 @@ TESTNET_NAME = "ganache"
 DEFAULT_ADDRESS = "http://127.0.0.1:8545"
 DEFAULT_CHAIN_ID = 1337
 DEFAULT_CURRENCY_DENOM = "wei"
+ETH_GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 _ABI = "abi"
 _BYTECODE = "bytecode"
+
+
+def get_gas_price_strategy(
+    gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None
+) -> Callable[[Web3, TxParams], Wei]:
+    """Get the gas price strategy."""
+    supported_gas_price_modes = ["safeLow", "average", "fast", "fastest"]
+    if gas_price_strategy is None:
+        _default_logger.debug(
+            "Gas price strategy not provided. Falling back to `rpc_gas_price_strategy`."
+        )
+        return rpc_gas_price_strategy
+
+    if gas_price_strategy not in supported_gas_price_modes:
+        _default_logger.debug(
+            f"Gas price strategy `{gas_price_strategy}` not in list of supported modes: {supported_gas_price_modes}. Falling back to `rpc_gas_price_strategy`."
+        )
+        return rpc_gas_price_strategy
+
+    if api_key is None:
+        _default_logger.debug(
+            "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
+        )
+        return rpc_gas_price_strategy
+
+    def gas_station_gas_price_strategy(  # pylint: disable=redefined-outer-name,unused-argument
+        web3: Web3, transaction_params: TxParams
+    ) -> Wei:
+        """
+        Get gas price from Eth Gas Station api.
+
+        Visit `https://docs.ethgasstation.info/gas-price` for documentation.
+        :param web3: web3 instance
+        :param transaction_params: transaction parameters
+        :return: wei
+        """
+        response = requests.get(f"{ETH_GASSTATION_URL}?api-key={api_key}")
+        if response.status_code != 200:
+            raise ValueError(  # pragma: nocover
+                f"Gas station API response: {response.status_code}, {response.text}"
+            )
+        response_dict = response.json()
+        _default_logger.debug("Gas station API response: {}".format(response_dict))
+        result = response_dict.get(gas_price_strategy, None)
+        if type(result) not in [int, float]:  # pragma: nocover
+            raise ValueError(f"Invalid return value for `{gas_price_strategy}`!")
+        gwei_result = result / 10  # adjustment (see api documentation)
+        wei_result = web3.toWei(gwei_result, "gwei")
+        return wei_result
+
+    return gas_station_gas_price_strategy
 
 
 class SignedTransactionTranslator:
@@ -510,6 +563,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             HTTPProvider(endpoint_uri=kwargs.pop("address", DEFAULT_ADDRESS))
         )
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
+        self._gas_price_api_key = kwargs.pop("gas_price_api_key", None)
         self._is_gas_estimation_enabled = kwargs.pop("is_gas_estimation_enabled", False)
 
     @property
@@ -561,9 +615,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        max_fee_per_gas: int = 0,
         chain_id: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
         max_priority_fee_per_gas: Optional[str] = None,
+        gas_price: Optional[str] = None,
+        gas_price_strategy: Optional[str] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -577,6 +633,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param chain_id: the Chain ID of the Ethereum transaction.
         :param max_fee_per_gas: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
         :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
+        :param gas_price: the gas price (in Wei)
+        :param gas_price_strategy: the gas price strategy to be used.
         :param kwargs: keyword arguments
         :return: the transfer transaction
         """
@@ -597,18 +655,45 @@ class EthereumApi(LedgerApi, EthereumHelper):
         }
         if self._is_gas_estimation_enabled:
             transaction = self.update_with_gas_estimate(transaction)
-        max_priority_fee_per_gas = (
-            self._try_get_max_priority_fee()
-            if max_priority_fee_per_gas is None
-            else max_priority_fee_per_gas
-        )
-        transaction.update(
-            {
-                "maxFeePerGas": max_fee_per_gas,
-                "maxPriorityFeePerGas": max_priority_fee_per_gas,
-            }
-        )
+        if max_fee_per_gas is not None:
+            max_priority_fee_per_gas = (
+                self._try_get_max_priority_fee()
+                if max_priority_fee_per_gas is None
+                else max_priority_fee_per_gas
+            )
+            transaction.update(
+                {
+                    "maxFeePerGas": max_fee_per_gas,
+                    "maxPriorityFeePerGas": max_priority_fee_per_gas,
+                }
+            )
+        else:
+            gas_price = (
+                self._try_get_gas_price(gas_price_strategy)
+                if gas_price is None
+                else gas_price
+            )
+            if gas_price is None:
+                return transaction  # pragma: nocover
+            transaction.update({"gasPrice": gas_price})
         return transaction
+
+    @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
+    def _try_get_gas_price(
+        self, gas_price_strategy: Optional[str] = None
+    ) -> Optional[int]:
+        """Try get the gas price based on the provided strategy."""
+        gas_price_strategy_callable = get_gas_price_strategy(
+            gas_price_strategy, self._gas_price_api_key
+        )
+        prior_strategy = self._api.eth.gasPriceStrategy
+        try:
+            self._api.eth.set_gas_price_strategy(gas_price_strategy_callable)
+            gas_price = self._api.eth.generate_gas_price()
+        finally:
+            if prior_strategy is not None:
+                self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
+        return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
@@ -742,9 +827,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         contract_interface: Dict[str, str],
         deployer_address: Address,
         value: int = 0,
-        max_fee_per_gas: int = 0,
         gas: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
         max_priority_fee_per_gas: Optional[str] = None,
+        gas_price: Optional[str] = None,
+        gas_price_strategy: Optional[str] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -756,6 +843,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param gas: the gas to be used (in Wei)
         :param max_fee_per_gas: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
         :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
+        :param gas_price: the gas price (in Wei)
+        :param gas_price_strategy: the gas price strategy to be used.
         :param kwargs: keyword arguments
         :return: the transaction dictionary.
         """
@@ -765,17 +854,33 @@ class EthereumApi(LedgerApi, EthereumHelper):
         if nonce is None:
             return transaction
         instance = self.get_contract_instance(contract_interface)
-        max_priority_fee_per_gas = (
-            self._try_get_max_priority_fee()
-            if max_priority_fee_per_gas is None
-            else max_priority_fee_per_gas
-        )
         transaction = {
             "value": value,
-            "maxFeePerGas": max_fee_per_gas,
-            "maxPriorityFeePerGas": max_priority_fee_per_gas,
             "nonce": nonce,
         }
+        if max_fee_per_gas is not None:
+            max_priority_fee_per_gas = (
+                self._try_get_max_priority_fee()
+                if max_priority_fee_per_gas is None
+                else max_priority_fee_per_gas
+            )
+            if max_priority_fee_per_gas is None:
+                return None  # pragma: nocover
+            transaction.update(
+                {
+                    "maxFeePerGas": max_fee_per_gas,
+                    "maxPriorityFeePerGas": max_priority_fee_per_gas,
+                }
+            )
+        else:
+            gas_price = (
+                self._try_get_gas_price(gas_price_strategy)
+                if gas_price is None
+                else gas_price
+            )
+            if gas_price is None:
+                return None  # pragma: nocover
+            transaction.update({"gasPrice": gas_price})
         transaction = instance.constructor(**kwargs).buildTransaction(transaction)
         if transaction is None:
             return None  # pragma: nocover
@@ -783,6 +888,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         transaction.update({"from": _deployer_address})
         if gas is not None:
             transaction.update({"gas": gas})
+        if self._is_gas_estimation_enabled:
+            transaction = self.update_with_gas_estimate(transaction)
         return transaction
 
     @try_decorator("Unable to retrieve max_priority_fee: {}", logger_method="warning")

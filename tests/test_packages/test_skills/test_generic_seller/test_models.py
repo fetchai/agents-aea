@@ -196,7 +196,9 @@ class TestGenericStrategy(BaseSkillTestCase):
         )
 
         # after
-        assert proposal == expected_proposal
+        proposal.values["tx_nonce"] = expected_proposal.values["tx_nonce"]
+        assert proposal.values == expected_proposal.values
+        terms._nonce = expected_terms._nonce
         assert terms == expected_terms
         assert data == self.data_for_sale
 

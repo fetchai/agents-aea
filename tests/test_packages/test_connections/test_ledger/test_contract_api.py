@@ -108,7 +108,7 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
     assert response_dialogue == contract_api_dialogue
     assert type(response_message.raw_transaction) == RawTransaction
     assert response_message.raw_transaction.ledger_id == EthereumCrypto.identifier
-    assert len(response.message.raw_transaction.body) == 6
+    assert len(response.message.raw_transaction.body) == 7
     assert len(response.message.raw_transaction.body["data"]) > 0
 
 

@@ -200,8 +200,8 @@ def test_construct_sign_and_submit_transfer_transaction(
 
     amount = 40000
     tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, account.address)
-    max_priority_fee_per_gas = 1000000000
-    max_fee_per_gas = 1000000000
+    max_priority_fee_per_gas = 1_000_000_000
+    max_fee_per_gas = 1_000_000_000
     transfer_transaction = ethereum_api.get_transfer_transaction(
         sender_address=account.address,
         destination_address=ec2.address,
