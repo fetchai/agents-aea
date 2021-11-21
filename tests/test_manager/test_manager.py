@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
 import asyncio
+import contextlib
 import logging
 import os
 import pickle  # nosec
@@ -82,10 +83,12 @@ class BaseTestMultiAgentManager(TestCase):
         """Tear down test case."""
         try:
             self.manager.stop_manager()
+
             for task in self.manager._agents_tasks.values():
                 if isinstance(task, AgentRunProcessTask):
                     task.process.terminate()
                     task.process.join(5)
+
             time.sleep(1)
             logging.shutdown(
                 [
@@ -306,11 +309,15 @@ class BaseTestMultiAgentManager(TestCase):
         self.test_add_agent()
 
         self.manager.start_all_agents()
+
         wait_for_condition(
             lambda: "Echo Behaviour: act method called."
             in open(self.log_file(self.agent_name), "r").read(),
             timeout=DEFAULT_TIMEOUT,
         )
+
+        with contextlib.suppress(Exception):
+            self.manager.stop_agent(self.agent_name)
 
     def test_exception_handling(self, *args):
         """Test error callback works."""

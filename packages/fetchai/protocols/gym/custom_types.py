@@ -41,7 +41,6 @@ class AnyObject:
 
         :param any_object_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param any_object_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         any_object_protobuf_object.any = pickle.dumps(any_object_object)  # nosec
 

@@ -44,11 +44,14 @@ from tests.conftest import (
     CUR_PATH,
     CliRunner,
     MAX_FLAKY_RERUNS,
+    MAX_FLAKY_RERUNS_ETH,
     ROOT_DIR,
 )
 
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_EXPECT_TIMEOUT = 40
 
 
 class BaseLaunchTestCase:
@@ -186,6 +189,7 @@ class TestLaunch(BaseLaunchTestCase):
     """Test that the command 'aea launch <agent_name>' works as expected."""
 
     @pytest.mark.skip  # wrong ledger_id
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
@@ -194,11 +198,11 @@ class TestLaunch(BaseLaunchTestCase):
                     f"[{self.agent_name_1}] Start processing messages...",
                     f"[{self.agent_name_2}] Start processing messages...",
                 ],
-                timeout=20,
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.control_c()
             process_launch.expect_all(
-                ["Exit cli. code: 0"], timeout=20,
+                ["Exit cli. code: 0"], timeout=DEFAULT_EXPECT_TIMEOUT,
             )
 
 
@@ -239,7 +243,7 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
                     "Expected exception!",
                     "Receiving loop terminated",  # cause race condition in close/interrupt agent 2, so wait it closed by exception before call ctrl+c
                 ],
-                timeout=20,
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.control_c()
             process_launch.expect_all(
@@ -247,10 +251,10 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
                     f"Agent {self.agent_name_1} terminated with exit code 0",
                     f"Agent {self.agent_name_2} terminated with exit code ",
                 ],
-                timeout=20,
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.expect(
-                EOF, timeout=20,
+                EOF, timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.wait_to_complete(10)
             assert process_launch.returncode == 1
@@ -301,11 +305,11 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
                     f"[{self.agent_name_1}] Start processing messages",
                     f"[{self.agent_name_2}] Start processing messages",
                 ],
-                timeout=30,
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.control_c()
             process_launch.expect_all(
-                ["Exit cli. code: 0"], timeout=30,
+                ["Exit cli. code: 0"], timeout=DEFAULT_EXPECT_TIMEOUT,
             )
 
 
@@ -317,11 +321,13 @@ class TestLaunchOneAgent(BaseLaunchTestCase):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch([self.agent_name_1]) as process_launch:
             process_launch.expect_all(
-                [f"[{self.agent_name_1}] Start processing messages..."], timeout=20
+                [f"[{self.agent_name_1}] Start processing messages..."],
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.control_c()
             process_launch.expect_all(
-                [f"Agent {self.agent_name_1} terminated with exit code 0"], timeout=20
+                [f"Agent {self.agent_name_1} terminated with exit code 0"],
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.wait_to_complete(10)
 

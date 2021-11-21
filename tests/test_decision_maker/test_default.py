@@ -51,6 +51,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
+    MAX_FLAKY_RERUNS,
     get_wealth_if_needed,
 )
 
@@ -144,6 +145,7 @@ class BaseTestDecisionMaker:
                 access_code="some_invalid_code"
             )
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
         fetchai_api = make_ledger_api(
