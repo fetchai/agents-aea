@@ -130,6 +130,8 @@ DUMMY_ENV = gym.GoalEnv
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
+DEFAULT_MAX_PRIORITY_FEE_PER_GAS = 1_000_000_000
+DEFAULT_MAX_FEE_PER_GAS = 1_000_000_000
 
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
@@ -918,11 +920,12 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api, deployer_address=crypto.address, gas=5000000
     )
-    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    gas = ledger_api.api.eth.estimate_gas(transaction=tx)
     tx["gas"] = gas
     tx_signed = crypto.sign_transaction(tx)
-    tx_receipt = ledger_api.send_signed_transaction(tx_signed)
-    receipt = ledger_api.get_transaction_receipt(tx_receipt)
+    tx_digest = ledger_api.send_signed_transaction(tx_signed)
+    time.sleep(0.5)
+    receipt = ledger_api.get_transaction_receipt(tx_digest)
     contract_address = cast(Dict, receipt)["contractAddress"]
     yield contract, contract_address
 
@@ -958,7 +961,7 @@ def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
         initialSupply=int(1e23),
         decimals_=18,
     )
-    gas = ledger_api.api.eth.estimateGas(transaction=tx)
+    gas = ledger_api.api.eth.estimate_gas(transaction=tx)
     tx["gas"] = gas
     tx_signed = account1.sign_transaction(tx)
     tx_receipt = ledger_api.send_signed_transaction(tx_signed)

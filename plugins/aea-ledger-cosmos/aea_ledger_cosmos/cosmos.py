@@ -27,7 +27,7 @@ import time
 from collections import namedtuple
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 from Crypto.Cipher import AES  # nosec
 from Crypto.Protocol.KDF import scrypt  # nosec
@@ -417,15 +417,23 @@ class CosmosCrypto(Crypto[SigningKey]):
     helper = CosmosHelper
 
     def __init__(
-        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+        self,
+        private_key_path: Optional[str] = None,
+        password: Optional[str] = None,
+        extra_entropy: Union[str, bytes, int] = "",
     ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
         :param password: the password to encrypt/decrypt the private key.
+        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
         """
-        super().__init__(private_key_path=private_key_path, password=password)
+        super().__init__(
+            private_key_path=private_key_path,
+            password=password,
+            extra_entropy=extra_entropy,
+        )
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = self.helper.get_address_from_public_key(self.public_key)
 
@@ -545,7 +553,9 @@ class CosmosCrypto(Crypto[SigningKey]):
         return {"tx": MessageToDict(tx), "sign_data": transaction["sign_data"]}
 
     @classmethod
-    def generate_private_key(cls) -> SigningKey:
+    def generate_private_key(  # pylint: disable=unused-argument
+        cls, extra_entropy: Union[str, bytes, int] = ""
+    ) -> SigningKey:
         """Generate a key pair for cosmos network."""
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key

@@ -294,6 +294,21 @@ class TestBaseSerializations:
         self.message.set(key, value)
         assert self.message.get(key) == value
 
+    def test_set_unset(self):
+        """Test that the set method works and is reversible."""
+        self.message._body = {}  # clean values
+        key, value = "content", "temporary_value"
+        assert self.message.get(key) is None
+        assert not self.message.is_set(key)
+        self.message.set(key, None)
+        assert self.message.get(key) is None
+        assert not self.message.is_set(key)
+        self.message.set(key, value)
+        assert self.message.get(key) == value
+        self.message.set(key, None)
+        assert self.message.get(key) is None
+        assert not self.message.is_set(key)
+
     def test_body_setter(self):
         """Test the body setter."""
         m_dict = {"content": "data"}

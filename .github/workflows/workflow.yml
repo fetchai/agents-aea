@@ -273,11 +273,6 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
-    - name: Setup GCloud - production
-      uses: google-github-actions/setup-gcloud@master
-      with:
-          project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
-          service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
     - name: Install dependencies (ubuntu-latest)
       run: |
         sudo apt-get update --fix-missing
@@ -288,12 +283,6 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
         unzip protoc-3.17.3-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
-    - name: Configure Docker
-      run: |
-        gcloud auth configure-docker 
-    - name: Sync AEA loop integration tests
-      run: |
-        tox -e py3.8 -- -m 'sync'  # --aea-loop sync
     - name: Async integration tests
       run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
 
@@ -313,20 +302,12 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.8
-      - name: Setup GCloud - production
-        uses: google-github-actions/setup-gcloud@master
-        with:
-            project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
-            service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker 
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
 
@@ -408,39 +389,6 @@ jobs:
       run: |
         tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
 
-  platform_checks_sync_aea_loop:
-    continue-on-error: True
-    needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
-    - dependencies_checks
-    - plugins_install_check
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: 3.8
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
-        unzip protoc-3.17.3-linux-x86_64.zip -d protoc
-        sudo mv protoc/bin/protoc /usr/local/bin/protoc
-        make protolint_install
-    - name: Unit tests with sync agent loop
-      run: |
-        tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
-
   golang_checks:
     continue-on-error: True
     needs:
@@ -464,10 +412,10 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
-    - if: matrix.python-version == '3.7'
-      name: Golang unit tests (aealite)
-      working-directory: ./libs/go/aealite
-      run: go test -p 1 -timeout 0 -count 1 -v ./...
+    # - if: matrix.python-version == '3.7'
+    #   name: Golang unit tests (aealite)
+    #   working-directory: ./libs/go/aealite
+    #   run: go test -p 1 -timeout 0 -count 1 -v ./...
 
   coverage_checks:
     continue-on-error: True
@@ -475,7 +423,6 @@ jobs:
     - integration_checks
     - integration_checks_ledger
     - platform_checks
-#    - platform_checks_sync_aea_loop
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

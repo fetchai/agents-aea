@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea generate_key' subcommand."""
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import click
 
@@ -50,6 +51,9 @@ from aea.crypto.registries import crypto_registry
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
 )
+@click.option(
+    "--extra-entropy", type=str, required=False, default="",
+)
 @click.pass_context
 def generate_key(
     click_context: click.core.Context,
@@ -58,9 +62,10 @@ def generate_key(
     password: Optional[str],
     add_key: bool = False,
     connection: bool = False,
+    extra_entropy: Union[str, bytes, int] = "",
 ) -> None:
     """Generate a private key and place it in a file."""
-    keys_generated = _generate_private_key(type_, file, password)
+    keys_generated = _generate_private_key(type_, file, password, extra_entropy)
     if add_key:
         _check_aea_project((click_context,))
         for key_type, key_filename in keys_generated.items():
@@ -70,7 +75,10 @@ def generate_key(
 
 
 def _generate_private_key(
-    type_: str, file: Optional[str] = None, password: Optional[str] = None
+    type_: str,
+    file: Optional[str] = None,
+    password: Optional[str] = None,
+    extra_entropy: Union[str, bytes, int] = "",
 ) -> Dict[str, str]:
     """
     Generate private key.
@@ -78,6 +86,7 @@ def _generate_private_key(
     :param type_: type.
     :param file: path to file.
     :param password: the password to encrypt/decrypt the private key.
+    :param extra_entropy: add extra randomness to whatever randomness your OS can provide
 
     :return: dict of types and filenames of keys generated
     """
@@ -90,7 +99,7 @@ def _generate_private_key(
             PRIVATE_KEY_PATH_SCHEMA.format(type__) if file is None else file
         )
         if _can_write(private_key_file):
-            create_private_key(type__, private_key_file, password)
+            create_private_key(type__, private_key_file, password, extra_entropy)
         keys[type__] = private_key_file
     return keys
 
