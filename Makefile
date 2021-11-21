@@ -99,6 +99,9 @@ test-sub-p:
 	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
+.PHONY: hashes
+hashes:
+	python scripts/generate_ipfs_hashes.py
 
 .PHONY: test-all
 test-all:

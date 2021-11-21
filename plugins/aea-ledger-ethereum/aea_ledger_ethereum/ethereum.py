@@ -884,7 +884,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         transaction = instance.constructor(**kwargs).buildTransaction(transaction)
         if transaction is None:
             return None  # pragma: nocover
-        transaction.pop("to")  # only 'from' address, don't insert 'to' address!
+        transaction.pop("to", None)  # only 'from' address, don't insert 'to' address!
         transaction.update({"from": _deployer_address})
         if gas is not None:
             transaction.update({"gas": gas})

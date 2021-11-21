@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,6 @@ import logging
 import os
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch
 
 import pytest
 import web3
@@ -151,16 +151,12 @@ def test_get_deploy_transaction_ethereum(
     ledger_api = ledger_apis_registry.make(
         EthereumCrypto.identifier, address=make_uri(ganache_addr, ganache_port)
     )
-    with patch(
-        "web3.contract.ContractConstructor.buildTransaction",
-        return_value={"data": "0xstub"},
-    ):
-        deploy_tx = dummy_contract.get_deploy_transaction(
-            ledger_api, aea_ledger_ethereum.address
-        )
-    assert deploy_tx is not None and len(deploy_tx) == 6
+    deploy_tx = dummy_contract.get_deploy_transaction(
+        ledger_api, aea_ledger_ethereum.address
+    )
+    assert deploy_tx is not None and len(deploy_tx) == 7
     assert all(
-        key in ["from", "value", "gas", "gasPrice", "nonce", "data"]
+        key in ["from", "value", "gas", "gasPrice", "nonce", "data", "chainId"]
         for key in deploy_tx.keys()
     )
 
