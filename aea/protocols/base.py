@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -212,13 +213,13 @@ class Message:
         :param key: the key.
         :param value: the value.
         """
+        if value is None and not hasattr(self._slots, key):
+            return
+        if value is None and hasattr(self._slots, key):
+            delattr(self._slots, key)
+            return
         try:
-            if value is None and not hasattr(self._slots, key):
-                return
-            elif value is None and hasattr(self._slots, key):
-                delattr(self._slots, key)
-            else:
-                setattr(self._slots, key, value)
+            setattr(self._slots, key, value)
         except AttributeError as e:  # pragma: nocover
             raise ValueError(f"Field `{key}` is not supported {e}")
 

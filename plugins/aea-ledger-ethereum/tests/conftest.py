@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -189,7 +190,7 @@ def ganache_configuration(ethereum_private_key_file):
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.fixture(scope="session")
-@action_for_platform("Linux", skip=False)
+# @action_for_platform("Linux", skip=False)
 def ganache(
     ganache_configuration,
     ganache_addr,
@@ -223,6 +224,7 @@ def _launch_image(
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
     if not success:
+        logger.warning(f"Logs: {container.logs()}")
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
