@@ -61,7 +61,7 @@ def update_plugin_setup(
     :param new_version: the new version.
     :return: True if an update has been done, False otherwise.
     """
-    setup_file = PLUGINS_DIR / plugin_name / "setup.py"
+    setup_file = PLUGINS_DIR / plugin_name.strip("open-") / "setup.py"
     content = setup_file.read_text()
     new_content = re.sub(
         rf"version=['\"]{old_version}['\"],", f'version="{new_version}",', content
