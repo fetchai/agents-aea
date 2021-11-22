@@ -30,10 +30,12 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "decision_maker"
+
 PACKAGES = [("protocol", "fetchai/signing")]
 
 
-@click.command(name="decision_maker")
+@click.command(name=CASE_NAME)
 @click.option(
     "--ledger_id",
     type=click.Choice(["ethereum", "cosmos", "fetchai"]),
@@ -42,7 +44,11 @@ PACKAGES = [("protocol", "fetchai/signing")]
     show_default=True,
 )
 @click.option(
-    "--number_of_tx", default=100, help="Number of transactions to sign.", show_default=True
+    "--number_of_tx",
+    default=100,
+    type=click.IntRange(1),
+    help="Number of transactions to sign.",
+    show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco
@@ -63,4 +69,4 @@ def main(
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
             return multi_run(int(number_of_runs), run, (ledger_id, amount_of_tx,),)
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

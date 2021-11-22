@@ -30,12 +30,17 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "proactive"
 PACKAGES = [("protocol", "fetchai/signing"), ("protocol", "fetchai/default")]
 
 
-@click.command(name="proactive")
+@click.command(name=CASE_NAME)
 @click.option(
-    "--duration", default=3, help="Run time in seconds.", show_default=True,
+    "--duration",
+    default=3,
+    type=click.IntRange(1,),
+    help="Run time in seconds.",
+    show_default=True,
 )
 @runtime_mode_deco
 @number_of_runs_deco
@@ -56,4 +61,4 @@ def main(
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
             return multi_run(int(number_of_runs), run, (duration, runtime_mode),)
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

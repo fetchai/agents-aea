@@ -30,12 +30,17 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "dialogues_mem_usage"
 PACKAGES = [("protocol", "fetchai/http")]
 
 
-@click.command(name="dialogues_mem_usage")
+@click.command(name=CASE_NAME)
 @click.option(
-    "--messages", default=1000, help="Run time in seconds.", show_default=True,
+    "--messages",
+    default=1000,
+    type=click.IntRange(1),
+    help="Run time in seconds.",
+    show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco
@@ -49,4 +54,4 @@ def main(messages: str, number_of_runs: int, output_format: str) -> Any:
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
             return multi_run(int(number_of_runs), run, (int(messages),),)
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

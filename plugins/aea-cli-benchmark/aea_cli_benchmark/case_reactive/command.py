@@ -30,12 +30,17 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "reactive"
 PACKAGES = [("protocol", "fetchai/signing"), ("protocol", "fetchai/default")]
 
 
-@click.command(name="reactive")
+@click.command(name=CASE_NAME)
 @click.option(
-    "--duration", default=1, help="Run time in seconds.", show_default=True,
+    "--duration",
+    default=1,
+    type=click.IntRange(1,),
+    help="Run time in seconds.",
+    show_default=True,
 )
 @runtime_mode_deco
 @click.option(
@@ -70,4 +75,4 @@ def main(
                 int(number_of_runs), run, (duration, runtime_mode, connection_mode),
             )
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

@@ -30,6 +30,8 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "tx_generate"
+
 PACKAGES = [
     ("protocol", "fetchai/signing"),
     ("protocol", "fetchai/default"),
@@ -39,7 +41,7 @@ PACKAGES = [
 ]
 
 
-@click.command(name="tx_generate")
+@click.command(name=CASE_NAME)
 @click.option(
     "--ledger_id",
     type=click.Choice(["ethereum", "fetchai"]),
@@ -50,9 +52,9 @@ PACKAGES = [
 @click.option(
     "--test-time",
     default=30,
+    type=click.IntRange(1,),
     help="Time to generate txs in seconds",
     show_default=True,
-    type=float,
 )
 @number_of_runs_deco
 @output_format_deco
@@ -76,4 +78,4 @@ def main(
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
             return multi_run(int(number_of_runs), run, (ledger_id, test_time,),)
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

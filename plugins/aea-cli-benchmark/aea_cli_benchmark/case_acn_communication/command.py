@@ -39,8 +39,10 @@ PACKAGES = [
     ("connection", "fetchai/p2p_libp2p_mailbox"),
 ]
 
+CASE_NAME = "acn_communicate"
 
-@click.command(name="acn_communicate")
+
+@click.command(name=CASE_NAME)
 @click.option(
     "--connection",
     default="p2pnode",
@@ -48,28 +50,19 @@ PACKAGES = [
     show_default=True,
     type=click.Choice(["p2pnode", "mailbox", "client"]),
 )
-@click.option(
-    "--connect-times",
-    default=10,
-    help="Number of times to perform connection.",
-    show_default=True,
-)
 @number_of_runs_deco
 @output_format_deco
-def main(
-    connection: str, connect_times: int, number_of_runs: int, output_format: str
-) -> Any:
+def main(connection: str, number_of_runs: int, output_format: str) -> Any:
     """Measure Agent Communication Network (ACN)'s latency."""
     with with_packages(PACKAGES):
         from aea_cli_benchmark.case_acn_communication.case import run
 
         parameters = {
             "Connection": connection,
-            "Number of connects": connect_times,
             "Number of runs": number_of_runs,
         }
 
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-            return multi_run(int(number_of_runs), run, (connection, connect_times,),)
+            return multi_run(int(number_of_runs), run, (connection,),)
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

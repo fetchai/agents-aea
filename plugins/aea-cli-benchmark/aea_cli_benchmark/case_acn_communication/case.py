@@ -150,7 +150,7 @@ async def _run(con_maker: Callable[..., Connection]) -> Tuple[float, float]:
             await con.disconnect()
 
 
-def run(connection: str, run_times: int = 10) -> List[Tuple[str, Union[int, float]]]:
+def run(connection: str) -> List[Tuple[str, Union[int, float]]]:
     """Check construction time and memory usage."""
     logging.basicConfig(level=logging.CRITICAL)
     cwd = os.getcwd()

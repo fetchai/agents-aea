@@ -30,6 +30,7 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "multiagent_http_dialogues"
 PACKAGES = [
     ("protocol", "fetchai/signing"),
     ("protocol", "fetchai/default"),
@@ -39,9 +40,13 @@ PACKAGES = [
 ]
 
 
-@click.command(name="multiagent_http_dialogues")
+@click.command(name=CASE_NAME)
 @click.option(
-    "--duration", default=1, help="Run time in seconds.", show_default=True,
+    "--duration",
+    default=1,
+    type=click.IntRange(1,),
+    help="Run time in seconds.",
+    show_default=True,
 )
 @runtime_mode_deco
 @click.option(
@@ -54,11 +59,16 @@ PACKAGES = [
 @click.option(
     "--start_messages",
     default=100,
+    type=click.IntRange(1,),
     help="Amount of messages to prepopulate.",
     show_default=True,
 )
 @click.option(
-    "--num_of_agents", default=2, help="Amount of agents to run.", show_default=True,
+    "--num_of_agents",
+    type=click.IntRange(2,),
+    default=2,
+    help="Amount of agents to run.",
+    show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco
@@ -91,4 +101,4 @@ def main(
                 (duration, runtime_mode, runner_mode, start_messages, num_of_agents),
             )
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

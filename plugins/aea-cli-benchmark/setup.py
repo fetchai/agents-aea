@@ -33,7 +33,7 @@ setup(
         where=".", include=["aea_cli_benchmark", "aea_cli_benchmark.*"]
     ),
     entry_points={"aea.cli": ["benchmark = aea_cli_benchmark.core:benchmark"]},
-    install_requires=["aea>=1.0.0, <2.0.0", "psutil==5.7.0"],
+    install_requires=["aea>=1.0.0, <2.0.0", "psutil==5.7.0", "py-cpuinfo==8.0.0"],
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",

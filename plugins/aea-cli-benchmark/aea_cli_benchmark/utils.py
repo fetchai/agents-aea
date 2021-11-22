@@ -32,6 +32,8 @@ from unittest.mock import MagicMock
 
 import click
 import psutil  # type: ignore
+from click.core import Group
+from click.formatting import HelpFormatter
 
 from aea.aea import AEA
 from aea.cli.registry.add import fetch_package
@@ -58,6 +60,7 @@ ERROR_SKILL_NAME = "error"
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
 PACKAGES_DIR = Path(".", PACKAGES)
 
+RUNTIME_MODE_CHOICES = ["async", "threaded"]
 
 output_format_deco = click.option(
     "--output_format",
@@ -67,11 +70,15 @@ output_format_deco = click.option(
     show_default=True,
 )
 number_of_runs_deco = click.option(
-    "--number_of_runs", default=2, help="Number of times to run the case.", show_default=True
+    "--number_of_runs",
+    type=click.IntRange(2),
+    default=2,
+    help="Number of times to run the case.",
+    show_default=True,
 )
 runtime_mode_deco = click.option(
     "--runtime_mode",
-    type=click.Choice(["async", "threaded"]),
+    type=click.Choice(RUNTIME_MODE_CHOICES),
     default="async",
     help="Runtime mode: async or threaded.",
     show_default=True,
@@ -300,23 +307,72 @@ def multi_run(
     )
 
 
+class TextResultPrinter:
+    """Results text printer to console."""
+
+    def __init__(
+        self,
+        case_name: str,
+        options: Dict,
+        result_fn: Callable[..., List[Tuple[str, Any, Any, Any]]],
+    ):
+        """
+        Init the printer
+
+        :param case_name: str. name of the case
+        :param options: dict of parameters of test run
+        :param result_fn: callable, to call actual test run to get results
+        """
+        self.options = options
+        self.result_fn = result_fn
+        self.case_name = case_name
+
+    def print_header(self):
+        """Print header."""
+        click.echo(f"Start benchmark case {self.case_name} run with options:")
+
+    def print_options(self):
+        """Print options."""
+        for name, value in self.options.items():
+            click.echo(f"* {name}: {value}")
+
+    def run(self):
+        """Run results printing."""
+        self.print_header()
+        self.print_options()
+        self.print_results()
+        self.print_footer()
+
+    def print_footer(self):
+        """Print footer."""
+        click.echo("Benchmark run finished.")
+
+    def print_results(self):
+        """Run case and print results."""
+        click.echo("\nResults:")
+        for msg, *values_set in self.result_fn():
+            mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
+            click.echo(
+                f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} "
+            )
+
+
+RESULT_PRINTERS = {"text": TextResultPrinter}
+
+
 def print_results(
     output_format: str,
+    case_name: str,
     parameters: Dict,
     result_fn: Callable[..., List[Tuple[str, Any, Any, Any]]],
 ) -> Any:
     """Print result for multi_run response."""
-    if output_format != "text":
-        raise ValueError(f"Bad output format {output_format}")
+    if output_format not in RESULT_PRINTERS:
+        raise ValueError(f"Unsupported output format {output_format}")
 
-    click.echo("Start benchmark run with options:")
-    for name, value in parameters.items():
-        click.echo(f"* {name}: {value}")
-    click.echo("\nResults:")
-    for msg, *values_set in result_fn():
-        mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
-        click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
-    click.echo("Benchmark run finished.")
+    printer_cls = RESULT_PRINTERS[output_format]
+    printer = printer_cls(case_name, parameters, result_fn)
+    printer.run()
 
 
 def _make_init_py(path: str) -> None:
@@ -357,3 +413,61 @@ def with_packages(packages: List[Tuple[str, str]]):
         for k in list(sys.modules.keys()):
             if k.startswith("packages"):
                 sys.modules.pop(k)
+
+
+class CommandSections(Group):
+    """Click group to store several commands groups to make help with commands sections."""
+
+    def list_commands(self, ctx: click.Context) -> List[str]:
+        """List all commands for all groups."""
+        commands = []
+        for subcommand in super().list_commands(ctx):
+            cmd = super().get_command(ctx, subcommand)
+            commands.extend(list(sorted(cmd.list_commands(ctx))))
+        return commands
+
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.core.Command:
+        """Get command."""
+        for subcommand in super().list_commands(ctx):
+            cmd = super().get_command(ctx, subcommand).get_command(ctx, cmd_name)
+            if cmd:
+                return cmd
+
+    def format_commands(self, ctx: click.Context, formatter: HelpFormatter) -> None:
+        """Extra format methods for multi methods that adds all the commands after the options."""
+
+        for subcommand in super().list_commands(ctx):
+            cmd = super().get_command(ctx, subcommand)
+            self._format_commands(cmd, ctx, formatter)
+
+    def _format_commands(
+        self, group: click.Command, ctx: click.Context, formatter: HelpFormatter
+    ) -> None:
+        """Extra format methods for multi methods that adds all the commands for group."""
+        commands = []
+        for subcommand in group.list_commands(ctx):
+            cmd = group.get_command(ctx, subcommand)
+            # What is this, the tool lied about a command.  Ignore it
+            if cmd is None:
+                continue
+            if cmd.hidden:
+                continue
+
+            commands.append((subcommand, cmd))
+
+        # allow for 3 times the default spacing
+        if len(commands):
+            limit = formatter.width - 6 - max(len(cmd[0]) for cmd in commands)
+
+            rows = []
+            for subcommand, cmd in commands:
+                help = cmd.get_short_help_str(limit)
+                rows.append((subcommand, help))
+
+            if rows:
+                with formatter.section(self._make_commands_header(group)):
+                    formatter.write_dl(rows)
+
+    def _make_commands_header(self, group: click.core.Command) -> str:
+        """Make a command sections name for group."""
+        return f"Commands {group.name.lower()}"

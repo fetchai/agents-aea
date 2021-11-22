@@ -30,12 +30,18 @@ from aea_cli_benchmark.utils import (
 )
 
 
+CASE_NAME = "messages_mem_usage"
+
 PACKAGES = [("protocol", "fetchai/default")]
 
 
-@click.command(name="messages_mem_usage")
+@click.command(name=CASE_NAME)
 @click.option(
-    "--messages", default=10 ** 6, help="Amount of messages.", show_default=True,
+    "--messages",
+    default=10 ** 6,
+    type=click.IntRange(1,),
+    help="Amount of messages.",
+    show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco
@@ -49,7 +55,7 @@ def main(messages: int, number_of_runs: int, output_format: str) -> Any:
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
             return multi_run(int(number_of_runs), run, (int(messages),),)
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)
 
 
 if __name__ == "__main__":

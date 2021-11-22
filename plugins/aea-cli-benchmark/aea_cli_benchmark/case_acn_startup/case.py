@@ -22,7 +22,6 @@ import asyncio
 import logging
 import os
 import time
-from statistics import mean
 from tempfile import TemporaryDirectory
 from typing import Callable, List, Tuple, Union
 
@@ -35,65 +34,59 @@ from aea_cli_benchmark.case_acn_startup.utils import (
 from aea.connections.base import Connection
 
 
-async def _multi_run_connect(con_maker: Callable[..., Connection], times: int) -> float:
-    timings = []
+async def _run_connect(con_maker: Callable[..., Connection]) -> float:
     logging.basicConfig(level=logging.CRITICAL)
-    for _ in range(times):
-        con = con_maker()
-        start_time = time.time()
-        await con.connect()
-        assert con.is_connected
-        timings.append(time.time() - start_time)
-        await con.disconnect()
-    return mean(timings)
+    con = con_maker()
+    start_time = time.time()
+    await con.connect()
+    assert con.is_connected
+    connect_time = time.time() - start_time
+    await con.disconnect()
+    return connect_time
 
 
-async def _run_libp2p_node(times: int) -> float:
-    return await _multi_run_connect(
-        con_maker=lambda: _make_libp2p_connection("."), times=times
-    )
+async def _run_libp2p_node() -> float:
+    return await _run_connect(con_maker=lambda: _make_libp2p_connection("."))
 
 
-async def _run_p2p_client(times: int) -> float:
+async def _run_p2p_client() -> float:
     node_con = _make_libp2p_connection(".", delegate=True)
     await node_con.connect()
     try:
-        return await _multi_run_connect(
+        return await _run_connect(
             con_maker=lambda: _make_libp2p_client_connection(
                 peer_public_key=node_con.node.pub, data_dir="."
             ),
-            times=times,
         )
     finally:
         await node_con.disconnect()
 
 
-async def _run_p2p_mailbox(times: int) -> float:
+async def _run_p2p_mailbox() -> float:
     node_con = _make_libp2p_connection(".", mailbox=True)
     await node_con.connect()
     try:
-        return await _multi_run_connect(
+        return await _run_connect(
             con_maker=lambda: _make_libp2p_mailbox_connection(
                 peer_public_key=node_con.node.pub, data_dir="."
             ),
-            times=times,
         )
     finally:
         await node_con.disconnect()
 
 
-def run(connection: str, run_times: int = 10) -> List[Tuple[str, Union[int, float]]]:
+def run(connection: str) -> List[Tuple[str, Union[int, float]]]:
     """Check construction time and memory usage."""
     cwd = os.getcwd()
     try:
         with TemporaryDirectory() as tmp_dir:
             os.chdir(tmp_dir)
             if connection == "p2pnode":
-                coro = _run_libp2p_node(run_times)
+                coro = _run_libp2p_node()
             elif connection == "client":
-                coro = _run_p2p_client(run_times)
+                coro = _run_p2p_client()
             elif connection == "mailbox":
-                coro = _run_p2p_mailbox(run_times)
+                coro = _run_p2p_mailbox()
             else:
                 raise ValueError(f"Unsupported connection: {connection}")
 

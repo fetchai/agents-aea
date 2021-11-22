@@ -21,7 +21,6 @@
 import os
 import time
 from pathlib import Path
-from statistics import mean
 from tempfile import TemporaryDirectory
 from typing import List, Tuple, Union
 
@@ -31,12 +30,10 @@ from click.testing import CliRunner
 from aea.aea_builder import AEABuilder
 
 
-def run(agents: int) -> List[Tuple[str, Union[int, float]]]:
+def run() -> List[Tuple[str, Union[int, float]]]:
     """Check construction time and memory usage."""
     from aea.cli.core import cli
 
-    load_times = []
-    full_times = []
     with TemporaryDirectory() as tmp_dir:
         os.chdir(tmp_dir)
         if (
@@ -68,17 +65,17 @@ def run(agents: int) -> List[Tuple[str, Union[int, float]]]:
             raise Exception("add-key failed")
         agents_list = []
         env_mem_usage = get_mem_usage_in_mb()
-        for _ in range(agents):
-            start_time = time.time()
-            builder = AEABuilder.from_aea_project(agent_dir)
-            load_times.append(time.time() - start_time)
-            agents_list.append(builder.build())
-            full_times.append(time.time() - start_time)
+        start_time = time.time()
+        builder = AEABuilder.from_aea_project(agent_dir)
+        load_time = time.time() - start_time
+        agents_list.append(builder.build())
+        full_time = time.time() - start_time
+        build_time = time.time() - load_time
         mem_usage = get_mem_usage_in_mb()
 
     return [
-        ("Average configuration load time", mean(load_times)),
-        ("Average full construction", mean(full_times)),
-        ("Average build time", mean(full_times) - mean(load_times)),
+        ("Average configuration load time", agents_list),
+        ("Average full construction", full_time),
+        ("Average build time", build_time),
         ("Agent memory usage (Mb)", mem_usage - env_mem_usage),
     ]

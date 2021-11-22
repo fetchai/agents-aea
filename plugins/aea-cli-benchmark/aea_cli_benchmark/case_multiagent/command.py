@@ -21,14 +21,17 @@ from typing import Any, List, Tuple
 
 import click
 from aea_cli_benchmark.utils import (
+    RUNTIME_MODE_CHOICES,
     multi_run,
     number_of_runs_deco,
     output_format_deco,
     print_results,
+    runtime_mode_deco,
     with_packages,
 )
 
 
+CASE_NAME = "multiagent_message_exchange"
 PACKAGES = [
     ("protocol", "fetchai/signing"),
     ("protocol", "fetchai/default"),
@@ -38,16 +41,29 @@ PACKAGES = [
 ]
 
 
-@click.command(name="multiagent_message_exchange")
-@click.option("--duration", default=1, help="Run time in seconds.")
+@click.command(name=CASE_NAME)
 @click.option(
-    "--runtime_mode", default="async", help="Runtime mode: async or threaded."
+    "--duration", default=1, type=click.IntRange(1,), help="Run time in seconds."
 )
-@click.option("--runner_mode", default="async", help="Runtime mode: async or threaded.")
+@runtime_mode_deco
 @click.option(
-    "--start_messages", default=100, help="Amount of messages to prepopulate."
+    "--runner_mode",
+    default="async",
+    type=click.Choice(RUNTIME_MODE_CHOICES),
+    help="Runtime mode: async or threaded.",
 )
-@click.option("--num_of_agents", default=2, help="Amount of agents to run.")
+@click.option(
+    "--start_messages",
+    default=100,
+    type=click.IntRange(1,),
+    help="Amount of messages to prepopulate.",
+)
+@click.option(
+    "--num_of_agents",
+    type=click.IntRange(2,),
+    default=2,
+    help="Amount of agents to run.",
+)
 @number_of_runs_deco
 @output_format_deco
 def main(
@@ -79,4 +95,4 @@ def main(
                 (duration, runtime_mode, runner_mode, start_messages, num_of_agents),
             )
 
-        return print_results(output_format, parameters, result_fn)
+        return print_results(output_format, CASE_NAME, parameters, result_fn)

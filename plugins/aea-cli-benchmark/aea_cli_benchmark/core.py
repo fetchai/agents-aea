@@ -46,36 +46,53 @@ from aea_cli_benchmark.case_multiagent_http_dialogues.command import (
 from aea_cli_benchmark.case_proactive.command import main as case_proactive
 from aea_cli_benchmark.case_reactive.command import main as case_reactive
 from aea_cli_benchmark.case_tx_generate.command import main as case_tx_generate
+from aea_cli_benchmark.utils import CommandSections
 
 from aea.helpers.yaml_utils import yaml_dump_all, yaml_load_all
 
 
-@click.group()
+@click.command(cls=CommandSections, name="benchmark", subcommand_metavar="[Command]")
 @click.pass_context
 def benchmark(click_context: click.Context) -> None:  # pylint: disable=unused-argument
-    """Run one of performance benchmark."""
+    """Run benchmark command."""
 
 
-benchmark.add_command(case_agent_construction_time)
+@benchmark.group(name="Benchmark cases")
+@click.pass_context
+def benchmark_cases(
+    click_context: click.Context,
+) -> None:  # pylint: disable=unused-argument
+    """Group benchamrk cases."""
 
-benchmark.add_command(case_decision_maker)
 
-benchmark.add_command(case_dialogues_memory_usage)
+@benchmark.group(name="Benchmark management")
+@click.pass_context
+def benchmark_managements(
+    click_context: click.Context,
+) -> None:  # pylint: disable=unused-argument
+    """Group benchmark management commands."""
 
-benchmark.add_command(case_mem_usage)
 
-benchmark.add_command(case_messages_memory_usage)
+benchmark_cases.add_command(case_agent_construction_time)
 
-benchmark.add_command(case_multiagent_http_dialogues)
+benchmark_cases.add_command(case_decision_maker)
 
-benchmark.add_command(case_mulltiagent)
+benchmark_cases.add_command(case_dialogues_memory_usage)
 
-benchmark.add_command(case_proactive)
+benchmark_cases.add_command(case_mem_usage)
 
-benchmark.add_command(case_reactive)
-benchmark.add_command(case_tx_generate)
-benchmark.add_command(case_acn_startup)
-benchmark.add_command(case_acn_communication)
+benchmark_cases.add_command(case_messages_memory_usage)
+
+benchmark_cases.add_command(case_multiagent_http_dialogues)
+
+benchmark_cases.add_command(case_mulltiagent)
+
+benchmark_cases.add_command(case_proactive)
+
+benchmark_cases.add_command(case_reactive)
+benchmark_cases.add_command(case_tx_generate)
+benchmark_cases.add_command(case_acn_startup)
+benchmark_cases.add_command(case_acn_communication)
 
 INTERNAL_COMMANDS = ["make-config", "run"]
 
@@ -120,7 +137,8 @@ def _make_cases_from_dicts(case_definitions: List[Dict]) -> List[BenchmarkCase]:
 
 def _enlist_cases() -> Dict[str, BenchmarkCase]:
     cases = {}
-    for name, command in benchmark.commands.items():
+    for name in benchmark.list_commands(ctx=None,):
+        command = benchmark.get_command(ctx=None, cmd_name=name)
         if name in INTERNAL_COMMANDS:
             continue
         cases[name] = BenchmarkCase(
@@ -160,5 +178,5 @@ def make_config(file: Optional[str]):
         )
 
 
-benchmark.add_command(run)
-benchmark.add_command(make_config)
+benchmark_managements.add_command(run)
+benchmark_managements.add_command(make_config)
