@@ -22,7 +22,6 @@
 from collections import OrderedDict
 from typing import Any, Dict, cast
 
-from aea.crypto.helpers import try_generate_testnet_wealth
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -94,28 +93,6 @@ class TacSearchBehaviour(TickerBehaviour):
             address=address,
         )
         self.context.outbox.put_message(message=ledger_api_msg)
-
-    def _is_balance_empty(self):
-        timeout = 5
-        period = 0.1
-        # TODO: Add correct reference to balances flags instead self.context
-        while self.context.is_balance_received or timeout < 0:
-            time.sleep(period)  # TODO: replace with async
-        if not self.context.is_balance_received:
-            self.context.logger.error(f"Failed to receive balance within timeout ({timeout}s)")
-        return self.context.is_balance_empty
-
-    def _fund_wallet(self):
-        """Fund agent wallet if it is empty."""
-        self._put_msg_get_balance()
-
-        if not self._is_balance_empty():
-            return
-
-        game = cast(Game, self.context.game)
-        if self._is_balance_empty():
-            # TODO: replace with creating a message
-            try_generate_testnet_wealth(game.ledger_id, self.context.agent_address)
 
 
 class TransactionProcessBehaviour(TickerBehaviour):

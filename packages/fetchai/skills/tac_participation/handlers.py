@@ -23,6 +23,7 @@ from typing import Dict, Optional, Tuple, cast
 
 from aea.common import Address
 from aea.configurations.base import PublicId
+from aea.crypto.helpers import try_generate_testnet_wealth
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -464,10 +465,12 @@ class LedgerApiHandler(Handler):
                 ledger_api_msg.ledger_id, ledger_api_msg.balance,
             )
         )
-        # TODO: add setting up flags: is_balance_empty and is_balance_received
-        game = cast(Game, self.context.game)
-        game.is_balance_received = True
         self.context.logger.warning(f"BALANCE: {ledger_api_msg.balance}")
+
+        if ledger_api_msg.balance == 0:
+            game = cast(Game, self.context.game)
+            # TODO: replace with message sending
+            try_generate_testnet_wealth(game.ledger_id, self.context.agent_address)
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
