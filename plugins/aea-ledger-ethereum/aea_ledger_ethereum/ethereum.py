@@ -18,12 +18,14 @@
 #
 # ------------------------------------------------------------------------------
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+import decimal
 import json
 import logging
+import math
 import threading
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 from uuid import uuid4
 
 import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
@@ -35,6 +37,7 @@ from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_account.signers.local import LocalAccount
 from eth_keys import keys
 from eth_typing import HexStr
+from eth_utils.currency import from_wei, to_wei
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
@@ -60,6 +63,141 @@ DEFAULT_CURRENCY_DENOM = "wei"
 ETH_GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 _ABI = "abi"
 _BYTECODE = "bytecode"
+
+MAX_GAS_FAST = 1500
+
+# How many blocks to consider for priority fee estimation
+FEE_HISTORY_BLOCKS = 10
+
+# Which percentile of effective priority fees to include
+FEE_HISTORY_PERCENTILE = 5
+
+# Which base fee to trigger priority fee estimation at (GWEI)
+PRIORITY_FEE_ESTIMATION_TRIGGER = 100
+
+# Returned if above trigger is not met (GWEI)
+DEFAULT_PRIORITY_FEE = 3
+
+# In case something goes wrong fall back to this estimate
+FALLBACK_ESTIMATE = {
+    "maxFeePerGas": 20,  # GWEI
+    "maxPriorityFeePerGas": DEFAULT_PRIORITY_FEE,  # GWEI
+    "baseFee": None
+}
+
+PRIORITY_FEE_INCREASE_BOUNDARY = 200
+
+
+def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
+    """Covert WEI to GWEI"""
+    return from_wei(cast(int, number), unit="gwei")
+
+
+def round_to_whole_gwei(number: Type[int]) -> Wei:
+    """Round WEI to equivalent GWEI"""
+    gwei = wei_to_gwei(number)
+    rounded = math.ceil(gwei)
+    return to_wei(rounded, "gwei")
+
+
+def get_base_fee_multiplier(base_fee_gwei: int) -> float:
+    """Returns multiplier value."""
+
+    if base_fee_gwei <= 40:
+        return 2.0
+    elif base_fee_gwei <= 100:
+        return 1.6
+    elif base_fee_gwei <= 200:
+        return 1.4
+    else:
+        return 1.2
+
+def estimate_priority_fee(
+    web3: Web3,
+    base_fee_gwei: int,
+    block_number: int
+) -> int:
+    """Estimate priority fee from base fee."""
+
+    if base_fee_gwei < PRIORITY_FEE_ESTIMATION_TRIGGER:
+        return DEFAULT_PRIORITY_FEE
+
+    fee_history = web3.eth.fee_history(
+        FEE_HISTORY_BLOCKS,
+        block_number,
+        [FEE_HISTORY_PERCENTILE]
+    )
+
+    rewards = sorted([reward for reward in fee_history["reward"] if reward > 0])
+    if not len(rewards):
+        return None
+    
+    # Calculate percentage increases from between ordered list of fees
+    percentage_increases = [((j - i) / i) * 100 for i,
+                            j in zip(rewards[:-1], rewards[1:])]
+    highest_increase = max(*percentage_increases)
+    highest_increase_index = percentage_increases.index(highest_increase)
+
+    values = rewards.copy()
+    # If we have big increase in value, we could be considering "outliers" in our estimate
+    # Skip the low elements and take a new median
+    if highest_increase > PRIORITY_FEE_INCREASE_BOUNDARY and highest_increase_index >= len(values) // 2:
+        values = values[highest_increase_index:]
+
+    return values[len(values) // 2]
+
+
+def get_gas_price_strategy_eip1559() -> Callable[[Web3, TxParams], Dict[str, Wei]]:
+    """Get the gas price strategy."""
+
+    def gas_station_gas_price_strategy_eip1559(  # pylint: disable=redefined-outer-name,unused-argument
+        web3: Web3, transaction_params: TxParams
+    ) -> Dict[str, Wei]:
+        """
+        Get gas price from Eth Gas Station api.
+
+        Visit `https://docs.ethgasstation.info/gas-price` for documentation.
+        :param web3: web3 instance
+        :param transaction_params: transaction parameters
+        :return: dictionary containing gas price strategy
+        """
+
+        latest_block = web3.eth.get_block("latest")
+        base_fee = latest_block.get("baseFeePerGas")
+        block_number = latest_block.get("number")
+        base_fee_gwei = wei_to_gwei(base_fee)
+
+        estimated_priority_fee = estimate_priority_fee(
+            web3,
+            base_fee_gwei,
+            block_number
+        )
+
+        if estimated_priority_fee is None:
+            _default_logger.warning(
+                "An error occurred while estimating priority fee, falling back")
+            return FALLBACK_ESTIMATE
+
+        max_priority_fee_per_gas = max(estimated_priority_fee, DEFAULT_PRIORITY_FEE)
+        multiplier = get_base_fee_multiplier(base_fee_gwei)
+
+        potential_max_fee = base_fee * multiplier
+        max_fee_per_gas = (
+            (potential_max_fee + max_priority_fee_per_gas)
+            if max_priority_fee_per_gas > potential_max_fee
+            else potential_max_fee
+        )
+
+        if wei_to_gwei(max_fee_per_gas) >= MAX_GAS_FAST or wei_to_gwei(max_priority_fee_per_gas) >= MAX_GAS_FAST:
+            return FALLBACK_ESTIMATE
+
+        return {
+            "max_fee_per_gas": max_fee_per_gas,
+            "max_priority_fee_per_gas": max_priority_fee_per_gas,
+            "base_fee": base_fee
+        }
+
+    return gas_station_gas_price_strategy_eip1559
 
 
 def get_gas_price_strategy(
