@@ -112,6 +112,7 @@ def get_base_fee_multiplier(base_fee_gwei: int) -> float:
     else:
         return 1.2
 
+
 def estimate_priority_fee(
     web3: Web3,
     base_fee_gwei: int,
@@ -131,7 +132,7 @@ def estimate_priority_fee(
     rewards = sorted([reward for reward in fee_history["reward"] if reward > 0])
     if not len(rewards):
         return None
-    
+
     # Calculate percentage increases from between ordered list of fees
     percentage_increases = [((j - i) / i) * 100 for i,
                             j in zip(rewards[:-1], rewards[1:])]
@@ -192,8 +193,8 @@ def get_gas_price_strategy_eip1559() -> Callable[[Web3, TxParams], Dict[str, Wei
             return FALLBACK_ESTIMATE
 
         return {
-            "max_fee_per_gas": max_fee_per_gas,
-            "max_priority_fee_per_gas": max_priority_fee_per_gas,
+            "max_fee_per_gas": round_to_whole_gwei(max_fee_per_gas),
+            "max_priority_fee_per_gas": round_to_whole_gwei(max_priority_fee_per_gas),
             "base_fee": base_fee
         }
 
