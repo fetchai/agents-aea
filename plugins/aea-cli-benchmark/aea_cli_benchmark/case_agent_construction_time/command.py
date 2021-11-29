@@ -18,10 +18,10 @@
 #
 # ------------------------------------------------------------------------------
 """Check amount of time and mem for agent setup."""
-
 from typing import Any, List, Tuple
 
 import click
+from aea_cli_benchmark.case_agent_construction_time.readme import README
 from aea_cli_benchmark.utils import (
     multi_run,
     number_of_runs_deco,
@@ -33,7 +33,7 @@ from aea_cli_benchmark.utils import (
 CASE_NAME = "agent_construction_time"
 
 
-@click.command(name=CASE_NAME)
+@click.command(name=CASE_NAME, help=README)
 @number_of_runs_deco
 @output_format_deco
 def main(number_of_runs: int, output_format: str) -> Any:

@@ -22,6 +22,7 @@
 from typing import Any, List, Tuple
 
 import click
+from aea_cli_benchmark.case_acn_communication.readme import README
 from aea_cli_benchmark.utils import (
     multi_run,
     number_of_runs_deco,
@@ -42,7 +43,7 @@ PACKAGES = [
 CASE_NAME = "acn_communicate"
 
 
-@click.command(name=CASE_NAME)
+@click.command(name=CASE_NAME, help=README)
 @click.option(
     "--connection",
     default="p2pnode",

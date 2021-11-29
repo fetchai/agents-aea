@@ -18,9 +18,11 @@
 # ------------------------------------------------------------------------------
 """Performance checks utils."""
 import asyncio
+import datetime
 import inspect
 import multiprocessing
 import os
+import platform
 import sys
 import time
 from contextlib import contextmanager
@@ -34,6 +36,7 @@ import click
 import psutil  # type: ignore
 from click.core import Group
 from click.formatting import HelpFormatter
+from cpuinfo import get_cpu_info
 
 from aea.aea import AEA
 from aea.cli.registry.add import fetch_package
@@ -329,6 +332,13 @@ class TextResultPrinter:
 
     def print_header(self):
         """Print header."""
+        click.echo("AEA Benchmark plugin")
+        click.echo(f"Date/time: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}")
+        click.echo(
+            f"Platform: {platform.system()}. Python version: {platform.python_version()}"
+        )
+        click.echo(f"CPU: {get_cpu_info()['brand_raw']}")
+        click.echo("")
         click.echo(f"Start benchmark case {self.case_name} run with options:")
 
     def print_options(self):

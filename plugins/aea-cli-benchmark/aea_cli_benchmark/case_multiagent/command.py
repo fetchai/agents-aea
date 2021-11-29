@@ -20,6 +20,7 @@
 from typing import Any, List, Tuple
 
 import click
+from aea_cli_benchmark.case_multiagent.readme import README
 from aea_cli_benchmark.utils import (
     RUNTIME_MODE_CHOICES,
     multi_run,
@@ -41,7 +42,7 @@ PACKAGES = [
 ]
 
 
-@click.command(name=CASE_NAME)
+@click.command(name=CASE_NAME, help=README)
 @click.option(
     "--duration", default=1, type=click.IntRange(1,), help="Run time in seconds."
 )

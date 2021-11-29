@@ -17,7 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Memory usage check."""
+"""Decision maker message sign check."""
 import time
 from pathlib import Path
 from tempfile import TemporaryDirectory

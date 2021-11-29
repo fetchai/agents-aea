@@ -21,6 +21,7 @@
 from typing import Any, List, Tuple
 
 import click
+from aea_cli_benchmark.case_tx_generate.readme import README
 from aea_cli_benchmark.utils import (
     multi_run,
     number_of_runs_deco,
@@ -41,7 +42,7 @@ PACKAGES = [
 ]
 
 
-@click.command(name=CASE_NAME)
+@click.command(name=CASE_NAME, help=README)
 @click.option(
     "--ledger_id",
     type=click.Choice(["ethereum", "fetchai"]),
