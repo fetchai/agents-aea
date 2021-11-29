@@ -6,7 +6,7 @@ description: Retrieve the latest block from the Fetch ledger
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmUzfZXCwZycuL9EtMiRkbfE3W2LzfrWJxur7cwEoDMK1o
+  README.md: QmTSH7GkNmRif1a7dZf5aTmBjkr2tVpu7bnBNMTVFKfg5Z
   __init__.py: QmXSXYE5iyRZ8xuc5FiJAJFX2wa4chz9PUMG8W5P5V1R8U
   behaviours.py: QmPJ3jtVrDyeWv64yiQiUcHCxpLMdoFVwXHKHD2bQcaTvZ
   dialogues.py: QmSdenuy6LGTPFJQUekEUAHRJoFpSYdbG1TQQb5TsK6kz2

@@ -6,7 +6,7 @@ This skill is used to get the latest block data from the Fetch ledger.
 
 ## Behaviours
 
-* `fetch_block_behaviour`: requests latest block data every `tick_interval` seconds from the REST endpoint `ledger_url` specified in the skill configuration.
+* `fetch_block_behaviour`: requests latest block data every `tick_interval` seconds from the REST endpoint for the FetchAI ledger.
 
 ## Handlers
 
