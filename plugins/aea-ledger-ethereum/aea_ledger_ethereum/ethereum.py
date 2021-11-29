@@ -80,12 +80,12 @@ DEFAULT_PRIORITY_FEE = 3
 
 # In case something goes wrong fall back to this estimate
 FALLBACK_ESTIMATE = {
-    "maxFeePerGas": 20,  # GWEI
-    "maxPriorityFeePerGas": DEFAULT_PRIORITY_FEE,  # GWEI
-    "baseFee": None
+    "max_fee_per_gas": to_wei(20,"gwei"),
+    "max_priority_fee_per_gas": to_wei(DEFAULT_PRIORITY_FEE, "gwei"),  # GWEI
+    "base_fee": None
 }
 
-PRIORITY_FEE_INCREASE_BOUNDARY = 200
+PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
 
 
 def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
@@ -116,17 +116,22 @@ def get_base_fee_multiplier(base_fee_gwei: int) -> float:
 def estimate_priority_fee(
     web3: Web3,
     base_fee_gwei: int,
-    block_number: int
+    block_number: int,
+    priority_fee_estimation_trigger: int,
+    default_priority_fee: int,
+    fee_history_blocks: int,
+    fee_history_percentile: int,
+    priority_fee_increase_boundary: int
 ) -> int:
     """Estimate priority fee from base fee."""
 
-    if base_fee_gwei < PRIORITY_FEE_ESTIMATION_TRIGGER:
-        return DEFAULT_PRIORITY_FEE
+    if base_fee_gwei < priority_fee_estimation_trigger:
+        return default_priority_fee
 
     fee_history = web3.eth.fee_history(
-        FEE_HISTORY_BLOCKS,
+        fee_history_blocks,
         block_number,
-        [FEE_HISTORY_PERCENTILE]
+        [fee_history_percentile]
     )
 
     rewards = sorted([reward for reward in fee_history["reward"] if reward > 0])
@@ -142,13 +147,21 @@ def estimate_priority_fee(
     values = rewards.copy()
     # If we have big increase in value, we could be considering "outliers" in our estimate
     # Skip the low elements and take a new median
-    if highest_increase > PRIORITY_FEE_INCREASE_BOUNDARY and highest_increase_index >= len(values) // 2:
+    if highest_increase > priority_fee_increase_boundary and highest_increase_index >= len(values) // 2:
         values = values[highest_increase_index:]
 
     return values[len(values) // 2]
 
 
-def get_gas_price_strategy_eip1559() -> Callable[[Web3, TxParams], Dict[str, Wei]]:
+def get_gas_price_strategy_eip1559(
+    max_gas_fast: int = MAX_GAS_FAST,
+    fee_history_blocks: int = FEE_HISTORY_BLOCKS,
+    fee_history_percentile: int = FEE_HISTORY_PERCENTILE,
+    priority_fee_estimation_trigger: int = PRIORITY_FEE_ESTIMATION_TRIGGER,
+    default_priority_fee: int = DEFAULT_PRIORITY_FEE,
+    fallback_estimate: Dict[str, Optional[int]] = FALLBACK_ESTIMATE,
+    priority_fee_increase_boundary: int = PRIORITY_FEE_INCREASE_BOUNDARY,
+) -> Callable[[Web3, TxParams], Dict[str, Wei]]:
     """Get the gas price strategy."""
 
     def gas_station_gas_price_strategy_eip1559(  # pylint: disable=redefined-outer-name,unused-argument
@@ -171,15 +184,20 @@ def get_gas_price_strategy_eip1559() -> Callable[[Web3, TxParams], Dict[str, Wei
         estimated_priority_fee = estimate_priority_fee(
             web3,
             base_fee_gwei,
-            block_number
+            block_number,
+            priority_fee_estimation_trigger=priority_fee_estimation_trigger,
+            default_priority_fee=default_priority_fee,
+            fee_history_blocks=fee_history_blocks,
+            fee_history_percentile=fee_history_percentile,
+            priority_fee_increase_boundary=priority_fee_increase_boundary,
         )
 
         if estimated_priority_fee is None:
             _default_logger.warning(
                 "An error occurred while estimating priority fee, falling back")
-            return FALLBACK_ESTIMATE
+            return fallback_estimate
 
-        max_priority_fee_per_gas = max(estimated_priority_fee, DEFAULT_PRIORITY_FEE)
+        max_priority_fee_per_gas = max(estimated_priority_fee, to_wei(default_priority_fee, "gwei"))
         multiplier = get_base_fee_multiplier(base_fee_gwei)
 
         potential_max_fee = base_fee * multiplier
@@ -189,8 +207,8 @@ def get_gas_price_strategy_eip1559() -> Callable[[Web3, TxParams], Dict[str, Wei
             else potential_max_fee
         )
 
-        if wei_to_gwei(max_fee_per_gas) >= MAX_GAS_FAST or wei_to_gwei(max_priority_fee_per_gas) >= MAX_GAS_FAST:
-            return FALLBACK_ESTIMATE
+        if wei_to_gwei(max_fee_per_gas) >= max_gas_fast or wei_to_gwei(max_priority_fee_per_gas) >= max_gas_fast:
+            return fallback_estimate
 
         return {
             "max_fee_per_gas": round_to_whole_gwei(max_fee_per_gas),
