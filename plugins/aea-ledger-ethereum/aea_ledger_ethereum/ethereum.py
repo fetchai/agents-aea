@@ -864,11 +864,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
             transaction.update({"gasPrice": gas_price})
 
         if gas_price is None and max_fee_per_gas is None:
-            gas_price = self._try_get_gas_price(
+            gas_pricing = self._try_get_gas_price(
                 gas_price_strategy, gas_price_strategy_extra_config)
-            if gas_price is None:
+            if gas_pricing is None:
                 return transaction  # pragma: nocover
-            transaction.update(gas_price)
+            transaction.update(gas_pricing)
 
         return transaction
 
@@ -1084,12 +1084,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
             transaction.update({"gasPrice": gas_price})
 
         if gas_price is None and max_fee_per_gas is None:
-            gas_price = self._try_get_gas_price(
+            gas_pricing = self._try_get_gas_price(
                 gas_price_strategy, gas_price_strategy_extra_config)
 
-            if gas_price is None:
+            if gas_pricing is None:
                 return None  # pragma: nocover
-            transaction.update(gas_price)
+            transaction.update(gas_pricing)
 
         transaction = instance.constructor(**kwargs).buildTransaction(transaction)
         if transaction is None:
