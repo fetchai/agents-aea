@@ -88,17 +88,20 @@ FALLBACK_ESTIMATE = {
 PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
 
 
-DEFAULT_GAS_PRICE_STRATEGY = {
-    "strategy": "eip1559",
-    "kwargs": {
-        "max_gas_fast": MAX_GAS_FAST,
-        "fee_history_blocks": FEE_HISTORY_BLOCKS,
-        "fee_history_percentile": FEE_HISTORY_PERCENTILE,
-        "priority_fee_estimation_trigger": PRIORITY_FEE_ESTIMATION_TRIGGER,
-        "default_priority_fee": DEFAULT_PRIORITY_FEE,
-        "fallback_estimate": FALLBACK_ESTIMATE,
-        "priority_fee_increase_boundary": PRIORITY_FEE_INCREASE_BOUNDARY,
-    }
+DEFAULT_EIP1559_STRATEGY = {
+    "max_gas_fast": MAX_GAS_FAST,
+    "fee_history_blocks": FEE_HISTORY_BLOCKS,
+    "fee_history_percentile": FEE_HISTORY_PERCENTILE,
+    "priority_fee_estimation_trigger": PRIORITY_FEE_ESTIMATION_TRIGGER,
+    "default_priority_fee": DEFAULT_PRIORITY_FEE,
+    "fallback_estimate": FALLBACK_ESTIMATE,
+    "priority_fee_increase_boundary": PRIORITY_FEE_INCREASE_BOUNDARY,
+}
+
+
+DEFAULT_GAS_STATION_STRATEGY = {
+    "gas_price_api_key": "",
+    "gas_price_strategy": "fast"
 }
 
 
@@ -235,7 +238,7 @@ def get_gas_price_strategy_eip1559(
 
 
 def get_gas_price_strategy(
-    gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None
+    gas_price_strategy: Optional[str] = None, gas_price_api_key: Optional[str] = None
 ) -> Callable[[Web3, TxParams], Wei]:
     """Get the gas price strategy."""
     supported_gas_price_modes = ["safeLow", "average", "fast", "fastest"]
@@ -251,7 +254,7 @@ def get_gas_price_strategy(
         )
         return rpc_gas_price_strategy
 
-    if api_key is None:
+    if gas_price_api_key is None:
         _default_logger.debug(
             "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
         )
@@ -268,7 +271,7 @@ def get_gas_price_strategy(
         :param transaction_params: transaction parameters
         :return: wei
         """
-        response = requests.get(f"{ETH_GASSTATION_URL}?api-key={api_key}")
+        response = requests.get(f"{ETH_GASSTATION_URL}?api-key={gas_price_api_key}")
         if response.status_code != 200:
             raise ValueError(  # pragma: nocover
                 f"Gas station API response: {response.status_code}, {response.text}"
@@ -720,12 +723,24 @@ class EthereumHelper(Helper):
         return contract_interface
 
 
+"""
+default_gas_price_strategy: eip1559
+gas_price_strategies:
+    eip1559:
+        max_gas_fast: ...
+        ....
+    gas_station:
+        gas_price_api_key: ...
+        ....
+"""
+
+
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
 
     identifier = _ETHEREUM
 
-    _gas_price_strategies: Dict[str, Callable] = {
+    _gas_price_strategy_callables: Dict[str, Callable] = {
         "gas_station": get_gas_price_strategy,
         "eip1559": get_gas_price_strategy_eip1559
     }
@@ -736,21 +751,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         :param kwargs: keyword arguments
         """
-        _default_logger.info(kwargs)
         self._api = Web3(
             HTTPProvider(endpoint_uri=kwargs.pop("address", DEFAULT_ADDRESS))
         )
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self._is_gas_estimation_enabled = kwargs.pop("is_gas_estimation_enabled", False)
 
-        gas_price_strategy = kwargs.pop("gas_price_strategy", None)
-        if gas_price_strategy is None:
-            gas_price_strategy = DEFAULT_GAS_PRICE_STRATEGY.copy()
-
-        self._gas_price_strategy = gas_price_strategy.pop("strategy")
-        self._gas_price_strategy_callable = self._gas_price_strategies.get(
-            self._gas_price_strategy)
-        self._gas_price_strategy_kwargs = gas_price_strategy.pop("kwargs")
+        self._default_gas_price_strategy = kwargs.pop(
+            "default_gas_price_strategy", "eip1559")
+        self._gas_price_strategies = kwargs.pop("gas_price_strategies")
 
     @property
     def api(self) -> Web3:
@@ -806,6 +815,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         max_priority_fee_per_gas: Optional[str] = None,
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
+        gas_price_strategy_extra_config: Dict = {},
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -855,7 +865,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
         else:
             gas_price = (
-                self._try_get_gas_price(gas_price_strategy)
+                self._try_get_gas_price(
+                    gas_price_strategy, gas_price_strategy_extra_config)
                 if gas_price is None
                 else gas_price
             )
@@ -865,14 +876,23 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return transaction
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
-    def _try_get_gas_price(self, kwargs: Dict) -> Optional[int]:
+    def _try_get_gas_price(
+        self,
+        gas_price_strategy: Optional[str] = None,
+        extra_config: Dict = {}
+    ) -> Optional[int]:
         """Try get the gas price based on the provided strategy."""
 
-        gas_price_strategy_kwargs = self._gas_price_strategy_kwargs.copy()
-        gas_price_strategy_kwargs.update(kwargs)
+        gas_price_strategy = gas_price_strategy or self._default_gas_price_strategy
+        gas_price_strategy_getter = self._gas_price_strategy_callables.get(
+            gas_price_strategy
+        )
+        kwargs = self._gas_price_strategies[gas_price_strategy].copy()
+        kwargs.update(extra_config)
+        gas_price_strategy_callable = gas_price_strategy_getter(
+            **kwargs
+        )
 
-        gas_price_strategy_callable = self._gas_price_strategy_callable(
-            **gas_price_strategy_kwargs)
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
             self._api.eth.set_gas_price_strategy(gas_price_strategy_callable)
@@ -1019,6 +1039,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         max_priority_fee_per_gas: Optional[str] = None,
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
+        gas_price_strategy_extra_config: Dict = {},
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -1061,7 +1082,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
         else:
             gas_price = (
-                self._try_get_gas_price(gas_price_strategy)
+                self._try_get_gas_price(
+                    gas_price_strategy, gas_price_strategy_extra_config)
                 if gas_price is None
                 else gas_price
             )

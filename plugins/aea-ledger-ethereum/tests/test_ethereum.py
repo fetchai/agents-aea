@@ -42,7 +42,7 @@ from aea_ledger_ethereum import (
     get_gas_price_strategy_eip1559,
     requests,
 )
-from aea_ledger_ethereum.ethereum import DEFAULT_GAS_PRICE_STRATEGY
+from aea_ledger_ethereum.ethereum import DEFAULT_EIP1559_STRATEGY, DEFAULT_GAS_STATION_STRATEGY
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
@@ -50,6 +50,16 @@ from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
+
+
+def get_default_gas_strategies() -> Dict:
+    return {
+        "default_gas_price_strategy": "eip1559",
+        "gas_price_strategies": {
+            "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+            "eip1559": DEFAULT_EIP1559_STRATEGY
+        }
+    }
 
 
 def get_history_data(
@@ -331,7 +341,7 @@ def test_ethereum_api_get_transfer_transaction(*args):
     """Test EthereumApi.get_transfer_transaction."""
     ec1 = EthereumCrypto()
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
     args = {
         "sender_address": ec1.address,
         "destination_address": ec2.address,
@@ -349,7 +359,7 @@ def test_ethereum_api_get_transfer_transaction_2(*args):
     """Test EthereumApi.get_transfer_transaction."""
     ec1 = EthereumCrypto()
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
     ethereum_api._is_gas_estimation_enabled = True
     args = {
         "sender_address": ec1.address,
@@ -368,7 +378,7 @@ def test_ethereum_api_get_transfer_transaction_3(*args):
     """Test EthereumApi.get_transfer_transaction."""
     ec1 = EthereumCrypto()
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
     ethereum_api._is_gas_estimation_enabled = True
     args = {
         "sender_address": ec1.address,
@@ -382,9 +392,9 @@ def test_ethereum_api_get_transfer_transaction_3(*args):
         assert len(ethereum_api.get_transfer_transaction(**args)) == 8
 
 
-def test_ethereum_api_get_deploy_transaction(*args):
+def test_ethereum_api_get_deploy_transaction(ethereum_testnet_config):
     """Test EthereumApi.get_deploy_transaction."""
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
     ec1 = EthereumCrypto()
     with patch.object(ethereum_api.api.eth, "get_transaction_count", return_value=None):
         assert (
@@ -414,7 +424,7 @@ def test_gas_price_strategy_eip1559() -> None:
     """Test eip1559 based gas price strategy."""
 
     callable_ = get_gas_price_strategy_eip1559(
-        **DEFAULT_GAS_PRICE_STRATEGY["kwargs"]
+        **DEFAULT_EIP1559_STRATEGY
     )
 
     web3 = Web3()
@@ -454,7 +464,7 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
     """Test eip1559 based gas price strategy."""
 
     callable_ = get_gas_price_strategy_eip1559(
-        **DEFAULT_GAS_PRICE_STRATEGY["kwargs"]
+        **DEFAULT_EIP1559_STRATEGY
     )
 
     web3 = Web3()
@@ -493,7 +503,7 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
 def test_gas_price_strategy_eip1559_fallback() -> None:
     """Test eip1559 based gas price strategy."""
 
-    strategy_kwargs = DEFAULT_GAS_PRICE_STRATEGY["kwargs"].copy()
+    strategy_kwargs = DEFAULT_EIP1559_STRATEGY.copy()
     strategy_kwargs["max_gas_fast"] = -1
 
     callable_ = get_gas_price_strategy_eip1559(**strategy_kwargs)
