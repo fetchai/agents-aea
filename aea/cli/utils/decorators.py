@@ -31,6 +31,7 @@ from jsonschema import ValidationError
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.configurations.base import (
+    AgentConfig,
     PackageType,
     PublicId,
     _check_aea_version,
@@ -118,11 +119,22 @@ def _check_aea_project(
     args: Tuple[Any, ...],
     check_aea_version: bool = True,
     check_finger_prints: bool = False,
+    is_local: bool = False
 ) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
-        try_to_load_agent_config(ctx)
+
+        if is_local:
+            ctx.agent_config = AgentConfig(
+                agent_name="agent",
+                author="valory",
+                default_ledger="stub"
+            )
+            ctx.agent_config.directory = ctx.cwd
+        else:
+            try_to_load_agent_config(ctx)
+
         skip_consistency_check = ctx.config["skip_consistency_check"]
         if not skip_consistency_check:
             _validate_config_consistency(ctx, check_aea_version=check_aea_version)
@@ -155,10 +167,12 @@ def check_aea_project(
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
+        is_local = kwargs.get("local_package")
         _check_aea_project(
             args,
             check_aea_version=check_aea_version,
             check_finger_prints=check_finger_prints,
+            is_local=is_local
         )
         return f(*args, **kwargs)
 

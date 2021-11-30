@@ -140,3 +140,5 @@ libs/go/libp2p_node/dht/dhtclient/agent_records_store*
 libs/go/libp2p_node/dht/dhtpeer/agent_records_store*
 !libs/go/aea_end2end/seller_agent
 coverage.txt
+
+temp/

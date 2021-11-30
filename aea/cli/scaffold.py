@@ -60,14 +60,20 @@ from aea.helpers.io import open_file
     is_flag=True,
     help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
 )
+@click.option(
+    "--local-package",
+    is_flag=True,
+    help="Scaffold skill outside a agent directory.",
+)
 @click.pass_context
 @check_aea_project
 def scaffold(
-    click_context: click.core.Context, with_symlinks: bool
+    click_context: click.core.Context, with_symlinks: bool, local_package: bool
 ) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
+    ctx.set_config("is_local", local_package)
 
 
 @scaffold.command()
@@ -123,7 +129,7 @@ def error_handler(ctx: Context) -> None:
 
 
 @clean_after
-def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
+def scaffold_item(ctx: Context, item_type: str, item_name: str, local: bool = False) -> None:
     """
     Add an item scaffolding to the configuration file and agent.
 
