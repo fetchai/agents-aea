@@ -80,9 +80,9 @@ DEFAULT_PRIORITY_FEE = 3
 
 # In case something goes wrong fall back to this estimate
 FALLBACK_ESTIMATE = {
-    "max_fee_per_gas": to_wei(20, "gwei"),
-    "max_priority_fee_per_gas": to_wei(DEFAULT_PRIORITY_FEE, "gwei"),  # GWEI
-    "base_fee": None
+    "maxFeePerGas": to_wei(20, "gwei"),
+    "maxPriorityFeePerGas": to_wei(DEFAULT_PRIORITY_FEE, "gwei"),  # GWEI
+    "baseFee": None
 }
 
 PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
