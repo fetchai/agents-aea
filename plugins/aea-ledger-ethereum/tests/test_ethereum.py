@@ -26,7 +26,7 @@ import random
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict
+from typing import Dict, cast
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -41,11 +41,14 @@ from aea_ledger_ethereum import (
     get_gas_price_strategy,
     get_gas_price_strategy_eip1559,
     requests,
+    rpc_gas_price_strategy_wrapper,
 )
-from aea_ledger_ethereum.ethereum import DEFAULT_EIP1559_STRATEGY, DEFAULT_GAS_STATION_STRATEGY
+from aea_ledger_ethereum.ethereum import (
+    DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_GAS_STATION_STRATEGY,
+)
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
-from web3.gas_strategies.rpc import rpc_gas_price_strategy
 
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
@@ -53,6 +56,7 @@ from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 def get_default_gas_strategies() -> Dict:
+    """Returns default gas price strategy."""
     return {
         "default_gas_price_strategy": "eip1559",
         "gas_price_strategies": {
@@ -451,7 +455,7 @@ def test_gas_price_strategy_eip1559() -> None:
 
     assert all([
         key in gas_stregy
-        for key in ['max_fee_per_gas', 'max_priority_fee_per_gas', 'base_fee']
+        for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
     ])
 
     assert all([
@@ -494,10 +498,10 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
 
     assert all([
         key in gas_stregy
-        for key in ['max_fee_per_gas', 'max_priority_fee_per_gas', 'base_fee']
+        for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
     ])
 
-    assert gas_stregy["base_fee"] is None
+    assert gas_stregy["baseFee"] is None
 
 
 def test_gas_price_strategy_eip1559_fallback() -> None:
@@ -534,10 +538,10 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
 
     assert all([
         key in gas_stregy
-        for key in ['max_fee_per_gas', 'max_priority_fee_per_gas', 'base_fee']
+        for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
     ])
 
-    assert gas_stregy["base_fee"] is None
+    assert gas_stregy["baseFee"] is None
 
 
 def test_gas_price_strategy_eth_gasstation():
@@ -554,7 +558,7 @@ def test_gas_price_strategy_eth_gasstation():
         ),
     ):
         result = callable_(Web3, "tx_params")
-    assert result == excepted_result / 10 * 1000000000
+    assert cast(int, result["gasPrice"]) == cast(int, excepted_result / 10 * 1000000000)
 
 
 def test_gas_price_strategy_not_supported(caplog):
@@ -562,7 +566,7 @@ def test_gas_price_strategy_not_supported(caplog):
     gas_price_strategy = "superfast"
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         callable_ = get_gas_price_strategy(gas_price_strategy, "api_key")
-    assert callable_ == rpc_gas_price_strategy
+    assert callable_ == rpc_gas_price_strategy_wrapper
     assert (
         f"Gas price strategy `{gas_price_strategy}` not in list of supported modes:"
         in caplog.text
@@ -574,7 +578,7 @@ def test_gas_price_strategy_no_api_key(caplog):
     gas_price_strategy = "fast"
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         callable_ = get_gas_price_strategy(gas_price_strategy, None)
-    assert callable_ == rpc_gas_price_strategy
+    assert callable_ == rpc_gas_price_strategy_wrapper
     assert (
         "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
         in caplog.text

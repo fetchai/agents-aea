@@ -108,5 +108,5 @@ def test_eip1559_strategy(ethereum_testnet_config, ganache):
     )
     assert all([
         key in tx
-        for key in ['gas', 'chainId', 'value', 'nonce', 'gasPrice', 'data', 'from']
+        for key in ['gas', 'gasPrice', 'chainId', 'value', 'nonce', 'maxFeePerGas', 'maxPriorityFeePerGas', 'baseFee', 'data', 'from']
     ])
