@@ -229,9 +229,9 @@ def get_gas_price_strategy_eip1559(
             return fallback_estimate
 
         return {
-            "max_fee_per_gas": round_to_whole_gwei(max_fee_per_gas),
-            "max_priority_fee_per_gas": round_to_whole_gwei(max_priority_fee_per_gas),
-            "base_fee": base_fee
+            "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
+            "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
+            "baseFee": base_fee
         }
 
     return eip1559_price_strategy
@@ -239,7 +239,7 @@ def get_gas_price_strategy_eip1559(
 
 def get_gas_price_strategy(
     gas_price_strategy: Optional[str] = None, gas_price_api_key: Optional[str] = None
-) -> Callable[[Web3, TxParams], Wei]:
+) -> Callable[[Web3, TxParams], Dict[str, Wei]]:
     """Get the gas price strategy."""
     supported_gas_price_modes = ["safeLow", "average", "fast", "fastest"]
     if gas_price_strategy is None:
@@ -283,7 +283,7 @@ def get_gas_price_strategy(
             raise ValueError(f"Invalid return value for `{gas_price_strategy}`!")
         gwei_result = result / 10  # adjustment (see api documentation)
         wei_result = web3.toWei(gwei_result, "gwei")
-        return wei_result
+        return {"gasPrice": wei_result}
 
     return gas_station_gas_price_strategy
 
@@ -723,18 +723,6 @@ class EthereumHelper(Helper):
         return contract_interface
 
 
-"""
-default_gas_price_strategy: eip1559
-gas_price_strategies:
-    eip1559:
-        max_gas_fast: ...
-        ....
-    gas_station:
-        gas_price_api_key: ...
-        ....
-"""
-
-
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
 
@@ -868,11 +856,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
                 self._try_get_gas_price(
                     gas_price_strategy, gas_price_strategy_extra_config)
                 if gas_price is None
-                else gas_price
+                else {"gasPrice": gas_price}
             )
             if gas_price is None:
                 return transaction  # pragma: nocover
-            transaction.update({"gasPrice": gas_price})
+            transaction.update(gas_price)
         return transaction
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
@@ -883,6 +871,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     ) -> Optional[int]:
         """Try get the gas price based on the provided strategy."""
 
+        _default_logger.debug(f"Using strategy: {gas_price_strategy}")
         gas_price_strategy = gas_price_strategy or self._default_gas_price_strategy
         gas_price_strategy_getter = self._gas_price_strategy_callables.get(
             gas_price_strategy
@@ -1085,11 +1074,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
                 self._try_get_gas_price(
                     gas_price_strategy, gas_price_strategy_extra_config)
                 if gas_price is None
-                else gas_price
+                else {"gasPrice": gas_price}
             )
             if gas_price is None:
                 return None  # pragma: nocover
-            transaction.update({"gasPrice": gas_price})
+            transaction.update(gas_price)
         transaction = instance.constructor(**kwargs).buildTransaction(transaction)
         if transaction is None:
             return None  # pragma: nocover
