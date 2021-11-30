@@ -22,11 +22,11 @@
 import hashlib
 import logging
 import math
+import random
 import tempfile
 import time
-import random
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -42,7 +42,7 @@ from aea_ledger_ethereum import (
     get_gas_price_strategy_eip1559,
     requests,
 )
-from aea_ledger_ethereum.ethereum import _default_logger
+from aea_ledger_ethereum.ethereum import DEFAULT_GAS_PRICE_STRATEGY
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
@@ -413,7 +413,9 @@ def test_session_cache():
 def test_gas_price_strategy_eip1559() -> None:
     """Test eip1559 based gas price strategy."""
 
-    callable_ = get_gas_price_strategy_eip1559()
+    callable_ = get_gas_price_strategy_eip1559(
+        **DEFAULT_GAS_PRICE_STRATEGY["kwargs"]
+    )
 
     web3 = Web3()
     get_block_mock = mock.patch.object(
@@ -451,7 +453,9 @@ def test_gas_price_strategy_eip1559() -> None:
 def test_gas_price_strategy_eip1559_estimate_none() -> None:
     """Test eip1559 based gas price strategy."""
 
-    callable_ = get_gas_price_strategy_eip1559()
+    callable_ = get_gas_price_strategy_eip1559(
+        **DEFAULT_GAS_PRICE_STRATEGY["kwargs"]
+    )
 
     web3 = Web3()
     get_block_mock = mock.patch.object(
@@ -489,7 +493,10 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
 def test_gas_price_strategy_eip1559_fallback() -> None:
     """Test eip1559 based gas price strategy."""
 
-    callable_ = get_gas_price_strategy_eip1559(max_gas_fast=-1)
+    strategy_kwargs = DEFAULT_GAS_PRICE_STRATEGY["kwargs"].copy()
+    strategy_kwargs["max_gas_fast"] = -1
+
+    callable_ = get_gas_price_strategy_eip1559(**strategy_kwargs)
     web3 = Web3()
     get_block_mock = mock.patch.object(
         web3.eth,
