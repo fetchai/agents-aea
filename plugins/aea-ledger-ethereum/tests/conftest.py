@@ -176,8 +176,8 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "default_gas_price_strategy": "eip1559",
         "gas_price_strategies": {
             "gas_station": DEFAULT_GAS_STATION_STRATEGY,
-            "eip1559": DEFAULT_EIP1559_STRATEGY
-        }
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+        },
     }
     return new_config
 

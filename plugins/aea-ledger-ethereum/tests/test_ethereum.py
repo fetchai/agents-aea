@@ -61,23 +61,22 @@ def get_default_gas_strategies() -> Dict:
         "default_gas_price_strategy": "eip1559",
         "gas_price_strategies": {
             "gas_station": DEFAULT_GAS_STATION_STRATEGY,
-            "eip1559": DEFAULT_EIP1559_STRATEGY
-        }
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+        },
     }
 
 
-def get_history_data(
-    n_blocks: int,
-    base_multiplier: int = 100
-) -> Dict:
+def get_history_data(n_blocks: int, base_multiplier: int = 100) -> Dict:
     """Returns dummy blockchain history data."""
 
     return {
-        'oldestBlock': 1,
-        'reward': [math.ceil(random.random() * base_multiplier)
-                   * 1e1 for _ in range(n_blocks)],
-        'baseFeePerGas': [math.ceil(random.random() * base_multiplier)
-                          * 1e9 for _ in range(n_blocks)]
+        "oldestBlock": 1,
+        "reward": [
+            math.ceil(random.random() * base_multiplier) * 1e1 for _ in range(n_blocks)
+        ],
+        "baseFeePerGas": [
+            math.ceil(random.random() * base_multiplier) * 1e9 for _ in range(n_blocks)
+        ],
     }
 
 
@@ -427,18 +426,11 @@ def test_session_cache():
 def test_gas_price_strategy_eip1559() -> None:
     """Test eip1559 based gas price strategy."""
 
-    callable_ = get_gas_price_strategy_eip1559(
-        **DEFAULT_EIP1559_STRATEGY
-    )
+    callable_ = get_gas_price_strategy_eip1559(**DEFAULT_EIP1559_STRATEGY)
 
     web3 = Web3()
     get_block_mock = mock.patch.object(
-        web3.eth,
-        "get_block",
-        return_value={
-            "baseFeePerGas": 150e9,
-            "number": 1
-        }
+        web3.eth, "get_block", return_value={"baseFeePerGas": 150e9, "number": 1}
     )
 
     fee_history_mock = mock.patch.object(
@@ -446,39 +438,31 @@ def test_gas_price_strategy_eip1559() -> None:
         "fee_history",
         return_value=get_history_data(
             n_blocks=5,
-        )
+        ),
     )
 
     with get_block_mock:
         with fee_history_mock:
             gas_stregy = callable_(web3, "tx_params")
 
-    assert all([
-        key in gas_stregy
-        for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-    ])
+    assert all(
+        [
+            key in gas_stregy
+            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
+        ]
+    )
 
-    assert all([
-        value > 1e8
-        for value in gas_stregy.values()
-    ])
+    assert all([value > 1e8 for value in gas_stregy.values()])
 
 
 def test_gas_price_strategy_eip1559_estimate_none() -> None:
     """Test eip1559 based gas price strategy."""
 
-    callable_ = get_gas_price_strategy_eip1559(
-        **DEFAULT_EIP1559_STRATEGY
-    )
+    callable_ = get_gas_price_strategy_eip1559(**DEFAULT_EIP1559_STRATEGY)
 
     web3 = Web3()
     get_block_mock = mock.patch.object(
-        web3.eth,
-        "get_block",
-        return_value={
-            "baseFeePerGas": 150e9,
-            "number": 1
-        }
+        web3.eth, "get_block", return_value={"baseFeePerGas": 150e9, "number": 1}
     )
 
     fee_history_mock = mock.patch.object(
@@ -486,20 +470,22 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
         "fee_history",
         return_value=get_history_data(
             n_blocks=5,
-        )
+        ),
     )
     with get_block_mock:
         with fee_history_mock:
             with mock.patch(
                 "aea_ledger_ethereum.ethereum.estimate_priority_fee",
-                new_callable=lambda: lambda *args, **kwargs: None
+                new_callable=lambda: lambda *args, **kwargs: None,
             ):
                 gas_stregy = callable_(web3, "tx_params")
 
-    assert all([
-        key in gas_stregy
-        for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-    ])
+    assert all(
+        [
+            key in gas_stregy
+            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
+        ]
+    )
 
     assert gas_stregy["baseFee"] is None
 
@@ -513,12 +499,7 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
     callable_ = get_gas_price_strategy_eip1559(**strategy_kwargs)
     web3 = Web3()
     get_block_mock = mock.patch.object(
-        web3.eth,
-        "get_block",
-        return_value={
-            "baseFeePerGas": 150e9,
-            "number": 1
-        }
+        web3.eth, "get_block", return_value={"baseFeePerGas": 150e9, "number": 1}
     )
 
     fee_history_mock = mock.patch.object(
@@ -526,20 +507,22 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
         "fee_history",
         return_value=get_history_data(
             n_blocks=5,
-        )
+        ),
     )
     with get_block_mock:
         with fee_history_mock:
             with mock.patch(
                 "aea_ledger_ethereum.ethereum.estimate_priority_fee",
-                new_callable=lambda: lambda *args, **kwargs: None
+                new_callable=lambda: lambda *args, **kwargs: None,
             ):
                 gas_stregy = callable_(web3, "tx_params")
 
-    assert all([
-        key in gas_stregy
-        for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-    ])
+    assert all(
+        [
+            key in gas_stregy
+            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
+        ]
+    )
 
     assert gas_stregy["baseFee"] is None
 

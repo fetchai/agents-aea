@@ -37,7 +37,7 @@ from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_account.signers.local import LocalAccount
 from eth_keys import keys
 from eth_typing import HexStr
-from eth_utils.currency import from_wei, to_wei
+from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
@@ -82,7 +82,7 @@ DEFAULT_PRIORITY_FEE = 3
 FALLBACK_ESTIMATE = {
     "maxFeePerGas": to_wei(20, "gwei"),
     "maxPriorityFeePerGas": to_wei(DEFAULT_PRIORITY_FEE, "gwei"),
-    "baseFee": None
+    "baseFee": None,
 }
 
 PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
@@ -99,10 +99,7 @@ DEFAULT_EIP1559_STRATEGY = {
 }
 
 
-DEFAULT_GAS_STATION_STRATEGY = {
-    "gas_price_api_key": "",
-    "gas_price_strategy": "fast"
-}
+DEFAULT_GAS_STATION_STRATEGY = {"gas_price_api_key": "", "gas_price_strategy": "fast"}
 
 
 def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
@@ -124,10 +121,10 @@ def get_base_fee_multiplier(base_fee_gwei: int) -> float:
         return 2.0
     elif base_fee_gwei <= 100:
         return 1.6
-    elif base_fee_gwei <= 200:
+    elif base_fee_gwei <= 200:  # pylint: disable=no-else-return
         return 1.4
-
-    return 1.2
+    else:  # pylint: disable=no-else-return
+        return 1.2
 
 
 def estimate_priority_fee(
@@ -138,7 +135,7 @@ def estimate_priority_fee(
     default_priority_fee: int,
     fee_history_blocks: int,
     fee_history_percentile: int,
-    priority_fee_increase_boundary: int
+    priority_fee_increase_boundary: int,
 ) -> int:
     """Estimate priority fee from base fee."""
 
@@ -146,9 +143,7 @@ def estimate_priority_fee(
         return default_priority_fee
 
     fee_history = web3_object.eth.fee_history(
-        fee_history_blocks,
-        block_number,
-        [fee_history_percentile]
+        fee_history_blocks, block_number, [fee_history_percentile]
     )
 
     rewards = sorted([reward for reward in fee_history["reward"] if reward > 0])
@@ -156,15 +151,19 @@ def estimate_priority_fee(
         return None
 
     # Calculate percentage increases from between ordered list of fees
-    percentage_increases = [((j - i) / i) * 100 for i,
-                            j in zip(rewards[:-1], rewards[1:])]
+    percentage_increases = [
+        ((j - i) / i) * 100 for i, j in zip(rewards[:-1], rewards[1:])
+    ]
     highest_increase = max(*percentage_increases)
     highest_increase_index = percentage_increases.index(highest_increase)
 
     values = rewards.copy()
     # If we have big increase in value, we could be considering "outliers" in our estimate
     # Skip the low elements and take a new median
-    if highest_increase > priority_fee_increase_boundary and highest_increase_index >= len(values) // 2:
+    if (
+        highest_increase > priority_fee_increase_boundary
+        and highest_increase_index >= len(values) // 2
+    ):
         values = values[highest_increase_index:]
 
     return values[len(values) // 2]
@@ -181,8 +180,9 @@ def get_gas_price_strategy_eip1559(
 ) -> Callable[[Web3, TxParams], Dict[str, Wei]]:
     """Get the gas price strategy."""
 
-    def eip1559_price_strategy(  # pylint: disable=redefined-outer-name,unused-argument
-        web3: Web3, transaction_params: TxParams
+    def eip1559_price_strategy(
+        web3: Web3,  # pylint: disable=redefined-outer-name
+        transaction_params: TxParams  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         """
         Get gas price from Eth Gas Station api.
@@ -211,11 +211,13 @@ def get_gas_price_strategy_eip1559(
 
         if estimated_priority_fee is None:
             _default_logger.warning(
-                "An error occurred while estimating priority fee, falling back")
+                "An error occurred while estimating priority fee, falling back"
+            )
             return fallback_estimate
 
         max_priority_fee_per_gas = max(
-            estimated_priority_fee, to_wei(default_priority_fee, "gwei"))
+            estimated_priority_fee, to_wei(default_priority_fee, "gwei")
+        )
         multiplier = get_base_fee_multiplier(base_fee_gwei)
 
         potential_max_fee = base_fee * multiplier
@@ -225,19 +227,24 @@ def get_gas_price_strategy_eip1559(
             else potential_max_fee
         )
 
-        if wei_to_gwei(max_fee_per_gas) >= max_gas_fast or wei_to_gwei(max_priority_fee_per_gas) >= max_gas_fast:
+        if (
+            wei_to_gwei(max_fee_per_gas) >= max_gas_fast
+            or wei_to_gwei(max_priority_fee_per_gas) >= max_gas_fast
+        ):
             return fallback_estimate
 
         return {
             "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
             "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
-            "baseFee": base_fee
+            "baseFee": base_fee,
         }
 
     return eip1559_price_strategy
 
 
-def rpc_gas_price_strategy_wrapper(web3: Web3, transaction_params: TxParams) -> Dict[str, Wei]:
+def rpc_gas_price_strategy_wrapper(
+    web3: Web3, transaction_params: TxParams
+) -> Dict[str, Wei]:
     """RPC gas price strategy wrapper."""
     return {"gasPrice": rpc_gas_price_strategy(web3, transaction_params)}
 
@@ -266,8 +273,9 @@ def get_gas_price_strategy(
         )
         return rpc_gas_price_strategy_wrapper
 
-    def gas_station_gas_price_strategy(  # pylint: disable=redefined-outer-name,unused-argument
-        web3: Web3, transaction_params: TxParams
+    def gas_station_gas_price_strategy(
+        web3: Web3,  # pylint: disable=redefined-outer-name
+        transaction_params: TxParams  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         """
         Get gas price from Eth Gas Station api.
@@ -602,7 +610,11 @@ class EthereumHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -736,7 +748,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     _gas_price_strategy_callables: Dict[str, Callable] = {
         "gas_station": get_gas_price_strategy,
-        "eip1559": get_gas_price_strategy_eip1559
+        "eip1559": get_gas_price_strategy_eip1559,
     }
 
     def __init__(self, **kwargs: Any):
@@ -752,9 +764,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self._is_gas_estimation_enabled = kwargs.pop("is_gas_estimation_enabled", False)
 
         self._default_gas_price_strategy: str = kwargs.pop(
-            "default_gas_price_strategy", "eip1559")
+            "default_gas_price_strategy", "eip1559"
+        )
         self._gas_price_strategies: Dict[str, Dict] = kwargs.pop(
-            "gas_price_strategies", {})
+            "gas_price_strategies", {}
+        )
 
     @property
     def api(self) -> Web3:
@@ -865,7 +879,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         if gas_price is None and max_fee_per_gas is None:
             gas_pricing = self._try_get_gas_price(
-                gas_price_strategy, gas_price_strategy_extra_config)
+                gas_price_strategy, gas_price_strategy_extra_config
+            )
             if gas_pricing is None:
                 return transaction  # pragma: nocover
             transaction.update(gas_pricing)
@@ -876,21 +891,23 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def _try_get_gas_price(
         self,
         gas_price_strategy: Optional[str] = None,
-        extra_config: Optional[Dict] = None
+        extra_config: Optional[Dict] = None,
     ) -> Optional[int]:
         """Try get the gas price based on the provided strategy."""
 
         _default_logger.debug(f"Using strategy: {gas_price_strategy}")
-        gas_price_strategy = gas_price_strategy if gas_price_strategy is not None else self._default_gas_price_strategy
+        gas_price_strategy = (
+            gas_price_strategy
+            if gas_price_strategy is not None
+            else self._default_gas_price_strategy
+        )
         extra_config = extra_config or {}
         gas_price_strategy_getter = self._gas_price_strategy_callables.get(
             gas_price_strategy
         )
         kwargs = self._gas_price_strategies[gas_price_strategy].copy()
         kwargs.update(extra_config)
-        gas_price_strategy_callable = gas_price_strategy_getter(
-            **kwargs
-        )
+        gas_price_strategy_callable = gas_price_strategy_getter(**kwargs)
 
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
@@ -1017,7 +1034,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface[_ABI],
+                bytecode=contract_interface[_BYTECODE],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
@@ -1085,7 +1103,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         if gas_price is None and max_fee_per_gas is None:
             gas_pricing = self._try_get_gas_price(
-                gas_price_strategy, gas_price_strategy_extra_config)
+                gas_price_strategy, gas_price_strategy_extra_config
+            )
 
             if gas_pricing is None:
                 return None  # pragma: nocover

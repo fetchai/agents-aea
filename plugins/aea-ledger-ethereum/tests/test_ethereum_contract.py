@@ -60,10 +60,13 @@ def test_get_contract_instance(ethereum_testnet_config, ganache):
     erc1155_contract_address = cast(Dict, receipt)["contractAddress"]
     interface = {"abi": [], "bytecode": b""}
     instance = ethereum_api.get_contract_instance(
-        contract_interface=interface, contract_address=erc1155_contract_address,
+        contract_interface=interface,
+        contract_address=erc1155_contract_address,
     )
     assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
-    instance = ethereum_api.get_contract_instance(contract_interface=interface,)
+    instance = ethereum_api.get_contract_instance(
+        contract_interface=interface,
+    )
     assert (
         str(type(instance)) == "<class 'web3._utils.datatypes.PropertyCheckingFactory'>"
     )
@@ -80,15 +83,14 @@ def test_gas_station_strategy(ethereum_testnet_config, ganache):
     full_path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
     contract_interface = ethereum_api.load_contract_interface(full_path)
     tx = ethereum_api.get_deploy_transaction(
-        contract_interface,
-        ec.address,
-        0,
-        gas_price_strategy="gas_station"
+        contract_interface, ec.address, 0, gas_price_strategy="gas_station"
     )
-    assert all([
-        key in tx
-        for key in ['gas', 'chainId', 'value', 'nonce', 'gasPrice', 'data', 'from']
-    ])
+    assert all(
+        [
+            key in tx
+            for key in ["gas", "chainId", "value", "nonce", "gasPrice", "data", "from"]
+        ]
+    )
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -102,13 +104,22 @@ def test_eip1559_strategy(ethereum_testnet_config, ganache):
     full_path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
     contract_interface = ethereum_api.load_contract_interface(full_path)
     tx = ethereum_api.get_deploy_transaction(
-        contract_interface,
-        ec.address,
-        0,
-        gas_price_strategy="eip1559"
+        contract_interface, ec.address, 0, gas_price_strategy="eip1559"
     )
     logging.info(tx.keys())
-    assert all([
-        key in tx
-        for key in ['gas', 'chainId', 'value', 'nonce', 'maxFeePerGas', 'maxPriorityFeePerGas', 'baseFee', 'data', 'from']
-    ])
+    assert all(
+        [
+            key in tx
+            for key in [
+                "gas",
+                "chainId",
+                "value",
+                "nonce",
+                "maxFeePerGas",
+                "maxPriorityFeePerGas",
+                "baseFee",
+                "data",
+                "from",
+            ]
+        ]
+    )
