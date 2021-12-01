@@ -147,7 +147,7 @@ def error_handler(ctx: Context) -> None:
 
 
 @clean_after
-def scaffold_item(ctx: Context, item_type: str, item_name: str, local: bool = False) -> None:
+def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
     """
     Add an item scaffolding to the configuration file and agent.
 
