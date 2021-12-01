@@ -56,9 +56,7 @@ from aea.helpers.io import open_file
 
 @click.group()
 @click.option(
-    "--local-package",
-    is_flag=True,
-    help="Scaffold skill outside a agent directory.",
+    "--local-package", is_flag=True, help="Scaffold skill outside a agent directory.",
 )
 @click.option(
     "--with-symlinks",
@@ -68,9 +66,7 @@ from aea.helpers.io import open_file
 @click.pass_context
 @check_aea_project
 def scaffold(
-    click_context: click.core.Context,
-    with_symlinks: bool,
-    local_package: bool,
+    click_context: click.core.Context, with_symlinks: bool, local_package: bool,
 ) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
@@ -164,12 +160,12 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
     # create the item folder
     if is_local:
-        dest = Path(ctx.agent_config.directory) / Path(item_type_plural)
-        dest.mkdir(exist_ok=True)
-        dest = dest / item_name
+        dest = Path(str(ctx.agent_config.directory)) / Path(item_type_plural)
     else:
-        Path(item_type_plural).mkdir(exist_ok=True)
-        dest = os.path.join(item_type_plural, item_name)
+        dest = Path(item_type_plural)
+
+    dest.mkdir(exist_ok=True)
+    dest = dest / item_name
 
     if os.path.exists(dest):
         raise click.ClickException(
@@ -219,7 +215,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
 
         # fingerprint item.
         if is_local:
-            ctx.cwd = ctx.agent_config.directory
+            ctx.cwd = str(ctx.agent_config.directory)
             fingerprint_item(ctx, item_type, new_public_id)
         else:
             fingerprint_item(ctx, item_type, new_public_id)

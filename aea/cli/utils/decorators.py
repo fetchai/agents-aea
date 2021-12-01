@@ -28,7 +28,10 @@ from typing import Any, Callable, Dict, Tuple, Union, cast
 import click
 from jsonschema import ValidationError
 
-from aea.cli.utils.config import get_default_author_from_cli_config, try_to_load_agent_config
+from aea.cli.utils.config import (
+    get_default_author_from_cli_config,
+    try_to_load_agent_config,
+)
 from aea.cli.utils.context import Context
 from aea.configurations.base import (
     AgentConfig,
@@ -125,12 +128,10 @@ def _check_aea_project(
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
 
-        default_author = get_default_author_from_cli_config()
+        default_author = cast(str, get_default_author_from_cli_config())
         if is_local:
             ctx.agent_config = AgentConfig(
-                agent_name="agent",
-                author=default_author,
-                default_ledger="stub"
+                agent_name="agent", author=default_author, default_ledger="stub"
             )
             package_dir = Path(ctx.registry_path).absolute()
             if not package_dir.is_dir():
@@ -172,7 +173,7 @@ def check_aea_project(
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
-        is_local = kwargs.get("local_package")
+        is_local = cast(bool, kwargs.get("local_package"))
         _check_aea_project(
             args,
             check_aea_version=check_aea_version,
