@@ -117,9 +117,9 @@ def round_to_whole_gwei(number: Type[int]) -> Wei:
 def get_base_fee_multiplier(base_fee_gwei: int) -> float:
     """Returns multiplier value."""
 
-    if base_fee_gwei <= 40:
+    if base_fee_gwei <= 40:  # pylint: disable=no-else-return
         return 2.0
-    elif base_fee_gwei <= 100:
+    elif base_fee_gwei <= 100:  # pylint: disable=no-else-return
         return 1.6
     elif base_fee_gwei <= 200:  # pylint: disable=no-else-return
         return 1.4
@@ -243,7 +243,8 @@ def get_gas_price_strategy_eip1559(
 
 
 def rpc_gas_price_strategy_wrapper(
-    web3: Web3, transaction_params: TxParams
+    web3: Web3,  # pylint: disable=redefined-outer-name
+    transaction_params: TxParams
 ) -> Dict[str, Wei]:
     """RPC gas price strategy wrapper."""
     return {"gasPrice": rpc_gas_price_strategy(web3, transaction_params)}
