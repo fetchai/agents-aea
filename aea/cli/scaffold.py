@@ -56,24 +56,42 @@ from aea.helpers.io import open_file
 
 @click.group()
 @click.option(
-    "--with-symlinks",
-    is_flag=True,
-    help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
+    "-vendor",
+    default="open_aea",
+    type=str,
+    help="Specify component vendor.",
+)
+@click.option(
+    "-package-dir",
+    default="packages/",
+    type=str,
+    help="Path packages directory.",
 )
 @click.option(
     "--local-package",
     is_flag=True,
     help="Scaffold skill outside a agent directory.",
 )
+@click.option(
+    "--with-symlinks",
+    is_flag=True,
+    help="Add symlinks from vendor to non-vendor and packages to vendor folders.",
+)
 @click.pass_context
 @check_aea_project
 def scaffold(
-    click_context: click.core.Context, with_symlinks: bool, local_package: bool
+    click_context: click.core.Context,
+    with_symlinks: bool,
+    local_package: bool,
+    vendor: str,
+    package_dir: str
 ) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
     ctx.set_config("is_local", local_package)
+    ctx.set_config("vendor", vendor)
+    ctx.set_config("package_dir", package_dir)
 
 
 @scaffold.command()
@@ -144,6 +162,8 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str, local: bool = Fa
     loader = getattr(ctx, f"{item_type}_loader")
     default_config_filename = globals()[f"DEFAULT_{item_type.upper()}_CONFIG_FILE"]
 
+    is_local = ctx.config.get("is_local")
+
     item_type_plural = item_type + "s"
     existing_ids = getattr(ctx.agent_config, f"{item_type}s")
     existing_ids_only_author_and_name = map(lambda x: (x.author, x.name), existing_ids)
@@ -159,8 +179,14 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str, local: bool = Fa
     )
 
     # create the item folder
-    Path(item_type_plural).mkdir(exist_ok=True)
-    dest = os.path.join(item_type_plural, item_name)
+    if is_local:
+        dest = Path(ctx.agent_config.directory) / Path(item_type_plural)
+        dest.mkdir(exist_ok=True)
+        dest = dest / item_name
+    else:
+        Path(item_type_plural).mkdir(exist_ok=True)
+        dest = os.path.join(item_type_plural, item_name)
+
     if os.path.exists(dest):
         raise click.ClickException(
             f"A {item_type} with this name already exists. Please choose a different name and try again."
@@ -174,16 +200,21 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str, local: bool = Fa
         shutil.copytree(src, dest)
 
         # add the item to the configurations.
-        logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
-        existing_ids.add(new_public_id)
-        with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
-            ctx.agent_loader.dump(ctx.agent_config, fp)
+        if not is_local:
+            logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
+            existing_ids.add(new_public_id)
+            with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+                ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
-        config_filepath = Path(
-            ctx.cwd, item_type_plural, item_name, default_config_filename
-        )
+        if is_local:
+            config_filepath = dest / default_config_filename
+        else:
+            config_filepath = Path(
+                ctx.cwd, item_type_plural, item_name, default_config_filename
+            )
+
         with open_file(config_filepath) as fp:
             config = loader.load(fp)
         config.name = item_name
@@ -203,7 +234,11 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str, local: bool = Fa
             )
 
         # fingerprint item.
-        fingerprint_item(ctx, item_type, new_public_id)
+        if is_local:
+            ctx.cwd = ctx.agent_config.directory
+            fingerprint_item(ctx, item_type, new_public_id)
+        else:
+            fingerprint_item(ctx, item_type, new_public_id)
 
         if ctx.config.get("with_symlinks", False):
             click.echo(
