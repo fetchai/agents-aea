@@ -157,6 +157,12 @@ def get_registry_path_from_cli_config() -> Optional[str]:
     return config.get(REGISTRY_PATH_KEY, None)
 
 
+def get_default_author_from_cli_config() -> Optional[str]:
+    """Get registry path from config."""
+    config = get_or_create_cli_config()
+    return config.get(AUTHOR_KEY, None)
+
+
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:
     """
     Load item configuration.

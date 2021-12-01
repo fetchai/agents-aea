@@ -56,18 +56,6 @@ from aea.helpers.io import open_file
 
 @click.group()
 @click.option(
-    "-vendor",
-    default="open_aea",
-    type=str,
-    help="Specify component vendor.",
-)
-@click.option(
-    "-package-dir",
-    default="packages/",
-    type=str,
-    help="Path packages directory.",
-)
-@click.option(
     "--local-package",
     is_flag=True,
     help="Scaffold skill outside a agent directory.",
@@ -83,15 +71,11 @@ def scaffold(
     click_context: click.core.Context,
     with_symlinks: bool,
     local_package: bool,
-    vendor: str,
-    package_dir: str
 ) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
     ctx.set_config("is_local", local_package)
-    ctx.set_config("vendor", vendor)
-    ctx.set_config("package_dir", package_dir)
 
 
 @scaffold.command()

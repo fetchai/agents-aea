@@ -28,7 +28,7 @@ from typing import Any, Callable, Dict, Tuple, Union, cast
 import click
 from jsonschema import ValidationError
 
-from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.config import get_default_author_from_cli_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.configurations.base import (
     AgentConfig,
@@ -120,23 +120,22 @@ def _check_aea_project(
     check_aea_version: bool = True,
     check_finger_prints: bool = False,
     is_local: bool = False,
-    vendor: str = "open_aea",
-    package_dir: str = "packages/"
 ) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
 
+        default_author = get_default_author_from_cli_config()
         if is_local:
             ctx.agent_config = AgentConfig(
                 agent_name="agent",
-                author=vendor,
+                author=default_author,
                 default_ledger="stub"
             )
-            package_dir = Path(package_dir).absolute()
+            package_dir = Path(ctx.registry_path).absolute()
             if not package_dir.is_dir():
                 raise FileNotFoundError("Cannnot find packages directory.")
-            ctx.agent_config.directory = package_dir / vendor
+            ctx.agent_config.directory = package_dir / default_author
             ctx.agent_config.directory.mkdir(exist_ok=True)
         else:
             try_to_load_agent_config(ctx)
@@ -174,15 +173,11 @@ def check_aea_project(
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
         is_local = kwargs.get("local_package")
-        vendor = kwargs.get("vendor")
-        package_dir = kwargs.get("package_dir")
         _check_aea_project(
             args,
             check_aea_version=check_aea_version,
             check_finger_prints=check_finger_prints,
             is_local=is_local,
-            vendor=vendor,
-            package_dir=package_dir
         )
         return f(*args, **kwargs)
 
