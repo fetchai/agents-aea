@@ -27,6 +27,9 @@ from packages.fetchai.connections.ledger.base import (
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_control.behaviours import (
+    SoefRegisterBehaviour as BaseSoefRegisterBehaviour,
+)
+from packages.fetchai.skills.tac_control.behaviours import (
     TacBehaviour as BaseTacBehaviour,
 )
 from packages.fetchai.skills.tac_control_contract.dialogues import (
@@ -88,7 +91,6 @@ class TacBehaviour(BaseTacBehaviour):
             < parameters.registration_end_time
         ):
             game.phase = Phase.GAME_REGISTRATION
-            self._register_tac()
             self.context.logger.info(
                 "TAC open for registration until: {}".format(
                     parameters.registration_end_time
@@ -107,13 +109,11 @@ class TacBehaviour(BaseTacBehaviour):
                 )
                 self._cancel_tac(game)
                 game.phase = Phase.POST_GAME
-                self._unregister_tac()
                 self.context.is_active = False
             else:
                 game.phase = Phase.GAME_SETUP
                 game.create()
                 game.conf.contract_address = parameters.contract_address
-                self._unregister_tac()
         elif (
             game.phase.value == Phase.GAME_SETUP.value
             and parameters.registration_end_time < now < parameters.start_time
@@ -223,3 +223,6 @@ class TacBehaviour(BaseTacBehaviour):
             ContractApiDialogue.Callable.GET_MINT_BATCH_TRANSACTION
         )
         self.context.outbox.put_message(message=contract_api_msg)
+
+
+SoefRegisterBehaviour = BaseSoefRegisterBehaviour

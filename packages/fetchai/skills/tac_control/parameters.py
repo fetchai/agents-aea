@@ -42,7 +42,6 @@ DEFAULT_GAS = 5000000
 DEFAULT_BASE_GOOD_ENDOWMENT = 2
 DEFAULT_LOWER_BOUND_FACTOR = 1
 DEFAULT_UPPER_BOUND_FACTOR = 1
-DEFAULT_REGISTRATION_RETRY_INTERVAL = 10
 DEFAULT_REGISTRATION_START_TIME = "01 01 2020  00:01"
 DEFAULT_REGISTRATION_TIMEOUT = 60
 DEFAULT_ITEM_SETUP_TIMEOUT = 60
@@ -89,9 +88,6 @@ class Parameters(Model):
         registration_start_time = kwargs.pop(
             "registration_start_time", DEFAULT_REGISTRATION_START_TIME
         )  # type: str
-        self._registration_retry_interval = kwargs.pop(
-            "registration_retry_interval", DEFAULT_REGISTRATION_RETRY_INTERVAL
-        )  # type: int
         self._registration_start_time = datetime.datetime.strptime(
             registration_start_time, "%d %m %Y %H:%M"
         )  # type: datetime.datetime
@@ -289,11 +285,6 @@ class Parameters(Model):
     def registration_end_time(self) -> datetime.datetime:
         """TAC registration end time."""
         return self._registration_end_time
-
-    @property
-    def registration_retry_interval(self) -> int:
-        """TAC registration retry interval."""
-        return self._registration_retry_interval
 
     @property
     def start_time(self) -> datetime.datetime:
