@@ -60,13 +60,10 @@ def test_get_contract_instance(ethereum_testnet_config, ganache):
     erc1155_contract_address = cast(Dict, receipt)["contractAddress"]
     interface = {"abi": [], "bytecode": b""}
     instance = ethereum_api.get_contract_instance(
-        contract_interface=interface,
-        contract_address=erc1155_contract_address,
+        contract_interface=interface, contract_address=erc1155_contract_address,
     )
     assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
-    instance = ethereum_api.get_contract_instance(
-        contract_interface=interface,
-    )
+    instance = ethereum_api.get_contract_instance(contract_interface=interface,)
     assert (
         str(type(instance)) == "<class 'web3._utils.datatypes.PropertyCheckingFactory'>"
     )

@@ -182,7 +182,7 @@ def get_gas_price_strategy_eip1559(
 
     def eip1559_price_strategy(
         web3: Web3,  # pylint: disable=redefined-outer-name
-        transaction_params: TxParams  # pylint: disable=unused-argument
+        transaction_params: TxParams,  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         """
         Get gas price from Eth Gas Station api.
@@ -243,8 +243,7 @@ def get_gas_price_strategy_eip1559(
 
 
 def rpc_gas_price_strategy_wrapper(
-    web3: Web3,  # pylint: disable=redefined-outer-name
-    transaction_params: TxParams
+    web3: Web3, transaction_params: TxParams  # pylint: disable=redefined-outer-name
 ) -> Dict[str, Wei]:
     """RPC gas price strategy wrapper."""
     return {"gasPrice": rpc_gas_price_strategy(web3, transaction_params)}
@@ -276,7 +275,7 @@ def get_gas_price_strategy(
 
     def gas_station_gas_price_strategy(
         web3: Web3,  # pylint: disable=redefined-outer-name
-        transaction_params: TxParams  # pylint: disable=unused-argument
+        transaction_params: TxParams,  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         """
         Get gas price from Eth Gas Station api.
@@ -611,11 +610,7 @@ class EthereumHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: dict,
-        seller: Address,
-        client: Address,
-        tx_nonce: str,
-        amount: int,
+        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -1035,8 +1030,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface[_ABI],
-                bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
