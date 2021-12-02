@@ -836,6 +836,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
+        :param gas_price_strategy_extra_config: extra config for gas price strategy.
         :param kwargs: keyword arguments
         :return: the transfer transaction
         """
@@ -1065,6 +1066,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
+        :param gas_price_strategy_extra_config: extra config for gas price strategy..
         :param kwargs: keyword arguments
         :return: the transaction dictionary.
         """
