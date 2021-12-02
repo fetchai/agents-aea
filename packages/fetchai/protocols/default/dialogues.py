@@ -25,7 +25,7 @@ This module contains the classes required for default dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,13 +37,13 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 class DefaultDialogue(Dialogue):
     """The default dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {DefaultMessage.Performative.BYTES, DefaultMessage.Performative.ERROR}
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {DefaultMessage.Performative.END, DefaultMessage.Performative.ERROR}
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         DefaultMessage.Performative.BYTES: frozenset(
             {
                 DefaultMessage.Performative.BYTES,

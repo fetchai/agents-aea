@@ -25,7 +25,7 @@ This module contains the classes required for cosm_trade dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,16 +37,16 @@ from packages.fetchai.protocols.cosm_trade.message import CosmTradeMessage
 class CosmTradeDialogue(Dialogue):
     """The cosm_trade dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             CosmTradeMessage.Performative.INFORM_PUBLIC_KEY,
             CosmTradeMessage.Performative.INFORM_SIGNED_TRANSACTION,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {CosmTradeMessage.Performative.ERROR, CosmTradeMessage.Performative.END}
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         CosmTradeMessage.Performative.END: frozenset(),
         CosmTradeMessage.Performative.ERROR: frozenset(),
         CosmTradeMessage.Performative.INFORM_PUBLIC_KEY: frozenset(

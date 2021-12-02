@@ -25,7 +25,7 @@ This module contains the classes required for ml_trade dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,9 +37,13 @@ from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 class MlTradeDialogue(Dialogue):
     """The ml_trade dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.CFP})
-    TERMINAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.DATA})
-    VALID_REPLIES = {
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {MlTradeMessage.Performative.CFP}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {MlTradeMessage.Performative.DATA}
+    )
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         MlTradeMessage.Performative.ACCEPT: frozenset(
             {MlTradeMessage.Performative.DATA}
         ),

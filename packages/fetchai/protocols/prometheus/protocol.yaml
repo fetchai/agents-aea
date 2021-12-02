@@ -8,8 +8,8 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmbibRarBMgpipxzTatvtBLTURGCucegjDHWERT7aiKALt
-  __init__.py: QmR2oHaW9gDi6XTtRvRHeQbAcTYU577JWh5PcMKsFX5AHj
-  dialogues.py: QmYQYkByWC3sBnQPnDEzFh98ULycx1jzqqs6hLC196YZg5
+  __init__.py: QmXg9tEVhGQwT4wnfPdVXTkRzL2jkDRPB3k9aB2gfvekAu
+  dialogues.py: QmNnWS1noUTnGEExA1i7fXNeeme9iWDCPEJGmSW5efueXt
   message.py: QmNwi8G8APo1wPC7aUxby5xTiNeLsdtBJ3XtHxHdNbGzyK
   prometheus.proto: QmXMxMXbDH1LoFcV9QB7TvewUPu62poka43aKuujL73UN1
   prometheus_pb2.py: QmREMpXRYd9PSYW5Vpa3C3C4amZ16bgVXeHsr8NriKqMct
