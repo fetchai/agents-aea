@@ -25,7 +25,7 @@ This module contains the classes required for t_protocol dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,19 +37,19 @@ from tests.data.generator.t_protocol.message import TProtocolMessage
 class TProtocolDialogue(Dialogue):
     """The t_protocol dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             TProtocolMessage.Performative.PERFORMATIVE_CT,
             TProtocolMessage.Performative.PERFORMATIVE_PT,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             TProtocolMessage.Performative.PERFORMATIVE_MT,
             TProtocolMessage.Performative.PERFORMATIVE_O,
         }
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TProtocolMessage.Performative.PERFORMATIVE_CT: frozenset(
             {TProtocolMessage.Performative.PERFORMATIVE_PCT}
         ),
@@ -105,7 +105,6 @@ class TProtocolDialogue(Dialogue):
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :param message_class: the message class used
-        :return: None
         """
         Dialogue.__init__(
             self,

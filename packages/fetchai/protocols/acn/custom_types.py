@@ -195,11 +195,9 @@ class StatusBody:
 
         :param status_body_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param status_body_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         status_body_protobuf_object.code = int(status_body_object.status_code)
         status_body_protobuf_object.msgs.extend(status_body_object.msgs)
-        return None
 
     @classmethod
     def decode(cls, status_body_protobuf_object: Any) -> "StatusBody":

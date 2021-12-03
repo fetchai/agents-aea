@@ -13,7 +13,7 @@ fingerprint:
   cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
   cosm_trade_pb2.py: QmVZWhxWmqr3WKPx2HQWPENavv8754BmiLuh6hTukuWRxX
   custom_types.py: QmUweZKxravsiJNVzUypN8fiF7XWYbuN2rVURw18EHQrss
-  dialogues.py: QmTBnscbaqnSK9hHyWL8jAFVoJtP9DK4V6dtoMjCikLSfd
+  dialogues.py: QmQMbaNba3HCZbubgBi1t9cyNPv7zKhm7odfQt31BJ1bK4
   message.py: QmXAP7uckdGW4T5Gb8xMuyaWQ73cGhCspa4AHCcq65j8uR
   serialization.py: QmTsEjoduW6mgWSGF1hFLobUmajPXVVVWZ7Bs4FmLWaRW8
 fingerprint_ignore_patterns: []

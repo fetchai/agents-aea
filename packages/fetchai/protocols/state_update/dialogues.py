@@ -25,7 +25,7 @@ This module contains the classes required for state_update dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,9 +37,13 @@ from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 class StateUpdateDialogue(Dialogue):
     """The state_update dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.INITIALIZE})
-    TERMINAL_PERFORMATIVES = frozenset({StateUpdateMessage.Performative.END})
-    VALID_REPLIES = {
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {StateUpdateMessage.Performative.INITIALIZE}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {StateUpdateMessage.Performative.END}
+    )
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         StateUpdateMessage.Performative.APPLY: frozenset(
             {StateUpdateMessage.Performative.APPLY, StateUpdateMessage.Performative.END}
         ),
@@ -74,7 +78,6 @@ class StateUpdateDialogue(Dialogue):
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :param message_class: the message class used
-        :return: None
         """
         Dialogue.__init__(
             self,

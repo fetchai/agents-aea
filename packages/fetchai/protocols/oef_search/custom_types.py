@@ -126,10 +126,8 @@ class OefErrorOperation(Enum):
 
         :param oef_error_operation_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param oef_error_operation_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         oef_error_operation_protobuf_object.oef_error = oef_error_operation_object.value
-        return None
 
     @classmethod
     def decode(cls, oef_error_operation_protobuf_object: Any) -> "OefErrorOperation":

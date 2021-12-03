@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: QmX2nGncvSdS5Py1LED3HEKZE11wtC2TZrmcgJtALGFo55
   aggregation.proto: QmPMqf6ysCcSS6j27zQRisD3YqbkiDaNF7AvHHi9vMYV1n
   aggregation_pb2.py: QmXKXPDctMS3amwzqDS6kTw2DZ4KpFTVNcyZJpPphsPLXw
-  dialogues.py: QmRwzbFMn24oYgjWK7cGgPC3Ce89Wnt6rPeALCjawSuyUh
+  dialogues.py: Qma9v3XvzNrMcU7Apvre4D5UWSym3wczfK5taWTEijxcBG
   message.py: QmdmEaTbtxXCVcrxWVE2QVrpS48wopEANZkCKZWMeANcQU
   serialization.py: QmfUH3z7yg4efdnWtJQAPL8Tihz9m64JY6bkXd2tg8bZ1h
 fingerprint_ignore_patterns: []

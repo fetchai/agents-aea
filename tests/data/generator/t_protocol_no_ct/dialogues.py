@@ -25,7 +25,7 @@ This module contains the classes required for t_protocol_no_ct dialogue manageme
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,16 +37,16 @@ from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 class TProtocolNoCtDialogue(Dialogue):
     """The t_protocol_no_ct dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {TProtocolNoCtMessage.Performative.PERFORMATIVE_PT}
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             TProtocolNoCtMessage.Performative.PERFORMATIVE_MT,
             TProtocolNoCtMessage.Performative.PERFORMATIVE_O,
         }
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS: frozenset(
             {TProtocolNoCtMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS}
         ),
@@ -100,7 +100,6 @@ class TProtocolNoCtDialogue(Dialogue):
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :param message_class: the message class used
-        :return: None
         """
         Dialogue.__init__(
             self,

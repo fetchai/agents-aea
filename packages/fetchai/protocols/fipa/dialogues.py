@@ -25,7 +25,7 @@ This module contains the classes required for fipa dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,11 +37,13 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 class FipaDialogue(Dialogue):
     """The fipa dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({FipaMessage.Performative.CFP})
-    TERMINAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {FipaMessage.Performative.CFP}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {FipaMessage.Performative.DECLINE, FipaMessage.Performative.END}
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         FipaMessage.Performative.ACCEPT: frozenset(
             {
                 FipaMessage.Performative.DECLINE,
@@ -108,7 +110,6 @@ class FipaDialogue(Dialogue):
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
         :param message_class: the message class used
-        :return: None
         """
         Dialogue.__init__(
             self,
