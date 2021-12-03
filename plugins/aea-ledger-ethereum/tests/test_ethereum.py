@@ -441,12 +441,7 @@ def test_gas_price_strategy_eip1559() -> None:
         with fee_history_mock:
             gas_stregy = callable_(web3, "tx_params")
 
-    assert all(
-        [
-            key in gas_stregy
-            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-        ]
-    )
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
     assert all([value > 1e8 for value in gas_stregy.values()])
 

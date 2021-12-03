@@ -630,7 +630,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
-        "default_gas_price_strategy": "eip1559",
+        "default_gas_price_strategy": "gas_station",
         "gas_price_strategies": {
             "eip1559": DEFAULT_EIP1559_STRATEGY,
             "gas_station": {
