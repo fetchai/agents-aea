@@ -39,7 +39,7 @@ from aea.crypto.ledger_apis import ETHEREUM_DEFAULT_ADDRESS, FETCHAI_DEFAULT_ADD
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
-from tests.conftest import ROOT_DIR, make_uri
+from tests.conftest import ETHEREUM_TESTNET_CONFIG, ROOT_DIR, make_uri
 
 
 logger = logging.getLogger(__name__)
@@ -148,9 +148,9 @@ def test_get_deploy_transaction_ethereum(
 ):
     """Tests the deploy transaction classmethod for ethereum."""
     aea_ledger_ethereum = crypto_registry.make(EthereumCrypto.identifier)
-    ledger_api = ledger_apis_registry.make(
-        EthereumCrypto.identifier, address=make_uri(ganache_addr, ganache_port)
-    )
+    config = ETHEREUM_TESTNET_CONFIG
+    config.update(dict(address=make_uri(ganache_addr, ganache_port)))
+    ledger_api = ledger_apis_registry.make(EthereumCrypto.identifier, **config)
     deploy_tx = dummy_contract.get_deploy_transaction(
         ledger_api, aea_ledger_ethereum.address
     )

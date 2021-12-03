@@ -21,9 +21,13 @@
 
 import hashlib
 import logging
+import math
+import random
 import tempfile
 import time
 from pathlib import Path
+from typing import Dict, cast
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -35,15 +39,45 @@ from aea_ledger_ethereum import (
     EthereumHelper,
     LruLockWrapper,
     get_gas_price_strategy,
+    get_gas_price_strategy_eip1559,
     requests,
+    rpc_gas_price_strategy_wrapper,
+)
+from aea_ledger_ethereum.ethereum import (
+    DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_GAS_STATION_STRATEGY,
 )
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
-from web3.gas_strategies.rpc import rpc_gas_price_strategy
 
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
+
+
+def get_default_gas_strategies() -> Dict:
+    """Returns default gas price strategy."""
+    return {
+        "default_gas_price_strategy": "eip1559",
+        "gas_price_strategies": {
+            "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+        },
+    }
+
+
+def get_history_data(n_blocks: int, base_multiplier: int = 100) -> Dict:
+    """Returns dummy blockchain history data."""
+
+    return {
+        "oldestBlock": 1,
+        "reward": [
+            math.ceil(random.random() * base_multiplier) * 1e1 for _ in range(n_blocks)
+        ],
+        "baseFeePerGas": [
+            math.ceil(random.random() * base_multiplier) * 1e9 for _ in range(n_blocks)
+        ],
+    }
 
 
 def test_attribute_dict_translator():
@@ -310,7 +344,7 @@ def test_ethereum_api_get_transfer_transaction(*args):
     """Test EthereumApi.get_transfer_transaction."""
     ec1 = EthereumCrypto()
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
     args = {
         "sender_address": ec1.address,
         "destination_address": ec2.address,
@@ -328,7 +362,7 @@ def test_ethereum_api_get_transfer_transaction_2(*args):
     """Test EthereumApi.get_transfer_transaction."""
     ec1 = EthereumCrypto()
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
     ethereum_api._is_gas_estimation_enabled = True
     args = {
         "sender_address": ec1.address,
@@ -347,7 +381,7 @@ def test_ethereum_api_get_transfer_transaction_3(*args):
     """Test EthereumApi.get_transfer_transaction."""
     ec1 = EthereumCrypto()
     ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**get_default_gas_strategies())
     ethereum_api._is_gas_estimation_enabled = True
     args = {
         "sender_address": ec1.address,
@@ -361,9 +395,9 @@ def test_ethereum_api_get_transfer_transaction_3(*args):
         assert len(ethereum_api.get_transfer_transaction(**args)) == 8
 
 
-def test_ethereum_api_get_deploy_transaction(*args):
+def test_ethereum_api_get_deploy_transaction(ethereum_testnet_config):
     """Test EthereumApi.get_deploy_transaction."""
-    ethereum_api = EthereumApi()
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
     ec1 = EthereumCrypto()
     with patch.object(ethereum_api.api.eth, "get_transaction_count", return_value=None):
         assert (
@@ -389,6 +423,83 @@ def test_session_cache():
     assert 1 not in session_cache
 
 
+def test_gas_price_strategy_eip1559() -> None:
+    """Test eip1559 based gas price strategy."""
+
+    callable_ = get_gas_price_strategy_eip1559(**DEFAULT_EIP1559_STRATEGY)
+
+    web3 = Web3()
+    get_block_mock = mock.patch.object(
+        web3.eth, "get_block", return_value={"baseFeePerGas": 150e9, "number": 1}
+    )
+
+    fee_history_mock = mock.patch.object(
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+    )
+
+    with get_block_mock:
+        with fee_history_mock:
+            gas_stregy = callable_(web3, "tx_params")
+
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
+
+    assert all([value > 1e8 for value in gas_stregy.values()])
+
+
+def test_gas_price_strategy_eip1559_estimate_none() -> None:
+    """Test eip1559 based gas price strategy."""
+
+    callable_ = get_gas_price_strategy_eip1559(**DEFAULT_EIP1559_STRATEGY)
+
+    web3 = Web3()
+    get_block_mock = mock.patch.object(
+        web3.eth, "get_block", return_value={"baseFeePerGas": 150e9, "number": 1}
+    )
+
+    fee_history_mock = mock.patch.object(
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+    )
+    with get_block_mock:
+        with fee_history_mock:
+            with mock.patch(
+                "aea_ledger_ethereum.ethereum.estimate_priority_fee",
+                new_callable=lambda: lambda *args, **kwargs: None,
+            ):
+                gas_stregy = callable_(web3, "tx_params")
+
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
+
+    assert gas_stregy["baseFee"] is None
+
+
+def test_gas_price_strategy_eip1559_fallback() -> None:
+    """Test eip1559 based gas price strategy."""
+
+    strategy_kwargs = DEFAULT_EIP1559_STRATEGY.copy()
+    strategy_kwargs["max_gas_fast"] = -1
+
+    callable_ = get_gas_price_strategy_eip1559(**strategy_kwargs)
+    web3 = Web3()
+    get_block_mock = mock.patch.object(
+        web3.eth, "get_block", return_value={"baseFeePerGas": 150e9, "number": 1}
+    )
+
+    fee_history_mock = mock.patch.object(
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+    )
+    with get_block_mock:
+        with fee_history_mock:
+            with mock.patch(
+                "aea_ledger_ethereum.ethereum.estimate_priority_fee",
+                new_callable=lambda: lambda *args, **kwargs: None,
+            ):
+                gas_stregy = callable_(web3, "tx_params")
+
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
+
+    assert gas_stregy["baseFee"] is None
+
+
 def test_gas_price_strategy_eth_gasstation():
     """Test the gas price strategy when using eth gasstation."""
     gas_price_strategy = "fast"
@@ -403,7 +514,7 @@ def test_gas_price_strategy_eth_gasstation():
         ),
     ):
         result = callable_(Web3, "tx_params")
-    assert result == excepted_result / 10 * 1000000000
+    assert cast(int, result["gasPrice"]) == cast(int, excepted_result / 10 * 1000000000)
 
 
 def test_gas_price_strategy_not_supported(caplog):
@@ -411,7 +522,7 @@ def test_gas_price_strategy_not_supported(caplog):
     gas_price_strategy = "superfast"
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         callable_ = get_gas_price_strategy(gas_price_strategy, "api_key")
-    assert callable_ == rpc_gas_price_strategy
+    assert callable_ == rpc_gas_price_strategy_wrapper
     assert (
         f"Gas price strategy `{gas_price_strategy}` not in list of supported modes:"
         in caplog.text
@@ -423,7 +534,7 @@ def test_gas_price_strategy_no_api_key(caplog):
     gas_price_strategy = "fast"
     with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
         callable_ = get_gas_price_strategy(gas_price_strategy, None)
-    assert callable_ == rpc_gas_price_strategy
+    assert callable_ == rpc_gas_price_strategy_wrapper
     assert (
         "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
         in caplog.text

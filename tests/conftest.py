@@ -43,6 +43,10 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.ethereum import (
+    DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_GAS_STATION_STRATEGY,
+)
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
 from cosmpy.common.rest_client import RestClient
@@ -249,7 +253,11 @@ COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
     "address": ETHEREUM_DEFAULT_ADDRESS,
     "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
-    "gas_price": 50,
+    "default_gas_price_strategy": "gas_station",
+    "gas_price_strategies": {
+        "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+        "eip1559": DEFAULT_EIP1559_STRATEGY,
+    },
 }
 FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 
@@ -622,7 +630,14 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
-        "gas_price_api_key": GAS_PRICE_API_KEY,
+        "default_gas_price_strategy": "gas_station",
+        "gas_price_strategies": {
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+            "gas_station": {
+                "gas_price_api_key": GAS_PRICE_API_KEY,
+                "gas_price_strategy": "fast",
+            },
+        },
     }
     return new_config
 

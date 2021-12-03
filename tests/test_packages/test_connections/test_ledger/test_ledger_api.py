@@ -26,7 +26,11 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
-from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum import (
+    DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_GAS_STATION_STRATEGY,
+    EthereumCrypto,
+)
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.common import Address
@@ -68,6 +72,10 @@ from tests.conftest import (
 
 logger = logging.getLogger(__name__)
 
+GAS_PRICE_STRATEGIES = {
+    "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+    "eip1559": DEFAULT_EIP1559_STRATEGY,
+}
 
 ledger_ids = pytest.mark.parametrize(
     "ledger_id,address",
@@ -80,7 +88,8 @@ gas_strategies = pytest.mark.parametrize(
     "gas_strategies",
     [
         {"gas_price_strategy": None},
-        {"gas_price_strategy": "average"},
+        {"gas_price_strategy": "gas_station"},
+        {"gas_price_strategy": "eip1559"},
         {
             "max_fee_per_gas": DEFAULT_MAX_FEE_PER_GAS,
             "max_priority_fee_per_gas": DEFAULT_MAX_PRIORITY_FEE_PER_GAS,
@@ -184,7 +193,7 @@ async def test_get_state(
         config = ethereum_testnet_config
 
     if "ethereum" in ledger_id:
-        callable_name = "getBlock"
+        callable_name = "get_block"
     else:
         callable_name = "blocks"
     args = ("latest",)
