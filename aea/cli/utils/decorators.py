@@ -122,14 +122,14 @@ def _check_aea_project(
     args: Tuple[Any, ...],
     check_aea_version: bool = True,
     check_finger_prints: bool = False,
-    is_local: bool = False,
+    to_local_registry: bool = False,
 ) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
 
         default_author = cast(str, get_default_author_from_cli_config())
-        if is_local:
+        if to_local_registry:
             ctx.agent_config = AgentConfig(
                 agent_name="agent", author=default_author, default_ledger="stub"
             )
@@ -173,12 +173,12 @@ def check_aea_project(
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
-        is_local = cast(bool, kwargs.get("local_package"))
+        to_local_registry = cast(bool, kwargs.get("to_local_registry"))
         _check_aea_project(
             args,
             check_aea_version=check_aea_version,
             check_finger_prints=check_finger_prints,
-            is_local=is_local,
+            to_local_registry=to_local_registry,
         )
         return f(*args, **kwargs)
 

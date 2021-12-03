@@ -130,6 +130,101 @@ class TestScaffoldProtocol:
             pass
 
 
+class TestScaffoldProtocolToRegistry:
+    """Test that the command 'aea scaffold protocol' works correctly in correct preconditions."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.resource_name = "myresource"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
+        cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
+        )
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        dir_path.mkdir(exist_ok=True)
+        # scaffold protocol
+        with patch("click.confirm", return_value=True) as confirm_mock:
+            cls.result = cls.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    f"--registry-path={str(dir_path)}",
+                    "scaffold",
+                    "--to-local-registry",
+                    "protocol",
+                    cls.resource_name,
+                ],
+                standalone_mode=False,
+            )
+            confirm_mock.assert_called_once_with(
+                "We highly recommend auto-generating protocols with the aea generate command. Do you really want to continue scaffolding?"
+            )
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0."""
+        assert self.result.exit_code == 0
+
+    def test_resource_folder_contains_module_message(self):
+        """Test that the resource folder contains scaffold message.py module."""
+        p = Path(
+            self.t, "packages", AUTHOR, "protocols", self.resource_name, "message.py"
+        )
+        original = Path(AEA_DIR, "protocols", "scaffold", "message.py")
+        assert filecmp.cmp(p, original)
+
+    def test_resource_folder_contains_module_protocol(self):
+        """Test that the resource folder contains scaffold protocol.py module."""
+        p = Path(
+            self.t,
+            "packages",
+            AUTHOR,
+            "protocols",
+            self.resource_name,
+            "serialization.py",
+        )
+        original = Path(AEA_DIR, "protocols", "scaffold", "serialization.py")
+        assert filecmp.cmp(p, original)
+
+    def test_resource_folder_contains_configuration_file(self):
+        """Test that the resource folder contains a good configuration file."""
+        p = Path(
+            self.t,
+            "packages",
+            AUTHOR,
+            "protocols",
+            self.resource_name,
+            DEFAULT_PROTOCOL_CONFIG_FILE,
+        )
+        config_file = yaml.safe_load(open(p))
+        self.validator.validate(instance=config_file)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
 class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
     """Test that the command 'aea scaffold protocol' fails when a folder with 'scaffold' name already."""
 
