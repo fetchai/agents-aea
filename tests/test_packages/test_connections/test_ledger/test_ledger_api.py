@@ -26,7 +26,11 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
-from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum import (
+    DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_GAS_STATION_STRATEGY,
+    EthereumCrypto,
+)
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.common import Address
@@ -68,6 +72,10 @@ from tests.conftest import (
 
 logger = logging.getLogger(__name__)
 
+GAS_PRICE_STRATEGIES = {
+    "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+    "eip1559": DEFAULT_EIP1559_STRATEGY,
+}
 
 ledger_ids = pytest.mark.parametrize(
     "ledger_id,address",
@@ -79,11 +87,13 @@ ledger_ids = pytest.mark.parametrize(
 gas_strategies = pytest.mark.parametrize(
     "gas_strategies",
     [
-        {"gas_price_strategy": None},
-        {"gas_price_strategy": "average"},
         {
-            "max_fee_per_gas": DEFAULT_MAX_FEE_PER_GAS,
-            "max_priority_fee_per_gas": DEFAULT_MAX_PRIORITY_FEE_PER_GAS,
+            "default_gas_price_strategy": "gas_station",
+            "gas_price_strategies": GAS_PRICE_STRATEGIES,
+        },
+        {
+            "default_gas_price_strategy": "eip1559",
+            "gas_price_strategies": GAS_PRICE_STRATEGIES,
         },
     ],
 )
@@ -146,7 +156,11 @@ async def test_get_balance(
         ledger_id=ledger_id,
         address=address,
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -199,7 +213,11 @@ async def test_get_state(
         args=args,
         kwargs=kwargs,
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -260,7 +278,11 @@ async def test_send_signed_transaction_ethereum(
         ),
     )
     request = cast(LedgerApiMessage, request)
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -287,7 +309,11 @@ async def test_send_signed_transaction_ethereum(
             ),
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -320,7 +346,11 @@ async def test_send_signed_transaction_ethereum(
             transaction_digest=response_message.transaction_digest,
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()

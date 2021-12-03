@@ -892,12 +892,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
     ) -> Optional[int]:
         """Try get the gas price based on the provided strategy."""
 
-        _default_logger.debug(f"Using strategy: {gas_price_strategy}")
         gas_price_strategy = (
             gas_price_strategy
             if gas_price_strategy is not None
             else self._default_gas_price_strategy
         )
+        _default_logger.debug(f"Using strategy: {gas_price_strategy}")
         extra_config = extra_config or {}
         gas_price_strategy_getter = self._gas_price_strategy_callables.get(
             gas_price_strategy
