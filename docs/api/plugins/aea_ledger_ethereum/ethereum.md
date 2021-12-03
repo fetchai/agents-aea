@@ -3,11 +3,65 @@
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.wei_to_gwei"></a>
+#### wei`_`to`_`gwei
+
+```python
+wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]
+```
+
+Covert WEI to GWEI
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.round_to_whole_gwei"></a>
+#### round`_`to`_`whole`_`gwei
+
+```python
+round_to_whole_gwei(number: Type[int]) -> Wei
+```
+
+Round WEI to equivalent GWEI
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_base_fee_multiplier"></a>
+#### get`_`base`_`fee`_`multiplier
+
+```python
+get_base_fee_multiplier(base_fee_gwei: int) -> float
+```
+
+Returns multiplier value.
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.estimate_priority_fee"></a>
+#### estimate`_`priority`_`fee
+
+```python
+estimate_priority_fee(web3_object: Web3, base_fee_gwei: int, block_number: int, priority_fee_estimation_trigger: int, default_priority_fee: int, fee_history_blocks: int, fee_history_percentile: int, priority_fee_increase_boundary: int) -> int
+```
+
+Estimate priority fee from base fee.
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_gas_price_strategy_eip1559"></a>
+#### get`_`gas`_`price`_`strategy`_`eip1559
+
+```python
+get_gas_price_strategy_eip1559(max_gas_fast: int, fee_history_blocks: int, fee_history_percentile: int, priority_fee_estimation_trigger: int, default_priority_fee: int, fallback_estimate: Dict[str, Optional[int]], priority_fee_increase_boundary: int) -> Callable[[Web3, TxParams], Dict[str, Wei]]
+```
+
+Get the gas price strategy.
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.rpc_gas_price_strategy_wrapper"></a>
+#### rpc`_`gas`_`price`_`strategy`_`wrapper
+
+```python
+rpc_gas_price_strategy_wrapper(web3: Web3, transaction_params: TxParams) -> Dict[str, Wei]
+```
+
+RPC gas price strategy wrapper.
+
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_gas_price_strategy"></a>
 #### get`_`gas`_`price`_`strategy
 
 ```python
-get_gas_price_strategy(gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None) -> Callable[[Web3, TxParams], Wei]
+get_gas_price_strategy(gas_price_strategy: Optional[str] = None, gas_price_api_key: Optional[str] = None) -> Callable[[Web3, TxParams], Dict[str, Wei]]
 ```
 
 Get the gas price strategy.
@@ -484,7 +538,7 @@ Call a specified function on the ledger API.
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, gas_price_strategy_extra_config: Optional[Dict] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -501,6 +555,7 @@ Submit a transfer transaction to the ledger.
 - `max_priority_fee_per_gas`: the part of the fee that goes to the miner (in Wei).
 - `gas_price`: the gas price (in Wei)
 - `gas_price_strategy`: the gas price strategy to be used.
+- `gas_price_strategy_extra_config`: extra config for gas price strategy.
 - `kwargs`: keyword arguments
 
 **Returns**:
@@ -597,7 +652,7 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, gas_price_strategy_extra_config: Optional[Dict] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -612,6 +667,7 @@ Get the transaction to deploy the smart contract.
 - `max_priority_fee_per_gas`: the part of the fee that goes to the miner (in Wei).
 - `gas_price`: the gas price (in Wei)
 - `gas_price_strategy`: the gas price strategy to be used.
+- `gas_price_strategy_extra_config`: extra config for gas price strategy..
 - `kwargs`: keyword arguments
 
 **Returns**:

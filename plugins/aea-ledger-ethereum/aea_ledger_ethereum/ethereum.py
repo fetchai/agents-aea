@@ -111,7 +111,7 @@ def round_to_whole_gwei(number: Type[int]) -> Wei:
     """Round WEI to equivalent GWEI"""
     gwei = wei_to_gwei(number)
     rounded = math.ceil(gwei)
-    return to_wei(rounded, "gwei")
+    return cast(Wei, to_wei(rounded, "gwei"))
 
 
 def get_base_fee_multiplier(base_fee_gwei: int) -> float:
@@ -874,7 +874,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             transaction.update({"gasPrice": gas_price})
 
         if gas_price is None and max_fee_per_gas is None:
-            gas_pricing = self._try_get_gas_price(
+            gas_pricing = self._try_get_gas_pricing(
                 gas_price_strategy, gas_price_strategy_extra_config
             )
             if gas_pricing is None:
@@ -884,11 +884,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return transaction
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
-    def _try_get_gas_price(
+    def _try_get_gas_pricing(
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
-    ) -> Optional[int]:
+    ) -> Optional[Dict[str, int]]:
         """Try get the gas price based on the provided strategy."""
 
         gas_price_strategy = (
@@ -899,9 +899,14 @@ class EthereumApi(LedgerApi, EthereumHelper):
         _default_logger.debug(f"Using strategy: {gas_price_strategy}")
         extra_config = extra_config or {}
         gas_price_strategy_getter = self._gas_price_strategy_callables.get(
-            gas_price_strategy
+            gas_price_strategy, None
         )
-        kwargs = self._gas_price_strategies[gas_price_strategy].copy()
+        if gas_price_strategy_getter is None:
+            _default_logger.debug(
+                "No strategy found! Check configuration of ethereum-ledger-api."
+            )
+            return None  # pragma: nocover
+        kwargs = self._gas_price_strategies.get(gas_price_strategy, {}).copy()
         kwargs.update(extra_config)
         gas_price_strategy_callable = gas_price_strategy_getter(**kwargs)
 
@@ -1098,7 +1103,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             transaction.update({"gasPrice": gas_price})
 
         if gas_price is None and max_fee_per_gas is None:
-            gas_pricing = self._try_get_gas_price(
+            gas_pricing = self._try_get_gas_pricing(
                 gas_price_strategy, gas_price_strategy_extra_config
             )
 
