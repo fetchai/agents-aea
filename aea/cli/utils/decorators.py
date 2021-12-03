@@ -28,9 +28,13 @@ from typing import Any, Callable, Dict, Tuple, Union, cast
 import click
 from jsonschema import ValidationError
 
-from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.config import (
+    get_default_author_from_cli_config,
+    try_to_load_agent_config,
+)
 from aea.cli.utils.context import Context
 from aea.configurations.base import (
+    AgentConfig,
     PackageType,
     PublicId,
     _check_aea_version,
@@ -118,11 +122,25 @@ def _check_aea_project(
     args: Tuple[Any, ...],
     check_aea_version: bool = True,
     check_finger_prints: bool = False,
+    to_local_registry: bool = False,
 ) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
-        try_to_load_agent_config(ctx)
+
+        default_author = cast(str, get_default_author_from_cli_config())
+        if to_local_registry:
+            ctx.agent_config = AgentConfig(
+                agent_name="agent", author=default_author, default_ledger="stub"
+            )
+            package_dir = Path(ctx.registry_path).absolute()
+            if not package_dir.is_dir():
+                raise FileNotFoundError("Cannnot find packages directory.")
+            ctx.agent_config.directory = package_dir / default_author
+            ctx.agent_config.directory.mkdir(exist_ok=True)
+        else:
+            try_to_load_agent_config(ctx)
+
         skip_consistency_check = ctx.config["skip_consistency_check"]
         if not skip_consistency_check:
             _validate_config_consistency(ctx, check_aea_version=check_aea_version)
@@ -155,10 +173,12 @@ def check_aea_project(
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
+        to_local_registry = cast(bool, kwargs.get("to_local_registry"))
         _check_aea_project(
             args,
             check_aea_version=check_aea_version,
             check_finger_prints=check_finger_prints,
+            to_local_registry=to_local_registry,
         )
         return f(*args, **kwargs)
 
