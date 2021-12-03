@@ -746,6 +746,7 @@ class ProtocolGenerator:
         cls_str += self.indent + ":param dialogue_reference: the dialogue reference.\n"
         cls_str += self.indent + ":param target: the message target.\n"
         cls_str += self.indent + ":param performative: the message performative.\n"
+        cls_str += self.indent + ":param **kwargs: extra options.\n"
         cls_str += self.indent + '"""\n'
 
         cls_str += self.indent + "super().__init__(\n"
@@ -1156,7 +1157,7 @@ class ProtocolGenerator:
             self.indent
             + ":param role: the role of the agent this dialogue is maintained for\n"
         )
-        cls_str += self.indent + ":return: None\n"
+        cls_str += self.indent + ":param message_class: the message class used\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogue.__init__(\n"
         cls_str += self.indent + "self,\n"
@@ -1219,7 +1220,11 @@ class ProtocolGenerator:
             self.indent
             + ":param self_address: the address of the entity for whom dialogues are maintained\n"
         )
-        cls_str += self.indent + ":return: None\n"
+        cls_str += self.indent + ":param dialogue_class: the dialogue class used\n"
+        cls_str += (
+            self.indent
+            + ":param role_from_first_message: the callable determining role from first message\n"
+        )
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogues.__init__(\n"
         self._change_indent(1)
@@ -1306,7 +1311,6 @@ class ProtocolGenerator:
                     _camel_case_to_snake_case(custom_type)
                 )
             )
-            cls_str += self.indent + ":return: None\n"
             cls_str += self.indent + '"""\n'
             cls_str += self.indent + "raise NotImplementedError\n\n"
             self._change_indent(-1)

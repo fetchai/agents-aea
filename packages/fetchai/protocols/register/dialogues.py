@@ -75,7 +75,7 @@ class RegisterDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :return: None
+        :param message_class: the message class used
         """
         Dialogue.__init__(
             self,
@@ -105,7 +105,8 @@ class RegisterDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :return: None
+        :param dialogue_class: the dialogue class used
+        :param role_from_first_message: the callable determining role from first message
         """
         Dialogues.__init__(
             self,

@@ -9,8 +9,8 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: QmdFa6EyuMwUECGMJKQsCyEa3SrZH4Es41s9SpUR8qF6jn
   custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
-  dialogues.py: QmTfa5v7NvRkaJTShVuGd8bCsFZ3R8pUmRP4fjaSEu1226
-  message.py: QmTjeJythfhy4XyzXRCA4fY2eULHciHBRCowWpZkEH77z9
+  dialogues.py: Qmb4BMtfTZcJudghJmPBNkakGVnHhHSsCRM6NqVj9U1bGK
+  message.py: QmQkCLUw9BujAGLDjUft9AyGuya6wZ8Stpe29xypxM5a12
   serialization.py: QmUWey5RWEhkeBVisbUmNVBdjGbbo92mi8dAK5MScJC9k4
   t_protocol.proto: QmedX13Z6cNgbTJ8L9LyYG3HtSKhkY8ntq6uVdtepmt2cg
   t_protocol_pb2.py: QmPzHCFTemDJ2cuUAdMat15P21DAist7f52VJLqZJK8Eon
