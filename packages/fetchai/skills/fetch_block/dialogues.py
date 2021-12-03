@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains dialogues used by the fetch_beacon skill."""
+"""This package contains dialogues used by the fetch_block skill."""
 
 from typing import Any, Type
 

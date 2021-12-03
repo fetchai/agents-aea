@@ -23,32 +23,25 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from aea_ledger_ethereum import EthereumApi
-
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.ledger_api.custom_types import State
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.skills.fetch_beacon.behaviours import FetchBeaconBehaviour
-from packages.fetchai.skills.fetch_beacon.dialogues import LedgerApiDialogues
-from packages.fetchai.skills.fetch_beacon.handlers import LedgerApiHandler
+from packages.fetchai.skills.fetch_block.behaviours import FetchBlockBehaviour
+from packages.fetchai.skills.fetch_block.dialogues import LedgerApiDialogues
+from packages.fetchai.skills.fetch_block.handlers import LedgerApiHandler
 
 from tests.conftest import ROOT_DIR
-
-
-def keccak256(input_: bytes) -> bytes:
-    """Compute hash."""
-    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
 LEDGER_ID = "fetchai"
 
 
 class TestLedgerApiHandler(BaseSkillTestCase):
-    """Test ledger_api handler of fetch_beacon skill."""
+    """Test ledger_api handler of fetch_block skill."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "fetch_beacon")
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "fetch_block")
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -59,9 +52,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             LedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
         cls.logger = cls._skill.skill_context.logger
-        cls.fetch_beacon_behaviour = cast(
-            FetchBeaconBehaviour,
-            cls._skill.skill_context.behaviours.fetch_beacon_behaviour,
+        cls.fetch_block_behaviour = cast(
+            FetchBlockBehaviour,
+            cls._skill.skill_context.behaviours.fetch_block_behaviour,
         )
         cls.ledger_api_dialogues = cast(
             LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
@@ -118,7 +111,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         """Test handling a state"""
 
         # setup
-        test_state = {
+        test_block_data = {
             "block_id": {"hash": "00000000"},
             "block": {
                 "header": {"height": "1", "entropy": {"group_signature": "SIGNATURE"}}
@@ -131,7 +124,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             dialogue=dialogue,
             performative=LedgerApiMessage.Performative.STATE,
             ledger_id=LEDGER_ID,
-            state=State(LEDGER_ID, test_state),
+            state=State(LEDGER_ID, test_block_data),
         )
 
         # handle message
@@ -139,19 +132,13 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.ledger_api_handler.handle(incoming_message)
 
         # check that data was correctly entered into shared state
-        beacon_data = {
-            "entropy": keccak256("SIGNATURE".encode("utf-8")),
-            "block_hash": bytes.fromhex("00000000"),
-            "block_height": 1,
-        }
         assert self.ledger_api_handler.context.shared_state["observation"] == {
-            "beacon": beacon_data
+            "block": test_block_data
         }
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO,
-            "Beacon info: " + str({"block_height": 1, "entropy": "SIGNATURE"}),
+            logging.INFO, "Retrieved latest block: " + str({"block_height": 1}),
         )
 
         self.assert_quantity_in_outbox(0)

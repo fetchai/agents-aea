@@ -17,4 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The tests module contains the tests of the packages/skills/fetch_beacon dir."""
+"""This module contains the implementation of the FetchBlock skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/fetch_block:0.12.0")
