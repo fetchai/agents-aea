@@ -236,7 +236,6 @@ def get_gas_price_strategy_eip1559(
         return {
             "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
             "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
-            "baseFee": base_fee,
         }
 
     return eip1559_price_strategy

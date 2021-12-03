@@ -36,6 +36,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple, cast
 from unittest.mock import MagicMock, patch
+from aea_ledger_ethereum.ethereum import DEFAULT_EIP1559_STRATEGY, DEFAULT_GAS_STATION_STRATEGY
 
 import docker as docker
 import gym
@@ -622,7 +623,14 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
-        "gas_price_api_key": GAS_PRICE_API_KEY,
+        "default_gas_price_strategy": "eip1559",
+        "gas_price_strategies":{
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+            "gas_station": {
+                "gas_price_api_key": GAS_PRICE_API_KEY,
+                "gas_price_strategy": "fast"
+            }
+        }
     }
     return new_config
 
