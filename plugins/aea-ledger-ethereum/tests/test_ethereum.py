@@ -434,11 +434,7 @@ def test_gas_price_strategy_eip1559() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth,
-        "fee_history",
-        return_value=get_history_data(
-            n_blocks=5,
-        ),
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
     )
 
     with get_block_mock:
@@ -461,11 +457,7 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth,
-        "fee_history",
-        return_value=get_history_data(
-            n_blocks=5,
-        ),
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
     )
     with get_block_mock:
         with fee_history_mock:
@@ -493,11 +485,7 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth,
-        "fee_history",
-        return_value=get_history_data(
-            n_blocks=5,
-        ),
+        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
     )
     with get_block_mock:
         with fee_history_mock:
