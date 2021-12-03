@@ -193,7 +193,7 @@ async def test_get_state(
         config = ethereum_testnet_config
 
     if "ethereum" in ledger_id:
-        callable_name = "getBlock"
+        callable_name = "get_block"
     else:
         callable_name = "blocks"
     args = ("latest",)
