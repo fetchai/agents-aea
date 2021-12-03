@@ -434,19 +434,18 @@ def test_gas_price_strategy_eip1559() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+        web3.eth,
+        "fee_history",
+        return_value=get_history_data(
+            n_blocks=5,
+        ),
     )
 
     with get_block_mock:
         with fee_history_mock:
             gas_stregy = callable_(web3, "tx_params")
 
-    assert all(
-        [
-            key in gas_stregy
-            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-        ]
-    )
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
     assert all([value > 1e8 for value in gas_stregy.values()])
 
@@ -462,7 +461,11 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+        web3.eth,
+        "fee_history",
+        return_value=get_history_data(
+            n_blocks=5,
+        ),
     )
     with get_block_mock:
         with fee_history_mock:
@@ -472,12 +475,7 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
             ):
                 gas_stregy = callable_(web3, "tx_params")
 
-    assert all(
-        [
-            key in gas_stregy
-            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-        ]
-    )
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
     assert gas_stregy["baseFee"] is None
 
@@ -495,7 +493,11 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+        web3.eth,
+        "fee_history",
+        return_value=get_history_data(
+            n_blocks=5,
+        ),
     )
     with get_block_mock:
         with fee_history_mock:
@@ -505,12 +507,7 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
             ):
                 gas_stregy = callable_(web3, "tx_params")
 
-    assert all(
-        [
-            key in gas_stregy
-            for key in ["maxFeePerGas", "maxPriorityFeePerGas", "baseFee"]
-        ]
-    )
+    assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
     assert gas_stregy["baseFee"] is None
 
