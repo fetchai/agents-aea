@@ -20,9 +20,12 @@
 import os
 import time
 from contextlib import suppress
+from glob import glob
+from pathlib import Path
 from typing import Any, Optional
 
 import click
+from aea.cli.utils.config import dump_item_config, load_item_config, update_item_config
 from aea_cli_ipfs.ipfs_utils import (
     DownloadError,
     IPFSTool,
@@ -88,6 +91,15 @@ def add(
     ipfs_tool = click_context.obj
     click.echo(f"Starting processing: {dir_path}")
     name, hash_, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
+
+    yaml_files = glob(str(Path(dir_path) / "*.yaml"))
+    if len(yaml_files) > 0:
+        (config_file_path,) = yaml_files
+        package_path, config_file = os.path.split(config_file_path)
+        component_type, _ = os.path.splitext(config_file)
+        package_path = Path(package_path)
+        update_item_config(component_type, package_path, package_hash=hash_)
+
     click.echo(f"Added: `{name}`, hash is {hash_}")
     if publish:
         click.echo("Publishing...")
@@ -100,7 +112,10 @@ def add(
 
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.pass_context
 def remove(click_context: click.Context, hash_: str) -> None:
@@ -115,7 +130,10 @@ def remove(click_context: click.Context, hash_: str) -> None:
 
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.argument(
     "target_dir",
