@@ -198,7 +198,7 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         required_ledgers=[DEFAULT_LEDGER],
         default_connection=None,
         dependencies=dependencies_from_json(DEFAULT_DEPENDENCIES),
-        package_hash=""
+        package_hash="",
     )
 
     with open_file(

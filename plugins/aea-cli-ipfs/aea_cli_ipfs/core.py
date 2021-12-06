@@ -25,7 +25,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 import click
-from aea.cli.utils.config import dump_item_config, load_item_config, update_item_config
 from aea_cli_ipfs.ipfs_utils import (
     DownloadError,
     IPFSTool,
@@ -33,6 +32,8 @@ from aea_cli_ipfs.ipfs_utils import (
     PublishError,
     RemoveError,
 )
+
+from aea.cli.utils.config import update_item_config
 
 
 @click.group()
@@ -112,10 +113,7 @@ def add(
 
 @ipfs.command()
 @click.argument(
-    "hash_",
-    metavar="hash",
-    type=str,
-    required=True,
+    "hash_", metavar="hash", type=str, required=True,
 )
 @click.pass_context
 def remove(click_context: click.Context, hash_: str) -> None:
@@ -130,10 +128,7 @@ def remove(click_context: click.Context, hash_: str) -> None:
 
 @ipfs.command()
 @click.argument(
-    "hash_",
-    metavar="hash",
-    type=str,
-    required=True,
+    "hash_", metavar="hash", type=str, required=True,
 )
 @click.argument(
     "target_dir",

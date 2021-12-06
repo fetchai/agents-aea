@@ -95,7 +95,7 @@ class PublicIdParameter(click.ParamType):
         try:
             return PublicId.from_str(value)
         except ValueError:
-            if ctx.obj.config.get("from_ipfs"):
+            if ctx.obj.config.get("from_ipfs"):  # type: ignore
                 return str(value)
             self.fail(value, param, ctx)
 

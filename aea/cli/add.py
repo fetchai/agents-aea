@@ -20,7 +20,6 @@
 """Implementation of the 'aea add' subcommand."""
 import os
 import shutil
-from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Union, cast
@@ -135,7 +134,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
 
     if from_ipfs:
         try:
-            from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool
+            from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool  # type: ignore
         except ImportError:
             click.echo("Please install IPFS plugin.")
             raise
@@ -263,10 +262,7 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context,
-    item_type: str,
-    item_public_id: PublicId,
-    dest_path: str,
+    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
