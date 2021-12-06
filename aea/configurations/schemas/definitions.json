@@ -4,6 +4,9 @@
   "type": "object",
   "additionalProperties": false,
   "definitions": {
+    "package_hash": {
+      "type": "string"
+    },
     "dependencies": {
       "type": "object",
       "additionalProperties": false,

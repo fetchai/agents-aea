@@ -11,7 +11,8 @@
     "aea_version",
     "speech_acts",
     "protocol_specification_id",
-    "description"
+    "description",
+    "package_hash"
   ],
   "properties": {
     "name": {
@@ -44,6 +45,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "package_hash": {
+      "$ref": "definitions.json#/definitions/package_hash"
     }
   },
   "definitions": {

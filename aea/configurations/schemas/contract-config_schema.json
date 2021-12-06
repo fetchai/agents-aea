@@ -15,7 +15,8 @@
     "class_name",
     "description",
     "contract_interface_paths",
-    "dependencies"
+    "dependencies",
+    "package_hash"
   ],
   "properties": {
     "name": {
@@ -53,6 +54,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "package_hash": {
+      "$ref": "definitions.json#/definitions/package_hash"
     },
     "contract_interface_paths": {
       "type": "object",

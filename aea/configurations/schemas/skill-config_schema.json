@@ -21,7 +21,8 @@
     "models",
     "dependencies",
     "description",
-    "is_abstract"
+    "is_abstract",
+    "package_hash"
   ],
   "properties": {
     "name": {
@@ -34,7 +35,9 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "enum": ["skill"]
+      "enum": [
+        "skill"
+      ]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
@@ -97,6 +100,9 @@
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
+    },
+    "package_hash": {
+      "$ref": "definitions.json#/definitions/package_hash"
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"

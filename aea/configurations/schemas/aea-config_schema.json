@@ -20,7 +20,8 @@
     "default_connection",
     "protocols",
     "skills",
-    "dependencies"
+    "dependencies",
+    "package_hash"
   ],
   "properties": {
     "aea_version": {
@@ -165,6 +166,9 @@
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
+    },
+    "package_hash": {
+      "$ref": "definitions.json#/definitions/package_hash"
     }
   }
 }
