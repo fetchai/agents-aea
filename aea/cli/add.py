@@ -134,7 +134,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
 
     if from_ipfs:
         try:
-            from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool  # type: ignore
+            from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool  # type: ignore # pylint: disable=import-outside-toplevel
         except ImportError:
             click.echo("Please install IPFS plugin.")
             raise
@@ -262,7 +262,10 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
