@@ -22,3 +22,4 @@ restricted_to_protocols:
 dependencies:
   gym: {}
 is_abstract: false
+package_hash: ''

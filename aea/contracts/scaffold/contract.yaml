@@ -12,3 +12,4 @@ fingerprint_ignore_patterns: []
 class_name: MyScaffoldContract
 contract_interface_paths: {}
 dependencies: {}
+package_hash: ''

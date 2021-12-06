@@ -32,3 +32,4 @@ models:
     class_name: HttpDialogues
 dependencies: {}
 is_abstract: false
+package_hash: ''

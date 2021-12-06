@@ -36,3 +36,4 @@ models:
 dependencies:
   gym: {}
 is_abstract: false
+package_hash: ''

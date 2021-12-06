@@ -36,3 +36,4 @@ connection_private_key_paths:
   fetchai: fetchai_private_key.txt
 default_routing: {}
 dependencies: {}
+package_hash: ''

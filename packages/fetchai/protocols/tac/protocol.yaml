@@ -19,3 +19,4 @@ fingerprint:
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
+package_hash: ''

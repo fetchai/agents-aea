@@ -24,3 +24,4 @@ handlers: {}
 models: {}
 dependencies: {}
 is_abstract: false
+package_hash: ''

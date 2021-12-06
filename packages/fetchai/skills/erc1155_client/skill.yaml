@@ -79,3 +79,4 @@ models:
     class_name: Strategy
 dependencies: {}
 is_abstract: false
+package_hash: ''

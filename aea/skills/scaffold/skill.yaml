@@ -31,4 +31,5 @@ models:
       foo: bar
     class_name: MyModel
 dependencies: {}
+package_hash: ''
 is_abstract: false

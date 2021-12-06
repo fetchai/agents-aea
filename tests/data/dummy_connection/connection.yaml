@@ -42,3 +42,4 @@ cert_requests:
   not_before: '2020-01-01'
   public_key: '0xABCDEF123456'
   save_path: /source/some/path_2
+package_hash: ''
