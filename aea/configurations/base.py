@@ -249,7 +249,7 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint: the fingerprint.
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         :param build_entrypoint: path to a script to execute at build time.
-        :param package_hash: package hash. 
+        :param package_hash: package hash.
         """
         super().__init__()
         if name is None or author is None:  # pragma: nocover
