@@ -99,6 +99,7 @@ def add(
         package_path, config_file = os.path.split(config_file_path)
         component_type, _ = os.path.splitext(config_file)
         package_path = Path(package_path)
+        component_type = "agent" if component_type == "aea-config" else component_type
         update_item_config(component_type, package_path, package_hash=hash_)
 
     click.echo(f"Added: `{name}`, hash is {hash_}")
@@ -113,7 +114,10 @@ def add(
 
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.pass_context
 def remove(click_context: click.Context, hash_: str) -> None:
@@ -128,7 +132,10 @@ def remove(click_context: click.Context, hash_: str) -> None:
 
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.argument(
     "target_dir",
