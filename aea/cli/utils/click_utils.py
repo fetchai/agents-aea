@@ -136,7 +136,6 @@ class AgentDirectory(click.Path):
 def registry_flag(
     help_local: str = "Use only local registry.",
     help_remote: str = "Use ony remote registry.",
-    ipfs_help: str = "Use only IPFS registry.",
 ) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
@@ -155,14 +154,6 @@ def registry_flag(
             help=help_remote,
             mutually_exclusive=["local", "ipfs"],
         )(f)
-        f = option(
-            "--ipfs",
-            is_flag=True,
-            cls=MutuallyExclusiveOption,
-            help=ipfs_help,
-            mutually_exclusive=["remote", "local"],
-        )(f)
-
         return f
 
     return wrapper

@@ -27,8 +27,12 @@ from typing import Union, cast
 import click
 
 from aea.cli.registry.add import fetch_package
-from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.click_utils import (
+    PublicIdParameter,
+    registry_flag,
+    MutuallyExclusiveOption,
+)
+from aea.cli.utils.config import load_item_config, update_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
@@ -49,12 +53,19 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.configurations.constants import AGENT, CONNECTION, CONTRACT, PROTOCOL, SKILL
 from aea.exceptions import enforce
 
 
 @click.group()
 @registry_flag()
+@click.option(
+    "--ipfs",
+    is_flag=True,
+    cls=MutuallyExclusiveOption,
+    help="Use only IPFS registry.",
+    mutually_exclusive=["remote", "local"],
+)
 @click.pass_context
 @check_aea_project
 def add(click_context: click.Context, local: bool, remote: bool, ipfs: bool) -> None:
@@ -200,6 +211,12 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
 
     _add_item_deps(ctx, item_type, item_config)
     register_item(ctx, item_type, item_config.public_id)
+
+    ipfs = ctx.agent_config.ipfs
+    ipfs[f"{item_type}s"][str(item_config.public_id)] = {
+        "hash": item_config.package_hash
+    }
+    update_item_config(AGENT, Path(ctx.cwd), ipfs=ipfs)
     click.echo(f"Successfully added {item_type} '{item_config.public_id}'.")
 
 
@@ -262,7 +279,10 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
