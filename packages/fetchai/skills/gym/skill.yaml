@@ -36,4 +36,13 @@ models:
 dependencies:
   gym: {}
 is_abstract: false
-package_hash: QmZSZZzyZ6MJ1q7otyNpBYxMdPP9RHRr3iUtRw48Khmymz
+package_hash: QmX5GhcoQSRa4vUE9TkyXHzdYVrzgbCiaWKMZZAtXaN7Z4
+ipfs:
+  connections:
+    fetchai/gym:0.19.0:
+      hash: QmcT2q8511gXGMaixDRDX974MtZRJFcssFtZMLiEYrn4J9
+  protocols:
+    fetchai/gym:1.0.0:
+      hash: QmcCkvS91ECKeeir71JLjKeZygzR9ha1hennrKG4uKAK7a
+  skills: {}
+  contracts: {}

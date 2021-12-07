@@ -19,4 +19,11 @@ excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
 is_abstract: false
-package_hash: QmXkWdynBrr48DkakAf1y9GycCjZBaDFt4bA4faXQKLQt4
+package_hash: QmQNFoaxc9BdevsjYJfo3Fuy1Bjek3CGmMnzCGNCm9FuXV
+ipfs:
+  connections: {}
+  protocols:
+    fetchai/oef_search:1.0.0:
+      hash: Qma6y9NMh9vHraVVuZitKJwvvpZiitLBeDDW28TYsisd2j
+  skills: {}
+  contracts: {}

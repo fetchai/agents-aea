@@ -30,4 +30,21 @@ connection_private_key_paths: {}
 dependencies:
   open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
-package_hash: QmUfG5y3Kgi9mEK5d2nHLkxi4wGjMTdpXbAHUeVAhCdbPb
+package_hash: QmbN3AVECCbkApSbPw5xpkUvrdkjEv8hfywfwAQDJtGUrr
+ipfs:
+  connections:
+    fetchai/gym:0.19.0:
+      hash: QmcT2q8511gXGMaixDRDX974MtZRJFcssFtZMLiEYrn4J9
+  protocols:
+    fetchai/default:1.0.0:
+      hash: QmYjuE4joesaMnVKBBrHosraEYKS7HjeHaApJLfW9NNFtT
+    fetchai/gym:1.0.0:
+      hash: QmcCkvS91ECKeeir71JLjKeZygzR9ha1hennrKG4uKAK7a
+    fetchai/state_update:1.0.0:
+      hash: QmPTtxV7h696uiUHGXWWTvRqvNeuByCPZwPZWXtxuvVbtS
+    open_aea/signing:1.0.0:
+      hash: QmNojEWktaeWeSueAUw9pZEprspLoycuBgUjKNGwMkS1vF
+  skills:
+    fetchai/gym:0.20.0:
+      hash: QmZSZZzyZ6MJ1q7otyNpBYxMdPP9RHRr3iUtRw48Khmymz
+  contracts: {}

@@ -22,3 +22,8 @@ dependencies: {}
 package_hash: ''
 is_abstract: false
 cert_requests: []
+ipfs:
+  connections: {}
+  protocols: {}
+  skills: {}
+  contracts: {}

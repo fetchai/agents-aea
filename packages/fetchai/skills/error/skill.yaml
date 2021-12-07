@@ -23,4 +23,11 @@ handlers:
 models: {}
 dependencies: {}
 is_abstract: false
-package_hash: QmX8ytpRCMYkUYeb11MeiD9Suogv2oTrWJGQ1PRuTXPr2a
+package_hash: Qmeos9Uf24sZQfjN7TDuL6pmv9qQdDaS1JPf7j27uPVsHL
+ipfs:
+  connections: {}
+  protocols:
+    fetchai/default:1.0.0:
+      hash: QmYjuE4joesaMnVKBBrHosraEYKS7HjeHaApJLfW9NNFtT
+  skills: {}
+  contracts: {}

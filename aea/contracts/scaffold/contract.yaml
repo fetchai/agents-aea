@@ -13,3 +13,8 @@ class_name: MyScaffoldContract
 contract_interface_paths: {}
 dependencies: {}
 package_hash: ''
+ipfs:
+  connections: {}
+  protocols: {}
+  skills: {}
+  contracts: {}

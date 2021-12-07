@@ -32,4 +32,11 @@ models:
     class_name: DefaultDialogues
 dependencies: {}
 is_abstract: false
-package_hash: QmeQDhbJhyFsYwsq2a41iv46BQhKf5774ZHfJfFaXrbciR
+package_hash: QmPGUQjKFQEi1poMi51mCh2V6bdVEtoa2kC249wtdy39Hg
+ipfs:
+  connections: {}
+  protocols:
+    fetchai/default:1.0.0:
+      hash: QmYjuE4joesaMnVKBBrHosraEYKS7HjeHaApJLfW9NNFtT
+  skills: {}
+  contracts: {}

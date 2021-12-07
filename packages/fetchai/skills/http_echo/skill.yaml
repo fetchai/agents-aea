@@ -32,4 +32,13 @@ models:
     class_name: HttpDialogues
 dependencies: {}
 is_abstract: false
-package_hash: QmUSJrtvLg9SyVJT2opnPmW91HZWZGnzAFeUHHGtYXAMYr
+package_hash: QmdJ74rPvpi4oUjgLtM1pA1Ys9FKfuLUG6GSfWF3yKetDG
+ipfs:
+  connections:
+    fetchai/http_server:0.22.0:
+      hash: QmNuuoBjepbrSwkmcksnNWuY4DcogdFv1kaZjBFzCNJ9j1
+  protocols:
+    fetchai/http:1.0.0:
+      hash: QmR6ViUYMpQUmDK8Lau2EUmvCvGajmu2x2RWDYEY4NDD2b
+  skills: {}
+  contracts: {}
