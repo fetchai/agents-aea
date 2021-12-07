@@ -21,7 +21,8 @@
     "protocols",
     "skills",
     "dependencies",
-    "package_hash"
+    "package_hash",
+    "ipfs"
   ],
   "properties": {
     "aea_version": {
@@ -100,7 +101,10 @@
       }
     },
     "default_connection": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "protocols": {
       "type": "array",
@@ -116,7 +120,7 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
-    "logging_config" : {
+    "logging_config": {
       "$ref": "definitions.json#/definitions/logging_config"
     },
     "period": {
@@ -169,6 +173,9 @@
     },
     "package_hash": {
       "$ref": "definitions.json#/definitions/package_hash"
+    },
+    "ipfs": {
+      "$ref": "definitions.json#/definitions/ipfs"
     }
   }
 }

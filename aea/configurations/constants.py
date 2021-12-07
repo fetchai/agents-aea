@@ -136,3 +136,9 @@ ITEM_TYPE_TO_PLURAL = {
 }
 
 ITEM_TYPE_PLURAL_TO_TYPE = {v: k for k, v in ITEM_TYPE_TO_PLURAL.items()}
+DEFAULT_IPFS_HASH_CONFIG = {
+    "connections": {},
+    "protocols": {},
+    "skills": {},
+    "contracts": {},
+}

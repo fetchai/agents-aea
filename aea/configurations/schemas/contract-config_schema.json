@@ -16,7 +16,8 @@
     "description",
     "contract_interface_paths",
     "dependencies",
-    "package_hash"
+    "package_hash",
+    "ipfs"
   ],
   "properties": {
     "name": {
@@ -57,6 +58,9 @@
     },
     "package_hash": {
       "$ref": "definitions.json#/definitions/package_hash"
+    },
+    "ipfs": {
+      "$ref": "definitions.json#/definitions/ipfs"
     },
     "contract_interface_paths": {
       "type": "object",

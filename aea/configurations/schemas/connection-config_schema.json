@@ -21,7 +21,8 @@
     "excluded_protocols",
     "dependencies",
     "is_abstract",
-    "package_hash"
+    "package_hash",
+    "ipfs"
   ],
   "properties": {
     "name": {
@@ -58,6 +59,9 @@
     },
     "package_hash": {
       "$ref": "definitions.json#/definitions/package_hash"
+    },
+    "ipfs": {
+      "$ref": "definitions.json#/definitions/ipfs"
     },
     "class_name": {
       "type": "string"
