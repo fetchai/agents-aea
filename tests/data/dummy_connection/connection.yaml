@@ -43,3 +43,8 @@ cert_requests:
   public_key: '0xABCDEF123456'
   save_path: /source/some/path_2
 package_hash: ''
+ipfs:
+  connections: {}
+  protocols: {}
+  skills: {}
+  contracts: {}

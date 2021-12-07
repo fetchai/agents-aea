@@ -58,3 +58,8 @@ dependencies: {}
 is_abstract: false
 connections: []
 package_hash: ''
+ipfs:
+  connections: {}
+  protocols: {}
+  skills: {}
+  contracts: {}

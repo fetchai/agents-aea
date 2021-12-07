@@ -19,3 +19,8 @@ contract_interface_paths:
   fetchai: build/some.wasm
 dependencies: {}
 package_hash: ''
+ipfs:
+  connections: {}
+  protocols: {}
+  skills: {}
+  contracts: {}
