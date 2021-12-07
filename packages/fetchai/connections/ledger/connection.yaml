@@ -38,4 +38,4 @@ restricted_to_protocols:
 - fetchai/ledger_api:1.0.0
 dependencies: {}
 is_abstract: false
-package_hash: ''
+package_hash: QmWzs68DxJVnMdLEVkwLX93YcwSWMFKfFUmEZog38YxhLt

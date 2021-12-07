@@ -25,4 +25,4 @@ connection_private_key_paths: {}
 dependencies:
   open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
-package_hash: ''
+package_hash: QmWievzpdMVm3nUtdmG4NUKjU3VP1xKqeVWsSWd95L5pHa

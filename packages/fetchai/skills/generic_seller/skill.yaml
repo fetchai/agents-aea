@@ -77,4 +77,4 @@ dependencies:
   open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 is_abstract: true
-package_hash: ''
+package_hash: QmVMTtWhaoauCuQvdYc4eu437zXRocYBcd5skADU1NdtaC

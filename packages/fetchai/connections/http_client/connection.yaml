@@ -25,4 +25,4 @@ dependencies:
   aiohttp:
     version: <3.8,>=3.7.4
 is_abstract: false
-package_hash: ''
+package_hash: QmYMAVTzxJeTceBZzf25RkFqZ3yDZgh9PPYApqCKnabGFM
