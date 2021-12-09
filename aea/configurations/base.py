@@ -486,7 +486,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             fingerprint_ignore_patterns,
             build_entrypoint,
         )
-        self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
+        self.pypi_dependencies: Dependencies = (
+            dependencies if dependencies is not None else {}
+        )
         self._build_directory = build_directory
 
     @property
@@ -610,17 +612,29 @@ class ConnectionConfig(ComponentConfiguration):
             enforce(version != "", "Version or connection_id must be set.")
         else:
             enforce(
-                name in ("", connection_id.name,),
+                name
+                in (
+                    "",
+                    connection_id.name,
+                ),
                 "Non matching name in ConnectionConfig name and public id.",
             )
             name = connection_id.name
             enforce(
-                author in ("", connection_id.author,),
+                author
+                in (
+                    "",
+                    connection_id.author,
+                ),
                 "Non matching author in ConnectionConfig author and public id.",
             )
             author = connection_id.author
             enforce(
-                version in ("", connection_id.version,),
+                version
+                in (
+                    "",
+                    connection_id.version,
+                ),
                 "Non matching version in ConnectionConfig version and public id.",
             )
             version = connection_id.version
@@ -1500,17 +1514,35 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         agent_config.connections = set(
-            map(PublicId.from_str, obj.get(CONNECTIONS, []),)
+            map(
+                PublicId.from_str,
+                obj.get(CONNECTIONS, []),
+            )
         )
 
         # parse contracts public ids
-        agent_config.contracts = set(map(PublicId.from_str, obj.get(CONTRACTS, []),))
+        agent_config.contracts = set(
+            map(
+                PublicId.from_str,
+                obj.get(CONTRACTS, []),
+            )
+        )
 
         # parse protocol public ids
-        agent_config.protocols = set(map(PublicId.from_str, obj.get(PROTOCOLS, []),))
+        agent_config.protocols = set(
+            map(
+                PublicId.from_str,
+                obj.get(PROTOCOLS, []),
+            )
+        )
 
         # parse skills public ids
-        agent_config.skills = set(map(PublicId.from_str, obj.get(SKILLS, []),))
+        agent_config.skills = set(
+            map(
+                PublicId.from_str,
+                obj.get(SKILLS, []),
+            )
+        )
 
         # parse component configurations
         component_configurations = {}
@@ -1707,6 +1739,7 @@ class ContractConfig(ComponentConfiguration):
         "description",
         "contract_interface_paths",
         "class_name",
+        "contracts",
     )
 
     def __init__(
@@ -1724,6 +1757,7 @@ class ContractConfig(ComponentConfiguration):
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
+        contracts: Optional[Set[PublicId]] = None,
     ) -> None:
         """Initialize a protocol configuration object."""
         super().__init__(
@@ -1744,6 +1778,7 @@ class ContractConfig(ComponentConfiguration):
             contract_interface_paths if contract_interface_paths is not None else {}
         )
         self.class_name = class_name
+        self.contracts = contracts or set()
 
     @property
     def json(self) -> Dict:
@@ -1762,6 +1797,7 @@ class ContractConfig(ComponentConfiguration):
                 "class_name": self.class_name,
                 "contract_interface_paths": self.contract_interface_paths,
                 "dependencies": dependencies_to_json(self.dependencies),
+                CONTRACTS: sorted(map(str, self.contracts)),
             }
         )
         if self.build_entrypoint:
@@ -1779,6 +1815,7 @@ class ContractConfig(ComponentConfiguration):
         dependencies = cast(
             Dependencies, dependencies_from_json(obj.get("dependencies", {}))
         )
+        contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1797,6 +1834,7 @@ class ContractConfig(ComponentConfiguration):
                 Dict[str, str], obj.get("contract_interface_paths", {})
             ),
             class_name=obj.get("class_name", ""),
+            contracts=contracts
         )
         instance = cast(ContractConfig, cls._apply_params_to_instance(params, instance))
 
