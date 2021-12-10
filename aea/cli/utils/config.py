@@ -43,6 +43,7 @@ import click
 import jsonschema
 import yaml
 
+from aea.cli.registry.settings import REGISTRY_CONFIG_KEY
 from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH
 from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
@@ -149,6 +150,18 @@ def set_cli_author(click_context: click.Context) -> None:
             "The AEA configurations are not initialized. Use `aea init` before continuing."
         )
     click_context.obj.set_config("cli_author", cli_author)
+
+
+def get_registry_config() -> Dict:
+    """Returns registry config from CLI config."""
+
+    config = get_or_create_cli_config()
+    cli_registry_config = config.get(REGISTRY_CONFIG_KEY, None)
+    if cli_registry_config is None:
+        raise click.ClickException(
+            "The AEA configurations are not initialized. Use `aea init` before continuing."
+        )
+    return cli_registry_config
 
 
 def get_registry_path_from_cli_config() -> Optional[str]:
