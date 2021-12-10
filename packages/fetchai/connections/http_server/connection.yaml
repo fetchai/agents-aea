@@ -33,11 +33,3 @@ dependencies:
   openapi-spec-validator:
     version: ==0.2.8
 is_abstract: false
-package_hash: QmZyLd83st5WFCrUGxC8QsdthwKXYsRVukj9GjJGh3zyHv
-ipfs:
-  connections: {}
-  protocols:
-    fetchai/http:1.0.0:
-      hash: QmR6ViUYMpQUmDK8Lau2EUmvCvGajmu2x2RWDYEY4NDD2b
-  skills: {}
-  contracts: {}

@@ -25,13 +25,3 @@ connection_private_key_paths: {}
 dependencies:
   open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
-package_hash: QmRdrx7JCk3e4oQ6XpQqDQsoqDTmcZgr7EdRZgEchP37gE
-ipfs:
-  connections:
-    fetchai/stub:0.21.0:
-      hash: QmPuREtoLeFptskYNn24mmFwkgNwqZCA39i2mByD4vVNUK
-  protocols: {}
-  skills:
-    fetchai/error_test_skill:0.1.0:
-      hash: QmY7twwjmS5yJo9QKDv7s4QG6oEKzPvQXDth9J7Yj3mNsc
-  contracts: {}

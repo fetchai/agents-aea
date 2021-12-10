@@ -25,11 +25,3 @@ dependencies:
   aiohttp:
     version: <3.8,>=3.7.4
 is_abstract: false
-package_hash: QmbD3C8dDzMQk8P7tAzfEAUfqdAdSzGshesYRWBpwopNcg
-ipfs:
-  connections: {}
-  protocols:
-    fetchai/http:1.0.0:
-      hash: QmR6ViUYMpQUmDK8Lau2EUmvCvGajmu2x2RWDYEY4NDD2b
-  skills: {}
-  contracts: {}

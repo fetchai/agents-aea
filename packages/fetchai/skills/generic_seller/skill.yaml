@@ -77,19 +77,3 @@ dependencies:
   open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 is_abstract: true
-package_hash: QmUwoDXFYv6si6hZvMbxHxdxHR6NhTKf6a7TVtBEqYmwDd
-ipfs:
-  connections:
-    fetchai/ledger:0.19.0:
-      hash: QmWzs68DxJVnMdLEVkwLX93YcwSWMFKfFUmEZog38YxhLt
-  protocols:
-    fetchai/default:1.0.0:
-      hash: QmYjuE4joesaMnVKBBrHosraEYKS7HjeHaApJLfW9NNFtT
-    fetchai/fipa:1.0.0:
-      hash: QmPcfGq1Azx7xUcqaBvg9kxCArkB4Lttn9FNFDozDWg7AX
-    fetchai/ledger_api:1.0.0:
-      hash: QmSwtfHjXzvTuZtGvvwxT5yVnoMpfkrZ59GM52f2SuZvzF
-    fetchai/oef_search:1.0.0:
-      hash: Qma6y9NMh9vHraVVuZitKJwvvpZiitLBeDDW28TYsisd2j
-  skills: {}
-  contracts: {}

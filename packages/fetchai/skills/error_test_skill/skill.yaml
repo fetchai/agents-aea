@@ -23,9 +23,3 @@ handlers: {}
 models: {}
 dependencies: {}
 is_abstract: false
-package_hash: QmUNoTdBFDERQ7b6orAGwduvVpTAdqc1usepfWp5hPMa7b
-ipfs:
-  connections: {}
-  protocols: {}
-  skills: {}
-  contracts: {}

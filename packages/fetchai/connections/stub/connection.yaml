@@ -21,9 +21,3 @@ excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
 is_abstract: false
-package_hash: QmThWQZTU6Ux3dwbJzNBYBAKidRKxfT7z6RsbHEAtk3u1p
-ipfs:
-  connections: {}
-  protocols: {}
-  skills: {}
-  contracts: {}

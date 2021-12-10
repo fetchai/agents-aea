@@ -29,9 +29,3 @@ dependencies:
     version: <2.0.0,>=1.0.0
   open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
-package_hash: QmVmG7PRB6DgMR6dneC2aqVGRjaff9Ng42R1nqoQFV1ge6
-ipfs:
-  connections: {}
-  protocols: {}
-  skills: {}
-  contracts: {}

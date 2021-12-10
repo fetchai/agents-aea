@@ -22,11 +22,3 @@ restricted_to_protocols:
 dependencies:
   gym: {}
 is_abstract: false
-package_hash: QmNsAWvNyX2Y3HGSsokN7qDUgfBv7aJV4b1XrZb46jVRtd
-ipfs:
-  connections: {}
-  protocols:
-    fetchai/gym:1.0.0:
-      hash: QmcCkvS91ECKeeir71JLjKeZygzR9ha1hennrKG4uKAK7a
-  skills: {}
-  contracts: {}

@@ -102,25 +102,3 @@ dependencies:
   open-aea-ledger-ethereum:
     version: <2.0.0,>=1.0.0
 is_abstract: false
-package_hash: QmZXaBafiVv1pGED45bBu7bAEEAZMLLLaxNuW5htJv6UW7
-ipfs:
-  connections:
-    fetchai/ledger:0.19.0:
-      hash: QmWzs68DxJVnMdLEVkwLX93YcwSWMFKfFUmEZog38YxhLt
-  protocols:
-    fetchai/contract_api:1.0.0:
-      hash: QmS2KUYLBwW1wTkXTpH2Aw1F6eMTjZtNRhdKK53BZsZtKe
-    fetchai/default:1.0.0:
-      hash: QmYjuE4joesaMnVKBBrHosraEYKS7HjeHaApJLfW9NNFtT
-    fetchai/fipa:1.0.0:
-      hash: QmPcfGq1Azx7xUcqaBvg9kxCArkB4Lttn9FNFDozDWg7AX
-    fetchai/ledger_api:1.0.0:
-      hash: QmSwtfHjXzvTuZtGvvwxT5yVnoMpfkrZ59GM52f2SuZvzF
-    fetchai/oef_search:1.0.0:
-      hash: Qma6y9NMh9vHraVVuZitKJwvvpZiitLBeDDW28TYsisd2j
-    open_aea/signing:1.0.0:
-      hash: QmNojEWktaeWeSueAUw9pZEprspLoycuBgUjKNGwMkS1vF
-  skills: {}
-  contracts:
-    fetchai/erc1155:0.22.0:
-      hash: QmQGaDiuhtSqkrdfwUtQL9UyBfCxcw2Mt7i73PNryEtQXQ

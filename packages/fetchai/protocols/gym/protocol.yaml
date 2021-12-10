@@ -18,9 +18,3 @@ fingerprint:
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
-package_hash: QmRqs3qAL4nvAnbi1K9hXw6RfANjrHXKTxZ22jxesV9V7v
-ipfs:
-  connections: {}
-  protocols: {}
-  skills: {}
-  contracts: {}

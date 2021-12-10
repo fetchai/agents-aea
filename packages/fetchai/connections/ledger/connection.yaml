@@ -38,13 +38,3 @@ restricted_to_protocols:
 - fetchai/ledger_api:1.0.0
 dependencies: {}
 is_abstract: false
-package_hash: Qmbmbgc43HpSSykDM37z3FXquGsLAJdZ4JcXgKbbwitaeY
-ipfs:
-  connections: {}
-  protocols:
-    fetchai/contract_api:1.0.0:
-      hash: QmS2KUYLBwW1wTkXTpH2Aw1F6eMTjZtNRhdKK53BZsZtKe
-    fetchai/ledger_api:1.0.0:
-      hash: QmSwtfHjXzvTuZtGvvwxT5yVnoMpfkrZ59GM52f2SuZvzF
-  skills: {}
-  contracts: {}
