@@ -85,7 +85,12 @@ def register_item_to_local_registry(
         fp.write(json.dumps(local_registry_data, indent=2))
 
 
-def fetch_ipfs(item_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
+def fetch_ipfs(
+    item_type: str,
+    public_id: PublicId,
+    cwd: str,  # pylint: disable=unused-argument
+    dest: str,
+) -> Path:
     """Fetch a package from IPFS node."""
     try:
         from aea_cli_ipfs.ipfs_utils import (  # type: ignore # pylint: disable=import-outside-toplevel

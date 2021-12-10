@@ -193,7 +193,7 @@ def fetch_item_remote(item_type: str, public_id: PublicId, cwd: str, dest: str) 
     click.echo(f"Using registry: {registry_type} ")
     if registry_type == REGISTRY_HTTP:
         return fetch_package(item_type, public_id=public_id, cwd=cwd, dest=dest)
-    else:
+    else:  # pylint: disable=no-else-return
         return fetch_ipfs(item_type, public_id=public_id, cwd=cwd, dest=dest)
 
 

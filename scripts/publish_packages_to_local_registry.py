@@ -52,7 +52,7 @@ def main() -> None:
     packages = get_package_list(args.package_dir)
     for package_path in packages:
         print(f"Processing package: {package_path}")
-        run(["python3", "-m", "aea.cli", "ipfs", "add", str(package_path)])
+        run(["python3", "-m", "aea.cli", "ipfs", "add", str(package_path)], check=False)
     print("Done!")
 
 
