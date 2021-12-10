@@ -29,6 +29,7 @@ import click
 from aea import get_current_aea_version
 from aea.cli.add import add_item
 from aea.cli.init import do_init
+from aea.cli.registry.settings import REGISTRY_HTTP
 from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
@@ -126,7 +127,7 @@ def create_aea(
 
     if author is not None:
         if is_local:
-            do_init(author, False, False, False)  # pragma: nocover
+            do_init(author, False, False, False, REGISTRY_HTTP)  # pragma: nocover
         else:
             raise click.ClickException(
                 "Author is not set up. Please use 'aea init' to initialize."
@@ -198,7 +199,6 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         required_ledgers=[DEFAULT_LEDGER],
         default_connection=None,
         dependencies=dependencies_from_json(DEFAULT_DEPENDENCIES),
-        package_hash="",
     )
 
     with open_file(
