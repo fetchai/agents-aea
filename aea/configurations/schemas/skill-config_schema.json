@@ -21,9 +21,7 @@
     "models",
     "dependencies",
     "description",
-    "is_abstract",
-    "package_hash",
-    "ipfs"
+    "is_abstract"
   ],
   "properties": {
     "name": {
@@ -101,12 +99,6 @@
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
-    },
-    "package_hash": {
-      "$ref": "definitions.json#/definitions/package_hash"
-    },
-    "ipfs": {
-      "$ref": "definitions.json#/definitions/ipfs"
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"

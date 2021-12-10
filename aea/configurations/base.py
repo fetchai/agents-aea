@@ -51,7 +51,6 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_FINGERPRINT_IGNORE_PATTERNS,
-    DEFAULT_IPFS_HASH_CONFIG,
     DEFAULT_LICENSE,
     DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL_CONFIG_FILE,
@@ -215,8 +214,6 @@ class PackageConfiguration(Configuration, ABC):
         "fingerprint",
         "fingerprint_ignore_patterns",
         "build_entrypoint",
-        "package_hash",
-        "ipfs",
         "_aea_version",
         "_aea_version_specifiers",
         "_directory",
@@ -238,8 +235,6 @@ class PackageConfiguration(Configuration, ABC):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
     ) -> None:
         """
         Initialize a package configuration.
@@ -252,8 +247,6 @@ class PackageConfiguration(Configuration, ABC):
         :param fingerprint: the fingerprint.
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         :param build_entrypoint: path to a script to execute at build time.
-        :param package_hash: package hash.
-        :param ipfs: mappings of dependencies to their respective IPFS hashes.
         """
         super().__init__()
         if name is None or author is None:  # pragma: nocover
@@ -269,8 +262,6 @@ class PackageConfiguration(Configuration, ABC):
             else []
         )
         self.build_entrypoint = build_entrypoint
-        self.package_hash = package_hash or ""
-        self.ipfs = DEFAULT_IPFS_HASH_CONFIG if ipfs is None else ipfs
         self._aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self.parse_aea_version_specifier(aea_version)
 
@@ -483,8 +474,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         build_entrypoint: Optional[str] = None,
         build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
     ) -> None:
         """Set component configuration."""
         super().__init__(
@@ -496,8 +485,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
-            package_hash=package_hash,
-            ipfs=ipfs,
         )
         self.pypi_dependencies: Dependencies = (
             dependencies if dependencies is not None else {}
@@ -593,8 +580,6 @@ class ConnectionConfig(ComponentConfiguration):
         "config",
         "is_abstract",
         "cert_requests",
-        "package_hash",
-        "ipfs",
     )
 
     def __init__(
@@ -607,8 +592,6 @@ class ConnectionConfig(ComponentConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
         build_directory: Optional[str] = None,
         class_name: str = "",
         protocols: Optional[Set[PublicId]] = None,
@@ -629,17 +612,29 @@ class ConnectionConfig(ComponentConfiguration):
             enforce(version != "", "Version or connection_id must be set.")
         else:
             enforce(
-                name in ("", connection_id.name,),
+                name
+                in (
+                    "",
+                    connection_id.name,
+                ),
                 "Non matching name in ConnectionConfig name and public id.",
             )
             name = connection_id.name
             enforce(
-                author in ("", connection_id.author,),
+                author
+                in (
+                    "",
+                    connection_id.author,
+                ),
                 "Non matching author in ConnectionConfig author and public id.",
             )
             author = connection_id.author
             enforce(
-                version in ("", connection_id.version,),
+                version
+                in (
+                    "",
+                    connection_id.version,
+                ),
                 "Non matching version in ConnectionConfig version and public id.",
             )
             version = connection_id.version
@@ -654,8 +649,6 @@ class ConnectionConfig(ComponentConfiguration):
             build_entrypoint,
             build_directory,
             dependencies,
-            package_hash=package_hash,
-            ipfs=ipfs,
         )
         self.class_name = class_name
         self.protocols = protocols if protocols is not None else set()
@@ -703,8 +696,6 @@ class ConnectionConfig(ComponentConfiguration):
                 "license": self.license,
                 "aea_version": self.aea_version,
                 "fingerprint": self.fingerprint,
-                "package_hash": self.package_hash,
-                "ipfs": self.ipfs,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 PROTOCOLS: sorted(map(str, self.protocols)),
                 CONNECTIONS: sorted(map(str, self.connections)),
@@ -773,8 +764,6 @@ class ConnectionConfig(ComponentConfiguration):
             description=cast(str, obj.get("description", "")),
             is_abstract=obj.get("is_abstract", False),
             cert_requests=cert_requests,
-            package_hash=obj.get("package_hash", ""),
-            ipfs=obj.get("ipfs", DEFAULT_IPFS_HASH_CONFIG),
             **cast(dict, obj.get("config", {})),
         )
 
@@ -797,8 +786,6 @@ class ProtocolConfig(ComponentConfiguration):
         "dependencies",
         "description",
         "protocol_specification_id",
-        "package_hash",
-        "ipfs",
     )
 
     def __init__(
@@ -815,8 +802,6 @@ class ProtocolConfig(ComponentConfiguration):
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         protocol_specification_id: Optional[str] = None,
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
     ) -> None:
         """Initialize a connection configuration object."""
         super().__init__(
@@ -830,8 +815,6 @@ class ProtocolConfig(ComponentConfiguration):
             build_entrypoint,
             build_directory,
             dependencies,
-            package_hash=package_hash,
-            ipfs=ipfs,
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -859,8 +842,6 @@ class ProtocolConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "dependencies": dependencies_to_json(self.dependencies),
-                "package_hash": self.package_hash,
-                "ipfs": self.ipfs,
             }
         )
         if self.build_entrypoint:
@@ -891,8 +872,6 @@ class ProtocolConfig(ComponentConfiguration):
             build_directory=cast(Optional[str], obj.get("build_directory")),
             dependencies=dependencies,
             description=cast(str, obj.get("description", "")),
-            package_hash=obj.get("package_hash", ""),
-            ipfs=obj.get("ipfs", DEFAULT_IPFS_HASH_CONFIG),
         )
         instance = cast(ProtocolConfig, cls._apply_params_to_instance(params, instance))
 
@@ -986,8 +965,6 @@ class SkillConfig(ComponentConfiguration):
         "behaviours",
         "models",
         "is_abstract",
-        "package_hash",
-        "ipfs",
     )
 
     def __init__(
@@ -1007,8 +984,6 @@ class SkillConfig(ComponentConfiguration):
         skills: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
         is_abstract: bool = False,
     ) -> None:
         """Initialize a skill configuration."""
@@ -1023,8 +998,6 @@ class SkillConfig(ComponentConfiguration):
             build_entrypoint,
             build_directory,
             dependencies,
-            package_hash=package_hash,
-            ipfs=ipfs,
         )
         self.connections = connections if connections is not None else set()
         self.protocols = protocols if protocols is not None else set()
@@ -1091,8 +1064,6 @@ class SkillConfig(ComponentConfiguration):
                 "models": {key: m.json for key, m in self.models.read_all()},
                 "dependencies": dependencies_to_json(self.dependencies),
                 "is_abstract": self.is_abstract,
-                "package_hash": self.package_hash,
-                "ipfs": self.ipfs,
             }
         )
         if self.build_entrypoint:
@@ -1140,8 +1111,6 @@ class SkillConfig(ComponentConfiguration):
             description=description,
             is_abstract=obj.get("is_abstract", False),
             build_directory=obj.get("build_directory"),
-            package_hash=obj.get("package_hash", ""),
-            ipfs=obj.get("ipfs", DEFAULT_IPFS_HASH_CONFIG),
         )
 
         instance = cast(SkillConfig, cls._apply_params_to_instance(params, instance))
@@ -1209,8 +1178,6 @@ class AgentConfig(PackageConfiguration):
             "required_ledgers",
             "default_routing",
             "storage_uri",
-            "package_hash",
-            "ipfs",
         ]
     )
     CHECK_EXCLUDES = [
@@ -1251,8 +1218,6 @@ class AgentConfig(PackageConfiguration):
         "data_dir",
         "_component_configurations",
         "dependencies",
-        "package_hash",
-        "ipfs",
     )
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
@@ -1286,8 +1251,6 @@ class AgentConfig(PackageConfiguration):
         data_dir: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
         dependencies: Optional[Dependencies] = None,
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
     ) -> None:
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1299,8 +1262,6 @@ class AgentConfig(PackageConfiguration):
             fingerprint,
             fingerprint_ignore_patterns,
             build_entrypoint,
-            package_hash=package_hash,
-            ipfs=ipfs,
         )
         self.agent_name = self.name
         self.description = description
@@ -1465,8 +1426,6 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "component_configurations": self.component_configurations_json(),
                 "dependencies": dependencies_to_json(self.dependencies),
-                "package_hash": self.package_hash,
-                "ipfs": self.ipfs,
             }
         )  # type: Dict[str, Any]
 
@@ -1545,8 +1504,6 @@ class AgentConfig(PackageConfiguration):
             dependencies=cast(
                 Dependencies, dependencies_from_json(obj.get("dependencies", {}))
             ),
-            package_hash=obj.get("package_hash", ""),
-            ipfs=obj.get("ipfs", DEFAULT_IPFS_HASH_CONFIG),
         )
         instance = cast(AgentConfig, cls._apply_params_to_instance(params, instance))
 
@@ -1561,17 +1518,35 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         agent_config.connections = set(
-            map(PublicId.from_str, obj.get(CONNECTIONS, []),)
+            map(
+                PublicId.from_str,
+                obj.get(CONNECTIONS, []),
+            )
         )
 
         # parse contracts public ids
-        agent_config.contracts = set(map(PublicId.from_str, obj.get(CONTRACTS, []),))
+        agent_config.contracts = set(
+            map(
+                PublicId.from_str,
+                obj.get(CONTRACTS, []),
+            )
+        )
 
         # parse protocol public ids
-        agent_config.protocols = set(map(PublicId.from_str, obj.get(PROTOCOLS, []),))
+        agent_config.protocols = set(
+            map(
+                PublicId.from_str,
+                obj.get(PROTOCOLS, []),
+            )
+        )
 
         # parse skills public ids
-        agent_config.skills = set(map(PublicId.from_str, obj.get(SKILLS, []),))
+        agent_config.skills = set(
+            map(
+                PublicId.from_str,
+                obj.get(SKILLS, []),
+            )
+        )
 
         # parse component configurations
         component_configurations = {}
@@ -1737,8 +1712,6 @@ class ProtocolSpecification(ProtocolConfig):
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
             description=cast(str, obj.get("description", "")),
-            package_hash=obj.get("package_hash", ""),
-            ipfs=obj.get("ipfs", DEFAULT_IPFS_HASH_CONFIG),
         )
 
         instance = cast(
@@ -1770,8 +1743,6 @@ class ContractConfig(ComponentConfiguration):
         "description",
         "contract_interface_paths",
         "class_name",
-        "package_hash",
-        "ipfs",
     )
 
     def __init__(
@@ -1789,8 +1760,6 @@ class ContractConfig(ComponentConfiguration):
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
-        package_hash: Optional[str] = None,
-        ipfs: Optional[Dict[str, Dict[str, str]]] = None,
     ) -> None:
         """Initialize a protocol configuration object."""
         super().__init__(
@@ -1804,8 +1773,6 @@ class ContractConfig(ComponentConfiguration):
             build_entrypoint,
             build_directory,
             dependencies,
-            package_hash=package_hash,
-            ipfs=ipfs,
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
@@ -1831,8 +1798,6 @@ class ContractConfig(ComponentConfiguration):
                 "class_name": self.class_name,
                 "contract_interface_paths": self.contract_interface_paths,
                 "dependencies": dependencies_to_json(self.dependencies),
-                "package_hash": self.package_hash,
-                "ipfs": self.ipfs,
             }
         )
         if self.build_entrypoint:
@@ -1868,8 +1833,6 @@ class ContractConfig(ComponentConfiguration):
                 Dict[str, str], obj.get("contract_interface_paths", {})
             ),
             class_name=obj.get("class_name", ""),
-            package_hash=obj.get("package_hash", ""),
-            ipfs=obj.get("ipfs", DEFAULT_IPFS_HASH_CONFIG),
         )
         instance = cast(ContractConfig, cls._apply_params_to_instance(params, instance))
 

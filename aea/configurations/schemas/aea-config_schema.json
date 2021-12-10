@@ -20,9 +20,7 @@
     "default_connection",
     "protocols",
     "skills",
-    "dependencies",
-    "package_hash",
-    "ipfs"
+    "dependencies"
   ],
   "properties": {
     "aea_version": {
@@ -170,12 +168,6 @@
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
-    },
-    "package_hash": {
-      "$ref": "definitions.json#/definitions/package_hash"
-    },
-    "ipfs": {
-      "$ref": "definitions.json#/definitions/ipfs"
     }
   }
 }
