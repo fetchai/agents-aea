@@ -25,7 +25,7 @@ This module contains the classes required for ml_trade dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,9 +37,13 @@ from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 class MlTradeDialogue(Dialogue):
     """The ml_trade dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.CFP})
-    TERMINAL_PERFORMATIVES = frozenset({MlTradeMessage.Performative.DATA})
-    VALID_REPLIES = {
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {MlTradeMessage.Performative.CFP}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {MlTradeMessage.Performative.DATA}
+    )
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         MlTradeMessage.Performative.ACCEPT: frozenset(
             {MlTradeMessage.Performative.DATA}
         ),
@@ -74,7 +78,7 @@ class MlTradeDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :return: None
+        :param message_class: the message class used
         """
         Dialogue.__init__(
             self,
@@ -102,7 +106,8 @@ class MlTradeDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :return: None
+        :param dialogue_class: the dialogue class used
+        :param role_from_first_message: the callable determining role from first message
         """
         Dialogues.__init__(
             self,

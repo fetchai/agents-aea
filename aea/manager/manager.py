@@ -281,7 +281,9 @@ class AgentRunProcessTask(BaseAgentRunTask):
             t.start()
             loop = asyncio.get_event_loop()
             aea.runtime.set_loop(loop)
-            aea.start()
+            aea.runtime.start()
+            loop.run_until_complete(aea.runtime.wait_completed())
+
         except BaseException as e:  # pylint: disable=broad-except
             print(
                 f"Exception in agent subprocess task at {datetime.datetime.now()}:\n{format_exc()}"
@@ -291,8 +293,8 @@ class AgentRunProcessTask(BaseAgentRunTask):
             run_stop_thread = False
             if t:
                 t.join(10)
-
-        result_queue.put(r)
+            result_queue.put(r)
+            aea.logger.debug("process task stopped")
 
     def stop(self) -> None:
         """Stop the task."""

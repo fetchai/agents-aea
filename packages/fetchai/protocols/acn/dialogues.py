@@ -25,7 +25,7 @@ This module contains the classes required for acn dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,17 +37,17 @@ from packages.fetchai.protocols.acn.message import AcnMessage
 class AcnDialogue(Dialogue):
     """The acn dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset(
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {
             AcnMessage.Performative.REGISTER,
             AcnMessage.Performative.LOOKUP_REQUEST,
             AcnMessage.Performative.AEA_ENVELOPE,
         }
     )
-    TERMINAL_PERFORMATIVES = frozenset(
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
         {AcnMessage.Performative.STATUS, AcnMessage.Performative.LOOKUP_RESPONSE}
     )
-    VALID_REPLIES = {
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         AcnMessage.Performative.AEA_ENVELOPE: frozenset(
             {AcnMessage.Performative.STATUS}
         ),
@@ -83,7 +83,7 @@ class AcnDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :return: None
+        :param message_class: the message class used
         """
         Dialogue.__init__(
             self,
@@ -113,7 +113,8 @@ class AcnDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :return: None
+        :param dialogue_class: the dialogue class used
+        :param role_from_first_message: the callable determining role from first message
         """
         Dialogues.__init__(
             self,
