@@ -33,7 +33,8 @@ from aea_cli_ipfs.ipfs_utils import (
     RemoveError,
 )
 
-from aea.cli.utils.config import update_item_config
+from aea.cli.registry.ipfs import register_item_to_local_registry
+from aea.cli.utils.config import load_item_config
 
 
 @click.group()
@@ -90,6 +91,7 @@ def add(
     """Add directory to ipfs, if not directory specified the current one will be added."""
     dir_path = dir_path or os.getcwd()
     ipfs_tool = click_context.obj
+
     click.echo(f"Starting processing: {dir_path}")
     name, hash_, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
 
@@ -97,12 +99,19 @@ def add(
     if len(yaml_files) > 0:
         (config_file_path,) = yaml_files
         package_path, config_file = os.path.split(config_file_path)
-        component_type, _ = os.path.splitext(config_file)
+        item_type, _ = os.path.splitext(config_file)
         package_path = Path(package_path)
-        component_type = "agent" if component_type == "aea-config" else component_type
-        update_item_config(component_type, package_path, package_hash=hash_)
+        item_type = "agent" if item_type == "aea-config" else item_type
+        item_config = load_item_config(item_type=item_type, package_path=package_path)
+        register_item_to_local_registry(
+            item_type=item_type, public_id=item_config.public_id, package_hash=hash_,
+        )
+        click.echo(
+            f"Registered item with:\n\tpublic id : {item_config.public_id}\n\thash : {hash_}"
+        )
+    else:
+        click.echo(f"Added: `{name}`, hash is {hash_}")
 
-    click.echo(f"Added: `{name}`, hash is {hash_}")
     if publish:
         click.echo("Publishing...")
         try:
