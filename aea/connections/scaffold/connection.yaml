@@ -19,11 +19,6 @@ config:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}
-package_hash: ''
+
 is_abstract: false
 cert_requests: []
-ipfs:
-  connections: {}
-  protocols: {}
-  skills: {}
-  contracts: {}
