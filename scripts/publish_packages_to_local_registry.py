@@ -23,15 +23,17 @@
 from argparse import ArgumentParser, Namespace
 from glob import glob
 from pathlib import Path
-from subprocess import run
 from typing import List, Union
+
+from aea_cli_ipfs.core import register_package  # type: ignore
+from aea_cli_ipfs.ipfs_utils import IPFSDaemon, IPFSTool  # type: ignore
 
 
 def get_arguments() -> Namespace:
     """Returns cli arguments."""
     parser = ArgumentParser()
     parser.add_argument(
-        "--package_dir", "-pd", type=str, default="./packages", required=False
+        "--package-dir", "-pd", type=str, default="./packages", required=False
     )
     return parser.parse_args()
 
@@ -50,9 +52,11 @@ def main() -> None:
     """Main function."""
     args = get_arguments()
     packages = get_package_list(args.package_dir)
-    for package_path in packages:
-        print(f"Processing package: {package_path}")
-        run(["python3", "-m", "aea.cli", "ipfs", "add", str(package_path)], check=False)
+    ipfs_tool = IPFSTool()
+    with IPFSDaemon(offline=True):
+        for package_path in packages:
+            print(f"Processing package: {package_path}")
+            register_package(ipfs_tool=ipfs_tool, dir_path=package_path, no_pin=False)
     print("Done!")
 
 
