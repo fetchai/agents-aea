@@ -186,12 +186,10 @@ def _add_item_deps(
 
 def fetch_item_remote(item_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
     """Fetch item from a rmeote backend."""
-
     registry_config = get_registry_config()
     registry_type = registry_config.get("default")
-
     click.echo(f"Using registry: {registry_type} ")
-    if registry_type == REGISTRY_HTTP:
+    if registry_type == REGISTRY_HTTP:  # pylint: disable=no-else-return
         return fetch_package(item_type, public_id=public_id, cwd=cwd, dest=dest)
     else:  # pylint: disable=no-else-return
         return fetch_ipfs(item_type, public_id=public_id, cwd=cwd, dest=dest)

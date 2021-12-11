@@ -457,10 +457,8 @@ def validate_registry_type(default_registry: Optional[str] = None) -> str:
             show_choices=True,
             default=REGISTRY_HTTP,
         )
-    assert (
-        default_registry in REGISTRY_TYPES
-    ), f"Default registry type should be one of {REGISTRY_TYPES}"
-
+    if default_registry not in REGISTRY_TYPES:
+        raise ValueError(f"Default registry type should be one of {REGISTRY_TYPES}")
     return default_registry
 
 

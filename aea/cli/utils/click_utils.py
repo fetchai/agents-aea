@@ -145,14 +145,14 @@ def registry_flag(
             is_flag=True,
             cls=MutuallyExclusiveOption,
             help=help_local,
-            mutually_exclusive=["remote", "ipfs"],
+            mutually_exclusive=["remote",],  # noqa: E231
         )(f)
         f = option(
             "--remote",
             is_flag=True,
             cls=MutuallyExclusiveOption,
             help=help_remote,
-            mutually_exclusive=["local", "ipfs"],
+            mutually_exclusive=["local",],  # noqa: E231
         )(f)
         return f
 
