@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 """Core components for `ipfs cli command`."""
 import os
-import time
-from contextlib import suppress
 from glob import glob
 from pathlib import Path
 from typing import Any, Optional
@@ -39,30 +37,21 @@ from aea.cli.utils.config import load_item_config
 
 @click.group()
 @click.pass_context
-def ipfs(click_context: click.Context) -> None:
+@click.option("--online", is_flag=True)
+def ipfs(click_context: click.Context, online: bool) -> None:
     """IPFS Commands"""
-    ipfs_tool = IPFSTool()
+    ipfs_tool = IPFSTool(offline=not online)
     click_context.obj = ipfs_tool
     try:
-        ipfs_tool.chec_ipfs_node_running()
-    except NodeError as e:
+        ipfs_tool.check_ipfs_node_running()
+    except NodeError:
         click.echo("Can not connect to the local ipfs node. Starting own one.")
         ipfs_tool.daemon.start()
-        for _ in range(10):
-            with suppress(NodeError):  # pragma: nocover
-                ipfs_tool.chec_ipfs_node_running()
-                click.echo("ipfs node started.")
-                break
-            time.sleep(1)
-        else:
-            raise click.ClickException(
-                "Failed to connect or start ipfs node! Please check ipfs is installed or launched!"
-            ) from e
 
 
 @ipfs.resultcallback()
 @click.pass_context
-def process_result(click_context: click.Context, *_: Any) -> None:
+def process_result(click_context: click.Context, *_: Any, **__: Any) -> None:
     """Tear down command group."""
     ipfs_tool = click_context.obj
     if ipfs_tool.daemon.is_started():  # pragma: nocover
@@ -91,31 +80,11 @@ def add(
     """Add directory to ipfs, if not directory specified the current one will be added."""
     dir_path = dir_path or os.getcwd()
     ipfs_tool = click_context.obj
-
-    click.echo(f"Starting processing: {dir_path}")
-    name, hash_, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
-
-    yaml_files = glob(str(Path(dir_path) / "*.yaml"))
-    if len(yaml_files) > 0:
-        (config_file_path,) = yaml_files
-        package_path, config_file = os.path.split(config_file_path)
-        item_type, _ = os.path.splitext(config_file)
-        package_path = Path(package_path)
-        item_type = "agent" if item_type == "aea-config" else item_type
-        item_config = load_item_config(item_type=item_type, package_path=package_path)
-        register_item_to_local_registry(
-            item_type=item_type, public_id=item_config.public_id, package_hash=hash_,
-        )
-        click.echo(
-            f"Registered item with:\n\tpublic id : {item_config.public_id}\n\thash : {hash_}"
-        )
-    else:
-        click.echo(f"Added: `{name}`, hash is {hash_}")
-
+    package_hash = register_package(ipfs_tool, dir_path, no_pin)
     if publish:
         click.echo("Publishing...")
         try:
-            response = ipfs_tool.publish(hash_)
+            response = ipfs_tool.publish(package_hash)
             click.echo(f"Published to {response['Name']}")
         except PublishError as e:
             raise click.ClickException(f"Publish failed: {str(e)}") from e
@@ -158,3 +127,35 @@ def download(
         click.echo("Download complete!")
     except DownloadError as e:  # pragma: nocover
         raise click.ClickException(str(e)) from e
+
+
+def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool,) -> str:
+    """
+    Register package to IPFS registry.
+
+    :param ipfs_tool: instance of IPFSTool.
+    :param dir_path: package directory.
+    :param no_pin: pin object or not.
+    :return: package hash
+    """
+    click.echo(f"Starting processing: {dir_path}")
+    name, package_hash, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
+    yaml_files = glob(str(Path(dir_path) / "*.yaml"))
+    if len(yaml_files) > 0:
+        (config_file_path,) = yaml_files
+        package_path, config_file = os.path.split(config_file_path)
+        item_type, _ = os.path.splitext(config_file)
+        package_path = Path(package_path)
+        item_type = "agent" if item_type == "aea-config" else item_type
+        item_config = load_item_config(item_type=item_type, package_path=package_path)
+        register_item_to_local_registry(
+            item_type=item_type,
+            public_id=item_config.public_id,
+            package_hash=package_hash,
+        )
+        click.echo(
+            f"Registered item with:\n\tpublic id : {item_config.public_id}\n\thash : {package_hash}"
+        )
+    else:
+        click.echo(f"Added: `{name}`, hash is {package_hash}")
+    return package_hash
