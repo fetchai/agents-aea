@@ -40,11 +40,10 @@ def get_ipfs_hash_from_public_id(
         local_registry_data = json.load(fp)
 
     if public_id.package_version.is_latest:
-        public_id_without_version = f"{public_id.author}/{public_id.name}"
         package_versions: List[PublicId] = [
             PublicId.from_str(_public_id)
             for _public_id in local_registry_data.get(f"{item_type}s").keys()
-            if public_id_without_version == _public_id.split(":")[0]
+            if public_id.same_prefix(PublicId.from_str(_public_id))
         ]
         package_versions = list(
             reversed(sorted(package_versions, key=lambda x: x.package_version))
@@ -96,6 +95,7 @@ def fetch_ipfs(
         from aea_cli_ipfs.ipfs_utils import (  # type: ignore # pylint: disable=import-outside-toplevel
             DownloadError,
             IPFSTool,
+            NodeError,
         )
     except ImportError:
         click.echo("Please install IPFS plugin.")
@@ -107,16 +107,24 @@ def fetch_ipfs(
     )
 
     if package_hash is None:
-        raise ValueError(f"Couldn't retrive hash for package {public_id}")
+        raise click.ClickException(f"Couldn't retrive hash for package {public_id}")
 
     ipfs_tool = IPFSTool()
+    try:
+        ipfs_tool.check_ipfs_node_running()
+    except NodeError:
+        click.echo("Can not connect to the local ipfs node. Starting own one.")
+        ipfs_tool.daemon.start()
+
     try:
         click.echo(f"Downloading {public_id} from IPFS.")
         *_download_dir, _ = os.path.split(dest)
         download_dir = os.path.sep.join(_download_dir)
         ipfs_tool.download(package_hash, download_dir)
         package_path = Path(dest).absolute()
+        ipfs_tool.daemon.stop()
         return package_path
 
     except DownloadError as e:  # pragma: nocover
+        ipfs_tool.daemon.stop()
         raise click.ClickException(str(e)) from e
