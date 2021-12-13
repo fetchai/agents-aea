@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Union, cast
 
 import click
-from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.ipfs import fetch_ipfs
@@ -199,10 +198,8 @@ def fetch_item_remote(
     registry_type = registry_config.get("default")
     click.echo(f"Using registry: {registry_type} ")
     if registry_type == REGISTRY_IPFS:
-        with IPFSDaemon(
-            offline=True
-        ):  # to prevent IPFS daemon from restarting when fetching recutsively
-            return fetch_ipfs(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
+        return fetch_ipfs(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
+
     return fetch_package(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
 
 
