@@ -1,10 +1,5 @@
-If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective, you can use the AEA framework.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-This example will take you through a simple AEA to familiarise you with the basics of the framework.
-
-## System Requirements
+## Dependencies & System Requirements
 
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
@@ -99,13 +94,11 @@ you can follow the rest of the guide the same way as if not using docker.
 ​
 </details>
 
-## Preliminaries
+## Getting Started
 
 Ensure, you are in a clean working directory:
 
-- either you create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
-
-- or you clone the template repo as described in `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
+- Create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
 
 At this point, when typing `ls` you should see a single folder called `packages` in your working environment. This will act as your local registry for AEA components.
 
@@ -131,12 +124,12 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
 ``` bash
-pip install aea[all]
+pip install open-aea[all]
 ```
 
 If you are using `zsh` rather than `bash` type
 ``` zsh
-pip install 'aea[all]'
+pip install 'open-aea[all]'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
@@ -176,6 +169,8 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
   <p class="admonition-title">Note</p>
   <p>If you would rather not create an account on the registry at this point, then run <code>aea init --local</code> instead.</p>
 </div>
+
+
 
 ## Echo skill demo
 
