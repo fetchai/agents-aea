@@ -42,6 +42,10 @@ DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
 class TacBehaviour(Behaviour):
     """This class implements the TAC control behaviour."""
 
+    def setup(self) -> None:
+        """Implement the setup."""
+        pass
+
     def act(self) -> None:
         """Implement the act."""
         game = cast(Game, self.context.game)
@@ -155,6 +159,10 @@ class TacBehaviour(Behaviour):
                 "computed equilibrium:\n{}".format(game.equilibrium_summary)
             )
             self.context.is_active = False
+
+    def teardown(self) -> None:
+        """Implement the setup."""
+        pass
 
 
 class SoefRegisterBehaviour(TickerBehaviour):
