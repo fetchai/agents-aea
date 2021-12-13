@@ -72,7 +72,6 @@ class AgentsInfo:
 
         :param agents_info_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param agents_info_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         agents_info_protobuf_object.agents_info = DictProtobufStructSerializer.encode(
             agents_info_object.body
@@ -129,7 +128,6 @@ class OefErrorOperation(Enum):
 
         :param oef_error_operation_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param oef_error_operation_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         oef_error_operation_protobuf_object.oef_error = oef_error_operation_object.value
 

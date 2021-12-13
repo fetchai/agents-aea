@@ -20,7 +20,11 @@
 """
 This module contains the support resources for the oef_search protocol.
 
+<<<<<<< HEAD
 It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.2`.
+=======
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.1.0`.
+>>>>>>> f16497783ef9f13335cd59413ea3daff888c7e34
 """
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage

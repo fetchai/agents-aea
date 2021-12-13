@@ -1,16 +1,16 @@
-name: fetch_beacon
+name: fetch_block
 author: fetchai
 version: 0.12.0
 type: skill
-description: Retrieve the value of the Fetch DRB
+description: Retrieve the latest block from the Fetch ledger
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
-  __init__.py: QmZ8SMyaNwQyqcveJaKWKnrGQAiB3nRB6NpGHkP32twcfD
-  behaviours.py: QmXoRN4WPqJPQtL1hHrERcvvAaT2CgvgERqvrWbhUPRdyz
-  dialogues.py: QmPCbw5TULaSfnqrqTm9vMujPhftrh4AUbSZP8PXbX8JHJ
-  handlers.py: QmZW79Ck4q72LLDYCwbAywTZ77EkeTDxFUPrw7zftH4d6j
+  README.md: QmTSH7GkNmRif1a7dZf5aTmBjkr2tVpu7bnBNMTVFKfg5Z
+  __init__.py: QmXSXYE5iyRZ8xuc5FiJAJFX2wa4chz9PUMG8W5P5V1R8U
+  behaviours.py: QmPJ3jtVrDyeWv64yiQiUcHCxpLMdoFVwXHKHD2bQcaTvZ
+  dialogues.py: QmSdenuy6LGTPFJQUekEUAHRJoFpSYdbG1TQQb5TsK6kz2
+  handlers.py: QmUAiZPnqJMYuZf8dgGDVrYVXmyJ2AAK1XuvheVsR4ENBC
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.19.0
@@ -19,10 +19,10 @@ protocols:
 - fetchai/ledger_api:1.0.0
 skills: []
 behaviours:
-  fetch_beacon_behaviour:
+  fetch_block_behaviour:
     args:
       tick_interval: 5
-    class_name: FetchBeaconBehaviour
+    class_name: FetchBlockBehaviour
 handlers:
   ledger_api:
     args: {}
