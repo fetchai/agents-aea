@@ -20,7 +20,7 @@
 import os
 from glob import glob
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 import click
 from aea_cli_ipfs.ipfs_utils import (
@@ -33,6 +33,7 @@ from aea_cli_ipfs.ipfs_utils import (
 
 from aea.cli.registry.ipfs import register_item_to_local_registry
 from aea.cli.utils.config import load_item_config
+from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
 
 
 @click.group()
@@ -129,6 +130,22 @@ def download(
         raise click.ClickException(str(e)) from e
 
 
+def _get_path_data(dir_path: str) -> Optional[Tuple[str, str]]:
+    """
+    Returns the file path for item config file.
+
+    :param dir_path: directory path.
+    :return: package path and item type.
+    """
+
+    yaml_files = glob(str(Path(dir_path) / "*.yaml"))
+    for config_file_path in yaml_files:
+        package_path, config_file = os.path.split(config_file_path)
+        if config_file in CONFIG_FILE_TO_PACKAGE_TYPE.keys():
+            return (package_path, CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
+    return None
+
+
 def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool,) -> str:
     """
     Register package to IPFS registry.
@@ -138,15 +155,13 @@ def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool,) -> str:
     :param no_pin: pin object or not.
     :return: package hash
     """
-    click.echo(f"Starting processing: {dir_path}")
+
+    click.echo(f"Processing package: {dir_path}")
     name, package_hash, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
-    yaml_files = glob(str(Path(dir_path) / "*.yaml"))
-    if len(yaml_files) > 0:
-        (config_file_path,) = yaml_files
-        package_path, config_file = os.path.split(config_file_path)
-        item_type, _ = os.path.splitext(config_file)
+    path_data = _get_path_data(dir_path)
+    if path_data is not None:
+        package_path, item_type = path_data
         package_path = Path(package_path)
-        item_type = "agent" if item_type == "aea-config" else item_type
         item_config = load_item_config(item_type=item_type, package_path=package_path)
         register_item_to_local_registry(
             item_type=item_type,
@@ -154,7 +169,7 @@ def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool,) -> str:
             package_hash=package_hash,
         )
         click.echo(
-            f"Registered item with:\n\tpublic id : {item_config.public_id}\n\thash : {package_hash}"
+            f"Registered item with:\n\titem_type: {item_type}\n\tpublic id : {item_config.public_id}\n\thash : {package_hash}"
         )
     else:
         click.echo(f"Added: `{name}`, hash is {package_hash}")
