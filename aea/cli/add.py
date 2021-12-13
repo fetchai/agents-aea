@@ -23,10 +23,11 @@ from pathlib import Path
 from typing import Union, cast
 
 import click
+from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.ipfs import fetch_ipfs
-from aea.cli.registry.settings import REGISTRY_HTTP
+from aea.cli.registry.settings import REGISTRY_IPFS
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import get_registry_config, load_item_config
 from aea.cli.utils.context import Context
@@ -34,9 +35,11 @@ from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import (
     copy_package_directory,
+    find_item_in_distribution,
     find_item_locally,
     get_item_id_present,
     get_package_path,
+    is_distributed_item,
     is_fingerprint_correct,
     is_item_present,
     register_item,
@@ -107,36 +110,40 @@ def skill(ctx: Context, skill_public_id: PublicId) -> None:
 
 
 @clean_after
-def add_item(ctx: Context, item_type: str, public_id: PublicId) -> None:
+def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     """
     Add an item.
 
     :param ctx: Context object.
     :param item_type: the item type.
-    :param public_id: the item public id.
+    :param item_public_id: the item public id.
     """
     is_local = ctx.config.get("is_local")
     is_mixed = ctx.config.get("is_mixed")
 
-    click.echo(f"Adding {item_type} '{public_id}'...")
-    if is_item_present(ctx.cwd, ctx.agent_config, item_type, public_id):
-        present_item_id = get_item_id_present(ctx.agent_config, item_type, public_id)
+    click.echo(f"Adding {item_type} '{item_public_id}'...")
+    if is_item_present(ctx.cwd, ctx.agent_config, item_type, item_public_id):
+        present_item_id = get_item_id_present(
+            ctx.agent_config, item_type, item_public_id
+        )
         raise click.ClickException(
             "A {} with id '{}' already exists. Aborting...".format(
                 item_type, present_item_id
             )
         )
 
-    dest_path = get_package_path(ctx.cwd, item_type, public_id)
+    dest_path = get_package_path(ctx.cwd, item_type, item_public_id)
     ctx.clean_paths.append(dest_path)
 
     if is_mixed:
-        package_path = fetch_item_mixed(ctx, item_type, public_id, dest_path)
+        package_path = fetch_item_mixed(ctx, item_type, item_public_id, dest_path)
     elif is_local:
-        package_path = fetch_item_locally(ctx, item_type, public_id, dest_path)
+        package_path = find_item_locally_or_distributed(
+            ctx, item_type, item_public_id, dest_path
+        )
     else:
         package_path = fetch_item_remote(
-            item_type, public_id=public_id, cwd=ctx.cwd, dest=dest_path
+            item_type, item_public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
     item_config = load_item_config(item_type, package_path)
     if not ctx.config.get("skip_consistency_check") and not is_fingerprint_correct(
@@ -184,36 +191,45 @@ def _add_item_deps(
                 add_item(ctx, SKILL, skill_public_id)
 
 
-def fetch_item_remote(item_type: str, public_id: PublicId, cwd: str, dest: str) -> Path:
+def fetch_item_remote(
+    item_type: str, item_public_id: PublicId, cwd: str, dest: str
+) -> Path:
     """Fetch item from a rmeote backend."""
     registry_config = get_registry_config()
     registry_type = registry_config.get("default")
     click.echo(f"Using registry: {registry_type} ")
-    if registry_type == REGISTRY_HTTP:  # pylint: disable=no-else-return
-        return fetch_package(item_type, public_id=public_id, cwd=cwd, dest=dest)
-    else:  # pylint: disable=no-else-return
-        return fetch_ipfs(item_type, public_id=public_id, cwd=cwd, dest=dest)
+    if registry_type == REGISTRY_IPFS:
+        with IPFSDaemon(
+            offline=True
+        ):  # to prevent IPFS daemon from restarting when fetching recutsively
+            return fetch_ipfs(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
+    return fetch_package(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
 
 
-def fetch_item_locally(
-    ctx: Context, item_type: str, public_id: PublicId, dest_path: str
+def find_item_locally_or_distributed(
+    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
 ) -> Path:
     """
     Unify find item locally both in case it is distributed or not.
 
     :param ctx: the CLI context.
     :param item_type: the item type.
-    :param public_id: the item public id.
+    :param item_public_id: the item public id.
     :param dest_path: the path to the destination.
     :return: the path to the found package.
     """
-    source_path, _ = find_item_locally(ctx, item_type, public_id)
-    package_path = copy_package_directory(source_path, dest_path)
+    is_distributed = is_distributed_item(item_public_id)
+    if is_distributed:  # pragma: nocover
+        source_path = find_item_in_distribution(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(source_path, dest_path)
+    else:
+        source_path, _ = find_item_locally(ctx, item_type, item_public_id)
+        package_path = copy_package_directory(source_path, dest_path)
     return package_path
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, public_id: PublicId, dest_path: str,
+    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
@@ -223,18 +239,20 @@ def fetch_item_mixed(
 
     :param ctx: the CLI context.
     :param item_type: the item type.
-    :param public_id: the item public id.
+    :param item_public_id: the item public id.
     :param dest_path: the path to the destination.
     :return: the path to the found package.
     """
     try:
-        package_path = fetch_item_locally(ctx, item_type, public_id, dest_path)
+        package_path = find_item_locally_or_distributed(
+            ctx, item_type, item_public_id, dest_path
+        )
     except click.ClickException as e:
         logger.debug(
             f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
         )
         # the following might raise exception, but we don't catch it this time
         package_path = fetch_item_remote(
-            item_type, public_id=public_id, cwd=ctx.cwd, dest=dest_path
+            item_type, item_public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
     return package_path

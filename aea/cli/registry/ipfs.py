@@ -20,29 +20,93 @@
 """Module with methods for ipfs registry."""
 
 import json
+import logging
 import os
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import click
+import jsonschema
 
 from aea.cli.utils.constants import LOCAL_REGISTRY_PATH
 from aea.configurations.base import PublicId
 from aea.helpers.io import open_file
 
 
-def get_ipfs_hash_from_public_id(
-    item_type: str, public_id: PublicId, local_registry_path: Path
-) -> Optional[str]:
+_default_logger = logging.getLogger(__name__)
+
+LocalRegistry = Dict[str, Dict[str, str]]
+
+LOCAL_REGISTRY_DEFAULT: LocalRegistry = {
+    "protocols": {},
+    "skills": {},
+    "connections": {},
+    "contracts": {},
+    "agents": {},
+}
+
+LOCAL_REGISTRY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "protocols": {
+            "type": "object",
+            "propertyNames": {"pattern": r"^[a-z][a-z0-9_]+\/[a-z_0-9]+:\d\.\d\.\d$"},
+        },
+        "skills": {"type": "object"},
+        "connections": {"type": "object"},
+        "contracts": {"type": "object"},
+        "agents": {"type": "object"},
+    },
+    "required": ["protocols", "skills", "connections", "contracts", "agents"],
+}
+
+
+def validate_registry(registry_data: LocalRegistry) -> None:
+    """
+    Validate local registry data.
+
+    :param registry_data: json like object containing registry data.
+    """
+    try:
+        jsonschema.validate(registry_data, schema=LOCAL_REGISTRY_SCHEMA)
+    except jsonschema.ValidationError as e:
+        _default_logger.debug("Registry Not Valid")
+        raise ValueError(str(e))
+
+
+def write_local_registry(registry_data: LocalRegistry) -> None:
+    """
+    Write registry data to file.
+
+    :param registry_data: json like object containing registry data.
+    """
+    validate_registry(registry_data)
+    with open_file(LOCAL_REGISTRY_PATH, mode="w+") as fp:
+        json.dump(registry_data, fp)
+
+
+def load_local_registry() -> LocalRegistry:
+    """Returns local registry data."""
+
+    local_registry_path = Path(LOCAL_REGISTRY_PATH)
+    if not local_registry_path.is_file():
+        write_local_registry(LOCAL_REGISTRY_DEFAULT)
+        return LOCAL_REGISTRY_DEFAULT
+
+    with open_file(local_registry_path, mode="r") as fp:
+        registry_data = json.load(fp)
+        validate_registry(registry_data)
+        return registry_data
+
+
+def get_ipfs_hash_from_public_id(item_type: str, public_id: PublicId) -> Optional[str]:
     """Get IPFS hash from local registry."""
 
-    with open_file(str(local_registry_path), mode="r") as fp:
-        local_registry_data = json.load(fp)
-
+    registry_data = load_local_registry()
     if public_id.package_version.is_latest:
         package_versions: List[PublicId] = [
             PublicId.from_str(_public_id)
-            for _public_id in local_registry_data.get(f"{item_type}s").keys()
+            for _public_id in registry_data.get(f"{item_type}s", {}).keys()
             if public_id.same_prefix(PublicId.from_str(_public_id))
         ]
         package_versions = list(
@@ -52,7 +116,7 @@ def get_ipfs_hash_from_public_id(
             return None
         public_id, *_ = package_versions
 
-    return local_registry_data.get(f"{item_type}s").get(str(public_id), None)
+    return registry_data.get(f"{item_type}s", {}).get(str(public_id), None)
 
 
 def register_item_to_local_registry(
@@ -66,22 +130,9 @@ def register_item_to_local_registry(
     :param package_hash: hash of package.
     """
 
-    local_registry_path = Path(LOCAL_REGISTRY_PATH)
-    if local_registry_path.is_file():
-        with open_file(local_registry_path, mode="r") as fp:
-            local_registry_data = json.load(fp)
-    else:
-        local_registry_data = {
-            "protocols": {},
-            "skills": {},
-            "connections": {},
-            "contracts": {},
-            "agents": {},
-        }
-
-    local_registry_data[f"{item_type}s"][str(public_id)] = str(package_hash)
-    with open_file(local_registry_path, mode="w+") as fp:
-        fp.write(json.dumps(local_registry_data, indent=2))
+    registry_data = load_local_registry()
+    registry_data[f"{item_type}s"][str(public_id)] = str(package_hash)
+    write_local_registry(registry_data)
 
 
 def fetch_ipfs(
@@ -101,11 +152,7 @@ def fetch_ipfs(
         click.echo("Please install IPFS plugin.")
         raise
 
-    local_registry_path = Path(LOCAL_REGISTRY_PATH)
-    package_hash = get_ipfs_hash_from_public_id(
-        item_type, public_id, local_registry_path
-    )
-
+    package_hash = get_ipfs_hash_from_public_id(item_type, public_id)
     if package_hash is None:
         raise click.ClickException(f"Couldn't retrive hash for package {public_id}")
 
@@ -117,7 +164,7 @@ def fetch_ipfs(
         ipfs_tool.daemon.start()
 
     try:
-        click.echo(f"Downloading {public_id} from IPFS.")
+        click.echo(f"Downloading {public_id}.")
         *_download_dir, _ = os.path.split(dest)
         download_dir = os.path.sep.join(_download_dir)
         ipfs_tool.download(package_hash, download_dir)

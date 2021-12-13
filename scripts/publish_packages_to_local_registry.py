@@ -55,7 +55,6 @@ def main() -> None:
     ipfs_tool = IPFSTool()
     with IPFSDaemon(offline=True):
         for package_path in packages:
-            print(f"Processing package: {package_path}")
             register_package(ipfs_tool=ipfs_tool, dir_path=package_path, no_pin=False)
     print("Done!")
 
