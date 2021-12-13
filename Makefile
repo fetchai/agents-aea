@@ -75,7 +75,7 @@ package_checks:
 
 .PHONY: docs
 docs:
-	mkdocs build --clean
+	pipenv run mkdocs build --clean
 
 .PHONY: common_checks
 common_checks: security misc_checks lint static docs

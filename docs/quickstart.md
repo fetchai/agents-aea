@@ -1,7 +1,7 @@
 
 ## Dependencies & System Requirements
 
-The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
+The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`. There are a number of base requirements to be installed prior to usage.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
@@ -119,7 +119,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
 
-## Installation
+## Installation of Open-AEA
 
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
@@ -134,7 +134,7 @@ pip install 'open-aea[all]'
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
-## Setup author name
+## Setup Open-AEA author name
 
 AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
 
@@ -149,8 +149,8 @@ You should see a similar output (with your input instead of the sample username 
 ``` bash
 Do you have a Registry account? [y/N]: n
 Create a new account on the Registry now:
-Username: fetchai
-Email: hello@fetch.ai
+Username: valory
+Email: hello@valory.xyz
 Password:
 Please make sure that passwords are equal.
 Confirm password:
@@ -162,7 +162,7 @@ Confirm password:
 
 v1.2.0
 
-AEA configurations successfully initialized: {'author': 'fetchai'}
+AEA configurations successfully initialized: {'author': 'valory'}
 ```
 
 <div class="admonition note">
@@ -179,70 +179,9 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0
+aea fetch fetchai/my_first_aea:0.27.0 --remote
 cd my_first_aea
 ```
-
-To learn more about the folder structure of an AEA project read on <a href="../package-imports/">here</a>.
-
-<details><summary>Alternatively: step by step install</summary>
-
-<b> Create a new AEA </b>
-<br>
-First, create a new AEA project and enter it.
-``` bash
-aea create my_first_aea
-cd my_first_aea
-```
-<br>
-<b>Add the stub connection</b>
-<br>
-Second, add the stub connection to the project.
-``` bash
-aea add connection fetchai/stub:0.21.0
-```
-<br>
-<b>Add the echo skill</b>
-<br>
-Third, add the echo skill to the project.
-``` bash
-aea add skill fetchai/echo:0.19.0
-```
-This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
-</details>
-
-### Echo skill
-
-Just like humans, AEAs can have _skills_ to achieve their tasks. As an agent developer, you can create skills to add to your own AEAs. You can also choose to publish your skills so others add them to their AEAs. More details on skills can be found on <a href="../skill/"> this page </a>.
-
-The above agent has an <a href="https://aea-registry.fetch.ai/details/skill/fetchai/echo/latest" target="_blank">echo skill</a>, fetched from <a href="https://aea-registry.fetch.ai" target="_blank">the registry</a>, which simply echoes any messages it receives back to its sender.
-
-### Communication via envelopes and messages
-
-AEAs use envelopes containing messages for communication. To learn more, check out the <a href="../core-components-1/">next section</a>.
-
-### Stub connection
-
-Besides skills, AEAs may have one or more _connections_ enabling them to interface with entities in the outside world. For example, an HTTP client connection allows an AEA to communicate with HTTP servers. To read more about connections see <a href="../connection/">this page</a>.
-
-In this demo, we use the stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
-
-A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
-
-The AEA waits for a new envelope posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.
-
-The format of each envelope is the following:
-
-``` bash
-TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
-```
-
-For example:
-
-``` bash
-recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
-```
-
 ### Install AEA dependencies
 
 ``` bash
@@ -286,10 +225,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ...
 ```
-
-The framework first calls the `setup` methods in the skill's `Handler` and `Behaviour` classes in that order; after which it repeatedly calls the `act` method of `Behaviour` class. This is the main agent loop in action.
-
-#### Add a message to the input file
+### Interact with the AEA
 
 From a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
 
@@ -323,7 +259,74 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 
-### Write a test for the AEA
+To learn more about the folder structure of an AEA project read on <a href="../package-imports/">here</a>.
+
+<details><summary>Alternatively: step by step install</summary>
+
+<b> Create a new AEA </b>
+<br>
+First, create a new AEA project and enter it.
+``` bash
+aea create my_first_aea
+cd my_first_aea
+```
+<br>
+<b>Add the stub connection</b>
+<br>
+Second, add the stub connection to the project.
+``` bash
+aea add connection fetchai/stub:0.21.0
+```
+<br>
+<b>Add the echo skill</b>
+<br>
+Third, add the echo skill to the project.
+``` bash
+aea add skill fetchai/echo:0.19.0
+```
+This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
+</details>
+
+## How Does This AEA work?
+
+
+### Echo skill
+
+Just like humans, AEAs can have _skills_ to achieve their tasks. As an agent developer, you can create skills to add to your own AEAs. You can also choose to publish your skills so others add them to their AEAs. More details on skills can be found on <a href="../skill/"> this page </a>.
+
+The above agent has an <a href="https://aea-registry.fetch.ai/details/skill/fetchai/echo/latest" target="_blank">echo skill</a>, fetched from <a href="https://aea-registry.fetch.ai" target="_blank">the registry</a>, which simply echoes any messages it receives back to its sender.
+
+### Communication via envelopes and messages
+
+AEAs use envelopes containing messages for communication. To learn more, check out the <a href="../core-components-1/">next section</a>.
+
+### Stub connection
+
+Besides skills, AEAs may have one or more _connections_ enabling them to interface with entities in the outside world. For example, an HTTP client connection allows an AEA to communicate with HTTP servers. To read more about connections see <a href="../connection/">this page</a>.
+
+In this demo, we use the stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
+
+A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
+
+The AEA waits for a new envelope posted to the file `my_first_aea/input_file`, and adds a response to the file `my_first_aea/output_file`.
+
+The format of each envelope is the following:
+
+``` bash
+TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
+```
+
+For example:
+
+``` bash
+recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
+```
+
+
+The framework first calls the `setup` methods in the skill's `Handler` and `Behaviour` classes in that order; after which it repeatedly calls the `act` method of `Behaviour` class. This is the main agent loop in action.
+
+## Test Quickstart
+### Write a simple test for the AEA
 
 We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
 
