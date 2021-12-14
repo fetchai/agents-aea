@@ -149,6 +149,8 @@ def test_fetch_ipfs() -> None:
         ), mock.patch(
             "aea_cli_ipfs.ipfs_utils.IPFSTool.check_ipfs_node_running",
             new=lambda *_: None,
+        ), mock.patch(
+            "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
         ):
             package_path = fetch_ipfs(
                 "protocol",
