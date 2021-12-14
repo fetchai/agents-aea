@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Union, cast
 
 import click
-from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.settings import REGISTRY_IPFS
@@ -198,6 +197,13 @@ def fetch_item_remote(
     registry_type = registry_config.get("default")
     click.echo(f"Using registry: {registry_type} ")
     if registry_type == REGISTRY_IPFS:
+        try:
+            from aea_cli_ipfs.registry import (  # type: ignore  # pylint: disable=import-outside-toplevel
+                fetch_ipfs,
+            )
+        except ImportError:
+            click.echo("Please install IPFS plugin.")
+
         return fetch_ipfs(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
 
     return fetch_package(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
@@ -226,7 +232,10 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
