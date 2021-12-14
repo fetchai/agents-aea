@@ -24,7 +24,12 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
-from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL_KEY
+from aea.cli.registry.settings import (
+    AUTH_TOKEN_KEY,
+    REGISTRY_API_URL_KEY,
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_HTTP,
+)
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -40,14 +45,19 @@ FILE_DOWNLOAD_TIMEOUT = (
 )
 
 
-def get_auth_token() -> str:
+def get_auth_token() -> Optional[str]:
     """
     Get current auth token.
 
     :return: str auth token
     """
     config = get_or_create_cli_config()
-    return config.get(AUTH_TOKEN_KEY, None)
+    return (
+        config.get(REGISTRY_CONFIG_KEY, {})
+        .get("settings", {})
+        .get(REGISTRY_HTTP, {})
+        .get(AUTH_TOKEN_KEY, None)
+    )
 
 
 def request_api(
@@ -140,7 +150,12 @@ def _perform_registry_request(
 ) -> requests.Response:
     """Perform HTTP request and resturn response object."""
     config = get_or_create_cli_config()
-    registry_api_url = config.get(REGISTRY_API_URL_KEY, None)
+    registry_api_url = (
+        config.get(REGISTRY_CONFIG_KEY, {})
+        .get("settings", {})
+        .get(REGISTRY_HTTP, {})
+        .get(REGISTRY_API_URL_KEY, None)
+    )
     if registry_api_url is None:
         raise click.ClickException(
             "The remote registry is not initialized. Remote registry command currently not supported - manually edit config file!"

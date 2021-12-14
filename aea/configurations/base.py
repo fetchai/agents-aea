@@ -486,7 +486,9 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             fingerprint_ignore_patterns,
             build_entrypoint,
         )
-        self.pypi_dependencies: Dependencies = dependencies if dependencies is not None else {}
+        self.pypi_dependencies: Dependencies = (
+            dependencies if dependencies is not None else {}
+        )
         self._build_directory = build_directory
 
     @property
@@ -768,7 +770,11 @@ class ProtocolConfig(ComponentConfiguration):
     schema = "protocol-config_schema.json"
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
-    __slots__ = ("dependencies", "description", "protocol_specification_id")
+    __slots__ = (
+        "dependencies",
+        "description",
+        "protocol_specification_id",
+    )
 
     def __init__(
         self,
@@ -1202,7 +1208,7 @@ class AgentConfig(PackageConfiguration):
         "dependencies",
     )
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         agent_name: SimpleIdOrStr,
         author: SimpleIdOrStr,

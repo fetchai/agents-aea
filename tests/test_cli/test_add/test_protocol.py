@@ -67,7 +67,16 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -132,7 +141,16 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -230,7 +248,16 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -286,7 +313,16 @@ class TestAddProtocolFailsWhenDifferentPublicId:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -339,7 +375,16 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -408,7 +453,16 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 

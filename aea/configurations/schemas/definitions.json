@@ -4,6 +4,9 @@
   "type": "object",
   "additionalProperties": false,
   "definitions": {
+    "package_hash": {
+      "type": "string"
+    },
     "dependencies": {
       "type": "object",
       "additionalProperties": false,
@@ -31,13 +34,21 @@
         }
       }
     },
+    "ipfs": {
+      "type": "object"
+    },
     "resource_name": {
       "type": "string",
       "pattern": "^[a-zA-Z_][a-zA-Z0-9_]{0,127}$"
     },
     "component_type": {
       "type": "string",
-      "enum": ["protocol", "connection", "contract", "skill"]
+      "enum": [
+        "protocol",
+        "connection",
+        "contract",
+        "skill"
+      ]
     },
     "private_key_path": {
       "type": "string"
@@ -87,8 +98,12 @@
       "type": "string",
       "description": "The version of AEA framework to use. It can be either a list of version specifiers (e.g. >0.2.0,<=0.2.3), or just a version number interpreted with the equality operator (e.g. 0.2.0, interpreted as ==0.2.0) (according to PEP 440).",
       "oneOf": [
-        {"$ref":  "#/definitions/version_specifiers"},
-        {"$ref":  "#/definitions/pep440_version"}
+        {
+          "$ref": "#/definitions/version_specifiers"
+        },
+        {
+          "$ref": "#/definitions/pep440_version"
+        }
       ]
     },
     "class_name": {
@@ -117,37 +132,63 @@
       "type": "string"
     },
     "max_reactions": {
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 1
     },
     "period": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "minimum": 0,
       "exclusiveMinimum": true
     },
     "execution_timeout": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "minimum": 0
     },
     "skill_exception_policy": {
       "type": "string",
-      "enum": ["propagate", "just_log", "stop_and_exit"]
+      "enum": [
+        "propagate",
+        "just_log",
+        "stop_and_exit"
+      ]
     },
     "connection_exception_policy": {
       "type": "string",
-      "enum": ["propagate", "just_log", "stop_and_exit"]
+      "enum": [
+        "propagate",
+        "just_log",
+        "stop_and_exit"
+      ]
     },
     "loop_mode": {
       "type": "string",
-      "enum": ["async", "sync"]
+      "enum": [
+        "async",
+        "sync"
+      ]
     },
     "runtime_mode": {
       "type": "string",
-      "enum": ["async", "threaded"]
+      "enum": [
+        "async",
+        "threaded"
+      ]
     },
     "task_manager_mode": {
       "type": "string",
-      "enum": ["threaded", "multiprocess"]
+      "enum": [
+        "threaded",
+        "multiprocess"
+      ]
     },
     "storage_uri": {
       "type": "string"
@@ -156,19 +197,28 @@
       "type": "boolean"
     },
     "logging_config": {
-    	"type": "object",
-    	"additionalProperties": true,
-        "properties": {
-        	"disable_existing_loggers": {
-              "type": ["boolean", "null"]
-            },
-            "version": {
-              "type": "number"
-            },
-            "handlers": {"type": "object"},
-            "formatters": {"type": "object"},
-            "loggers": {"type": "object"}
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "disable_existing_loggers": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "version": {
+          "type": "number"
+        },
+        "handlers": {
+          "type": "object"
+        },
+        "formatters": {
+          "type": "object"
+        },
+        "loggers": {
+          "type": "object"
         }
+      }
     },
     "framework_handler": {
       "type": "object",
@@ -183,9 +233,14 @@
           "type": "string"
         },
         "file_path": {
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
-        "config": {"type": "object"}
+        "config": {
+          "type": "object"
+        }
       }
     },
     "cert_requests": {
