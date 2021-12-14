@@ -858,7 +858,7 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 		iii++
 	}
 	// }()
-
+	print("STOP OF THE TEST")
 }
 
 // TestMessageOrderingWithDelegateClientTwoHops
@@ -975,7 +975,7 @@ func TestMessageOrderingWithDelegateClientTwoHops(t *testing.T) {
 		iii++
 	}
 	// }()
-
+	print("STOP OF THE TEST")
 }
 
 // TestRoutingDelegateClientToDHTPeerIndirectTwoHops
@@ -1693,7 +1693,7 @@ func SetupLocalDHTPeer(
 		return nil, nil, err
 	}
 
-	return dhtPeer, func() { dhtPeer.Close() }, nil
+	return dhtPeer, func() { println("dhtpeer going to be closed!"); dhtPeer.Close() }, nil
 
 }
 
@@ -1743,7 +1743,7 @@ func SetupDHTClient(
 		return nil, nil, err
 	}
 
-	return dhtClient, func() { dhtClient.Close() }, nil
+	return dhtClient, func() { println("dhtclient going to be closed!"); dhtClient.Close() }, nil
 }
 
 // Delegate tcp client for tests only
