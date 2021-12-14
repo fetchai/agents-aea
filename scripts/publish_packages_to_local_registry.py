@@ -44,7 +44,7 @@ def get_package_list(packages_dir: Union[str, Path]) -> List[Path]:
     return [
         Path(package_path)
         for package_path in glob(str(packages_dir))
-        if Path(package_path).is_dir()
+        if Path(package_path).is_dir() and "__pycache__" not in package_path
     ]
 
 

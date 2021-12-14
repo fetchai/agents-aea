@@ -41,9 +41,6 @@ ITEM_TYPES = (CONNECTION, CONTRACT, PROTOCOL, SKILL)
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
-LOCAL_REGISTRY_PATH = os.path.join(
-    os.path.expanduser("~"), ".aea", "local_registry.json"
-)
 NOT_PERMITTED_AUTHORS = [
     CONNECTIONS,
     CONTRACTS,

@@ -23,9 +23,9 @@ from pathlib import Path
 from typing import Union, cast
 
 import click
+from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
 from aea.cli.registry.add import fetch_package
-from aea.cli.registry.ipfs import fetch_ipfs
 from aea.cli.registry.settings import REGISTRY_IPFS
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import get_registry_config, load_item_config
