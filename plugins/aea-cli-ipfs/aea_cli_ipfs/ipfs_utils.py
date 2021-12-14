@@ -37,6 +37,12 @@ class IPFSDaemon:
     def __init__(self, offline: bool = False):
         """Initialise IPFS daemon."""
 
+        self.process = None  # type: Optional[subprocess.Popen]
+        self.offline = offline
+        self._check_ipfs()
+
+    @staticmethod
+    def _check_ipfs() -> None:
         # check we have ipfs
         res = shutil.which("ipfs")
         if res is None:
@@ -49,8 +55,6 @@ class IPFSDaemon:
             raise Exception(
                 "Please ensure you have version 0.6.0 of IPFS daemon installed."
             )
-        self.process = None  # type: Optional[subprocess.Popen]
-        self.offline = offline
 
     def is_started(self) -> bool:
         """Check daemon was started."""
@@ -62,9 +66,14 @@ class IPFSDaemon:
         self.process = subprocess.Popen(  # nosec
             cmd, stdout=subprocess.PIPE, env=os.environ.copy(),
         )
+        empty_outputs = 0
         for stdout_line in iter(self.process.stdout.readline, ""):
             if b"Daemon is ready" in stdout_line:
                 break
+            if stdout_line == b"":
+                empty_outputs += 1
+                if empty_outputs >= 5:
+                    raise RuntimeError("Could not start IPFS daemon.")
 
     def stop(self) -> None:  # pragma: nocover
         """Terminate the ipfs daemon."""

@@ -30,8 +30,8 @@ from aea_cli_ipfs.ipfs_utils import (
     PublishError,
     RemoveError,
 )
+from aea_cli_ipfs.registry import register_item_to_local_registry
 
-from aea.cli.registry.ipfs import register_item_to_local_registry
 from aea.cli.utils.config import load_item_config
 from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
 

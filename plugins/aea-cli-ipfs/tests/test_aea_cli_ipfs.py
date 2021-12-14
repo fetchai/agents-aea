@@ -25,6 +25,7 @@ import click
 import ipfshttpclient  # type: ignore
 import pytest
 from click.testing import CliRunner
+from urllib3.exceptions import NewConnectionError
 
 from aea.cli.core import cli
 
@@ -84,11 +85,36 @@ def test_node_not_alive_can_not_be_started():
         side_effect=ipfshttpclient.exceptions.CommunicationError(
             original=Exception("oops")
         ),
-    ), patch("time.sleep"), patch("subprocess.Popen"):
+    ), patch("time.sleep"), patch("subprocess.Popen"), patch(
+        "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs"
+    ), patch(
+        "aea_cli_ipfs.ipfs_utils.IPFSDaemon.start"
+    ):
+
+        with pytest.raises(NewConnectionError):
+            runner.invoke(
+                cli,
+                ["ipfs", "add", "-p"],
+                catch_exceptions=False,
+                standalone_mode=False,
+            )
+
+
+def test_version_did_not_match():
+    """Test error on node connection failed"""
+    runner = CliRunner()
+    with patch(
+        "ipfshttpclient.Client.id",
+        side_effect=ipfshttpclient.exceptions.CommunicationError(
+            original=Exception("oops")
+        ),
+    ), patch("time.sleep"), patch(
+        "subprocess.Popen.communicate", new_callable=lambda: lambda _: (b"", None)
+    ):
 
         with pytest.raises(
-            click.ClickException,
-            match="Failed to connect or start ipfs node! Please check ipfs is installed or launched!",
+            Exception,
+            match="Please ensure you have version 0.6.0 of IPFS daemon installed.",
         ):
             runner.invoke(
                 cli,
