@@ -77,7 +77,16 @@ def test_run(password_or_none):
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -190,7 +199,16 @@ def test_run_with_profiling():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -298,7 +316,16 @@ def test_run_with_default_connection():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -395,7 +422,16 @@ def test_run_multiple_connections(connection_ids):
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -486,7 +522,16 @@ def test_run_unknown_private_key():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -561,7 +606,16 @@ def test_run_fet_private_key_config():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -620,7 +674,16 @@ def test_run_ethereum_private_key_config():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -683,7 +746,16 @@ def test_run_with_install_deps():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -771,7 +843,16 @@ def test_run_with_install_deps_and_requirement_file():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        cli,
+        [
+            *CLI_LOG_OPTION,
+            "init",
+            "--local",
+            "--author",
+            AUTHOR,
+            "--default-registry",
+            "http",
+        ],
     )
     assert result.exit_code == 0
 
@@ -892,7 +973,16 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -963,7 +1053,16 @@ class TestRunFailsWhenConfigurationFileNotFound:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -1019,7 +1118,16 @@ class TestRunFailsWhenConfigurationFileIsEmpty:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -1072,7 +1180,16 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -1162,7 +1279,16 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -1354,7 +1480,16 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 
@@ -1429,7 +1564,16 @@ class TestRunFailsWhenProtocolNotComplete:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
 

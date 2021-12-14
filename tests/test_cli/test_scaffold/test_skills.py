@@ -72,7 +72,16 @@ class TestScaffoldSkill:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -163,7 +172,16 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -230,7 +248,16 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -303,7 +330,16 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -374,7 +410,16 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
