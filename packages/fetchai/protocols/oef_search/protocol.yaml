@@ -7,13 +7,13 @@ description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmRzU4RAYqfnDKxHv6iH9hmbG59uEJequ6CA4rwwbvgjuW
+  README.md: QmSHBkZysLRmVLhB81ZE6MgdJ33K5QVDV4Mex7tizuZuo1
   __init__.py: QmVSSB1YsXWHYHcvBR6Rwbn5cTN5e5BoY2nFa3ZQNVaY9U
-  custom_types.py: QmeyJUULbC8HuNbaU8kmQYau9BJo6gBkTTsZPFmk8ngtPf
+  custom_types.py: QmPh8YcoUChY2fkp8E1GUJZAknKGZfS2zCLx4iJDyPUZ69
   dialogues.py: QmRkEr1XqZgiGdPG3hi511ymBtHnWfZa1jLQY44E4XKT3F
   message.py: QmdJi8UD943NRTfwXQmxExkqH9crZFneRMBWvvcRYGRBPi
-  oef_search.proto: QmaYkawAXEeeNuCcjmwcvdsttnE3owtuP9ouAYVyRu7M2J
-  oef_search_pb2.py: QmUw5bHKg7VuAXde4pgYQgubZkiYgzUGsJnEEHEy3gBkbg
+  oef_search.proto: QmZg1Rw3Rq1QWa1Hs8bXb8qVUNQ7VPTFuNPoSwVcycogf5
+  oef_search_pb2.py: QmU86SrRzbFBsv3mJTAyqowp6hXLijU9e6NGqpC4FccdpA
   serialization.py: QmVv7oVKQvWsA576Jjyg3sGR8iVshTpPct2TGhKLZKYCcm
 fingerprint_ignore_patterns: []
 dependencies:
