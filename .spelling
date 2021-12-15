@@ -226,6 +226,7 @@ CosmPy
 dockerised
 Mermaid-JS
 darglint
+aea-cli-ipfs
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

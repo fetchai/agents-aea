@@ -1,5 +1,22 @@
 # Release History
 
+## 1.1.1 (2021-12-15)
+
+AEA:
+- Updates the protocol generator to generate protocols that satisfy linter constraints
+
+Plugins:
+ - aea-cli-ipfs plugin small update
+
+Packages:
+- Fixes fetchai/p2p_libp2p connection to address a slow DHT lookup problem
+- Updates protocols with the latest protocol generator
+- Updates random beacon agent so it produces block data instead of the (now deprecated feature of the test-net) random beacon data
+
+Misc
+- Bumps go library versions
+- Various fixes and improvements
+
 ## 1.1.0 (2021-10-13)
 
 AEA:
