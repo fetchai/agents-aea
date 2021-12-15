@@ -25,7 +25,7 @@ This module contains the classes required for tac dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, Dict, FrozenSet, Type, cast
+from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,13 +37,9 @@ from packages.fetchai.protocols.tac.message import TacMessage
 class TacDialogue(Dialogue):
     """The tac dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
-        {TacMessage.Performative.REGISTER}
-    )
-    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
-        {TacMessage.Performative.CANCELLED}
-    )
-    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
+    INITIAL_PERFORMATIVES = frozenset({TacMessage.Performative.REGISTER})
+    TERMINAL_PERFORMATIVES = frozenset({TacMessage.Performative.CANCELLED})
+    VALID_REPLIES = {
         TacMessage.Performative.CANCELLED: frozenset(),
         TacMessage.Performative.GAME_DATA: frozenset(
             {
@@ -112,7 +108,7 @@ class TacDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class used
+        :return: None
         """
         Dialogue.__init__(
             self,
@@ -142,8 +138,7 @@ class TacDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :param dialogue_class: the dialogue class used
-        :param role_from_first_message: the callable determining role from first message
+        :return: None
         """
         Dialogues.__init__(
             self,

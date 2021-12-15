@@ -39,7 +39,7 @@ class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
     protocol_id = PublicId.from_str("fetchai/default:1.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/default:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/default:1.0.0")
 
     ErrorCode = CustomErrorCode
 
@@ -84,7 +84,6 @@ class DefaultMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

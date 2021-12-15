@@ -14,7 +14,7 @@ version: 1.1.0
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-protocol_specification_id: fetchai/state_update:1.1.0
+protocol_specification_id: fetchai/state_update:1.0.0
 speech_acts:
   initialize:
     exchange_params_by_currency_id: pt:dict[pt:str, pt:float]

@@ -25,7 +25,7 @@ This module contains the classes required for prometheus dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, Dict, FrozenSet, Type, cast
+from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,16 +37,14 @@ from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 class PrometheusDialogue(Dialogue):
     """The prometheus dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+    INITIAL_PERFORMATIVES = frozenset(
         {
             PrometheusMessage.Performative.ADD_METRIC,
             PrometheusMessage.Performative.UPDATE_METRIC,
         }
     )
-    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
-        {PrometheusMessage.Performative.RESPONSE}
-    )
-    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
+    TERMINAL_PERFORMATIVES = frozenset({PrometheusMessage.Performative.RESPONSE})
+    VALID_REPLIES = {
         PrometheusMessage.Performative.ADD_METRIC: frozenset(
             {PrometheusMessage.Performative.RESPONSE}
         ),
@@ -80,7 +78,7 @@ class PrometheusDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class used
+        :return: None
         """
         Dialogue.__init__(
             self,
@@ -108,8 +106,7 @@ class PrometheusDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :param dialogue_class: the dialogue class used
-        :param role_from_first_message: the callable determining role from first message
+        :return: None
         """
         Dialogues.__init__(
             self,

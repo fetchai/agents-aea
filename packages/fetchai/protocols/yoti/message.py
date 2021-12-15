@@ -37,7 +37,7 @@ class YotiMessage(Message):
     """A protocol for communication between yoti skills and yoti connection."""
 
     protocol_id = PublicId.from_str("fetchai/yoti:1.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/yoti:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/yoti:1.0.0")
 
     class Performative(Message.Performative):
         """Performatives for the yoti protocol."""
@@ -82,7 +82,6 @@ class YotiMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

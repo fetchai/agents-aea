@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the gym protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.1.1`.
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.1.0`.
 """
 
 from packages.fetchai.protocols.gym.message import GymMessage

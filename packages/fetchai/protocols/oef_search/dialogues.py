@@ -25,7 +25,7 @@ This module contains the classes required for oef_search dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, Dict, FrozenSet, Type, cast
+from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,21 +37,21 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 class OefSearchDialogue(Dialogue):
     """The oef_search dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+    INITIAL_PERFORMATIVES = frozenset(
         {
             OefSearchMessage.Performative.REGISTER_SERVICE,
             OefSearchMessage.Performative.UNREGISTER_SERVICE,
             OefSearchMessage.Performative.SEARCH_SERVICES,
         }
     )
-    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+    TERMINAL_PERFORMATIVES = frozenset(
         {
             OefSearchMessage.Performative.OEF_ERROR,
             OefSearchMessage.Performative.SEARCH_RESULT,
             OefSearchMessage.Performative.SUCCESS,
         }
     )
-    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
+    VALID_REPLIES = {
         OefSearchMessage.Performative.OEF_ERROR: frozenset(),
         OefSearchMessage.Performative.REGISTER_SERVICE: frozenset(
             {
@@ -100,7 +100,7 @@ class OefSearchDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class used
+        :return: None
         """
         Dialogue.__init__(
             self,
@@ -130,8 +130,7 @@ class OefSearchDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :param dialogue_class: the dialogue class used
-        :param role_from_first_message: the callable determining role from first message
+        :return: None
         """
         Dialogues.__init__(
             self,

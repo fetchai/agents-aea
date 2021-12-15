@@ -25,7 +25,7 @@ This module contains the classes required for aggregation dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, Dict, FrozenSet, Type, cast
+from typing import Callable, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,19 +37,19 @@ from packages.fetchai.protocols.aggregation.message import AggregationMessage
 class AggregationDialogue(Dialogue):
     """The aggregation dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+    INITIAL_PERFORMATIVES = frozenset(
         {
             AggregationMessage.Performative.OBSERVATION,
             AggregationMessage.Performative.AGGREGATION,
         }
     )
-    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+    TERMINAL_PERFORMATIVES = frozenset(
         {
             AggregationMessage.Performative.OBSERVATION,
             AggregationMessage.Performative.AGGREGATION,
         }
     )
-    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
+    VALID_REPLIES = {
         AggregationMessage.Performative.AGGREGATION: frozenset(),
         AggregationMessage.Performative.OBSERVATION: frozenset(),
     }
@@ -78,7 +78,7 @@ class AggregationDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class used
+        :return: None
         """
         Dialogue.__init__(
             self,
@@ -108,8 +108,7 @@ class AggregationDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :param dialogue_class: the dialogue class used
-        :param role_from_first_message: the callable determining role from first message
+        :return: None
         """
         Dialogues.__init__(
             self,

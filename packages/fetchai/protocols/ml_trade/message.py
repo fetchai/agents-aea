@@ -42,7 +42,7 @@ class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
     protocol_id = PublicId.from_str("fetchai/ml_trade:1.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/ml_trade:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/ml_trade:1.0.0")
 
     Description = CustomDescription
 
@@ -90,7 +90,6 @@ class MlTradeMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

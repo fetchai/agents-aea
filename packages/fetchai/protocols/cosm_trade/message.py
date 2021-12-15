@@ -89,7 +89,6 @@ class CosmTradeMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

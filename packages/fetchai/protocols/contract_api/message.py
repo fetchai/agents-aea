@@ -48,7 +48,7 @@ class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
     protocol_id = PublicId.from_str("fetchai/contract_api:1.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/contract_api:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/contract_api:1.0.0")
 
     Kwargs = CustomKwargs
 
@@ -120,7 +120,6 @@ class ContractApiMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

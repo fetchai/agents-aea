@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="yoti.proto",
-    package="aea.fetchai.yoti.v1_1_0",
+    package="aea.fetchai.yoti.v1_0_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\nyoti.proto\x12\x17\x61\x65\x61.fetchai.yoti.v1_1_0"\xaf\x04\n\x0bYotiMessage\x12H\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x37.aea.fetchai.yoti.v1_1_0.YotiMessage.Error_PerformativeH\x00\x12T\n\x0bget_profile\x18\x06 \x01(\x0b\x32=.aea.fetchai.yoti.v1_1_0.YotiMessage.Get_Profile_PerformativeH\x00\x12L\n\x07profile\x18\x07 \x01(\x0b\x32\x39.aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_PerformativeH\x00\x1aL\n\x18Get_Profile_Performative\x12\r\n\x05token\x18\x01 \x01(\t\x12\x13\n\x0b\x64otted_path\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x1a\x96\x01\n\x14Profile_Performative\x12Q\n\x04info\x18\x01 \x03(\x0b\x32\x43.aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x12\x45rror_Performative\x12\x12\n\nerror_code\x18\x01 \x01(\x05\x12\x11\n\terror_msg\x18\x02 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\nyoti.proto\x12\x17\x61\x65\x61.fetchai.yoti.v1_0_0"\xaf\x04\n\x0bYotiMessage\x12H\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x37.aea.fetchai.yoti.v1_0_0.YotiMessage.Error_PerformativeH\x00\x12T\n\x0bget_profile\x18\x06 \x01(\x0b\x32=.aea.fetchai.yoti.v1_0_0.YotiMessage.Get_Profile_PerformativeH\x00\x12L\n\x07profile\x18\x07 \x01(\x0b\x32\x39.aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_PerformativeH\x00\x1aL\n\x18Get_Profile_Performative\x12\r\n\x05token\x18\x01 \x01(\t\x12\x13\n\x0b\x64otted_path\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x1a\x96\x01\n\x14Profile_Performative\x12Q\n\x04info\x18\x01 \x03(\x0b\x32\x43.aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x12\x45rror_Performative\x12\x12\n\nerror_code\x18\x01 \x01(\x05\x12\x11\n\terror_msg\x18\x02 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _YOTIMESSAGE_GET_PROFILE_PERFORMATIVE = _descriptor.Descriptor(
     name="Get_Profile_Performative",
-    full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Get_Profile_Performative",
+    full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Get_Profile_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="token",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Get_Profile_Performative.token",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Get_Profile_Performative.token",
             index=0,
             number=1,
             type=9,
@@ -48,7 +48,7 @@ _YOTIMESSAGE_GET_PROFILE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="dotted_path",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Get_Profile_Performative.dotted_path",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Get_Profile_Performative.dotted_path",
             index=1,
             number=2,
             type=9,
@@ -66,7 +66,7 @@ _YOTIMESSAGE_GET_PROFILE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="args",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Get_Profile_Performative.args",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Get_Profile_Performative.args",
             index=2,
             number=3,
             type=9,
@@ -97,14 +97,14 @@ _YOTIMESSAGE_GET_PROFILE_PERFORMATIVE = _descriptor.Descriptor(
 
 _YOTIMESSAGE_PROFILE_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative.InfoEntry",
+    full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative.InfoEntry.key",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -122,7 +122,7 @@ _YOTIMESSAGE_PROFILE_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative.InfoEntry.value",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -153,14 +153,14 @@ _YOTIMESSAGE_PROFILE_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
 
 _YOTIMESSAGE_PROFILE_PERFORMATIVE = _descriptor.Descriptor(
     name="Profile_Performative",
-    full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative",
+    full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative.info",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative.info",
             index=0,
             number=1,
             type=11,
@@ -191,14 +191,14 @@ _YOTIMESSAGE_PROFILE_PERFORMATIVE = _descriptor.Descriptor(
 
 _YOTIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     name="Error_Performative",
-    full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Error_Performative",
+    full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Error_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error_code",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Error_Performative.error_code",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Error_Performative.error_code",
             index=0,
             number=1,
             type=5,
@@ -216,7 +216,7 @@ _YOTIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="error_msg",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.Error_Performative.error_msg",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.Error_Performative.error_msg",
             index=1,
             number=2,
             type=9,
@@ -247,14 +247,14 @@ _YOTIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
 
 _YOTIMESSAGE = _descriptor.Descriptor(
     name="YotiMessage",
-    full_name="aea.fetchai.yoti.v1_1_0.YotiMessage",
+    full_name="aea.fetchai.yoti.v1_0_0.YotiMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.error",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.error",
             index=0,
             number=5,
             type=11,
@@ -272,7 +272,7 @@ _YOTIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="get_profile",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.get_profile",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.get_profile",
             index=1,
             number=6,
             type=11,
@@ -290,7 +290,7 @@ _YOTIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="profile",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.profile",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.profile",
             index=2,
             number=7,
             type=11,
@@ -321,7 +321,7 @@ _YOTIMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.yoti.v1_1_0.YotiMessage.performative",
+            full_name="aea.fetchai.yoti.v1_0_0.YotiMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -376,7 +376,7 @@ YotiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _YOTIMESSAGE_GET_PROFILE_PERFORMATIVE,
                 "__module__": "yoti_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_1_0.YotiMessage.Get_Profile_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_0_0.YotiMessage.Get_Profile_Performative)
             },
         ),
         "Profile_Performative": _reflection.GeneratedProtocolMessageType(
@@ -389,12 +389,12 @@ YotiMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _YOTIMESSAGE_PROFILE_PERFORMATIVE_INFOENTRY,
                         "__module__": "yoti_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative.InfoEntry)
                     },
                 ),
                 "DESCRIPTOR": _YOTIMESSAGE_PROFILE_PERFORMATIVE,
                 "__module__": "yoti_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_1_0.YotiMessage.Profile_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_0_0.YotiMessage.Profile_Performative)
             },
         ),
         "Error_Performative": _reflection.GeneratedProtocolMessageType(
@@ -403,12 +403,12 @@ YotiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _YOTIMESSAGE_ERROR_PERFORMATIVE,
                 "__module__": "yoti_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_1_0.YotiMessage.Error_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_0_0.YotiMessage.Error_Performative)
             },
         ),
         "DESCRIPTOR": _YOTIMESSAGE,
         "__module__": "yoti_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_1_0.YotiMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.yoti.v1_0_0.YotiMessage)
     },
 )
 _sym_db.RegisterMessage(YotiMessage)

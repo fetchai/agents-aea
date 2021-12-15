@@ -39,7 +39,7 @@ class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
     protocol_id = PublicId.from_str("fetchai/tac:1.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/tac:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/tac:1.0.0")
 
     ErrorCode = CustomErrorCode
 
@@ -111,7 +111,6 @@ class TacMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

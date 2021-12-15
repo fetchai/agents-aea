@@ -48,7 +48,7 @@ class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
     protocol_id = PublicId.from_str("fetchai/oef_search:1.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/oef_search:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/oef_search:1.0.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -110,7 +110,6 @@ class OefSearchMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
-        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,
