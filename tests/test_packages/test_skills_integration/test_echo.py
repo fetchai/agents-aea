@@ -71,7 +71,7 @@ class TestEchoSkill(AEATestCaseEmpty):
         self.generate_private_key()
         self.add_private_key()
         self.add_item("connection", "fetchai/stub:0.21.0")
-        self.add_item("skill", "fetchai/echo:0.19.0")
+        self.add_item("skill", "fetchai/echo:0.20.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)

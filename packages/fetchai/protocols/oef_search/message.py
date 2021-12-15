@@ -47,8 +47,8 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = PublicId.from_str("fetchai/oef_search:1.0.0")
-    protocol_specification_id = PublicId.from_str("fetchai/oef_search:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/oef_search:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/oef_search:1.1.0")
 
     AgentsInfo = CustomAgentsInfo
 

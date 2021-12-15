@@ -36,8 +36,8 @@ DEFAULT_BODY_SIZE = 4
 class RegisterMessage(Message):
     """A protocol for communication between two AEAs for registration."""
 
-    protocol_id = PublicId.from_str("fetchai/register:1.0.0")
-    protocol_specification_id = PublicId.from_str("fetchai/register:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/register:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/register:1.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the register protocol."""

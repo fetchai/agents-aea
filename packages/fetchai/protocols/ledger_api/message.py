@@ -52,8 +52,8 @@ DEFAULT_BODY_SIZE = 4
 class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/ledger_api:1.0.0")
-    protocol_specification_id = PublicId.from_str("fetchai/ledger_api:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/ledger_api:1.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/ledger_api:1.1.0")
 
     Kwargs = CustomKwargs
 

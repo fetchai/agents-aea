@@ -12,8 +12,8 @@ description: "The gym connection wraps an OpenAI gym."
 class_name: GymConnection
 connections: []
 protocols:
-- fetchai/gym:1.0.0
-restricted_to_protocols: ["fetchai/gym:1.0.0"]
+- fetchai/gym:1.1.0
+restricted_to_protocols: ["fetchai/gym:1.1.0"]
 excluded_protocols: []
 config:
   env: 'gyms.env.BanditNArmedRandom'
