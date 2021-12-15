@@ -14,16 +14,16 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="default.proto",
-    package="aea.fetchai.default.v1_0_0",
+    package="aea.fetchai.default.v1_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\rdefault.proto\x12\x1a\x61\x65\x61.fetchai.default.v1_0_0"\xb6\x06\n\x0e\x44\x65\x66\x61ultMessage\x12N\n\x05\x62ytes\x18\x05 \x01(\x0b\x32=.aea.fetchai.default.v1_0_0.DefaultMessage.Bytes_PerformativeH\x00\x12J\n\x03\x65nd\x18\x06 \x01(\x0b\x32;.aea.fetchai.default.v1_0_0.DefaultMessage.End_PerformativeH\x00\x12N\n\x05\x65rror\x18\x07 \x01(\x0b\x32=.aea.fetchai.default.v1_0_0.DefaultMessage.Error_PerformativeH\x00\x1a\xe4\x01\n\tErrorCode\x12V\n\nerror_code\x18\x01 \x01(\x0e\x32\x42.aea.fetchai.default.v1_0_0.DefaultMessage.ErrorCode.ErrorCodeEnum"\x7f\n\rErrorCodeEnum\x12\x18\n\x14UNSUPPORTED_PROTOCOL\x10\x00\x12\x12\n\x0e\x44\x45\x43ODING_ERROR\x10\x01\x12\x13\n\x0fINVALID_MESSAGE\x10\x02\x12\x15\n\x11UNSUPPORTED_SKILL\x10\x03\x12\x14\n\x10INVALID_DIALOGUE\x10\x04\x1a%\n\x12\x42ytes_Performative\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x1a\x85\x02\n\x12\x45rror_Performative\x12H\n\nerror_code\x18\x01 \x01(\x0b\x32\x34.aea.fetchai.default.v1_0_0.DefaultMessage.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12`\n\nerror_data\x18\x03 \x03(\x0b\x32L.aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.ErrorDataEntry\x1a\x30\n\x0e\x45rrorDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x12\n\x10\x45nd_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\rdefault.proto\x12\x1a\x61\x65\x61.fetchai.default.v1_1_0"\xb6\x06\n\x0e\x44\x65\x66\x61ultMessage\x12N\n\x05\x62ytes\x18\x05 \x01(\x0b\x32=.aea.fetchai.default.v1_1_0.DefaultMessage.Bytes_PerformativeH\x00\x12J\n\x03\x65nd\x18\x06 \x01(\x0b\x32;.aea.fetchai.default.v1_1_0.DefaultMessage.End_PerformativeH\x00\x12N\n\x05\x65rror\x18\x07 \x01(\x0b\x32=.aea.fetchai.default.v1_1_0.DefaultMessage.Error_PerformativeH\x00\x1a\xe4\x01\n\tErrorCode\x12V\n\nerror_code\x18\x01 \x01(\x0e\x32\x42.aea.fetchai.default.v1_1_0.DefaultMessage.ErrorCode.ErrorCodeEnum"\x7f\n\rErrorCodeEnum\x12\x18\n\x14UNSUPPORTED_PROTOCOL\x10\x00\x12\x12\n\x0e\x44\x45\x43ODING_ERROR\x10\x01\x12\x13\n\x0fINVALID_MESSAGE\x10\x02\x12\x15\n\x11UNSUPPORTED_SKILL\x10\x03\x12\x14\n\x10INVALID_DIALOGUE\x10\x04\x1a%\n\x12\x42ytes_Performative\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\x0c\x1a\x85\x02\n\x12\x45rror_Performative\x12H\n\nerror_code\x18\x01 \x01(\x0b\x32\x34.aea.fetchai.default.v1_1_0.DefaultMessage.ErrorCode\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12`\n\nerror_data\x18\x03 \x03(\x0b\x32L.aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.ErrorDataEntry\x1a\x30\n\x0e\x45rrorDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x12\n\x10\x45nd_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
     name="ErrorCodeEnum",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage.ErrorCode.ErrorCodeEnum",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage.ErrorCode.ErrorCodeEnum",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -69,14 +69,14 @@ _sym_db.RegisterEnumDescriptor(_DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM)
 
 _DEFAULTMESSAGE_ERRORCODE = _descriptor.Descriptor(
     name="ErrorCode",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage.ErrorCode",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage.ErrorCode",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error_code",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.ErrorCode.error_code",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.ErrorCode.error_code",
             index=0,
             number=1,
             type=14,
@@ -107,14 +107,14 @@ _DEFAULTMESSAGE_ERRORCODE = _descriptor.Descriptor(
 
 _DEFAULTMESSAGE_BYTES_PERFORMATIVE = _descriptor.Descriptor(
     name="Bytes_Performative",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Bytes_Performative",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Bytes_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="content",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Bytes_Performative.content",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Bytes_Performative.content",
             index=0,
             number=1,
             type=12,
@@ -145,14 +145,14 @@ _DEFAULTMESSAGE_BYTES_PERFORMATIVE = _descriptor.Descriptor(
 
 _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
     name="ErrorDataEntry",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.ErrorDataEntry",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.ErrorDataEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.ErrorDataEntry.key",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.ErrorDataEntry.key",
             index=0,
             number=1,
             type=9,
@@ -170,7 +170,7 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.ErrorDataEntry.value",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.ErrorDataEntry.value",
             index=1,
             number=2,
             type=12,
@@ -201,14 +201,14 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY = _descriptor.Descriptor(
 
 _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     name="Error_Performative",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error_code",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.error_code",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.error_code",
             index=0,
             number=1,
             type=11,
@@ -226,7 +226,7 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="error_msg",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.error_msg",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.error_msg",
             index=1,
             number=2,
             type=9,
@@ -244,7 +244,7 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="error_data",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.error_data",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.error_data",
             index=2,
             number=3,
             type=11,
@@ -275,7 +275,7 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
 
 _DEFAULTMESSAGE_END_PERFORMATIVE = _descriptor.Descriptor(
     name="End_Performative",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage.End_Performative",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage.End_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -294,14 +294,14 @@ _DEFAULTMESSAGE_END_PERFORMATIVE = _descriptor.Descriptor(
 
 _DEFAULTMESSAGE = _descriptor.Descriptor(
     name="DefaultMessage",
-    full_name="aea.fetchai.default.v1_0_0.DefaultMessage",
+    full_name="aea.fetchai.default.v1_1_0.DefaultMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="bytes",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.bytes",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.bytes",
             index=0,
             number=5,
             type=11,
@@ -319,7 +319,7 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.end",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.end",
             index=1,
             number=6,
             type=11,
@@ -337,7 +337,7 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="error",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.error",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.error",
             index=2,
             number=7,
             type=11,
@@ -369,7 +369,7 @@ _DEFAULTMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.default.v1_0_0.DefaultMessage.performative",
+            full_name="aea.fetchai.default.v1_1_0.DefaultMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -434,7 +434,7 @@ DefaultMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _DEFAULTMESSAGE_ERRORCODE,
                 "__module__": "default_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_0_0.DefaultMessage.ErrorCode)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_1_0.DefaultMessage.ErrorCode)
             },
         ),
         "Bytes_Performative": _reflection.GeneratedProtocolMessageType(
@@ -443,7 +443,7 @@ DefaultMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _DEFAULTMESSAGE_BYTES_PERFORMATIVE,
                 "__module__": "default_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_0_0.DefaultMessage.Bytes_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_1_0.DefaultMessage.Bytes_Performative)
             },
         ),
         "Error_Performative": _reflection.GeneratedProtocolMessageType(
@@ -456,12 +456,12 @@ DefaultMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY,
                         "__module__": "default_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative.ErrorDataEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative.ErrorDataEntry)
                     },
                 ),
                 "DESCRIPTOR": _DEFAULTMESSAGE_ERROR_PERFORMATIVE,
                 "__module__": "default_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_0_0.DefaultMessage.Error_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_1_0.DefaultMessage.Error_Performative)
             },
         ),
         "End_Performative": _reflection.GeneratedProtocolMessageType(
@@ -470,12 +470,12 @@ DefaultMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _DEFAULTMESSAGE_END_PERFORMATIVE,
                 "__module__": "default_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_0_0.DefaultMessage.End_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_1_0.DefaultMessage.End_Performative)
             },
         ),
         "DESCRIPTOR": _DEFAULTMESSAGE,
         "__module__": "default_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_0_0.DefaultMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.default.v1_1_0.DefaultMessage)
     },
 )
 _sym_db.RegisterMessage(DefaultMessage)

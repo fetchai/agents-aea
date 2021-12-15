@@ -8,7 +8,7 @@ This example will take you through a simple AEA to familiarise you with the basi
 
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
-You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 ​GCC installation is required:
 * Ubuntu: `apt-get install gcc`
@@ -25,7 +25,7 @@ Install a compatible Python and Go version on your system (see <a href="https://
 The following hints can help:
 
 <ul>
-<li>To install Go, follow the official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a></li>
+<li>To install Go, follow the official guide, depending on your platform <a href="https://go.dev/doc/install" target="_blank">here</a></li>
 
 <li>Python is already included by default on 
 many Linux distributions (e.g. Ubuntu), as well as MacOS.

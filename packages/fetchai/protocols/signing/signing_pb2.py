@@ -14,16 +14,16 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="signing.proto",
-    package="aea.fetchai.signing.v1_0_0",
+    package="aea.fetchai.signing.v1_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\rsigning.proto\x12\x1a\x61\x65\x61.fetchai.signing.v1_0_0"\xaf\x0c\n\x0eSigningMessage\x12N\n\x05\x65rror\x18\x05 \x01(\x0b\x32=.aea.fetchai.signing.v1_0_0.SigningMessage.Error_PerformativeH\x00\x12\\\n\x0csign_message\x18\x06 \x01(\x0b\x32\x44.aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Message_PerformativeH\x00\x12\x64\n\x10sign_transaction\x18\x07 \x01(\x0b\x32H.aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Transaction_PerformativeH\x00\x12`\n\x0esigned_message\x18\x08 \x01(\x0b\x32\x46.aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Message_PerformativeH\x00\x12h\n\x12signed_transaction\x18\t \x01(\x0b\x32J.aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Transaction_PerformativeH\x00\x1a\xbc\x01\n\tErrorCode\x12V\n\nerror_code\x18\x01 \x01(\x0e\x32\x42.aea.fetchai.signing.v1_0_0.SigningMessage.ErrorCode.ErrorCodeEnum"W\n\rErrorCodeEnum\x12 \n\x1cUNSUCCESSFUL_MESSAGE_SIGNING\x10\x00\x12$\n UNSUCCESSFUL_TRANSACTION_SIGNING\x10\x01\x1a!\n\nRawMessage\x12\x13\n\x0braw_message\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a\'\n\rSignedMessage\x12\x16\n\x0esigned_message\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a\xb4\x01\n\x1dSign_Transaction_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.signing.v1_0_0.SigningMessage.Terms\x12R\n\x0fraw_transaction\x18\x02 \x01(\x0b\x32\x39.aea.fetchai.signing.v1_0_0.SigningMessage.RawTransaction\x1a\xa8\x01\n\x19Sign_Message_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.signing.v1_0_0.SigningMessage.Terms\x12J\n\x0braw_message\x18\x02 \x01(\x0b\x32\x35.aea.fetchai.signing.v1_0_0.SigningMessage.RawMessage\x1a{\n\x1fSigned_Transaction_Performative\x12X\n\x12signed_transaction\x18\x01 \x01(\x0b\x32<.aea.fetchai.signing.v1_0_0.SigningMessage.SignedTransaction\x1ao\n\x1bSigned_Message_Performative\x12P\n\x0esigned_message\x18\x01 \x01(\x0b\x32\x38.aea.fetchai.signing.v1_0_0.SigningMessage.SignedMessage\x1a^\n\x12\x45rror_Performative\x12H\n\nerror_code\x18\x01 \x01(\x0b\x32\x34.aea.fetchai.signing.v1_0_0.SigningMessage.ErrorCodeB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\rsigning.proto\x12\x1a\x61\x65\x61.fetchai.signing.v1_1_0"\xaf\x0c\n\x0eSigningMessage\x12N\n\x05\x65rror\x18\x05 \x01(\x0b\x32=.aea.fetchai.signing.v1_1_0.SigningMessage.Error_PerformativeH\x00\x12\\\n\x0csign_message\x18\x06 \x01(\x0b\x32\x44.aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Message_PerformativeH\x00\x12\x64\n\x10sign_transaction\x18\x07 \x01(\x0b\x32H.aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Transaction_PerformativeH\x00\x12`\n\x0esigned_message\x18\x08 \x01(\x0b\x32\x46.aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Message_PerformativeH\x00\x12h\n\x12signed_transaction\x18\t \x01(\x0b\x32J.aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Transaction_PerformativeH\x00\x1a\xbc\x01\n\tErrorCode\x12V\n\nerror_code\x18\x01 \x01(\x0e\x32\x42.aea.fetchai.signing.v1_1_0.SigningMessage.ErrorCode.ErrorCodeEnum"W\n\rErrorCodeEnum\x12 \n\x1cUNSUCCESSFUL_MESSAGE_SIGNING\x10\x00\x12$\n UNSUCCESSFUL_TRANSACTION_SIGNING\x10\x01\x1a!\n\nRawMessage\x12\x13\n\x0braw_message\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a\'\n\rSignedMessage\x12\x16\n\x0esigned_message\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a\xb4\x01\n\x1dSign_Transaction_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.signing.v1_1_0.SigningMessage.Terms\x12R\n\x0fraw_transaction\x18\x02 \x01(\x0b\x32\x39.aea.fetchai.signing.v1_1_0.SigningMessage.RawTransaction\x1a\xa8\x01\n\x19Sign_Message_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.signing.v1_1_0.SigningMessage.Terms\x12J\n\x0braw_message\x18\x02 \x01(\x0b\x32\x35.aea.fetchai.signing.v1_1_0.SigningMessage.RawMessage\x1a{\n\x1fSigned_Transaction_Performative\x12X\n\x12signed_transaction\x18\x01 \x01(\x0b\x32<.aea.fetchai.signing.v1_1_0.SigningMessage.SignedTransaction\x1ao\n\x1bSigned_Message_Performative\x12P\n\x0esigned_message\x18\x01 \x01(\x0b\x32\x38.aea.fetchai.signing.v1_1_0.SigningMessage.SignedMessage\x1a^\n\x12\x45rror_Performative\x12H\n\nerror_code\x18\x01 \x01(\x0b\x32\x34.aea.fetchai.signing.v1_1_0.SigningMessage.ErrorCodeB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _SIGNINGMESSAGE_ERRORCODE_ERRORCODEENUM = _descriptor.EnumDescriptor(
     name="ErrorCodeEnum",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.ErrorCode.ErrorCodeEnum",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.ErrorCode.ErrorCodeEnum",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -52,14 +52,14 @@ _sym_db.RegisterEnumDescriptor(_SIGNINGMESSAGE_ERRORCODE_ERRORCODEENUM)
 
 _SIGNINGMESSAGE_ERRORCODE = _descriptor.Descriptor(
     name="ErrorCode",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.ErrorCode",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.ErrorCode",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error_code",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.ErrorCode.error_code",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.ErrorCode.error_code",
             index=0,
             number=1,
             type=14,
@@ -90,14 +90,14 @@ _SIGNINGMESSAGE_ERRORCODE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_RAWMESSAGE = _descriptor.Descriptor(
     name="RawMessage",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.RawMessage",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.RawMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="raw_message",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.RawMessage.raw_message",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.RawMessage.raw_message",
             index=0,
             number=1,
             type=12,
@@ -128,14 +128,14 @@ _SIGNINGMESSAGE_RAWMESSAGE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
     name="RawTransaction",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.RawTransaction",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.RawTransaction",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="raw_transaction",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.RawTransaction.raw_transaction",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.RawTransaction.raw_transaction",
             index=0,
             number=1,
             type=12,
@@ -166,14 +166,14 @@ _SIGNINGMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_SIGNEDMESSAGE = _descriptor.Descriptor(
     name="SignedMessage",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.SignedMessage",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.SignedMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="signed_message",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.SignedMessage.signed_message",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.SignedMessage.signed_message",
             index=0,
             number=1,
             type=12,
@@ -204,14 +204,14 @@ _SIGNINGMESSAGE_SIGNEDMESSAGE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_SIGNEDTRANSACTION = _descriptor.Descriptor(
     name="SignedTransaction",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.SignedTransaction",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.SignedTransaction",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="signed_transaction",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.SignedTransaction.signed_transaction",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.SignedTransaction.signed_transaction",
             index=0,
             number=1,
             type=12,
@@ -242,14 +242,14 @@ _SIGNINGMESSAGE_SIGNEDTRANSACTION = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_TERMS = _descriptor.Descriptor(
     name="Terms",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Terms",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Terms",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Terms.terms",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Terms.terms",
             index=0,
             number=1,
             type=12,
@@ -280,14 +280,14 @@ _SIGNINGMESSAGE_TERMS = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     name="Sign_Transaction_Performative",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Transaction_Performative",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Transaction_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Transaction_Performative.terms",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Transaction_Performative.terms",
             index=0,
             number=1,
             type=11,
@@ -305,7 +305,7 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="raw_transaction",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Transaction_Performative.raw_transaction",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Transaction_Performative.raw_transaction",
             index=1,
             number=2,
             type=11,
@@ -336,14 +336,14 @@ _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
     name="Sign_Message_Performative",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Message_Performative",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Message_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Message_Performative.terms",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Message_Performative.terms",
             index=0,
             number=1,
             type=11,
@@ -361,7 +361,7 @@ _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="raw_message",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Message_Performative.raw_message",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Message_Performative.raw_message",
             index=1,
             number=2,
             type=11,
@@ -392,14 +392,14 @@ _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     name="Signed_Transaction_Performative",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Transaction_Performative",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Transaction_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="signed_transaction",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Transaction_Performative.signed_transaction",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Transaction_Performative.signed_transaction",
             index=0,
             number=1,
             type=11,
@@ -430,14 +430,14 @@ _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
     name="Signed_Message_Performative",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Message_Performative",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Message_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="signed_message",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Message_Performative.signed_message",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Message_Performative.signed_message",
             index=0,
             number=1,
             type=11,
@@ -468,14 +468,14 @@ _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     name="Error_Performative",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Error_Performative",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Error_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error_code",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.Error_Performative.error_code",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.Error_Performative.error_code",
             index=0,
             number=1,
             type=11,
@@ -506,14 +506,14 @@ _SIGNINGMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
 
 _SIGNINGMESSAGE = _descriptor.Descriptor(
     name="SigningMessage",
-    full_name="aea.fetchai.signing.v1_0_0.SigningMessage",
+    full_name="aea.fetchai.signing.v1_1_0.SigningMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.error",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.error",
             index=0,
             number=5,
             type=11,
@@ -531,7 +531,7 @@ _SIGNINGMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="sign_message",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.sign_message",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.sign_message",
             index=1,
             number=6,
             type=11,
@@ -549,7 +549,7 @@ _SIGNINGMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="sign_transaction",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.sign_transaction",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.sign_transaction",
             index=2,
             number=7,
             type=11,
@@ -567,7 +567,7 @@ _SIGNINGMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="signed_message",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.signed_message",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.signed_message",
             index=3,
             number=8,
             type=11,
@@ -585,7 +585,7 @@ _SIGNINGMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="signed_transaction",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.signed_transaction",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.signed_transaction",
             index=4,
             number=9,
             type=11,
@@ -624,7 +624,7 @@ _SIGNINGMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.signing.v1_0_0.SigningMessage.performative",
+            full_name="aea.fetchai.signing.v1_1_0.SigningMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -728,7 +728,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_ERRORCODE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.ErrorCode)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.ErrorCode)
             },
         ),
         "RawMessage": _reflection.GeneratedProtocolMessageType(
@@ -737,7 +737,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_RAWMESSAGE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.RawMessage)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.RawMessage)
             },
         ),
         "RawTransaction": _reflection.GeneratedProtocolMessageType(
@@ -746,7 +746,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_RAWTRANSACTION,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.RawTransaction)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.RawTransaction)
             },
         ),
         "SignedMessage": _reflection.GeneratedProtocolMessageType(
@@ -755,7 +755,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGNEDMESSAGE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.SignedMessage)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.SignedMessage)
             },
         ),
         "SignedTransaction": _reflection.GeneratedProtocolMessageType(
@@ -764,7 +764,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGNEDTRANSACTION,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.SignedTransaction)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.SignedTransaction)
             },
         ),
         "Terms": _reflection.GeneratedProtocolMessageType(
@@ -773,7 +773,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_TERMS,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.Terms)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.Terms)
             },
         ),
         "Sign_Transaction_Performative": _reflection.GeneratedProtocolMessageType(
@@ -782,7 +782,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGN_TRANSACTION_PERFORMATIVE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Transaction_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Transaction_Performative)
             },
         ),
         "Sign_Message_Performative": _reflection.GeneratedProtocolMessageType(
@@ -791,7 +791,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGN_MESSAGE_PERFORMATIVE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.Sign_Message_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.Sign_Message_Performative)
             },
         ),
         "Signed_Transaction_Performative": _reflection.GeneratedProtocolMessageType(
@@ -800,7 +800,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGNED_TRANSACTION_PERFORMATIVE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Transaction_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Transaction_Performative)
             },
         ),
         "Signed_Message_Performative": _reflection.GeneratedProtocolMessageType(
@@ -809,7 +809,7 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_SIGNED_MESSAGE_PERFORMATIVE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.Signed_Message_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.Signed_Message_Performative)
             },
         ),
         "Error_Performative": _reflection.GeneratedProtocolMessageType(
@@ -818,12 +818,12 @@ SigningMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _SIGNINGMESSAGE_ERROR_PERFORMATIVE,
                 "__module__": "signing_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage.Error_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage.Error_Performative)
             },
         ),
         "DESCRIPTOR": _SIGNINGMESSAGE,
         "__module__": "signing_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_0_0.SigningMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.signing.v1_1_0.SigningMessage)
     },
 )
 _sym_db.RegisterMessage(SigningMessage)
