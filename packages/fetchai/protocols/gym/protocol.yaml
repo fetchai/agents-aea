@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSrL3oujtXaSgrbxQzYD12oHjb5d55kNSFiZ4SA3jSNj1
-  __init__.py: QmPE862VDVyhz2DLx1HNzc8fDXrRgFDCTDSHJNEcJ2cz9W
+  __init__.py: QmfQUNDwgRt3xjf815iGwkz7grPvPSXm7Spr28bj6FPmqd
   custom_types.py: QmTQSizkRh6awSk4J2cPGjidMcZ356bTyYxNG2HSgfkj9B
   dialogues.py: QmbeoxWVZAoQt83k3JKom3mjHg23m9CDviWXcgW9ijPGkN
   gym.proto: QmSYD1qtmNwKnfuTUtPGzbfW3kww4viJ714aRTPupLdV62
