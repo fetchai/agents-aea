@@ -38,8 +38,8 @@ DEFAULT_BODY_SIZE = 4
 class AggregationMessage(Message):
     """A protocol for agents to aggregate individual observations"""
 
-    protocol_id = PublicId.from_str("fetchai/aggregation:0.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/aggregation:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/aggregation:0.2.0")
+    protocol_specification_id = PublicId.from_str("fetchai/aggregation:0.2.0")
 
     class Performative(Message.Performative):
         """Performatives for the aggregation protocol."""
@@ -82,6 +82,7 @@ class AggregationMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
+        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

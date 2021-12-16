@@ -746,6 +746,7 @@ class ProtocolGenerator:
         cls_str += self.indent + ":param dialogue_reference: the dialogue reference.\n"
         cls_str += self.indent + ":param target: the message target.\n"
         cls_str += self.indent + ":param performative: the message performative.\n"
+        cls_str += self.indent + ":param **kwargs: extra options.\n"
         cls_str += self.indent + '"""\n'
 
         cls_str += self.indent + "super().__init__(\n"
@@ -965,7 +966,10 @@ class ProtocolGenerator:
 
         :return: the `valid replies` dictionary string
         """
-        valid_replies_str = self.indent + "VALID_REPLIES = {\n"
+        valid_replies_str = (
+            self.indent
+            + "VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {\n"
+        )
         self._change_indent(1)
         for performative in sorted(self.spec.reply.keys()):
             valid_replies_str += (
@@ -1067,7 +1071,7 @@ class ProtocolGenerator:
         # Imports
         cls_str += self.indent + "from abc import ABC\n"
         cls_str += (
-            self.indent + "from typing import Callable, FrozenSet, Type, cast\n\n"
+            self.indent + "from typing import Callable, Dict, FrozenSet, Type, cast\n\n"
         )
         cls_str += self.indent + "from aea.common import Address\n"
         cls_str += self.indent + "from aea.protocols.base import Message\n"
@@ -1111,11 +1115,11 @@ class ProtocolGenerator:
         )
         cls_str += (
             self.indent
-            + "INITIAL_PERFORMATIVES = frozenset({"
+            + "INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset({"
             + initial_performatives_str
             + "})\n"
             + self.indent
-            + "TERMINAL_PERFORMATIVES = frozenset({"
+            + "TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset({"
             + terminal_performatives_str
             + "})\n"
             + self._valid_replies_str()
@@ -1153,7 +1157,7 @@ class ProtocolGenerator:
             self.indent
             + ":param role: the role of the agent this dialogue is maintained for\n"
         )
-        cls_str += self.indent + ":return: None\n"
+        cls_str += self.indent + ":param message_class: the message class used\n"
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogue.__init__(\n"
         cls_str += self.indent + "self,\n"
@@ -1216,7 +1220,11 @@ class ProtocolGenerator:
             self.indent
             + ":param self_address: the address of the entity for whom dialogues are maintained\n"
         )
-        cls_str += self.indent + ":return: None\n"
+        cls_str += self.indent + ":param dialogue_class: the dialogue class used\n"
+        cls_str += (
+            self.indent
+            + ":param role_from_first_message: the callable determining role from first message\n"
+        )
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Dialogues.__init__(\n"
         self._change_indent(1)
@@ -1303,7 +1311,6 @@ class ProtocolGenerator:
                     _camel_case_to_snake_case(custom_type)
                 )
             )
-            cls_str += self.indent + ":return: None\n"
             cls_str += self.indent + '"""\n'
             cls_str += self.indent + "raise NotImplementedError\n\n"
             self._change_indent(-1)

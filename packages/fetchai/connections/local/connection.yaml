@@ -1,6 +1,6 @@
 name: local
 author: fetchai
-version: 0.20.0
+version: 0.21.0
 type: connection
 description: The local connection provides a stub for an OEF node.
 license: Apache-2.0
@@ -8,11 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmbK7MtyAVqh2LmSh9TY6yBZqfWaAXURP4rQGATyP2hTKC
   __init__.py: QmeeoX5E38Ecrb1rLdeFyyxReHLrcJoETnBcPbcNWVbiKG
-  connection.py: QmefhFjAcFQZSTmwRjQF8CS6gd3qKQ298x3BVMNn6cnZJM
+  connection.py: QmVYF942Cn6ukDQZLZf8DCWVqXuhXbC42Jhq89XaCMDcmN
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/oef_search:1.0.0
+- fetchai/oef_search:1.1.0
 class_name: OEFLocalConnection
 config: {}
 excluded_protocols: []

@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class PrometheusMessage(Message):
     """A protocol for adding and updating metrics to a prometheus server."""
 
-    protocol_id = PublicId.from_str("fetchai/prometheus:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/prometheus:1.1.0")
     protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.0.0")
 
     class Performative(Message.Performative):
@@ -84,6 +84,7 @@ class PrometheusMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
+        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

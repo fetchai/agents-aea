@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="aggregation.proto",
-    package="aea.fetchai.aggregation.v0_1_0",
+    package="aea.fetchai.aggregation.v0_2_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x11\x61ggregation.proto\x12\x1e\x61\x65\x61.fetchai.aggregation.v0_1_0"\xaa\x03\n\x12\x41ggregationMessage\x12\x62\n\x0b\x61ggregation\x18\x05 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_PerformativeH\x00\x12\x62\n\x0bobservation\x18\x06 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_PerformativeH\x00\x1aZ\n\x18Observation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\x1a`\n\x18\x41ggregation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x14\n\x0c\x63ontributors\x18\x03 \x03(\t\x12\x11\n\tsignature\x18\x04 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x11\x61ggregation.proto\x12\x1e\x61\x65\x61.fetchai.aggregation.v0_2_0"\xaa\x03\n\x12\x41ggregationMessage\x12\x62\n\x0b\x61ggregation\x18\x05 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_PerformativeH\x00\x12\x62\n\x0bobservation\x18\x06 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_PerformativeH\x00\x1aZ\n\x18Observation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\x1a`\n\x18\x41ggregation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x14\n\x0c\x63ontributors\x18\x03 \x03(\t\x12\x11\n\tsignature\x18\x04 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _AGGREGATIONMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
     name="Observation_Performative",
-    full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_Performative",
+    full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_Performative.value",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_Performative.value",
             index=0,
             number=1,
             type=5,
@@ -48,7 +48,7 @@ _AGGREGATIONMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="time",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_Performative.time",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_Performative.time",
             index=1,
             number=2,
             type=9,
@@ -66,7 +66,7 @@ _AGGREGATIONMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="source",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_Performative.source",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_Performative.source",
             index=2,
             number=3,
             type=9,
@@ -84,7 +84,7 @@ _AGGREGATIONMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="signature",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_Performative.signature",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_Performative.signature",
             index=3,
             number=4,
             type=9,
@@ -115,14 +115,14 @@ _AGGREGATIONMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
 
 _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
     name="Aggregation_Performative",
-    full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative",
+    full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative.value",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_Performative.value",
             index=0,
             number=1,
             type=5,
@@ -140,7 +140,7 @@ _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="time",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative.time",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_Performative.time",
             index=1,
             number=2,
             type=9,
@@ -158,7 +158,7 @@ _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="contributors",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative.contributors",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_Performative.contributors",
             index=2,
             number=3,
             type=9,
@@ -176,7 +176,7 @@ _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="signature",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative.signature",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_Performative.signature",
             index=3,
             number=4,
             type=9,
@@ -207,14 +207,14 @@ _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
 
 _AGGREGATIONMESSAGE = _descriptor.Descriptor(
     name="AggregationMessage",
-    full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage",
+    full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="aggregation",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.aggregation",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.aggregation",
             index=0,
             number=5,
             type=11,
@@ -232,7 +232,7 @@ _AGGREGATIONMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="observation",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.observation",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.observation",
             index=1,
             number=6,
             type=11,
@@ -262,7 +262,7 @@ _AGGREGATIONMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.performative",
+            full_name="aea.fetchai.aggregation.v0_2_0.AggregationMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -305,7 +305,7 @@ AggregationMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _AGGREGATIONMESSAGE_OBSERVATION_PERFORMATIVE,
                 "__module__": "aggregation_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.aggregation.v0_2_0.AggregationMessage.Observation_Performative)
             },
         ),
         "Aggregation_Performative": _reflection.GeneratedProtocolMessageType(
@@ -314,12 +314,12 @@ AggregationMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE,
                 "__module__": "aggregation_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.aggregation.v0_2_0.AggregationMessage.Aggregation_Performative)
             },
         ),
         "DESCRIPTOR": _AGGREGATIONMESSAGE,
         "__module__": "aggregation_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.aggregation.v0_1_0.AggregationMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.aggregation.v0_2_0.AggregationMessage)
     },
 )
 _sym_db.RegisterMessage(AggregationMessage)

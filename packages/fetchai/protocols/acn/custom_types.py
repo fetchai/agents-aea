@@ -101,7 +101,6 @@ class AgentRecord:
 
         :param agent_record_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param agent_record_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         agent_record_protobuf_object.address = agent_record_object.address
         agent_record_protobuf_object.public_key = agent_record_object.public_key
@@ -196,7 +195,6 @@ class StatusBody:
 
         :param status_body_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param status_body_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         status_body_protobuf_object.code = int(status_body_object.status_code)
         status_body_protobuf_object.msgs.extend(status_body_object.msgs)

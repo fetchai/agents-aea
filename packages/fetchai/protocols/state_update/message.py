@@ -38,7 +38,7 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:1.1.0")
     protocol_specification_id = PublicId.from_str("fetchai/state_update:1.0.0")
 
     class Performative(Message.Performative):
@@ -82,6 +82,7 @@ class StateUpdateMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
+        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

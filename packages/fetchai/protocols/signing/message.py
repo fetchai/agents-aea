@@ -51,7 +51,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/signing:1.1.0")
     protocol_specification_id = PublicId.from_str("fetchai/signing:1.0.0")
 
     ErrorCode = CustomErrorCode
@@ -117,6 +117,7 @@ class SigningMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
+        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,
