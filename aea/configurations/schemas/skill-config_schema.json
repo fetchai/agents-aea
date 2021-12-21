@@ -34,7 +34,9 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "enum": ["skill"]
+      "enum": [
+        "skill"
+      ]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"

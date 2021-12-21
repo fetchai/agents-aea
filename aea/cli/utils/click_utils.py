@@ -21,7 +21,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import click
 from click import Context, Option, UsageError, option
@@ -88,11 +88,15 @@ class PublicIdParameter(click.ParamType):
         """Return the metavar default for this param if it provides one."""
         return "PUBLIC_ID"
 
-    def convert(self, value: str, param: Any, ctx: Optional[click.Context]) -> PublicId:
+    def convert(
+        self, value: str, param: Any, ctx: Optional[click.Context]
+    ) -> Union[PublicId, str]:
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         try:
             return PublicId.from_str(value)
         except ValueError:
+            if ctx.obj.config.get("from_ipfs"):  # type: ignore
+                return str(value)
             self.fail(value, param, ctx)
 
 
@@ -141,16 +145,15 @@ def registry_flag(
             is_flag=True,
             cls=MutuallyExclusiveOption,
             help=help_local,
-            mutually_exclusive=["remote"],
+            mutually_exclusive=["remote",],  # noqa: E231
         )(f)
         f = option(
             "--remote",
             is_flag=True,
             cls=MutuallyExclusiveOption,
             help=help_remote,
-            mutually_exclusive=["local"],
+            mutually_exclusive=["local",],  # noqa: E231
         )(f)
-
         return f
 
     return wrapper
