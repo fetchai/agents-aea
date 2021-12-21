@@ -1,5 +1,5 @@
-name: stub
-author: fetchai
+name: stub_0
+author: default_author
 version: 0.1.0
 type: contract
 description: The scaffold contract scaffolds a contract to be implemented by the developer.
@@ -12,5 +12,4 @@ fingerprint_ignore_patterns: []
 class_name: MyScaffoldContract
 contract_interface_paths: {}
 dependencies: {}
-contracts:
-- fetchai/erc1155:0.22.0
+contracts: []
