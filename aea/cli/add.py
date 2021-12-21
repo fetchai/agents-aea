@@ -188,6 +188,12 @@ def _add_item_deps(
             if skill_public_id not in ctx.agent_config.skills:
                 add_item(ctx, SKILL, skill_public_id)
 
+    if item_type == CONTRACT:
+        item_config = cast(SkillConfig, item_config)
+        # add missing contracts
+        for contract_public_id in item_config.contracts:
+            if contract_public_id not in ctx.agent_config.contracts:
+                add_item(ctx, CONTRACT, contract_public_id)
 
 def fetch_item_remote(
     item_type: str, item_public_id: PublicId, cwd: str, dest: str
