@@ -30,7 +30,6 @@ from copy import deepcopy
 from importlib import import_module
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
-import click
 
 import jsonschema
 from packaging.specifiers import SpecifierSet

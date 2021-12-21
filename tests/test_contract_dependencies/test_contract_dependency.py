@@ -20,22 +20,22 @@
 
 """This test module contains the tests for the `aea create` sub-command."""
 
-import logging
 import os
 import shutil
 from pathlib import Path
 from typing import List
-from unittest.mock import patch
 
 from click.testing import Result
+
+from aea.cli import cli
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.data_types import PackageType, PublicId
-from aea.configurations.loader import ConfigLoader, load_component_configuration
-
+from aea.configurations.loader import ConfigLoader
 from aea.test_tools.click_testing import CliRunner
+
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, ROOT_DIR
-from aea.cli import cli
+
 
 TEST_DIR = Path(ROOT_DIR) / "tests" / "test_contract_dependencies"
 
@@ -81,22 +81,10 @@ class TestCreate:
         )
         assert result.exit_code == 0, result.stdout
 
-        result = self._run_command(
-            [
-                "create",
-                "--empty",
-                "--local",
-                self.agent_name,
-            ]
-        )
+        result = self._run_command(["create", "--empty", "--local", self.agent_name,])
         os.chdir(self.agent_dir)
         result = self._run_command(
-            [
-                "add",
-                "--local",
-                "contract",
-                "default_author/stub_1:0.1.0",
-            ]
+            ["add", "--local", "contract", "default_author/stub_1:0.1.0",]
         )
 
         agent_config = self._load_agent_config()
@@ -118,16 +106,10 @@ class TestCreate:
             ]
         )
 
-        result = self._run_command(
-            [
-                "build",
-            ]
-        )
+        result = self._run_command(["build",])
         assert result.stdout == "Build completed!\n"
 
-    def teardown(
-        self,
-    ):
+    def teardown(self,):
         """Test teardown."""
         shutil.rmtree(str(self.agent_dir))
         os.chdir(str(ROOT_DIR))
