@@ -195,6 +195,7 @@ def _add_item_deps(
             if contract_public_id not in ctx.agent_config.contracts:
                 add_item(ctx, CONTRACT, contract_public_id)
 
+
 def fetch_item_remote(
     item_type: str, item_public_id: PublicId, cwd: str, dest: str
 ) -> Path:
