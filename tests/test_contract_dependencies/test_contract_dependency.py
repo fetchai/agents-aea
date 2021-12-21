@@ -81,10 +81,10 @@ class TestCreate:
         )
         assert result.exit_code == 0, result.stdout
 
-        result = self._run_command(["create", "--empty", "--local", self.agent_name,])
+        result = self._run_command(["create", "--empty", "--local", self.agent_name])
         os.chdir(self.agent_dir)
         result = self._run_command(
-            ["add", "--local", "contract", "default_author/stub_1:0.1.0",]
+            ["add", "--local", "contract", "default_author/stub_1:0.1.0"]
         )
 
         agent_config = self._load_agent_config()
@@ -106,7 +106,7 @@ class TestCreate:
             ]
         )
 
-        result = self._run_command(["build",])
+        result = self._run_command(["build"])
         assert result.stdout == "Build completed!\n"
 
     def teardown(self,):
