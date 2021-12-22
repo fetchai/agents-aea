@@ -9,13 +9,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmZnnrELDnJY6tJLBg12orufw1KqahRcTNdJJHN16Qo425
-  __init__.py: QmWrVBeornauFHuywxs82FoS7JRAL7s9CSYKRE9wu89Ukc
+  __init__.py: QmZeTQnKDziRdoiWG5fBY2NoxddaiABuAqKjQ8SNyqTrbB
   cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
   cosm_trade_pb2.py: QmVZWhxWmqr3WKPx2HQWPENavv8754BmiLuh6hTukuWRxX
   custom_types.py: QmUweZKxravsiJNVzUypN8fiF7XWYbuN2rVURw18EHQrss
-  dialogues.py: QmQMbaNba3HCZbubgBi1t9cyNPv7zKhm7odfQt31BJ1bK4
-  message.py: QmPcSWz1VJx9MEFxxAhycdS2hsuSdtrNRvVLiJt5gq4Gz6
-  serialization.py: QmTsEjoduW6mgWSGF1hFLobUmajPXVVVWZ7Bs4FmLWaRW8
+  dialogues.py: QmXuvrQqkFjxVXSS73FProQtxDnEn8wXJWGdoscaBwTmxS
+  message.py: QmUwvsTP2ebR8wQvFvSFGVBPqXNs7gUeV6pcxQupFRRZsh
+  serialization.py: QmaJ89jE6VWsRxgrkZVhaY2YRwBLXhN6pvdnKRUKwHqbmj
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
