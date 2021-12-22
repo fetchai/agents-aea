@@ -61,52 +61,50 @@ class TestCreate:
     def test_run(self):
         """Run the test."""
 
-        with TemporaryDirectory() as temp_dir:
-            temp_dir = Path(temp_dir)
-            os.chdir(str(temp_dir))
-            self.agent_name = "default_agent"
-            self.agent_dir = temp_dir / self.agent_name
-            self.runner = CliRunner()
-            result = self.runner.invoke(
-                cli,
-                [
-                    *CLI_LOG_OPTION,
-                    "init",
-                    "--local",
-                    "--author",
-                    AUTHOR,
-                    "--default-registry",
-                    "http",
-                ],
-            )
-            assert result.exit_code == 0, result.stdout
-            result = self._run_command(
-                ["create", "--empty", "--local", self.agent_name]
-            )
-            os.chdir(self.agent_dir)
-            result = self._run_command(
-                ["add", "--local", "contract", "default_author/stub_1:0.1.0"]
-            )
-            agent_config = self._load_agent_config()
-            assert all(
-                [
-                    PublicId.from_str(pid) in agent_config.contracts
-                    for pid in [
-                        "default_author/stub_0:0.1.0",
-                        "default_author/stub_1:0.1.0",
-                    ]
+        temp_dir = Path(TemporaryDirectory().name)
+        temp_dir.mkdir(exist_ok=True)
+        os.chdir(str(temp_dir))
+        self.agent_name = "default_agent"
+        self.agent_dir = temp_dir / self.agent_name
+        self.runner = CliRunner()
+        result = self.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "init",
+                "--local",
+                "--author",
+                AUTHOR,
+                "--default-registry",
+                "http",
+            ],
+        )
+        assert result.exit_code == 0, result.stdout
+        result = self._run_command(["create", "--empty", "--local", self.agent_name])
+        os.chdir(self.agent_dir)
+        result = self._run_command(
+            ["add", "--local", "contract", "default_author/stub_1:0.1.0"]
+        )
+        agent_config = self._load_agent_config()
+        assert all(
+            [
+                PublicId.from_str(pid) in agent_config.contracts
+                for pid in [
+                    "default_author/stub_0:0.1.0",
+                    "default_author/stub_1:0.1.0",
                 ]
-            )
-            assert all(
-                [
-                    (
-                        self.agent_dir / "vendor" / "default_author" / "contracts" / pid
-                    ).is_dir()
-                    for pid in ["stub_0", "stub_1"]
-                ]
-            )
-            result = self._run_command(["build"])
-            assert result.stdout == "Build completed!\n"
+            ]
+        )
+        assert all(
+            [
+                (
+                    self.agent_dir / "vendor" / "default_author" / "contracts" / pid
+                ).is_dir()
+                for pid in ["stub_0", "stub_1"]
+            ]
+        )
+        result = self._run_command(["build"])
+        assert result.stdout == "Build completed!\n"
 
     def teardown(self,):
         """Test teardown."""
