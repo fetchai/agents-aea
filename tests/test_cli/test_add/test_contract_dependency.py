@@ -53,8 +53,7 @@ class TestCreate:
     def _run_command(self, options: List) -> Result:
         """Run command with default options."""
         result = self.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, f"--registry-path={str(REGISTRY_PATH)}", *options],
+            cli, [*CLI_LOG_OPTION, f"--registry-path={str(REGISTRY_PATH)}", *options],
         )
         assert result.exit_code == 0, result.stdout
         return result
@@ -109,8 +108,6 @@ class TestCreate:
             result = self._run_command(["build"])
             assert result.stdout == "Build completed!\n"
 
-    def teardown(
-        self,
-    ):
+    def teardown(self,):
         """Test teardown."""
         os.chdir(str(ROOT_DIR))
