@@ -44,6 +44,7 @@ from aea.cli.utils.package_utils import (
 )
 from aea.configurations.base import (
     ConnectionConfig,
+    ContractConfig,
     PackageConfiguration,
     PublicId,
     SkillConfig,
@@ -189,7 +190,7 @@ def _add_item_deps(
                 add_item(ctx, SKILL, skill_public_id)
 
     if item_type == CONTRACT:
-        item_config = cast(SkillConfig, item_config)
+        item_config = cast(ContractConfig, item_config)
         # add missing contracts
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
@@ -239,7 +240,10 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.
