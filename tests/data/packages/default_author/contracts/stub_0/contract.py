@@ -33,6 +33,11 @@ class MyScaffoldContract(Contract):
 
     contract_id = PublicId.from_str("open_aea/scaffold:0.1.0")
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Init contract."""
+        super().__init__(*args, **kwargs)
+        print("Contract stub_0 initialized.")
+
     @classmethod
     def get_raw_transaction(
         cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
