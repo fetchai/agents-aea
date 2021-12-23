@@ -1817,11 +1817,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             else:
                 raise AEAException("Not a valid configuration type.")  # pragma: nocover
 
-            if component_type != CONTRACTS:
-                for dependency in dependencies:
-                    dependency_to_supported_dependencies[
-                        ComponentId(ComponentType.SKILL, dependency)
-                    ].add(component_id)
+            for dependency in dependencies:
+                dependency_to_supported_dependencies[
+                    ComponentId(component_type[:-1], dependency)
+                ].add(component_id)
 
         try:
             order = find_topological_order(dependency_to_supported_dependencies)
