@@ -50,12 +50,13 @@ class TestCreate:
             agent_config = agent_loader.load(fp)
         return agent_config
 
-    def _run_command(self, options: List) -> Result:
+    def _run_command(self, options: List, assert_exit_code: bool = True) -> Result:
         """Run command with default options."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, f"--registry-path={str(REGISTRY_PATH)}", *options],
+            cli, ["-v", "INFO", f"--registry-path={str(REGISTRY_PATH)}", *options],
         )
-        assert result.exit_code == 0, result.stdout
+        if assert_exit_code:
+            assert result.exit_code == 0, result.stdout
         return result
 
     def test_run(self):
@@ -105,6 +106,14 @@ class TestCreate:
         )
         result = self._run_command(["build"])
         assert result.stdout == "Build completed!\n"
+
+        self._run_command(["generate-key", "ethereum"])
+        self._run_command(["add-key", "ethereum"])
+
+        result = self._run_command(["run"], False)
+
+        assert "Contract stub_0 initialized." in result.stdout
+        assert "Contract stub_1 initialized." in result.stdout
 
     def teardown(self,):
         """Test teardown."""
