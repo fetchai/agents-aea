@@ -44,6 +44,7 @@ from aea.cli.utils.package_utils import (
 )
 from aea.configurations.base import (
     ConnectionConfig,
+    ContractConfig,
     PackageConfiguration,
     PublicId,
     SkillConfig,
@@ -187,6 +188,13 @@ def _add_item_deps(
         for skill_public_id in item_config.skills:
             if skill_public_id not in ctx.agent_config.skills:
                 add_item(ctx, SKILL, skill_public_id)
+
+    if item_type == CONTRACT:
+        item_config = cast(ContractConfig, item_config)
+        # add missing contracts
+        for contract_public_id in item_config.contracts:
+            if contract_public_id not in ctx.agent_config.contracts:
+                add_item(ctx, CONTRACT, contract_public_id)
 
 
 def fetch_item_remote(

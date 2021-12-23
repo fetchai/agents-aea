@@ -1713,6 +1713,7 @@ class ContractConfig(ComponentConfiguration):
         "description",
         "contract_interface_paths",
         "class_name",
+        "contracts",
     )
 
     def __init__(
@@ -1730,6 +1731,7 @@ class ContractConfig(ComponentConfiguration):
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
+        contracts: Optional[Set[PublicId]] = None,
     ) -> None:
         """Initialize a protocol configuration object."""
         super().__init__(
@@ -1750,6 +1752,7 @@ class ContractConfig(ComponentConfiguration):
             contract_interface_paths if contract_interface_paths is not None else {}
         )
         self.class_name = class_name
+        self.contracts = contracts or set()
 
     @property
     def json(self) -> Dict:
@@ -1768,6 +1771,7 @@ class ContractConfig(ComponentConfiguration):
                 "class_name": self.class_name,
                 "contract_interface_paths": self.contract_interface_paths,
                 "dependencies": dependencies_to_json(self.dependencies),
+                CONTRACTS: sorted(map(str, self.contracts)),
             }
         )
         if self.build_entrypoint:
@@ -1785,6 +1789,7 @@ class ContractConfig(ComponentConfiguration):
         dependencies = cast(
             Dependencies, dependencies_from_json(obj.get("dependencies", {}))
         )
+        contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1803,6 +1808,7 @@ class ContractConfig(ComponentConfiguration):
                 Dict[str, str], obj.get("contract_interface_paths", {})
             ),
             class_name=obj.get("class_name", ""),
+            contracts=contracts,
         )
         instance = cast(ContractConfig, cls._apply_params_to_instance(params, instance))
 

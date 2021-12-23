@@ -53,6 +53,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import (
     CONNECTIONS,
+    CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
@@ -1811,11 +1812,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 dependencies, component_type = configuration.skills, SKILLS
             elif isinstance(configuration, ConnectionConfig):
                 dependencies, component_type = configuration.connections, CONNECTIONS
+            elif isinstance(configuration, ContractConfig):
+                dependencies, component_type = configuration.contracts, CONTRACTS
             else:
                 raise AEAException("Not a valid configuration type.")  # pragma: nocover
+
             for dependency in dependencies:
                 dependency_to_supported_dependencies[
-                    ComponentId(ComponentType.SKILL, dependency)
+                    ComponentId(component_type[:-1], dependency)
                 ].add(component_id)
 
         try:
@@ -1967,13 +1971,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         component_ids = [
             ComponentId(component_type, public_id) for public_id in public_ids
         ]
-        if component_type in {ComponentType.PROTOCOL, ComponentType.CONTRACT}:
+        if component_type in {ComponentType.PROTOCOL}:
             # if protocols or contracts, import order doesn't matter.
             import_order = component_ids
         else:
             import_order = self._find_import_order(
                 component_ids, aea_project_path, skip_consistency_check
             )
+
         for component_id in import_order:
             component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id

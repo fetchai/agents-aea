@@ -15,7 +15,8 @@
     "class_name",
     "description",
     "contract_interface_paths",
-    "dependencies"
+    "dependencies",
+    "contracts"
   ],
   "properties": {
     "name": {
@@ -28,7 +29,9 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "enum": ["contract"]
+      "enum": [
+        "contract"
+      ]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"
@@ -65,6 +68,14 @@
     },
     "class_name": {
       "type": "string"
+    },
+    "contracts": {
+      "type": "array",
+      "additionalProperties": false,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/public_id"
+      }
     }
   }
 }
