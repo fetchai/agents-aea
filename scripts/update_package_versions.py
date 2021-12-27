@@ -17,13 +17,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """
 Updates package versions relative to last release.
 
 Run this script from the root of the project directory:
-
     python scripts/update_package_versions.py
-
 """
 
 import argparse
@@ -246,10 +245,15 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
     """
     runner = CliRunner()
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "search", type_, "--query", name], standalone_mode=False,
+        cli,
+        [*CLI_LOG_OPTION, "search", type_, "--query", name],
+        standalone_mode=False,
     )
     reg = r"({}/{}:{})".format("fetchai", name, PublicId.VERSION_REGEX)
-    ids = re.findall(reg, result.output,)
+    ids = re.findall(
+        reg,
+        result.output,
+    )
     p_ids = []
     highest = PublicId.from_str("fetchai/{}:0.1.0".format(name))
     for id_ in ids:
@@ -267,7 +271,6 @@ def get_all_protocol_spec_ids() -> Set[PublicId]:
     We return package ids with type "protocol" even though
     they are not exactly protocol. The reason is that
     they are only used to find clashes with protocol ids.
-
     :return: a set of package ids.
     """
     result: Set[PublicId] = set()
@@ -309,7 +312,6 @@ def get_public_ids_to_update() -> Set[PackageId]:
     - the package hasn't change since the last release;
     - the public ids of the local package and the package in the registry
       are already the same.
-
     :return: set of package ids to update
     """
     result: Set[PackageId] = set()
@@ -376,14 +378,12 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
     Sort the set of package id in the order of update.
 
     In particular, they are sorted from the greatest version number to the lowest.
-
     The reason is to avoid that consecutive package ids (i.e. whose minors difference is 1)
     gets updated in ascending order, resulting in all the updates collapsing to the greatest version.
     For example, consider two package ids with prefix 'author/package' and with versions
     0.1.0 and 0.2.0, respectively. If we bump first the former and then the latter,
     the new replacements associated to the first updated are taken into account in
     the second update.
-
     :param package_ids: set of package ids
     :return: sorted list of package ids
     """
@@ -417,7 +417,6 @@ def _can_disambiguate_from_context(
     - whether the public id appears in a line of the form 'aea fetch ...' (we know it's an agent)
     - whether the public id appears in a line of the form 'aea add ...' (we know the component type)
     - whether the type appears in the same line where the public id occurs.
-
     :param line: the line
     :param old_string: the old string
     :param type_: the type of package
@@ -520,7 +519,6 @@ def replace_in_yamls(
         |author: package_author
         |version: package_version -> bump up
         |type: package_type
-        
     :param content: the content
     :param old_public_id: the old public id
     :param new_public_id: the new public id
@@ -545,6 +543,7 @@ def replace_in_protocol_readme(
 ) -> str:
     """
     Replace the version id in the protocol specification in the protcol's README.
+
     That is, bump the version in cases like:
         |name: package_name
         |author: package_author
@@ -618,6 +617,7 @@ class Updater:
     def check_if_running_allowed():
         """
         Check if we can run the script.
+
         Script should only be run on a clean branch.
         """
         git_call = subprocess.Popen(["git", "diff"], stdout=subprocess.PIPE)  # nosec
@@ -676,8 +676,8 @@ class Updater:
             self.process_package(package_id, is_ambiguous)
 
     def process_package(self, package_id: PackageId, is_ambiguous: bool) -> None:
-        """
-        Process a package.
+        """Process a package.
+
         - check version in registry
         - make sure, version is exactly one above the one in registry
         - change all occurrences in packages/tests/aea/examples/benchmark/docs to new reference
@@ -733,6 +733,7 @@ class Updater:
     ) -> None:
         """
         Bump the version references of the package in the repo.
+
         Includes, bumping the package itself.
         :param current_public_id: the current public id
         :param configuration_file_path: the path to the configuration file
@@ -802,6 +803,7 @@ class Updater:
     ) -> str:
         """
         Ask to user if the line should be replaced or not, If the script arguments allow that.
+
         :param content: the content.
         :param old_string: the old string.
         :param new_string: the new string.
