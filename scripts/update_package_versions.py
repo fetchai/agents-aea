@@ -183,7 +183,7 @@ def split_hashes_by_type(all_hashes: Dict[str, str]) -> Dict[str, Dict[str, str]
         "skills": {},
     }  # type: Dict[str, Dict[str, str]]
     for key, value in all_hashes.items():
-        if "fetchai" not in key:
+        if "fetchai" not in key or "open-aea" not in key:
             print("Non-fetchai packages not allowed!")
             sys.exit(1)
         _, type_, name = key.split("/")
