@@ -204,6 +204,7 @@ def fetch_item_remote(
     registry_config = get_registry_config()
     registry_type = registry_config.get("default")
     click.echo(f"Using registry: {registry_type} ")
+
     if registry_type == REGISTRY_IPFS:
         try:
             from aea_cli_ipfs.registry import (  # type: ignore  # pylint: disable=import-outside-toplevel
@@ -212,7 +213,13 @@ def fetch_item_remote(
         except ImportError:
             click.echo("Please install IPFS plugin.")
 
-        return fetch_ipfs(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
+        package_path = fetch_ipfs(
+            item_type, public_id=item_public_id, cwd=cwd, dest=dest
+        )
+        if package_path is not None:
+            return package_path
+        click.echo(f"Cannot find hash for {item_public_id}")
+        click.echo("Fetching item using http.")
 
     return fetch_package(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
 
