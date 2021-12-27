@@ -183,7 +183,7 @@ def split_hashes_by_type(all_hashes: Dict[str, str]) -> Dict[str, Dict[str, str]
         "skills": {},
     }  # type: Dict[str, Dict[str, str]]
     for key, value in all_hashes.items():
-        if "fetchai" not in key and "open_aea" not in key:
+        if "fetchai" not in key:
             print("Non-fetchai packages not allowed!")
             sys.exit(1)
         _, type_, name = key.split("/")
@@ -628,7 +628,7 @@ class Updater:
 
     def _checks(self):
         self.check_if_svn_installed()
-        # self.run_hashing()
+        self.run_hashing()
         self.check_if_running_allowed()
 
     def run(self):
