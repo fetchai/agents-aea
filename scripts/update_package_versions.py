@@ -182,8 +182,8 @@ def split_hashes_by_type(all_hashes: Dict[str, str]) -> Dict[str, Dict[str, str]
         "skills": {},
     }  # type: Dict[str, Dict[str, str]]
     for key, value in all_hashes.items():
-        if "fetchai" not in key:
-            print("Non-fetchai packages not allowed!")
+        if "fetchai" not in key and "open_aea" not in key:
+            print("Non (fetchai|open_aea) packages not allowed!")
             sys.exit(1)
         _, type_, name = key.split("/")
         result[type_][name] = value
@@ -192,12 +192,19 @@ def split_hashes_by_type(all_hashes: Dict[str, str]) -> Dict[str, Dict[str, str]
 
 def get_configuration_file_path(type_: str, name: str) -> Path:
     """Get the configuration file path."""
+
     fp = os.path.join("packages", "fetchai", type_, name, TYPE_TO_CONFIG_FILE[type_])
     if os.path.isfile(fp):
         return Path(fp)
+
+    fp = os.path.join("packages", "open_aea", type_, name, TYPE_TO_CONFIG_FILE[type_])
+    if os.path.isfile(fp):
+        return Path(fp)
+
     fp = os.path.join("aea", type_, name, TYPE_TO_CONFIG_FILE[type_])
     if os.path.isfile(fp):
         return Path(fp)
+
     print("Cannot find folder for package `{}` of type `{}`".format(name, type_))
     sys.exit(1)
 
