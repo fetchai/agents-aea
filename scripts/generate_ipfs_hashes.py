@@ -223,9 +223,7 @@ class IPFSDaemon:
         if res is None:
             raise Exception("Please install IPFS first!")
         process = subprocess.Popen(  # nosec
-            ["ipfs", "--version"],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
+            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
         output, _ = process.communicate()
         if b"0.6.0" not in output:
@@ -237,9 +235,7 @@ class IPFSDaemon:
     def __enter__(self) -> None:
         """Run the ipfs daemon."""
         self.process = subprocess.Popen(  # nosec
-            ["ipfs", "daemon"],
-            stdout=subprocess.PIPE,
-            env=os.environ.copy(),
+            ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
         print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
 
