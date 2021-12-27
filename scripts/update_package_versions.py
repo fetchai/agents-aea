@@ -628,7 +628,7 @@ class Updater:
 
     def _checks(self):
         self.check_if_svn_installed()
-        self.run_hashing()
+        # self.run_hashing()
         self.check_if_running_allowed()
 
     def run(self):
