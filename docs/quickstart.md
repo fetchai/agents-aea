@@ -34,9 +34,9 @@ python3 --version
 
 <li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
-  E.g. for Python 3.7: 
+  E.g. for Python 3.8: 
 ``` bash
-sudo apt-get install python3.7-dev
+sudo apt-get install python3.8-dev
 ```
 </li>
 
@@ -112,10 +112,10 @@ which pipenv
 
 If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target="_blank">here</a>.
 
-Once installed, create a new environment and open it (here we use Python 3.7 but the AEA framework supports any Python >= 3.6).
+Once installed, create a new environment and open it (here we use Python 3.8 but the AEA framework supports any Python >= 3.6).
 
 ``` bash
-touch Pipfile && pipenv --python 3.7 && pipenv shell
+touch Pipfile && pipenv --python 3.8 && pipenv shell
 ```
 
 
@@ -134,43 +134,9 @@ pip install 'open-aea[all]'
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
-## Setup Open-AEA author name
+## Setup Open-AEA Components
 
-AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
-
-You can set up your author name using the `init` command:
-``` bash
-aea init
-```
-
-This is your unique author (or developer) name in the AEA ecosystem.
-
-You should see a similar output (with your input instead of the sample username and email):
-``` bash
-Do you have a Registry account? [y/N]: n
-Create a new account on the Registry now:
-Username: valory
-Email: hello@valory.xyz
-Password:
-Please make sure that passwords are equal.
-Confirm password:
-    _     _____     _
-   / \   | ____|   / \
-  / _ \  |  _|    / _ \
- / ___ \ | |___  / ___ \
-/_/   \_\|_____|/_/   \_\
-
-v1.2.0
-
-AEA configurations successfully initialized: {'author': 'valory'}
-```
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If you would rather not create an account on the registry at this point, then run <code>aea init --local</code> instead.</p>
-</div>
-
-
+AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
 
 ## Echo skill demo
 
