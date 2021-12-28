@@ -22,12 +22,12 @@ handle_dotted_path(value: str, author: str, aea_project_path: Union[str, Path] =
 Separate the path between path to resource and json path to attribute.
 
 Allowed values:
-'agent.an_attribute_name'
-'protocols.my_protocol.an_attribute_name'
-'connections.my_connection.an_attribute_name'
-'contracts.my_contract.an_attribute_name'
-'skills.my_skill.an_attribute_name'
-'vendor.author.[protocols|contracts|connections|skills].package_name.attribute_name
+    'agent.an_attribute_name'
+    'protocols.my_protocol.an_attribute_name'
+    'connections.my_connection.an_attribute_name'
+    'contracts.my_contract.an_attribute_name'
+    'skills.my_skill.an_attribute_name'
+    'vendor.author.[protocols|contracts|connections|skills].package_name.attribute_name
 
 We also return the component id to retrieve the configuration of a specific
 component. Notice that at this point we don't know the version,

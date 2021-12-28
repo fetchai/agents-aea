@@ -7,7 +7,7 @@ This demo assumes you have followed the setup guide.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea --local
+aea fetch open_aea/my_first_aea:0.1.0 --local
 cd my_first_aea
 ```
 ### Install AEA dependencies

@@ -17,7 +17,7 @@ The AEA framework is a development suite, implemented in Python, which equips yo
 
 The framework is modular, extensible, and composable. It attempts to make agent development as straightforward as possible, similar to web development using popular web frameworks such as Django or Flask.
 
-A modular approach to the framework allows the resuse of previously developed components from the entire community, easily equiping AEA's with the necessary components to: 
+A modular approach to the framework allows the reuse of previously developed components from the entire community, easily equipping AEA's with the necessary components to: 
 
 * Communicate with each other in a decentralised peer 2 peer manner using the <a href="acn">Agent Communication Network (ACN)</a> 
 * Interact directly with blockchains as a financial settlement and commitment layer, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.

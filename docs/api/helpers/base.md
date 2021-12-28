@@ -654,13 +654,13 @@ It can be used both as:
 
 @mydecorator
 def myfunction():
-...
+    ...
 
 or as:
 
 @mydecorator(arg1, kwarg1="value")
 def myfunction():
-...
+    ...
 
 **Arguments**:
 

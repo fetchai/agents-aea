@@ -46,12 +46,12 @@ Set an AEA config with nested values.
 Run from agent's directory.
 
 Allowed dotted_path:
-'agent.an_attribute_name'
-'protocols.my_protocol.an_attribute_name'
-'connections.my_connection.an_attribute_name'
-'contracts.my_contract.an_attribute_name'
-'skills.my_skill.an_attribute_name'
-'vendor.author.[protocols|connections|skills].package_name.attribute_name
+    'agent.an_attribute_name'
+    'protocols.my_protocol.an_attribute_name'
+    'connections.my_connection.an_attribute_name'
+    'contracts.my_contract.an_attribute_name'
+    'skills.my_skill.an_attribute_name'
+    'vendor.author.[protocols|connections|skills].package_name.attribute_name
 
 **Arguments**:
 

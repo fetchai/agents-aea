@@ -83,8 +83,8 @@ Initialize the connection multiplexer.
 
 - `connections`: a sequence of connections.
 - `default_connection_index`: the index of the connection to use as default.
-This information is used for envelopes which don't specify any routing context.
-If connections is None, this parameter is ignored.
+    This information is used for envelopes which don't specify any routing context.
+    If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
 - `exception_policy`: the exception policy used for connections.
 - `threaded`: if True, run in threaded mode, else async

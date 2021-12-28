@@ -36,7 +36,7 @@ Transform a Dependencies object into a JSON object.
 **Returns**:
 
 a dictionary whose keys are package names and
-values are the JSON version of a Dependency object.
+         values are the JSON version of a Dependency object.
 
 <a name="aea.configurations.base.ProtocolSpecificationParseError"></a>
 ## ProtocolSpecificationParseError Objects
@@ -452,8 +452,8 @@ Check that the fingerprint are correct against a directory path.
 **Raises**:
 
 - `ValueError`: if
-- the argument is not a valid package directory
-- the fingerprints do not match.
+    - the argument is not a valid package directory
+    - the fingerprints do not match.
 
 <a name="aea.configurations.base.ComponentConfiguration.check_public_id_consistency"></a>
 #### check`_`public`_`id`_`consistency
@@ -471,8 +471,8 @@ Check that the public ids in the init file match the config.
 **Raises**:
 
 - `ValueError`: if
-- the argument is not a valid package directory
-- the public ids do not match.
+    - the argument is not a valid package directory
+    - the public ids do not match.
 
 <a name="aea.configurations.base.ConnectionConfig"></a>
 ## ConnectionConfig Objects
