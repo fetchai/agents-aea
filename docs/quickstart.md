@@ -130,6 +130,7 @@ pip install open-aea[all]
 If you are using `zsh` rather than `bash` type
 ``` zsh
 pip install 'open-aea[all]'
+pip install 'open-aea-ledger-ethereum'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
@@ -138,6 +139,13 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
 
+
+To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">SVN</a> to checkout the specific folders;
+```bash
+svn checkout https://github.com/valory-xyz/open-aea/trunk/packages packages
+```
+
+
 ## Echo skill demo
 
 This is a simple demo that introduces you to the main components of an AEA. 
@@ -145,7 +153,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0 --remote
+aea fetch open_aea/my_first_aea --local
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -159,8 +167,8 @@ aea install
 All AEAs need a private key to run. Add one now:
 
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai
+aea generate-key ethereum
+aea add-key ethereum
 ```
 
 ### Run the AEA

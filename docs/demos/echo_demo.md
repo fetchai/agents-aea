@@ -2,10 +2,12 @@ This is a simple demo that introduces you to the main components of an AEA.
 
 A full break down of the development is covered within the <a href="../../quickstart/">Development Quickstart</a>. It is highly recommended that developers begin by following the quick start!
 
+This demo assumes you have followed the setup guide.
+
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0 --remote
+aea fetch open_aea/my_first_aea --local
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -19,8 +21,8 @@ aea install
 All AEAs need a private key to run. Add one now:
 
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai
+aea generate-key ethereum
+aea add-key ethereum
 ```
 
 ### Run the AEA
