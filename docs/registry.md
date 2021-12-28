@@ -1,6 +1,6 @@
 # Component Registry
 
-Individual components are stored on the [IPFS](https://ipfs.io) registry. This registry allows other developer to reuse these components. Anyone case register a new component which is uniquely identifiable by a hash of the contents of the component. 
+Individual components are stored on the  <a href="https://ipfs.io" target="_blank">`IPFS registry`</a>. This registry allows other developer to reuse these components. Anyone case register a new component which is uniquely identifiable by a hash of the contents of the component. 
 
 ## Creating a Project
 We can create a new agent with the bare minimal components as so;
@@ -22,7 +22,7 @@ Successfully added protocol 'open_aea/signing:1.0.0'.
 Once we have an agent, we can add individual components to the agent as so;
 
 ```
-aea add skill fetchai/echo
+aea add skill fetchai/echo:0.27.0
 Registry path not provided and local registry `packages` not found in current (.) and parent directory.
 Trying remote registry (`--remote`).
 Adding skill 'fetchai/echo:latest'...
