@@ -446,8 +446,8 @@ Initialize a constraint type.
 **Arguments**:
 
 - `type_`: the type of the constraint.
-           | Either an instance of the ConstraintTypes enum,
-           | or a string representation associated with the type.
+| Either an instance of the ConstraintTypes enum,
+| or a string representation associated with the type.
 - `value`: the value that defines the constraint.
 
 **Raises**:
@@ -1018,39 +1018,39 @@ Check if a description satisfies the constraint. The implementation depends on t
 True if the description satisfies the constraint, False otherwise.
 
 Examples:
-    >>> attr_author = Attribute("author" , str, True, "The author of the book.")
-    >>> attr_year   = Attribute("year",    int, True, "The year of publication of the book.")
-    >>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
-    >>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
-    >>> c2 = Constraint("year", ConstraintType(">", 1990))
-    >>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
-    >>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
-    >>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
+>>> attr_author = Attribute("author" , str, True, "The author of the book.")
+>>> attr_year   = Attribute("year",    int, True, "The year of publication of the book.")
+>>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
+>>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
+>>> c2 = Constraint("year", ConstraintType(">", 1990))
+>>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
+>>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
+>>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
 
-    The "author" attribute instantiation satisfies the constraint, so the result is True.
+The "author" attribute instantiation satisfies the constraint, so the result is True.
 
-    >>> c1.check(book_1)
-    True
+>>> c1.check(book_1)
+True
 
-    Here, the "author" does not satisfy the constraints. Hence, the result is False.
+Here, the "author" does not satisfy the constraints. Hence, the result is False.
 
-    >>> c1.check(book_2)
-    False
+>>> c1.check(book_2)
+False
 
-    In this case, there is a missing field specified by the query, that is "year"
-    So the result is False, even in the case it is not required by the schema:
+In this case, there is a missing field specified by the query, that is "year"
+So the result is False, even in the case it is not required by the schema:
 
-    >>> c2.check(Description({"author": "Stephen King"}))
-    False
+>>> c2.check(Description({"author": "Stephen King"}))
+False
 
-    If the type of some attribute of the description is not correct, the result is False.
-    In this case, the field "year" has a string instead of an integer:
+If the type of some attribute of the description is not correct, the result is False.
+In this case, the field "year" has a string instead of an integer:
 
-    >>> c2.check(Description({"author": "Stephen King", "year": "1991"}))
-    False
+>>> c2.check(Description({"author": "Stephen King", "year": "1991"}))
+False
 
-    >>> c3.check(Description({"author": "Stephen King", "genre": False}))
-    False
+>>> c3.check(Description({"author": "Stephen King", "genre": False}))
+False
 
 <a name="aea.helpers.search.models.Constraint.is_valid"></a>
 #### is`_`valid

@@ -63,9 +63,9 @@ None
 Run the generator in "full" mode:
 
 Runs the generator in protobuf only mode:
-    a) validate the protocol specification.
-    b) create the protocol buffer schema file.
-    c) create the protocol buffer implementation file via 'protoc'.
+a) validate the protocol specification.
+b) create the protocol buffer schema file.
+c) create the protocol buffer implementation file via 'protoc'.
 Additionally:
 d) generates python modules.
 e) applies black formatting

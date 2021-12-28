@@ -184,10 +184,10 @@ Quickly create a dialogue.
 
 The 'messages' argument is a tuple of DialogueMessages.
 For every DialogueMessage (performative, contents, is_incoming, target):
-    - if 'is_incoming' is not provided: for the first message it is assumed False (outgoing),
-    for any other message, it is the opposite of the one preceding it.
-    - if 'target' is not provided: for the first message it is assumed 0,
-    for any other message, it is the index of the message before it in the tuple of messages + 1.
+- if 'is_incoming' is not provided: for the first message it is assumed False (outgoing),
+for any other message, it is the opposite of the one preceding it.
+- if 'target' is not provided: for the first message it is assumed 0,
+for any other message, it is the index of the message before it in the tuple of messages + 1.
 
 **Arguments**:
 
