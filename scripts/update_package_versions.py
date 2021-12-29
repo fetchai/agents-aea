@@ -628,8 +628,8 @@ class Updater:
 
     def _checks(self):
         self.check_if_svn_installed()
-        self.check_if_running_allowed()
         self.run_hashing()
+        self.check_if_running_allowed()
 
     def run(self):
         """Run package versions update process."""
