@@ -219,7 +219,7 @@ def fetch_item_remote(
         if package_path is not None:
             return package_path
         click.echo(f"Cannot find hash for {item_public_id}")
-        click.echo("Fetching item using http.")
+        click.echo("Attempting to fetch item using http.")
 
     return fetch_package(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
 
