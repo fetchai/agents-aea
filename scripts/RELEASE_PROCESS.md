@@ -11,7 +11,7 @@
 
 4. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`. Commit if changes occurred.
 
-5. Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
+5. [CURRENTLY SKIPPED] Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
 6. Check the package upgrades are correct by running `python scripts/check_packages.py` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 
