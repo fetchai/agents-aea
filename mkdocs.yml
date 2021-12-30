@@ -237,7 +237,7 @@ markdown_extensions:
   - admonition
 
 extra_css:
-    - css/my-styles.css
+    - stylesheets/extra.css
 
 extra_javascript:
     - https://unpkg.com/mermaid@8.10.1/dist/mermaid.min.js
