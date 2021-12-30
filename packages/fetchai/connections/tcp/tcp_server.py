@@ -70,7 +70,7 @@ class TCPServerConnection(TCPConnection):
             address = address_bytes.decode("utf-8")
             self.logger.debug("Public key of the client: {}".format(address))
             self.connections[address] = (reader, writer)
-            read_task = asyncio.ensure_future(self._recv(reader), loop=self.loop)
+            read_task = asyncio.ensure_future(self._recv(reader))
             self._read_tasks_to_address[read_task] = address
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
@@ -100,7 +100,7 @@ class TCPServerConnection(TCPConnection):
             envelope = Envelope.decode(envelope_bytes)
             address = self._read_tasks_to_address.pop(task)
             reader = self.connections[address][0]
-            new_task = asyncio.ensure_future(self._recv(reader), loop=self.loop)
+            new_task = asyncio.ensure_future(self._recv(reader))
             self._read_tasks_to_address[new_task] = address
             return envelope
         except asyncio.CancelledError:
