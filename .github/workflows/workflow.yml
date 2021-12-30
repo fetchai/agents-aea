@@ -185,8 +185,11 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: ${{ matrix.python_version }}
-      - name: Install tox
+      - name: Install tools
         run : |
+          export SETUPTOOLS_USE_DISTUTILS=stdlib
+          pip install --upgrade pip==21.3.1
+          pip install --upgrade setuptools==59.6.0
           pip install tox
       - name: Check Pipfile and tox.ini consistency
         run : |
