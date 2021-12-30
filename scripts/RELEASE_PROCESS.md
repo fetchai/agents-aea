@@ -32,7 +32,7 @@
 
 14. Repeat 11. & 12. for each plugin (use `python setup.py sdist bdist_wheel`).
 
-15. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
+15. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
 16. [CURRENTLY SKIPPED] Release packages into registry: `python scripts/deploy_to_registry.py`. If necessary, run it several times until all packages are updated.
 
