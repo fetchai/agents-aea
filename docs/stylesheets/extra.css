@@ -1,11 +1,40 @@
 @font-face {
     font-family: 'triakis__font_lightregular';
-    src: url('../font/Webfont/triakisfont-regular-webfont.woff2') format('woff2'),
-        url('../font/Webfont/triakisfont-regular-webfont.woff') format('woff');
+    src: url('../fonts/Webfont/triakisfont-regular-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-regular-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
+
+@font-face {
+    font-family: 'triakis__font_medium';
+    src: url('../fonts/Webfont/triakisfont-medium-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-medium-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'triakis__font_bold';
+    src: url('../fonts/Webfont/triakisfont-bold-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'triakis__font_heavy';
+    src: url('../fonts/Webfont/triakisfont-heavy-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-heavy-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* can add more font from autonolas repo if more fonts are needed */
 
 :root {
     --md-primary-fg-color: #00D948;
@@ -17,17 +46,19 @@
     --md-extra-color-gray-1: #585858;
     --md-extra-color-gray-2: #f8f8f7;
     --md-extra-color-gray-3: #000000;
-    --md-text-font: "triakis__font_lightregular";
+    --md-text-font-lightregular: "triakis__font_lightregular";
+    --md-text-font-medium: "triakis__font_medium";
+    --md-text-font-bold: "triakis__font_bold";
+    --md-text-font-heavy: "triakis__font_heavy";
 }
 
 /* font changes */
-.md-header-nav .md-header-nav__title .md-header-nav__topic,
 .md-content__inner h1,
 .md-content__inner h2,
 .md-content__inner h3,
 .md-sidebar .md-nav .md-nav__title,
 .md-footer .md-footer-nav__title {
-    font-family: var(--md-text-font);
+    font-family: var(--md-text-font-lightregular);
 }
 
 /* header & tabs */
@@ -35,10 +66,16 @@
     color: var(--md-extra-color-black);
 }
 
+/* hiding icon at top */
+.md-header-nav .md-flex__cell.md-flex__cell--shrink {
+    display: none;
+}
+
 .md-header-nav .md-header-nav__title .md-header-nav__topic {
     text-transform: uppercase;
     letter-spacing: 20px;
     font-size: 24px;
+    font-family: var(--md-text-font-medium);
 }
 
 .md-header-nav .md-header-nav__title .md-header-nav__topic:nth-child(2) {
@@ -96,7 +133,6 @@
 }
 
 .md-content__inner h2 {
-    text-transform: uppercase;
     color: var(--md-primary-fg-color--dark);
 }
 
