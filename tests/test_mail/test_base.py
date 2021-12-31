@@ -194,11 +194,11 @@ def test_outbox_put_message():
     inbox = InBox(multiplexer)
     multiplexer.connect()
     wait_for_condition(
-        lambda: multiplexer.is_connected, 15, "Multiplexer is not connected"
+        lambda: multiplexer.is_connected, 30, "Multiplexer is not connected"
     )
     outbox.put_message(msg)
     wait_for_condition(
-        lambda: inbox.empty(), 15, "Inbox must not be empty after putting a message"
+        lambda: inbox.empty(), 30, "Inbox must not be empty after putting a message"
     )
     multiplexer.disconnect()
 

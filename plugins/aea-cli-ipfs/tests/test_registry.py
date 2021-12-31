@@ -23,7 +23,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 
-import click
 import pytest
 from aea_cli_ipfs.registry import (
     LOCAL_REGISTRY_DEFAULT,
@@ -137,13 +136,10 @@ def test_fetch_ipfs() -> None:
         new=lambda *_, **__: DUMMY_REGISTRY_DATA,
     ), TemporaryDirectory() as dest_path:
 
-        with pytest.raises(
-            click.ClickException,
-            match="Couldn't retrive hash for package fetchai/dummy:latest",
-        ):
-            fetch_ipfs(
-                "skill", PublicId.from_str("fetchai/dummy:latest"), "", dest_path
-            )
+        package_path = fetch_ipfs(
+            "skill", PublicId.from_str("fetchai/dummy:latest"), "", dest_path
+        )
+        assert package_path is None
 
         with mock.patch(
             "aea_cli_ipfs.ipfs_utils.IPFSTool.download", new=lambda *_: None

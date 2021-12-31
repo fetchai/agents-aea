@@ -19,8 +19,8 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.25.0 --alias my_gym_aea
-cd my_gym_aea
+aea fetch open_aea/gym_aea:0.1.0 --local
+cd gym_aea
 aea install
 ```
 
@@ -70,8 +70,8 @@ aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedR
 #### Create and add a private key
 
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai
+aea generate-key ethereum
+aea add-key ethereum
 ```
 
 ### Run the AEA with the gym connection

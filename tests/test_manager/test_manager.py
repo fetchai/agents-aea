@@ -52,7 +52,7 @@ from tests.common.utils import wait_for_condition
 from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
-DEFAULT_TIMEOUT = 60
+DEFAULT_TIMEOUT = 120
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")

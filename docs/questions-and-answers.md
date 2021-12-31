@@ -21,7 +21,7 @@ The framework supports the use of third-party libraries hosted on <a href="https
 <details><summary>How does one connect to a database?</summary>
 You have two options to connect to a database: using the built-in storage solution or using a custom ORM (object-relational mapping) library and backend.
 <br><br>
-The use of the built-in storage is explained <a href="../generic-storage/">here</a>. For a detailed example of how to use an ORM, follow the <a href="https://docs.fetch.ai/aea/orm-integration/" target="_blank">ORM guide</a>.
+The use of the built-in storage is explained <a href="../generic-storage/">here</a>. 
 </details>
 
 <details><summary>How does one connect a frontend?</summary>
