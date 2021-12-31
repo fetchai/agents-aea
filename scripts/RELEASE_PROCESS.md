@@ -1,9 +1,11 @@
 
 # Release Process from develop to main
 
-1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit). Make sure you have a clean develop virtual environment.
-
-2. Determine the next AEA version and run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
+1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit). Make sure you have a clean develop virtual environment. 
+   
+2. Determine the next AEA version 
+   Create new release branch named "feature/release-{new-version}, switch to this branch"
+   Run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
 
 3. Bump plugin versions if necessary by running `python scripts/update_plugin_versions.py --update "PLUGIN_NAME,NEW_VERSION"`. Commit if satisfied.
 
@@ -19,7 +21,7 @@
 
 9. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
 
-10. Open PRs and merge into main.
+10. Open PRs and merge into develop. Then open develop to main PR and merge it.
 
 11. Tag version on main.
 
@@ -32,8 +34,8 @@
 
 15. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
-16. Release packages into registry: `python scripts/deploy_to_registry.py`.
+16. [CURRENTLY SKIPPED] Release packages into registry: `python scripts/deploy_to_registry.py`. If necessary, run it several times until all packages are updated.
 
-17. Create and push Docker images `user-image` and `develop-image`.
+17. The `user-image` and `develop-image` are updated via CI.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +18,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """
 Updates package versions relative to last release.
 
 Run this script from the root of the project directory:
-
     python scripts/update_package_versions.py
-
 """
 
 import argparse
@@ -37,6 +37,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Pattern, Set
 
+import click
 import semver
 import yaml
 from click.testing import CliRunner
@@ -116,7 +117,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-arguments: argparse.Namespace = None  # type: ignore
+arguments: Optional[argparse.Namespace] = None
 
 
 def check_if_running_allowed() -> None:
@@ -182,8 +183,8 @@ def split_hashes_by_type(all_hashes: Dict[str, str]) -> Dict[str, Dict[str, str]
         "skills": {},
     }  # type: Dict[str, Dict[str, str]]
     for key, value in all_hashes.items():
-        if "fetchai" not in key:
-            print("Non-fetchai packages not allowed!")
+        if "fetchai" not in key and "open_aea" not in key:
+            print("Non (fetchai|open_aea) packages not allowed!")
             sys.exit(1)
         _, type_, name = key.split("/")
         result[type_][name] = value
@@ -192,12 +193,19 @@ def split_hashes_by_type(all_hashes: Dict[str, str]) -> Dict[str, Dict[str, str]
 
 def get_configuration_file_path(type_: str, name: str) -> Path:
     """Get the configuration file path."""
+
     fp = os.path.join("packages", "fetchai", type_, name, TYPE_TO_CONFIG_FILE[type_])
     if os.path.isfile(fp):
         return Path(fp)
+
+    fp = os.path.join("packages", "open_aea", type_, name, TYPE_TO_CONFIG_FILE[type_])
+    if os.path.isfile(fp):
+        return Path(fp)
+
     fp = os.path.join("aea", type_, name, TYPE_TO_CONFIG_FILE[type_])
     if os.path.isfile(fp):
         return Path(fp)
+
     print("Cannot find folder for package `{}` of type `{}`".format(name, type_))
     sys.exit(1)
 
@@ -266,7 +274,6 @@ def get_all_protocol_spec_ids() -> Set[PublicId]:
     We return package ids with type "protocol" even though
     they are not exactly protocol. The reason is that
     they are only used to find clashes with protocol ids.
-
     :return: a set of package ids.
     """
     result: Set[PublicId] = set()
@@ -308,7 +315,6 @@ def get_public_ids_to_update() -> Set[PackageId]:
     - the package hasn't change since the last release;
     - the public ids of the local package and the package in the registry
       are already the same.
-
     :return: set of package ids to update
     """
     result: Set[PackageId] = set()
@@ -375,14 +381,12 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
     Sort the set of package id in the order of update.
 
     In particular, they are sorted from the greatest version number to the lowest.
-
     The reason is to avoid that consecutive package ids (i.e. whose minors difference is 1)
     gets updated in ascending order, resulting in all the updates collapsing to the greatest version.
     For example, consider two package ids with prefix 'author/package' and with versions
     0.1.0 and 0.2.0, respectively. If we bump first the former and then the latter,
     the new replacements associated to the first updated are taken into account in
     the second update.
-
     :param package_ids: set of package ids
     :return: sorted list of package ids
     """
@@ -398,69 +402,12 @@ def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
     )
 
 
-def process_packages(
-    all_package_ids_to_update: Set[PackageId], ambiguous_public_ids: Set[PublicId]
-) -> None:
-    """Process the package versions."""
-    print("*" * 100)
-
-    conflicts = {p.public_id for p in all_package_ids_to_update}.intersection(
-        ambiguous_public_ids
-    )
-    print(f"Ambiguous public ids: {ambiguous_public_ids}")
-    print(f"Conflicts with public ids to update: {conflicts}",)
-
-    print("*" * 100)
-    print("Start processing.")
-    # we need to include this in case some protocol id == spec id of that protocol.
-    spec_protocol_ids = get_all_protocol_spec_ids()
-    sorted_package_ids_list = _sort_in_update_order(all_package_ids_to_update)
-    for package_id in sorted_package_ids_list:
-        print("#" * 50)
-        print(f"Processing {package_id}")
-        is_ambiguous = package_id.public_id in ambiguous_public_ids.union(
-            spec_protocol_ids
-        )
-        process_package(package_id, is_ambiguous)
-
-
 def minor_version_difference(
     current_public_id: PublicId, deployed_public_id: PublicId
 ) -> int:
     """Check the minor version difference."""
     diff = semver.compare(current_public_id.version, deployed_public_id.version)
     return diff
-
-
-def bump_package_version(
-    current_public_id: PublicId,
-    configuration_file_path: Path,
-    type_: str,
-    is_ambiguous: bool = False,
-) -> None:
-    """
-    Bump the version references of the package in the repo.
-
-    Includes, bumping the package itself.
-
-    :param current_public_id: the current public id
-    :param configuration_file_path: the path to the configuration file
-    :param type_: the type of package
-    :param is_ambiguous: whether or not the package id is ambiguous
-    """
-    ver = semver.VersionInfo.parse(current_public_id.version)
-    new_version = str(ver.bump_minor())
-    new_public_id = PublicId(
-        current_public_id.author, current_public_id.name, new_version
-    )
-    for rootdir in DIRECTORIES:
-        for path in Path(rootdir).glob("**/*"):
-            if path.is_file() and str(path).endswith((".py", ".yaml", ".md")):
-                inplace_change(
-                    path, current_public_id, new_public_id, type_, is_ambiguous,
-                )
-
-    bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
 
 
 def _can_disambiguate_from_context(
@@ -473,7 +420,6 @@ def _can_disambiguate_from_context(
     - whether the public id appears in a line of the form 'aea fetch ...' (we know it's an agent)
     - whether the public id appears in a line of the form 'aea add ...' (we know the component type)
     - whether the type appears in the same line where the public id occurs.
-
     :param line: the line
     :param old_string: the old string
     :param type_: the type of package
@@ -511,50 +457,16 @@ def _can_disambiguate_from_context(
 
 
 def _ask_to_user(
-    lines: List[str], line: str, idx: int, old_string: str, type_: str
+    lines: List[str], line: str, idx: int, old_string: str, type_: str, lines_num: int
 ) -> str:
     print("=" * 50)
-    above_rows = lines[idx - arguments.context : idx]
-    below_rows = lines[idx + 1 : idx + arguments.context]
+    above_rows = lines[idx - lines_num : idx]
+    below_rows = lines[idx + 1 : idx + lines_num]
     print("".join(above_rows))
     print(line.rstrip().replace(old_string, "\033[91m" + old_string + "\033[0m"))
     print("".join(below_rows))
     answer = input(f"Replace for component ({type_}, {old_string})? [y/N]: ",)  # nosec
     return answer
-
-
-def _ask_to_user_and_replace_if_allowed(
-    content: str, old_string: str, new_string: str, type_: str
-) -> str:
-    """
-    Ask to user if the line should be replaced or not, If the script arguments allow that.
-
-    :param content: the content.
-    :param old_string: the old string.
-    :param new_string: the new string.
-    :param type_: the type of the package.
-    :return: the updated content.
-    """
-    if arguments.no_interactive and arguments.replace_by_default:
-        content = content.replace(old_string, new_string)
-        return content
-
-    lines = content.splitlines(keepends=True)
-    for idx, line in enumerate(lines[:]):
-        if old_string not in line:
-            continue
-
-        can_replace = _can_disambiguate_from_context(line, old_string, type_)
-        # if we managed to replace all the occurrences, then save this line and continue
-        if can_replace is not None:
-            lines[idx] = line.replace(old_string, new_string) if can_replace else line
-            continue
-
-        # otherwise, forget the attempts and ask to the user.
-        answer = _ask_to_user(lines, line, idx, old_string, type_)
-        if answer == "y":
-            lines[idx] = line.replace(old_string, new_string)
-    return "".join(lines)
 
 
 def replace_aea_fetch_statements(
@@ -608,7 +520,6 @@ def replace_in_yamls(
         |author: package_author
         |version: package_version -> bump up
         |type: package_type
-
     :param content: the content
     :param old_public_id: the old public id
     :param new_public_id: the new public id
@@ -635,12 +546,10 @@ def replace_in_protocol_readme(
     Replace the version id in the protocol specification in the protcol's README.
 
     That is, bump the version in cases like:
-
         |name: package_name
         |author: package_author
         |version: package_version -> bump up
         ...
-
     :param fp: path to the file being edited.
     :param content: the content of the file.
     :param old_public_id: the old public id.
@@ -668,40 +577,6 @@ def file_should_be_processed(content: str, old_public_id: PublicId) -> bool:
     )
 
 
-def inplace_change(
-    fp: Path,
-    old_public_id: PublicId,
-    new_public_id: PublicId,
-    type_: str,
-    is_ambiguous: bool,
-) -> None:
-    """Replace the occurrence of a string with a new one in the provided file."""
-
-    content = fp.read_text()
-    if not file_should_be_processed(content, old_public_id):
-        return
-
-    old_string = str(old_public_id)
-    new_string = str(new_public_id)
-    print(
-        f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})"
-    )
-
-    content = replace_in_yamls(content, old_public_id, new_public_id, type_)
-    content = replace_in_protocol_readme(
-        fp, content, old_public_id, new_public_id, type_
-    )
-    if not is_ambiguous:
-        content = content.replace(old_string, new_string)
-    else:
-        content = _ask_to_user_and_replace_if_allowed(
-            content, old_string, new_string, type_
-        )
-
-    with fp.open(mode="w") as f:
-        f.write(content)
-
-
 def bump_version_in_yaml(
     configuration_file_path: Path, type_: str, version: str
 ) -> None:
@@ -712,54 +587,295 @@ def bump_version_in_yaml(
     loader.dump(config, open(configuration_file_path, "w"))
 
 
-def process_package(package_id: PackageId, is_ambiguous: bool) -> None:
-    """
-    Process a package.
+class Updater:
+    """PAckage versions updter tool."""
 
-    - check version in registry
-    - make sure, version is exactly one above the one in registry
-    - change all occurrences in packages/tests/aea/examples/benchmark/docs to new reference
-    - change yaml version number
+    def __init__(
+        self, ask_version, update_version, replace_by_default, no_interactive, context
+    ):
+        """Init updater."""
+        self.option_ask_version = ask_version
+        self.option_update_version = update_version
+        self.option_replace_by_default = replace_by_default
+        self.option_no_interactive = no_interactive
+        self.option_context = context
 
-    :param package_id: the id of the package
-    :param is_ambiguous: whether the public id is ambiguous.
-    """
-    type_plural = package_id.package_type.to_plural()
-    configuration_file_path = get_configuration_file_path(type_plural, package_id.name)
-    current_public_id = get_public_id_from_yaml(configuration_file_path)
-    bump_package_version(
-        current_public_id, configuration_file_path, type_plural, is_ambiguous
-    )
+    @staticmethod
+    def check_if_svn_installed():
+        """Check svn tool installed."""
+        res = shutil.which("svn")
+        if res is None:
+            raise Exception("Install svn first!")
+
+    @staticmethod
+    def run_hashing():
+        """Run hashes update."""
+        hashing_call = update_hashes()
+        if hashing_call == 1:
+            raise Exception("Problem when running IPFS script!")
+
+    @staticmethod
+    def check_if_running_allowed():
+        """
+        Check if we can run the script.
+
+        Script should only be run on a clean branch.
+        """
+        git_call = subprocess.Popen(["git", "diff"], stdout=subprocess.PIPE)  # nosec
+        (stdout, _) = git_call.communicate()
+        git_call.wait()
+        if len(stdout) > 0:
+            raise Exception("Cannot run script in unclean git state.")
+
+    def _checks(self):
+        self.check_if_svn_installed()
+        self.run_hashing()
+        self.check_if_running_allowed()
+
+    def run(self):
+        """Run package versions update process."""
+        self._checks()
+        self._run_hashing()
+
+    def _run_once(self):
+        """Run the upgrade logic once."""
+        all_package_ids_to_update = get_public_ids_to_update()
+        if len(all_package_ids_to_update) == 0:
+            print("No packages to update. Done!")
+            return False
+        ambiguous_public_ids = _get_ambiguous_public_ids()
+        self.process_packages(all_package_ids_to_update, ambiguous_public_ids)
+        return True
+
+    def process_packages(
+        self,
+        all_package_ids_to_update: Set[PackageId],
+        ambiguous_public_ids: Set[PublicId],
+    ) -> None:
+        """Process the package versions."""
+        print("*" * 100)
+
+        conflicts = {p.public_id for p in all_package_ids_to_update}.intersection(
+            ambiguous_public_ids
+        )
+        print(f"Ambiguous public ids: {ambiguous_public_ids}")
+        print(f"Conflicts with public ids to update: {conflicts}",)
+
+        print("*" * 100)
+        print("Start processing.")
+        # we need to include this in case some protocol id == spec id of that protocol.
+        spec_protocol_ids = get_all_protocol_spec_ids()
+        sorted_package_ids_list = _sort_in_update_order(all_package_ids_to_update)
+        for package_id in sorted_package_ids_list:
+            print("#" * 50)
+            print(f"Processing {package_id}")
+            is_ambiguous = package_id.public_id in ambiguous_public_ids.union(
+                spec_protocol_ids
+            )
+            self.process_package(package_id, is_ambiguous)
+
+    def process_package(self, package_id: PackageId, is_ambiguous: bool) -> None:
+        """Process a package.
+
+        - check version in registry
+        - make sure, version is exactly one above the one in registry
+        - change all occurrences in packages/tests/aea/examples/benchmark/docs to new reference
+        - change yaml version number
+        :param package_id: the id of the package
+        :param is_ambiguous: whether the public id is ambiguous.
+        """
+        type_plural = package_id.package_type.to_plural()
+        configuration_file_path = get_configuration_file_path(
+            type_plural, package_id.name
+        )
+        current_public_id = get_public_id_from_yaml(configuration_file_path)
+
+        self.bump_package_version(
+            current_public_id, configuration_file_path, type_plural, is_ambiguous
+        )
+
+    def get_new_package_version(self, current_public_id: PublicId) -> str:
+        """Get new package version according to command line options provided."""
+
+        ver = semver.VersionInfo.parse(current_public_id.version)
+
+        if self.option_ask_version:
+            while True:
+                new_version = click.prompt(
+                    f"Please enter a new version for {current_public_id}", type=str
+                )
+
+                try:
+                    new_ver = semver.VersionInfo.parse(new_version)
+                    if new_ver <= ver:
+                        print("Version is lower or the same. Enter a new one.")
+                        continue
+                    break
+                except Exception as e:  # pylint: disable=broad-except
+                    print(f"Version parse error: {e}. Enter a new one")
+                    continue
+        elif self.option_update_version == "minor":
+            new_version = ver.bump_minor()
+        elif self.option_update_version == "patch":
+            new_version = ver.bump_patch()
+        else:
+            raise Exception("unknown version update mode")
+
+        return str(new_version)
+
+    def bump_package_version(
+        self,
+        current_public_id: PublicId,
+        configuration_file_path: Path,
+        type_: str,
+        is_ambiguous: bool = False,
+    ) -> None:
+        """
+        Bump the version references of the package in the repo.
+
+        Includes, bumping the package itself.
+        :param current_public_id: the current public id
+        :param configuration_file_path: the path to the configuration file
+        :param type_: the type of package
+        :param is_ambiguous: whether or not the package id is ambiguous
+        """
+        new_version = self.get_new_package_version(current_public_id)
+
+        new_public_id = PublicId(
+            current_public_id.author, current_public_id.name, new_version
+        )
+        for rootdir in DIRECTORIES:
+            for path in Path(rootdir).glob("**/*"):
+                if path.is_file() and str(path).endswith(
+                    (".py", ".yaml", ".md", ".sh")
+                ):
+                    self.inplace_change(
+                        path, current_public_id, new_public_id, type_, is_ambiguous,
+                    )
+
+        bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
+
+    def _run_hashing(self):
+        while self._run_once():
+            self._run_hashing()
+
+    def inplace_change(
+        self,
+        fp: Path,
+        old_public_id: PublicId,
+        new_public_id: PublicId,
+        type_: str,
+        is_ambiguous: bool,
+    ) -> None:
+        """Replace the occurrence of a string with a new one in the provided file."""
+
+        content = fp.read_text()
+        if not file_should_be_processed(content, old_public_id):
+            return
+
+        old_string = str(old_public_id)
+        new_string = str(new_public_id)
+        print(
+            f"Processing file {fp} for replacing {old_string} with {new_string} (is_ambiguous: {is_ambiguous})"
+        )
+
+        content = replace_in_yamls(content, old_public_id, new_public_id, type_)
+        content = replace_in_protocol_readme(
+            fp, content, old_public_id, new_public_id, type_
+        )
+        if not is_ambiguous:
+            content = content.replace(old_string, new_string)
+        else:
+            content = self._ask_to_user_and_replace_if_allowed(
+                content, old_string, new_string, type_
+            )
+
+        with fp.open(mode="w") as f:
+            f.write(content)
+
+    def _ask_to_user_and_replace_if_allowed(
+        self, content: str, old_string: str, new_string: str, type_: str
+    ) -> str:
+        """
+        Ask to user if the line should be replaced or not, If the script arguments allow that.
+
+        :param content: the content.
+        :param old_string: the old string.
+        :param new_string: the new string.
+        :param type_: the type of the package.
+        :return: the updated content.
+        """
+        if self.option_no_interactive and self.option_replace_by_default:
+            content = content.replace(old_string, new_string)
+            return content
+
+        lines = content.splitlines(keepends=True)
+        for idx, line in enumerate(lines[:]):
+            if old_string not in line:
+                continue
+
+            can_replace = _can_disambiguate_from_context(line, old_string, type_)
+            # if we managed to replace all the occurrences, then save this line and continue
+            if can_replace is not None:
+                lines[idx] = (
+                    line.replace(old_string, new_string) if can_replace else line
+                )
+                continue
+
+            # otherwise, forget the attempts and ask to the user.
+            answer = _ask_to_user(
+                lines, line, idx, old_string, type_, self.option_context
+            )
+            if answer == "y":
+                lines[idx] = line.replace(old_string, new_string)
+        return "".join(lines)
 
 
-def run_once() -> bool:
-    """Run the upgrade logic once."""
-    all_package_ids_to_update = get_public_ids_to_update()
-    if len(all_package_ids_to_update) == 0:
-        print("No packages to update. Done!")
-        return False
-    ambiguous_public_ids = _get_ambiguous_public_ids()
-    process_packages(all_package_ids_to_update, ambiguous_public_ids)
-    return True
-
-
-def check_if_svn_installed() -> None:
-    """Check if svn is installed."""
-    res = shutil.which("svn")
-    if res is None:
-        print("Install svn first!")
-        sys.exit(1)
+@click.command()
+@click.option(
+    "--ask-version",
+    "-a",
+    is_flag=True,
+    help="Ask for every package version interactively",
+)
+@click.option(
+    "--update-minor",
+    "update_version",
+    flag_value="minor",
+    default=True,
+    help="Increase minor version",
+)
+@click.option(
+    "--update-patch",
+    "update_version",
+    flag_value="patch",
+    help="Increase patch version",
+)
+@click.option(
+    "--no-interactive",
+    "-n",
+    is_flag=True,
+    help="Don't ask user confirmation for replacement.",
+)
+@click.option(
+    "--context",
+    "-C",
+    type=int,
+    help="Don't ask user confirmation for replacement.",
+    default=3,
+)
+@click.option(
+    "--replace-by-default",
+    "-r",
+    is_flag=True,
+    help="If --no-interactive is set, apply the replacement (default: False).",
+)
+def command(ask_version, update_version, replace_by_default, no_interactive, context):
+    """Run cli command."""
+    Updater(
+        ask_version, update_version, replace_by_default, no_interactive, context
+    ).run()
 
 
 if __name__ == "__main__":
-    """
-    First, check all hashes are up to date, exit if not.
-    Then, run the bumping algo, re-hashing upon each bump.
-    """
-    arguments = parse_arguments()
-    check_if_svn_installed()
-    run_hashing()
-    check_if_running_allowed()
-    while run_once():
-        run_hashing()
-    sys.exit(0)
+    command()  # pylint: disable=no-value-for-parameter

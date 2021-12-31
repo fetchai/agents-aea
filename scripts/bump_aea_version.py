@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,8 +124,8 @@ def check_executed(func: Callable) -> Callable:
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> None:
         if self.is_executed:
             raise ValueError("already executed")
-        self._executed = True
-        self._result = func(self, *args, **kwargs)
+        self._executed = True  # pylint: disable=protected-access
+        self._result = func(self, *args, **kwargs)  # pylint: disable=protected-access
 
     return wrapper
 
