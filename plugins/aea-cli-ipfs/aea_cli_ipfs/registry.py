@@ -151,11 +151,11 @@ def fetch_ipfs(
     public_id: PublicId,
     cwd: str,  # pylint: disable=unused-argument
     dest: str,
-) -> Path:
+) -> Optional[Path]:
     """Fetch a package from IPFS node."""
     package_hash = get_ipfs_hash_from_public_id(item_type, public_id)
     if package_hash is None:
-        raise click.ClickException(f"Couldn't retrive hash for package {public_id}")
+        return None
 
     ipfs_tool = IPFSTool()
     try:
