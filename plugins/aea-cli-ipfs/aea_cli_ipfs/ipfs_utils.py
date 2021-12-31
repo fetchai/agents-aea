@@ -34,10 +34,27 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, offline: bool = False):
         """Initialise IPFS daemon."""
-        # check we have ipfs
+
         self.process = None  # type: Optional[subprocess.Popen]
+        self.offline = offline
+        self._check_ipfs()
+
+    @staticmethod
+    def _check_ipfs() -> None:
+        # check we have ipfs
+        res = shutil.which("ipfs")
+        if res is None:
+            raise Exception("Please install IPFS first!")
+        process = subprocess.Popen(  # nosec
+            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
+        )
+        output, _ = process.communicate()
+        if b"0.6.0" not in output:
+            raise Exception(
+                "Please ensure you have version 0.6.0 of IPFS daemon installed."
+            )
 
     def is_started(self) -> bool:
         """Check daemon was started."""
@@ -45,20 +62,38 @@ class IPFSDaemon:
 
     def start(self) -> None:
         """Run the ipfs daemon."""
+        cmd = ["ipfs", "daemon", "--offline"] if self.offline else ["ipfs", "daemon"]
         self.process = subprocess.Popen(  # nosec
-            ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
+            cmd, stdout=subprocess.PIPE, env=os.environ.copy(),
         )
+        empty_outputs = 0
+        for stdout_line in iter(self.process.stdout.readline, ""):
+            if b"Daemon is ready" in stdout_line:
+                break
+            if stdout_line == b"":
+                empty_outputs += 1
+                if empty_outputs >= 5:
+                    raise RuntimeError("Could not start IPFS daemon.")
 
     def stop(self) -> None:  # pragma: nocover
         """Terminate the ipfs daemon."""
         if self.process is None:
             return
+        self.process.stdout.close()
         self.process.send_signal(signal.SIGTERM)
         self.process.wait(timeout=30)
         poll = self.process.poll()
         if poll is None:
             self.process.terminate()
             self.process.wait(2)
+
+    def __enter__(self) -> None:
+        """Run the ipfs daemon."""
+        self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
+        """Terminate the ipfs daemon."""
+        self.stop()
 
 
 class BaseIPFSToolException(Exception):
@@ -84,14 +119,15 @@ class DownloadError(BaseIPFSToolException):
 class IPFSTool:
     """IPFS tool to add, publish, remove, download directories."""
 
-    def __init__(self, client_options: Optional[Dict] = None):
+    def __init__(self, client_options: Optional[Dict] = None, offline: bool = True):
         """
         Init tool.
 
         :param client_options: dict, options for ipfshttpclient instance.
+        :param offline: ipfs mode.
         """
         self.client = ipfshttpclient.Client(**(client_options or {}))
-        self.daemon = IPFSDaemon()
+        self.daemon = IPFSDaemon(offline=offline)
 
     def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
         """
@@ -166,7 +202,7 @@ class IPFSTool:
                 "can not publish within timeout, check internet connection!"
             ) from e
 
-    def chec_ipfs_node_running(self) -> None:
+    def check_ipfs_node_running(self) -> None:
         """Check ipfs node running."""
         try:
             self.client.id()

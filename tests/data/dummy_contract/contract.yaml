@@ -18,3 +18,4 @@ contract_interface_paths:
   ethereum: build/some.json
   fetchai: build/some.wasm
 dependencies: {}
+contracts: []

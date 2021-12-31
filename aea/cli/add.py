@@ -18,14 +18,16 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea add' subcommand."""
+
 from pathlib import Path
 from typing import Union, cast
 
 import click
 
 from aea.cli.registry.add import fetch_package
+from aea.cli.registry.settings import REGISTRY_IPFS
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import get_registry_config, load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
@@ -42,6 +44,7 @@ from aea.cli.utils.package_utils import (
 )
 from aea.configurations.base import (
     ConnectionConfig,
+    ContractConfig,
     PackageConfiguration,
     PublicId,
     SkillConfig,
@@ -57,6 +60,7 @@ from aea.exceptions import enforce
 def add(click_context: click.Context, local: bool, remote: bool) -> None:
     """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
+
     enforce(
         not (local and remote), "'local' and 'remote' options are mutually exclusive."
     )
@@ -66,6 +70,7 @@ def add(click_context: click.Context, local: bool, remote: bool) -> None:
         except ValueError as e:
             click.echo(f"{e}\nTrying remote registry (`--remote`).")
             remote = True
+
     is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", is_mixed)
@@ -112,6 +117,9 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     :param item_type: the item type.
     :param item_public_id: the item public id.
     """
+    is_local = ctx.config.get("is_local")
+    is_mixed = ctx.config.get("is_mixed")
+
     click.echo(f"Adding {item_type} '{item_public_id}'...")
     if is_item_present(ctx.cwd, ctx.agent_config, item_type, item_public_id):
         present_item_id = get_item_id_present(
@@ -124,9 +132,6 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         )
 
     dest_path = get_package_path(ctx.cwd, item_type, item_public_id)
-    is_local = ctx.config.get("is_local")
-    is_mixed = ctx.config.get("is_mixed")
-
     ctx.clean_paths.append(dest_path)
 
     if is_mixed:
@@ -136,11 +141,10 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
             ctx, item_type, item_public_id, dest_path
         )
     else:
-        package_path = fetch_package(
-            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
+        package_path = fetch_item_remote(
+            item_type, item_public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
     item_config = load_item_config(item_type, package_path)
-
     if not ctx.config.get("skip_consistency_check") and not is_fingerprint_correct(
         package_path, item_config
     ):  # pragma: no cover
@@ -185,6 +189,33 @@ def _add_item_deps(
             if skill_public_id not in ctx.agent_config.skills:
                 add_item(ctx, SKILL, skill_public_id)
 
+    if item_type == CONTRACT:
+        item_config = cast(ContractConfig, item_config)
+        # add missing contracts
+        for contract_public_id in item_config.contracts:
+            if contract_public_id not in ctx.agent_config.contracts:
+                add_item(ctx, CONTRACT, contract_public_id)
+
+
+def fetch_item_remote(
+    item_type: str, item_public_id: PublicId, cwd: str, dest: str
+) -> Path:
+    """Fetch item from a rmeote backend."""
+    registry_config = get_registry_config()
+    registry_type = registry_config.get("default")
+    click.echo(f"Using registry: {registry_type} ")
+    if registry_type == REGISTRY_IPFS:
+        try:
+            from aea_cli_ipfs.registry import (  # type: ignore  # pylint: disable=import-outside-toplevel
+                fetch_ipfs,
+            )
+        except ImportError:
+            click.echo("Please install IPFS plugin.")
+
+        return fetch_ipfs(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
+
+    return fetch_package(item_type, public_id=item_public_id, cwd=cwd, dest=dest)
+
 
 def find_item_locally_or_distributed(
     ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
@@ -205,7 +236,6 @@ def find_item_locally_or_distributed(
     else:
         source_path, _ = find_item_locally(ctx, item_type, item_public_id)
         package_path = copy_package_directory(source_path, dest_path)
-
     return package_path
 
 
@@ -233,7 +263,7 @@ def fetch_item_mixed(
             f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
         )
         # the following might raise exception, but we don't catch it this time
-        package_path = fetch_package(
-            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
+        package_path = fetch_item_remote(
+            item_type, item_public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
     return package_path

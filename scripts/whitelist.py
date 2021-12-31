@@ -285,3 +285,6 @@ _.Tsize  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/hel
 _.Name  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:126)
 init_worker  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/skills/tasks.py:108)
 _._generate_hash  # unused method (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:161)
+register_item_to_local_registry  # unused function in (aea/cli/registry/ipfs.py:59)
+find_item_in_distribution  # unused function in (aea/cli/utils/package_utils.py:353)
+is_distributed_item  # unused function in (aea/cli/utils/package_utils.py:618)
