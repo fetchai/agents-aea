@@ -37,7 +37,7 @@ def test_correct_echo_string():
     """Test the echo string in the quickstart is using the correct protocol specification id."""
     file_path = Path(ROOT_DIR, "docs", "quickstart.md")
     bash_code_blocks = extract_code_blocks(filepath=file_path, filter_="bash")
-    echo_bloc = bash_code_blocks[16]
+    echo_bloc = bash_code_blocks[17]
     default_protocol_spec_id = echo_bloc.split(",")[2]
     assert (
         str(DefaultMessage.protocol_specification_id) == default_protocol_spec_id

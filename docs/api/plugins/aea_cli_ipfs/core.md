@@ -9,7 +9,8 @@ Core components for `ipfs cli command`.
 ```python
 @click.group()
 @click.pass_context
-ipfs(click_context: click.Context) -> None
+@click.option("--online", is_flag=True)
+ipfs(click_context: click.Context, online: bool) -> None
 ```
 
 IPFS Commands
@@ -20,7 +21,7 @@ IPFS Commands
 ```python
 @ipfs.resultcallback()
 @click.pass_context
-process_result(click_context: click.Context, *_: Any) -> None
+process_result(click_context: click.Context, *_: Any, **__: Any) -> None
 ```
 
 Tear down command group.
@@ -77,4 +78,23 @@ download(click_context: click.Context, hash_: str, target_dir: Optional[str]) ->
 ```
 
 Download directory by it's hash, if not target directory specified will use current one.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.register_package"></a>
+#### register`_`package
+
+```python
+register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool) -> str
+```
+
+Register package to IPFS registry.
+
+**Arguments**:
+
+- `ipfs_tool`: instance of IPFSTool.
+- `dir_path`: package directory.
+- `no_pin`: pin object or not.
+
+**Returns**:
+
+package hash
 

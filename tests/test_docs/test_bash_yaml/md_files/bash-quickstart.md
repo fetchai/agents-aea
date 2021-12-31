@@ -2,7 +2,7 @@
 python3 --version
 ```
 ``` bash
-sudo apt-get install python3.7-dev
+sudo apt-get install python3.8-dev
 ```
 ``` bash
 curl https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.sh --output install.sh
@@ -26,7 +26,7 @@ cd my_aea_projects/
 which pipenv
 ```
 ``` bash
-touch Pipfile && pipenv --python 3.7 && pipenv shell
+touch Pipfile && pipenv --python 3.8 && pipenv shell
 ```
 ``` bash
 svn export https://github.com/valory-xyz/open-aea.git/trunk/examples
@@ -34,8 +34,13 @@ svn export https://github.com/valory-xyz/open-aea.git/trunk/scripts
 svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 ``` bash
-pip install aea[all]
+pip install open-aea[all]
 ```
+```
+svn checkout https://github.com/valory-xyz/open-aea/trunk/packages packages
+```
+
+
 ``` bash
 sudo apt-get install python3.7-dev
 ```
@@ -61,7 +66,7 @@ v1.2.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0
+aea fetch open_aea/my_first_aea:0.1.0 --local
 cd my_first_aea
 ```
 ``` bash
@@ -84,8 +89,8 @@ recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello
 aea install
 ```
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai
+aea generate-key ethereum
+aea add-key ethereum
 ```
 ``` bash
 aea run

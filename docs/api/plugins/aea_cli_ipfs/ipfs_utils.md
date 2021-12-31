@@ -20,7 +20,7 @@ Set up the IPFS daemon.
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+ | __init__(offline: bool = False)
 ```
 
 Initialise IPFS daemon.
@@ -48,6 +48,24 @@ Run the ipfs daemon.
 
 ```python
  | stop() -> None
+```
+
+Terminate the ipfs daemon.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.__enter__"></a>
+#### `__`enter`__`
+
+```python
+ | __enter__() -> None
+```
+
+Run the ipfs daemon.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.__exit__"></a>
+#### `__`exit`__`
+
+```python
+ | __exit__(exc_type, exc_val, exc_tb) -> None
 ```
 
 Terminate the ipfs daemon.
@@ -110,7 +128,7 @@ IPFS tool to add, publish, remove, download directories.
 #### `__`init`__`
 
 ```python
- | __init__(client_options: Optional[Dict] = None)
+ | __init__(client_options: Optional[Dict] = None, offline: bool = True)
 ```
 
 Init tool.
@@ -118,6 +136,7 @@ Init tool.
 **Arguments**:
 
 - `client_options`: dict, options for ipfshttpclient instance.
+- `offline`: ipfs mode.
 
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.add"></a>
 #### add
@@ -188,11 +207,11 @@ Publish directory by it's hash id.
 
 dict of names it was publish for.
 
-<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.chec_ipfs_node_running"></a>
-#### chec`_`ipfs`_`node`_`running
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.check_ipfs_node_running"></a>
+#### check`_`ipfs`_`node`_`running
 
 ```python
- | chec_ipfs_node_running() -> None
+ | check_ipfs_node_running() -> None
 ```
 
 Check ipfs node running.

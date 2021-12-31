@@ -229,6 +229,7 @@ darglint
 open_aea
 ethereum
 EIP1159-style
+Valory
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -281,3 +282,6 @@ oef_search
 handlers.py
 skill.yaml
 packages.fetchai.skills.my_search.dialogues
+ - docs/demos/echo_demo.md
+my_first_aea
+output_file

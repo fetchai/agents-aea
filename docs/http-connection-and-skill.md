@@ -46,8 +46,8 @@ Ensure the file exists under the specified path!
 Create and add a private key:
 
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai
+aea generate-key ethereum 
+aea add-key ethereum
 ```
 
 Install the dependencies:
