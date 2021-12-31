@@ -8,7 +8,14 @@ AEA:
 - Allows contracts to depend on other contracts.
 
 Plugins:
-- Adds support for EIP1559 based gas estimation strategy.
+- Adds support for EIP1559 based gas estimation strategy on aea-ledger-ethereum.
+- Adds support for package hashing and local ipfs registry on aea-cli-ipfs.
+- Bumps aea-ledger-ethereum and aea-cli-ipfs to `1.3.0`.
+
+Docs: 
+- Applies new styling
+- Simplifies documentation and updates with latest features
+
 
 ## 1.2.0 (2021-11-21)
 
