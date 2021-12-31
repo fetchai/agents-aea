@@ -68,7 +68,7 @@ Add PublicId to hash mapping in the local registry.
 #### fetch`_`ipfs
 
 ```python
-fetch_ipfs(item_type: str, public_id: PublicId, cwd: str, dest: str) -> Path
+fetch_ipfs(item_type: str, public_id: PublicId, cwd: str, dest: str) -> Optional[Path]
 ```
 
 Fetch a package from IPFS node.
