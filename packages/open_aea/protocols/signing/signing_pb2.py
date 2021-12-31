@@ -84,7 +84,9 @@ _SIGNINGMESSAGE_ERRORCODE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[_SIGNINGMESSAGE_ERRORCODE_ERRORCODEENUM,],
+    enum_types=[
+        _SIGNINGMESSAGE_ERRORCODE_ERRORCODEENUM,
+    ],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",

@@ -243,7 +243,9 @@ _TPROTOCOLMESSAGE_DATAMODEL = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY,],
+    nested_types=[
+        _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY,
+    ],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,

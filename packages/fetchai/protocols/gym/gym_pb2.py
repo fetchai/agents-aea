@@ -325,7 +325,9 @@ _GYMMESSAGE_STATUS_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY,],
+    nested_types=[
+        _GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY,
+    ],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
