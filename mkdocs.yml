@@ -25,6 +25,7 @@ nav:
     - Identity: 'identity.md'
     - Trust minimisation: 'trust.md'
     - Language Agnostic Definition: 'language-agnostic-definition.md'
+    - Agent & component registry: 'registry.md'
   - Demos:
     - Demos: 'demos.md'
     - Echo Demo: demos/echo_demo.md
@@ -220,6 +221,7 @@ nav:
         - CLI:
           - IPFS:
             - API: 'api/plugins/aea_cli_ipfs/core.md'
+            - Registry: 'api/plugins/aea_cli_ipfs/registry.md'
             - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
         - Ledger:
           - Cosmos:
@@ -241,7 +243,7 @@ markdown_extensions:
   - admonition
 
 extra_css:
-    - css/my-styles.css
+    - stylesheets/extra.css
 
 extra_javascript:
     - https://unpkg.com/mermaid@8.10.1/dist/mermaid.min.js

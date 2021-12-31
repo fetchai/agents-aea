@@ -1,5 +1,5 @@
 
-## What are AEAs(Autonomous Economic Agents)?
+## What are AEAs (Autonomous Economic Agents)?
 
 We define an AEA as:
 
@@ -28,7 +28,7 @@ A modular approach to the framework allows the reuse of previously developed com
 The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
 
 * The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
-* The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
+* The <a href="registry">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
 * The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
 * The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts on various decentralised ledgers. 
 
