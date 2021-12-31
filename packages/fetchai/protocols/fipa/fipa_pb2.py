@@ -270,9 +270,7 @@ _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_FIPAMESSAGE_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
@@ -371,9 +369,7 @@ _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_FIPAMESSAGE_MATCH_ACCEPT_W_INFORM_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
@@ -472,9 +468,7 @@ _FIPAMESSAGE_INFORM_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_FIPAMESSAGE_INFORM_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,

@@ -108,9 +108,7 @@ _DEFAULTMESSAGE_ERRORCODE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[
-        _DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM,
-    ],
+    enum_types=[_DEFAULTMESSAGE_ERRORCODE_ERRORCODEENUM,],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
@@ -286,9 +284,7 @@ _DEFAULTMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY,
-    ],
+    nested_types=[_DEFAULTMESSAGE_ERROR_PERFORMATIVE_ERRORDATAENTRY,],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,

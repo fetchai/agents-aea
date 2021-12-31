@@ -148,9 +148,7 @@ _TACMESSAGE_ERRORCODE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[
-        _TACMESSAGE_ERRORCODE_ERRORCODEENUM,
-    ],
+    enum_types=[_TACMESSAGE_ERRORCODE_ERRORCODEENUM,],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
@@ -1728,9 +1726,7 @@ _TACMESSAGE_TAC_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[
-        _TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY,
-    ],
+    nested_types=[_TACMESSAGE_TAC_ERROR_PERFORMATIVE_INFOENTRY,],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
