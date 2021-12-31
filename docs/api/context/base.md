@@ -1,11 +1,9 @@
-<a id="aea.context.base"></a>
-
+<a name="aea.context.base"></a>
 # aea.context.base
 
 This module contains the agent context class.
 
-<a id="aea.context.base.AgentContext"></a>
-
+<a name="aea.context.base.AgentContext"></a>
 ## AgentContext Objects
 
 ```python
@@ -14,12 +12,11 @@ class AgentContext()
 
 Provide read access to relevant objects of the agent for the skills.
 
-<a id="aea.context.base.AgentContext.__init__"></a>
-
+<a name="aea.context.base.AgentContext.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, data_dir: str, storage_callable: Callable[[], Optional[Storage]] = lambda: None, send_to_skill: Optional[Callable] = None, **kwargs: Any) -> None
+ | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, data_dir: str, storage_callable: Callable[[], Optional[Storage]] = lambda: None, send_to_skill: Optional[Callable] = None, **kwargs: Any) -> None
 ```
 
 Initialize an agent context.
@@ -43,12 +40,11 @@ Initialize an agent context.
 - `send_to_skill`: callable for sending envelopes to skills.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
-<a id="aea.context.base.AgentContext.send_to_skill"></a>
-
+<a name="aea.context.base.AgentContext.send_to_skill"></a>
 #### send`_`to`_`skill
 
 ```python
-def send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+ | send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Send message or envelope to another skill.
@@ -60,35 +56,32 @@ If message passed it will be wrapped into envelope with optional envelope contex
 - `message_or_envelope`: envelope to send to another skill.
 - `context`: the optional envelope context
 
-<a id="aea.context.base.AgentContext.storage"></a>
-
+<a name="aea.context.base.AgentContext.storage"></a>
 #### storage
 
 ```python
-@property
-def storage() -> Optional[Storage]
+ | @property
+ | storage() -> Optional[Storage]
 ```
 
 Return storage instance if enabled in AEA.
 
-<a id="aea.context.base.AgentContext.data_dir"></a>
-
+<a name="aea.context.base.AgentContext.data_dir"></a>
 #### data`_`dir
 
 ```python
-@property
-def data_dir() -> str
+ | @property
+ | data_dir() -> str
 ```
 
 Return assets directory.
 
-<a id="aea.context.base.AgentContext.shared_state"></a>
-
+<a name="aea.context.base.AgentContext.shared_state"></a>
 #### shared`_`state
 
 ```python
-@property
-def shared_state() -> Dict[str, Any]
+ | @property
+ | shared_state() -> Dict[str, Any]
 ```
 
 Get the shared state dictionary.
@@ -101,200 +94,182 @@ all skills.
 
 dictionary of the shared state.
 
-<a id="aea.context.base.AgentContext.identity"></a>
-
+<a name="aea.context.base.AgentContext.identity"></a>
 #### identity
 
 ```python
-@property
-def identity() -> Identity
+ | @property
+ | identity() -> Identity
 ```
 
 Get the identity.
 
-<a id="aea.context.base.AgentContext.agent_name"></a>
-
+<a name="aea.context.base.AgentContext.agent_name"></a>
 #### agent`_`name
 
 ```python
-@property
-def agent_name() -> str
+ | @property
+ | agent_name() -> str
 ```
 
 Get agent name.
 
-<a id="aea.context.base.AgentContext.addresses"></a>
-
+<a name="aea.context.base.AgentContext.addresses"></a>
 #### addresses
 
 ```python
-@property
-def addresses() -> Dict[str, Address]
+ | @property
+ | addresses() -> Dict[str, Address]
 ```
 
 Get addresses.
 
-<a id="aea.context.base.AgentContext.public_keys"></a>
-
+<a name="aea.context.base.AgentContext.public_keys"></a>
 #### public`_`keys
 
 ```python
-@property
-def public_keys() -> Dict[str, str]
+ | @property
+ | public_keys() -> Dict[str, str]
 ```
 
 Get public keys.
 
-<a id="aea.context.base.AgentContext.address"></a>
-
+<a name="aea.context.base.AgentContext.address"></a>
 #### address
 
 ```python
-@property
-def address() -> Address
+ | @property
+ | address() -> Address
 ```
 
 Get the default address.
 
-<a id="aea.context.base.AgentContext.public_key"></a>
-
+<a name="aea.context.base.AgentContext.public_key"></a>
 #### public`_`key
 
 ```python
-@property
-def public_key() -> str
+ | @property
+ | public_key() -> str
 ```
 
 Get the default public key.
 
-<a id="aea.context.base.AgentContext.connection_status"></a>
-
+<a name="aea.context.base.AgentContext.connection_status"></a>
 #### connection`_`status
 
 ```python
-@property
-def connection_status() -> MultiplexerStatus
+ | @property
+ | connection_status() -> MultiplexerStatus
 ```
 
 Get connection status of the multiplexer.
 
-<a id="aea.context.base.AgentContext.outbox"></a>
-
+<a name="aea.context.base.AgentContext.outbox"></a>
 #### outbox
 
 ```python
-@property
-def outbox() -> OutBox
+ | @property
+ | outbox() -> OutBox
 ```
 
 Get outbox.
 
-<a id="aea.context.base.AgentContext.decision_maker_message_queue"></a>
-
+<a name="aea.context.base.AgentContext.decision_maker_message_queue"></a>
 #### decision`_`maker`_`message`_`queue
 
 ```python
-@property
-def decision_maker_message_queue() -> Queue
+ | @property
+ | decision_maker_message_queue() -> Queue
 ```
 
 Get decision maker queue.
 
-<a id="aea.context.base.AgentContext.decision_maker_handler_context"></a>
-
+<a name="aea.context.base.AgentContext.decision_maker_handler_context"></a>
 #### decision`_`maker`_`handler`_`context
 
 ```python
-@property
-def decision_maker_handler_context() -> SimpleNamespace
+ | @property
+ | decision_maker_handler_context() -> SimpleNamespace
 ```
 
 Get the decision maker handler context.
 
-<a id="aea.context.base.AgentContext.task_manager"></a>
-
+<a name="aea.context.base.AgentContext.task_manager"></a>
 #### task`_`manager
 
 ```python
-@property
-def task_manager() -> TaskManager
+ | @property
+ | task_manager() -> TaskManager
 ```
 
 Get the task manager.
 
-<a id="aea.context.base.AgentContext.search_service_address"></a>
-
+<a name="aea.context.base.AgentContext.search_service_address"></a>
 #### search`_`service`_`address
 
 ```python
-@property
-def search_service_address() -> Address
+ | @property
+ | search_service_address() -> Address
 ```
 
 Get the address of the search service.
 
-<a id="aea.context.base.AgentContext.decision_maker_address"></a>
-
+<a name="aea.context.base.AgentContext.decision_maker_address"></a>
 #### decision`_`maker`_`address
 
 ```python
-@property
-def decision_maker_address() -> Address
+ | @property
+ | decision_maker_address() -> Address
 ```
 
 Get the address of the decision maker.
 
-<a id="aea.context.base.AgentContext.default_ledger_id"></a>
-
+<a name="aea.context.base.AgentContext.default_ledger_id"></a>
 #### default`_`ledger`_`id
 
 ```python
-@property
-def default_ledger_id() -> str
+ | @property
+ | default_ledger_id() -> str
 ```
 
 Get the default ledger id.
 
-<a id="aea.context.base.AgentContext.currency_denominations"></a>
-
+<a name="aea.context.base.AgentContext.currency_denominations"></a>
 #### currency`_`denominations
 
 ```python
-@property
-def currency_denominations() -> Dict[str, str]
+ | @property
+ | currency_denominations() -> Dict[str, str]
 ```
 
 Get a dictionary mapping ledger ids to currency denominations.
 
-<a id="aea.context.base.AgentContext.default_connection"></a>
-
+<a name="aea.context.base.AgentContext.default_connection"></a>
 #### default`_`connection
 
 ```python
-@property
-def default_connection() -> Optional[PublicId]
+ | @property
+ | default_connection() -> Optional[PublicId]
 ```
 
 Get the default connection.
 
-<a id="aea.context.base.AgentContext.default_routing"></a>
-
+<a name="aea.context.base.AgentContext.default_routing"></a>
 #### default`_`routing
 
 ```python
-@property
-def default_routing() -> Dict[PublicId, PublicId]
+ | @property
+ | default_routing() -> Dict[PublicId, PublicId]
 ```
 
 Get the default routing.
 
-<a id="aea.context.base.AgentContext.namespace"></a>
-
+<a name="aea.context.base.AgentContext.namespace"></a>
 #### namespace
 
 ```python
-@property
-def namespace() -> SimpleNamespace
+ | @property
+ | namespace() -> SimpleNamespace
 ```
 
 Get the agent context namespace.

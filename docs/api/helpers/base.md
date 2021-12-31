@@ -1,25 +1,22 @@
-<a id="aea.helpers.base"></a>
-
+<a name="aea.helpers.base"></a>
 # aea.helpers.base
 
 Miscellaneous helpers.
 
-<a id="aea.helpers.base.locate"></a>
-
+<a name="aea.helpers.base.locate"></a>
 #### locate
 
 ```python
-def locate(path: str) -> Any
+locate(path: str) -> Any
 ```
 
 Locate an object by name or dotted save_path, importing as necessary.
 
-<a id="aea.helpers.base.load_module"></a>
-
+<a name="aea.helpers.base.load_module"></a>
 #### load`_`module
 
 ```python
-def load_module(dotted_path: str, filepath: Path) -> types.ModuleType
+load_module(dotted_path: str, filepath: Path) -> types.ModuleType
 ```
 
 Load a module.
@@ -38,12 +35,11 @@ module type
 - `ValueError`: if the filepath provided is not a module.  # noqa: DAR402
 - `Exception`: if the execution of the module raises exception.  # noqa: DAR402
 
-<a id="aea.helpers.base.load_env_file"></a>
-
+<a name="aea.helpers.base.load_env_file"></a>
 #### load`_`env`_`file
 
 ```python
-def load_env_file(env_file: str) -> None
+load_env_file(env_file: str) -> None
 ```
 
 Load the content of the environment file into the process environment.
@@ -52,12 +48,11 @@ Load the content of the environment file into the process environment.
 
 - `env_file`: save_path to the env file.
 
-<a id="aea.helpers.base.sigint_crossplatform"></a>
-
+<a name="aea.helpers.base.sigint_crossplatform"></a>
 #### sigint`_`crossplatform
 
 ```python
-def sigint_crossplatform(process: subprocess.Popen) -> None
+sigint_crossplatform(process: subprocess.Popen) -> None
 ```
 
 Send a SIGINT, cross-platform.
@@ -73,12 +68,11 @@ However, a subprocess.Popen class has the method
 
 - `process`: the process to send the signal to.
 
-<a id="aea.helpers.base.win_popen_kwargs"></a>
-
+<a name="aea.helpers.base.win_popen_kwargs"></a>
 #### win`_`popen`_`kwargs
 
 ```python
-def win_popen_kwargs() -> dict
+win_popen_kwargs() -> dict
 ```
 
 Return kwargs to start a process in windows with new process group.
@@ -90,12 +84,11 @@ Return empty dict if platform is not win32
 
 windows popen kwargs
 
-<a id="aea.helpers.base.send_control_c"></a>
-
+<a name="aea.helpers.base.send_control_c"></a>
 #### send`_`control`_`c
 
 ```python
-def send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None
+send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None
 ```
 
 Send ctrl-C cross-platform to terminate a subprocess.
@@ -105,8 +98,7 @@ Send ctrl-C cross-platform to terminate a subprocess.
 - `process`: the process to send the signal to.
 - `kill_group`: whether or not to kill group
 
-<a id="aea.helpers.base.RegexConstrainedString"></a>
-
+<a name="aea.helpers.base.RegexConstrainedString"></a>
 ## RegexConstrainedString Objects
 
 ```python
@@ -119,18 +111,16 @@ The default behaviour is to match anything.
 Subclass this class and change the 'REGEX' class
 attribute to implement a different behaviour.
 
-<a id="aea.helpers.base.RegexConstrainedString.__init__"></a>
-
+<a name="aea.helpers.base.RegexConstrainedString.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(seq: Union[UserString, str]) -> None
+ | __init__(seq: Union[UserString, str]) -> None
 ```
 
 Initialize a regex constrained string.
 
-<a id="aea.helpers.base.SimpleId"></a>
-
+<a name="aea.helpers.base.SimpleId"></a>
 ## SimpleId Objects
 
 ```python
@@ -165,23 +155,21 @@ Traceback (most recent call last):
 ...
 ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
-<a id="aea.helpers.base.cd"></a>
-
+<a name="aea.helpers.base.cd"></a>
 #### cd
 
 ```python
 @contextlib.contextmanager
-def cd(path: PathLike) -> Generator
+cd(path: PathLike) -> Generator
 ```
 
 Change working directory temporarily.
 
-<a id="aea.helpers.base.get_logger_method"></a>
-
+<a name="aea.helpers.base.get_logger_method"></a>
 #### get`_`logger`_`method
 
 ```python
-def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable
+get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable
 ```
 
 Get logger method for function.
@@ -191,7 +179,6 @@ Or return logger_method if it's callable.
 
 **Arguments**:
 
-
 - `fn`: function to get logger for.
 - `logger_method`: logger name or callable.
 
@@ -199,12 +186,11 @@ Or return logger_method if it's callable.
 
 callable to write log with
 
-<a id="aea.helpers.base.try_decorator"></a>
-
+<a name="aea.helpers.base.try_decorator"></a>
 #### try`_`decorator
 
 ```python
-def try_decorator(error_message: str, default_return: Callable = None, logger_method: Any = "error") -> Callable
+try_decorator(error_message: str, default_return: Callable = None, logger_method: Any = "error") -> Callable
 ```
 
 Run function, log and return default value on exception.
@@ -221,8 +207,7 @@ Does not support async or coroutines!
 
 the callable
 
-<a id="aea.helpers.base.MaxRetriesError"></a>
-
+<a name="aea.helpers.base.MaxRetriesError"></a>
 ## MaxRetriesError Objects
 
 ```python
@@ -231,12 +216,11 @@ class MaxRetriesError(Exception)
 
 Exception for retry decorator.
 
-<a id="aea.helpers.base.retry_decorator"></a>
-
+<a name="aea.helpers.base.retry_decorator"></a>
 #### retry`_`decorator
 
 ```python
-def retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method: str = "error") -> Callable
+retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method: str = "error") -> Callable
 ```
 
 Run function with several attempts.
@@ -254,29 +238,27 @@ Does not support async or coroutines!
 
 the callable
 
-<a id="aea.helpers.base.exception_log_and_reraise"></a>
-
+<a name="aea.helpers.base.exception_log_and_reraise"></a>
 #### exception`_`log`_`and`_`reraise
 
 ```python
 @contextlib.contextmanager
-def exception_log_and_reraise(log_method: Callable, message: str) -> Generator
+exception_log_and_reraise(log_method: Callable, message: str) -> Generator
 ```
 
 Run code in context to log and re raise exception.
 
 **Arguments**:
 
-:yield: the generator
 - `log_method`: function to print log
 - `message`: message template to add error text.
+:yield: the generator
 
-<a id="aea.helpers.base.recursive_update"></a>
-
+<a name="aea.helpers.base.recursive_update"></a>
 #### recursive`_`update
 
 ```python
-def recursive_update(to_update: Dict, new_values: Dict, allow_new_values: bool = False) -> None
+recursive_update(to_update: Dict, new_values: Dict, allow_new_values: bool = False) -> None
 ```
 
 Update a dictionary by replacing conflicts with the new values.
@@ -295,12 +277,11 @@ It does side-effects to the first dictionary.
 - `new_values`: the dictionary of new values to replace.
 - `allow_new_values`: whether or not to allow new values.
 
-<a id="aea.helpers.base.find_topological_order"></a>
-
+<a name="aea.helpers.base.find_topological_order"></a>
 #### find`_`topological`_`order
 
 ```python
-def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]
+find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]
 ```
 
 Compute the topological order of a graph (using Kahn's algorithm).
@@ -317,12 +298,11 @@ the topological order for the graph (as a sequence of nodes)
 
 - `ValueError`: if the graph contains a cycle.
 
-<a id="aea.helpers.base.reachable_nodes"></a>
-
+<a name="aea.helpers.base.reachable_nodes"></a>
 #### reachable`_`nodes
 
 ```python
-def reachable_nodes(adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]) -> Dict[T, Set[T]]
+reachable_nodes(adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]) -> Dict[T, Set[T]]
 ```
 
 Find the reachable subgraph induced by a set of starting nodes.
@@ -336,8 +316,7 @@ Find the reachable subgraph induced by a set of starting nodes.
 
 the adjacency list of the subgraph.
 
-<a id="aea.helpers.base.cached_property"></a>
-
+<a name="aea.helpers.base.cached_property"></a>
 ## cached`_`property Objects
 
 ```python
@@ -346,68 +325,61 @@ class cached_property()
 
 Cached property from python3.8 functools.
 
-<a id="aea.helpers.base.cached_property.__init__"></a>
-
+<a name="aea.helpers.base.cached_property.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(func: Callable) -> None
+ | __init__(func: Callable) -> None
 ```
 
 Init cached property.
 
-<a id="aea.helpers.base.cached_property.__set_name__"></a>
-
+<a name="aea.helpers.base.cached_property.__set_name__"></a>
 #### `__`set`_`name`__`
 
 ```python
-def __set_name__(_: Any, name: Any) -> None
+ | __set_name__(_: Any, name: Any) -> None
 ```
 
 Set name.
 
-<a id="aea.helpers.base.cached_property.__get__"></a>
-
+<a name="aea.helpers.base.cached_property.__get__"></a>
 #### `__`get`__`
 
 ```python
-def __get__(instance: Any, _: Optional[Any] = None) -> Any
+ | __get__(instance: Any, _: Optional[Any] = None) -> Any
 ```
 
 Get instance.
 
-<a id="aea.helpers.base.ensure_dir"></a>
-
+<a name="aea.helpers.base.ensure_dir"></a>
 #### ensure`_`dir
 
 ```python
-def ensure_dir(dir_path: str) -> None
+ensure_dir(dir_path: str) -> None
 ```
 
 Check if dir_path is a directory or create it.
 
-<a id="aea.helpers.base.dict_to_path_value"></a>
-
+<a name="aea.helpers.base.dict_to_path_value"></a>
 #### dict`_`to`_`path`_`value
 
 ```python
-def dict_to_path_value(data: Mapping, path: Optional[List] = None) -> Iterable[Tuple[List[str], Any]]
+dict_to_path_value(data: Mapping, path: Optional[List] = None) -> Iterable[Tuple[List[str], Any]]
 ```
 
 Convert dict to sequence of terminal path build of  keys and value.
 
-<a id="aea.helpers.base.parse_datetime_from_str"></a>
-
+<a name="aea.helpers.base.parse_datetime_from_str"></a>
 #### parse`_`datetime`_`from`_`str
 
 ```python
-def parse_datetime_from_str(date_string: str) -> datetime.datetime
+parse_datetime_from_str(date_string: str) -> datetime.datetime
 ```
 
 Parse datetime from string.
 
-<a id="aea.helpers.base.CertRequest"></a>
-
+<a name="aea.helpers.base.CertRequest"></a>
 ## CertRequest Objects
 
 ```python
@@ -416,12 +388,11 @@ class CertRequest()
 
 Certificate request for proof of representation.
 
-<a id="aea.helpers.base.CertRequest.__init__"></a>
-
+<a name="aea.helpers.base.CertRequest.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, save_path: str) -> None
+ | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, save_path: str) -> None
 ```
 
 Initialize the certificate request.
@@ -436,112 +407,102 @@ Initialize the certificate request.
 - `message_format`: message format used for signing
 - `save_path`: the save_path where to save the certificate.
 
-<a id="aea.helpers.base.CertRequest.public_key"></a>
-
+<a name="aea.helpers.base.CertRequest.public_key"></a>
 #### public`_`key
 
 ```python
-@property
-def public_key() -> Optional[str]
+ | @property
+ | public_key() -> Optional[str]
 ```
 
 Get the public key.
 
-<a id="aea.helpers.base.CertRequest.ledger_id"></a>
-
+<a name="aea.helpers.base.CertRequest.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the ledger id.
 
-<a id="aea.helpers.base.CertRequest.key_identifier"></a>
-
+<a name="aea.helpers.base.CertRequest.key_identifier"></a>
 #### key`_`identifier
 
 ```python
-@property
-def key_identifier() -> Optional[str]
+ | @property
+ | key_identifier() -> Optional[str]
 ```
 
 Get the key identifier.
 
-<a id="aea.helpers.base.CertRequest.identifier"></a>
-
+<a name="aea.helpers.base.CertRequest.identifier"></a>
 #### identifier
 
 ```python
-@property
-def identifier() -> str
+ | @property
+ | identifier() -> str
 ```
 
 Get the identifier.
 
-<a id="aea.helpers.base.CertRequest.not_before_string"></a>
-
+<a name="aea.helpers.base.CertRequest.not_before_string"></a>
 #### not`_`before`_`string
 
 ```python
-@property
-def not_before_string() -> str
+ | @property
+ | not_before_string() -> str
 ```
 
 Get the not_before field as string.
 
-<a id="aea.helpers.base.CertRequest.not_after_string"></a>
-
+<a name="aea.helpers.base.CertRequest.not_after_string"></a>
 #### not`_`after`_`string
 
 ```python
-@property
-def not_after_string() -> str
+ | @property
+ | not_after_string() -> str
 ```
 
 Get the not_after field as string.
 
-<a id="aea.helpers.base.CertRequest.not_before"></a>
-
+<a name="aea.helpers.base.CertRequest.not_before"></a>
 #### not`_`before
 
 ```python
-@property
-def not_before() -> datetime.datetime
+ | @property
+ | not_before() -> datetime.datetime
 ```
 
 Get the not_before field.
 
-<a id="aea.helpers.base.CertRequest.not_after"></a>
-
+<a name="aea.helpers.base.CertRequest.not_after"></a>
 #### not`_`after
 
 ```python
-@property
-def not_after() -> datetime.datetime
+ | @property
+ | not_after() -> datetime.datetime
 ```
 
 Get the not_after field.
 
-<a id="aea.helpers.base.CertRequest.message_format"></a>
-
+<a name="aea.helpers.base.CertRequest.message_format"></a>
 #### message`_`format
 
 ```python
-@property
-def message_format() -> str
+ | @property
+ | message_format() -> str
 ```
 
 Get the message format.
 
-<a id="aea.helpers.base.CertRequest.save_path"></a>
-
+<a name="aea.helpers.base.CertRequest.save_path"></a>
 #### save`_`path
 
 ```python
-@property
-def save_path() -> Path
+ | @property
+ | save_path() -> Path
 ```
 
 Get the save path for the certificate.
@@ -553,12 +514,11 @@ the actual save path might depend on the context.
 
 the save path
 
-<a id="aea.helpers.base.CertRequest.get_absolute_save_path"></a>
-
+<a name="aea.helpers.base.CertRequest.get_absolute_save_path"></a>
 #### get`_`absolute`_`save`_`path
 
 ```python
-def get_absolute_save_path(path_prefix: Optional[PathLike] = None) -> Path
+ | get_absolute_save_path(path_prefix: Optional[PathLike] = None) -> Path
 ```
 
 Get the absolute save path.
@@ -574,34 +534,31 @@ Otherwise, the path prefix is prepended.
 
 the actual save path.
 
-<a id="aea.helpers.base.CertRequest.public_key_or_identifier"></a>
-
+<a name="aea.helpers.base.CertRequest.public_key_or_identifier"></a>
 #### public`_`key`_`or`_`identifier
 
 ```python
-@property
-def public_key_or_identifier() -> str
+ | @property
+ | public_key_or_identifier() -> str
 ```
 
 Get the public key or identifier.
 
-<a id="aea.helpers.base.CertRequest.get_message"></a>
-
+<a name="aea.helpers.base.CertRequest.get_message"></a>
 #### get`_`message
 
 ```python
-def get_message(public_key: str) -> bytes
+ | get_message(public_key: str) -> bytes
 ```
 
 Get the message to sign.
 
-<a id="aea.helpers.base.CertRequest.construct_message"></a>
-
+<a name="aea.helpers.base.CertRequest.construct_message"></a>
 #### construct`_`message
 
 ```python
-@classmethod
-def construct_message(cls, public_key: str, identifier: SimpleIdOrStr, not_before_string: str, not_after_string: str, message_format: str) -> bytes
+ | @classmethod
+ | construct_message(cls, public_key: str, identifier: SimpleIdOrStr, not_before_string: str, not_after_string: str, message_format: str) -> bytes
 ```
 
 Construct message for singning.
@@ -618,12 +575,11 @@ Construct message for singning.
 
 the message
 
-<a id="aea.helpers.base.CertRequest.get_signature"></a>
-
+<a name="aea.helpers.base.CertRequest.get_signature"></a>
 #### get`_`signature
 
 ```python
-def get_signature(path_prefix: Optional[PathLike] = None) -> str
+ | get_signature(path_prefix: Optional[PathLike] = None) -> str
 ```
 
 Get signature from save_path.
@@ -636,44 +592,40 @@ Get signature from save_path.
 
 the signature.
 
-<a id="aea.helpers.base.CertRequest.json"></a>
-
+<a name="aea.helpers.base.CertRequest.json"></a>
 #### json
 
 ```python
-@property
-def json() -> Dict
+ | @property
+ | json() -> Dict
 ```
 
 Compute the JSON representation.
 
-<a id="aea.helpers.base.CertRequest.from_json"></a>
-
+<a name="aea.helpers.base.CertRequest.from_json"></a>
 #### from`_`json
 
 ```python
-@classmethod
-def from_json(cls, obj: Dict) -> "CertRequest"
+ | @classmethod
+ | from_json(cls, obj: Dict) -> "CertRequest"
 ```
 
 Compute the JSON representation.
 
-<a id="aea.helpers.base.CertRequest.__eq__"></a>
-
+<a name="aea.helpers.base.CertRequest.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.base.compute_specifier_from_version"></a>
-
+<a name="aea.helpers.base.compute_specifier_from_version"></a>
 #### compute`_`specifier`_`from`_`version
 
 ```python
-def compute_specifier_from_version(version: Version) -> str
+compute_specifier_from_version(version: Version) -> str
 ```
 
 Compute the specifier set from a version.
@@ -688,12 +640,11 @@ version specifier is:  >=major.minor.0, <next_major.0.0
 
 the specifier set
 
-<a id="aea.helpers.base.decorator_with_optional_params"></a>
-
+<a name="aea.helpers.base.decorator_with_optional_params"></a>
 #### decorator`_`with`_`optional`_`params
 
 ```python
-def decorator_with_optional_params(decorator: Callable) -> Callable
+decorator_with_optional_params(decorator: Callable) -> Callable
 ```
 
 Make a decorator usable either with or without parameters.
@@ -719,22 +670,20 @@ def myfunction():
 
 a decorator callable
 
-<a id="aea.helpers.base.delete_directory_contents"></a>
-
+<a name="aea.helpers.base.delete_directory_contents"></a>
 #### delete`_`directory`_`contents
 
 ```python
-def delete_directory_contents(directory: Path) -> None
+delete_directory_contents(directory: Path) -> None
 ```
 
 Delete the content of a directory, without deleting it.
 
-<a id="aea.helpers.base.prepend_if_not_absolute"></a>
-
+<a name="aea.helpers.base.prepend_if_not_absolute"></a>
 #### prepend`_`if`_`not`_`absolute
 
 ```python
-def prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike
+prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike
 ```
 
 Prepend a path with a prefix, but only if not absolute

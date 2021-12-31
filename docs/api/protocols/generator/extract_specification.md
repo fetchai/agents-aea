@@ -1,11 +1,9 @@
-<a id="aea.protocols.generator.extract_specification"></a>
-
+<a name="aea.protocols.generator.extract_specification"></a>
 # aea.protocols.generator.extract`_`specification
 
 This module extracts a valid protocol specification into pythonic objects.
 
-<a id="aea.protocols.generator.extract_specification.PythonicProtocolSpecification"></a>
-
+<a name="aea.protocols.generator.extract_specification.PythonicProtocolSpecification"></a>
 ## PythonicProtocolSpecification Objects
 
 ```python
@@ -14,22 +12,20 @@ class PythonicProtocolSpecification()
 
 This class represents a protocol specification in python.
 
-<a id="aea.protocols.generator.extract_specification.PythonicProtocolSpecification.__init__"></a>
-
+<a name="aea.protocols.generator.extract_specification.PythonicProtocolSpecification.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__() -> None
+ | __init__() -> None
 ```
 
 Instantiate a Pythonic protocol specification.
 
-<a id="aea.protocols.generator.extract_specification.extract"></a>
-
+<a name="aea.protocols.generator.extract_specification.extract"></a>
 #### extract
 
 ```python
-def extract(protocol_specification: ProtocolSpecification) -> PythonicProtocolSpecification
+extract(protocol_specification: ProtocolSpecification) -> PythonicProtocolSpecification
 ```
 
 Converts a protocol specification into a Pythonic protocol specification.

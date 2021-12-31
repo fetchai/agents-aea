@@ -1,11 +1,9 @@
-<a id="aea.registries.base"></a>
-
+<a name="aea.registries.base"></a>
 # aea.registries.base
 
 This module contains registries.
 
-<a id="aea.registries.base.Registry"></a>
-
+<a name="aea.registries.base.Registry"></a>
 ## Registry Objects
 
 ```python
@@ -14,12 +12,11 @@ class Registry(Generic[ItemId, Item],  WithLogger,  ABC)
 
 This class implements an abstract registry.
 
-<a id="aea.registries.base.Registry.__init__"></a>
-
+<a name="aea.registries.base.Registry.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(agent_name: str = "standalone") -> None
+ | __init__(agent_name: str = "standalone") -> None
 ```
 
 Initialize the registry.
@@ -28,13 +25,12 @@ Initialize the registry.
 
 - `agent_name`: the name of the agent
 
-<a id="aea.registries.base.Registry.register"></a>
-
+<a name="aea.registries.base.Registry.register"></a>
 #### register
 
 ```python
-@abstractmethod
-def register(item_id: ItemId, item: Item, is_dynamically_added: bool = False) -> None
+ | @abstractmethod
+ | register(item_id: ItemId, item: Item, is_dynamically_added: bool = False) -> None
 ```
 
 Register an item.
@@ -48,14 +44,14 @@ Register an item.
 **Returns**:
 
 None
+:raises: ValueError if an item is already registered with that item id.
 
-<a id="aea.registries.base.Registry.unregister"></a>
-
+<a name="aea.registries.base.Registry.unregister"></a>
 #### unregister
 
 ```python
-@abstractmethod
-def unregister(item_id: ItemId) -> Optional[Item]
+ | @abstractmethod
+ | unregister(item_id: ItemId) -> Optional[Item]
 ```
 
 Unregister an item.
@@ -67,14 +63,14 @@ Unregister an item.
 **Returns**:
 
 the item
+:raises: ValueError if no item registered with that item id.
 
-<a id="aea.registries.base.Registry.fetch"></a>
-
+<a name="aea.registries.base.Registry.fetch"></a>
 #### fetch
 
 ```python
-@abstractmethod
-def fetch(item_id: ItemId) -> Optional[Item]
+ | @abstractmethod
+ | fetch(item_id: ItemId) -> Optional[Item]
 ```
 
 Fetch an item.
@@ -87,13 +83,12 @@ Fetch an item.
 
 the Item
 
-<a id="aea.registries.base.Registry.fetch_all"></a>
-
+<a name="aea.registries.base.Registry.fetch_all"></a>
 #### fetch`_`all
 
 ```python
-@abstractmethod
-def fetch_all() -> List[Item]
+ | @abstractmethod
+ | fetch_all() -> List[Item]
 ```
 
 Fetch all the items.
@@ -102,13 +97,12 @@ Fetch all the items.
 
 the list of items.
 
-<a id="aea.registries.base.Registry.ids"></a>
-
+<a name="aea.registries.base.Registry.ids"></a>
 #### ids
 
 ```python
-@abstractmethod
-def ids() -> Set[ItemId]
+ | @abstractmethod
+ | ids() -> Set[ItemId]
 ```
 
 Return the set of all the used item ids.
@@ -117,13 +111,12 @@ Return the set of all the used item ids.
 
 the set of item ids.
 
-<a id="aea.registries.base.Registry.setup"></a>
-
+<a name="aea.registries.base.Registry.setup"></a>
 #### setup
 
 ```python
-@abstractmethod
-def setup() -> None
+ | @abstractmethod
+ | setup() -> None
 ```
 
 Set up registry.
@@ -132,13 +125,12 @@ Set up registry.
 
 None
 
-<a id="aea.registries.base.Registry.teardown"></a>
-
+<a name="aea.registries.base.Registry.teardown"></a>
 #### teardown
 
 ```python
-@abstractmethod
-def teardown() -> None
+ | @abstractmethod
+ | teardown() -> None
 ```
 
 Teardown the registry.
@@ -147,8 +139,7 @@ Teardown the registry.
 
 None
 
-<a id="aea.registries.base.PublicIdRegistry"></a>
-
+<a name="aea.registries.base.PublicIdRegistry"></a>
 ## PublicIdRegistry Objects
 
 ```python
@@ -160,42 +151,38 @@ This class implement a registry whose keys are public ids.
 In particular, it is able to handle the case when the public id
 points to the 'latest' version of a package.
 
-<a id="aea.registries.base.PublicIdRegistry.__init__"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__() -> None
+ | __init__() -> None
 ```
 
 Initialize the registry.
 
-<a id="aea.registries.base.PublicIdRegistry.register"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.register"></a>
 #### register
 
 ```python
-def register(public_id: PublicId, item: Item, is_dynamically_added: bool = False) -> None
+ | register(public_id: PublicId, item: Item, is_dynamically_added: bool = False) -> None
 ```
 
 Register an item.
 
-<a id="aea.registries.base.PublicIdRegistry.unregister"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.unregister"></a>
 #### unregister
 
 ```python
-def unregister(public_id: PublicId) -> Item
+ | unregister(public_id: PublicId) -> Item
 ```
 
 Unregister an item.
 
-<a id="aea.registries.base.PublicIdRegistry.fetch"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.fetch"></a>
 #### fetch
 
 ```python
-def fetch(public_id: PublicId) -> Optional[Item]
+ | fetch(public_id: PublicId) -> Optional[Item]
 ```
 
 Fetch an item associated with a public id.
@@ -208,48 +195,43 @@ Fetch an item associated with a public id.
 
 an item, or None if the key is not present.
 
-<a id="aea.registries.base.PublicIdRegistry.fetch_all"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.fetch_all"></a>
 #### fetch`_`all
 
 ```python
-def fetch_all() -> List[Item]
+ | fetch_all() -> List[Item]
 ```
 
 Fetch all the items.
 
-<a id="aea.registries.base.PublicIdRegistry.ids"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.ids"></a>
 #### ids
 
 ```python
-def ids() -> Set[PublicId]
+ | ids() -> Set[PublicId]
 ```
 
 Get all the item ids.
 
-<a id="aea.registries.base.PublicIdRegistry.setup"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.setup"></a>
 #### setup
 
 ```python
-def setup() -> None
+ | setup() -> None
 ```
 
 Set up the items.
 
-<a id="aea.registries.base.PublicIdRegistry.teardown"></a>
-
+<a name="aea.registries.base.PublicIdRegistry.teardown"></a>
 #### teardown
 
 ```python
-def teardown() -> None
+ | teardown() -> None
 ```
 
 Tear down the items.
 
-<a id="aea.registries.base.AgentComponentRegistry"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry"></a>
 ## AgentComponentRegistry Objects
 
 ```python
@@ -258,12 +240,11 @@ class AgentComponentRegistry(Registry[ComponentId, Component])
 
 This class implements a simple dictionary-based registry for agent components.
 
-<a id="aea.registries.base.AgentComponentRegistry.__init__"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(**kwargs: Any) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Instantiate the registry.
@@ -272,12 +253,11 @@ Instantiate the registry.
 
 - `kwargs`: kwargs
 
-<a id="aea.registries.base.AgentComponentRegistry.register"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.register"></a>
 #### register
 
 ```python
-def register(component_id: ComponentId, component: Component, is_dynamically_added: bool = False) -> None
+ | register(component_id: ComponentId, component: Component, is_dynamically_added: bool = False) -> None
 ```
 
 Register a component.
@@ -288,12 +268,11 @@ Register a component.
 - `component`: the component object.
 - `is_dynamically_added`: whether or not the item is dynamically added.
 
-<a id="aea.registries.base.AgentComponentRegistry.unregister"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.unregister"></a>
 #### unregister
 
 ```python
-def unregister(component_id: ComponentId) -> Optional[Component]
+ | unregister(component_id: ComponentId) -> Optional[Component]
 ```
 
 Unregister a component.
@@ -306,12 +285,11 @@ Unregister a component.
 
 the item
 
-<a id="aea.registries.base.AgentComponentRegistry.fetch"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.fetch"></a>
 #### fetch
 
 ```python
-def fetch(component_id: ComponentId) -> Optional[Component]
+ | fetch(component_id: ComponentId) -> Optional[Component]
 ```
 
 Fetch the component by id.
@@ -324,12 +302,11 @@ Fetch the component by id.
 
 the component or None if the component is not registered
 
-<a id="aea.registries.base.AgentComponentRegistry.fetch_all"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.fetch_all"></a>
 #### fetch`_`all
 
 ```python
-def fetch_all() -> List[Component]
+ | fetch_all() -> List[Component]
 ```
 
 Fetch all the components.
@@ -338,12 +315,11 @@ Fetch all the components.
 
 the list of registered components.
 
-<a id="aea.registries.base.AgentComponentRegistry.fetch_by_type"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.fetch_by_type"></a>
 #### fetch`_`by`_`type
 
 ```python
-def fetch_by_type(component_type: ComponentType) -> List[Component]
+ | fetch_by_type(component_type: ComponentType) -> List[Component]
 ```
 
 Fetch all the components by a given type..
@@ -356,38 +332,34 @@ Fetch all the components by a given type..
 
 the list of registered components of a given type.
 
-<a id="aea.registries.base.AgentComponentRegistry.ids"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.ids"></a>
 #### ids
 
 ```python
-def ids() -> Set[ComponentId]
+ | ids() -> Set[ComponentId]
 ```
 
 Get the item ids.
 
-<a id="aea.registries.base.AgentComponentRegistry.setup"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.setup"></a>
 #### setup
 
 ```python
-def setup() -> None
+ | setup() -> None
 ```
 
 Set up the registry.
 
-<a id="aea.registries.base.AgentComponentRegistry.teardown"></a>
-
+<a name="aea.registries.base.AgentComponentRegistry.teardown"></a>
 #### teardown
 
 ```python
-def teardown() -> None
+ | teardown() -> None
 ```
 
 Teardown the registry.
 
-<a id="aea.registries.base.ComponentRegistry"></a>
-
+<a name="aea.registries.base.ComponentRegistry"></a>
 ## ComponentRegistry Objects
 
 ```python
@@ -397,12 +369,11 @@ class ComponentRegistry(
 
 This class implements a generic registry for skill components.
 
-<a id="aea.registries.base.ComponentRegistry.__init__"></a>
-
+<a name="aea.registries.base.ComponentRegistry.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(**kwargs: Any) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Instantiate the registry.
@@ -411,29 +382,27 @@ Instantiate the registry.
 
 - `kwargs`: kwargs
 
-<a id="aea.registries.base.ComponentRegistry.register"></a>
-
+<a name="aea.registries.base.ComponentRegistry.register"></a>
 #### register
 
 ```python
-def register(item_id: Tuple[PublicId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
+ | register(item_id: Tuple[PublicId, str], item: SkillComponentType, is_dynamically_added: bool = False) -> None
 ```
 
 Register a item.
 
 **Arguments**:
 
-:raises: ValueError if an item is already registered with that item id.
 - `item_id`: a pair (skill id, item name).
 - `item`: the item to register.
 - `is_dynamically_added`: whether or not the item is dynamically added.
+:raises: ValueError if an item is already registered with that item id.
 
-<a id="aea.registries.base.ComponentRegistry.unregister"></a>
-
+<a name="aea.registries.base.ComponentRegistry.unregister"></a>
 #### unregister
 
 ```python
-def unregister(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
+ | unregister(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
 ```
 
 Unregister a item.
@@ -445,13 +414,13 @@ Unregister a item.
 **Returns**:
 
 skill component
+:raises: ValueError if no item registered with that item id.
 
-<a id="aea.registries.base.ComponentRegistry.fetch"></a>
-
+<a name="aea.registries.base.ComponentRegistry.fetch"></a>
 #### fetch
 
 ```python
-def fetch(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
+ | fetch(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
 ```
 
 Fetch an item.
@@ -464,68 +433,61 @@ Fetch an item.
 
 the Item
 
-<a id="aea.registries.base.ComponentRegistry.fetch_by_skill"></a>
-
+<a name="aea.registries.base.ComponentRegistry.fetch_by_skill"></a>
 #### fetch`_`by`_`skill
 
 ```python
-def fetch_by_skill(skill_id: PublicId) -> List[SkillComponentType]
+ | fetch_by_skill(skill_id: PublicId) -> List[SkillComponentType]
 ```
 
 Fetch all the items of a given skill.
 
-<a id="aea.registries.base.ComponentRegistry.fetch_all"></a>
-
+<a name="aea.registries.base.ComponentRegistry.fetch_all"></a>
 #### fetch`_`all
 
 ```python
-def fetch_all() -> List[SkillComponentType]
+ | fetch_all() -> List[SkillComponentType]
 ```
 
 Fetch all the items.
 
-<a id="aea.registries.base.ComponentRegistry.unregister_by_skill"></a>
-
+<a name="aea.registries.base.ComponentRegistry.unregister_by_skill"></a>
 #### unregister`_`by`_`skill
 
 ```python
-def unregister_by_skill(skill_id: PublicId) -> None
+ | unregister_by_skill(skill_id: PublicId) -> None
 ```
 
 Unregister all the components by skill.
 
-<a id="aea.registries.base.ComponentRegistry.ids"></a>
-
+<a name="aea.registries.base.ComponentRegistry.ids"></a>
 #### ids
 
 ```python
-def ids() -> Set[Tuple[PublicId, str]]
+ | ids() -> Set[Tuple[PublicId, str]]
 ```
 
 Get the item ids.
 
-<a id="aea.registries.base.ComponentRegistry.setup"></a>
-
+<a name="aea.registries.base.ComponentRegistry.setup"></a>
 #### setup
 
 ```python
-def setup() -> None
+ | setup() -> None
 ```
 
 Set up the items in the registry.
 
-<a id="aea.registries.base.ComponentRegistry.teardown"></a>
-
+<a name="aea.registries.base.ComponentRegistry.teardown"></a>
 #### teardown
 
 ```python
-def teardown() -> None
+ | teardown() -> None
 ```
 
 Teardown the registry.
 
-<a id="aea.registries.base.HandlerRegistry"></a>
-
+<a name="aea.registries.base.HandlerRegistry"></a>
 ## HandlerRegistry Objects
 
 ```python
@@ -534,12 +496,11 @@ class HandlerRegistry(ComponentRegistry[Handler])
 
 This class implements the handlers registry.
 
-<a id="aea.registries.base.HandlerRegistry.__init__"></a>
-
+<a name="aea.registries.base.HandlerRegistry.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(**kwargs: Any) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Instantiate the registry.
@@ -548,12 +509,11 @@ Instantiate the registry.
 
 - `kwargs`: kwargs
 
-<a id="aea.registries.base.HandlerRegistry.register"></a>
-
+<a name="aea.registries.base.HandlerRegistry.register"></a>
 #### register
 
 ```python
-def register(item_id: Tuple[PublicId, str], item: Handler, is_dynamically_added: bool = False) -> None
+ | register(item_id: Tuple[PublicId, str], item: Handler, is_dynamically_added: bool = False) -> None
 ```
 
 Register a handler.
@@ -568,12 +528,11 @@ Register a handler.
 
 - `ValueError`: if the protocol is None, or an item with pair (skill_id, protocol_id_ already exists.
 
-<a id="aea.registries.base.HandlerRegistry.unregister"></a>
-
+<a name="aea.registries.base.HandlerRegistry.unregister"></a>
 #### unregister
 
 ```python
-def unregister(item_id: Tuple[PublicId, str]) -> Handler
+ | unregister(item_id: Tuple[PublicId, str]) -> Handler
 ```
 
 Unregister a item.
@@ -585,23 +544,22 @@ Unregister a item.
 **Returns**:
 
 the unregistered handler
+:raises: ValueError if no item is registered with that item id.
 
-<a id="aea.registries.base.HandlerRegistry.unregister_by_skill"></a>
-
+<a name="aea.registries.base.HandlerRegistry.unregister_by_skill"></a>
 #### unregister`_`by`_`skill
 
 ```python
-def unregister_by_skill(skill_id: PublicId) -> None
+ | unregister_by_skill(skill_id: PublicId) -> None
 ```
 
 Unregister all the components by skill.
 
-<a id="aea.registries.base.HandlerRegistry.fetch_by_protocol"></a>
-
+<a name="aea.registries.base.HandlerRegistry.fetch_by_protocol"></a>
 #### fetch`_`by`_`protocol
 
 ```python
-def fetch_by_protocol(protocol_id: PublicId) -> List[Handler]
+ | fetch_by_protocol(protocol_id: PublicId) -> List[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.
@@ -614,12 +572,11 @@ Fetch the handler by the pair protocol id and skill id.
 
 the handlers registered for the protocol_id and skill_id
 
-<a id="aea.registries.base.HandlerRegistry.fetch_by_protocol_and_skill"></a>
-
+<a name="aea.registries.base.HandlerRegistry.fetch_by_protocol_and_skill"></a>
 #### fetch`_`by`_`protocol`_`and`_`skill
 
 ```python
-def fetch_by_protocol_and_skill(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
+ | fetch_by_protocol_and_skill(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
 ```
 
 Fetch the handler by the pair protocol id and skill id.

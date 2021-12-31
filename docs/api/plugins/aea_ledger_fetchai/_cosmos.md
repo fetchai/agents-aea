@@ -1,11 +1,9 @@
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos"></a>
 # plugins.aea-ledger-fetchai.aea`_`ledger`_`fetchai.`_`cosmos
 
 Cosmos module wrapping the public and private key cryptography and ledger api.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt"></a>
 ## DataEncrypt Objects
 
 ```python
@@ -14,52 +12,47 @@ class DataEncrypt()
 
 Class to encrypt/decrypt data strings with password provided.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.encrypt"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.encrypt"></a>
 #### encrypt
 
 ```python
-@classmethod
-def encrypt(cls, data: bytes, password: str) -> bytes
+ | @classmethod
+ | encrypt(cls, data: bytes, password: str) -> bytes
 ```
 
 Encrypt data with password.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.bytes_encode"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.bytes_encode"></a>
 #### bytes`_`encode
 
 ```python
-@staticmethod
-def bytes_encode(data: bytes) -> str
+ | @staticmethod
+ | bytes_encode(data: bytes) -> str
 ```
 
 Encode bytes to ascii friendly string.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.bytes_decode"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.bytes_decode"></a>
 #### bytes`_`decode
 
 ```python
-@staticmethod
-def bytes_decode(data: str) -> bytes
+ | @staticmethod
+ | bytes_decode(data: str) -> bytes
 ```
 
 Decode ascii friendly string to bytes.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.decrypt"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.decrypt"></a>
 #### decrypt
 
 ```python
-@classmethod
-def decrypt(cls, encrypted_data: bytes, password: str) -> bytes
+ | @classmethod
+ | decrypt(cls, encrypted_data: bytes, password: str) -> bytes
 ```
 
 Decrypt data with password provided.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper"></a>
 ## CosmosHelper Objects
 
 ```python
@@ -68,13 +61,12 @@ class CosmosHelper(Helper)
 
 Helper class usable as Mixin for CosmosApi or as standalone class.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.is_transaction_settled"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
-@staticmethod
-def is_transaction_settled(tx_receipt: JSONLike) -> bool
+ | @staticmethod
+ | is_transaction_settled(tx_receipt: JSONLike) -> bool
 ```
 
 Check whether a transaction is settled or not.
@@ -87,13 +79,12 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_code_id"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_code_id"></a>
 #### get`_`code`_`id
 
 ```python
-@staticmethod
-def get_code_id(tx_receipt: JSONLike) -> Optional[int]
+ | @staticmethod
+ | get_code_id(tx_receipt: JSONLike) -> Optional[int]
 ```
 
 Retrieve the `code_id` from a transaction receipt.
@@ -106,13 +97,12 @@ Retrieve the `code_id` from a transaction receipt.
 
 the code id, if present
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_contract_address"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_contract_address"></a>
 #### get`_`contract`_`address
 
 ```python
-@staticmethod
-def get_contract_address(tx_receipt: JSONLike) -> Optional[str]
+ | @staticmethod
+ | get_contract_address(tx_receipt: JSONLike) -> Optional[str]
 ```
 
 Retrieve the `contract_address` from a transaction receipt.
@@ -125,13 +115,12 @@ Retrieve the `contract_address` from a transaction receipt.
 
 the contract address, if present
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.is_transaction_valid"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
-@staticmethod
-def is_transaction_valid(tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | @staticmethod
+ | is_transaction_valid(tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -148,13 +137,12 @@ Check whether a transaction is valid or not.
 
 True if the random_message is equals to tx['input']
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.generate_tx_nonce"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python
-@staticmethod
-def generate_tx_nonce(seller: Address, client: Address) -> str
+ | @staticmethod
+ | generate_tx_nonce(seller: Address, client: Address) -> str
 ```
 
 Generate a unique hash to distinguish transactions with the same terms.
@@ -168,13 +156,12 @@ Generate a unique hash to distinguish transactions with the same terms.
 
 return the hash in hex.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_address_from_public_key"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
 
 ```python
-@classmethod
-def get_address_from_public_key(cls, public_key: str) -> str
+ | @classmethod
+ | get_address_from_public_key(cls, public_key: str) -> str
 ```
 
 Get the address from the public key.
@@ -187,13 +174,12 @@ Get the address from the public key.
 
 str
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.recover_message"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.recover_message"></a>
 #### recover`_`message
 
 ```python
-@classmethod
-def recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+ | @classmethod
+ | recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.
@@ -208,13 +194,12 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.recover_public_keys_from_message"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.recover_public_keys_from_message"></a>
 #### recover`_`public`_`keys`_`from`_`message
 
 ```python
-@classmethod
-def recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+ | @classmethod
+ | recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
 ```
 
 Get the public key used to produce the `signature` of the `message`
@@ -229,13 +214,12 @@ Get the public key used to produce the `signature` of the `message`
 
 the recovered public keys
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_hash"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_hash"></a>
 #### get`_`hash
 
 ```python
-@staticmethod
-def get_hash(message: bytes) -> str
+ | @staticmethod
+ | get_hash(message: bytes) -> str
 ```
 
 Get the hash of a message.
@@ -248,13 +232,12 @@ Get the hash of a message.
 
 the hash of the message.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.is_valid_address"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.is_valid_address"></a>
 #### is`_`valid`_`address
 
 ```python
-@classmethod
-def is_valid_address(cls, address: Address) -> bool
+ | @classmethod
+ | is_valid_address(cls, address: Address) -> bool
 ```
 
 Check if the address is valid.
@@ -267,13 +250,12 @@ Check if the address is valid.
 
 whether address is valid or not
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.load_contract_interface"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.load_contract_interface"></a>
 #### load`_`contract`_`interface
 
 ```python
-@classmethod
-def load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+ | @classmethod
+ | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
 ```
 
 Load contract interface.
@@ -286,8 +268,7 @@ Load contract interface.
 
 the interface
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto"></a>
 ## CosmosCrypto Objects
 
 ```python
@@ -296,12 +277,11 @@ class CosmosCrypto(Crypto[SigningKey])
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.__init__"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(private_key_path: Optional[str] = None, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
+ | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -312,13 +292,12 @@ Instantiate an ethereum crypto object.
 - `password`: the password to encrypt/decrypt the private key.
 - `extra_entropy`: add extra randomness to whatever randomness your OS can provide
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.private_key"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.private_key"></a>
 #### private`_`key
 
 ```python
-@property
-def private_key() -> str
+ | @property
+ | private_key() -> str
 ```
 
 Return a private key.
@@ -327,13 +306,12 @@ Return a private key.
 
 a private key string
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.public_key"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.public_key"></a>
 #### public`_`key
 
 ```python
-@property
-def public_key() -> str
+ | @property
+ | public_key() -> str
 ```
 
 Return a public key in hex format.
@@ -342,13 +320,12 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.address"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.address"></a>
 #### address
 
 ```python
-@property
-def address() -> str
+ | @property
+ | address() -> str
 ```
 
 Return the address for the key pair.
@@ -357,13 +334,12 @@ Return the address for the key pair.
 
 a display_address str
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.load_private_key_from_path"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.load_private_key_from_path"></a>
 #### load`_`private`_`key`_`from`_`path
 
 ```python
-@classmethod
-def load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> SigningKey
+ | @classmethod
+ | load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> SigningKey
 ```
 
 Load a private key in hex format from a file.
@@ -377,12 +353,11 @@ Load a private key in hex format from a file.
 
 the Entity.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.sign_message"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.sign_message"></a>
 #### sign`_`message
 
 ```python
-def sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
+ | sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
 ```
 
 Sign a message in bytes string form.
@@ -396,12 +371,11 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.sign_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
-def sign_transaction(transaction: JSONLike) -> JSONLike
+ | sign_transaction(transaction: JSONLike) -> JSONLike
 ```
 
 Sign a transaction in bytes string form.
@@ -414,23 +388,21 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.generate_private_key"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
-@classmethod
-def generate_private_key(cls, extra_entropy: Union[str, bytes, int] = "") -> SigningKey
+ | @classmethod
+ | generate_private_key(cls, extra_entropy: Union[str, bytes, int] = "") -> SigningKey
 ```
 
 Generate a key pair for cosmos network.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.encrypt"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.encrypt"></a>
 #### encrypt
 
 ```python
-def encrypt(password: str) -> str
+ | encrypt(password: str) -> str
 ```
 
 Encrypt the private key and return in json.
@@ -443,13 +415,12 @@ Encrypt the private key and return in json.
 
 json string containing encrypted private key.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.decrypt"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosCrypto.decrypt"></a>
 #### decrypt
 
 ```python
-@classmethod
-def decrypt(cls, keyfile_json: str, password: str) -> str
+ | @classmethod
+ | decrypt(cls, keyfile_json: str, password: str) -> str
 ```
 
 Decrypt the private key and return in raw form.
@@ -463,8 +434,7 @@ Decrypt the private key and return in raw form.
 
 the raw private key.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi"></a>
 ## `_`CosmosApi Objects
 
 ```python
@@ -473,43 +443,39 @@ class _CosmosApi(LedgerApi)
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.__init__"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(**kwargs: Any) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the Cosmos ledger APIs.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.api"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.api"></a>
 #### api
 
 ```python
-@property
-def api() -> Any
+ | @property
+ | api() -> Any
 ```
 
 Get the underlying API object.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_balance"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_balance"></a>
 #### get`_`balance
 
 ```python
-def get_balance(address: Address) -> Optional[int]
+ | get_balance(address: Address) -> Optional[int]
 ```
 
 Get the balance of a given account.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_state"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_state"></a>
 #### get`_`state
 
 ```python
-def get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
+ | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the ledger API.
@@ -529,12 +495,11 @@ as the callable_name and the rest of the path as args.
 
 the transaction dictionary
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_deploy_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_deploy_transaction"></a>
 #### get`_`deploy`_`transaction
 
 ```python
-def get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -551,12 +516,11 @@ Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs
 
 the transaction dictionary.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_handle_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_handle_transaction"></a>
 #### get`_`handle`_`transaction
 
 ```python
-def get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None) -> Optional[JSONLike]
+ | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Create a CosmWasm HandleMsg transaction.
@@ -580,12 +544,11 @@ Create a CosmWasm HandleMsg transaction.
 
 the unsigned CosmWasm HandleMsg
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.execute_contract_query"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.execute_contract_query"></a>
 #### execute`_`contract`_`query
 
 ```python
-def execute_contract_query(contract_address: Address, query_msg: JSONLike) -> Optional[JSONLike]
+ | execute_contract_query(contract_address: Address, query_msg: JSONLike) -> Optional[JSONLike]
 ```
 
 Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
@@ -599,12 +562,11 @@ Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
 the message receipt
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transfer_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
-def get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = DEFAULT_GAS_AMOUNT, memo: str = "", chain_id: Optional[str] = None, account_number: Optional[int] = None, sequence: Optional[int] = None, tx_fee_denom: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -629,18 +591,16 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_exec_msg"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_exec_msg"></a>
 #### get`_`packed`_`exec`_`msg
 
 ```python
-def get_packed_exec_msg(sender_address: Address, contract_address: str, msg: JSONLike, funds: int = 0, denom: Optional[str] = None) -> ProtoAny
+ | get_packed_exec_msg(sender_address: Address, contract_address: str, msg: JSONLike, funds: int = 0, denom: Optional[str] = None) -> ProtoAny
 ```
 
 Create and pack MsgExecuteContract
 
 **Arguments**:
-
 
 - `sender_address`: Address of sender
 - `contract_address`: Address of contract
@@ -652,18 +612,16 @@ Create and pack MsgExecuteContract
 
 Packed MsgExecuteContract
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_send_msg"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_send_msg"></a>
 #### get`_`packed`_`send`_`msg
 
 ```python
-def get_packed_send_msg(from_address: Address, to_address: Address, amount: int, denom: Optional[str] = None) -> ProtoAny
+ | get_packed_send_msg(from_address: Address, to_address: Address, amount: int, denom: Optional[str] = None) -> ProtoAny
 ```
 
 Generate and pack MsgSend
 
 **Arguments**:
-
 
 - `from_address`: Address of sender
 - `to_address`: Address of recipient
@@ -674,20 +632,16 @@ Generate and pack MsgSend
 
 packer ProtoAny type message
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_multi_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_multi_transaction"></a>
 #### get`_`multi`_`transaction
 
 ```python
-def get_multi_transaction(from_addresses: List[str], pub_keys: Optional[List[bytes]], msgs: List[ProtoAny], gas: int, tx_fee: int = 0, memo: str = "", chain_id: Optional[str] = None, denom: Optional[str] = None, tx_fee_denom: Optional[str] = None) -> JSONLike
+ | get_multi_transaction(from_addresses: List[str], pub_keys: Optional[List[bytes]], msgs: List[ProtoAny], gas: int, tx_fee: int = 0, memo: str = "", chain_id: Optional[str] = None, denom: Optional[str] = None, tx_fee_denom: Optional[str] = None) -> JSONLike
 ```
 
 Generate transaction with multiple messages
 
 **Arguments**:
-
-
-:raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
 
 - `from_addresses`: Addresses of signers
 - `pub_keys`: Public keys of signers
@@ -699,16 +653,17 @@ Generate transaction with multiple messages
 - `denom`: the denomination of tx fee
 - `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
 
+:raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
+
 **Returns**:
 
 the transaction
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.send_signed_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
-def send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
+ | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -721,12 +676,11 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction_receipt"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
-def get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
+ | get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -739,12 +693,11 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction"></a>
 #### get`_`transaction
 
 ```python
-def get_transaction(tx_digest: str) -> Optional[JSONLike]
+ | get_transaction(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -757,12 +710,11 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_contract_instance"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_contract_instance"></a>
 #### get`_`contract`_`instance
 
 ```python
-def get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
+ | get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
 ```
 
 Get the instance of a contract.
@@ -776,23 +728,21 @@ Get the instance of a contract.
 
 the contract instance
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.update_with_gas_estimate"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate
 
 ```python
-def update_with_gas_estimate(transaction: JSONLike) -> JSONLike
+ | update_with_gas_estimate(transaction: JSONLike) -> JSONLike
 ```
 
 Attempts to update the transaction with a gas estimate
 
 **Arguments**:
 
-:raises: NotImplementedError
 - `transaction`: the transaction
+:raises: NotImplementedError
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosApi"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosApi"></a>
 ## CosmosApi Objects
 
 ```python
@@ -801,8 +751,7 @@ class CosmosApi(_CosmosApi,  CosmosHelper)
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi"></a>
 ## CosmosFaucetApi Objects
 
 ```python
@@ -811,29 +760,27 @@ class CosmosFaucetApi(FaucetApi)
 
 Cosmos testnet faucet API.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi.__init__"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(poll_interval: Optional[float] = None, final_wait_interval: Optional[float] = None)
+ | __init__(poll_interval: Optional[float] = None, final_wait_interval: Optional[float] = None)
 ```
 
 Initialize CosmosFaucetApi.
 
-<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi.get_wealth"></a>
-
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi.get_wealth"></a>
 #### get`_`wealth
 
 ```python
-def get_wealth(address: Address, url: Optional[str] = None) -> None
+ | get_wealth(address: Address, url: Optional[str] = None) -> None
 ```
 
 Get wealth from the faucet for the provided address.
 
 **Arguments**:
 
-:raises: RuntimeError of explicit faucet failures
 - `address`: the address.
 - `url`: the url
+:raises: RuntimeError of explicit faucet failures
 

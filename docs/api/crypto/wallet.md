@@ -1,11 +1,9 @@
-<a id="aea.crypto.wallet"></a>
-
+<a name="aea.crypto.wallet"></a>
 # aea.crypto.wallet
 
 Module wrapping all the public and private keys cryptography.
 
-<a id="aea.crypto.wallet.CryptoStore"></a>
-
+<a name="aea.crypto.wallet.CryptoStore"></a>
 ## CryptoStore Objects
 
 ```python
@@ -14,68 +12,62 @@ class CryptoStore()
 
 Utility class to store and retrieve crypto objects.
 
-<a id="aea.crypto.wallet.CryptoStore.__init__"></a>
-
+<a name="aea.crypto.wallet.CryptoStore.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None) -> None
+ | __init__(crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None) -> None
 ```
 
 Initialize the crypto store.
 
 **Arguments**:
 
-    to the private key.
 - `crypto_id_to_path`: dictionary from crypto id to an (optional) path
+    to the private key.
 - `password`: the password to encrypt/decrypt the private key.
 
-<a id="aea.crypto.wallet.CryptoStore.public_keys"></a>
-
+<a name="aea.crypto.wallet.CryptoStore.public_keys"></a>
 #### public`_`keys
 
 ```python
-@property
-def public_keys() -> Dict[str, str]
+ | @property
+ | public_keys() -> Dict[str, str]
 ```
 
 Get the public_key dictionary.
 
-<a id="aea.crypto.wallet.CryptoStore.crypto_objects"></a>
-
+<a name="aea.crypto.wallet.CryptoStore.crypto_objects"></a>
 #### crypto`_`objects
 
 ```python
-@property
-def crypto_objects() -> Dict[str, Crypto]
+ | @property
+ | crypto_objects() -> Dict[str, Crypto]
 ```
 
 Get the crypto objects (key pair).
 
-<a id="aea.crypto.wallet.CryptoStore.addresses"></a>
-
+<a name="aea.crypto.wallet.CryptoStore.addresses"></a>
 #### addresses
 
 ```python
-@property
-def addresses() -> Dict[str, str]
+ | @property
+ | addresses() -> Dict[str, str]
 ```
 
 Get the crypto addresses.
 
-<a id="aea.crypto.wallet.CryptoStore.private_keys"></a>
-
+<a name="aea.crypto.wallet.CryptoStore.private_keys"></a>
 #### private`_`keys
 
 ```python
-@property
-def private_keys() -> Dict[str, str]
+ | @property
+ | private_keys() -> Dict[str, str]
 ```
 
 Get the crypto addresses.
 
-<a id="aea.crypto.wallet.Wallet"></a>
-
+<a name="aea.crypto.wallet.Wallet"></a>
 ## Wallet Objects
 
 ```python
@@ -89,12 +81,11 @@ The cryptos are separated into two categories:
 - main cryptos: used by the AEA for the economic side (i.e. signing transaction)
 - connection cryptos: exposed to the connection objects for encrypted communication.
 
-<a id="aea.crypto.wallet.Wallet.__init__"></a>
-
+<a name="aea.crypto.wallet.Wallet.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(private_key_paths: Dict[str, Optional[str]], connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None)
+ | __init__(private_key_paths: Dict[str, Optional[str]], connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None)
 ```
 
 Instantiate a wallet object.
@@ -105,78 +96,71 @@ Instantiate a wallet object.
 - `connection_private_key_paths`: the private key paths for the connections.
 - `password`: the password to encrypt/decrypt the private key.
 
-<a id="aea.crypto.wallet.Wallet.public_keys"></a>
-
+<a name="aea.crypto.wallet.Wallet.public_keys"></a>
 #### public`_`keys
 
 ```python
-@property
-def public_keys() -> Dict[str, str]
+ | @property
+ | public_keys() -> Dict[str, str]
 ```
 
 Get the public_key dictionary.
 
-<a id="aea.crypto.wallet.Wallet.crypto_objects"></a>
-
+<a name="aea.crypto.wallet.Wallet.crypto_objects"></a>
 #### crypto`_`objects
 
 ```python
-@property
-def crypto_objects() -> Dict[str, Crypto]
+ | @property
+ | crypto_objects() -> Dict[str, Crypto]
 ```
 
 Get the crypto objects (key pair).
 
-<a id="aea.crypto.wallet.Wallet.addresses"></a>
-
+<a name="aea.crypto.wallet.Wallet.addresses"></a>
 #### addresses
 
 ```python
-@property
-def addresses() -> Dict[str, str]
+ | @property
+ | addresses() -> Dict[str, str]
 ```
 
 Get the crypto addresses.
 
-<a id="aea.crypto.wallet.Wallet.private_keys"></a>
-
+<a name="aea.crypto.wallet.Wallet.private_keys"></a>
 #### private`_`keys
 
 ```python
-@property
-def private_keys() -> Dict[str, str]
+ | @property
+ | private_keys() -> Dict[str, str]
 ```
 
 Get the crypto addresses.
 
-<a id="aea.crypto.wallet.Wallet.main_cryptos"></a>
-
+<a name="aea.crypto.wallet.Wallet.main_cryptos"></a>
 #### main`_`cryptos
 
 ```python
-@property
-def main_cryptos() -> CryptoStore
+ | @property
+ | main_cryptos() -> CryptoStore
 ```
 
 Get the main crypto store.
 
-<a id="aea.crypto.wallet.Wallet.connection_cryptos"></a>
-
+<a name="aea.crypto.wallet.Wallet.connection_cryptos"></a>
 #### connection`_`cryptos
 
 ```python
-@property
-def connection_cryptos() -> CryptoStore
+ | @property
+ | connection_cryptos() -> CryptoStore
 ```
 
 Get the connection crypto store.
 
-<a id="aea.crypto.wallet.Wallet.sign_message"></a>
-
+<a name="aea.crypto.wallet.Wallet.sign_message"></a>
 #### sign`_`message
 
 ```python
-def sign_message(crypto_id: str, message: bytes, is_deprecated_mode: bool = False) -> Optional[str]
+ | sign_message(crypto_id: str, message: bytes, is_deprecated_mode: bool = False) -> Optional[str]
 ```
 
 Sign a message.
@@ -191,12 +175,11 @@ Sign a message.
 
 the signature of the message
 
-<a id="aea.crypto.wallet.Wallet.sign_transaction"></a>
-
+<a name="aea.crypto.wallet.Wallet.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
-def sign_transaction(crypto_id: str, transaction: Any) -> Optional[JSONLike]
+ | sign_transaction(crypto_id: str, transaction: Any) -> Optional[JSONLike]
 ```
 
 Sign a tx.

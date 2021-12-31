@@ -1,11 +1,9 @@
-<a id="aea.helpers.async_friendly_queue"></a>
-
+<a name="aea.helpers.async_friendly_queue"></a>
 # aea.helpers.async`_`friendly`_`queue
 
 This module contains the implementation of AsyncFriendlyQueue.
 
-<a id="aea.helpers.async_friendly_queue.AsyncFriendlyQueue"></a>
-
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue"></a>
 ## AsyncFriendlyQueue Objects
 
 ```python
@@ -14,22 +12,20 @@ class AsyncFriendlyQueue(queue.Queue)
 
 queue.Queue with async_get method.
 
-<a id="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.__init__"></a>
-
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(*args: Any, **kwargs: Any) -> None
+ | __init__(*args: Any, **kwargs: Any) -> None
 ```
 
 Init queue.
 
-<a id="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.put"></a>
-
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.put"></a>
 #### put
 
 ```python
-def put(item: Any, *args: Any, **kwargs: Any) -> None
+ | put(item: Any, *args: Any, **kwargs: Any) -> None
 ```
 
 Put an item into the queue.
@@ -40,12 +36,11 @@ Put an item into the queue.
 - `args`: similar to queue.Queue.put
 - `kwargs`: similar to queue.Queue.put
 
-<a id="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.get"></a>
-
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.get"></a>
 #### get
 
 ```python
-def get(*args: Any, **kwargs: Any) -> Any
+ | get(*args: Any, **kwargs: Any) -> Any
 ```
 
 Get an item into the queue.
@@ -59,12 +54,11 @@ Get an item into the queue.
 
 similar to queue.Queue.get
 
-<a id="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_wait"></a>
-
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_wait"></a>
 #### async`_`wait
 
 ```python
-async def async_wait() -> None
+ | async async_wait() -> None
 ```
 
 Wait an item appears in the queue.
@@ -73,12 +67,11 @@ Wait an item appears in the queue.
 
 None
 
-<a id="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_get"></a>
-
+<a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_get"></a>
 #### async`_`get
 
 ```python
-async def async_get() -> Any
+ | async async_get() -> Any
 ```
 
 Wait and get an item from the queue.

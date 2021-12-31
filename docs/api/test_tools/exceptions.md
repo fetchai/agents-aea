@@ -1,11 +1,9 @@
-<a id="aea.test_tools.exceptions"></a>
-
+<a name="aea.test_tools.exceptions"></a>
 # aea.test`_`tools.exceptions
 
 Module with AEA testing exceptions.
 
-<a id="aea.test_tools.exceptions.AEATestingException"></a>
-
+<a name="aea.test_tools.exceptions.AEATestingException"></a>
 ## AEATestingException Objects
 
 ```python

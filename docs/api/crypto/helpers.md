@@ -1,50 +1,46 @@
-<a id="aea.crypto.helpers"></a>
-
+<a name="aea.crypto.helpers"></a>
 # aea.crypto.helpers
 
 Module wrapping the helpers of public and private key cryptography.
 
-<a id="aea.crypto.helpers.try_validate_private_key_path"></a>
-
+<a name="aea.crypto.helpers.try_validate_private_key_path"></a>
 #### try`_`validate`_`private`_`key`_`path
 
 ```python
-def try_validate_private_key_path(ledger_id: str, private_key_path: str, password: Optional[str] = None) -> None
+try_validate_private_key_path(ledger_id: str, private_key_path: str, password: Optional[str] = None) -> None
 ```
 
 Try validate a private key path.
 
 **Arguments**:
 
-:raises: ValueError if the identifier is invalid.
 - `ledger_id`: one of 'fetchai', 'ethereum'
 - `private_key_path`: the path to the private key.
 - `password`: the password to encrypt/decrypt the private key.
+:raises: ValueError if the identifier is invalid.
 
-<a id="aea.crypto.helpers.create_private_key"></a>
-
+<a name="aea.crypto.helpers.create_private_key"></a>
 #### create`_`private`_`key
 
 ```python
-def create_private_key(ledger_id: str, private_key_file: str, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
+create_private_key(ledger_id: str, private_key_file: str, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Create a private key for the specified ledger identifier.
 
 **Arguments**:
 
-:raises: ValueError if the identifier is invalid.
 - `ledger_id`: the ledger identifier.
 - `private_key_file`: the private key file.
 - `password`: the password to encrypt/decrypt the private key.
 - `extra_entropy`: add extra randomness to whatever randomness your OS can provide
+:raises: ValueError if the identifier is invalid.
 
-<a id="aea.crypto.helpers.try_generate_testnet_wealth"></a>
-
+<a name="aea.crypto.helpers.try_generate_testnet_wealth"></a>
 #### try`_`generate`_`testnet`_`wealth
 
 ```python
-def try_generate_testnet_wealth(identifier: str, address: str, url: Optional[str] = None, _sync: bool = True) -> None
+try_generate_testnet_wealth(identifier: str, address: str, url: Optional[str] = None, _sync: bool = True) -> None
 ```
 
 Try generate wealth on a testnet.
@@ -56,12 +52,11 @@ Try generate wealth on a testnet.
 - `url`: the url
 - `_sync`: whether to wait to sync or not; currently unused
 
-<a id="aea.crypto.helpers.private_key_verify"></a>
-
+<a name="aea.crypto.helpers.private_key_verify"></a>
 #### private`_`key`_`verify
 
 ```python
-def private_key_verify(aea_conf: AgentConfig, aea_project_path: Path, password: Optional[str] = None) -> None
+private_key_verify(aea_conf: AgentConfig, aea_project_path: Path, password: Optional[str] = None) -> None
 ```
 
 Check key.
@@ -72,12 +67,11 @@ Check key.
 - `aea_project_path`: Path, where project placed.
 - `password`: the password to encrypt/decrypt the private key.
 
-<a id="aea.crypto.helpers.make_certificate"></a>
-
+<a name="aea.crypto.helpers.make_certificate"></a>
 #### make`_`certificate
 
 ```python
-def make_certificate(ledger_id: str, crypto_private_key_path: str, message: bytes, output_path: str, password: Optional[str] = None) -> str
+make_certificate(ledger_id: str, crypto_private_key_path: str, message: bytes, output_path: str, password: Optional[str] = None) -> str
 ```
 
 Create certificate.
@@ -94,12 +88,11 @@ Create certificate.
 
 the signature/certificate
 
-<a id="aea.crypto.helpers.get_wallet_from_agent_config"></a>
-
+<a name="aea.crypto.helpers.get_wallet_from_agent_config"></a>
 #### get`_`wallet`_`from`_`agent`_`config
 
 ```python
-def get_wallet_from_agent_config(agent_config: AgentConfig, password: Optional[str] = None) -> Wallet
+get_wallet_from_agent_config(agent_config: AgentConfig, password: Optional[str] = None) -> Wallet
 ```
 
 Get wallet from agent_cofig provided.
@@ -113,8 +106,7 @@ Get wallet from agent_cofig provided.
 
 wallet
 
-<a id="aea.crypto.helpers.DecryptError"></a>
-
+<a name="aea.crypto.helpers.DecryptError"></a>
 ## DecryptError Objects
 
 ```python
@@ -123,18 +115,16 @@ class DecryptError(ValueError)
 
 Error on bytes decryption with password.
 
-<a id="aea.crypto.helpers.DecryptError.__init__"></a>
-
+<a name="aea.crypto.helpers.DecryptError.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(msg: Optional[str] = None) -> None
+ | __init__(msg: Optional[str] = None) -> None
 ```
 
 Init exception.
 
-<a id="aea.crypto.helpers.KeyIsIncorrect"></a>
-
+<a name="aea.crypto.helpers.KeyIsIncorrect"></a>
 ## KeyIsIncorrect Objects
 
 ```python
@@ -143,12 +133,11 @@ class KeyIsIncorrect(ValueError)
 
 Error decoding hex string to bytes for private key.
 
-<a id="aea.crypto.helpers.hex_to_bytes_for_key"></a>
-
+<a name="aea.crypto.helpers.hex_to_bytes_for_key"></a>
 #### hex`_`to`_`bytes`_`for`_`key
 
 ```python
-def hex_to_bytes_for_key(data: str) -> bytes
+hex_to_bytes_for_key(data: str) -> bytes
 ```
 
 Convert hex string to bytes with error handling.

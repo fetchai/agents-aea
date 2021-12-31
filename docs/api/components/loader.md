@@ -1,15 +1,13 @@
-<a id="aea.components.loader"></a>
-
+<a name="aea.components.loader"></a>
 # aea.components.loader
 
 This module contains utilities for loading components.
 
-<a id="aea.components.loader.component_type_to_class"></a>
-
+<a name="aea.components.loader.component_type_to_class"></a>
 #### component`_`type`_`to`_`class
 
 ```python
-def component_type_to_class(component_type: ComponentType) -> Type[Component]
+component_type_to_class(component_type: ComponentType) -> Type[Component]
 ```
 
 Get the component class from the component type.
@@ -22,12 +20,11 @@ Get the component class from the component type.
 
 the component class
 
-<a id="aea.components.loader.load_component_from_config"></a>
-
+<a name="aea.components.loader.load_component_from_config"></a>
 #### load`_`component`_`from`_`config
 
 ```python
-def load_component_from_config(configuration: ComponentConfiguration, *args, **kwargs) -> Component
+load_component_from_config(configuration: ComponentConfiguration, *args, **kwargs) -> Component
 ```
 
 Load a component from a directory.
@@ -42,8 +39,7 @@ Load a component from a directory.
 
 the component instance.
 
-<a id="aea.components.loader.AEAPackageNotFound"></a>
-
+<a name="aea.components.loader.AEAPackageNotFound"></a>
 ## AEAPackageNotFound Objects
 
 ```python

@@ -1,11 +1,9 @@
-<a id="aea.helpers.storage.backends.sqlite"></a>
-
+<a name="aea.helpers.storage.backends.sqlite"></a>
 # aea.helpers.storage.backends.sqlite
 
 This module contains sqlite storage backend implementation.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend"></a>
 ## SqliteStorageBackend Objects
 
 ```python
@@ -14,42 +12,38 @@ class SqliteStorageBackend(AbstractStorageBackend)
 
 Sqlite storage backend.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.__init__"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(uri: str) -> None
+ | __init__(uri: str) -> None
 ```
 
 Init backend.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.connect"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.connect"></a>
 #### connect
 
 ```python
-async def connect() -> None
+ | async connect() -> None
 ```
 
 Connect to backend.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.disconnect"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.disconnect"></a>
 #### disconnect
 
 ```python
-async def disconnect() -> None
+ | async disconnect() -> None
 ```
 
 Disconnect the backend.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.ensure_collection"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.ensure_collection"></a>
 #### ensure`_`collection
 
 ```python
-async def ensure_collection(collection_name: str) -> None
+ | async ensure_collection(collection_name: str) -> None
 ```
 
 Create collection if not exits.
@@ -58,12 +52,11 @@ Create collection if not exits.
 
 - `collection_name`: name of the collection.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.put"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.put"></a>
 #### put
 
 ```python
-async def put(collection_name: str, object_id: str, object_body: JSON_TYPES) -> None
+ | async put(collection_name: str, object_id: str, object_body: JSON_TYPES) -> None
 ```
 
 Put object into collection.
@@ -74,18 +67,16 @@ Put object into collection.
 - `object_id`: str object id
 - `object_body`: python dict, json compatible.
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.get"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.get"></a>
 #### get
 
 ```python
-async def get(collection_name: str, object_id: str) -> Optional[JSON_TYPES]
+ | async get(collection_name: str, object_id: str) -> Optional[JSON_TYPES]
 ```
 
 Get object from the collection.
 
 **Arguments**:
-
 
 - `collection_name`: str.
 - `object_id`: str object id
@@ -94,12 +85,11 @@ Get object from the collection.
 
 dict if object exists in collection otherwise None
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.remove"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.remove"></a>
 #### remove
 
 ```python
-async def remove(collection_name: str, object_id: str) -> None
+ | async remove(collection_name: str, object_id: str) -> None
 ```
 
 Remove object from the collection.
@@ -109,12 +99,11 @@ Remove object from the collection.
 - `collection_name`: str.
 - `object_id`: str object id
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.find"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.find"></a>
 #### find
 
 ```python
-async def find(collection_name: str, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
+ | async find(collection_name: str, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
 ```
 
 Get objects from the collection by filtering by field value.
@@ -129,12 +118,11 @@ Get objects from the collection by filtering by field value.
 
 list of object ids and body
 
-<a id="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.list"></a>
-
+<a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.list"></a>
 #### list
 
 ```python
-async def list(collection_name: str) -> List[OBJECT_ID_AND_BODY]
+ | async list(collection_name: str) -> List[OBJECT_ID_AND_BODY]
 ```
 
 List all objects with keys from the collection.

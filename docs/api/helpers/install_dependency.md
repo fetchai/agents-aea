@@ -1,15 +1,13 @@
-<a id="aea.helpers.install_dependency"></a>
-
+<a name="aea.helpers.install_dependency"></a>
 # aea.helpers.install`_`dependency
 
 Helper to install python dependencies.
 
-<a id="aea.helpers.install_dependency.install_dependency"></a>
-
+<a name="aea.helpers.install_dependency.install_dependency"></a>
 #### install`_`dependency
 
 ```python
-def install_dependency(dependency_name: str, dependency: Dependency, logger: Logger, install_timeout: float = 300) -> None
+install_dependency(dependency_name: str, dependency: Dependency, logger: Logger, install_timeout: float = 300) -> None
 ```
 
 Install python dependency to the current python environment.
@@ -21,12 +19,11 @@ Install python dependency to the current python environment.
 - `logger`: the logger
 - `install_timeout`: timeout to wait pip to install
 
-<a id="aea.helpers.install_dependency.install_dependencies"></a>
-
+<a name="aea.helpers.install_dependency.install_dependencies"></a>
 #### install`_`dependencies
 
 ```python
-def install_dependencies(dependencies: List[Dependency], logger: Logger, install_timeout: float = 300) -> None
+install_dependencies(dependencies: List[Dependency], logger: Logger, install_timeout: float = 300) -> None
 ```
 
 Install python dependencies to the current python environment.
@@ -37,12 +34,11 @@ Install python dependencies to the current python environment.
 - `logger`: the logger
 - `install_timeout`: timeout to wait pip to install
 
-<a id="aea.helpers.install_dependency.call_pip"></a>
-
+<a name="aea.helpers.install_dependency.call_pip"></a>
 #### call`_`pip
 
 ```python
-def call_pip(pip_args: List[str], timeout: float = 300, retry: bool = False) -> None
+call_pip(pip_args: List[str], timeout: float = 300, retry: bool = False) -> None
 ```
 
 Run pip install command.
@@ -53,12 +49,11 @@ Run pip install command.
 - `timeout`: timeout to wait pip to install
 - `retry`: bool, try one more time if command failed
 
-<a id="aea.helpers.install_dependency.run_install_subprocess"></a>
-
+<a name="aea.helpers.install_dependency.run_install_subprocess"></a>
 #### run`_`install`_`subprocess
 
 ```python
-def run_install_subprocess(install_command: List[str], install_timeout: float = 300) -> int
+run_install_subprocess(install_command: List[str], install_timeout: float = 300) -> int
 ```
 
 Try executing install command.

@@ -1,11 +1,9 @@
-<a id="packages.open_aea.protocols.signing.serialization"></a>
-
+<a name="packages.open_aea.protocols.signing.serialization"></a>
 # packages.open`_`aea.protocols.signing.serialization
 
 Serialization module for signing protocol.
 
-<a id="packages.open_aea.protocols.signing.serialization.SigningSerializer"></a>
-
+<a name="packages.open_aea.protocols.signing.serialization.SigningSerializer"></a>
 ## SigningSerializer Objects
 
 ```python
@@ -14,13 +12,12 @@ class SigningSerializer(Serializer)
 
 Serialization for the 'signing' protocol.
 
-<a id="packages.open_aea.protocols.signing.serialization.SigningSerializer.encode"></a>
-
+<a name="packages.open_aea.protocols.signing.serialization.SigningSerializer.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(msg: Message) -> bytes
+ | @staticmethod
+ | encode(msg: Message) -> bytes
 ```
 
 Encode a 'Signing' message into bytes.
@@ -33,13 +30,12 @@ Encode a 'Signing' message into bytes.
 
 the bytes.
 
-<a id="packages.open_aea.protocols.signing.serialization.SigningSerializer.decode"></a>
-
+<a name="packages.open_aea.protocols.signing.serialization.SigningSerializer.decode"></a>
 #### decode
 
 ```python
-@staticmethod
-def decode(obj: bytes) -> Message
+ | @staticmethod
+ | decode(obj: bytes) -> Message
 ```
 
 Decode bytes into a 'Signing' message.

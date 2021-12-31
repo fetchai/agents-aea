@@ -1,11 +1,9 @@
-<a id="aea.crypto.ledger_apis"></a>
-
+<a name="aea.crypto.ledger_apis"></a>
 # aea.crypto.ledger`_`apis
 
 Module wrapping all the public and private keys cryptography.
 
-<a id="aea.crypto.ledger_apis.LedgerApis"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis"></a>
 ## LedgerApis Objects
 
 ```python
@@ -14,35 +12,32 @@ class LedgerApis()
 
 Store all the ledger apis we initialise.
 
-<a id="aea.crypto.ledger_apis.LedgerApis.has_ledger"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.has_ledger"></a>
 #### has`_`ledger
 
 ```python
-@staticmethod
-def has_ledger(identifier: str) -> bool
+ | @staticmethod
+ | has_ledger(identifier: str) -> bool
 ```
 
 Check if it has the api.
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_api"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_api"></a>
 #### get`_`api
 
 ```python
-@classmethod
-def get_api(cls, identifier: str) -> LedgerApi
+ | @classmethod
+ | get_api(cls, identifier: str) -> LedgerApi
 ```
 
 Get the ledger API.
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_balance"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_balance"></a>
 #### get`_`balance
 
 ```python
-@classmethod
-def get_balance(cls, identifier: str, address: str) -> Optional[int]
+ | @classmethod
+ | get_balance(cls, identifier: str, address: str) -> Optional[int]
 ```
 
 Get the token balance.
@@ -56,19 +51,17 @@ Get the token balance.
 
 the token balance
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_transfer_transaction"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
-@classmethod
-def get_transfer_transaction(cls, identifier: str, sender_address: str, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs: Any, ,) -> Optional[Any]
+ | @classmethod
+ | get_transfer_transaction(cls, identifier: str, sender_address: str, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs: Any, ,) -> Optional[Any]
 ```
 
 Get a transaction to transfer from self to destination.
 
 **Arguments**:
-
 
 - `identifier`: the identifier of the ledger
 - `sender_address`: the address of the sender
@@ -82,13 +75,12 @@ Get a transaction to transfer from self to destination.
 
 tx
 
-<a id="aea.crypto.ledger_apis.LedgerApis.send_signed_transaction"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
-@classmethod
-def send_signed_transaction(cls, identifier: str, tx_signed: Any) -> Optional[str]
+ | @classmethod
+ | send_signed_transaction(cls, identifier: str, tx_signed: Any) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -102,13 +94,12 @@ Send a signed transaction and wait for confirmation.
 
 the tx_digest, if present
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_transaction_receipt"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
-@classmethod
-def get_transaction_receipt(cls, identifier: str, tx_digest: str) -> Optional[Any]
+ | @classmethod
+ | get_transaction_receipt(cls, identifier: str, tx_digest: str) -> Optional[Any]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -122,13 +113,12 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_transaction"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_transaction"></a>
 #### get`_`transaction
 
 ```python
-@classmethod
-def get_transaction(cls, identifier: str, tx_digest: str) -> Optional[Any]
+ | @classmethod
+ | get_transaction(cls, identifier: str, tx_digest: str) -> Optional[Any]
 ```
 
 Get the transaction for a transaction digest.
@@ -142,13 +132,12 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_contract_address"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_contract_address"></a>
 #### get`_`contract`_`address
 
 ```python
-@staticmethod
-def get_contract_address(identifier: str, tx_receipt: Any) -> Optional[Address]
+ | @staticmethod
+ | get_contract_address(identifier: str, tx_receipt: Any) -> Optional[Address]
 ```
 
 Get the contract address from a transaction receipt.
@@ -162,13 +151,12 @@ Get the contract address from a transaction receipt.
 
 the contract address if successful
 
-<a id="aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
-@staticmethod
-def is_transaction_settled(identifier: str, tx_receipt: Any) -> bool
+ | @staticmethod
+ | is_transaction_settled(identifier: str, tx_receipt: Any) -> bool
 ```
 
 Check whether the transaction is settled and correct.
@@ -182,13 +170,12 @@ Check whether the transaction is settled and correct.
 
 True if correctly settled, False otherwise
 
-<a id="aea.crypto.ledger_apis.LedgerApis.is_transaction_valid"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
-@staticmethod
-def is_transaction_valid(identifier: str, tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | @staticmethod
+ | is_transaction_valid(identifier: str, tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether the transaction is valid.
@@ -206,13 +193,12 @@ Check whether the transaction is valid.
 
 True if is valid , False otherwise
 
-<a id="aea.crypto.ledger_apis.LedgerApis.generate_tx_nonce"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python
-@staticmethod
-def generate_tx_nonce(identifier: str, seller: Address, client: Address) -> str
+ | @staticmethod
+ | generate_tx_nonce(identifier: str, seller: Address, client: Address) -> str
 ```
 
 Generate a random str message.
@@ -227,13 +213,12 @@ Generate a random str message.
 
 return the hash in hex.
 
-<a id="aea.crypto.ledger_apis.LedgerApis.recover_message"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.recover_message"></a>
 #### recover`_`message
 
 ```python
-@staticmethod
-def recover_message(identifier: str, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+ | @staticmethod
+ | recover_message(identifier: str, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.
@@ -249,13 +234,12 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a id="aea.crypto.ledger_apis.LedgerApis.get_hash"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.get_hash"></a>
 #### get`_`hash
 
 ```python
-@staticmethod
-def get_hash(identifier: str, message: bytes) -> str
+ | @staticmethod
+ | get_hash(identifier: str, message: bytes) -> str
 ```
 
 Get the hash of a message.
@@ -269,13 +253,12 @@ Get the hash of a message.
 
 the hash of the message.
 
-<a id="aea.crypto.ledger_apis.LedgerApis.is_valid_address"></a>
-
+<a name="aea.crypto.ledger_apis.LedgerApis.is_valid_address"></a>
 #### is`_`valid`_`address
 
 ```python
-@staticmethod
-def is_valid_address(identifier: str, address: Address) -> bool
+ | @staticmethod
+ | is_valid_address(identifier: str, address: Address) -> bool
 ```
 
 Check if the address is valid.

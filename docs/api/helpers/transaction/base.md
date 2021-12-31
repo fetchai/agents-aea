@@ -1,11 +1,9 @@
-<a id="aea.helpers.transaction.base"></a>
-
+<a name="aea.helpers.transaction.base"></a>
 # aea.helpers.transaction.base
 
 This module contains terms related classes.
 
-<a id="aea.helpers.transaction.base.RawTransaction"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction"></a>
 ## RawTransaction Objects
 
 ```python
@@ -14,45 +12,41 @@ class RawTransaction()
 
 This class represents an instance of RawTransaction.
 
-<a id="aea.helpers.transaction.base.RawTransaction.__init__"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, body: JSONLike) -> None
+ | __init__(ledger_id: str, body: JSONLike) -> None
 ```
 
 Initialise an instance of RawTransaction.
 
-<a id="aea.helpers.transaction.base.RawTransaction.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.RawTransaction.body"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.body"></a>
 #### body
 
 ```python
-@property
-def body() -> JSONLike
+ | @property
+ | body() -> JSONLike
 ```
 
 Get the body.
 
-<a id="aea.helpers.transaction.base.RawTransaction.encode"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(raw_transaction_protobuf_object: Any, raw_transaction_object: "RawTransaction") -> None
+ | @staticmethod
+ | encode(raw_transaction_protobuf_object: Any, raw_transaction_object: "RawTransaction") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -64,13 +58,12 @@ The protocol buffer object in the raw_transaction_protobuf_object argument must 
 - `raw_transaction_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `raw_transaction_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.RawTransaction.decode"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, raw_transaction_protobuf_object: Any) -> "RawTransaction"
+ | @classmethod
+ | decode(cls, raw_transaction_protobuf_object: Any) -> "RawTransaction"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -85,28 +78,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'raw_transaction_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.RawTransaction.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.RawTransaction.__str__"></a>
-
+<a name="aea.helpers.transaction.base.RawTransaction.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.RawMessage"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage"></a>
 ## RawMessage Objects
 
 ```python
@@ -115,56 +105,51 @@ class RawMessage()
 
 This class represents an instance of RawMessage.
 
-<a id="aea.helpers.transaction.base.RawMessage.__init__"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, body: bytes, is_deprecated_mode: bool = False) -> None
+ | __init__(ledger_id: str, body: bytes, is_deprecated_mode: bool = False) -> None
 ```
 
 Initialise an instance of RawMessage.
 
-<a id="aea.helpers.transaction.base.RawMessage.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.RawMessage.body"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.body"></a>
 #### body
 
 ```python
-@property
-def body() -> bytes
+ | @property
+ | body() -> bytes
 ```
 
 Get the body.
 
-<a id="aea.helpers.transaction.base.RawMessage.is_deprecated_mode"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.is_deprecated_mode"></a>
 #### is`_`deprecated`_`mode
 
 ```python
-@property
-def is_deprecated_mode() -> bool
+ | @property
+ | is_deprecated_mode() -> bool
 ```
 
 Get the is_deprecated_mode.
 
-<a id="aea.helpers.transaction.base.RawMessage.encode"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(raw_message_protobuf_object: Any, raw_message_object: "RawMessage") -> None
+ | @staticmethod
+ | encode(raw_message_protobuf_object: Any, raw_message_object: "RawMessage") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -176,13 +161,12 @@ The protocol buffer object in the raw_message_protobuf_object argument must be m
 - `raw_message_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `raw_message_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.RawMessage.decode"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, raw_message_protobuf_object: Any) -> "RawMessage"
+ | @classmethod
+ | decode(cls, raw_message_protobuf_object: Any) -> "RawMessage"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -197,28 +181,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'raw_message_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.RawMessage.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.RawMessage.__str__"></a>
-
+<a name="aea.helpers.transaction.base.RawMessage.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.SignedTransaction"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction"></a>
 ## SignedTransaction Objects
 
 ```python
@@ -227,45 +208,41 @@ class SignedTransaction()
 
 This class represents an instance of SignedTransaction.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.__init__"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, body: JSONLike) -> None
+ | __init__(ledger_id: str, body: JSONLike) -> None
 ```
 
 Initialise an instance of SignedTransaction.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.body"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.body"></a>
 #### body
 
 ```python
-@property
-def body() -> JSONLike
+ | @property
+ | body() -> JSONLike
 ```
 
 Get the body.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.encode"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(signed_transaction_protobuf_object: Any, signed_transaction_object: "SignedTransaction") -> None
+ | @staticmethod
+ | encode(signed_transaction_protobuf_object: Any, signed_transaction_object: "SignedTransaction") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -277,13 +254,12 @@ The protocol buffer object in the signed_transaction_protobuf_object argument mu
 - `signed_transaction_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `signed_transaction_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.decode"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, signed_transaction_protobuf_object: Any) -> "SignedTransaction"
+ | @classmethod
+ | decode(cls, signed_transaction_protobuf_object: Any) -> "SignedTransaction"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -298,28 +274,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'signed_transaction_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.SignedTransaction.__str__"></a>
-
+<a name="aea.helpers.transaction.base.SignedTransaction.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.SignedMessage"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage"></a>
 ## SignedMessage Objects
 
 ```python
@@ -328,56 +301,51 @@ class SignedMessage()
 
 This class represents an instance of RawMessage.
 
-<a id="aea.helpers.transaction.base.SignedMessage.__init__"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, body: str, is_deprecated_mode: bool = False) -> None
+ | __init__(ledger_id: str, body: str, is_deprecated_mode: bool = False) -> None
 ```
 
 Initialise an instance of SignedMessage.
 
-<a id="aea.helpers.transaction.base.SignedMessage.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.SignedMessage.body"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.body"></a>
 #### body
 
 ```python
-@property
-def body() -> str
+ | @property
+ | body() -> str
 ```
 
 Get the body.
 
-<a id="aea.helpers.transaction.base.SignedMessage.is_deprecated_mode"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.is_deprecated_mode"></a>
 #### is`_`deprecated`_`mode
 
 ```python
-@property
-def is_deprecated_mode() -> bool
+ | @property
+ | is_deprecated_mode() -> bool
 ```
 
 Get the is_deprecated_mode.
 
-<a id="aea.helpers.transaction.base.SignedMessage.encode"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(signed_message_protobuf_object: Any, signed_message_object: "SignedMessage") -> None
+ | @staticmethod
+ | encode(signed_message_protobuf_object: Any, signed_message_object: "SignedMessage") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -389,13 +357,12 @@ The protocol buffer object in the signed_message_protobuf_object argument must b
 - `signed_message_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `signed_message_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.SignedMessage.decode"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, signed_message_protobuf_object: Any) -> "SignedMessage"
+ | @classmethod
+ | decode(cls, signed_message_protobuf_object: Any) -> "SignedMessage"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -410,28 +377,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'signed_message_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.SignedMessage.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.SignedMessage.__str__"></a>
-
+<a name="aea.helpers.transaction.base.SignedMessage.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.State"></a>
-
+<a name="aea.helpers.transaction.base.State"></a>
 ## State Objects
 
 ```python
@@ -440,45 +404,41 @@ class State()
 
 This class represents an instance of State.
 
-<a id="aea.helpers.transaction.base.State.__init__"></a>
-
+<a name="aea.helpers.transaction.base.State.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, body: JSONLike) -> None
+ | __init__(ledger_id: str, body: JSONLike) -> None
 ```
 
 Initialise an instance of State.
 
-<a id="aea.helpers.transaction.base.State.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.State.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.State.body"></a>
-
+<a name="aea.helpers.transaction.base.State.body"></a>
 #### body
 
 ```python
-@property
-def body() -> JSONLike
+ | @property
+ | body() -> JSONLike
 ```
 
 Get the body.
 
-<a id="aea.helpers.transaction.base.State.encode"></a>
-
+<a name="aea.helpers.transaction.base.State.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(state_protobuf_object: Any, state_object: "State") -> None
+ | @staticmethod
+ | encode(state_protobuf_object: Any, state_object: "State") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -490,13 +450,12 @@ The protocol buffer object in the state_protobuf_object argument must be matched
 - `state_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `state_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.State.decode"></a>
-
+<a name="aea.helpers.transaction.base.State.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, state_protobuf_object: Any) -> "State"
+ | @classmethod
+ | decode(cls, state_protobuf_object: Any) -> "State"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -511,28 +470,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'state_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.State.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.State.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.State.__str__"></a>
-
+<a name="aea.helpers.transaction.base.State.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.Terms"></a>
-
+<a name="aea.helpers.transaction.base.Terms"></a>
 ## Terms Objects
 
 ```python
@@ -541,12 +497,11 @@ class Terms()
 
 Class to represent the terms of a multi-currency & multi-token ledger transaction.
 
-<a id="aea.helpers.transaction.base.Terms.__init__"></a>
-
+<a name="aea.helpers.transaction.base.Terms.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], nonce: str, is_sender_payable_tx_fee: bool = True, fee_by_currency_id: Optional[Dict[str, int]] = None, is_strict: bool = False, **kwargs: Any, ,) -> None
+ | __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], nonce: str, is_sender_payable_tx_fee: bool = True, fee_by_currency_id: Optional[Dict[str, int]] = None, is_strict: bool = False, **kwargs: Any, ,) -> None
 ```
 
 Instantiate terms of a transaction.
@@ -564,321 +519,292 @@ Instantiate terms of a transaction.
 - `is_strict`: whether or not terms must have quantities and amounts of opposite signs.
 - `kwargs`: keyword arguments
 
-<a id="aea.helpers.transaction.base.Terms.id"></a>
-
+<a name="aea.helpers.transaction.base.Terms.id"></a>
 #### id
 
 ```python
-@property
-def id() -> str
+ | @property
+ | id() -> str
 ```
 
 Get hash of the terms.
 
-<a id="aea.helpers.transaction.base.Terms.sender_hash"></a>
-
+<a name="aea.helpers.transaction.base.Terms.sender_hash"></a>
 #### sender`_`hash
 
 ```python
-@property
-def sender_hash() -> str
+ | @property
+ | sender_hash() -> str
 ```
 
 Get the sender hash.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_hash"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_hash"></a>
 #### counterparty`_`hash
 
 ```python
-@property
-def counterparty_hash() -> str
+ | @property
+ | counterparty_hash() -> str
 ```
 
 Get the sender hash.
 
-<a id="aea.helpers.transaction.base.Terms.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.Terms.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.Terms.sender_address"></a>
-
+<a name="aea.helpers.transaction.base.Terms.sender_address"></a>
 #### sender`_`address
 
 ```python
-@property
-def sender_address() -> Address
+ | @property
+ | sender_address() -> Address
 ```
 
 Get the sender address.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_address"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_address"></a>
 #### counterparty`_`address
 
 ```python
-@property
-def counterparty_address() -> Address
+ | @property
+ | counterparty_address() -> Address
 ```
 
 Get the counterparty address.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_address"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_address"></a>
 #### counterparty`_`address
 
 ```python
-@counterparty_address.setter
-def counterparty_address(counterparty_address: Address) -> None
+ | @counterparty_address.setter
+ | counterparty_address(counterparty_address: Address) -> None
 ```
 
 Set the counterparty address.
 
-<a id="aea.helpers.transaction.base.Terms.amount_by_currency_id"></a>
-
+<a name="aea.helpers.transaction.base.Terms.amount_by_currency_id"></a>
 #### amount`_`by`_`currency`_`id
 
 ```python
-@property
-def amount_by_currency_id() -> Dict[str, int]
+ | @property
+ | amount_by_currency_id() -> Dict[str, int]
 ```
 
 Get the amount by currency id.
 
-<a id="aea.helpers.transaction.base.Terms.is_sender_payable_tx_fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.is_sender_payable_tx_fee"></a>
 #### is`_`sender`_`payable`_`tx`_`fee
 
 ```python
-@property
-def is_sender_payable_tx_fee() -> bool
+ | @property
+ | is_sender_payable_tx_fee() -> bool
 ```
 
 Bool indicating whether the tx fee is paid by sender or counterparty.
 
-<a id="aea.helpers.transaction.base.Terms.is_single_currency"></a>
-
+<a name="aea.helpers.transaction.base.Terms.is_single_currency"></a>
 #### is`_`single`_`currency
 
 ```python
-@property
-def is_single_currency() -> bool
+ | @property
+ | is_single_currency() -> bool
 ```
 
 Check whether a single currency is used for payment.
 
-<a id="aea.helpers.transaction.base.Terms.is_empty_currency"></a>
-
+<a name="aea.helpers.transaction.base.Terms.is_empty_currency"></a>
 #### is`_`empty`_`currency
 
 ```python
-@property
-def is_empty_currency() -> bool
+ | @property
+ | is_empty_currency() -> bool
 ```
 
 Check whether a single currency is used for payment.
 
-<a id="aea.helpers.transaction.base.Terms.currency_id"></a>
-
+<a name="aea.helpers.transaction.base.Terms.currency_id"></a>
 #### currency`_`id
 
 ```python
-@property
-def currency_id() -> str
+ | @property
+ | currency_id() -> str
 ```
 
 Get the amount the sender must pay.
 
-<a id="aea.helpers.transaction.base.Terms.sender_payable_amount"></a>
-
+<a name="aea.helpers.transaction.base.Terms.sender_payable_amount"></a>
 #### sender`_`payable`_`amount
 
 ```python
-@property
-def sender_payable_amount() -> int
+ | @property
+ | sender_payable_amount() -> int
 ```
 
 Get the amount the sender must pay.
 
-<a id="aea.helpers.transaction.base.Terms.sender_payable_amount_incl_fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.sender_payable_amount_incl_fee"></a>
 #### sender`_`payable`_`amount`_`incl`_`fee
 
 ```python
-@property
-def sender_payable_amount_incl_fee() -> int
+ | @property
+ | sender_payable_amount_incl_fee() -> int
 ```
 
 Get the amount the sender must pay inclusive fee.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_payable_amount"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_payable_amount"></a>
 #### counterparty`_`payable`_`amount
 
 ```python
-@property
-def counterparty_payable_amount() -> int
+ | @property
+ | counterparty_payable_amount() -> int
 ```
 
 Get the amount the counterparty must pay.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_payable_amount_incl_fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_payable_amount_incl_fee"></a>
 #### counterparty`_`payable`_`amount`_`incl`_`fee
 
 ```python
-@property
-def counterparty_payable_amount_incl_fee() -> int
+ | @property
+ | counterparty_payable_amount_incl_fee() -> int
 ```
 
 Get the amount the counterparty must pay.
 
-<a id="aea.helpers.transaction.base.Terms.quantities_by_good_id"></a>
-
+<a name="aea.helpers.transaction.base.Terms.quantities_by_good_id"></a>
 #### quantities`_`by`_`good`_`id
 
 ```python
-@property
-def quantities_by_good_id() -> Dict[str, int]
+ | @property
+ | quantities_by_good_id() -> Dict[str, int]
 ```
 
 Get the quantities by good id.
 
-<a id="aea.helpers.transaction.base.Terms.good_ids"></a>
-
+<a name="aea.helpers.transaction.base.Terms.good_ids"></a>
 #### good`_`ids
 
 ```python
-@property
-def good_ids() -> List[str]
+ | @property
+ | good_ids() -> List[str]
 ```
 
 Get the (ordered) good ids.
 
-<a id="aea.helpers.transaction.base.Terms.sender_supplied_quantities"></a>
-
+<a name="aea.helpers.transaction.base.Terms.sender_supplied_quantities"></a>
 #### sender`_`supplied`_`quantities
 
 ```python
-@property
-def sender_supplied_quantities() -> List[int]
+ | @property
+ | sender_supplied_quantities() -> List[int]
 ```
 
 Get the (ordered) quantities supplied by the sender.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_supplied_quantities"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_supplied_quantities"></a>
 #### counterparty`_`supplied`_`quantities
 
 ```python
-@property
-def counterparty_supplied_quantities() -> List[int]
+ | @property
+ | counterparty_supplied_quantities() -> List[int]
 ```
 
 Get the (ordered) quantities supplied by the counterparty.
 
-<a id="aea.helpers.transaction.base.Terms.nonce"></a>
-
+<a name="aea.helpers.transaction.base.Terms.nonce"></a>
 #### nonce
 
 ```python
-@property
-def nonce() -> str
+ | @property
+ | nonce() -> str
 ```
 
 Get the nonce.
 
-<a id="aea.helpers.transaction.base.Terms.has_fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.has_fee"></a>
 #### has`_`fee
 
 ```python
-@property
-def has_fee() -> bool
+ | @property
+ | has_fee() -> bool
 ```
 
 Check if fee is set.
 
-<a id="aea.helpers.transaction.base.Terms.fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.fee"></a>
 #### fee
 
 ```python
-@property
-def fee() -> int
+ | @property
+ | fee() -> int
 ```
 
 Get the fee.
 
-<a id="aea.helpers.transaction.base.Terms.sender_fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.sender_fee"></a>
 #### sender`_`fee
 
 ```python
-@property
-def sender_fee() -> int
+ | @property
+ | sender_fee() -> int
 ```
 
 Get the sender fee.
 
-<a id="aea.helpers.transaction.base.Terms.counterparty_fee"></a>
-
+<a name="aea.helpers.transaction.base.Terms.counterparty_fee"></a>
 #### counterparty`_`fee
 
 ```python
-@property
-def counterparty_fee() -> int
+ | @property
+ | counterparty_fee() -> int
 ```
 
 Get the counterparty fee.
 
-<a id="aea.helpers.transaction.base.Terms.fee_by_currency_id"></a>
-
+<a name="aea.helpers.transaction.base.Terms.fee_by_currency_id"></a>
 #### fee`_`by`_`currency`_`id
 
 ```python
-@property
-def fee_by_currency_id() -> Dict[str, int]
+ | @property
+ | fee_by_currency_id() -> Dict[str, int]
 ```
 
 Get fee by currency.
 
-<a id="aea.helpers.transaction.base.Terms.kwargs"></a>
-
+<a name="aea.helpers.transaction.base.Terms.kwargs"></a>
 #### kwargs
 
 ```python
-@property
-def kwargs() -> JSONLike
+ | @property
+ | kwargs() -> JSONLike
 ```
 
 Get the kwargs.
 
-<a id="aea.helpers.transaction.base.Terms.is_strict"></a>
-
+<a name="aea.helpers.transaction.base.Terms.is_strict"></a>
 #### is`_`strict
 
 ```python
-@property
-def is_strict() -> bool
+ | @property
+ | is_strict() -> bool
 ```
 
 Get is_strict.
 
-<a id="aea.helpers.transaction.base.Terms.get_hash"></a>
-
+<a name="aea.helpers.transaction.base.Terms.get_hash"></a>
 #### get`_`hash
 
 ```python
-@staticmethod
-def get_hash(ledger_id: str, sender_address: str, counterparty_address: str, good_ids: List[str], sender_supplied_quantities: List[int], counterparty_supplied_quantities: List[int], sender_payable_amount: int, counterparty_payable_amount: int, nonce: str) -> str
+ | @staticmethod
+ | get_hash(ledger_id: str, sender_address: str, counterparty_address: str, good_ids: List[str], sender_supplied_quantities: List[int], counterparty_supplied_quantities: List[int], sender_payable_amount: int, counterparty_payable_amount: int, nonce: str) -> str
 ```
 
 Generate a hash from transaction information.
@@ -899,13 +825,12 @@ Generate a hash from transaction information.
 
 the hash
 
-<a id="aea.helpers.transaction.base.Terms.encode"></a>
-
+<a name="aea.helpers.transaction.base.Terms.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(terms_protobuf_object: Any, terms_object: "Terms") -> None
+ | @staticmethod
+ | encode(terms_protobuf_object: Any, terms_object: "Terms") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -917,13 +842,12 @@ The protocol buffer object in the terms_protobuf_object argument must be matched
 - `terms_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `terms_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.Terms.decode"></a>
-
+<a name="aea.helpers.transaction.base.Terms.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, terms_protobuf_object: Any) -> "Terms"
+ | @classmethod
+ | decode(cls, terms_protobuf_object: Any) -> "Terms"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -938,28 +862,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'terms_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.Terms.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.Terms.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.Terms.__str__"></a>
-
+<a name="aea.helpers.transaction.base.Terms.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.TransactionDigest"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest"></a>
 ## TransactionDigest Objects
 
 ```python
@@ -968,45 +889,41 @@ class TransactionDigest()
 
 This class represents an instance of TransactionDigest.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.__init__"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, body: str) -> None
+ | __init__(ledger_id: str, body: str) -> None
 ```
 
 Initialise an instance of TransactionDigest.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.body"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.body"></a>
 #### body
 
 ```python
-@property
-def body() -> str
+ | @property
+ | body() -> str
 ```
 
 Get the receipt.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.encode"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(transaction_digest_protobuf_object: Any, transaction_digest_object: "TransactionDigest") -> None
+ | @staticmethod
+ | encode(transaction_digest_protobuf_object: Any, transaction_digest_object: "TransactionDigest") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -1018,13 +935,12 @@ The protocol buffer object in the transaction_digest_protobuf_object argument mu
 - `transaction_digest_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `transaction_digest_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.decode"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, transaction_digest_protobuf_object: Any) -> "TransactionDigest"
+ | @classmethod
+ | decode(cls, transaction_digest_protobuf_object: Any) -> "TransactionDigest"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -1039,28 +955,25 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'transaction_digest_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.TransactionDigest.__str__"></a>
-
+<a name="aea.helpers.transaction.base.TransactionDigest.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt"></a>
 ## TransactionReceipt Objects
 
 ```python
@@ -1069,56 +982,51 @@ class TransactionReceipt()
 
 This class represents an instance of TransactionReceipt.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.__init__"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str, receipt: JSONLike, transaction: JSONLike) -> None
+ | __init__(ledger_id: str, receipt: JSONLike, transaction: JSONLike) -> None
 ```
 
 Initialise an instance of TransactionReceipt.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.ledger_id"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> str
+ | @property
+ | ledger_id() -> str
 ```
 
 Get the id of the ledger on which the terms are to be settled.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.receipt"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.receipt"></a>
 #### receipt
 
 ```python
-@property
-def receipt() -> JSONLike
+ | @property
+ | receipt() -> JSONLike
 ```
 
 Get the receipt.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.transaction"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.transaction"></a>
 #### transaction
 
 ```python
-@property
-def transaction() -> JSONLike
+ | @property
+ | transaction() -> JSONLike
 ```
 
 Get the transaction.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.encode"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.encode"></a>
 #### encode
 
 ```python
-@staticmethod
-def encode(transaction_receipt_protobuf_object: Any, transaction_receipt_object: "TransactionReceipt") -> None
+ | @staticmethod
+ | encode(transaction_receipt_protobuf_object: Any, transaction_receipt_object: "TransactionReceipt") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -1130,13 +1038,12 @@ The protocol buffer object in the transaction_receipt_protobuf_object argument m
 - `transaction_receipt_protobuf_object`: the protocol buffer object whose type corresponds with this class.
 - `transaction_receipt_object`: an instance of this class to be encoded in the protocol buffer object.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.decode"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.decode"></a>
 #### decode
 
 ```python
-@classmethod
-def decode(cls, transaction_receipt_protobuf_object: Any) -> "TransactionReceipt"
+ | @classmethod
+ | decode(cls, transaction_receipt_protobuf_object: Any) -> "TransactionReceipt"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -1151,22 +1058,20 @@ A new instance of this class must be created that matches the protocol buffer ob
 
 A new instance of this class that matches the protocol buffer object in the 'transaction_receipt_protobuf_object' argument.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.__eq__"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.__eq__"></a>
 #### `__`eq`__`
 
 ```python
-def __eq__(other: Any) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a id="aea.helpers.transaction.base.TransactionReceipt.__str__"></a>
-
+<a name="aea.helpers.transaction.base.TransactionReceipt.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.

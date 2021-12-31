@@ -1,11 +1,9 @@
-<a id="aea.multiplexer"></a>
-
+<a name="aea.multiplexer"></a>
 # aea.multiplexer
 
 Module for the multiplexer class and related classes.
 
-<a id="aea.multiplexer.MultiplexerStatus"></a>
-
+<a name="aea.multiplexer.MultiplexerStatus"></a>
 ## MultiplexerStatus Objects
 
 ```python
@@ -14,62 +12,56 @@ class MultiplexerStatus(AsyncState)
 
 The connection status class.
 
-<a id="aea.multiplexer.MultiplexerStatus.__init__"></a>
-
+<a name="aea.multiplexer.MultiplexerStatus.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__() -> None
+ | __init__() -> None
 ```
 
 Initialize the connection status.
 
-<a id="aea.multiplexer.MultiplexerStatus.is_connected"></a>
-
+<a name="aea.multiplexer.MultiplexerStatus.is_connected"></a>
 #### is`_`connected
 
 ```python
-@property
-def is_connected() -> bool
+ | @property
+ | is_connected() -> bool
 ```
 
 Return is connected.
 
-<a id="aea.multiplexer.MultiplexerStatus.is_connecting"></a>
-
+<a name="aea.multiplexer.MultiplexerStatus.is_connecting"></a>
 #### is`_`connecting
 
 ```python
-@property
-def is_connecting() -> bool
+ | @property
+ | is_connecting() -> bool
 ```
 
 Return is connecting.
 
-<a id="aea.multiplexer.MultiplexerStatus.is_disconnected"></a>
-
+<a name="aea.multiplexer.MultiplexerStatus.is_disconnected"></a>
 #### is`_`disconnected
 
 ```python
-@property
-def is_disconnected() -> bool
+ | @property
+ | is_disconnected() -> bool
 ```
 
 Return is disconnected.
 
-<a id="aea.multiplexer.MultiplexerStatus.is_disconnecting"></a>
-
+<a name="aea.multiplexer.MultiplexerStatus.is_disconnecting"></a>
 #### is`_`disconnecting
 
 ```python
-@property
-def is_disconnecting() -> bool
+ | @property
+ | is_disconnecting() -> bool
 ```
 
 Return is disconnected.
 
-<a id="aea.multiplexer.AsyncMultiplexer"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer"></a>
 ## AsyncMultiplexer Objects
 
 ```python
@@ -78,22 +70,21 @@ class AsyncMultiplexer(Runnable,  WithLogger)
 
 This class can handle multiple connections at once.
 
-<a id="aea.multiplexer.AsyncMultiplexer.__init__"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, threaded: bool = False, agent_name: str = "standalone", default_routing: Optional[Dict[PublicId, PublicId]] = None, default_connection: Optional[PublicId] = None, protocols: Optional[List[Union[Protocol, Message]]] = None) -> None
+ | __init__(connections: Optional[Sequence[Connection]] = None, default_connection_index: int = 0, loop: Optional[AbstractEventLoop] = None, exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, threaded: bool = False, agent_name: str = "standalone", default_routing: Optional[Dict[PublicId, PublicId]] = None, default_connection: Optional[PublicId] = None, protocols: Optional[List[Union[Protocol, Message]]] = None) -> None
 ```
 
 Initialize the connection multiplexer.
 
 **Arguments**:
 
-    This information is used for envelopes which don't specify any routing context.
-    If connections is None, this parameter is ignored.
 - `connections`: a sequence of connections.
 - `default_connection_index`: the index of the connection to use as default.
+    This information is used for envelopes which don't specify any routing context.
+    If connections is None, this parameter is ignored.
 - `loop`: the event loop to run the multiplexer. If None, a new event loop is created.
 - `exception_policy`: the exception policy used for connections.
 - `threaded`: if True, run in threaded mode, else async
@@ -102,110 +93,100 @@ Initialize the connection multiplexer.
 - `default_connection`: default connection
 - `protocols`: protocols used
 
-<a id="aea.multiplexer.AsyncMultiplexer.default_connection"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.default_connection"></a>
 #### default`_`connection
 
 ```python
-@property
-def default_connection() -> Optional[Connection]
+ | @property
+ | default_connection() -> Optional[Connection]
 ```
 
 Get the default connection.
 
-<a id="aea.multiplexer.AsyncMultiplexer.in_queue"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.in_queue"></a>
 #### in`_`queue
 
 ```python
-@property
-def in_queue() -> AsyncFriendlyQueue
+ | @property
+ | in_queue() -> AsyncFriendlyQueue
 ```
 
 Get the in queue.
 
-<a id="aea.multiplexer.AsyncMultiplexer.out_queue"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.out_queue"></a>
 #### out`_`queue
 
 ```python
-@property
-def out_queue() -> asyncio.Queue
+ | @property
+ | out_queue() -> asyncio.Queue
 ```
 
 Get the out queue.
 
-<a id="aea.multiplexer.AsyncMultiplexer.connections"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.connections"></a>
 #### connections
 
 ```python
-@property
-def connections() -> Tuple[Connection, ...]
+ | @property
+ | connections() -> Tuple[Connection, ...]
 ```
 
 Get the connections.
 
-<a id="aea.multiplexer.AsyncMultiplexer.is_connected"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.is_connected"></a>
 #### is`_`connected
 
 ```python
-@property
-def is_connected() -> bool
+ | @property
+ | is_connected() -> bool
 ```
 
 Check whether the multiplexer is processing envelopes.
 
-<a id="aea.multiplexer.AsyncMultiplexer.default_routing"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.default_routing"></a>
 #### default`_`routing
 
 ```python
-@property
-def default_routing() -> Dict[PublicId, PublicId]
+ | @property
+ | default_routing() -> Dict[PublicId, PublicId]
 ```
 
 Get the default routing.
 
-<a id="aea.multiplexer.AsyncMultiplexer.default_routing"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.default_routing"></a>
 #### default`_`routing
 
 ```python
-@default_routing.setter
-def default_routing(default_routing: Dict[PublicId, PublicId]) -> None
+ | @default_routing.setter
+ | default_routing(default_routing: Dict[PublicId, PublicId]) -> None
 ```
 
 Set the default routing.
 
-<a id="aea.multiplexer.AsyncMultiplexer.connection_status"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.connection_status"></a>
 #### connection`_`status
 
 ```python
-@property
-def connection_status() -> MultiplexerStatus
+ | @property
+ | connection_status() -> MultiplexerStatus
 ```
 
 Get the connection status.
 
-<a id="aea.multiplexer.AsyncMultiplexer.run"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.run"></a>
 #### run
 
 ```python
-async def run() -> None
+ | async run() -> None
 ```
 
 Run multiplexer connect and receive/send tasks.
 
-<a id="aea.multiplexer.AsyncMultiplexer.set_loop"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.set_loop"></a>
 #### set`_`loop
 
 ```python
-def set_loop(loop: AbstractEventLoop) -> None
+ | set_loop(loop: AbstractEventLoop) -> None
 ```
 
 Set event loop and all event loop related objects.
@@ -214,12 +195,11 @@ Set event loop and all event loop related objects.
 
 - `loop`: asyncio event loop.
 
-<a id="aea.multiplexer.AsyncMultiplexer.add_connection"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.add_connection"></a>
 #### add`_`connection
 
 ```python
-def add_connection(connection: Connection, is_default: bool = False) -> None
+ | add_connection(connection: Connection, is_default: bool = False) -> None
 ```
 
 Add a connection to the multiplexer.
@@ -229,32 +209,29 @@ Add a connection to the multiplexer.
 - `connection`: the connection to add.
 - `is_default`: whether the connection added should be the default one.
 
-<a id="aea.multiplexer.AsyncMultiplexer.connect"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.connect"></a>
 #### connect
 
 ```python
-async def connect() -> None
+ | async connect() -> None
 ```
 
 Connect the multiplexer.
 
-<a id="aea.multiplexer.AsyncMultiplexer.disconnect"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.disconnect"></a>
 #### disconnect
 
 ```python
-async def disconnect() -> None
+ | async disconnect() -> None
 ```
 
 Disconnect the multiplexer.
 
-<a id="aea.multiplexer.AsyncMultiplexer.get"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.get"></a>
 #### get
 
 ```python
-def get(block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]
+ | get(block: bool = False, timeout: Optional[float] = None) -> Optional[Envelope]
 ```
 
 Get an envelope within a timeout.
@@ -268,12 +245,11 @@ Get an envelope within a timeout.
 
 the envelope, or None if no envelope is available within a timeout.
 
-<a id="aea.multiplexer.AsyncMultiplexer.async_get"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.async_get"></a>
 #### async`_`get
 
 ```python
-async def async_get() -> Envelope
+ | async async_get() -> Envelope
 ```
 
 Get an envelope async way.
@@ -282,12 +258,11 @@ Get an envelope async way.
 
 the envelope
 
-<a id="aea.multiplexer.AsyncMultiplexer.async_wait"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.async_wait"></a>
 #### async`_`wait
 
 ```python
-async def async_wait() -> None
+ | async async_wait() -> None
 ```
 
 Get an envelope async way.
@@ -296,12 +271,11 @@ Get an envelope async way.
 
 the envelope
 
-<a id="aea.multiplexer.AsyncMultiplexer.put"></a>
-
+<a name="aea.multiplexer.AsyncMultiplexer.put"></a>
 #### put
 
 ```python
-def put(envelope: Envelope) -> None
+ | put(envelope: Envelope) -> None
 ```
 
 Schedule an envelope for sending it.
@@ -313,8 +287,7 @@ running on a different thread than the one used in this function.
 
 - `envelope`: the envelope to be sent.
 
-<a id="aea.multiplexer.Multiplexer"></a>
-
+<a name="aea.multiplexer.Multiplexer"></a>
 ## Multiplexer Objects
 
 ```python
@@ -323,12 +296,11 @@ class Multiplexer(AsyncMultiplexer)
 
 Transit sync multiplexer for compatibility.
 
-<a id="aea.multiplexer.Multiplexer.__init__"></a>
-
+<a name="aea.multiplexer.Multiplexer.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(*args: Any, **kwargs: Any) -> None
+ | __init__(*args: Any, **kwargs: Any) -> None
 ```
 
 Initialize the connection multiplexer.
@@ -338,12 +310,11 @@ Initialize the connection multiplexer.
 - `args`: arguments
 - `kwargs`: keyword arguments
 
-<a id="aea.multiplexer.Multiplexer.set_loop"></a>
-
+<a name="aea.multiplexer.Multiplexer.set_loop"></a>
 #### set`_`loop
 
 ```python
-def set_loop(loop: AbstractEventLoop) -> None
+ | set_loop(loop: AbstractEventLoop) -> None
 ```
 
 Set event loop and all event loop related objects.
@@ -352,36 +323,33 @@ Set event loop and all event loop related objects.
 
 - `loop`: asyncio event loop.
 
-<a id="aea.multiplexer.Multiplexer.connect"></a>
-
+<a name="aea.multiplexer.Multiplexer.connect"></a>
 #### connect
 
 ```python
-def connect() -> None
+ | connect() -> None
 ```
 
 Connect the multiplexer.
 
 Synchronously in thread spawned if new loop created.
 
-<a id="aea.multiplexer.Multiplexer.disconnect"></a>
-
+<a name="aea.multiplexer.Multiplexer.disconnect"></a>
 #### disconnect
 
 ```python
-def disconnect() -> None
+ | disconnect() -> None
 ```
 
 Disconnect the multiplexer.
 
 Also stops a dedicated thread for event loop if spawned on connect.
 
-<a id="aea.multiplexer.Multiplexer.put"></a>
-
+<a name="aea.multiplexer.Multiplexer.put"></a>
 #### put
 
 ```python
-def put(envelope: Envelope) -> None
+ | put(envelope: Envelope) -> None
 ```
 
 Schedule an envelope for sending it.
@@ -393,8 +361,7 @@ running on a different thread than the one used in this function.
 
 - `envelope`: the envelope to be sent.
 
-<a id="aea.multiplexer.InBox"></a>
-
+<a name="aea.multiplexer.InBox"></a>
 ## InBox Objects
 
 ```python
@@ -403,12 +370,11 @@ class InBox()
 
 A queue from where you can only consume envelopes.
 
-<a id="aea.multiplexer.InBox.__init__"></a>
-
+<a name="aea.multiplexer.InBox.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(multiplexer: AsyncMultiplexer) -> None
+ | __init__(multiplexer: AsyncMultiplexer) -> None
 ```
 
 Initialize the inbox.
@@ -417,12 +383,11 @@ Initialize the inbox.
 
 - `multiplexer`: the multiplexer
 
-<a id="aea.multiplexer.InBox.empty"></a>
-
+<a name="aea.multiplexer.InBox.empty"></a>
 #### empty
 
 ```python
-def empty() -> bool
+ | empty() -> bool
 ```
 
 Check for a envelope on the in queue.
@@ -431,18 +396,16 @@ Check for a envelope on the in queue.
 
 boolean indicating whether there is an envelope or not
 
-<a id="aea.multiplexer.InBox.get"></a>
-
+<a name="aea.multiplexer.InBox.get"></a>
 #### get
 
 ```python
-def get(block: bool = False, timeout: Optional[float] = None) -> Envelope
+ | get(block: bool = False, timeout: Optional[float] = None) -> Envelope
 ```
 
 Check for a envelope on the in queue.
 
 **Arguments**:
-
 
 - `block`: make the call blocking (ignore the timeout).
 - `timeout`: times out the block after timeout seconds.
@@ -455,12 +418,11 @@ the envelope object.
 
 - `Empty`: if the attempt to get an envelope fails.
 
-<a id="aea.multiplexer.InBox.get_nowait"></a>
-
+<a name="aea.multiplexer.InBox.get_nowait"></a>
 #### get`_`nowait
 
 ```python
-def get_nowait() -> Optional[Envelope]
+ | get_nowait() -> Optional[Envelope]
 ```
 
 Check for a envelope on the in queue and wait for no time.
@@ -469,12 +431,11 @@ Check for a envelope on the in queue and wait for no time.
 
 the envelope object
 
-<a id="aea.multiplexer.InBox.async_get"></a>
-
+<a name="aea.multiplexer.InBox.async_get"></a>
 #### async`_`get
 
 ```python
-async def async_get() -> Envelope
+ | async async_get() -> Envelope
 ```
 
 Check for a envelope on the in queue.
@@ -483,18 +444,16 @@ Check for a envelope on the in queue.
 
 the envelope object.
 
-<a id="aea.multiplexer.InBox.async_wait"></a>
-
+<a name="aea.multiplexer.InBox.async_wait"></a>
 #### async`_`wait
 
 ```python
-async def async_wait() -> None
+ | async async_wait() -> None
 ```
 
 Check for a envelope on the in queue.
 
-<a id="aea.multiplexer.OutBox"></a>
-
+<a name="aea.multiplexer.OutBox"></a>
 ## OutBox Objects
 
 ```python
@@ -503,12 +462,11 @@ class OutBox()
 
 A queue from where you can only enqueue envelopes.
 
-<a id="aea.multiplexer.OutBox.__init__"></a>
-
+<a name="aea.multiplexer.OutBox.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(multiplexer: AsyncMultiplexer) -> None
+ | __init__(multiplexer: AsyncMultiplexer) -> None
 ```
 
 Initialize the outbox.
@@ -517,12 +475,11 @@ Initialize the outbox.
 
 - `multiplexer`: the multiplexer
 
-<a id="aea.multiplexer.OutBox.empty"></a>
-
+<a name="aea.multiplexer.OutBox.empty"></a>
 #### empty
 
 ```python
-def empty() -> bool
+ | empty() -> bool
 ```
 
 Check for a envelope on the in queue.
@@ -531,12 +488,11 @@ Check for a envelope on the in queue.
 
 boolean indicating whether there is an envelope or not
 
-<a id="aea.multiplexer.OutBox.put"></a>
-
+<a name="aea.multiplexer.OutBox.put"></a>
 #### put
 
 ```python
-def put(envelope: Envelope) -> None
+ | put(envelope: Envelope) -> None
 ```
 
 Put an envelope into the queue.
@@ -545,12 +501,11 @@ Put an envelope into the queue.
 
 - `envelope`: the envelope.
 
-<a id="aea.multiplexer.OutBox.put_message"></a>
-
+<a name="aea.multiplexer.OutBox.put_message"></a>
 #### put`_`message
 
 ```python
-def put_message(message: Message, context: Optional[EnvelopeContext] = None) -> None
+ | put_message(message: Message, context: Optional[EnvelopeContext] = None) -> None
 ```
 
 Put a message in the outbox.

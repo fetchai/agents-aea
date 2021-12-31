@@ -1,11 +1,9 @@
-<a id="aea.helpers.acn.agent_record"></a>
-
+<a name="aea.helpers.acn.agent_record"></a>
 # aea.helpers.acn.agent`_`record
 
 This module contains types and helpers for ACN Proof-of-Representation.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord"></a>
 ## AgentRecord Objects
 
 ```python
@@ -14,12 +12,11 @@ class AgentRecord()
 
 Agent Proof-of-Representation to representative.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.__init__"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(address: str, representative_public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, signature: str) -> None
+ | __init__(address: str, representative_public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, signature: str) -> None
 ```
 
 Initialize the AgentRecord
@@ -35,133 +32,121 @@ Initialize the AgentRecord
 - `message_format`: message format used for signing
 - `signature`: proof-of-representation of this AgentRecord
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.address"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.address"></a>
 #### address
 
 ```python
-@property
-def address() -> str
+ | @property
+ | address() -> str
 ```
 
 Get agent address
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.public_key"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.public_key"></a>
 #### public`_`key
 
 ```python
-@property
-def public_key() -> str
+ | @property
+ | public_key() -> str
 ```
 
 Get agent public key
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.representative_public_key"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.representative_public_key"></a>
 #### representative`_`public`_`key
 
 ```python
-@property
-def representative_public_key() -> str
+ | @property
+ | representative_public_key() -> str
 ```
 
 Get agent representative's public key
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.signature"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.signature"></a>
 #### signature
 
 ```python
-@property
-def signature() -> str
+ | @property
+ | signature() -> str
 ```
 
 Get record signature
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.message"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.message"></a>
 #### message
 
 ```python
-@property
-def message() -> bytes
+ | @property
+ | message() -> bytes
 ```
 
 Get the message.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.identifier"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.identifier"></a>
 #### identifier
 
 ```python
-@property
-def identifier() -> SimpleIdOrStr
+ | @property
+ | identifier() -> SimpleIdOrStr
 ```
 
 Get the identifier.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.ledger_id"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.ledger_id"></a>
 #### ledger`_`id
 
 ```python
-@property
-def ledger_id() -> SimpleIdOrStr
+ | @property
+ | ledger_id() -> SimpleIdOrStr
 ```
 
 Get ledger id.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.not_before"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.not_before"></a>
 #### not`_`before
 
 ```python
-@property
-def not_before() -> str
+ | @property
+ | not_before() -> str
 ```
 
 Get the not_before field.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.not_after"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.not_after"></a>
 #### not`_`after
 
 ```python
-@property
-def not_after() -> str
+ | @property
+ | not_after() -> str
 ```
 
 Get the not_after field.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.message_format"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.message_format"></a>
 #### message`_`format
 
 ```python
-@property
-def message_format() -> str
+ | @property
+ | message_format() -> str
 ```
 
 Get the message format.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.__str__"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.__str__"></a>
 #### `__`str`__`
 
 ```python
-def __str__() -> str
+ | __str__() -> str
 ```
 
 Get string representation.
 
-<a id="aea.helpers.acn.agent_record.AgentRecord.from_cert_request"></a>
-
+<a name="aea.helpers.acn.agent_record.AgentRecord.from_cert_request"></a>
 #### from`_`cert`_`request
 
 ```python
-@classmethod
-def from_cert_request(cls, cert_request: CertRequest, address: str, representative_public_key: str, data_dir: Optional[PathLike] = None) -> "AgentRecord"
+ | @classmethod
+ | from_cert_request(cls, cert_request: CertRequest, address: str, representative_public_key: str, data_dir: Optional[PathLike] = None) -> "AgentRecord"
 ```
 
 Get agent record from cert request.

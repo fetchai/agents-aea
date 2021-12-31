@@ -1,11 +1,9 @@
-<a id="aea.aea_builder"></a>
-
+<a name="aea.aea_builder"></a>
 # aea.aea`_`builder
 
 This module contains utilities for building an AEA.
 
-<a id="aea.aea_builder._DependenciesManager"></a>
-
+<a name="aea.aea_builder._DependenciesManager"></a>
 ## `_`DependenciesManager Objects
 
 ```python
@@ -14,98 +12,89 @@ class _DependenciesManager()
 
 Class to manage dependencies of agent packages.
 
-<a id="aea.aea_builder._DependenciesManager.__init__"></a>
-
+<a name="aea.aea_builder._DependenciesManager.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__() -> None
+ | __init__() -> None
 ```
 
 Initialize the dependency graph.
 
-<a id="aea.aea_builder._DependenciesManager.all_dependencies"></a>
-
+<a name="aea.aea_builder._DependenciesManager.all_dependencies"></a>
 #### all`_`dependencies
 
 ```python
-@property
-def all_dependencies() -> Set[ComponentId]
+ | @property
+ | all_dependencies() -> Set[ComponentId]
 ```
 
 Get all dependencies.
 
-<a id="aea.aea_builder._DependenciesManager.dependencies_highest_version"></a>
-
+<a name="aea.aea_builder._DependenciesManager.dependencies_highest_version"></a>
 #### dependencies`_`highest`_`version
 
 ```python
-@property
-def dependencies_highest_version() -> Set[ComponentId]
+ | @property
+ | dependencies_highest_version() -> Set[ComponentId]
 ```
 
 Get the dependencies with highest version.
 
-<a id="aea.aea_builder._DependenciesManager.get_components_by_type"></a>
-
+<a name="aea.aea_builder._DependenciesManager.get_components_by_type"></a>
 #### get`_`components`_`by`_`type
 
 ```python
-def get_components_by_type(component_type: ComponentType) -> Dict[ComponentId, ComponentConfiguration]
+ | get_components_by_type(component_type: ComponentType) -> Dict[ComponentId, ComponentConfiguration]
 ```
 
 Get the components by type.
 
-<a id="aea.aea_builder._DependenciesManager.protocols"></a>
-
+<a name="aea.aea_builder._DependenciesManager.protocols"></a>
 #### protocols
 
 ```python
-@property
-def protocols() -> Dict[ComponentId, ProtocolConfig]
+ | @property
+ | protocols() -> Dict[ComponentId, ProtocolConfig]
 ```
 
 Get the protocols.
 
-<a id="aea.aea_builder._DependenciesManager.connections"></a>
-
+<a name="aea.aea_builder._DependenciesManager.connections"></a>
 #### connections
 
 ```python
-@property
-def connections() -> Dict[ComponentId, ConnectionConfig]
+ | @property
+ | connections() -> Dict[ComponentId, ConnectionConfig]
 ```
 
 Get the connections.
 
-<a id="aea.aea_builder._DependenciesManager.skills"></a>
-
+<a name="aea.aea_builder._DependenciesManager.skills"></a>
 #### skills
 
 ```python
-@property
-def skills() -> Dict[ComponentId, SkillConfig]
+ | @property
+ | skills() -> Dict[ComponentId, SkillConfig]
 ```
 
 Get the skills.
 
-<a id="aea.aea_builder._DependenciesManager.contracts"></a>
-
+<a name="aea.aea_builder._DependenciesManager.contracts"></a>
 #### contracts
 
 ```python
-@property
-def contracts() -> Dict[ComponentId, ContractConfig]
+ | @property
+ | contracts() -> Dict[ComponentId, ContractConfig]
 ```
 
 Get the contracts.
 
-<a id="aea.aea_builder._DependenciesManager.add_component"></a>
-
+<a name="aea.aea_builder._DependenciesManager.add_component"></a>
 #### add`_`component
 
 ```python
-def add_component(configuration: ComponentConfiguration) -> None
+ | add_component(configuration: ComponentConfiguration) -> None
 ```
 
 Add a component to the dependency manager.
@@ -114,12 +103,11 @@ Add a component to the dependency manager.
 
 - `configuration`: the component configuration to add.
 
-<a id="aea.aea_builder._DependenciesManager.remove_component"></a>
-
+<a name="aea.aea_builder._DependenciesManager.remove_component"></a>
 #### remove`_`component
 
 ```python
-def remove_component(component_id: ComponentId) -> None
+ | remove_component(component_id: ComponentId) -> None
 ```
 
 Remove a component.
@@ -132,13 +120,12 @@ Remove a component.
 
 - `ValueError`: if some component depends on this package.
 
-<a id="aea.aea_builder._DependenciesManager.pypi_dependencies"></a>
-
+<a name="aea.aea_builder._DependenciesManager.pypi_dependencies"></a>
 #### pypi`_`dependencies
 
 ```python
-@property
-def pypi_dependencies() -> Dependencies
+ | @property
+ | pypi_dependencies() -> Dependencies
 ```
 
 Get all the PyPI dependencies.
@@ -151,18 +138,16 @@ version field.
 
 the merged PyPI dependencies
 
-<a id="aea.aea_builder._DependenciesManager.install_dependencies"></a>
-
+<a name="aea.aea_builder._DependenciesManager.install_dependencies"></a>
 #### install`_`dependencies
 
 ```python
-def install_dependencies() -> None
+ | install_dependencies() -> None
 ```
 
 Install extra dependencies for components.
 
-<a id="aea.aea_builder.AEABuilder"></a>
-
+<a name="aea.aea_builder.AEABuilder"></a>
 ## AEABuilder Objects
 
 ```python
@@ -213,12 +198,11 @@ builder.add_component_instance(...)
 # second call
 my_aea_2 = builder.builder()
 
-<a id="aea.aea_builder.AEABuilder.__init__"></a>
-
+<a name="aea.aea_builder.AEABuilder.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None) -> None
+ | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None) -> None
 ```
 
 Initialize the builder.
@@ -229,12 +213,11 @@ Initialize the builder.
 - `registry_dir`: the registry directory.
 - `build_dir_root`: the root of the build directory.
 
-<a id="aea.aea_builder.AEABuilder.reset"></a>
-
+<a name="aea.aea_builder.AEABuilder.reset"></a>
 #### reset
 
 ```python
-def reset(is_full_reset: bool = False) -> None
+ | reset(is_full_reset: bool = False) -> None
 ```
 
 Reset the builder.
@@ -249,18 +232,16 @@ only resets:
 
 - `is_full_reset`: whether it is a full reset or not.
 
-<a id="aea.aea_builder.AEABuilder.set_period"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_period"></a>
 #### set`_`period
 
 ```python
-def set_period(period: Optional[float]) -> "AEABuilder"
+ | set_period(period: Optional[float]) -> "AEABuilder"
 ```
 
 Set agent act period.
 
 **Arguments**:
-
 
 - `period`: period in seconds
 
@@ -268,18 +249,16 @@ Set agent act period.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_execution_timeout"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_execution_timeout"></a>
 #### set`_`execution`_`timeout
 
 ```python
-def set_execution_timeout(execution_timeout: Optional[float]) -> "AEABuilder"
+ | set_execution_timeout(execution_timeout: Optional[float]) -> "AEABuilder"
 ```
 
 Set agent execution timeout in seconds.
 
 **Arguments**:
-
 
 - `execution_timeout`: execution_timeout in seconds
 
@@ -287,18 +266,16 @@ Set agent execution timeout in seconds.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_max_reactions"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_max_reactions"></a>
 #### set`_`max`_`reactions
 
 ```python
-def set_max_reactions(max_reactions: Optional[int]) -> "AEABuilder"
+ | set_max_reactions(max_reactions: Optional[int]) -> "AEABuilder"
 ```
 
 Set agent max reaction in one react.
 
 **Arguments**:
-
 
 - `max_reactions`: int
 
@@ -306,18 +283,16 @@ Set agent max reaction in one react.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_decision_maker_handler_details"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler_details"></a>
 #### set`_`decision`_`maker`_`handler`_`details
 
 ```python
-def set_decision_maker_handler_details(decision_maker_handler_dotted_path: str, file_path: str, config: Dict[str, Any]) -> "AEABuilder"
+ | set_decision_maker_handler_details(decision_maker_handler_dotted_path: str, file_path: str, config: Dict[str, Any]) -> "AEABuilder"
 ```
 
 Set error handler details.
 
 **Arguments**:
-
 
 - `decision_maker_handler_dotted_path`: the dotted path to the decision maker handler
 - `file_path`: the file path to the file which contains the decision maker handler
@@ -327,18 +302,16 @@ Set error handler details.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_error_handler_details"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_error_handler_details"></a>
 #### set`_`error`_`handler`_`details
 
 ```python
-def set_error_handler_details(error_handler_dotted_path: str, file_path: str, config: Dict[str, Any]) -> "AEABuilder"
+ | set_error_handler_details(error_handler_dotted_path: str, file_path: str, config: Dict[str, Any]) -> "AEABuilder"
 ```
 
 Set error handler details.
 
 **Arguments**:
-
 
 - `error_handler_dotted_path`: the dotted path to the error handler
 - `file_path`: the file path to the file which contains the error handler
@@ -348,18 +321,16 @@ Set error handler details.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_skill_exception_policy"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_skill_exception_policy"></a>
 #### set`_`skill`_`exception`_`policy
 
 ```python
-def set_skill_exception_policy(skill_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
+ | set_skill_exception_policy(skill_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
 ```
 
 Set skill exception policy.
 
 **Arguments**:
-
 
 - `skill_exception_policy`: the policy
 
@@ -367,18 +338,16 @@ Set skill exception policy.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_connection_exception_policy"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_connection_exception_policy"></a>
 #### set`_`connection`_`exception`_`policy
 
 ```python
-def set_connection_exception_policy(connection_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
+ | set_connection_exception_policy(connection_exception_policy: Optional[ExceptionPolicyEnum]) -> "AEABuilder"
 ```
 
 Set connection exception policy.
 
 **Arguments**:
-
 
 - `connection_exception_policy`: the policy
 
@@ -386,12 +355,11 @@ Set connection exception policy.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_default_routing"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_default_routing"></a>
 #### set`_`default`_`routing
 
 ```python
-def set_default_routing(default_routing: Dict[PublicId, PublicId]) -> "AEABuilder"
+ | set_default_routing(default_routing: Dict[PublicId, PublicId]) -> "AEABuilder"
 ```
 
 Set default routing.
@@ -400,19 +368,17 @@ This is a map from public ids (protocols) to public ids (connections).
 
 **Arguments**:
 
-
 - `default_routing`: the default routing mapping
 
 **Returns**:
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_loop_mode"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_loop_mode"></a>
 #### set`_`loop`_`mode
 
 ```python
-def set_loop_mode(loop_mode: Optional[str]) -> "AEABuilder"
+ | set_loop_mode(loop_mode: Optional[str]) -> "AEABuilder"
 ```
 
 Set the loop mode.
@@ -425,12 +391,11 @@ Set the loop mode.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_runtime_mode"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_runtime_mode"></a>
 #### set`_`runtime`_`mode
 
 ```python
-def set_runtime_mode(runtime_mode: Optional[str]) -> "AEABuilder"
+ | set_runtime_mode(runtime_mode: Optional[str]) -> "AEABuilder"
 ```
 
 Set the runtime mode.
@@ -443,12 +408,11 @@ Set the runtime mode.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_task_manager_mode"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_task_manager_mode"></a>
 #### set`_`task`_`manager`_`mode
 
 ```python
-def set_task_manager_mode(task_manager_mode: Optional[str]) -> "AEABuilder"
+ | set_task_manager_mode(task_manager_mode: Optional[str]) -> "AEABuilder"
 ```
 
 Set the task_manager_mode.
@@ -461,12 +425,11 @@ Set the task_manager_mode.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_storage_uri"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_storage_uri"></a>
 #### set`_`storage`_`uri
 
 ```python
-def set_storage_uri(storage_uri: Optional[str]) -> "AEABuilder"
+ | set_storage_uri(storage_uri: Optional[str]) -> "AEABuilder"
 ```
 
 Set the storage uri.
@@ -479,12 +442,11 @@ Set the storage uri.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_data_dir"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_data_dir"></a>
 #### set`_`data`_`dir
 
 ```python
-def set_data_dir(data_dir: Optional[str]) -> "AEABuilder"
+ | set_data_dir(data_dir: Optional[str]) -> "AEABuilder"
 ```
 
 Set the data directory.
@@ -497,12 +459,11 @@ Set the data directory.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_logging_config"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_logging_config"></a>
 #### set`_`logging`_`config
 
 ```python
-def set_logging_config(logging_config: Dict) -> "AEABuilder"
+ | set_logging_config(logging_config: Dict) -> "AEABuilder"
 ```
 
 Set the logging configurations.
@@ -519,12 +480,11 @@ https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_search_service_address"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_search_service_address"></a>
 #### set`_`search`_`service`_`address
 
 ```python
-def set_search_service_address(search_service_address: str) -> "AEABuilder"
+ | set_search_service_address(search_service_address: str) -> "AEABuilder"
 ```
 
 Set the search service address.
@@ -537,12 +497,11 @@ Set the search service address.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_name"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_name"></a>
 #### set`_`name
 
 ```python
-def set_name(name: str) -> "AEABuilder"
+ | set_name(name: str) -> "AEABuilder"
 ```
 
 Set the name of the agent.
@@ -555,12 +514,11 @@ Set the name of the agent.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.set_default_connection"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_default_connection"></a>
 #### set`_`default`_`connection
 
 ```python
-def set_default_connection(public_id: Optional[PublicId] = None) -> "AEABuilder"
+ | set_default_connection(public_id: Optional[PublicId] = None) -> "AEABuilder"
 ```
 
 Set the default connection.
@@ -573,33 +531,31 @@ Set the default connection.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_private_key"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_private_key"></a>
 #### add`_`private`_`key
 
 ```python
-def add_private_key(identifier: str, private_key_path: Optional[PathLike] = None, is_connection: bool = False) -> "AEABuilder"
+ | add_private_key(identifier: str, private_key_path: Optional[PathLike] = None, is_connection: bool = False) -> "AEABuilder"
 ```
 
 Add a private key path.
 
 **Arguments**:
 
-    If None, the key will be created at build time.
 - `identifier`: the identifier for that private key path.
 - `private_key_path`: an (optional) path to the private key file.
+    If None, the key will be created at build time.
 - `is_connection`: if the pair is for the connection cryptos
 
 **Returns**:
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.remove_private_key"></a>
-
+<a name="aea.aea_builder.AEABuilder.remove_private_key"></a>
 #### remove`_`private`_`key
 
 ```python
-def remove_private_key(identifier: str, is_connection: bool = False) -> "AEABuilder"
+ | remove_private_key(identifier: str, is_connection: bool = False) -> "AEABuilder"
 ```
 
 Remove a private key path by identifier, if present.
@@ -613,34 +569,31 @@ Remove a private key path by identifier, if present.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.private_key_paths"></a>
-
+<a name="aea.aea_builder.AEABuilder.private_key_paths"></a>
 #### private`_`key`_`paths
 
 ```python
-@property
-def private_key_paths() -> Dict[str, Optional[str]]
+ | @property
+ | private_key_paths() -> Dict[str, Optional[str]]
 ```
 
 Get the private key paths.
 
-<a id="aea.aea_builder.AEABuilder.connection_private_key_paths"></a>
-
+<a name="aea.aea_builder.AEABuilder.connection_private_key_paths"></a>
 #### connection`_`private`_`key`_`paths
 
 ```python
-@property
-def connection_private_key_paths() -> Dict[str, Optional[str]]
+ | @property
+ | connection_private_key_paths() -> Dict[str, Optional[str]]
 ```
 
 Get the connection private key paths.
 
-<a id="aea.aea_builder.AEABuilder.set_default_ledger"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_default_ledger"></a>
 #### set`_`default`_`ledger
 
 ```python
-def set_default_ledger(identifier: Optional[str]) -> "AEABuilder"
+ | set_default_ledger(identifier: Optional[str]) -> "AEABuilder"
 ```
 
 Set a default ledger API to use.
@@ -653,12 +606,11 @@ Set a default ledger API to use.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.set_required_ledgers"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_required_ledgers"></a>
 #### set`_`required`_`ledgers
 
 ```python
-def set_required_ledgers(required_ledgers: Optional[List[str]]) -> "AEABuilder"
+ | set_required_ledgers(required_ledgers: Optional[List[str]]) -> "AEABuilder"
 ```
 
 Set the required ledger identifiers.
@@ -673,12 +625,11 @@ These are the ledgers for which the AEA requires a key pair.
 
 the AEABuilder.
 
-<a id="aea.aea_builder.AEABuilder.set_build_entrypoint"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_build_entrypoint"></a>
 #### set`_`build`_`entrypoint
 
 ```python
-def set_build_entrypoint(build_entrypoint: Optional[str]) -> "AEABuilder"
+ | set_build_entrypoint(build_entrypoint: Optional[str]) -> "AEABuilder"
 ```
 
 Set build entrypoint.
@@ -691,12 +642,11 @@ Set build entrypoint.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.set_currency_denominations"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_currency_denominations"></a>
 #### set`_`currency`_`denominations
 
 ```python
-def set_currency_denominations(currency_denominations: Dict[str, str]) -> "AEABuilder"
+ | set_currency_denominations(currency_denominations: Dict[str, str]) -> "AEABuilder"
 ```
 
 Set the mapping from ledger ids to currency denominations.
@@ -709,12 +659,11 @@ Set the mapping from ledger ids to currency denominations.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_component"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_component"></a>
 #### add`_`component
 
 ```python
-def add_component(component_type: ComponentType, directory: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
+ | add_component(component_type: ComponentType, directory: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
 ```
 
 Add a component, given its type and the directory.
@@ -734,12 +683,11 @@ Add a component, given its type and the directory.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_component_instance"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_component_instance"></a>
 #### add`_`component`_`instance
 
 ```python
-def add_component_instance(component: Component) -> "AEABuilder"
+ | add_component_instance(component: Component) -> "AEABuilder"
 ```
 
 Add already initialized component object to resources or connections.
@@ -757,22 +705,20 @@ You will have to `reset()` the builder before calling `build()` again.
 
 self
 
-<a id="aea.aea_builder.AEABuilder.set_context_namespace"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
 
 ```python
-def set_context_namespace(context_namespace: Dict[str, Any]) -> "AEABuilder"
+ | set_context_namespace(context_namespace: Dict[str, Any]) -> "AEABuilder"
 ```
 
 Set the context namespace.
 
-<a id="aea.aea_builder.AEABuilder.set_agent_pypi_dependencies"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_agent_pypi_dependencies"></a>
 #### set`_`agent`_`pypi`_`dependencies
 
 ```python
-def set_agent_pypi_dependencies(dependencies: Dependencies) -> "AEABuilder"
+ | set_agent_pypi_dependencies(dependencies: Dependencies) -> "AEABuilder"
 ```
 
 Set agent PyPI dependencies.
@@ -785,12 +731,11 @@ Set agent PyPI dependencies.
 
 the AEABuilder.
 
-<a id="aea.aea_builder.AEABuilder.remove_component"></a>
-
+<a name="aea.aea_builder.AEABuilder.remove_component"></a>
 #### remove`_`component
 
 ```python
-def remove_component(component_id: ComponentId) -> "AEABuilder"
+ | remove_component(component_id: ComponentId) -> "AEABuilder"
 ```
 
 Remove a component.
@@ -803,12 +748,11 @@ Remove a component.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_protocol"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_protocol"></a>
 #### add`_`protocol
 
 ```python
-def add_protocol(directory: PathLike) -> "AEABuilder"
+ | add_protocol(directory: PathLike) -> "AEABuilder"
 ```
 
 Add a protocol to the agent.
@@ -821,12 +765,11 @@ Add a protocol to the agent.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.remove_protocol"></a>
-
+<a name="aea.aea_builder.AEABuilder.remove_protocol"></a>
 #### remove`_`protocol
 
 ```python
-def remove_protocol(public_id: PublicId) -> "AEABuilder"
+ | remove_protocol(public_id: PublicId) -> "AEABuilder"
 ```
 
 Remove protocol.
@@ -839,12 +782,11 @@ Remove protocol.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_connection"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_connection"></a>
 #### add`_`connection
 
 ```python
-def add_connection(directory: PathLike) -> "AEABuilder"
+ | add_connection(directory: PathLike) -> "AEABuilder"
 ```
 
 Add a connection to the agent.
@@ -857,12 +799,11 @@ Add a connection to the agent.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.remove_connection"></a>
-
+<a name="aea.aea_builder.AEABuilder.remove_connection"></a>
 #### remove`_`connection
 
 ```python
-def remove_connection(public_id: PublicId) -> "AEABuilder"
+ | remove_connection(public_id: PublicId) -> "AEABuilder"
 ```
 
 Remove a connection.
@@ -875,12 +816,11 @@ Remove a connection.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_skill"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_skill"></a>
 #### add`_`skill
 
 ```python
-def add_skill(directory: PathLike) -> "AEABuilder"
+ | add_skill(directory: PathLike) -> "AEABuilder"
 ```
 
 Add a skill to the agent.
@@ -893,12 +833,11 @@ Add a skill to the agent.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.remove_skill"></a>
-
+<a name="aea.aea_builder.AEABuilder.remove_skill"></a>
 #### remove`_`skill
 
 ```python
-def remove_skill(public_id: PublicId) -> "AEABuilder"
+ | remove_skill(public_id: PublicId) -> "AEABuilder"
 ```
 
 Remove protocol.
@@ -911,12 +850,11 @@ Remove protocol.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.add_contract"></a>
-
+<a name="aea.aea_builder.AEABuilder.add_contract"></a>
 #### add`_`contract
 
 ```python
-def add_contract(directory: PathLike) -> "AEABuilder"
+ | add_contract(directory: PathLike) -> "AEABuilder"
 ```
 
 Add a contract to the agent.
@@ -929,12 +867,11 @@ Add a contract to the agent.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.remove_contract"></a>
-
+<a name="aea.aea_builder.AEABuilder.remove_contract"></a>
 #### remove`_`contract
 
 ```python
-def remove_contract(public_id: PublicId) -> "AEABuilder"
+ | remove_contract(public_id: PublicId) -> "AEABuilder"
 ```
 
 Remove protocol.
@@ -947,53 +884,48 @@ Remove protocol.
 
 the AEABuilder
 
-<a id="aea.aea_builder.AEABuilder.call_all_build_entrypoints"></a>
-
+<a name="aea.aea_builder.AEABuilder.call_all_build_entrypoints"></a>
 #### call`_`all`_`build`_`entrypoints
 
 ```python
-def call_all_build_entrypoints() -> None
+ | call_all_build_entrypoints() -> None
 ```
 
 Call all the build entrypoints.
 
-<a id="aea.aea_builder.AEABuilder.get_build_root_directory"></a>
-
+<a name="aea.aea_builder.AEABuilder.get_build_root_directory"></a>
 #### get`_`build`_`root`_`directory
 
 ```python
-def get_build_root_directory() -> str
+ | get_build_root_directory() -> str
 ```
 
 Get build directory root.
 
-<a id="aea.aea_builder.AEABuilder.run_build_for_component_configuration"></a>
-
+<a name="aea.aea_builder.AEABuilder.run_build_for_component_configuration"></a>
 #### run`_`build`_`for`_`component`_`configuration
 
 ```python
-@classmethod
-def run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None) -> None
+ | @classmethod
+ | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None) -> None
 ```
 
 Run a build entrypoint script for component configuration.
 
-<a id="aea.aea_builder.AEABuilder.install_pypi_dependencies"></a>
-
+<a name="aea.aea_builder.AEABuilder.install_pypi_dependencies"></a>
 #### install`_`pypi`_`dependencies
 
 ```python
-def install_pypi_dependencies() -> None
+ | install_pypi_dependencies() -> None
 ```
 
 Install components extra dependencies.
 
-<a id="aea.aea_builder.AEABuilder.build"></a>
-
+<a name="aea.aea_builder.AEABuilder.build"></a>
 #### build
 
 ```python
-def build(connection_ids: Optional[Collection[PublicId]] = None, password: Optional[str] = None) -> AEA
+ | build(connection_ids: Optional[Collection[PublicId]] = None, password: Optional[str] = None) -> AEA
 ```
 
 Build the AEA.
@@ -1014,12 +946,11 @@ via 'add_component_instance' and the private keys.
 
 the AEA object.
 
-<a id="aea.aea_builder.AEABuilder.get_default_ledger"></a>
-
+<a name="aea.aea_builder.AEABuilder.get_default_ledger"></a>
 #### get`_`default`_`ledger
 
 ```python
-def get_default_ledger() -> str
+ | get_default_ledger() -> str
 ```
 
 Return default ledger.
@@ -1028,12 +959,11 @@ Return default ledger.
 
 the default ledger identifier.
 
-<a id="aea.aea_builder.AEABuilder.get_required_ledgers"></a>
-
+<a name="aea.aea_builder.AEABuilder.get_required_ledgers"></a>
 #### get`_`required`_`ledgers
 
 ```python
-def get_required_ledgers() -> List[str]
+ | get_required_ledgers() -> List[str]
 ```
 
 Get the required ledger identifiers.
@@ -1044,23 +974,21 @@ These are the ledgers for which the AEA requires a key pair.
 
 the list of required ledgers.
 
-<a id="aea.aea_builder.AEABuilder.try_to_load_agent_configuration_file"></a>
-
+<a name="aea.aea_builder.AEABuilder.try_to_load_agent_configuration_file"></a>
 #### try`_`to`_`load`_`agent`_`configuration`_`file
 
 ```python
-@classmethod
-def try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path]) -> AgentConfig
+ | @classmethod
+ | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path]) -> AgentConfig
 ```
 
 Try to load the agent configuration file..
 
-<a id="aea.aea_builder.AEABuilder.set_from_configuration"></a>
-
+<a name="aea.aea_builder.AEABuilder.set_from_configuration"></a>
 #### set`_`from`_`configuration
 
 ```python
-def set_from_configuration(agent_configuration: AgentConfig, aea_project_path: Path, skip_consistency_check: bool = False) -> None
+ | set_from_configuration(agent_configuration: AgentConfig, aea_project_path: Path, skip_consistency_check: bool = False) -> None
 ```
 
 Set builder variables from AgentConfig.
@@ -1071,13 +999,12 @@ Set builder variables from AgentConfig.
 - `aea_project_path`: PathLike root directory of the agent project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
 
-<a id="aea.aea_builder.AEABuilder.from_aea_project"></a>
-
+<a name="aea.aea_builder.AEABuilder.from_aea_project"></a>
 #### from`_`aea`_`project
 
 ```python
-@classmethod
-def from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, password: Optional[str] = None) -> "AEABuilder"
+ | @classmethod
+ | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, password: Optional[str] = None) -> "AEABuilder"
 ```
 
 Construct the builder from an AEA project.
@@ -1099,23 +1026,21 @@ Construct the builder from an AEA project.
 
 an AEABuilder.
 
-<a id="aea.aea_builder.AEABuilder.get_configuration_file_path"></a>
-
+<a name="aea.aea_builder.AEABuilder.get_configuration_file_path"></a>
 #### get`_`configuration`_`file`_`path
 
 ```python
-@staticmethod
-def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path
+ | @staticmethod
+ | get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path
 ```
 
 Return path to aea-config file for the given aea project path.
 
-<a id="aea.aea_builder.make_component_logger"></a>
-
+<a name="aea.aea_builder.make_component_logger"></a>
 #### make`_`component`_`logger
 
 ```python
-def make_component_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
+make_component_logger(configuration: ComponentConfiguration, agent_name: str) -> Optional[logging.Logger]
 ```
 
 Make the logger for a component.

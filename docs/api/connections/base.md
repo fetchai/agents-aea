@@ -1,11 +1,9 @@
-<a id="aea.connections.base"></a>
-
+<a name="aea.connections.base"></a>
 # aea.connections.base
 
 The base connection package.
 
-<a id="aea.connections.base.ConnectionStates"></a>
-
+<a name="aea.connections.base.ConnectionStates"></a>
 ## ConnectionStates Objects
 
 ```python
@@ -14,8 +12,7 @@ class ConnectionStates(Enum)
 
 Connection states enum.
 
-<a id="aea.connections.base.Connection"></a>
-
+<a name="aea.connections.base.Connection"></a>
 ## Connection Objects
 
 ```python
@@ -24,12 +21,11 @@ class Connection(Component,  ABC)
 
 Abstract definition of a connection.
 
-<a id="aea.connections.base.Connection.__init__"></a>
-
+<a name="aea.connections.base.Connection.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
+ | __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize the connection.
@@ -47,156 +43,142 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 - `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
 - `kwargs`: keyword arguments passed to component base
 
-<a id="aea.connections.base.Connection.loop"></a>
-
+<a name="aea.connections.base.Connection.loop"></a>
 #### loop
 
 ```python
-@property
-def loop() -> asyncio.AbstractEventLoop
+ | @property
+ | loop() -> asyncio.AbstractEventLoop
 ```
 
 Get the event loop.
 
-<a id="aea.connections.base.Connection.address"></a>
-
+<a name="aea.connections.base.Connection.address"></a>
 #### address
 
 ```python
-@property
-def address() -> "Address"
+ | @property
+ | address() -> "Address"
 ```
 
 Get the address.
 
-<a id="aea.connections.base.Connection.crypto_store"></a>
-
+<a name="aea.connections.base.Connection.crypto_store"></a>
 #### crypto`_`store
 
 ```python
-@property
-def crypto_store() -> CryptoStore
+ | @property
+ | crypto_store() -> CryptoStore
 ```
 
 Get the crypto store.
 
-<a id="aea.connections.base.Connection.has_crypto_store"></a>
-
+<a name="aea.connections.base.Connection.has_crypto_store"></a>
 #### has`_`crypto`_`store
 
 ```python
-@property
-def has_crypto_store() -> bool
+ | @property
+ | has_crypto_store() -> bool
 ```
 
 Check if the connection has the crypto store.
 
-<a id="aea.connections.base.Connection.data_dir"></a>
-
+<a name="aea.connections.base.Connection.data_dir"></a>
 #### data`_`dir
 
 ```python
-@property
-def data_dir() -> str
+ | @property
+ | data_dir() -> str
 ```
 
 Get the data directory.
 
-<a id="aea.connections.base.Connection.component_type"></a>
-
+<a name="aea.connections.base.Connection.component_type"></a>
 #### component`_`type
 
 ```python
-@property
-def component_type() -> ComponentType
+ | @property
+ | component_type() -> ComponentType
 ```
 
 Get the component type.
 
-<a id="aea.connections.base.Connection.configuration"></a>
-
+<a name="aea.connections.base.Connection.configuration"></a>
 #### configuration
 
 ```python
-@property
-def configuration() -> ConnectionConfig
+ | @property
+ | configuration() -> ConnectionConfig
 ```
 
 Get the connection configuration.
 
-<a id="aea.connections.base.Connection.restricted_to_protocols"></a>
-
+<a name="aea.connections.base.Connection.restricted_to_protocols"></a>
 #### restricted`_`to`_`protocols
 
 ```python
-@property
-def restricted_to_protocols() -> Set[PublicId]
+ | @property
+ | restricted_to_protocols() -> Set[PublicId]
 ```
 
 Get the ids of the protocols this connection is restricted to.
 
-<a id="aea.connections.base.Connection.excluded_protocols"></a>
-
+<a name="aea.connections.base.Connection.excluded_protocols"></a>
 #### excluded`_`protocols
 
 ```python
-@property
-def excluded_protocols() -> Set[PublicId]
+ | @property
+ | excluded_protocols() -> Set[PublicId]
 ```
 
 Get the ids of the excluded protocols for this connection.
 
-<a id="aea.connections.base.Connection.state"></a>
-
+<a name="aea.connections.base.Connection.state"></a>
 #### state
 
 ```python
-@property
-def state() -> ConnectionStates
+ | @property
+ | state() -> ConnectionStates
 ```
 
 Get the connection status.
 
-<a id="aea.connections.base.Connection.state"></a>
-
+<a name="aea.connections.base.Connection.state"></a>
 #### state
 
 ```python
-@state.setter
-def state(value: ConnectionStates) -> None
+ | @state.setter
+ | state(value: ConnectionStates) -> None
 ```
 
 Set the connection status.
 
-<a id="aea.connections.base.Connection.connect"></a>
-
+<a name="aea.connections.base.Connection.connect"></a>
 #### connect
 
 ```python
-@abstractmethod
-async def connect() -> None
+ | @abstractmethod
+ | async connect() -> None
 ```
 
 Set up the connection.
 
-<a id="aea.connections.base.Connection.disconnect"></a>
-
+<a name="aea.connections.base.Connection.disconnect"></a>
 #### disconnect
 
 ```python
-@abstractmethod
-async def disconnect() -> None
+ | @abstractmethod
+ | async disconnect() -> None
 ```
 
 Tear down the connection.
 
-<a id="aea.connections.base.Connection.send"></a>
-
+<a name="aea.connections.base.Connection.send"></a>
 #### send
 
 ```python
-@abstractmethod
-async def send(envelope: "Envelope") -> None
+ | @abstractmethod
+ | async send(envelope: "Envelope") -> None
 ```
 
 Send an envelope.
@@ -209,13 +191,12 @@ Send an envelope.
 
 None
 
-<a id="aea.connections.base.Connection.receive"></a>
-
+<a name="aea.connections.base.Connection.receive"></a>
 #### receive
 
 ```python
-@abstractmethod
-async def receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
+ | @abstractmethod
+ | async receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
 ```
 
 Receive an envelope.
@@ -229,13 +210,12 @@ Receive an envelope.
 
 the received envelope, or None if an error occurred.
 
-<a id="aea.connections.base.Connection.from_dir"></a>
-
+<a name="aea.connections.base.Connection.from_dir"></a>
 #### from`_`dir
 
 ```python
-@classmethod
-def from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
+ | @classmethod
+ | from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
 ```
 
 Load the connection from a directory.
@@ -252,13 +232,12 @@ Load the connection from a directory.
 
 the connection object.
 
-<a id="aea.connections.base.Connection.from_config"></a>
-
+<a name="aea.connections.base.Connection.from_config"></a>
 #### from`_`config
 
 ```python
-@classmethod
-def from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
+ | @classmethod
+ | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
 ```
 
 Load a connection from a configuration.
@@ -275,41 +254,37 @@ Load a connection from a configuration.
 
 an instance of the concrete connection class.
 
-<a id="aea.connections.base.Connection.is_connected"></a>
-
+<a name="aea.connections.base.Connection.is_connected"></a>
 #### is`_`connected
 
 ```python
-@property
-def is_connected() -> bool
+ | @property
+ | is_connected() -> bool
 ```
 
 Return is connected state.
 
-<a id="aea.connections.base.Connection.is_connecting"></a>
-
+<a name="aea.connections.base.Connection.is_connecting"></a>
 #### is`_`connecting
 
 ```python
-@property
-def is_connecting() -> bool
+ | @property
+ | is_connecting() -> bool
 ```
 
 Return is connecting state.
 
-<a id="aea.connections.base.Connection.is_disconnected"></a>
-
+<a name="aea.connections.base.Connection.is_disconnected"></a>
 #### is`_`disconnected
 
 ```python
-@property
-def is_disconnected() -> bool
+ | @property
+ | is_disconnected() -> bool
 ```
 
 Return is disconnected state.
 
-<a id="aea.connections.base.BaseSyncConnection"></a>
-
+<a name="aea.connections.base.BaseSyncConnection"></a>
 ## BaseSyncConnection Objects
 
 ```python
@@ -318,12 +293,11 @@ class BaseSyncConnection(Connection)
 
 Base sync connection class to write connections with sync code.
 
-<a id="aea.connections.base.BaseSyncConnection.__init__"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
+ | __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize the connection.
@@ -341,105 +315,95 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 - `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
 - `kwargs`: keyword arguments passed to connection base
 
-<a id="aea.connections.base.BaseSyncConnection.put_envelope"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.put_envelope"></a>
 #### put`_`envelope
 
 ```python
-def put_envelope(envelope: Optional["Envelope"]) -> None
+ | put_envelope(envelope: Optional["Envelope"]) -> None
 ```
 
 Put envelope in to the incoming queue.
 
-<a id="aea.connections.base.BaseSyncConnection.connect"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.connect"></a>
 #### connect
 
 ```python
-async def connect() -> None
+ | async connect() -> None
 ```
 
 Connect connection.
 
-<a id="aea.connections.base.BaseSyncConnection.disconnect"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.disconnect"></a>
 #### disconnect
 
 ```python
-async def disconnect() -> None
+ | async disconnect() -> None
 ```
 
 Disconnect connection.
 
-<a id="aea.connections.base.BaseSyncConnection.send"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.send"></a>
 #### send
 
 ```python
-async def send(envelope: "Envelope") -> None
+ | async send(envelope: "Envelope") -> None
 ```
 
 Send envelope to connection.
 
-<a id="aea.connections.base.BaseSyncConnection.receive"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.receive"></a>
 #### receive
 
 ```python
-async def receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
+ | async receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
 ```
 
 Get an envelope from the connection.
 
-<a id="aea.connections.base.BaseSyncConnection.start_main"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.start_main"></a>
 #### start`_`main
 
 ```python
-def start_main() -> None
+ | start_main() -> None
 ```
 
 Start main function of the connection.
 
-<a id="aea.connections.base.BaseSyncConnection.main"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.main"></a>
 #### main
 
 ```python
-def main() -> None
+ | main() -> None
 ```
 
 Run main body of the connection in dedicated thread.
 
-<a id="aea.connections.base.BaseSyncConnection.on_connect"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.on_connect"></a>
 #### on`_`connect
 
 ```python
-@abstractmethod
-def on_connect() -> None
+ | @abstractmethod
+ | on_connect() -> None
 ```
 
 Run on connect method called.
 
-<a id="aea.connections.base.BaseSyncConnection.on_disconnect"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.on_disconnect"></a>
 #### on`_`disconnect
 
 ```python
-@abstractmethod
-def on_disconnect() -> None
+ | @abstractmethod
+ | on_disconnect() -> None
 ```
 
 Run on disconnect method called.
 
-<a id="aea.connections.base.BaseSyncConnection.on_send"></a>
-
+<a name="aea.connections.base.BaseSyncConnection.on_send"></a>
 #### on`_`send
 
 ```python
-@abstractmethod
-def on_send(envelope: "Envelope") -> None
+ | @abstractmethod
+ | on_send(envelope: "Envelope") -> None
 ```
 
 Run on send method called.

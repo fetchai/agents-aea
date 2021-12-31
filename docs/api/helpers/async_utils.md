@@ -1,21 +1,18 @@
-<a id="aea.helpers.async_utils"></a>
-
+<a name="aea.helpers.async_utils"></a>
 # aea.helpers.async`_`utils
 
 This module contains the misc utils for async code.
 
-<a id="aea.helpers.async_utils.ensure_list"></a>
-
+<a name="aea.helpers.async_utils.ensure_list"></a>
 #### ensure`_`list
 
 ```python
-def ensure_list(value: Any) -> List
+ensure_list(value: Any) -> List
 ```
 
 Return [value] or list(value) if value is a sequence.
 
-<a id="aea.helpers.async_utils.AsyncState"></a>
-
+<a name="aea.helpers.async_utils.AsyncState"></a>
 ## AsyncState Objects
 
 ```python
@@ -24,12 +21,11 @@ class AsyncState()
 
 Awaitable state.
 
-<a id="aea.helpers.async_utils.AsyncState.__init__"></a>
-
+<a name="aea.helpers.async_utils.AsyncState.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(initial_state: Any = None, states_enum: Optional[Container[Any]] = None) -> None
+ | __init__(initial_state: Any = None, states_enum: Optional[Container[Any]] = None) -> None
 ```
 
 Init async state.
@@ -39,22 +35,20 @@ Init async state.
 - `initial_state`: state to set on start.
 - `states_enum`: container of valid states if not provided state not checked on set.
 
-<a id="aea.helpers.async_utils.AsyncState.set"></a>
-
+<a name="aea.helpers.async_utils.AsyncState.set"></a>
 #### set
 
 ```python
-def set(state: Any) -> None
+ | set(state: Any) -> None
 ```
 
 Set state.
 
-<a id="aea.helpers.async_utils.AsyncState.add_callback"></a>
-
+<a name="aea.helpers.async_utils.AsyncState.add_callback"></a>
 #### add`_`callback
 
 ```python
-def add_callback(callback_fn: Callable[[Any], None]) -> None
+ | add_callback(callback_fn: Callable[[Any], None]) -> None
 ```
 
 Add callback to track state changes.
@@ -63,28 +57,25 @@ Add callback to track state changes.
 
 - `callback_fn`: callable object to be called on state changed.
 
-<a id="aea.helpers.async_utils.AsyncState.get"></a>
-
+<a name="aea.helpers.async_utils.AsyncState.get"></a>
 #### get
 
 ```python
-def get() -> Any
+ | get() -> Any
 ```
 
 Get state.
 
-<a id="aea.helpers.async_utils.AsyncState.wait"></a>
-
+<a name="aea.helpers.async_utils.AsyncState.wait"></a>
 #### wait
 
 ```python
-async def wait(state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]
+ | async wait(state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]
 ```
 
 Wait state to be set.
 
 **Arguments**:
-
 
 - `state_or_states`: state or list of states.
 
@@ -92,26 +83,24 @@ Wait state to be set.
 
 tuple of previous state and new state.
 
-<a id="aea.helpers.async_utils.AsyncState.transit"></a>
-
+<a name="aea.helpers.async_utils.AsyncState.transit"></a>
 #### transit
 
 ```python
-@contextmanager
-def transit(initial: Any = not_set, success: Any = not_set, fail: Any = not_set) -> Generator
+ | @contextmanager
+ | transit(initial: Any = not_set, success: Any = not_set, fail: Any = not_set) -> Generator
 ```
 
 Change state context according to success or not.
 
 **Arguments**:
 
-:yield: generator
 - `initial`: set state on context enter, not_set by default
 - `success`: set state on context block done, not_set by default
 - `fail`: set state on context block raises exception, not_set by default
+:yield: generator
 
-<a id="aea.helpers.async_utils.PeriodicCaller"></a>
-
+<a name="aea.helpers.async_utils.PeriodicCaller"></a>
 ## PeriodicCaller Objects
 
 ```python
@@ -122,12 +111,11 @@ Schedule a periodic call of callable using event loop.
 
 Used for periodic function run using asyncio.
 
-<a id="aea.helpers.async_utils.PeriodicCaller.__init__"></a>
-
+<a name="aea.helpers.async_utils.PeriodicCaller.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(callback: Callable, period: float, start_at: Optional[datetime.datetime] = None, exception_callback: Optional[Callable[[Callable, Exception], None]] = None, loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(callback: Callable, period: float, start_at: Optional[datetime.datetime] = None, exception_callback: Optional[Callable[[Callable, Exception], None]] = None, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init periodic caller.
@@ -140,28 +128,25 @@ Init periodic caller.
 - `exception_callback`: optional handler to call on exception raised.
 - `loop`: optional asyncio event loop
 
-<a id="aea.helpers.async_utils.PeriodicCaller.start"></a>
-
+<a name="aea.helpers.async_utils.PeriodicCaller.start"></a>
 #### start
 
 ```python
-def start() -> None
+ | start() -> None
 ```
 
 Activate period calls.
 
-<a id="aea.helpers.async_utils.PeriodicCaller.stop"></a>
-
+<a name="aea.helpers.async_utils.PeriodicCaller.stop"></a>
 #### stop
 
 ```python
-def stop() -> None
+ | stop() -> None
 ```
 
 Remove from schedule.
 
-<a id="aea.helpers.async_utils.AnotherThreadTask"></a>
-
+<a name="aea.helpers.async_utils.AnotherThreadTask"></a>
 ## AnotherThreadTask Objects
 
 ```python
@@ -172,12 +157,11 @@ Schedule a task to run on the loop in another thread.
 
 Provides better cancel behaviour: on cancel it will wait till cancelled completely.
 
-<a id="aea.helpers.async_utils.AnotherThreadTask.__init__"></a>
-
+<a name="aea.helpers.async_utils.AnotherThreadTask.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(coro: Awaitable, loop: AbstractEventLoop) -> None
+ | __init__(coro: Awaitable, loop: AbstractEventLoop) -> None
 ```
 
 Init the task.
@@ -187,12 +171,11 @@ Init the task.
 - `coro`: coroutine to schedule
 - `loop`: an event loop to schedule on.
 
-<a id="aea.helpers.async_utils.AnotherThreadTask.result"></a>
-
+<a name="aea.helpers.async_utils.AnotherThreadTask.result"></a>
 #### result
 
 ```python
-def result(timeout: Optional[float] = None) -> Any
+ | result(timeout: Optional[float] = None) -> Any
 ```
 
 Wait for coroutine execution result.
@@ -205,28 +188,25 @@ Wait for coroutine execution result.
 
 result
 
-<a id="aea.helpers.async_utils.AnotherThreadTask.cancel"></a>
-
+<a name="aea.helpers.async_utils.AnotherThreadTask.cancel"></a>
 #### cancel
 
 ```python
-def cancel() -> None
+ | cancel() -> None
 ```
 
 Cancel coroutine task execution in a target loop.
 
-<a id="aea.helpers.async_utils.AnotherThreadTask.done"></a>
-
+<a name="aea.helpers.async_utils.AnotherThreadTask.done"></a>
 #### done
 
 ```python
-def done() -> bool
+ | done() -> bool
 ```
 
 Check task is done.
 
-<a id="aea.helpers.async_utils.ThreadedAsyncRunner"></a>
-
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner"></a>
 ## ThreadedAsyncRunner Objects
 
 ```python
@@ -235,12 +215,11 @@ class ThreadedAsyncRunner(Thread)
 
 Util to run thread with event loop and execute coroutines inside.
 
-<a id="aea.helpers.async_utils.ThreadedAsyncRunner.__init__"></a>
-
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(loop: Optional[AbstractEventLoop] = None) -> None
+ | __init__(loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init threaded runner.
@@ -249,32 +228,29 @@ Init threaded runner.
 
 - `loop`: optional event loop. is it's running loop, threaded runner will use it.
 
-<a id="aea.helpers.async_utils.ThreadedAsyncRunner.start"></a>
-
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.start"></a>
 #### start
 
 ```python
-def start() -> None
+ | start() -> None
 ```
 
 Start event loop in dedicated thread.
 
-<a id="aea.helpers.async_utils.ThreadedAsyncRunner.run"></a>
-
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.run"></a>
 #### run
 
 ```python
-def run() -> None
+ | run() -> None
 ```
 
 Run code inside thread.
 
-<a id="aea.helpers.async_utils.ThreadedAsyncRunner.call"></a>
-
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.call"></a>
 #### call
 
 ```python
-def call(coro: Awaitable) -> Any
+ | call(coro: Awaitable) -> Any
 ```
 
 Run a coroutine inside the event loop.
@@ -287,18 +263,16 @@ Run a coroutine inside the event loop.
 
 task
 
-<a id="aea.helpers.async_utils.ThreadedAsyncRunner.stop"></a>
-
+<a name="aea.helpers.async_utils.ThreadedAsyncRunner.stop"></a>
 #### stop
 
 ```python
-def stop() -> None
+ | stop() -> None
 ```
 
 Stop event loop in thread.
 
-<a id="aea.helpers.async_utils.Runnable"></a>
-
+<a name="aea.helpers.async_utils.Runnable"></a>
 ## Runnable Objects
 
 ```python
@@ -311,12 +285,11 @@ Use to run async task in same event loop or in dedicated thread.
 Provides: start, stop sync methods to start and stop task
 Use wait_completed to await task was completed.
 
-<a id="aea.helpers.async_utils.Runnable.__init__"></a>
-
+<a name="aea.helpers.async_utils.Runnable.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(loop: asyncio.AbstractEventLoop = None, threaded: bool = False) -> None
+ | __init__(loop: asyncio.AbstractEventLoop = None, threaded: bool = False) -> None
 ```
 
 Init runnable.
@@ -326,12 +299,11 @@ Init runnable.
 - `loop`: asyncio event loop to use.
 - `threaded`: bool. start in thread if True.
 
-<a id="aea.helpers.async_utils.Runnable.start"></a>
-
+<a name="aea.helpers.async_utils.Runnable.start"></a>
 #### start
 
 ```python
-def start() -> bool
+ | start() -> bool
 ```
 
 Start runnable.
@@ -340,40 +312,36 @@ Start runnable.
 
 bool started or not.
 
-<a id="aea.helpers.async_utils.Runnable.is_running"></a>
-
+<a name="aea.helpers.async_utils.Runnable.is_running"></a>
 #### is`_`running
 
 ```python
-@property
-def is_running() -> bool
+ | @property
+ | is_running() -> bool
 ```
 
 Get running state.
 
-<a id="aea.helpers.async_utils.Runnable.run"></a>
-
+<a name="aea.helpers.async_utils.Runnable.run"></a>
 #### run
 
 ```python
-@abstractmethod
-async def run() -> Any
+ | @abstractmethod
+ | async run() -> Any
 ```
 
 Implement run logic respectful to CancelError on termination.
 
-<a id="aea.helpers.async_utils.Runnable.wait_completed"></a>
-
+<a name="aea.helpers.async_utils.Runnable.wait_completed"></a>
 #### wait`_`completed
 
 ```python
-def wait_completed(sync: bool = False, timeout: float = None, force_result: bool = False) -> Awaitable
+ | wait_completed(sync: bool = False, timeout: float = None, force_result: bool = False) -> Awaitable
 ```
 
 Wait runnable execution completed.
 
 **Arguments**:
-
 
 - `sync`: bool. blocking wait
 - `timeout`: float seconds
@@ -383,22 +351,20 @@ Wait runnable execution completed.
 
 awaitable if sync is False, otherwise None
 
-<a id="aea.helpers.async_utils.Runnable.stop"></a>
-
+<a name="aea.helpers.async_utils.Runnable.stop"></a>
 #### stop
 
 ```python
-def stop(force: bool = False) -> None
+ | stop(force: bool = False) -> None
 ```
 
 Stop runnable.
 
-<a id="aea.helpers.async_utils.Runnable.start_and_wait_completed"></a>
-
+<a name="aea.helpers.async_utils.Runnable.start_and_wait_completed"></a>
 #### start`_`and`_`wait`_`completed
 
 ```python
-def start_and_wait_completed(*args: Any, **kwargs: Any) -> Awaitable
+ | start_and_wait_completed(*args: Any, **kwargs: Any) -> Awaitable
 ```
 
 Alias for start and wait methods.

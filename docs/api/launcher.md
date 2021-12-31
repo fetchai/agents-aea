@@ -1,21 +1,18 @@
-<a id="aea.launcher"></a>
-
+<a name="aea.launcher"></a>
 # aea.launcher
 
 This module contains the implementation of multiple AEA configs launcher.
 
-<a id="aea.launcher.load_agent"></a>
-
+<a name="aea.launcher.load_agent"></a>
 #### load`_`agent
 
 ```python
-def load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> AEA
+load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> AEA
 ```
 
 Load AEA from directory.
 
 **Arguments**:
-
 
 - `agent_dir`: agent configuration directory
 - `password`: the password to encrypt/decrypt the private key.
@@ -24,8 +21,7 @@ Load AEA from directory.
 
 AEA instance
 
-<a id="aea.launcher.AEADirTask"></a>
-
+<a name="aea.launcher.AEADirTask"></a>
 ## AEADirTask Objects
 
 ```python
@@ -34,12 +30,11 @@ class AEADirTask(AbstractExecutorTask)
 
 Task to run agent from agent configuration directory.
 
-<a id="aea.launcher.AEADirTask.__init__"></a>
-
+<a name="aea.launcher.AEADirTask.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> None
+ | __init__(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> None
 ```
 
 Init aea config dir task.
@@ -49,49 +44,44 @@ Init aea config dir task.
 - `agent_dir`: directory with aea config.
 - `password`: the password to encrypt/decrypt the private key.
 
-<a id="aea.launcher.AEADirTask.id"></a>
-
+<a name="aea.launcher.AEADirTask.id"></a>
 #### id
 
 ```python
-@property
-def id() -> Union[PathLike, str]
+ | @property
+ | id() -> Union[PathLike, str]
 ```
 
 Return agent_dir.
 
-<a id="aea.launcher.AEADirTask.start"></a>
-
+<a name="aea.launcher.AEADirTask.start"></a>
 #### start
 
 ```python
-def start() -> None
+ | start() -> None
 ```
 
 Start task.
 
-<a id="aea.launcher.AEADirTask.stop"></a>
-
+<a name="aea.launcher.AEADirTask.stop"></a>
 #### stop
 
 ```python
-def stop() -> None
+ | stop() -> None
 ```
 
 Stop task.
 
-<a id="aea.launcher.AEADirTask.create_async_task"></a>
-
+<a name="aea.launcher.AEADirTask.create_async_task"></a>
 #### create`_`async`_`task
 
 ```python
-def create_async_task(loop: AbstractEventLoop) -> TaskAwaitable
+ | create_async_task(loop: AbstractEventLoop) -> TaskAwaitable
 ```
 
 Return asyncio Task for task run in asyncio loop.
 
-<a id="aea.launcher.AEADirMultiprocessTask"></a>
-
+<a name="aea.launcher.AEADirMultiprocessTask"></a>
 ## AEADirMultiprocessTask Objects
 
 ```python
@@ -102,12 +92,11 @@ Task to run agent from agent configuration directory.
 
 Version for multiprocess executor mode.
 
-<a id="aea.launcher.AEADirMultiprocessTask.__init__"></a>
-
+<a name="aea.launcher.AEADirMultiprocessTask.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None, password: Optional[str] = None) -> None
+ | __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None, password: Optional[str] = None) -> None
 ```
 
 Init aea config dir task.
@@ -118,24 +107,22 @@ Init aea config dir task.
 - `log_level`: debug level applied for AEA in subprocess
 - `password`: the password to encrypt/decrypt the private key.
 
-<a id="aea.launcher.AEADirMultiprocessTask.id"></a>
-
+<a name="aea.launcher.AEADirMultiprocessTask.id"></a>
 #### id
 
 ```python
-@property
-def id() -> Union[PathLike, str]
+ | @property
+ | id() -> Union[PathLike, str]
 ```
 
 Return agent_dir.
 
-<a id="aea.launcher.AEADirMultiprocessTask.failed"></a>
-
+<a name="aea.launcher.AEADirMultiprocessTask.failed"></a>
 #### failed
 
 ```python
-@property
-def failed() -> bool
+ | @property
+ | failed() -> bool
 ```
 
 Return was exception failed or not.
@@ -146,28 +133,25 @@ If it's running it's not failed.
 
 bool
 
-<a id="aea.launcher.AEADirMultiprocessTask.start"></a>
-
+<a name="aea.launcher.AEADirMultiprocessTask.start"></a>
 #### start
 
 ```python
-def start() -> Tuple[Callable, Sequence[Any]]
+ | start() -> Tuple[Callable, Sequence[Any]]
 ```
 
 Return function and arguments to call within subprocess.
 
-<a id="aea.launcher.AEADirMultiprocessTask.stop"></a>
-
+<a name="aea.launcher.AEADirMultiprocessTask.stop"></a>
 #### stop
 
 ```python
-def stop() -> None
+ | stop() -> None
 ```
 
 Stop task.
 
-<a id="aea.launcher.AEALauncher"></a>
-
+<a name="aea.launcher.AEALauncher"></a>
 ## AEALauncher Objects
 
 ```python
@@ -176,12 +160,11 @@ class AEALauncher(AbstractMultipleRunner)
 
 Run multiple AEA instances.
 
-<a id="aea.launcher.AEALauncher.__init__"></a>
-
+<a name="aea.launcher.AEALauncher.__init__"></a>
 #### `__`init`__`
 
 ```python
-def __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None, password: Optional[str] = None) -> None
+ | __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None, password: Optional[str] = None) -> None
 ```
 
 Init AEALauncher.

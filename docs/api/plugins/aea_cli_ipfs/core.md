@@ -1,36 +1,32 @@
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core"></a>
 # plugins.aea-cli-ipfs.aea`_`cli`_`ipfs.core
 
 Core components for `ipfs cli command`.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core.ipfs"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.ipfs"></a>
 #### ipfs
 
 ```python
 @click.group()
 @click.pass_context
 @click.option("--online", is_flag=True)
-def ipfs(click_context: click.Context, online: bool) -> None
+ipfs(click_context: click.Context, online: bool) -> None
 ```
 
 IPFS Commands
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core.process_result"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.process_result"></a>
 #### process`_`result
 
 ```python
 @ipfs.resultcallback()
 @click.pass_context
-def process_result(click_context: click.Context, *_: Any, **__: Any) -> None
+process_result(click_context: click.Context, *_: Any, **__: Any) -> None
 ```
 
 Tear down command group.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core.add"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.add"></a>
 #### add
 
 ```python
@@ -45,13 +41,12 @@ Tear down command group.
 @click.option("-p", "--publish", is_flag=True)
 @click.option("--no-pin", is_flag=True)
 @click.pass_context
-def add(click_context: click.Context, dir_path: Optional[str], publish: bool = False, no_pin: bool = False) -> None
+add(click_context: click.Context, dir_path: Optional[str], publish: bool = False, no_pin: bool = False) -> None
 ```
 
 Add directory to ipfs, if not directory specified the current one will be added.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core.remove"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.remove"></a>
 #### remove
 
 ```python
@@ -60,13 +55,12 @@ Add directory to ipfs, if not directory specified the current one will be added.
     "hash_", metavar="hash", type=str, required=True,
 )
 @click.pass_context
-def remove(click_context: click.Context, hash_: str) -> None
+remove(click_context: click.Context, hash_: str) -> None
 ```
 
 Remove a directory from ipfs by it's hash.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core.download"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.download"></a>
 #### download
 
 ```python
@@ -80,17 +74,16 @@ Remove a directory from ipfs by it's hash.
     required=False,
 )
 @click.pass_context
-def download(click_context: click.Context, hash_: str, target_dir: Optional[str]) -> None
+download(click_context: click.Context, hash_: str, target_dir: Optional[str]) -> None
 ```
 
 Download directory by it's hash, if not target directory specified will use current one.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.core.register_package"></a>
-
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.core.register_package"></a>
 #### register`_`package
 
 ```python
-def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool) -> str
+register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool) -> str
 ```
 
 Register package to IPFS registry.
