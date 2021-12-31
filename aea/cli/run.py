@@ -84,6 +84,13 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     default=None,
     help="The connection names to disable for running the agent. Must be declared in the agent's configuration file.",
 )
+@click.option(
+    "--load_from_env_variables",
+    "load_environment_variables",
+    required=False,
+    default=0,
+    help="Populate Agent configs from Environment variables.",
+)
 @click.pass_context
 @check_aea_project
 def run(
@@ -92,6 +99,7 @@ def run(
     exclude_connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
+    load_environment_variables:bool,
     profiling: int,
     password: str,
 ) -> None:
@@ -108,9 +116,9 @@ def run(
 
     if profiling > 0:
         with _profiling_context(period=profiling):
-            run_aea(ctx, connection_ids, env_file, is_install_deps, password)
+            run_aea(ctx, connection_ids, env_file, is_install_deps, load_environment_variables, password)
             return
-    run_aea(ctx, connection_ids, env_file, is_install_deps, password)
+    run_aea(ctx, connection_ids, env_file, is_install_deps, load_environment_variables, password)
 
 
 def _calculate_connection_ids(
@@ -174,6 +182,7 @@ def run_aea(
     connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
+    load_environment_variables: bool,
     password: Optional[str] = None,
 ) -> None:
     """
@@ -189,7 +198,7 @@ def run_aea(
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
-    aea = _build_aea(connection_ids, skip_consistency_check, password)
+    aea = _build_aea(connection_ids, skip_consistency_check, load_environment_variables, password)
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(
@@ -224,12 +233,15 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
 def _build_aea(
     connection_ids: Optional[List[PublicId]],
     skip_consistency_check: bool,
+    load_environment_variables: bool,
     password: Optional[str] = None,
 ) -> AEA:
     """Build the AEA."""
     try:
         builder = AEABuilder.from_aea_project(
-            Path("."), skip_consistency_check=skip_consistency_check, password=password
+            Path("."), skip_consistency_check=skip_consistency_check,
+            load_environment_variables=load_environment_variables,
+            password=password
         )
         aea = builder.build(connection_ids=connection_ids, password=password)
         return aea
