@@ -1,26 +1,29 @@
-<a name="aea.configurations.utils"></a>
+<a id="aea.configurations.utils"></a>
+
 # aea.configurations.utils
 
 AEA configuration utils.
 
-<a name="aea.configurations.utils.replace_component_ids"></a>
+<a id="aea.configurations.utils.replace_component_ids"></a>
+
 #### replace`_`component`_`ids
 
 ```python
 @singledispatch
-replace_component_ids(_arg: PackageConfiguration, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def replace_component_ids(_arg: PackageConfiguration, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Update public id references in a package configuration.
 
 This depends on the actual configuration being considered.
 
-<a name="aea.configurations.utils._"></a>
+<a id="aea.configurations.utils._"></a>
+
 #### `_`
 
 ```python
 @replace_component_ids.register(AgentConfig)  # type: ignore
-_(arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in agent configuration.
@@ -36,51 +39,56 @@ It breaks down in:
 - `arg`: the agent configuration.
 - `replacements`: the replacement mapping.
 
-<a name="aea.configurations.utils._"></a>
+<a id="aea.configurations.utils._"></a>
+
 #### `_`
 
 ```python
 @replace_component_ids.register(ProtocolConfig)  # type: ignore
-_(_arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(_arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Do nothing - protocols have no references.
 
-<a name="aea.configurations.utils._"></a>
+<a id="aea.configurations.utils._"></a>
+
 #### `_`
 
 ```python
 @replace_component_ids.register(ConnectionConfig)  # type: ignore
-_(arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in a connection configuration.
 
-<a name="aea.configurations.utils._"></a>
+<a id="aea.configurations.utils._"></a>
+
 #### `_`
 
 ```python
 @replace_component_ids.register(ContractConfig)  # type: ignore
-_(_arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(_arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Do nothing - contracts have no references.
 
-<a name="aea.configurations.utils._"></a>
+<a id="aea.configurations.utils._"></a>
+
 #### `_`
 
 ```python
 @replace_component_ids.register(SkillConfig)  # type: ignore
-_(arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in a skill configuration.
 
-<a name="aea.configurations.utils.get_latest_component_id_from_prefix"></a>
+<a id="aea.configurations.utils.get_latest_component_id_from_prefix"></a>
+
 #### get`_`latest`_`component`_`id`_`from`_`prefix
 
 ```python
-get_latest_component_id_from_prefix(agent_config: AgentConfig, component_prefix: PackageIdPrefix) -> Optional[ComponentId]
+def get_latest_component_id_from_prefix(agent_config: AgentConfig, component_prefix: PackageIdPrefix) -> Optional[ComponentId]
 ```
 
 Get component id with the greatest version in an agent configuration given its prefix.

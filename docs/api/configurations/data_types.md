@@ -1,9 +1,11 @@
-<a name="aea.configurations.data_types"></a>
+<a id="aea.configurations.data_types"></a>
+
 # aea.configurations.data`_`types
 
 Base config data types.
 
-<a name="aea.configurations.data_types.JSONSerializable"></a>
+<a id="aea.configurations.data_types.JSONSerializable"></a>
+
 ## JSONSerializable Objects
 
 ```python
@@ -12,28 +14,31 @@ class JSONSerializable(ABC)
 
 Interface for JSON-serializable objects.
 
-<a name="aea.configurations.data_types.JSONSerializable.json"></a>
+<a id="aea.configurations.data_types.JSONSerializable.json"></a>
+
 #### json
 
 ```python
- | @property
- | @abstractmethod
- | json() -> Dict
+@property
+@abstractmethod
+def json() -> Dict
 ```
 
 Compute the JSON representation.
 
-<a name="aea.configurations.data_types.JSONSerializable.from_json"></a>
+<a id="aea.configurations.data_types.JSONSerializable.from_json"></a>
+
 #### from`_`json
 
 ```python
- | @classmethod
- | from_json(cls, obj: Dict) -> "JSONSerializable"
+@classmethod
+def from_json(cls, obj: Dict) -> "JSONSerializable"
 ```
 
 Build from a JSON object.
 
-<a name="aea.configurations.data_types.PackageVersion"></a>
+<a id="aea.configurations.data_types.PackageVersion"></a>
+
 ## PackageVersion Objects
 
 ```python
@@ -43,11 +48,12 @@ class PackageVersion()
 
 A package version.
 
-<a name="aea.configurations.data_types.PackageVersion.__init__"></a>
+<a id="aea.configurations.data_types.PackageVersion.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(version_like: PackageVersionLike) -> None
+def __init__(version_like: PackageVersionLike) -> None
 ```
 
 Initialize a package version.
@@ -56,44 +62,49 @@ Initialize a package version.
 
 - `version_like`: a string, os a semver.VersionInfo object.
 
-<a name="aea.configurations.data_types.PackageVersion.is_latest"></a>
+<a id="aea.configurations.data_types.PackageVersion.is_latest"></a>
+
 #### is`_`latest
 
 ```python
- | @property
- | is_latest() -> bool
+@property
+def is_latest() -> bool
 ```
 
 Check whether the version is 'latest'.
 
-<a name="aea.configurations.data_types.PackageVersion.__str__"></a>
+<a id="aea.configurations.data_types.PackageVersion.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Get the string representation.
 
-<a name="aea.configurations.data_types.PackageVersion.__eq__"></a>
+<a id="aea.configurations.data_types.PackageVersion.__eq__"></a>
+
 #### `__`eq`__`
 
 ```python
- | __eq__(other: Any) -> bool
+def __eq__(other: Any) -> bool
 ```
 
 Check equality.
 
-<a name="aea.configurations.data_types.PackageVersion.__lt__"></a>
+<a id="aea.configurations.data_types.PackageVersion.__lt__"></a>
+
 #### `__`lt`__`
 
 ```python
- | __lt__(other: Any) -> bool
+def __lt__(other: Any) -> bool
 ```
 
 Compare with another object.
 
-<a name="aea.configurations.data_types.PackageType"></a>
+<a id="aea.configurations.data_types.PackageType"></a>
+
 ## PackageType Objects
 
 ```python
@@ -102,11 +113,12 @@ class PackageType(Enum)
 
 Package types.
 
-<a name="aea.configurations.data_types.PackageType.to_plural"></a>
+<a id="aea.configurations.data_types.PackageType.to_plural"></a>
+
 #### to`_`plural
 
 ```python
- | to_plural() -> str
+def to_plural() -> str
 ```
 
 Get the plural name.
@@ -126,16 +138,18 @@ Get the plural name.
 
 pluralised package type
 
-<a name="aea.configurations.data_types.PackageType.__str__"></a>
+<a id="aea.configurations.data_types.PackageType.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Convert to string.
 
-<a name="aea.configurations.data_types.ComponentType"></a>
+<a id="aea.configurations.data_types.ComponentType"></a>
+
 ## ComponentType Objects
 
 ```python
@@ -144,21 +158,23 @@ class ComponentType(Enum)
 
 Enum of component types supported.
 
-<a name="aea.configurations.data_types.ComponentType.to_package_type"></a>
+<a id="aea.configurations.data_types.ComponentType.to_package_type"></a>
+
 #### to`_`package`_`type
 
 ```python
- | to_package_type() -> PackageType
+def to_package_type() -> PackageType
 ```
 
 Get package type for component type.
 
-<a name="aea.configurations.data_types.ComponentType.plurals"></a>
+<a id="aea.configurations.data_types.ComponentType.plurals"></a>
+
 #### plurals
 
 ```python
- | @staticmethod
- | plurals() -> Collection[str]
+@staticmethod
+def plurals() -> Collection[str]
 ```
 
 Get the collection of type names, plural.
@@ -170,11 +186,12 @@ Get the collection of type names, plural.
 
 list of all pluralised component types
 
-<a name="aea.configurations.data_types.ComponentType.to_plural"></a>
+<a id="aea.configurations.data_types.ComponentType.to_plural"></a>
+
 #### to`_`plural
 
 ```python
- | to_plural() -> str
+def to_plural() -> str
 ```
 
 Get the plural version of the component type.
@@ -192,16 +209,18 @@ Get the plural version of the component type.
 
 pluralised component type
 
-<a name="aea.configurations.data_types.ComponentType.__str__"></a>
+<a id="aea.configurations.data_types.ComponentType.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Get the string representation.
 
-<a name="aea.configurations.data_types.PublicId"></a>
+<a id="aea.configurations.data_types.PublicId"></a>
+
 ## PublicId Objects
 
 ```python
@@ -232,88 +251,97 @@ The concatenation of those three elements gives the public identifier:
 >>> latest_public_id.package_version.is_latest
 True
 
-<a name="aea.configurations.data_types.PublicId.__init__"></a>
+<a id="aea.configurations.data_types.PublicId.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[PackageVersionLike] = None) -> None
+def __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[PackageVersionLike] = None) -> None
 ```
 
 Initialize the public identifier.
 
-<a name="aea.configurations.data_types.PublicId.author"></a>
+<a id="aea.configurations.data_types.PublicId.author"></a>
+
 #### author
 
 ```python
- | @property
- | author() -> str
+@property
+def author() -> str
 ```
 
 Get the author.
 
-<a name="aea.configurations.data_types.PublicId.name"></a>
+<a id="aea.configurations.data_types.PublicId.name"></a>
+
 #### name
 
 ```python
- | @property
- | name() -> str
+@property
+def name() -> str
 ```
 
 Get the name.
 
-<a name="aea.configurations.data_types.PublicId.version"></a>
+<a id="aea.configurations.data_types.PublicId.version"></a>
+
 #### version
 
 ```python
- | @property
- | version() -> str
+@property
+def version() -> str
 ```
 
 Get the version string.
 
-<a name="aea.configurations.data_types.PublicId.package_version"></a>
+<a id="aea.configurations.data_types.PublicId.package_version"></a>
+
 #### package`_`version
 
 ```python
- | @property
- | package_version() -> PackageVersion
+@property
+def package_version() -> PackageVersion
 ```
 
 Get the package version object.
 
-<a name="aea.configurations.data_types.PublicId.to_any"></a>
+<a id="aea.configurations.data_types.PublicId.to_any"></a>
+
 #### to`_`any
 
 ```python
- | to_any() -> "PublicId"
+def to_any() -> "PublicId"
 ```
 
 Return the same public id, but with any version.
 
-<a name="aea.configurations.data_types.PublicId.same_prefix"></a>
+<a id="aea.configurations.data_types.PublicId.same_prefix"></a>
+
 #### same`_`prefix
 
 ```python
- | same_prefix(other: "PublicId") -> bool
+def same_prefix(other: "PublicId") -> bool
 ```
 
 Check if the other public id has the same author and name of this.
 
-<a name="aea.configurations.data_types.PublicId.to_latest"></a>
+<a id="aea.configurations.data_types.PublicId.to_latest"></a>
+
 #### to`_`latest
 
 ```python
- | to_latest() -> "PublicId"
+def to_latest() -> "PublicId"
 ```
 
 Return the same public id, but with latest version.
 
-<a name="aea.configurations.data_types.PublicId.is_valid_str"></a>
+<a id="aea.configurations.data_types.PublicId.is_valid_str"></a>
+
 #### is`_`valid`_`str
 
 ```python
- | @classmethod
- | is_valid_str(cls, public_id_string: str) -> bool
+@classmethod
+def is_valid_str(cls, public_id_string: str) -> bool
 ```
 
 Check if a string is a public id.
@@ -326,12 +354,13 @@ Check if a string is a public id.
 
 bool indicating validity
 
-<a name="aea.configurations.data_types.PublicId.from_str"></a>
+<a id="aea.configurations.data_types.PublicId.from_str"></a>
+
 #### from`_`str
 
 ```python
- | @classmethod
- | from_str(cls, public_id_string: str) -> "PublicId"
+@classmethod
+def from_str(cls, public_id_string: str) -> "PublicId"
 ```
 
 Initialize the public id from the string.
@@ -357,12 +386,13 @@ the public id object.
 
 - `ValueError`: if the string in input is not well formatted.
 
-<a name="aea.configurations.data_types.PublicId.try_from_str"></a>
+<a id="aea.configurations.data_types.PublicId.try_from_str"></a>
+
 #### try`_`from`_`str
 
 ```python
- | @classmethod
- | try_from_str(cls, public_id_string: str) -> Optional["PublicId"]
+@classmethod
+def try_from_str(cls, public_id_string: str) -> Optional["PublicId"]
 ```
 
 Safely try to get public id from string.
@@ -375,12 +405,13 @@ Safely try to get public id from string.
 
 the public id object or None
 
-<a name="aea.configurations.data_types.PublicId.from_uri_path"></a>
+<a id="aea.configurations.data_types.PublicId.from_uri_path"></a>
+
 #### from`_`uri`_`path
 
 ```python
- | @classmethod
- | from_uri_path(cls, public_id_uri_path: str) -> "PublicId"
+@classmethod
+def from_uri_path(cls, public_id_uri_path: str) -> "PublicId"
 ```
 
 Initialize the public id from the string.
@@ -406,12 +437,13 @@ the public id object.
 
 - `ValueError`: if the string in input is not well formatted.
 
-<a name="aea.configurations.data_types.PublicId.to_uri_path"></a>
+<a id="aea.configurations.data_types.PublicId.to_uri_path"></a>
+
 #### to`_`uri`_`path
 
 ```python
- | @property
- | to_uri_path() -> str
+@property
+def to_uri_path() -> str
 ```
 
 Turn the public id into a uri path string.
@@ -420,67 +452,74 @@ Turn the public id into a uri path string.
 
 uri path string
 
-<a name="aea.configurations.data_types.PublicId.json"></a>
+<a id="aea.configurations.data_types.PublicId.json"></a>
+
 #### json
 
 ```python
- | @property
- | json() -> Dict
+@property
+def json() -> Dict
 ```
 
 Compute the JSON representation.
 
-<a name="aea.configurations.data_types.PublicId.from_json"></a>
+<a id="aea.configurations.data_types.PublicId.from_json"></a>
+
 #### from`_`json
 
 ```python
- | @classmethod
- | from_json(cls, obj: Dict) -> "PublicId"
+@classmethod
+def from_json(cls, obj: Dict) -> "PublicId"
 ```
 
 Build from a JSON object.
 
-<a name="aea.configurations.data_types.PublicId.__hash__"></a>
+<a id="aea.configurations.data_types.PublicId.__hash__"></a>
+
 #### `__`hash`__`
 
 ```python
- | __hash__() -> int
+def __hash__() -> int
 ```
 
 Get the hash.
 
-<a name="aea.configurations.data_types.PublicId.__str__"></a>
+<a id="aea.configurations.data_types.PublicId.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Get the string representation.
 
-<a name="aea.configurations.data_types.PublicId.__repr__"></a>
+<a id="aea.configurations.data_types.PublicId.__repr__"></a>
+
 #### `__`repr`__`
 
 ```python
- | __repr__() -> str
+def __repr__() -> str
 ```
 
 Get the representation.
 
-<a name="aea.configurations.data_types.PublicId.__eq__"></a>
+<a id="aea.configurations.data_types.PublicId.__eq__"></a>
+
 #### `__`eq`__`
 
 ```python
- | __eq__(other: Any) -> bool
+def __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
 
-<a name="aea.configurations.data_types.PublicId.__lt__"></a>
+<a id="aea.configurations.data_types.PublicId.__lt__"></a>
+
 #### `__`lt`__`
 
 ```python
- | __lt__(other: Any) -> bool
+def __lt__(other: Any) -> bool
 ```
 
 Compare two public ids.
@@ -510,7 +549,8 @@ ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 canno
 
 whether or not the inequality is satisfied
 
-<a name="aea.configurations.data_types.PackageId"></a>
+<a id="aea.configurations.data_types.PackageId"></a>
+
 ## PackageId Objects
 
 ```python
@@ -519,11 +559,12 @@ class PackageId()
 
 A package identifier.
 
-<a name="aea.configurations.data_types.PackageId.__init__"></a>
+<a id="aea.configurations.data_types.PackageId.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(package_type: Union[PackageType, str], public_id: PublicId) -> None
+def __init__(package_type: Union[PackageType, str], public_id: PublicId) -> None
 ```
 
 Initialize the package id.
@@ -533,72 +574,79 @@ Initialize the package id.
 - `package_type`: the package type.
 - `public_id`: the public id.
 
-<a name="aea.configurations.data_types.PackageId.package_type"></a>
+<a id="aea.configurations.data_types.PackageId.package_type"></a>
+
 #### package`_`type
 
 ```python
- | @property
- | package_type() -> PackageType
+@property
+def package_type() -> PackageType
 ```
 
 Get the package type.
 
-<a name="aea.configurations.data_types.PackageId.public_id"></a>
+<a id="aea.configurations.data_types.PackageId.public_id"></a>
+
 #### public`_`id
 
 ```python
- | @property
- | public_id() -> PublicId
+@property
+def public_id() -> PublicId
 ```
 
 Get the public id.
 
-<a name="aea.configurations.data_types.PackageId.author"></a>
+<a id="aea.configurations.data_types.PackageId.author"></a>
+
 #### author
 
 ```python
- | @property
- | author() -> str
+@property
+def author() -> str
 ```
 
 Get the author of the package.
 
-<a name="aea.configurations.data_types.PackageId.name"></a>
+<a id="aea.configurations.data_types.PackageId.name"></a>
+
 #### name
 
 ```python
- | @property
- | name() -> str
+@property
+def name() -> str
 ```
 
 Get the name of the package.
 
-<a name="aea.configurations.data_types.PackageId.version"></a>
+<a id="aea.configurations.data_types.PackageId.version"></a>
+
 #### version
 
 ```python
- | @property
- | version() -> str
+@property
+def version() -> str
 ```
 
 Get the version of the package.
 
-<a name="aea.configurations.data_types.PackageId.package_prefix"></a>
+<a id="aea.configurations.data_types.PackageId.package_prefix"></a>
+
 #### package`_`prefix
 
 ```python
- | @property
- | package_prefix() -> Tuple[PackageType, str, str]
+@property
+def package_prefix() -> Tuple[PackageType, str, str]
 ```
 
 Get the package identifier without the version.
 
-<a name="aea.configurations.data_types.PackageId.from_uri_path"></a>
+<a id="aea.configurations.data_types.PackageId.from_uri_path"></a>
+
 #### from`_`uri`_`path
 
 ```python
- | @classmethod
- | from_uri_path(cls, package_id_uri_path: str) -> "PackageId"
+@classmethod
+def from_uri_path(cls, package_id_uri_path: str) -> "PackageId"
 ```
 
 Initialize the package id from the string.
@@ -624,12 +672,13 @@ the package id object.
 
 - `ValueError`: if the string in input is not well formatted.
 
-<a name="aea.configurations.data_types.PackageId.to_uri_path"></a>
+<a id="aea.configurations.data_types.PackageId.to_uri_path"></a>
+
 #### to`_`uri`_`path
 
 ```python
- | @property
- | to_uri_path() -> str
+@property
+def to_uri_path() -> str
 ```
 
 Turn the package id into a uri path string.
@@ -638,52 +687,58 @@ Turn the package id into a uri path string.
 
 uri path string
 
-<a name="aea.configurations.data_types.PackageId.__hash__"></a>
+<a id="aea.configurations.data_types.PackageId.__hash__"></a>
+
 #### `__`hash`__`
 
 ```python
- | __hash__() -> int
+def __hash__() -> int
 ```
 
 Get the hash.
 
-<a name="aea.configurations.data_types.PackageId.__str__"></a>
+<a id="aea.configurations.data_types.PackageId.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Get the string representation.
 
-<a name="aea.configurations.data_types.PackageId.__repr__"></a>
+<a id="aea.configurations.data_types.PackageId.__repr__"></a>
+
 #### `__`repr`__`
 
 ```python
- | __repr__() -> str
+def __repr__() -> str
 ```
 
 Get the object representation in string.
 
-<a name="aea.configurations.data_types.PackageId.__eq__"></a>
+<a id="aea.configurations.data_types.PackageId.__eq__"></a>
+
 #### `__`eq`__`
 
 ```python
- | __eq__(other: Any) -> bool
+def __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
 
-<a name="aea.configurations.data_types.PackageId.__lt__"></a>
+<a id="aea.configurations.data_types.PackageId.__lt__"></a>
+
 #### `__`lt`__`
 
 ```python
- | __lt__(other: Any) -> bool
+def __lt__(other: Any) -> bool
 ```
 
 Compare two public ids.
 
-<a name="aea.configurations.data_types.ComponentId"></a>
+<a id="aea.configurations.data_types.ComponentId"></a>
+
 ## ComponentId Objects
 
 ```python
@@ -702,11 +757,12 @@ True
 >>> pacakge_id == component_id2
 False
 
-<a name="aea.configurations.data_types.ComponentId.__init__"></a>
+<a id="aea.configurations.data_types.ComponentId.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(component_type: Union[ComponentType, str], public_id: PublicId) -> None
+def __init__(component_type: Union[ComponentType, str], public_id: PublicId) -> None
 ```
 
 Initialize the component id.
@@ -716,66 +772,73 @@ Initialize the component id.
 - `component_type`: the component type.
 - `public_id`: the public id.
 
-<a name="aea.configurations.data_types.ComponentId.component_type"></a>
+<a id="aea.configurations.data_types.ComponentId.component_type"></a>
+
 #### component`_`type
 
 ```python
- | @property
- | component_type() -> ComponentType
+@property
+def component_type() -> ComponentType
 ```
 
 Get the component type.
 
-<a name="aea.configurations.data_types.ComponentId.component_prefix"></a>
+<a id="aea.configurations.data_types.ComponentId.component_prefix"></a>
+
 #### component`_`prefix
 
 ```python
- | @property
- | component_prefix() -> PackageIdPrefix
+@property
+def component_prefix() -> PackageIdPrefix
 ```
 
 Get the component identifier without the version.
 
-<a name="aea.configurations.data_types.ComponentId.same_prefix"></a>
+<a id="aea.configurations.data_types.ComponentId.same_prefix"></a>
+
 #### same`_`prefix
 
 ```python
- | same_prefix(other: "ComponentId") -> bool
+def same_prefix(other: "ComponentId") -> bool
 ```
 
 Check if the other component id has the same type, author and name of this.
 
-<a name="aea.configurations.data_types.ComponentId.prefix_import_path"></a>
+<a id="aea.configurations.data_types.ComponentId.prefix_import_path"></a>
+
 #### prefix`_`import`_`path
 
 ```python
- | @property
- | prefix_import_path() -> str
+@property
+def prefix_import_path() -> str
 ```
 
 Get the prefix import path for this component.
 
-<a name="aea.configurations.data_types.ComponentId.json"></a>
+<a id="aea.configurations.data_types.ComponentId.json"></a>
+
 #### json
 
 ```python
- | @property
- | json() -> Dict
+@property
+def json() -> Dict
 ```
 
 Get the JSON representation.
 
-<a name="aea.configurations.data_types.ComponentId.from_json"></a>
+<a id="aea.configurations.data_types.ComponentId.from_json"></a>
+
 #### from`_`json
 
 ```python
- | @classmethod
- | from_json(cls, json_data: Dict) -> "ComponentId"
+@classmethod
+def from_json(cls, json_data: Dict) -> "ComponentId"
 ```
 
 Create  component id from json data.
 
-<a name="aea.configurations.data_types.PyPIPackageName"></a>
+<a id="aea.configurations.data_types.PyPIPackageName"></a>
+
 ## PyPIPackageName Objects
 
 ```python
@@ -784,7 +847,8 @@ class PyPIPackageName(RegexConstrainedString)
 
 A PyPI Package name.
 
-<a name="aea.configurations.data_types.GitRef"></a>
+<a id="aea.configurations.data_types.GitRef"></a>
+
 ## GitRef Objects
 
 ```python
@@ -795,7 +859,8 @@ A Git reference.
 
 It can be a branch name, a commit hash or a tag.
 
-<a name="aea.configurations.data_types.Dependency"></a>
+<a id="aea.configurations.data_types.Dependency"></a>
+
 ## Dependency Objects
 
 ```python
@@ -813,11 +878,12 @@ It contains the following information:
 If the 'git' field is set, the 'version' field will be ignored.
 These fields will be forwarded to the 'pip' command.
 
-<a name="aea.configurations.data_types.Dependency.__init__"></a>
+<a id="aea.configurations.data_types.Dependency.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[str] = None, git: Optional[str] = None, ref: Optional[Union[GitRef, str]] = None) -> None
+def __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[str] = None, git: Optional[str] = None, ref: Optional[Union[GitRef, str]] = None) -> None
 ```
 
 Initialize a PyPI dependency.
@@ -830,103 +896,114 @@ Initialize a PyPI dependency.
 - `git`: the URL to a git repository.
 - `ref`: the Git reference (branch/commit/tag).
 
-<a name="aea.configurations.data_types.Dependency.name"></a>
+<a id="aea.configurations.data_types.Dependency.name"></a>
+
 #### name
 
 ```python
- | @property
- | name() -> str
+@property
+def name() -> str
 ```
 
 Get the name.
 
-<a name="aea.configurations.data_types.Dependency.version"></a>
+<a id="aea.configurations.data_types.Dependency.version"></a>
+
 #### version
 
 ```python
- | @property
- | version() -> str
+@property
+def version() -> str
 ```
 
 Get the version.
 
-<a name="aea.configurations.data_types.Dependency.index"></a>
+<a id="aea.configurations.data_types.Dependency.index"></a>
+
 #### index
 
 ```python
- | @property
- | index() -> Optional[str]
+@property
+def index() -> Optional[str]
 ```
 
 Get the index.
 
-<a name="aea.configurations.data_types.Dependency.git"></a>
+<a id="aea.configurations.data_types.Dependency.git"></a>
+
 #### git
 
 ```python
- | @property
- | git() -> Optional[str]
+@property
+def git() -> Optional[str]
 ```
 
 Get the git.
 
-<a name="aea.configurations.data_types.Dependency.ref"></a>
+<a id="aea.configurations.data_types.Dependency.ref"></a>
+
 #### ref
 
 ```python
- | @property
- | ref() -> Optional[str]
+@property
+def ref() -> Optional[str]
 ```
 
 Get the ref.
 
-<a name="aea.configurations.data_types.Dependency.from_json"></a>
+<a id="aea.configurations.data_types.Dependency.from_json"></a>
+
 #### from`_`json
 
 ```python
- | @classmethod
- | from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency"
+@classmethod
+def from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency"
 ```
 
 Parse a dependency object from a dictionary.
 
-<a name="aea.configurations.data_types.Dependency.to_json"></a>
+<a id="aea.configurations.data_types.Dependency.to_json"></a>
+
 #### to`_`json
 
 ```python
- | to_json() -> Dict[str, Dict[str, str]]
+def to_json() -> Dict[str, Dict[str, str]]
 ```
 
 Transform the object to JSON.
 
-<a name="aea.configurations.data_types.Dependency.get_pip_install_args"></a>
+<a id="aea.configurations.data_types.Dependency.get_pip_install_args"></a>
+
 #### get`_`pip`_`install`_`args
 
 ```python
- | get_pip_install_args() -> List[str]
+def get_pip_install_args() -> List[str]
 ```
 
 Get 'pip install' arguments.
 
-<a name="aea.configurations.data_types.Dependency.__str__"></a>
+<a id="aea.configurations.data_types.Dependency.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Get the string representation.
 
-<a name="aea.configurations.data_types.Dependency.__eq__"></a>
+<a id="aea.configurations.data_types.Dependency.__eq__"></a>
+
 #### `__`eq`__`
 
 ```python
- | __eq__(other: Any) -> bool
+def __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
 
-<a name="aea.configurations.data_types.Dependencies"></a>
+<a id="aea.configurations.data_types.Dependencies"></a>
+
 #### Dependencies
 
 A dictionary from package name to dependency data structure (see above).
@@ -935,7 +1012,8 @@ The package name must satisfy  <a href="https://www.python.org/dev/peps/pep-0426
 The main advantage of having a dictionary is that we implicitly filter out dependency duplicates.
 We cannot have two items with the same package name since the keys of a YAML object form a set.
 
-<a name="aea.configurations.data_types.CRUDCollection"></a>
+<a id="aea.configurations.data_types.CRUDCollection"></a>
+
 ## CRUDCollection Objects
 
 ```python
@@ -944,20 +1022,22 @@ class CRUDCollection(Generic[T])
 
 Interface of a CRUD collection.
 
-<a name="aea.configurations.data_types.CRUDCollection.__init__"></a>
+<a id="aea.configurations.data_types.CRUDCollection.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__() -> None
+def __init__() -> None
 ```
 
 Instantiate a CRUD collection.
 
-<a name="aea.configurations.data_types.CRUDCollection.create"></a>
+<a id="aea.configurations.data_types.CRUDCollection.create"></a>
+
 #### create
 
 ```python
- | create(item_id: str, item: T) -> None
+def create(item_id: str, item: T) -> None
 ```
 
 Add an item.
@@ -971,11 +1051,12 @@ Add an item.
 
 - `ValueError`: if the item with the same id is already in the collection.
 
-<a name="aea.configurations.data_types.CRUDCollection.read"></a>
+<a id="aea.configurations.data_types.CRUDCollection.read"></a>
+
 #### read
 
 ```python
- | read(item_id: str) -> Optional[T]
+def read(item_id: str) -> Optional[T]
 ```
 
 Get an item by its name.
@@ -988,11 +1069,12 @@ Get an item by its name.
 
 the associated item, or None if the item id is not present.
 
-<a name="aea.configurations.data_types.CRUDCollection.update"></a>
+<a id="aea.configurations.data_types.CRUDCollection.update"></a>
+
 #### update
 
 ```python
- | update(item_id: str, item: T) -> None
+def update(item_id: str, item: T) -> None
 ```
 
 Update an existing item.
@@ -1002,29 +1084,32 @@ Update an existing item.
 - `item_id`: the item id.
 - `item`: the item to be added.
 
-<a name="aea.configurations.data_types.CRUDCollection.delete"></a>
+<a id="aea.configurations.data_types.CRUDCollection.delete"></a>
+
 #### delete
 
 ```python
- | delete(item_id: str) -> None
+def delete(item_id: str) -> None
 ```
 
 Delete an item.
 
-<a name="aea.configurations.data_types.CRUDCollection.read_all"></a>
+<a id="aea.configurations.data_types.CRUDCollection.read_all"></a>
+
 #### read`_`all
 
 ```python
- | read_all() -> List[Tuple[str, T]]
+def read_all() -> List[Tuple[str, T]]
 ```
 
 Read all the items.
 
-<a name="aea.configurations.data_types.CRUDCollection.keys"></a>
+<a id="aea.configurations.data_types.CRUDCollection.keys"></a>
+
 #### keys
 
 ```python
- | keys() -> Set[str]
+def keys() -> Set[str]
 ```
 
 Get the set of keys.

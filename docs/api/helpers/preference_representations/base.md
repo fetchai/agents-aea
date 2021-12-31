@@ -1,13 +1,15 @@
-<a name="aea.helpers.preference_representations.base"></a>
+<a id="aea.helpers.preference_representations.base"></a>
+
 # aea.helpers.preference`_`representations.base
 
 Preference representation helpers.
 
-<a name="aea.helpers.preference_representations.base.logarithmic_utility"></a>
+<a id="aea.helpers.preference_representations.base.logarithmic_utility"></a>
+
 #### logarithmic`_`utility
 
 ```python
-logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int], quantity_shift: int = 100) -> float
+def logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int], quantity_shift: int = 100) -> float
 ```
 
 Compute agent's utility given her utility function params and a good bundle.
@@ -22,11 +24,12 @@ Compute agent's utility given her utility function params and a good bundle.
 
 utility value
 
-<a name="aea.helpers.preference_representations.base.linear_utility"></a>
+<a id="aea.helpers.preference_representations.base.linear_utility"></a>
+
 #### linear`_`utility
 
 ```python
-linear_utility(exchange_params_by_currency_id: Dict[str, float], balance_by_currency_id: Dict[str, int]) -> float
+def linear_utility(exchange_params_by_currency_id: Dict[str, float], balance_by_currency_id: Dict[str, int]) -> float
 ```
 
 Compute agent's utility given her utility function params and a good bundle.

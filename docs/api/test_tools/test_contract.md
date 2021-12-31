@@ -1,9 +1,11 @@
-<a name="aea.test_tools.test_contract"></a>
+<a id="aea.test_tools.test_contract"></a>
+
 # aea.test`_`tools.test`_`contract
 
 This module contains test case classes based on pytest for AEA contract testing.
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase"></a>
+
 ## BaseContractTestCase Objects
 
 ```python
@@ -12,33 +14,36 @@ class BaseContractTestCase(ABC)
 
 A class to test a contract.
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase.contract"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase.contract"></a>
+
 #### contract
 
 ```python
- | @property
- | contract() -> Contract
+@property
+def contract() -> Contract
 ```
 
 Get the contract.
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase.setup"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase.setup"></a>
+
 #### setup
 
 ```python
- | @classmethod
- | setup(cls, **kwargs: Any) -> None
+@classmethod
+def setup(cls, **kwargs: Any) -> None
 ```
 
 Set up the contract test case.
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase.finish_contract_deployment"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase.finish_contract_deployment"></a>
+
 #### finish`_`contract`_`deployment
 
 ```python
- | @classmethod
- | @abstractmethod
- | finish_contract_deployment(cls) -> str
+@classmethod
+@abstractmethod
+def finish_contract_deployment(cls) -> str
 ```
 
 Finish deploying contract.
@@ -47,22 +52,24 @@ Finish deploying contract.
 
 contract address
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase.refill_from_faucet"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase.refill_from_faucet"></a>
+
 #### refill`_`from`_`faucet
 
 ```python
- | @staticmethod
- | refill_from_faucet(ledger_api: LedgerApi, faucet_api: FaucetApi, address: str) -> None
+@staticmethod
+def refill_from_faucet(ledger_api: LedgerApi, faucet_api: FaucetApi, address: str) -> None
 ```
 
 Refill from faucet.
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_multisig_transaction"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_multisig_transaction"></a>
+
 #### sign`_`send`_`confirm`_`receipt`_`multisig`_`transaction
 
 ```python
- | @staticmethod
- | sign_send_confirm_receipt_multisig_transaction(tx: JSONLike, ledger_api: LedgerApi, cryptos: List[Crypto], sleep_time: float = 2.0) -> JSONLike
+@staticmethod
+def sign_send_confirm_receipt_multisig_transaction(tx: JSONLike, ledger_api: LedgerApi, cryptos: List[Crypto], sleep_time: float = 2.0) -> JSONLike
 ```
 
 Sign, send and confirm settlement of a transaction with multiple signatures.
@@ -78,12 +85,13 @@ Sign, send and confirm settlement of a transaction with multiple signatures.
 
 The transaction receipt
 
-<a name="aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_transaction"></a>
+<a id="aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_transaction"></a>
+
 #### sign`_`send`_`confirm`_`receipt`_`transaction
 
 ```python
- | @classmethod
- | sign_send_confirm_receipt_transaction(cls, tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto, sleep_time: float = 2.0) -> JSONLike
+@classmethod
+def sign_send_confirm_receipt_transaction(cls, tx: JSONLike, ledger_api: LedgerApi, crypto: Crypto, sleep_time: float = 2.0) -> JSONLike
 ```
 
 Sign, send and confirm settlement of a transaction with multiple signatures.

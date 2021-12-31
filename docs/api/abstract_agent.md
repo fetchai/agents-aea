@@ -1,9 +1,11 @@
-<a name="aea.abstract_agent"></a>
+<a id="aea.abstract_agent"></a>
+
 # aea.abstract`_`agent
 
 This module contains the interface definition of the abstract agent.
 
-<a name="aea.abstract_agent.AbstractAgent"></a>
+<a id="aea.abstract_agent.AbstractAgent"></a>
+
 ## AbstractAgent Objects
 
 ```python
@@ -12,32 +14,35 @@ class AbstractAgent(ABC)
 
 This class provides an abstract base  interface for an agent.
 
-<a name="aea.abstract_agent.AbstractAgent.name"></a>
+<a id="aea.abstract_agent.AbstractAgent.name"></a>
+
 #### name
 
 ```python
- | @abstractproperty
- | name() -> str
+@abstractproperty
+def name() -> str
 ```
 
 Get agent's name.
 
-<a name="aea.abstract_agent.AbstractAgent.storage_uri"></a>
+<a id="aea.abstract_agent.AbstractAgent.storage_uri"></a>
+
 #### storage`_`uri
 
 ```python
- | @abstractproperty
- | storage_uri() -> Optional[str]
+@abstractproperty
+def storage_uri() -> Optional[str]
 ```
 
 Return storage uri.
 
-<a name="aea.abstract_agent.AbstractAgent.start"></a>
+<a id="aea.abstract_agent.AbstractAgent.start"></a>
+
 #### start
 
 ```python
- | @abstractmethod
- | start() -> None
+@abstractmethod
+def start() -> None
 ```
 
 Start the agent.
@@ -46,12 +51,13 @@ Start the agent.
 
 None
 
-<a name="aea.abstract_agent.AbstractAgent.stop"></a>
+<a id="aea.abstract_agent.AbstractAgent.stop"></a>
+
 #### stop
 
 ```python
- | @abstractmethod
- | stop() -> None
+@abstractmethod
+def stop() -> None
 ```
 
 Stop the agent.
@@ -60,12 +66,13 @@ Stop the agent.
 
 None
 
-<a name="aea.abstract_agent.AbstractAgent.setup"></a>
+<a id="aea.abstract_agent.AbstractAgent.setup"></a>
+
 #### setup
 
 ```python
- | @abstractmethod
- | setup() -> None
+@abstractmethod
+def setup() -> None
 ```
 
 Set up the agent.
@@ -74,12 +81,13 @@ Set up the agent.
 
 None
 
-<a name="aea.abstract_agent.AbstractAgent.act"></a>
+<a id="aea.abstract_agent.AbstractAgent.act"></a>
+
 #### act
 
 ```python
- | @abstractmethod
- | act() -> None
+@abstractmethod
+def act() -> None
 ```
 
 Perform actions on period.
@@ -88,12 +96,13 @@ Perform actions on period.
 
 None
 
-<a name="aea.abstract_agent.AbstractAgent.handle_envelope"></a>
+<a id="aea.abstract_agent.AbstractAgent.handle_envelope"></a>
+
 #### handle`_`envelope
 
 ```python
- | @abstractmethod
- | handle_envelope(envelope: Envelope) -> None
+@abstractmethod
+def handle_envelope(envelope: Envelope) -> None
 ```
 
 Handle an envelope.
@@ -106,12 +115,13 @@ Handle an envelope.
 
 None
 
-<a name="aea.abstract_agent.AbstractAgent.get_periodic_tasks"></a>
+<a id="aea.abstract_agent.AbstractAgent.get_periodic_tasks"></a>
+
 #### get`_`periodic`_`tasks
 
 ```python
- | @abstractmethod
- | get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
+@abstractmethod
+def get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
 ```
 
 Get all periodic tasks for agent.
@@ -120,12 +130,13 @@ Get all periodic tasks for agent.
 
 dict of callable with period specified
 
-<a name="aea.abstract_agent.AbstractAgent.get_message_handlers"></a>
+<a id="aea.abstract_agent.AbstractAgent.get_message_handlers"></a>
+
 #### get`_`message`_`handlers
 
 ```python
- | @abstractmethod
- | get_message_handlers() -> List[Tuple[Callable[[Any], None], Callable]]
+@abstractmethod
+def get_message_handlers() -> List[Tuple[Callable[[Any], None], Callable]]
 ```
 
 Get handlers with message getters.
@@ -134,17 +145,19 @@ Get handlers with message getters.
 
 List of tuples of callables: handler and coroutine to get a message
 
-<a name="aea.abstract_agent.AbstractAgent.exception_handler"></a>
+<a id="aea.abstract_agent.AbstractAgent.exception_handler"></a>
+
 #### exception`_`handler
 
 ```python
- | @abstractmethod
- | exception_handler(exception: Exception, function: Callable) -> Optional[bool]
+@abstractmethod
+def exception_handler(exception: Exception, function: Callable) -> Optional[bool]
 ```
 
 Handle exception raised during agent main loop execution.
 
 **Arguments**:
+
 
 - `exception`: exception raised
 - `function`: a callable exception raised in.
@@ -153,12 +166,13 @@ Handle exception raised during agent main loop execution.
 
 skip exception if True, otherwise re-raise it
 
-<a name="aea.abstract_agent.AbstractAgent.teardown"></a>
+<a id="aea.abstract_agent.AbstractAgent.teardown"></a>
+
 #### teardown
 
 ```python
- | @abstractmethod
- | teardown() -> None
+@abstractmethod
+def teardown() -> None
 ```
 
 Tear down the agent.

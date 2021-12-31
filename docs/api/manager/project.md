@@ -1,9 +1,11 @@
-<a name="aea.manager.project"></a>
+<a id="aea.manager.project"></a>
+
 # aea.manager.project
 
 This module contains the implementation of AEA agents project configuration.
 
-<a name="aea.manager.project._Base"></a>
+<a id="aea.manager.project._Base"></a>
+
 ## `_`Base Objects
 
 ```python
@@ -12,26 +14,29 @@ class _Base()
 
 Base class to share some methods.
 
-<a name="aea.manager.project._Base.builder"></a>
+<a id="aea.manager.project._Base.builder"></a>
+
 #### builder
 
 ```python
- | @property
- | builder() -> AEABuilder
+@property
+def builder() -> AEABuilder
 ```
 
 Get AEABuilder instance.
 
-<a name="aea.manager.project._Base.install_pypi_dependencies"></a>
+<a id="aea.manager.project._Base.install_pypi_dependencies"></a>
+
 #### install`_`pypi`_`dependencies
 
 ```python
- | install_pypi_dependencies() -> None
+def install_pypi_dependencies() -> None
 ```
 
 Install python dependencies for the project.
 
-<a name="aea.manager.project.Project"></a>
+<a id="aea.manager.project.Project"></a>
+
 ## Project Objects
 
 ```python
@@ -40,30 +45,33 @@ class Project(_Base)
 
 Agent project representation.
 
-<a name="aea.manager.project.Project.__init__"></a>
+<a id="aea.manager.project.Project.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(public_id: PublicId, path: str) -> None
+def __init__(public_id: PublicId, path: str) -> None
 ```
 
 Init project with public_id and project's path.
 
-<a name="aea.manager.project.Project.build"></a>
+<a id="aea.manager.project.Project.build"></a>
+
 #### build
 
 ```python
- | build() -> None
+def build() -> None
 ```
 
 Call all build entry points.
 
-<a name="aea.manager.project.Project.load"></a>
+<a id="aea.manager.project.Project.load"></a>
+
 #### load
 
 ```python
- | @classmethod
- | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_remote: bool = False, is_restore: bool = False, cli_verbosity: str = "INFO", registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False, skip_aea_validation: bool = False) -> "Project"
+@classmethod
+def load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_remote: bool = False, is_restore: bool = False, cli_verbosity: str = "INFO", registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False, skip_aea_validation: bool = False) -> "Project"
 ```
 
 Load project with given public_id to working_dir.
@@ -88,45 +96,50 @@ registry, and then from remote registry in case of failure).
 
 project
 
-<a name="aea.manager.project.Project.remove"></a>
+<a id="aea.manager.project.Project.remove"></a>
+
 #### remove
 
 ```python
- | remove() -> None
+def remove() -> None
 ```
 
 Remove project, do cleanup.
 
-<a name="aea.manager.project.Project.agent_config"></a>
+<a id="aea.manager.project.Project.agent_config"></a>
+
 #### agent`_`config
 
 ```python
- | @property
- | agent_config() -> AgentConfig
+@property
+def agent_config() -> AgentConfig
 ```
 
 Get the agent configuration.
 
-<a name="aea.manager.project.Project.builder"></a>
+<a id="aea.manager.project.Project.builder"></a>
+
 #### builder
 
 ```python
- | @property
- | builder() -> AEABuilder
+@property
+def builder() -> AEABuilder
 ```
 
 Get builder instance.
 
-<a name="aea.manager.project.Project.check"></a>
+<a id="aea.manager.project.Project.check"></a>
+
 #### check
 
 ```python
- | check() -> None
+def check() -> None
 ```
 
 Check we can still construct an AEA from the project with builder.build.
 
-<a name="aea.manager.project.AgentAlias"></a>
+<a id="aea.manager.project.AgentAlias"></a>
+
 ## AgentAlias Objects
 
 ```python
@@ -135,20 +148,22 @@ class AgentAlias(_Base)
 
 Agent alias representation.
 
-<a name="aea.manager.project.AgentAlias.__init__"></a>
+<a id="aea.manager.project.AgentAlias.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(project: Project, agent_name: str, data_dir: str, password: Optional[str] = None)
+def __init__(project: Project, agent_name: str, data_dir: str, password: Optional[str] = None)
 ```
 
 Init agent alias with project, config, name, agent, builder.
 
-<a name="aea.manager.project.AgentAlias.set_agent_config_from_data"></a>
+<a id="aea.manager.project.AgentAlias.set_agent_config_from_data"></a>
+
 #### set`_`agent`_`config`_`from`_`data
 
 ```python
- | set_agent_config_from_data(json_data: List[Dict]) -> None
+def set_agent_config_from_data(json_data: List[Dict]) -> None
 ```
 
 Set agent config instance constructed from json data.
@@ -157,106 +172,117 @@ Set agent config instance constructed from json data.
 
 - `json_data`: agent config json data
 
-<a name="aea.manager.project.AgentAlias.builder"></a>
+<a id="aea.manager.project.AgentAlias.builder"></a>
+
 #### builder
 
 ```python
- | @property
- | builder() -> AEABuilder
+@property
+def builder() -> AEABuilder
 ```
 
 Get builder instance.
 
-<a name="aea.manager.project.AgentAlias.agent_config"></a>
+<a id="aea.manager.project.AgentAlias.agent_config"></a>
+
 #### agent`_`config
 
 ```python
- | @property
- | agent_config() -> AgentConfig
+@property
+def agent_config() -> AgentConfig
 ```
 
 Get agent config.
 
-<a name="aea.manager.project.AgentAlias.remove_from_project"></a>
+<a id="aea.manager.project.AgentAlias.remove_from_project"></a>
+
 #### remove`_`from`_`project
 
 ```python
- | remove_from_project() -> None
+def remove_from_project() -> None
 ```
 
 Remove agent alias from project.
 
-<a name="aea.manager.project.AgentAlias.dict"></a>
+<a id="aea.manager.project.AgentAlias.dict"></a>
+
 #### dict
 
 ```python
- | @property
- | dict() -> Dict[str, Any]
+@property
+def dict() -> Dict[str, Any]
 ```
 
 Convert AgentAlias to dict.
 
-<a name="aea.manager.project.AgentAlias.config_json"></a>
+<a id="aea.manager.project.AgentAlias.config_json"></a>
+
 #### config`_`json
 
 ```python
- | @property
- | config_json() -> List[Dict]
+@property
+def config_json() -> List[Dict]
 ```
 
 Get agent config json data.
 
-<a name="aea.manager.project.AgentAlias.get_aea_instance"></a>
+<a id="aea.manager.project.AgentAlias.get_aea_instance"></a>
+
 #### get`_`aea`_`instance
 
 ```python
- | get_aea_instance() -> AEA
+def get_aea_instance() -> AEA
 ```
 
 Build new aea instance.
 
-<a name="aea.manager.project.AgentAlias.issue_certificates"></a>
+<a id="aea.manager.project.AgentAlias.issue_certificates"></a>
+
 #### issue`_`certificates
 
 ```python
- | issue_certificates() -> None
+def issue_certificates() -> None
 ```
 
 Issue the certificates for this agent.
 
-<a name="aea.manager.project.AgentAlias.set_overrides"></a>
+<a id="aea.manager.project.AgentAlias.set_overrides"></a>
+
 #### set`_`overrides
 
 ```python
- | set_overrides(agent_overrides: Optional[Dict] = None, component_overrides: Optional[List[Dict]] = None) -> None
+def set_overrides(agent_overrides: Optional[Dict] = None, component_overrides: Optional[List[Dict]] = None) -> None
 ```
 
 Set override for this agent alias's config.
 
-<a name="aea.manager.project.AgentAlias.agent_config_manager"></a>
+<a id="aea.manager.project.AgentAlias.agent_config_manager"></a>
+
 #### agent`_`config`_`manager
 
 ```python
- | @property
- | agent_config_manager() -> AgentConfigManager
+@property
+def agent_config_manager() -> AgentConfigManager
 ```
 
 Get agent configuration manager instance for the config.
 
-<a name="aea.manager.project.AgentAlias.get_overridables"></a>
+<a id="aea.manager.project.AgentAlias.get_overridables"></a>
+
 #### get`_`overridables
 
 ```python
- | get_overridables() -> Tuple[Dict, List[Dict]]
+def get_overridables() -> Tuple[Dict, List[Dict]]
 ```
 
 Get all overridables for this agent alias's config.
 
-<a name="aea.manager.project.AgentAlias.get_addresses"></a>
+<a id="aea.manager.project.AgentAlias.get_addresses"></a>
+
 #### get`_`addresses
 
 ```python
- | get_addresses() -> Dict[str, str]
+def get_addresses() -> Dict[str, str]
 ```
 
 Get addresses from private keys.
@@ -265,11 +291,12 @@ Get addresses from private keys.
 
 dict with crypto id str as key and address str as value
 
-<a name="aea.manager.project.AgentAlias.get_connections_addresses"></a>
+<a id="aea.manager.project.AgentAlias.get_connections_addresses"></a>
+
 #### get`_`connections`_`addresses
 
 ```python
- | get_connections_addresses() -> Dict[str, str]
+def get_connections_addresses() -> Dict[str, str]
 ```
 
 Get connections addresses from connections private keys.

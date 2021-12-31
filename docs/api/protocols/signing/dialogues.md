@@ -1,4 +1,5 @@
-<a name="packages.open_aea.protocols.signing.dialogues"></a>
+<a id="packages.open_aea.protocols.signing.dialogues"></a>
+
 # packages.open`_`aea.protocols.signing.dialogues
 
 This module contains the classes required for signing dialogue management.
@@ -6,7 +7,8 @@ This module contains the classes required for signing dialogue management.
 - SigningDialogue: The dialogue class maintains state of a dialogue and manages it.
 - SigningDialogues: The dialogues class keeps track of all dialogues.
 
-<a name="packages.open_aea.protocols.signing.dialogues.SigningDialogue"></a>
+<a id="packages.open_aea.protocols.signing.dialogues.SigningDialogue"></a>
+
 ## SigningDialogue Objects
 
 ```python
@@ -15,7 +17,8 @@ class SigningDialogue(Dialogue)
 
 The signing dialogue class maintains state of a dialogue and manages it.
 
-<a name="packages.open_aea.protocols.signing.dialogues.SigningDialogue.Role"></a>
+<a id="packages.open_aea.protocols.signing.dialogues.SigningDialogue.Role"></a>
+
 ## Role Objects
 
 ```python
@@ -24,7 +27,8 @@ class Role(Dialogue.Role)
 
 This class defines the agent's role in a signing dialogue.
 
-<a name="packages.open_aea.protocols.signing.dialogues.SigningDialogue.EndState"></a>
+<a id="packages.open_aea.protocols.signing.dialogues.SigningDialogue.EndState"></a>
+
 ## EndState Objects
 
 ```python
@@ -33,11 +37,12 @@ class EndState(Dialogue.EndState)
 
 This class defines the end states of a signing dialogue.
 
-<a name="packages.open_aea.protocols.signing.dialogues.SigningDialogue.__init__"></a>
+<a id="packages.open_aea.protocols.signing.dialogues.SigningDialogue.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(dialogue_label: DialogueLabel, self_address: Address, role: Dialogue.Role, message_class: Type[SigningMessage] = SigningMessage) -> None
+def __init__(dialogue_label: DialogueLabel, self_address: Address, role: Dialogue.Role, message_class: Type[SigningMessage] = SigningMessage) -> None
 ```
 
 Initialize a dialogue.
@@ -49,7 +54,8 @@ Initialize a dialogue.
 - `role`: the role of the agent this dialogue is maintained for
 - `message_class`: the message class used
 
-<a name="packages.open_aea.protocols.signing.dialogues.SigningDialogues"></a>
+<a id="packages.open_aea.protocols.signing.dialogues.SigningDialogues"></a>
+
 ## SigningDialogues Objects
 
 ```python
@@ -58,11 +64,12 @@ class SigningDialogues(Dialogues,  ABC)
 
 This class keeps track of all signing dialogues.
 
-<a name="packages.open_aea.protocols.signing.dialogues.SigningDialogues.__init__"></a>
+<a id="packages.open_aea.protocols.signing.dialogues.SigningDialogues.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(self_address: Address, role_from_first_message: Callable[[Message, Address], Dialogue.Role], dialogue_class: Type[SigningDialogue] = SigningDialogue) -> None
+def __init__(self_address: Address, role_from_first_message: Callable[[Message, Address], Dialogue.Role], dialogue_class: Type[SigningDialogue] = SigningDialogue) -> None
 ```
 
 Initialize dialogues.

@@ -1,9 +1,11 @@
-<a name="aea.helpers.storage.backends.base"></a>
+<a id="aea.helpers.storage.backends.base"></a>
+
 # aea.helpers.storage.backends.base
 
 This module contains storage abstract backend class.
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend"></a>
+
 ## AbstractStorageBackend Objects
 
 ```python
@@ -12,41 +14,45 @@ class AbstractStorageBackend(ABC)
 
 Abstract base class for storage backend.
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.__init__"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(uri: str) -> None
+def __init__(uri: str) -> None
 ```
 
 Init backend.
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.connect"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.connect"></a>
+
 #### connect
 
 ```python
- | @abstractmethod
- | async connect() -> None
+@abstractmethod
+async def connect() -> None
 ```
 
 Connect to backend.
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.disconnect"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.disconnect"></a>
+
 #### disconnect
 
 ```python
- | @abstractmethod
- | async disconnect() -> None
+@abstractmethod
+async def disconnect() -> None
 ```
 
 Disconnect the backend.
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.ensure_collection"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.ensure_collection"></a>
+
 #### ensure`_`collection
 
 ```python
- | @abstractmethod
- | async ensure_collection(collection_name: str) -> None
+@abstractmethod
+async def ensure_collection(collection_name: str) -> None
 ```
 
 Create collection if not exits.
@@ -59,12 +65,13 @@ Create collection if not exits.
 
 None
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.put"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.put"></a>
+
 #### put
 
 ```python
- | @abstractmethod
- | async put(collection_name: str, object_id: str, object_body: JSON_TYPES) -> None
+@abstractmethod
+async def put(collection_name: str, object_id: str, object_body: JSON_TYPES) -> None
 ```
 
 Put object into collection.
@@ -79,17 +86,19 @@ Put object into collection.
 
 None
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.get"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.get"></a>
+
 #### get
 
 ```python
- | @abstractmethod
- | async get(collection_name: str, object_id: str) -> Optional[JSON_TYPES]
+@abstractmethod
+async def get(collection_name: str, object_id: str) -> Optional[JSON_TYPES]
 ```
 
 Get object from the collection.
 
 **Arguments**:
+
 
 - `collection_name`: str.
 - `object_id`: str object id
@@ -98,17 +107,19 @@ Get object from the collection.
 
 dict if object exists in collection otherwise None
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.remove"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.remove"></a>
+
 #### remove
 
 ```python
- | @abstractmethod
- | async remove(collection_name: str, object_id: str) -> None
+@abstractmethod
+async def remove(collection_name: str, object_id: str) -> None
 ```
 
 Remove object from the collection.
 
 **Arguments**:
+
 
 - `collection_name`: str.
 - `object_id`: str object id
@@ -117,17 +128,19 @@ Remove object from the collection.
 
 None
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.find"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.find"></a>
+
 #### find
 
 ```python
- | @abstractmethod
- | async find(collection_name: str, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
+@abstractmethod
+async def find(collection_name: str, field: str, equals: EQUALS_TYPE) -> List[OBJECT_ID_AND_BODY]
 ```
 
 Get objects from the collection by filtering by field value.
 
 **Arguments**:
+
 
 - `collection_name`: str.
 - `field`: field name to search: example "parent.field"
@@ -137,12 +150,13 @@ Get objects from the collection by filtering by field value.
 
 list of objects bodies
 
-<a name="aea.helpers.storage.backends.base.AbstractStorageBackend.list"></a>
+<a id="aea.helpers.storage.backends.base.AbstractStorageBackend.list"></a>
+
 #### list
 
 ```python
- | @abstractmethod
- | async list(collection_name: str) -> List[OBJECT_ID_AND_BODY]
+@abstractmethod
+async def list(collection_name: str) -> List[OBJECT_ID_AND_BODY]
 ```
 
 List all objects with keys from the collection.

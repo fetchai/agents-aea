@@ -1,22 +1,25 @@
-<a name="aea.configurations.pypi"></a>
+<a id="aea.configurations.pypi"></a>
+
 # aea.configurations.pypi
 
 This module contains a checker for PyPI version consistency.
 
-<a name="aea.configurations.pypi.and_"></a>
+<a id="aea.configurations.pypi.and_"></a>
+
 #### and`_`
 
 ```python
-and_(s1: SpecifierSet, s2: SpecifierSet) -> SpecifierSet
+def and_(s1: SpecifierSet, s2: SpecifierSet) -> SpecifierSet
 ```
 
 Do the and between two specifier sets.
 
-<a name="aea.configurations.pypi.is_satisfiable"></a>
+<a id="aea.configurations.pypi.is_satisfiable"></a>
+
 #### is`_`satisfiable
 
 ```python
-is_satisfiable(specifier_set: SpecifierSet) -> bool
+def is_satisfiable(specifier_set: SpecifierSet) -> bool
 ```
 
 Check if the specifier set is satisfiable.
@@ -55,11 +58,12 @@ For other details, please refer to PEP440:
 
 False if the constraints are surely non-satisfiable, True if we don't know.
 
-<a name="aea.configurations.pypi.is_simple_dep"></a>
+<a id="aea.configurations.pypi.is_simple_dep"></a>
+
 #### is`_`simple`_`dep
 
 ```python
-is_simple_dep(dep: Dependency) -> bool
+def is_simple_dep(dep: Dependency) -> bool
 ```
 
 Check if it is a simple dependency.
@@ -74,20 +78,22 @@ Namely, if it has no field specified, or only the 'version' field set.
 
 whether it is a simple dependency or not
 
-<a name="aea.configurations.pypi.to_set_specifier"></a>
+<a id="aea.configurations.pypi.to_set_specifier"></a>
+
 #### to`_`set`_`specifier
 
 ```python
-to_set_specifier(dep: Dependency) -> SpecifierSet
+def to_set_specifier(dep: Dependency) -> SpecifierSet
 ```
 
 Get the set specifier. It assumes to be a simple dependency (see above).
 
-<a name="aea.configurations.pypi.merge_dependencies"></a>
+<a id="aea.configurations.pypi.merge_dependencies"></a>
+
 #### merge`_`dependencies
 
 ```python
-merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies
+def merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies
 ```
 
 Merge two groups of dependencies.
@@ -105,11 +111,12 @@ we leave them; otherwise we raise an error.
 
 the merged dependencies.
 
-<a name="aea.configurations.pypi.merge_dependencies_list"></a>
+<a id="aea.configurations.pypi.merge_dependencies_list"></a>
+
 #### merge`_`dependencies`_`list
 
 ```python
-merge_dependencies_list(*deps: Dependencies) -> Dependencies
+def merge_dependencies_list(*deps: Dependencies) -> Dependencies
 ```
 
 Merge a list of dependencies.
