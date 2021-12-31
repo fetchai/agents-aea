@@ -1,5 +1,15 @@
 # Release History - open AEA
 
+## 1.3.0 (2021-12-31)
+
+AEA:
+- Adds support to scaffold packages outside an AEA project
+- Adds support for IPFS package hashing and IPFS based registry.
+- Allows contracts to depend on other contracts.
+
+Plugins:
+- Adds support for EIP1559 based gas estimation strategy.
+
 ## 1.2.0 (2021-11-21)
 
 AEA:
