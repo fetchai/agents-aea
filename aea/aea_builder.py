@@ -1871,7 +1871,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # check and create missing, do not replace env variables. updates config
         AgentConfigManager.verify_private_keys(
             aea_project_path,
-            substitude_env_vars=False,
+            substitude_env_vars=load_environment_variables,
             private_key_helper=private_key_verify,
             password=password,
         ).dump_config()
