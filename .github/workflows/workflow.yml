@@ -23,7 +23,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ CI_PROJECT_TITLE }}:${{ CI_MERGE_REQUEST_TARGET_BRANCH_NAME }}
+          tags: ${{ github.repository}}:${{ github.ref}}
 
 # name: AEA framework sanity checks and tests
 # 
