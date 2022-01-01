@@ -98,11 +98,11 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
 )
+from aea.helpers.env_vars import apply_env_variables
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.io import open_file
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
-from aea.helpers.env_vars import apply_env_variables
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
@@ -1632,7 +1632,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def try_to_load_agent_configuration_file(
-        cls, aea_project_path: Union[str, Path], load_environment_variables: bool
+        cls,
+        aea_project_path: Union[str, Path],
+        load_environment_variables: bool = False,
     ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
@@ -1641,8 +1643,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             with open_file(configuration_file_path, mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
-                if load_environment_variables: 
-                    agent_configuration = apply_env_variables(agent_configuration, os.environ)
+                if load_environment_variables:
+                    agent_configuration = apply_env_variables(
+                        agent_configuration, os.environ
+                    )
                 return agent_configuration
         except FileNotFoundError:  # pragma: nocover
             raise ValueError(
@@ -1854,11 +1858,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
+        :param load_environment_variables: if True, environment variables are loaded.
         :param password: the password to encrypt/decrypt private keys.
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
-        cls.try_to_load_agent_configuration_file(aea_project_path, load_environment_variables)
+        cls.try_to_load_agent_configuration_file(
+            aea_project_path, load_environment_variables
+        )
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # check and create missing, do not replace env variables. updates config

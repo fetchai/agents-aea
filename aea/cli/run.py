@@ -88,7 +88,8 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     "--load_from_env_variables",
     "load_environment_variables",
     required=False,
-    default=0,
+    is_flag=True,
+    default=False,
     help="Populate Agent configs from Environment variables.",
 )
 @click.pass_context
@@ -99,7 +100,7 @@ def run(
     exclude_connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
-    load_environment_variables:bool,
+    load_environment_variables: bool,
     profiling: int,
     password: str,
 ) -> None:
@@ -116,9 +117,23 @@ def run(
 
     if profiling > 0:
         with _profiling_context(period=profiling):
-            run_aea(ctx, connection_ids, env_file, is_install_deps, load_environment_variables, password)
+            run_aea(
+                ctx,
+                connection_ids,
+                env_file,
+                is_install_deps,
+                load_environment_variables,
+                password,
+            )
             return
-    run_aea(ctx, connection_ids, env_file, is_install_deps, load_environment_variables, password)
+    run_aea(
+        ctx,
+        connection_ids,
+        env_file,
+        is_install_deps,
+        load_environment_variables,
+        password,
+    )
 
 
 def _calculate_connection_ids(
@@ -192,13 +207,16 @@ def run_aea(
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
     :param is_install_deps: bool flag is install dependencies.
+    :param load_environment_variables: bool flag is load environemnt variables.
     :param password: the password to encrypt/decrypt the private key.
 
     :raises ClickException: if any Exception occurs.
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
-    aea = _build_aea(connection_ids, skip_consistency_check, load_environment_variables, password)
+    aea = _build_aea(
+        connection_ids, skip_consistency_check, load_environment_variables, password
+    )
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(
@@ -239,9 +257,10 @@ def _build_aea(
     """Build the AEA."""
     try:
         builder = AEABuilder.from_aea_project(
-            Path("."), skip_consistency_check=skip_consistency_check,
+            Path("."),
+            skip_consistency_check=skip_consistency_check,
             load_environment_variables=load_environment_variables,
-            password=password
+            password=password,
         )
         aea = builder.build(connection_ids=connection_ids, password=password)
         return aea
