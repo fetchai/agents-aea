@@ -63,6 +63,9 @@ DEFAULT_CURRENCY_DENOM = "wei"
 ETH_GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 _ABI = "abi"
 _BYTECODE = "bytecode"
+EIP1559 = "eip1559"
+GAS_STATION = "gas_station"
+AVAILABLE_STRATEGIES = (EIP1559, GAS_STATION)
 
 MAX_GAS_FAST = 1500
 
@@ -100,6 +103,11 @@ DEFAULT_EIP1559_STRATEGY = {
 
 
 DEFAULT_GAS_STATION_STRATEGY = {"gas_price_api_key": "", "gas_price_strategy": "fast"}
+
+DEFAULT_GAS_PRICE_STRATEGIES = {
+    EIP1559: DEFAULT_EIP1559_STRATEGY,
+    GAS_STATION: DEFAULT_GAS_STATION_STRATEGY,
+}
 
 
 def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
@@ -185,9 +193,11 @@ def get_gas_price_strategy_eip1559(
         transaction_params: TxParams,  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         """
-        Get gas price from Eth Gas Station api.
+        Get gas price using EIP1559.
 
-        Visit `https://docs.ethgasstation.info/gas-price` for documentation.
+        Visit `https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md`
+        for more information.
+
         :param web3: web3 instance
         :param transaction_params: transaction parameters
         :return: dictionary containing gas price strategy
@@ -609,7 +619,11 @@ class EthereumHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -742,8 +756,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
     identifier = _ETHEREUM
 
     _gas_price_strategy_callables: Dict[str, Callable] = {
-        "gas_station": get_gas_price_strategy,
-        "eip1559": get_gas_price_strategy_eip1559,
+        GAS_STATION: get_gas_price_strategy,
+        EIP1559: get_gas_price_strategy_eip1559,
     }
 
     def __init__(self, **kwargs: Any):
@@ -759,8 +773,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self._is_gas_estimation_enabled = kwargs.pop("is_gas_estimation_enabled", False)
 
         self._default_gas_price_strategy: str = kwargs.pop(
-            "default_gas_price_strategy", "eip1559"
+            "default_gas_price_strategy", EIP1559
         )
+        if self._default_gas_price_strategy not in AVAILABLE_STRATEGIES:
+            raise ValueError(
+                f"Gas price strategy must be one of {AVAILABLE_STRATEGIES}, provided: {self._default_gas_price_strategy}"
+            )  # pragma: nocover
+
         self._gas_price_strategies: Dict[str, Dict] = kwargs.pop(
             "gas_price_strategies", {}
         )
@@ -883,6 +902,34 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         return transaction
 
+    def _get_gas_price_strategy_callable(
+        self,
+        gas_price_strategy: Optional[str] = None,
+        extra_config: Optional[Dict] = None,
+    ) -> Tuple[Callable, Dict]:
+        """Returns parameters for gas price callable."""
+        gas_price_strategy = (
+            gas_price_strategy
+            if gas_price_strategy is not None
+            else self._default_gas_price_strategy
+        )
+        if gas_price_strategy not in AVAILABLE_STRATEGIES:  # pragma: nocover
+            _default_logger.debug(
+                f"Gas price strategy must be one of {AVAILABLE_STRATEGIES}, provided: {self._default_gas_price_strategy}"
+            )
+            return None
+
+        _default_logger.debug(f"Using strategy: {gas_price_strategy}")
+        gas_price_strategy_getter = self._gas_price_strategy_callables.get(
+            gas_price_strategy, None
+        )
+
+        extra_config = extra_config or {}
+        parameters = DEFAULT_GAS_PRICE_STRATEGIES.get(gas_price_strategy)
+        parameters.update(self._gas_price_strategies.get(gas_price_strategy, {}))
+        parameters.update(extra_config)
+        return gas_price_strategy_getter(**parameters)
+
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
     def _try_get_gas_pricing(
         self,
@@ -891,32 +938,19 @@ class EthereumApi(LedgerApi, EthereumHelper):
     ) -> Optional[Dict[str, int]]:
         """Try get the gas price based on the provided strategy."""
 
-        gas_price_strategy = (
-            gas_price_strategy
-            if gas_price_strategy is not None
-            else self._default_gas_price_strategy
+        gas_price_strategy_callable = self._get_gas_price_strategy_callable(
+            gas_price_strategy,
+            extra_config,
         )
-        _default_logger.debug(f"Using strategy: {gas_price_strategy}")
-        extra_config = extra_config or {}
-        gas_price_strategy_getter = self._gas_price_strategy_callables.get(
-            gas_price_strategy, None
-        )
-        if gas_price_strategy_getter is None:
-            _default_logger.debug(
-                "No strategy found! Check configuration of ethereum-ledger-api."
-            )
-            return None  # pragma: nocover
-        kwargs = self._gas_price_strategies.get(gas_price_strategy, {}).copy()
-        kwargs.update(extra_config)
-        gas_price_strategy_callable = gas_price_strategy_getter(**kwargs)
+        if gas_price_strategy_callable is None:  # pragma: nocover
+            return None
 
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
             self._api.eth.set_gas_price_strategy(gas_price_strategy_callable)
             gas_price = self._api.eth.generate_gas_price()
         finally:
-            if prior_strategy is not None:
-                self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
+            self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
         return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
@@ -1035,7 +1069,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface[_ABI],
+                bytecode=contract_interface[_BYTECODE],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
@@ -1109,9 +1144,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
             if gas_pricing is None:
                 return None  # pragma: nocover
+
             transaction.update(gas_pricing)
 
         transaction = instance.constructor(**kwargs).buildTransaction(transaction)
+
         if transaction is None:
             return None  # pragma: nocover
         transaction.pop("to", None)  # only 'from' address, don't insert 'to' address!
