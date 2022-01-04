@@ -906,7 +906,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         Returns parameters for gas price callable.
 
-        Note: The priority of gas price callable will be 
+        Note: The priority of gas price callable will be
         `extra_config(Runtime params) > self._gas_price_strategies (Set using config file.) > DEFAULT_GAS_PRICE_STRATEGIES (Default values.)`
 
         :param gas_price_strategy: name of the gas price strategy.
