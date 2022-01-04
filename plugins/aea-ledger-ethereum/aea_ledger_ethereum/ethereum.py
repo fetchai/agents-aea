@@ -777,7 +777,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )  # pragma: nocover
 
         self._gas_price_strategies: Dict[str, Dict] = kwargs.pop(
-            "gas_price_strategies", {}
+            "gas_price_strategies", DEFAULT_GAS_PRICE_STRATEGIES
         )
 
     @property
@@ -902,8 +902,17 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
-    ) -> Tuple[Callable, Dict]:
-        """Returns parameters for gas price callable."""
+    ) -> Callable:
+        """
+        Returns parameters for gas price callable.
+
+        Note: The priority of gas price callable will be 
+        `extra_config(Runtime params) > self._gas_price_strategies (Set using config file.) > DEFAULT_GAS_PRICE_STRATEGIES (Default values.)`
+
+        :param gas_price_strategy: name of the gas price strategy.
+        :param extra_config: gas price strategy getter parameters.
+        :return: gas price callable.
+        """
         gas_price_strategy = (
             gas_price_strategy
             if gas_price_strategy is not None
