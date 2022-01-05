@@ -562,6 +562,16 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.try_get_gas_pricing"></a>
+#### try`_`get`_`gas`_`pricing
+
+```python
+ | @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
+ | try_get_gas_pricing(gas_price_strategy: Optional[str] = None, extra_config: Optional[Dict] = None) -> Optional[Dict[str, int]]
+```
+
+Try get the gas price based on the provided strategy.
+
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate
 
