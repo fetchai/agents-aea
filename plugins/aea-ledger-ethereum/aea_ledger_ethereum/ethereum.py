@@ -889,7 +889,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             transaction.update({"gasPrice": gas_price})
 
         if gas_price is None and max_fee_per_gas is None:
-            gas_pricing = self._try_get_gas_pricing(
+            gas_pricing = self.try_get_gas_pricing(
                 gas_price_strategy, gas_price_strategy_extra_config
             )
             if gas_pricing is None:
@@ -929,14 +929,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
             gas_price_strategy, None
         )
 
-        extra_config = extra_config or {}
         parameters = DEFAULT_GAS_PRICE_STRATEGIES.get(gas_price_strategy)
         parameters.update(self._gas_price_strategies.get(gas_price_strategy, {}))
-        parameters.update(extra_config)
+        parameters.update(extra_config or {})
         return gas_price_strategy_getter(**parameters)
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
-    def _try_get_gas_pricing(
+    def try_get_gas_pricing(
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
@@ -1141,7 +1140,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             transaction.update({"gasPrice": gas_price})
 
         if gas_price is None and max_fee_per_gas is None:
-            gas_pricing = self._try_get_gas_pricing(
+            gas_pricing = self.try_get_gas_pricing(
                 gas_price_strategy, gas_price_strategy_extra_config
             )
 
