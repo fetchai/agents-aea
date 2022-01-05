@@ -36,7 +36,9 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self, offline: bool = False, api_url: str = "http://127.0.0.1:5001/api/v0/id"):
+    def __init__(
+        self, offline: bool = False, api_url: str = "http://127.0.0.1:5001/api/v0/id"
+    ):
         """Initialise IPFS daemon."""
 
         self.process = None  # type: Optional[subprocess.Popen]
