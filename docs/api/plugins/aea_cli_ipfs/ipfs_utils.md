@@ -20,10 +20,28 @@ Set up the IPFS daemon.
 #### `__`init`__`
 
 ```python
- | __init__(offline: bool = False)
+ | __init__(offline: bool = False, api_url: str = "http://127.0.0.1:5001/api/v0/id")
 ```
 
 Initialise IPFS daemon.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.is_started_externally"></a>
+#### is`_`started`_`externally
+
+```python
+ | is_started_externally() -> bool
+```
+
+Check daemon was started externally.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.is_started_internally"></a>
+#### is`_`started`_`internally
+
+```python
+ | is_started_internally() -> bool
+```
+
+Check daemon was started internally.
 
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.is_started"></a>
 #### is`_`started
@@ -50,7 +68,7 @@ Run the ipfs daemon.
  | stop() -> None
 ```
 
-Terminate the ipfs daemon.
+Terminate the ipfs daemon if it was started internally.
 
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.__enter__"></a>
 #### `__`enter`__`

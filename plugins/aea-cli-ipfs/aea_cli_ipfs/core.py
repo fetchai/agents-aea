@@ -56,7 +56,7 @@ def ipfs(click_context: click.Context, online: bool) -> None:
 def process_result(click_context: click.Context, *_: Any, **__: Any) -> None:
     """Tear down command group."""
     ipfs_tool = click_context.obj
-    if ipfs_tool.daemon.is_started():  # pragma: nocover
+    if ipfs_tool.daemon.is_started_internally():  # pragma: nocover
         click.echo("Stopping ipfs node launched to execute the command.")
         ipfs_tool.daemon.stop()
         click.echo("Daemon stopped.")
