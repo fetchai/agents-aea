@@ -25,6 +25,24 @@ Set up the IPFS daemon.
 
 Initialise IPFS daemon.
 
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.is_started_externally"></a>
+#### is`_`started`_`externally
+
+```python
+ | is_started_externally() -> bool
+```
+
+Check if daemon was started from an external source.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.is_started_internally"></a>
+#### is`_`started`_`internally
+
+```python
+ | is_started_internally() -> bool
+```
+
+Check if daemon has been started internally, using the `start` method.
+
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.is_started"></a>
 #### is`_`started
 
@@ -32,7 +50,7 @@ Initialise IPFS daemon.
  | is_started() -> bool
 ```
 
-Check daemon was started.
+Check if daemon has been started either internally or externally.
 
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon.start"></a>
 #### start
