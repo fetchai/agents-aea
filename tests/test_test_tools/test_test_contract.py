@@ -54,7 +54,8 @@ class TestContractTestCase(BaseContractTestCase):
                 with mock.patch.object(FetchAIApi, "get_deploy_transaction"):
                     super().setup()
 
-    def finish_contract_deployment():
+    @classmethod
+    def finish_contract_deployment(cls):
         """Finish contract deployment method."""
         return CONTRACT_ADDRESS
 
