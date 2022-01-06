@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a test for aea.test_tools.test_contract.BaseContractTestCase."""
+"""This module contains tests for aea.test_tools.test_contract.BaseContractTestCase."""
 
 
 from pathlib import Path
