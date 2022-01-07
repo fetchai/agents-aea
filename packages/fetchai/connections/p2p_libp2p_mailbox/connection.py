@@ -327,7 +327,7 @@ class P2PLibp2pMailboxConnection(Connection):
             # start receiving msgs
             self._in_queue = asyncio.Queue()
             self._process_messages_task = asyncio.ensure_future(
-                self._process_messages()
+                self._process_messages(), loop=self.loop
             )
             self._send_queue = asyncio.Queue()
             self._send_task = self.loop.create_task(self._send_loop())

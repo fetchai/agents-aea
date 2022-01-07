@@ -83,7 +83,7 @@ class LedgerConnection(Connection):
             api_configs=self.api_configs,
             logger=self.logger,
         )
-        self._event_new_receiving_task = asyncio.Event()
+        self._event_new_receiving_task = asyncio.Event(loop=self.loop)
 
         self.state = ConnectionStates.connected
 

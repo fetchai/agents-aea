@@ -828,7 +828,7 @@ class P2PLibp2pConnection(Connection):
             self._in_queue = asyncio.Queue()
             self._send_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
-                self._receive_from_node()
+                self._receive_from_node(), loop=self.loop
             )
             self._send_task = self.loop.create_task(self._send_loop())
 
