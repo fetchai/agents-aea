@@ -13,7 +13,9 @@ fingerprint:
   check_dependencies.py: QmXovF8y7QrtbmDbbkUXDoSz89Gwc1ZeGgaj2qmq3f8kGV
   connection.py: QmQVLsB5fmMEAgBjiESvWC6zWnBaHJRXAESmM1xYQo23dj
   consts.py: QmNup63K21nAMgQ8VLjNGZgceus97gUpsgBMNpDxcSTmCr
-  libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
+  libp2p_node/.dockerignore: QmVwyNjya468nRTxSjFP73dSzQdSffp74osz5dGEAHHweA
+  libp2p_node/Dockerfile: QmeZ6KJf4cpgL7DY6qdWetVfTPPijUvHxoCUbYgSS3SsWM
+  libp2p_node/Makefile: Qmezxsp96mW85mJhjGAarLmwWJG9JvGJowcY5h56oPB9bt
   libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
   libp2p_node/acn/utils.go: Qmb39aDGu7N5a8JPdHeRsjSzJ9fyKp2jT3EkULocvGGYKV
   libp2p_node/aea/api.go: QmW7mHHShumfDHg9Ds1nxHZJN4EAHGLrr15jLX7kKYkcV9
