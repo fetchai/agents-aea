@@ -130,8 +130,8 @@ jobs:
           pip install tox
           pip install --user --upgrade setuptools
           # install Protobuf compiler
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-          unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.13.0-linux-x86_64.zip
+          unzip protoc-3.13.0-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           # install IPFS
           sudo apt-get install -y wget
