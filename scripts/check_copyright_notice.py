@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -28,13 +28,14 @@ This script checks that all the Python files of the repository have:
 It is assumed the script is run from the repository root.
 """
 
+import datetime
 import itertools
 import re
 import sys
 from pathlib import Path
 
 
-SUPPORTED_YEARS = ["2019", "2020", "2021"]
+SUPPORTED_YEARS = [str(i) for i in range(2018, datetime.datetime.now().year + 1)]
 
 
 HEADER_REGEX = fr"""(#!/usr/bin/env python3

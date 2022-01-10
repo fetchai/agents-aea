@@ -9,10 +9,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmd6xGBWWvYaxZUryir7m2SWFZX7fpzoBC3ttJiKXEJVXK
-  __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  check_dependencies.py: QmXovF8y7QrtbmDbbkUXDoSz89Gwc1ZeGgaj2qmq3f8kGV
-  connection.py: QmQVLsB5fmMEAgBjiESvWC6zWnBaHJRXAESmM1xYQo23dj
-  consts.py: QmNup63K21nAMgQ8VLjNGZgceus97gUpsgBMNpDxcSTmCr
+  __init__.py: QmcibHXQV8uZnMRJe7jNGEFeUKns1ZF2QR9c6mxKMbV4oa
+  check_dependencies.py: QmWt5a3svTV4VRGbr2tRW9dZoSENnTzi344mDwoMDA9jww
+  connection.py: QmZTqGQEcW9Rt96DxxSqktBhWHky6rX5fCFzCQ6WHeHdh9
+  consts.py: QmNbua6EsorAf3FS4fCmCHBZ9TRZ6ENkZoHTyA9TEJZqpy
   libp2p_node/.dockerignore: QmVwyNjya468nRTxSjFP73dSzQdSffp74osz5dGEAHHweA
   libp2p_node/Dockerfile: QmeZ6KJf4cpgL7DY6qdWetVfTPPijUvHxoCUbYgSS3SsWM
   libp2p_node/Makefile: Qmezxsp96mW85mJhjGAarLmwWJG9JvGJowcY5h56oPB9bt

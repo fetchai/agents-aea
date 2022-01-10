@@ -154,6 +154,11 @@ jobs:
         run: tox -e check_generate_all_protocols
       - name: Generate Documentation
         run: tox -e docs
+      - name: Check copyright year is up to date
+        run: |
+          ./scripts/bump_year.sh $(date +%Y)
+          git diff --quiet||(echo "Working tree is dirty. Run ./scripts/bump_year.sh!"; exit 1)
+          echo "all good"
 
   common_checks_5:
     continue-on-error: False

@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmY4djZd3CLJWivbjCsuzpzEHmSpgs8ScRbo6gKrQAD5gU
   __init__.py: QmVCn3rpFZZJ3TC4cXZTLx8jTFyV1z83F873y2pavgJpxs
-  custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
+  custom_types.py: QmbCLTdhJf3GNCAK1p31yExSeCZpHv39JmHY1bqekjE7PP
   dialogues.py: QmQgAzmib1LitMjYHFTD6dnxqySXBq3DLDYpV7s72XznNq
   message.py: QmSd5vWARsnUPMbrCsbtNsrnTXgGrvTfJNxJLshMANLyux
   ml_trade.proto: QmbW2f4qNJJeY8YVgrawHjroqYcTviY5BevCBYVUMVVoH9
