@@ -961,9 +961,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     @staticmethod
     @try_decorator("Unable to update gas price: {}", logger_method="warning")
-    def try_update_gas_pricing(
-        gas_params: Dict[str, int],
-    ) -> Optional[Dict[str, int]]:
+    def try_update_gas_pricing(gas_params: Dict[str, int],) -> Optional[Dict[str, int]]:
         """Try to update the gas price."""
         for gas_item in gas_params.keys():
             gas_params[gas_item] = math.ceil(gas_params[gas_item] * TIP_INCREASE)
