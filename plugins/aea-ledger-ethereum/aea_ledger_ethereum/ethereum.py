@@ -109,6 +109,9 @@ DEFAULT_GAS_PRICE_STRATEGIES = {
     GAS_STATION: DEFAULT_GAS_STATION_STRATEGY,
 }
 
+# The tip increase is the minimum required of 10%.
+TIP_INCREASE = 1.1
+
 
 def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
     """Covert WEI to GWEI"""
@@ -955,6 +958,17 @@ class EthereumApi(LedgerApi, EthereumHelper):
         finally:
             self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
         return gas_price
+
+    @try_decorator("Unable to update gas price: {}", logger_method="warning")
+    def try_update_gas_pricing(
+        self,
+        gas_params: Dict[str, int],
+    ) -> Optional[Dict[str, int]]:
+        """Try to update the gas price."""
+        for gas_item in gas_params.keys():
+            gas_params[gas_item] = math.ceil(gas_params[gas_item] * TIP_INCREASE)
+
+        return gas_params
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
