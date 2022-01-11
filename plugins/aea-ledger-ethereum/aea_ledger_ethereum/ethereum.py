@@ -959,9 +959,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
             self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
         return gas_price
 
+    @staticmethod
     @try_decorator("Unable to update gas price: {}", logger_method="warning")
     def try_update_gas_pricing(
-        self,
         gas_params: Dict[str, int],
     ) -> Optional[Dict[str, int]]:
         """Try to update the gas price."""
