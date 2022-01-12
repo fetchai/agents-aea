@@ -484,6 +484,16 @@ Load contract interface.
 
 the interface
 
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.update_gas_pricing"></a>
+#### update`_`gas`_`pricing
+
+```python
+ | @staticmethod
+ | update_gas_pricing(gas_params: Dict[str, int]) -> Optional[Dict[str, int]]
+```
+
+Try to update the gas price.
+
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 
@@ -571,17 +581,6 @@ the transfer transaction
 ```
 
 Try get the gas price based on the provided strategy.
-
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.try_update_gas_pricing"></a>
-#### try`_`update`_`gas`_`pricing
-
-```python
- | @staticmethod
- | @try_decorator("Unable to update gas price: {}", logger_method="warning")
- | try_update_gas_pricing(gas_params: Dict[str, int]) -> Optional[Dict[str, int]]
-```
-
-Try to update the gas price.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate

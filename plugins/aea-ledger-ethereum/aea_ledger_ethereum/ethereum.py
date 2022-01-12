@@ -748,6 +748,14 @@ class EthereumHelper(Helper):
                 raise ValueError(f"Contract {file_path} missing key {key}.")
         return contract_interface
 
+    @staticmethod
+    def update_gas_pricing(gas_params: Dict[str, int],) -> Optional[Dict[str, int]]:
+        """Try to update the gas price."""
+        for gas_item in gas_params.keys():
+            gas_params[gas_item] = math.ceil(gas_params[gas_item] * TIP_INCREASE)
+
+        return gas_params
+
 
 class EthereumApi(LedgerApi, EthereumHelper):
     """Class to interact with the Ethereum Web3 APIs."""
@@ -958,15 +966,6 @@ class EthereumApi(LedgerApi, EthereumHelper):
         finally:
             self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
         return gas_price
-
-    @staticmethod
-    @try_decorator("Unable to update gas price: {}", logger_method="warning")
-    def try_update_gas_pricing(gas_params: Dict[str, int],) -> Optional[Dict[str, int]]:
-        """Try to update the gas price."""
-        for gas_item in gas_params.keys():
-            gas_params[gas_item] = math.ceil(gas_params[gas_item] * TIP_INCREASE)
-
-        return gas_params
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
