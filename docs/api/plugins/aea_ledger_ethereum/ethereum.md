@@ -484,16 +484,6 @@ Load contract interface.
 
 the interface
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.update_gas_pricing"></a>
-#### update`_`gas`_`pricing
-
-```python
- | @staticmethod
- | update_gas_pricing(gas_params: Dict[str, int]) -> Optional[Dict[str, int]]
-```
-
-Try to update the gas price.
-
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 
@@ -577,10 +567,21 @@ the transfer transaction
 
 ```python
  | @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
- | try_get_gas_pricing(gas_price_strategy: Optional[str] = None, extra_config: Optional[Dict] = None) -> Optional[Dict[str, int]]
+ | try_get_gas_pricing(gas_price_strategy: Optional[str] = None, extra_config: Optional[Dict] = None, old_tip: Optional[int] = None) -> Optional[Dict[str, int]]
 ```
 
 Try get the gas price based on the provided strategy.
+
+**Arguments**:
+
+- `gas_price_strategy`: the gas price strategy to use, e.g., the EIP-1559 strategy.
+    Can be either `eip1559` or `gas_station`.
+- `extra_config`: gas price strategy getter parameters.
+- `old_tip`: the old `maxPriorityFeePerGas` in case that we are trying to resubmit a transaction.
+
+**Returns**:
+
+a dictionary with the gas data.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate
