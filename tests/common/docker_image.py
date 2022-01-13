@@ -91,6 +91,15 @@ class DockerImage(ABC):
     def tag(self) -> str:
         """Return the tag of the image."""
 
+    def pull_image(self, retries=3) -> None:
+        """Pull image from remote repo."""
+        for _ in range(retries):
+            try:
+                self._client.images.pull(self.tag)
+                return
+            except Exception as e:  # nosec
+                print("failed to pull image", e)
+
     def stop_if_already_running(self):
         """Stop the running images with the same tag, if any."""
         client = docker.from_env()
@@ -224,6 +233,8 @@ class OEFSearchDockerImage(DockerImage):
     def create(self) -> Container:
         """Create an instance of the OEF Search image."""
         from tests.conftest import ROOT_DIR  # pylint: disable
+
+        self.pull_image()
 
         logger.info(ROOT_DIR + "/tests/common/oef_search_pluto_scripts")
         ports = {
@@ -400,6 +411,7 @@ class SOEFDockerImage(DockerImage):
 
     def create(self) -> Container:
         """Create the container."""
+        self.pull_image()
         with tempfile.TemporaryDirectory() as tmpdirname:
             self._make_soef_config_file(tmpdirname)
             volumes = {tmpdirname: {"bind": self.SOEF_MOUNT_PATH, "mode": "ro"}}
@@ -485,6 +497,7 @@ class FetchLedgerDockerImage(DockerImage):
 
     def create(self) -> Container:
         """Create the container."""
+        self.pull_image()
         with tempfile.TemporaryDirectory() as tmpdirname:
             self._make_entrypoint_file(tmpdirname)
             mount_path = "/mnt"

@@ -784,6 +784,16 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     image.stop_if_already_running()
     container = image.create()
     container.start()
+
+    for _ in range(10):
+        time.sleep(1)
+        container.reload()
+        if container.status == "running":
+            break
+        container.start()
+    else:
+        raise Exception("Failed to start container")
+
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
     if not success:
