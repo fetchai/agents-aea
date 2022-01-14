@@ -663,7 +663,7 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
         reader, writer = await asyncio.open_connection(
-            self._host, self._port, loop=self._loop, ssl=ssl_ctx,
+            self._host, self._port, ssl=ssl_ctx,
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 
