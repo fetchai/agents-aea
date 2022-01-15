@@ -109,6 +109,9 @@ DEFAULT_GAS_PRICE_STRATEGIES = {
     GAS_STATION: DEFAULT_GAS_STATION_STRATEGY,
 }
 
+# The tip increase is the minimum required of 10%.
+TIP_INCREASE = 1.1
+
 
 def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
     """Covert WEI to GWEI"""
@@ -939,8 +942,17 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
+        old_tip: Optional[int] = None,
     ) -> Optional[Dict[str, int]]:
-        """Try get the gas price based on the provided strategy."""
+        """
+        Try get the gas price based on the provided strategy.
+
+        :param gas_price_strategy: the gas price strategy to use, e.g., the EIP-1559 strategy.
+            Can be either `eip1559` or `gas_station`.
+        :param extra_config: gas price strategy getter parameters.
+        :param old_tip: the old `maxPriorityFeePerGas` in case that we are trying to resubmit a transaction.
+        :return: a dictionary with the gas data.
+        """
 
         gas_price_strategy_callable = self._get_gas_price_strategy_callable(
             gas_price_strategy, extra_config,
@@ -954,6 +966,24 @@ class EthereumApi(LedgerApi, EthereumHelper):
             gas_price = self._api.eth.generate_gas_price()
         finally:
             self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
+
+        if old_tip is not None and gas_price_strategy is EIP1559:
+            base_fee_per_gas = (
+                gas_price["maxFeePerGas"] - gas_price["maxPriorityFeePerGas"]
+            )
+            updated_max_priority_fee_per_gas = old_tip * TIP_INCREASE
+            updated_max_fee_per_gas = (
+                updated_max_priority_fee_per_gas + base_fee_per_gas
+            )
+
+            if gas_price["maxPriorityFeePerGas"] < updated_max_priority_fee_per_gas:
+                gas_price["maxPriorityFeePerGas"] = updated_max_priority_fee_per_gas
+                gas_price["maxFeePerGas"] = updated_max_fee_per_gas
+
+        elif old_tip is not None and gas_price_strategy is GAS_STATION:
+            updated_gas_price = old_tip * TIP_INCREASE
+            gas_price["gasPrice"] = max(gas_price["gasPrice"], updated_gas_price)
+
         return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
