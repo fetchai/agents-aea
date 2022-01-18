@@ -427,8 +427,10 @@ class SOEFDockerImage(DockerImage):
                 response = requests.get(f"{self._addr}:{self._port}")
                 enforce(response.status_code == 200, "")
                 return True
-            except Exception:
-                logger.info(f"Attempt {i} failed. Retrying in {sleep_rate} seconds...")
+            except Exception as e:
+                logger.info(
+                    f"Attempt {i} failed. Retrying in {sleep_rate} seconds... exception {e}"
+                )
                 time.sleep(sleep_rate)
         return False
 

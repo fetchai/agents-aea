@@ -797,6 +797,11 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
     if not success:
+        logger.info(
+            "containers list: {}".format(
+                [f"{i.image}:{i.status}" for i in image._client.containers.list()],
+            )
+        )
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
