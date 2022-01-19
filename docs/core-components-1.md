@@ -1,6 +1,6 @@
 The AEA framework consists of several core components, some required to run an AEA and others optional.
 
-The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
+The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). While it is in principle possible to use parts of the framework as a library, we do not recommend it.
 
 ## The elements each AEA uses
 
@@ -8,9 +8,7 @@ The following sections discuss the inner workings of the AEA framework and how i
 
 <img src="../assets/envelope.jpg" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-<a href="../api/aea#aea-objects">`AEA`</a> objects communicate asynchronously via <a href="../api/mail/base#envelope-objects">`Envelopes`</a>.
-
-An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object with which agents communicate. It is a vehicle for <a href="../api/protocols/base#message-objects">`Messages`</a> with five attributes:
+<a href="../api/aea#aea-objects">`AEAs`</a> communicate asynchronously via  exchange of  <a href="../api/protocols/base#message-objects">`Messages`</a> wrapped in <a href="../api/mail/base#envelope-objects">`Envelopes`</a> containing five attributes:
 
 * `to`: defines the destination address.
 
