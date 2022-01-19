@@ -31,11 +31,9 @@ skills:
 - fetchai/tac_control:0.24.0
 behaviours:
   soef_register:
-    args: {}
+    args:
+      tick_interval: 60
     class_name: SoefRegisterBehaviour
-  tac:
-    args: {}
-    class_name: TacBehaviour
 handlers:
   contract_api:
     args: {}

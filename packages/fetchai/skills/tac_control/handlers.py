@@ -25,6 +25,7 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.behaviours import SoefRegisterBehaviour
@@ -453,6 +454,23 @@ class OefSearchHandler(Handler):
             registration_behaviour.failed_registration_reason = (
                 oef_search_error_msg.oef_error_operation
             )
+            if (
+                registration_behaviour.failed_registration_reason
+                == OefErrorOperation.ALREADY_IN_LOBBY
+            ):
+                if (
+                    registration_behaviour.nb_retries
+                    < registration_behaviour.max_soef_registration_retries
+                ):
+                    self.context.logger.info(
+                        "registration failed because agent is already in lobby: next retry in {} seconds.".format(
+                            registration_behaviour.tick_interval
+                        )
+                    )
+                else:
+                    self.context.logger.info(
+                        "registration failed because agent is already in lobby: number of retries exceeded"
+                    )
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

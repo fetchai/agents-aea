@@ -1043,11 +1043,10 @@ class SOEFChannel:
                 response = await asyncio.shield(task)
             finally:
                 response = await task
-                if (
-                    "<response><message>Goodbye!</message></response>" not in response
-                ):  # pragma: nocover
+                if "Goodbye!" in response[0].text:  # pragma: nocover
+                    self.unique_page_address = None
+                else:
                     self.logger.debug(f"No Goodbye response. Response={response}")
-                self.unique_page_address = None
                 await self._stop_periodic_ping_task()
         if oef_message is not None and oef_search_dialogue is not None:
             await self._send_success_response(oef_message, oef_search_dialogue)

@@ -187,7 +187,7 @@ class SoefRegisterBehaviour(TickerBehaviour):
 
     def __init__(self, **kwargs: Any):
         """Instantiate the behaviour."""
-        self._max_soef_registration_retries = kwargs.pop(
+        self.max_soef_registration_retries = kwargs.pop(
             "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
         )  # type: int
         super().__init__(**kwargs)
@@ -199,8 +199,8 @@ class SoefRegisterBehaviour(TickerBehaviour):
         self.status = (
             self.Status.REGISTERING_AGENT
         )  # type: SoefRegisterBehaviour.Status
-        self._last_registration_attempt = None  # type: datetime.datetime
-        self._nb_retries = 0
+        self._last_registration_attempt = datetime.datetime.now()
+        self.nb_retries = 0
 
     def setup(self) -> None:
         """Implement the setup."""
@@ -225,8 +225,8 @@ class SoefRegisterBehaviour(TickerBehaviour):
 
     def _retry_failed_registration(self) -> None:
         """Retry a failed registration."""
-        self._nb_retries += 1
-        if self._nb_retries > self._max_soef_registration_retries:
+        self.nb_retries += 1
+        if self.nb_retries > self.max_soef_registration_retries:
             self.context.is_active = False
             return
 
@@ -260,7 +260,7 @@ class SoefRegisterBehaviour(TickerBehaviour):
         )
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
-            f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
+            f"Retrying registration with sOEF. Retry {self.nb_retries} out of {self.max_soef_registration_retries}."
         )
 
         self.failed_registration_msg = None
