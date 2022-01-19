@@ -1,33 +1,65 @@
+!!! note
+
+    The (open) AEA framework provides the necessary tools for creating 
+    Autonomous Economic Agents (AEA). It is a fork of the 
+    <a href="https://github.com/fetchai/agents-aea" target="_blank">legacy AEA 
+    framework</a> that gives no priority to any package vendor.
+
 
 ## What are AEAs (Autonomous Economic Agents)?
 
 We define an AEA as:
 
 > An intelligent agent acting on an owner's behalf, with limited or no interference, and whose goal is to generate economic value for its owner.
+    
+-----
 
-An AEA represents an individual, organisation or object and looks after its interests and acts independently of constant input from their owner.
+The AEA framework offers the owner, either an individual, an organisation, or 
+another application, the ability to outsource the pursuit of their economic 
+interests. Such interests may include maximizing the acquisition of items 
+from a desired basket of goods, adaptive management of market exposure,
+or minimization of transaction costs within an application to benefit its users.
 
-AEA's can autonomously execute actions to achieve their goals.
+In order to be able to act on an owner's behalf AEAs need to be endowed with a 
+sense of agency, which requires the ability to enact behaviour and exercise 
+control over its consequences in a way that is commensurate with its owners' 
+goals. The ability to autonomously interact with their environment and 
+proactively engage in peer-to-peer dialogue is a distinguishing feature of AEAs. 
+Where otherwise the execution of skills and decision-making logic are left as 
+an exercise to the reader, AEAs allow developers to design systems that pursue 
+economic interests without the requirement of an owner to actively partake or 
+continuously intervene in the process.
 
-Their purpose is to create economic value for you, their owner, in clearly defined domains. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
+Information on <a href="app-areas"> areas and applications </a> of AEAs and
+<a href="demos">examples of their implementation </a> are provided to illustrate 
+their use.
+
 
 ## What is the AEA Framework?
 
-The AEA framework is a development suite, implemented in Python, which equips you with an efficient and accessible set of tools for building and running AEAs. 
+The AEA development suite, implemented in Python, equips the developer with an 
+easily accessible set of tools for building AEAs. The framework is modular, 
+composable and extensible. Its purpose is to make agent development as 
+straightforward as web development became with the introduction of Django and 
+Flask.
 
-The framework is modular, extensible, and composable. It attempts to make agent development as straightforward as possible, similar to web development using popular web frameworks such as Django or Flask.
+The modularity of components in this framework facilitates their reuse as parts 
+of other applications that might serve an entirely different set of needs. The 
+framework provided offers the user:
 
-A modular approach to the framework allows the reuse of previously developed components from the entire community, easily equipping AEA's with the necessary components to: 
-
-* Communicate with each other in a decentralised peer 2 peer manner using the <a href="acn">Agent Communication Network (ACN)</a> 
-* Interact directly with blockchains as a financial settlement and commitment layer, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+* A peer-to-peer <a href="acn">Agent Communication Network (ACN)</a> (ACN)
+* To interact directly with blockchains such as
+  <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+  and use these as a financial settlement and commitment layer. 
+* A registry for sharing implementations of agent component designs  
 
 
 ## Why build with the AEA Framework?
 
 The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
 
-* The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
+* The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with other AEAs over the public internet.
+* The <a href="oef-ledger">Open Economic Framework</a> provides a search and discovery system that allows AEAs to locate each other.
 * The <a href="registry">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
 * The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
 * The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts on various decentralised ledgers. 
@@ -39,7 +71,7 @@ To get started developing your own AEA, check out the <a href="quickstart">getti
 
 If you want to run a demo, check out the <a href="demos">demo guides</a>.
 
-To learn more about some of the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
+To learn more about the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
 
 
 
@@ -51,6 +83,3 @@ To learn more about some of the distinctive characteristics of agent-oriented de
 </div>
 
 <br />
-
-The (open) AEA framework provides the tools for creating Autonomous Economic Agents (AEA). It is a fork of the <a href="https://github.com/fetchai/agents-aea" target="_blank">legacy AEA framework</a> that gives no priority to any package vendor.
-
