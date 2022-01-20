@@ -19,11 +19,8 @@
 
 """This package contains the handlers for the aries_alice skill."""
 
-import base64
-import binascii
 import json
 from typing import Any, Dict, Optional, cast
-from urllib.parse import urlparse
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -52,48 +49,15 @@ class DefaultHandler(Handler):
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
-    def _handle_received_invite(
-        self, invite_detail: Dict[str, str]
-    ) -> Optional[str]:  # pragma: no cover
+    @staticmethod
+    def _handle_received_invite(invite_detail: Dict) -> Dict:  # pragma: no cover
         """
         Prepare an invitation detail received from Faber_AEA to be send to the Alice ACA.
 
         :param invite_detail: the invitation detail
         :return: The prepared invitation detail
         """
-        for details in invite_detail:
-            try:
-                url = urlparse(details)
-                query = url.query
-                if query and "c_i=" in query:
-                    pos = query.index("c_i=") + 4
-                    b64_invite = query[pos:]
-                else:
-                    b64_invite = details
-            except ValueError:
-                b64_invite = details
-
-            if b64_invite:
-                try:
-                    padlen = 4 - len(b64_invite) % 4
-                    if padlen <= 2:
-                        b64_invite += "=" * padlen
-                    invite_json = base64.urlsafe_b64decode(b64_invite)
-                    details = invite_json.decode("utf-8")
-                except binascii.Error as e:
-                    self.context.logger.error("Invalid invitation:", str(e))
-                except UnicodeDecodeError as e:
-                    self.context.logger.error("Invalid invitation:", str(e))
-
-            if details:
-                try:
-                    json.loads(details)
-                    return details
-                except json.JSONDecodeError as e:
-                    self.context.logger.error("Invalid invitation:", str(e))
-
-        self.context.logger.error("No details in the invitation detail:")
-        return None
+        return invite_detail
 
     def setup(self) -> None:
         """Implement the setup."""
@@ -120,13 +84,15 @@ class DefaultHandler(Handler):
         if message.performative == DefaultMessage.Performative.BYTES:
             content_bytes = message.content
             content = json.loads(content_bytes)
-            self.context.logger.info("Received message content:" + str(content))
+            self.context.logger.info("Received message content:" + repr(content))
             if "@type" in content:
                 strategy = cast(Strategy, self.context.strategy)
                 details = self._handle_received_invite(content)
                 self.context.behaviours.alice.send_http_request_message(
                     method="POST",
-                    url=strategy.admin_url + ADMIN_COMMAND_RECEIVE_INVITE,
+                    url=strategy.admin_url
+                    + ADMIN_COMMAND_RECEIVE_INVITE
+                    + "?auto_accept=true",
                     content=details,
                 )
 
@@ -175,6 +141,13 @@ class HttpHandler(Handler):
                     if content["state"] == "active" and not self.is_connected_to_Faber:
                         self.context.logger.info("Connected to Faber")
                         self.is_connected_to_Faber = True
+            elif "credential_request" in content:
+                if content["state"] == "credential_issued":
+                    self.context.logger.info(
+                        f"Got crendetials from faber: {content['credential_offer_dict']['credential_preview']}"
+                    )
+            else:
+                print("unknown message", content)
         elif (
             message.performative == HttpMessage.Performative.RESPONSE
         ):  # response to http_client request
@@ -191,7 +164,7 @@ class HttpHandler(Handler):
                 if "connection_id" in content:
                     connection = content
                     self.connection_id = content["connection_id"]
-                    invitation = connection["invitation"]
+                    invitation = connection["invitation_msg_id"]
                     self.context.logger.info(f"invitation response: {str(connection)}")
                     self.context.logger.info(f"connection id: {self.connection_id}")  # type: ignore
                     self.context.logger.info(f"invitation: {str(invitation)}")

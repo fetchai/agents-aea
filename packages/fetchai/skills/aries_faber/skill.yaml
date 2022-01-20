@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUQB9uBtWGWY5zETSyJnbPZixRj1c4suedVwGPegrTQWs
   __init__.py: QmYqLCeNJjMCDb718nMFh7o8r16wgz8yCN23wa3gcViJi8
-  behaviours.py: Qmb4hwn6DYsnAHKgbSbw7bPfsNSBdCpYhYC7HddSPnvbhh
+  behaviours.py: QmfXTbHZWYCh5xWB5QZEXyym2imbE2NoojzxPaaCgG2C9X
   dialogues.py: QmV6h1wva5YQfL59rnXuFpr2voMYWPcYW3PhDtnrvSRM8m
-  handlers.py: QmZPrhJKUiZkGkyebJ8d2pCU83VvRFMX9qZgRzPvxwoQA2
-  strategy.py: Qma3LTPwUJFFts8B6sozutaed6brxsLQNNaX98Y1e3Cm2K
+  handlers.py: QmZvUF6bwmQACWaF8osWR1MmuoLMmStQd9iPpUZDpbiDMs
+  strategy.py: QmW8xGF5NxgurmYH4vWarwvqt3NL3NM7u1AMMGR1nvfbT7
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.0
@@ -57,6 +57,7 @@ models:
         search_key: intro_service
         search_value: intro_alice
       search_radius: 5.0
+      seed: null
     class_name: Strategy
 dependencies: {}
 is_abstract: false

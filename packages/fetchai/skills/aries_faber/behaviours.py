@@ -68,7 +68,7 @@ class FaberBehaviour(TickerBehaviour):
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
-            headers="",
+            headers="Content-Type: application/json",
             version="",
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )

@@ -16,9 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the strategy class."""
-
+import random
 from typing import Any
 
 from aea.exceptions import enforce
@@ -64,6 +63,14 @@ class Strategy(Model):
         self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
 
         self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
+
+        self._seed = (
+            kwargs.pop("seed", None,)
+            or (
+                "my_seed_000000000000000000000000"
+                + str(random.randint(100_000, 999_999))  # nosec
+            )[-32:]
+        )
 
         # search
         location = kwargs.pop("location", DEFAULT_LOCATION)
@@ -113,6 +120,11 @@ class Strategy(Model):
     def admin_url(self) -> str:
         """Get the admin URL."""
         return self._admin_url
+
+    @property
+    def seed(self) -> str:
+        """Get the wallet seed."""
+        return self._seed
 
     def get_location_description(self) -> Description:
         """
