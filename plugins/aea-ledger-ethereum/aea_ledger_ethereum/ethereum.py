@@ -30,6 +30,7 @@ from uuid import uuid4
 
 import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
+from web3.exceptions import TransactionNotFound
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
@@ -312,6 +313,13 @@ def get_gas_price_strategy(
         return {"gasPrice": wei_result}
 
     return gas_station_gas_price_strategy
+
+
+def rebuild_receipt(tx_receipt: JSONLike) -> JSONLike:
+    """Convert all tx receipt's event topics to HexBytes"""
+    for i in range(len(tx_receipt["logs"])):  # type: ignore
+        tx_receipt["logs"][i]["topics"] = [HexBytes(topic) for topic in tx_receipt["logs"][i]["topics"]]  # type: ignore
+    return tx_receipt
 
 
 class SignedTransactionTranslator:
@@ -1205,6 +1213,180 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: whether the address is valid
         """
         return Web3.isAddress(address)
+
+    def _call(
+        self,
+        contract_interface: Dict[str, str],
+        method_name: str,
+        *method_args: Any,
+    ) -> Optional[JSONLike]:
+        """Call method."""
+        contract = self.get_contract_instance(contract_interface)
+        method = getattr(contract.functions, method_name)
+        result = method(*method_args).call()
+        return result
+
+    def _prepare_tx(  # pylint: disable=too-many-arguments
+        self,
+        contract_interface: Dict[str, str],
+        sender_address: str,
+        method_name: str,
+        *method_args: Any,
+        eth_value: int = 0,
+        gas: Optional[int] = None,
+        gas_price: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[int] = None,
+    ) -> Optional[JSONLike]:
+        """Prepare tx method."""
+        contract = self.get_contract_instance(contract_interface)
+        method = getattr(contract.functions, method_name)
+        tx = method(*method_args)
+        tx = self._build_transaction(
+            sender_address,
+            tx,
+            eth_value,
+            gas,
+            gas_price,
+            max_fee_per_gas,
+            max_priority_fee_per_gas,
+        )
+        return tx
+
+    def _build_transaction(  # pylint: disable=too-many-arguments
+        self,
+        sender_address: str,
+        tx: Any,
+        eth_value: int = 0,
+        gas: Optional[int] = None,
+        gas_price: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[int] = None,
+    ) -> Optional[JSONLike]:
+        """Build transaction method."""
+        nonce = self.api.eth.get_transaction_count(sender_address)
+        tx_params = {
+            "nonce": nonce,
+            "value": eth_value,
+        }
+        if gas is not None:
+            tx_params["gas"] = gas
+        if gas_price is not None:
+            tx_params["gasPrice"] = gas_price
+        if max_fee_per_gas is not None:
+            tx_params["maxFeePerGas"] = max_fee_per_gas  # pragma: nocover
+        if max_priority_fee_per_gas is not None:
+            tx_params[
+                "maxPriorityFeePerGas"
+            ] = max_priority_fee_per_gas  # pragma: nocover
+        if (
+            gas_price is None
+            and max_fee_per_gas is None
+            and max_priority_fee_per_gas is None
+        ):
+            gas_data = self.try_get_gas_pricing()
+            if gas_data:
+                tx_params.update()  # pragma: nocover
+        tx = tx.buildTransaction(tx_params)
+        return tx
+
+    def get_tx_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
+        self,
+        contract_interface: Dict[str, str],
+        tx_hash: str,
+        target_address: Optional[str] = None,
+    ) -> JSONLike:
+        """
+        Get all transfer events derived from a transaction.
+
+        :param ledger_api: the ledger API object
+        :param contract_address: the contract address
+        :param tx_hash: the transaction hash
+        :param target_address: optional address to filter tranfer events to just those that affect it
+        :return: the verified status
+        """
+        contract = self.get_contract_instance(contract_interface)
+
+        try:
+            tx_receipt = self.api.eth.get_transaction_receipt(tx_hash)
+            if tx_receipt is None:
+                raise ValueError  # pragma: nocover
+
+        except (TransactionNotFound, ValueError):  # pragma: nocover
+            return dict(logs=[])
+
+        # Due to serialization, event topics must be converted again to HexBytes or processReceipt will fail
+        tx_receipt = rebuild_receipt(tx_receipt)
+
+        transfer_logs = contract.events.Transfer().processReceipt(tx_receipt)
+
+        transfer_logs = [
+            {
+                "from": log["args"]["from"],
+                "to": log["args"]["to"],
+                "value": log["args"]["value"],
+                "token_address": log["address"],
+            }
+            for log in transfer_logs
+        ]
+
+        if target_address:
+            transfer_logs = list(
+                filter(
+                    lambda log: target_address in (log["from"], log["to"]),  # type: ignore
+                    transfer_logs,
+                )
+            )
+
+        return dict(logs=transfer_logs)
+
+    def get_tx_transfered_amount(  # pylint: disable=too-many-arguments,too-many-locals
+        self,
+        contract_interface: Dict[str, str],
+        tx_hash: str,
+        token_address: str,
+        source_address: Optional[str] = None,
+        destination_address: Optional[str] = None,
+    ) -> JSONLike:
+        """
+        Get the amount of a token transferred as a result of a transaction.
+
+        :param ledger_api: the ledger API object
+        :param contract_address: the contract address
+        :param tx_hash: the transaction hash
+        :param token_address: the token's address
+        :param source_address: the source address
+        :param destination_address: the destination address
+        :return: the incoming amount
+        """
+
+        transfer_logs: list = self.get_tx_transfer_logs(contract_interface, tx_hash)["logs"]  # type: ignore
+
+        token_events = list(
+            filter(
+                lambda log: log["token_address"] == self.api.toChecksumAddress(token_address),  # type: ignore
+                transfer_logs,
+            )
+        )
+
+        if source_address:
+            token_events = list(
+                filter(
+                    lambda log: log["from"] == self.api.toChecksumAddress(source_address),  # type: ignore
+                    token_events,
+                )
+            )
+
+        if destination_address:
+            token_events = list(
+                filter(
+                    lambda log: log["to"] == self.api.toChecksumAddress(destination_address),  # type: ignore
+                    token_events,
+                )
+            )
+
+        amount = 0 if not token_events else sum([event["value"] for event in list(token_events)])  # type: ignore
+        return dict(amount=amount)
 
 
 class EthereumFaucetApi(FaucetApi):
