@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2022 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ DEFAULT_BODY_SIZE = 4
 class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/ledger_api:1.0.0")
+    protocol_id = PublicId.from_str("fetchai/ledger_api:1.1.0")
     protocol_specification_id = PublicId.from_str("fetchai/ledger_api:1.0.0")
 
     Kwargs = CustomKwargs

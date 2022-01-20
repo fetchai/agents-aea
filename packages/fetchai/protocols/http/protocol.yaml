@@ -1,19 +1,19 @@
 name: http
 author: fetchai
-version: 1.0.0
+version: 1.1.0
 protocol_specification_id: fetchai/http:1.0.0
 type: protocol
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVzD8i4VPm36TKUn8yfuswTJbeaMBSuSqb4amokQCDc9d
-  __init__.py: QmVxB4fAnoaKxiU7FH2KsPD3nNVCBySubnz27ACMx1Sdst
-  dialogues.py: QmV4Lezum5YAxj4FJoxt1oMCxKZ9dhtkrALxgc1xbDus6d
+  README.md: QmYZbMFuzspCSsfTX1KtU2NVweedKaEqL24fMXxoX9DwBb
+  __init__.py: QmRaahois8b9Ktg7EE1WXFD81WT3mUKWyY7uLz5rCA9DLx
+  dialogues.py: Qmc7ZyMiofAp95bwty32Ty3bgtEuWN2A76LWhKeYVpDNWj
   http.proto: QmfJj4aoNpVCZs8HsQNmf1Zx2y8b9JbuPG2Dysow4LwRQU
-  http_pb2.py: QmPs79EZ1UCk1BZPe5g9AKoDNFPaJqjtofKxokxwoacvLE
-  message.py: QmZFrafqi8iKBo3zd5FR7KbbFFoYYk1745P67RL2h4wnJe
-  serialization.py: QmUGssMgiTnKNT7f7iG5wtpsXyM5mspVXRroByT2y1wvKZ
+  http_pb2.py: QmbNnrdF9ZHJkERdhe7GW2wAENGDo1YnZEEbY4szMTLJHw
+  message.py: QmP6FumVHGhAsHRuRDhcHDqpgjNMoktPJ31XfHpkVDWn6y
+  serialization.py: QmXgJtLZfoLyMYegpfAMzhwfLTTobD6QxtEmzJnZAfYKHc
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

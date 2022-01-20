@@ -1,26 +1,26 @@
 name: http_client
 author: fetchai
-version: 0.23.0
+version: 0.24.0
 type: connection
 description: The HTTP_client connection that wraps a web-based client connecting to
   a RESTful API specification.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmS6oZ4AKuTm2Gj5Xjz99s9b7BXgXyBifcFPo7ZNPrWsqx
+  README.md: QmRRhqbUienByhiTDvofbvgUiHgNeMXAVgCfxG39kDKKVE
   __init__.py: QmPdKAks8A6XKAgZiopJzPZYXJumTeUqChd8UorqmLQQPU
-  connection.py: QmPhg67mJPskRatZmSkiNREYagtRZb6uvgepnzcuP76noD
+  connection.py: Qmd8nxFjFdHybyxJ2FhM5wnm2Ns8angrHG3twMSZZ7HPoe
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0
+- fetchai/http:1.1.0
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1
   port: 8000
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:1.0.0
+- fetchai/http:1.1.0
 dependencies:
   aiohttp:
     version: <3.8,>=3.7.4

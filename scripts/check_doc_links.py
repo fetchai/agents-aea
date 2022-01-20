@@ -59,7 +59,7 @@ def is_url_reachable(url: str) -> bool:
     if url in IGNORE:
         return True
     try:
-        response = requests.head(url, timeout=3)
+        response = requests.head(url, timeout=20)
         if response.status_code == 200:
             return True
         if response.status_code in [403, 405, 302, 404]:
