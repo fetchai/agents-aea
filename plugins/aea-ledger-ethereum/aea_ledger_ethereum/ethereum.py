@@ -1286,7 +1286,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         ):
             gas_data = self.try_get_gas_pricing()
             if gas_data:
-                tx_params.update()  # pragma: nocover
+                tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)
         return tx
 
