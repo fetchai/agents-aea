@@ -242,7 +242,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The <a href="../simple-oef">SOEF search node</a> will respond with a message `msg` of type `OefSearchMessage` with performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:1.0.0`.
+* The <a href="../simple-oef">SOEF search node</a> will respond with a message `msg` of type `OefSearchMessage` with performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../acn/">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:1.0.0`.
 
 * If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python

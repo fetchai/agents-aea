@@ -14,7 +14,7 @@ of an entity (e.g. individual, organisation, business).
 * **AEA (Autonomous Economic Agent)**: An AEA is "an intelligent agent acting on
 an owner's behalf, with limited or no interference, and whose goal is to 
 generate economic value to its owner". AEAs are a special type of agent.
-[<a href="../">more</a>]
+[<a href="../index">more</a>]
 
 * **MAS (Multi-agent system)**: A MAS is a system that is inhabited by agents 
 who can interact with their environment and other agents in the system through 
@@ -23,7 +23,7 @@ the use of decision-making logic.
 
 * **ACN (Agent Communication Network)**: The ACN is a peer-to-peer communication
 network for autonomous economic agents. 
-[<a href="../acn">more</a>]
+[<a href="../acn/">more</a>]
 
 * **Distributed**: Distributed systems or computing refers to networks whose 
 nodes are physically separated, and who may be used to solve problems 
@@ -37,7 +37,7 @@ communication without a third-party intermediary acting as a central authority.
 
 * **Skill**: A Skill encapsulates implementations Handler, Behaviour and Model, 
 and may include any number of each of these components. 
-[<a href="../skill">more</a>]
+[<a href="../skill/">more</a>]
 
 * **Task**: Encapsulate skill components that are scheduled for asynchronous 
 execution. They are background processes that enable concurrency in the system,
