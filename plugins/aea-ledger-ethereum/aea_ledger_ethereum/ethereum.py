@@ -30,7 +30,6 @@ from uuid import uuid4
 
 import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
-from web3.exceptions import TransactionNotFound
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
@@ -42,6 +41,7 @@ from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+from web3.exceptions import TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
@@ -1214,11 +1214,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         return Web3.isAddress(address)
 
-    def _call(
-        self,
-        contract_interface: Dict[str, str],
-        method_name: str,
-        *method_args: Any,
+    def contract_method_call(
+        self, contract_interface: Dict[str, str], method_name: str, *method_args: Any,
     ) -> Optional[JSONLike]:
         """Call method."""
         contract = self.get_contract_instance(contract_interface)
@@ -1226,7 +1223,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         result = method(*method_args).call()
         return result
 
-    def _prepare_tx(  # pylint: disable=too-many-arguments
+    def build_transaction(  # pylint: disable=too-many-arguments
         self,
         contract_interface: Dict[str, str],
         sender_address: str,
@@ -1290,7 +1287,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx = tx.buildTransaction(tx_params)
         return tx
 
-    def get_tx_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
+    def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         contract_interface: Dict[str, str],
         tx_hash: str,
@@ -1299,8 +1296,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         Get all transfer events derived from a transaction.
 
-        :param ledger_api: the ledger API object
-        :param contract_address: the contract address
+        :param contract_interface: the contract interface
         :param tx_hash: the transaction hash
         :param target_address: optional address to filter tranfer events to just those that affect it
         :return: the verified status
@@ -1340,7 +1336,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         return dict(logs=transfer_logs)
 
-    def get_tx_transfered_amount(  # pylint: disable=too-many-arguments,too-many-locals
+    def get_transaction_transfered_amount(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         contract_interface: Dict[str, str],
         tx_hash: str,
@@ -1351,8 +1347,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         Get the amount of a token transferred as a result of a transaction.
 
-        :param ledger_api: the ledger API object
-        :param contract_address: the contract address
+        :param contract_interface: the contract interface
         :param tx_hash: the transaction hash
         :param token_address: the token's address
         :param source_address: the source address
@@ -1360,7 +1355,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the incoming amount
         """
 
-        transfer_logs: list = self.get_tx_transfer_logs(contract_interface, tx_hash)["logs"]  # type: ignore
+        transfer_logs: list = self.get_transaction_transfer_logs(contract_interface, tx_hash)["logs"]  # type: ignore
 
         token_events = list(
             filter(

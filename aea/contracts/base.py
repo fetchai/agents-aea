@@ -202,6 +202,79 @@ class Contract(Component):
         """
         raise NotImplementedError
 
+    @classmethod
+    def contract_method_call(
+        cls, ledger_api: LedgerApi, method_name: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
+        """
+        Make a contract call.
+
+        :param ledger_api: the ledger apis.
+        :param method_name: the contract method name.
+        :param kwargs: keyword arguments.
+        :return: the call result
+        """
+
+        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        result = ledger_api.contract_method_call(
+            contract_interface, method_name, **kwargs
+        )
+        return result
+
+    @classmethod
+    def build_transaction(
+        cls, ledger_api: LedgerApi, **kwargs: Any
+    ) -> Optional[JSONLike]:
+        """
+        Build a transaction.
+
+        :param ledger_api: the ledger apis.
+        :param kwargs: keyword arguments.
+        :return: the transaction
+        """
+
+        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        tx = ledger_api.build_transaction(contract_interface, **kwargs)
+        return tx
+
+    @classmethod
+    def get_transaction_transfer_logs(
+        cls, ledger_api: LedgerApi, tx_hash: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
+        """
+        Retrieve the logs from a transaction.
+
+        :param ledger_api: the ledger apis.
+        :param tx_hash: The transaction hash to check logs from.
+        :param kwargs: keyword arguments.
+        :return: the tx logs
+        """
+
+        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        tx_logs = ledger_api.get_transaction_transfer_logs(
+            contract_interface, tx_hash, **kwargs
+        )
+        return tx_logs
+
+    @classmethod
+    def get_transaction_transfered_amount(
+        cls, ledger_api: LedgerApi, tx_hash: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
+        """
+        Get a transaction's transfered amount
+
+        :param ledger_api: the ledger apis.
+        :param tx_hash: The transaction hash to check transfered amounts from.
+        :param kwargs: keyword arguments.
+        :return: the tx logs
+        """
+
+        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        tx_logs = ledger_api.get_transaction_transfered_amount(
+            contract_interface, tx_hash, **kwargs
+        )
+        return tx_logs
+
 
 def _try_to_register_contract(configuration: ContractConfig) -> None:
     """Register a contract to the registry."""
