@@ -61,7 +61,7 @@ class TacBehaviour(Behaviour):
             registration_behaviour = cast(
                 SoefRegisterBehaviour, self.context.behaviours.soef_register
             )
-            registration_behaviour.Status = SoefRegisterBehaviour.Status.REGISTERING_TAC
+            registration_behaviour.status = SoefRegisterBehaviour.Status.REGISTERING_TAC
             self.context.logger.info(
                 "TAC open for registration until: {}".format(parameters.start_time)
             )
@@ -193,9 +193,7 @@ class SoefRegisterBehaviour(TickerBehaviour):
         super().__init__(**kwargs)
         self._registered_description = None  # type: Optional[Description]
         self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
-        self.failed_registration_reason = (
-            None
-        )  # type: Optional[OefSearchMessage.OefErrorOperation]
+        self.failed_registration_reason = None  # type: Optional[Enum]
         self.status = (
             self.Status.REGISTERING_AGENT
         )  # type: SoefRegisterBehaviour.Status
@@ -253,10 +251,13 @@ class SoefRegisterBehaviour(TickerBehaviour):
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
+
+        retry_msg = cast(OefSearchMessage, self.failed_registration_msg)
+
         oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.failed_registration_msg.to,
-            performative=self.failed_registration_msg.performative,
-            service_description=self.failed_registration_msg.service_description,
+            counterparty=retry_msg.to,
+            performative=retry_msg.performative,
+            service_description=retry_msg.service_description,
         )
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
