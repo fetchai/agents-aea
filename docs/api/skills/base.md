@@ -46,6 +46,16 @@ Get the logger.
 
 Set the logger.
 
+<a name="aea.skills.base.SkillContext.data_dir"></a>
+#### data`_`dir
+
+```python
+ | @property
+ | data_dir() -> str
+```
+
+Get the agent's data directory
+
 <a name="aea.skills.base.SkillContext.set_agent_context"></a>
 #### set`_`agent`_`context
 

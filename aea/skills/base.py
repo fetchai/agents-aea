@@ -103,6 +103,11 @@ class SkillContext:
             raise ValueError("Agent context not set yet.")
         return self._agent_context
 
+    @property
+    def data_dir(self) -> str:
+        """Get the agent's data directory"""
+        return self._get_agent_context().data_dir
+
     def set_agent_context(self, agent_context: AgentContext) -> None:
         """Set the agent context."""
         self._agent_context = agent_context

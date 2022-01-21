@@ -219,6 +219,14 @@ class TestSkillContextDefault(BaseTestSkillContext):
 class SkillContextTestCase(TestCase):
     """Test case for SkillContext class."""
 
+    @staticmethod
+    def test_data_dir():
+        """Test data_dir property."""
+        agent_context = mock.Mock()
+        agent_context.data_dir = "path"
+        obj = SkillContext(agent_context)
+        assert obj.data_dir == "path"
+
     def test_shared_state_positive(self):
         """Test shared_state property positive result"""
         agent_context = mock.Mock()
