@@ -443,6 +443,44 @@ class LedgerApi(Helper, ABC):
         :return: the updated transaction
         """
 
+    @abstractmethod
+    def contract_method_call(
+        self, contract_interface: Dict[str, str], method_name: str, **kwargs: Any,
+    ) -> JSONLike:
+        """Call method"""
+
+    @abstractmethod
+    def build_transaction(
+        self, contract_interface: Dict[str, str], **kwargs: Any
+    ) -> JSONLike:
+        """Prepare tx method"""
+
+    @abstractmethod
+    def get_transaction_transfer_logs(
+        self, contract_interface: Dict[str, str], tx_hash: str, **kwargs: Any
+    ) -> JSONLike:
+        """
+        Get all transfer events derived from a transaction.
+
+        :param contract_interface: the contract interface
+        :param tx_hash: the transaction hash
+        :param kwargs: the keyword arguments.
+        :return: the transfer logs
+        """
+
+    @abstractmethod
+    def get_transaction_transfered_amount(
+        self, contract_interface: Dict[str, str], tx_hash: str, **kwargs: Any
+    ) -> JSONLike:
+        """
+        Get the amount of a token transferred as a result of a transaction.
+
+        :param contract_interface: the contract interface
+        :param tx_hash: the transaction hash
+        :param kwargs: the keyword arguments.
+        :return: the transfered amount
+        """
+
 
 class FaucetApi(ABC):
     """Interface for testnet faucet APIs."""

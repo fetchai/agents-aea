@@ -1299,7 +1299,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param contract_interface: the contract interface
         :param tx_hash: the transaction hash
         :param target_address: optional address to filter tranfer events to just those that affect it
-        :return: the verified status
+        :return: the transfer logs
         """
         contract = self.get_contract_instance(contract_interface)
 
