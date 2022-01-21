@@ -5,13 +5,13 @@ AEA stands for "Autonomous Economic Agent". An AEA can represent an individual, 
 <details><summary>How do AEAs talk to each other when they do not know each other?</summary>
 For an Autonomous Economic Agent (AEA) to talk to other AEAs, it first needs to find them. Once it does, it should ensure that they both use the same protocol for communication, and if so, they then have to send messages to each other.
 <br><br>
-The AEA framework provides the necessary services to address all three problems. You can read more about search and discovery <a href="../oef-ledger/">here</a>, protocols <a href="../core-components-1/">here</a>, and the Agent Communication Network (ACN) <a href="../acn/">here</a>.
+The AEA framework provides the necessary services to address all three problems. You can read more about the agent communication network <a href="../acn/">here</a>, protocols <a href="../core-components-1/">here</a>, and the Agent Communication Network (ACN) <a href="../acn/">here</a>.
 </details>
 
 <details><summary>How does an AEA use blockchain?</summary>
 The AEA framework enables agents to interact with blockchains to settle transactions. Currently, the framework has native support for three different networks: <i>Fetch.ai</i>, <i>Ethereum</i> and <i>Cosmos</i>.
 <br><br>
-You can read more about the framework's integration with the different blockchains <a href="../ledger-integration/">here</a> and gain a high level overview <a href="../oef-ledger/">here</a>.
+You can read more about the framework's integration with the different blockchains <a href="../ledger-integration/">here</a>.
 </details>
 
 <details><summary>How does one install third party libraries?</summary>

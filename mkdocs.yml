@@ -57,8 +57,6 @@ nav:
       - Message routing: 'message-routing.md'
       - Configurations: 'config.md'
       - Limitations of v1: 'limits.md'
-
-  # - Development - Use Case:
     - Use Case:
       - Front-end intergration: 'connect-a-frontend.md'
       - HTTP Connection: 'http-connection-and-skill.md'
