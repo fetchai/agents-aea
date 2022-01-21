@@ -87,6 +87,6 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 
-To learn more about the folder structure of an AEA project read on <a href="../package-imports/">here</a>.
+To learn more about the folder structure of an AEA project read on <a href="../../package-imports/">here</a>.
 
 A full break down of the development is covered within the <a href="../../quickstart/">Development Quickstart</a>. It is highly recommended that developers begin by following the quick start!

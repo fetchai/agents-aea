@@ -11,18 +11,71 @@ the design and implementation of agent-based solutions to real world problems.
 
 Allowing for direct peer-to-peer communication makes Multi-Agent Systems 
 (**MAS**) inherently decentralized. This contrasts conventional systems design, 
-such as that of the client-server model, where clients rely on message relay 
-services provided by an intermediary. That does not imply that facilitators of 
-services and middlemen have no place in a multi-agent system; rather it is the 
-notion of a '_commanding reliance on middlemen_' that is rejected.   
+such as that of the client-server model, in which clients are forced to trust 
+the server host - a central point of authority in the network - as the mediator 
+of all client interactions. That does not imply that facilitators of services 
+and middlemen have no place in a multi-agent system; rather it is the notion of 
+a '_commanding reliance on middlemen_' that is rejected.
 
-**Division of responsibilities:** In a decentralised system every agent is equally privileged and (in principle) able to interact with any other agent. Without a central authority that provides the services needed to mediate agent interactions, hosting these becomes part of the agents' responsibility. An example hereof is the access to a registry of contact addresses that is normally maintained by a service provider. Without any form of government, however, a central database that can be updated at the sole discretion of any individual agent is easily corrupted. A system in which every agent is only responsible for maintaining their own set of records is also problematic, since errors and the asynchronous execution of events inevitably leads to a situation in which agents possess different versions of the record. Instead, agents must share responsibility over the state of records and do so by maintaining a local copy of it and periodically synchronizing this state by requiring consensus to be achieved over it.
+Lack of a centralized authority is not their only distinctive characteristic. 
+The agents and their components - those enabling them to enact, react and engage
+in decision-making - generally belong to different stakeholders - e.g. 
+individuals, companies or governments - and need to share no more commonality 
+than a network connection and an interaction protocol to be able to interact. 
+The consequence hereof is that they can be exceptionally diverse in terms of
+their design, the standards they adhere to, the software used to implement them 
+and the hardware they operate on. Moreover, each of the agents has their own 
+objectives, which may well be unaligned, inconsistent or even conflicting with 
+those of others.
 
-<!--Another example is the verification of protocol adherence in regulated systems. Consider the problem of traffic management. The success of such a system relies on its participants (e.g. pedestrians, cars, motorbikes, bicycles, etc) conforming with the traffic management protocol, which specifies, for instance, who has the right of way in a junction. It is trivial, that the continuous functioning of this system does not rest solely on the existence of a protocol; there should also be a mechanism in place that verifies the protocol is followed by the participants. In a central system, verifying whether parties adhere to the system's protocol is often the responsibility of a central unit that checks (some or all) actions of the parties involved. The police could be considered a central entity that enforces traffic protocols and punishes those violating it. However, in a decentralised environment, this burden falls on the parties involved in the interaction themselves. Therefore, one could imagine a self-governing traffic management system whereby individuals on the road enforce protocol adherence on each other and decide on the appropriate method(s) of enforcement (e.g. through collective punishments, sanctions, rewards, ratings, etc).-->
+**Division of responsibilities:** In a decentralised system every agent is 
+equally privileged and (in principle) able to interact with any other agent. 
+Without a central authority that provides the services needed to mediate agent 
+interactions, hosting them becomes part of the agents' responsibility. An 
+example hereof is the access to a registry of contact addresses that is 
+otherwise maintained by a service provider. Without any form of government, 
+however, a central database that can be updated at the sole discretion of any 
+individual agent is easily corrupted. Yet, a system in which every agent is only
+responsible for maintaining their own set of records is also problematic, since 
+errors and the asynchronous execution of events inevitably leads to a situation 
+in which agents possess different versions of the record. Instead, agents must 
+share responsibility over the state of records and do so by maintaining a local 
+copy of it and periodically synchronizing this state by requiring consensus to 
+be achieved over it and any updates to it. 
 
-**Decentralised vs distributed:** It is important to distinguish the concepts of distributed and decentralised systems. A distributed system is one whose components are physically separated and connected over a network, whereas a decentralized system requires control over its governance to be shared among its stakeholders. Google or Microsoft's cloud infrastructure are examples of the former; nodes of these networks are distributed across the globe, yet these systems are centralized because governance over them resides solely with centralized entities.
+Distributed ledger technologies, such as blockchain-based cryptocurrencies, are
+a prime example of this. A characteristic feature of cryptocurrencies is the 
+absence of central trusted entities (e.g. banks). The notion of decentralisation
+extends as far as ownership and control. Although enabled through the use of 
+open source code and cryptographic primitives offering security precautions, 
+the validation of transactions and accuracy of ledger is ultimately the 
+responsibility of individuals.
 
-**Example:** To better illustrate the distinction between centralised and decentralised systems, consider another example: search and discoverability in a commerce environment. In a centralised system (say Amazon), there is a single search service -- provided, owned and run by the commerce company itself -- which takes care of all search-related functionality for every product within their domain. So to be discoverable in this system, all sellers must register their products with this particular service. However, in a decentralised system, there may not necessarily be a single search service provider. There may be multiple such services, run by different, perhaps competing entities. Each seller has the freedom to register with (i.e. make themselves known to) one or a handful of services. On the buyers side, the more services they contact and query, the higher their chances of finding the product they are looking for.
+<!--Another example is the verification of protocol adherence in regulated systems. Consider the problem of traffic management. The success of such a system relies on its participants (e.g. pedestrians, cars, motorbikes, bicycles, etc.) conforming with the traffic management protocol, which specifies, for instance, who has the right of way in a junction. It is trivial, that the continuous functioning of this system does not rest solely on the existence of a protocol; there should also be a mechanism in place that verifies the protocol is followed by the participants. In a central system, verifying whether parties adhere to the system's protocol is often the responsibility of a central unit that checks (some or all) actions of the parties involved. The police could be considered a central entity that enforces traffic protocols and punishes those violating it. However, in a decentralised environment, this burden falls on the parties involved in the interaction themselves. Therefore, one could imagine a self-governing traffic management system whereby individuals on the road enforce protocol adherence on each other and decide on the appropriate method(s) of enforcement (e.g. through collective punishments, sanctions, rewards, ratings, etc).-->
+
+**Decentralised vs distributed:** 
+It is important to distinguish the concepts of distributed and decentralised 
+systems. A distributed system is one whose components are physically separated 
+and connected over a network, whereas a decentralised system requires control 
+over its governance to be shared among its stakeholders. Google or Microsoft's 
+cloud infrastructure are examples of the former; nodes of these networks are 
+distributed across the globe, yet these systems are centralized because 
+governance over them resides solely with centralized entities.
+
+**Example:** 
+To better illustrate the distinction between centralised and decentralised 
+systems, consider another example: search and discoverability in a commerce 
+environment. In a centralised system (say Amazon), there is a single search 
+service - provided, owned and run by the commerce company itself - which takes 
+care of all search-related functionality for every product within their domain.
+So to be discoverable in this system, all sellers must register their products 
+with this particular service. However, in a decentralised system, there may not
+necessarily be a single search service provider. There may be multiple such 
+services, run by different, perhaps competing entities. Each seller has the 
+freedom to register with (i.e. make themselves known to) one or a handful of 
+services. On the buyers side, the more services they contact and query, the 
+higher their chances of finding the product they are looking for.
+
 
 ## Conflicting Environment
 
@@ -36,7 +89,7 @@ information available to it is:
 * Uncertain: it may be the result of an inaccurate prediction. 
 * Incorrect: it could be an outright lie, due to the adversarial nature of the environment.
 
-This uncertainty poses a challenge to the agents, who,  since they cannot blindly trust other agents, need to validate the information that they provide.
+This uncertainty poses a challenge to the agents, who, since they cannot blindly trust other agents, need to validate the information that they provide.
 
 
 ## Asynchronous task execution

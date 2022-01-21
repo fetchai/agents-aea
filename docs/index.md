@@ -24,7 +24,7 @@ In order to be able to act on an owner's behalf AEAs need to be endowed with a
 sense of agency, which requires the ability to enact behaviour and exercise 
 control over its consequences in a way that is commensurate with its owners' 
 goals. The ability to autonomously interact with their environment and 
-proactively engage in peer-to-peer dialogue is a distinguishing feature of AEAs. 
+proactively engage in peer-to-peer dialogue is a distinctive feature of AEAs. 
 Where otherwise the execution of skills and decision-making logic are left as 
 an exercise to the reader, AEAs allow developers to design systems that pursue 
 economic interests without the requirement of an owner to actively partake or 
@@ -43,7 +43,7 @@ composable and extensible. Its purpose is to make agent development as
 straightforward as web development became with the introduction of Django and 
 Flask.
 
-The modularity of components in this framework facilitates their reuse as parts 
+A modular design of components facilitates their reuse as parts 
 of other applications that might serve an entirely different set of needs. The 
 framework provided offers the user:
 
@@ -58,8 +58,6 @@ framework provided offers the user:
 
 The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
 
-* The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with other AEAs over the public internet.
-* The <a href="oef-ledger">Open Economic Framework</a> provides a search and discovery system that allows AEAs to locate each other.
 * The <a href="registry">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
 * The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
 * The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts on various decentralised ledgers. 
