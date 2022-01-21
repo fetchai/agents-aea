@@ -1,8 +1,13 @@
+!!! note
+
+    The (open) AEA framework provides the necessary tools for creating 
+    Autonomous Economic Agents (AEA). It is a fork of the 
+    <a href="https://github.com/fetchai/agents-aea" target="_blank">legacy AEA 
+    framework</a> that gives no priority to any package vendor.
+
 The latest version of the Python implementation of the AEA Framework:
 
-<a href="https://img.shields.io/pypi/v/aea" target="_blank"><img alt="PyPI" src="https://img.shields.io/pypi/v/aea" /></a>. 
-
-The framework is under rapid development with frequent breaking changes in the run-up to version `1.0` which is due in Q1 2021.
+<a href="https://img.shields.io/pypi/v/aea" target="_blank"><img alt="PyPI" src="https://img.shields.io/pypi/v/aea" /></a>.
 
 If you are upgrading your AEA project from a previous version of the AEA framework, please check out <a href="../upgrading/">the upgrading guide</a>.
 

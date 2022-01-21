@@ -11,7 +11,7 @@ In light of those discussions, on this page we identify a number of application 
 * **Inhabitants**: agents representing objects in the IoT (Internet of Things) space. For examples, AEAs paired with real world hardware devices such as drones, laptops, heat sensors, etc.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between existing (Web 2.0) and new (Web 3.0) economic models. An example is an AEA with <a href="../http-connection-and-skill"> HTTP connection and skill </a> who has the capability to communicate using HTTP.
 * **Pure software**: software agents _living_ in the digital space that interact with interface agents and others.
-* **Digital data sales agents**: software agents that attach to data sources and sell it via the open economic framework. 
+* **Digital data sales agents**: software agents that attach to data sources and sell it to other agents. 
 * **Representative**: an agent which represents an individual's activities on the network. 
 
 ## Likely short-term applications
