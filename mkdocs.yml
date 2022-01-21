@@ -27,9 +27,9 @@ nav:
     - Agent & component registry: 'registry.md'
   - Demos:
     - Demos: 'demos.md'
-    - Echo Demo: 'demos/echo_demo.md'
-    - Gym example: 'demos/gym-example.md'
-    - Gym skill: 'demos/gym-skill.md'
+    - Echo Demo: 'echo_demo.md'
+    - Gym example: 'gym-example.md'
+    - Gym skill: 'gym-skill.md'
   - Development - Beginner:
     - AEA quick start: 'quickstart.md'
     - Core components - Part 1: 'core-components-1.md'

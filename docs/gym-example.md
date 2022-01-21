@@ -10,7 +10,7 @@ However, the example decouples the RL agent from the `gym.Env` allowing them to 
 
 ### Dependencies
 
-Follow the <a href="../../quickstart/#preliminaries">Preliminaries</a> and <a href="../../quickstart/#installation">Installation</a> sections from the AEA quick start.
+Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
 Download the necessary directories into your working directory:
 ``` bash
