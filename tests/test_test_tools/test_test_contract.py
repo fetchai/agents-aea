@@ -71,7 +71,7 @@ class TestContractTestCase(BaseContractTestCase):
         assert self.item_owner_crypto.identifier == LEDGER_ID
 
         assert type(self.faucet_api) is FetchAIFaucetApi
-        assert self.item_owner_crypto.identifier == LEDGER_ID
+        assert self.faucet_api.identifier == LEDGER_ID
 
         assert self.contract_address == CONTRACT_ADDRESS
 
