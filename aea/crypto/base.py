@@ -442,44 +442,34 @@ class LedgerApi(Helper, ABC):
         :param transaction: the transaction
         :return: the updated transaction
         """
+        raise NotImplementedError
 
     @abstractmethod
     def contract_method_call(
-        self, contract_interface: Dict[str, str], method_name: str, **kwargs: Any,
-    ) -> JSONLike:
+        self, contract_instance: Any, method_name: str, **kwargs: Any,
+    ) -> Optional[JSONLike]:
         """Call method"""
+        raise NotImplementedError
 
     @abstractmethod
     def build_transaction(
-        self, contract_interface: Dict[str, str], **kwargs: Any
-    ) -> JSONLike:
+        self, contract_instance: Any, method_name: str, method_args: Dict, tx_args: Dict
+    ) -> Optional[JSONLike]:
         """Prepare tx method"""
+        raise NotImplementedError
 
     @abstractmethod
     def get_transaction_transfer_logs(
-        self, contract_interface: Dict[str, str], tx_hash: str, **kwargs: Any
-    ) -> JSONLike:
+        self, contract_instance: Any, tx_hash: str
+    ) -> Optional[JSONLike]:
         """
         Get all transfer events derived from a transaction.
 
-        :param contract_interface: the contract interface
+        :param contract_instance: the contract
         :param tx_hash: the transaction hash
-        :param kwargs: the keyword arguments.
         :return: the transfer logs
         """
-
-    @abstractmethod
-    def get_transaction_transfered_amount(
-        self, contract_interface: Dict[str, str], tx_hash: str, **kwargs: Any
-    ) -> JSONLike:
-        """
-        Get the amount of a token transferred as a result of a transaction.
-
-        :param contract_interface: the contract interface
-        :param tx_hash: the transaction hash
-        :param kwargs: the keyword arguments.
-        :return: the transfered amount
-        """
+        raise NotImplementedError
 
 
 class FaucetApi(ABC):

@@ -215,7 +215,7 @@ class Contract(Component):
         :return: the call result
         """
 
-        contract_instance = cls.get_instance(ledger_api, contract_address)
+        contract_instance = cls.get_instance(ledger_api)
         result = ledger_api.contract_method_call(
             contract_instance, method_name, **kwargs
         )
@@ -233,8 +233,8 @@ class Contract(Component):
         :return: the transaction
         """
 
-        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
-        tx = ledger_api.build_transaction(contract_interface, **kwargs)
+        contract_instance = cls.get_instance(ledger_api)
+        tx = ledger_api.build_transaction(contract_instance, **kwargs)
         return tx
 
     @classmethod
@@ -250,28 +250,9 @@ class Contract(Component):
         :return: the tx logs
         """
 
-        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        contract_instance = cls.get_instance(ledger_api)
         tx_logs = ledger_api.get_transaction_transfer_logs(
-            contract_interface, tx_hash, **kwargs
-        )
-        return tx_logs
-
-    @classmethod
-    def get_transaction_transfered_amount(
-        cls, ledger_api: LedgerApi, tx_hash: str, **kwargs: Any
-    ) -> Optional[JSONLike]:
-        """
-        Get a transaction's transfered amount
-
-        :param ledger_api: the ledger apis.
-        :param tx_hash: The transaction hash to check transfered amounts from.
-        :param kwargs: keyword arguments.
-        :return: the tx logs
-        """
-
-        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
-        tx_logs = ledger_api.get_transaction_transfered_amount(
-            contract_interface, tx_hash, **kwargs
+            contract_instance, tx_hash
         )
         return tx_logs
 

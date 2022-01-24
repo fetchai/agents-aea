@@ -1215,38 +1215,31 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return Web3.isAddress(address)
 
     def contract_method_call(
-        self, contract_interface: Dict[str, str], method_name: str, *method_args: Any,
+        self, contract_instance: Any, method_name: str, **method_args: Any,
     ) -> Optional[JSONLike]:
         """Call method."""
-        contract = self.get_contract_instance(contract_interface)
-        method = getattr(contract.functions, method_name)
-        result = method(*method_args).call()
+        method = getattr(contract_instance.functions, method_name)
+        result = method(**method_args).call()
         return result
 
     def build_transaction(  # pylint: disable=too-many-arguments
         self,
-        contract_interface: Dict[str, str],
-        sender_address: str,
+        contract_instance: Any,
         method_name: str,
-        *method_args: Any,
-        eth_value: int = 0,
-        gas: Optional[int] = None,
-        gas_price: Optional[int] = None,
-        max_fee_per_gas: Optional[int] = None,
-        max_priority_fee_per_gas: Optional[int] = None,
+        method_args: Dict,
+        tx_args: Dict,
     ) -> Optional[JSONLike]:
         """Prepare tx method."""
-        contract = self.get_contract_instance(contract_interface)
-        method = getattr(contract.functions, method_name)
-        tx = method(*method_args)
+        method = getattr(contract_instance.functions, method_name)
+        tx = method(**method_args)
         tx = self._build_transaction(
-            sender_address,
+            tx_args["sender_address"],
             tx,
-            eth_value,
-            gas,
-            gas_price,
-            max_fee_per_gas,
-            max_priority_fee_per_gas,
+            tx_args["eth_value"],
+            tx_args["gas"],
+            tx_args["gas_price"],
+            tx_args["max_fee_per_gas"],
+            tx_args["max_priority_fee_per_gas"],
         )
         return tx
 
@@ -1288,21 +1281,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
-        self,
-        contract_interface: Dict[str, str],
-        tx_hash: str,
-        target_address: Optional[str] = None,
-    ) -> JSONLike:
+        self, contract_instance: Any, tx_hash: str,
+    ) -> Optional[JSONLike]:
         """
         Get all transfer events derived from a transaction.
 
-        :param contract_interface: the contract interface
+        :param contract_instance: the contract
         :param tx_hash: the transaction hash
-        :param target_address: optional address to filter tranfer events to just those that affect it
         :return: the transfer logs
         """
-        contract = self.get_contract_instance(contract_interface)
-
         try:
             tx_receipt = self.api.eth.get_transaction_receipt(tx_hash)
             if tx_receipt is None:
@@ -1314,74 +1301,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         # Due to serialization, event topics must be converted again to HexBytes or processReceipt will fail
         tx_receipt = rebuild_receipt(tx_receipt)
 
-        transfer_logs = contract.events.Transfer().processReceipt(tx_receipt)
-
-        transfer_logs = [
-            {
-                "from": log["args"]["from"],
-                "to": log["args"]["to"],
-                "value": log["args"]["value"],
-                "token_address": log["address"],
-            }
-            for log in transfer_logs
-        ]
-
-        if target_address:
-            transfer_logs = list(
-                filter(
-                    lambda log: target_address in (log["from"], log["to"]),  # type: ignore
-                    transfer_logs,
-                )
-            )
+        transfer_logs = contract_instance.events.Transfer().processReceipt(tx_receipt)
 
         return dict(logs=transfer_logs)
-
-    def get_transaction_transfered_amount(  # pylint: disable=too-many-arguments,too-many-locals
-        self,
-        contract_interface: Dict[str, str],
-        tx_hash: str,
-        token_address: str,
-        source_address: Optional[str] = None,
-        destination_address: Optional[str] = None,
-    ) -> JSONLike:
-        """
-        Get the amount of a token transferred as a result of a transaction.
-
-        :param contract_interface: the contract interface
-        :param tx_hash: the transaction hash
-        :param token_address: the token's address
-        :param source_address: the source address
-        :param destination_address: the destination address
-        :return: the incoming amount
-        """
-
-        transfer_logs: list = self.get_transaction_transfer_logs(contract_interface, tx_hash)["logs"]  # type: ignore
-
-        token_events = list(
-            filter(
-                lambda log: log["token_address"] == self.api.toChecksumAddress(token_address),  # type: ignore
-                transfer_logs,
-            )
-        )
-
-        if source_address:
-            token_events = list(
-                filter(
-                    lambda log: log["from"] == self.api.toChecksumAddress(source_address),  # type: ignore
-                    token_events,
-                )
-            )
-
-        if destination_address:
-            token_events = list(
-                filter(
-                    lambda log: log["to"] == self.api.toChecksumAddress(destination_address),  # type: ignore
-                    token_events,
-                )
-            )
-
-        amount = 0 if not token_events else sum([event["value"] for event in list(token_events)])  # type: ignore
-        return dict(amount=amount)
 
 
 class EthereumFaucetApi(FaucetApi):
