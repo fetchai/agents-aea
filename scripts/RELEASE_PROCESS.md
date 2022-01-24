@@ -19,7 +19,7 @@
 
 9. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
 
-10. Open PRs and merge into develop. Then open develop to main PR and merge it.
+10. Open PRs and merge into develop. Then switch to the develop branch, open a PR from develop to main and merge if no problems.
 
 11. Tag version on main.
 
@@ -32,8 +32,8 @@
 
 15. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
 
-16. Release packages into registry: `python scripts/deploy_to_registry.py`. Run it several times till all packages updated, cause some dependencies order.
+16. Release packages into registry: `python scripts/deploy_to_registry.py`. You might have to run the script a few times until all packages are updated due to a specific dependency structure.
 
-17. AEA develop docker image don automatically with CI with develop to main PR.
+17. Note, the AEA develop docker image is automatically created as part of the CI process in the develop to main PR.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
