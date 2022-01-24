@@ -1634,7 +1634,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def try_to_load_agent_configuration_file(
         cls,
         aea_project_path: Union[str, Path],
-        load_environment_variables: bool = False,
+        apply_environment_variables: bool = False,
     ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
@@ -1643,7 +1643,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             with open_file(configuration_file_path, mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
-                if load_environment_variables:
+                if apply_environment_variables:
                     agent_configuration = apply_env_variables(
                         agent_configuration, os.environ
                     )
@@ -1843,7 +1843,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         cls,
         aea_project_path: PathLike,
         skip_consistency_check: bool = False,
-        load_environment_variables: bool = False,
+        apply_environment_variables: bool = False,
         password: Optional[str] = None,
     ) -> "AEABuilder":
         """
@@ -1858,20 +1858,20 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :param load_environment_variables: if True, environment variables are loaded.
+        :param apply_environment_variables: if True, environment variables are loaded.
         :param password: the password to encrypt/decrypt private keys.
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
         cls.try_to_load_agent_configuration_file(
-            aea_project_path, load_environment_variables
+            aea_project_path, apply_environment_variables
         )
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # check and create missing, do not replace env variables. updates config
         AgentConfigManager.verify_private_keys(
             aea_project_path,
-            substitude_env_vars=load_environment_variables,
+            substitude_env_vars=apply_environment_variables,
             private_key_helper=private_key_verify,
             password=password,
         ).dump_config()

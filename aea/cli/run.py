@@ -85,8 +85,8 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     help="The connection names to disable for running the agent. Must be declared in the agent's configuration file.",
 )
 @click.option(
-    "--load_from_env_variables",
-    "load_environment_variables",
+    "--aev",
+    "apply_environment_variables",
     required=False,
     is_flag=True,
     default=False,
@@ -100,7 +100,7 @@ def run(
     exclude_connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
-    load_environment_variables: bool,
+    apply_environment_variables: bool,
     profiling: int,
     password: str,
 ) -> None:
@@ -122,7 +122,7 @@ def run(
                 connection_ids,
                 env_file,
                 is_install_deps,
-                load_environment_variables,
+                apply_environment_variables,
                 password,
             )
             return
@@ -131,7 +131,7 @@ def run(
         connection_ids,
         env_file,
         is_install_deps,
-        load_environment_variables,
+        apply_environment_variables,
         password,
     )
 
@@ -197,7 +197,7 @@ def run_aea(
     connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
-    load_environment_variables: bool,
+    apply_environment_variables: bool,
     password: Optional[str] = None,
 ) -> None:
     """
@@ -207,7 +207,7 @@ def run_aea(
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
     :param is_install_deps: bool flag is install dependencies.
-    :param load_environment_variables: bool flag is load environemnt variables.
+    :param apply_environment_variables: bool flag is load environemnt variables.
     :param password: the password to encrypt/decrypt the private key.
 
     :raises ClickException: if any Exception occurs.
@@ -215,7 +215,7 @@ def run_aea(
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
     aea = _build_aea(
-        connection_ids, skip_consistency_check, load_environment_variables, password
+        connection_ids, skip_consistency_check, apply_environment_variables, password
     )
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
@@ -251,7 +251,7 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
 def _build_aea(
     connection_ids: Optional[List[PublicId]],
     skip_consistency_check: bool,
-    load_environment_variables: bool,
+    apply_environment_variables: bool,
     password: Optional[str] = None,
 ) -> AEA:
     """Build the AEA."""
@@ -259,7 +259,7 @@ def _build_aea(
         builder = AEABuilder.from_aea_project(
             Path("."),
             skip_consistency_check=skip_consistency_check,
-            load_environment_variables=load_environment_variables,
+            apply_environment_variables=apply_environment_variables,
             password=password,
         )
         aea = builder.build(connection_ids=connection_ids, password=password)
