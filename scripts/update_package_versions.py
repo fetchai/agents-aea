@@ -715,7 +715,7 @@ class Updater:
                         continue
                     break
                 except Exception as e:  # pylint: disable=broad-except
-                    print(f"Version parse error: {e}. Enter a new one")
+                    print(f"Version parse error: {e}. Please enter a new version.")
                     continue
         elif self.option_update_version == "minor":
             new_version = ver.bump_minor()
@@ -801,7 +801,7 @@ class Updater:
         self, content: str, old_string: str, new_string: str, type_: str
     ) -> str:
         """
-        Ask to user if the line should be replaced or not, If the script arguments allow that.
+        Ask user if the line should be replaced or not, if the script arguments allow that.
 
         :param content: the content.
         :param old_string: the old string.
@@ -826,7 +826,7 @@ class Updater:
                 )
                 continue
 
-            # otherwise, forget the attempts and ask to the user.
+            # otherwise, forget the attempts and ask the user.
             answer = _ask_to_user(
                 lines, line, idx, old_string, type_, self.option_context
             )
