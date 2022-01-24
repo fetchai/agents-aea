@@ -453,7 +453,11 @@ class LedgerApi(Helper, ABC):
 
     @abstractmethod
     def build_transaction(
-        self, contract_instance: Any, method_name: str, method_args: Dict, tx_args: Dict
+        self,
+        contract_instance: Any,
+        method_name: str,
+        method_args: Optional[Dict],
+        tx_args: Optional[Dict],
     ) -> Optional[JSONLike]:
         """Prepare tx method"""
         raise NotImplementedError

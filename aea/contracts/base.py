@@ -239,21 +239,18 @@ class Contract(Component):
 
     @classmethod
     def get_transaction_transfer_logs(
-        cls, ledger_api: LedgerApi, tx_hash: str, **kwargs: Any
+        cls, ledger_api: LedgerApi, tx_hash: str,
     ) -> Optional[JSONLike]:
         """
         Retrieve the logs from a transaction.
 
         :param ledger_api: the ledger apis.
         :param tx_hash: The transaction hash to check logs from.
-        :param kwargs: keyword arguments.
         :return: the tx logs
         """
 
         contract_instance = cls.get_instance(ledger_api)
-        tx_logs = ledger_api.get_transaction_transfer_logs(
-            contract_instance, tx_hash
-        )
+        tx_logs = ledger_api.get_transaction_transfer_logs(contract_instance, tx_hash)
         return tx_logs
 
 
