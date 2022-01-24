@@ -215,9 +215,9 @@ class Contract(Component):
         :return: the call result
         """
 
-        contract_interface = cls.contract_interface.get(ledger_api.identifier, {})
+        contract_instance = cls.get_instance(ledger_api, contract_address)
         result = ledger_api.contract_method_call(
-            contract_interface, method_name, **kwargs
+            contract_instance, method_name, **kwargs
         )
         return result
 
