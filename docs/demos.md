@@ -2,4 +2,4 @@ We provide demo guides for multiple use-cases, each one involving several AEAs i
 
 These demos serve to highlight the concept of AEAs as well as provide inspiration for developers. Demos should not be taken as production ready software, although every care is taken to fix bugs when reported.
 
-Demos are alphabetically sorted, we recommend you start with the <a href="../demos/echo_demo">Echo Skills Demo</a>.
+Demos are alphabetically sorted, we recommend you start with the <a href="../echo_demo">Echo Skills Demo</a>.
