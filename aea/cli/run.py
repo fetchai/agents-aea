@@ -207,7 +207,7 @@ def run_aea(
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
     :param is_install_deps: bool flag is install dependencies.
-    :param apply_environment_variables: bool flag is load environemnt variables.
+    :param apply_environment_variables: bool flag is load environment variables.
     :param password: the password to encrypt/decrypt the private key.
 
     :raises ClickException: if any Exception occurs.
