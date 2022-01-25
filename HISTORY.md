@@ -1,5 +1,20 @@
 # Release History - open AEA
 
+## Plugins patch (2022-01-15)
+
+Plugins:
+- Bumps open-aea-ethereum-ledger to `1.3.2` after adding tip increase logic
+
+## Plugins patch (2022-01-05)
+
+Plugins:
+- Fixes dynamic gas pricing on open-aea-ethereum
+- Improves daemon availability check in `IPFSDaemon` on open-aea-cli-ipfs
+- Bumps open-aea-cli-ipfs and open-aea-ethereum-ledger to `1.3.1`
+
+Docs: 
+- Removes reference to fetch.ai.
+
 ## 1.3.0 (2021-12-31)
 
 AEA:

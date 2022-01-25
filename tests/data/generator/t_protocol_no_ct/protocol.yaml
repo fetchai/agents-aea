@@ -7,14 +7,6 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  .history/__init___20220125102242.py: QmNoNkG4EsTCzjtXP4C7r9QQCKqmjTCQ6raVePB3mPZhZy
-  .history/__init___20220125155720.py: QmW3gnmLai4vF6JScM2KxsViptDT5T3NbhP88yBSrPJ5UF
-  .history/dialogues_20220125102242.py: QmU6Et8wdCT7RTAwpRucp4o8NjCrtkdSo1hMAadwM8ueB2
-  .history/dialogues_20220125155710.py: QmfRSbg85eQgUbGXgaxCJwrj29afkPEMaStaCPNTL6xL1o
-  .history/message_20220125102242.py: QmR3SMgfAZEKAj3ex3PcSh7qothbptdJPzMoS5mhf8KWZn
-  .history/message_20220125155715.py: Qmf3x9wexDzCdqnNBYW4yQybQkT4FaeDM796cvQDAhiYq6
-  .history/serialization_20220125102242.py: QmSGoA2WjKU7F6oYfLwxG4uJVFuVhHNRSo7TNJ1EuYadEg
-  .history/serialization_20220125155726.py: Qmf3FC34wQSsAWB2T9p7RN1RYohb29REWbX3c1Js6yyYXA
   __init__.py: QmW3gnmLai4vF6JScM2KxsViptDT5T3NbhP88yBSrPJ5UF
   dialogues.py: QmfRSbg85eQgUbGXgaxCJwrj29afkPEMaStaCPNTL6xL1o
   message.py: Qmf3x9wexDzCdqnNBYW4yQybQkT4FaeDM796cvQDAhiYq6

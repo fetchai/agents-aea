@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import ipfshttpclient  # type: ignore
+import requests
 
 
 class IPFSDaemon:
@@ -35,11 +36,14 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self, offline: bool = False):
+    def __init__(
+        self, offline: bool = False, api_url: str = "http://127.0.0.1:5001/api/v0/id"
+    ):
         """Initialise IPFS daemon."""
 
         self.process = None  # type: Optional[subprocess.Popen]
         self.offline = offline
+        self.api_url = api_url
         self._check_ipfs()
 
     @staticmethod
@@ -57,9 +61,21 @@ class IPFSDaemon:
                 "Please ensure you have version 0.6.0 of IPFS daemon installed."
             )
 
+    def is_started_externally(self) -> bool:
+        """Check daemon was started externally."""
+        try:
+            x = requests.post(self.api_url)
+            return x.status_code == 200
+        except requests.exceptions.ConnectionError:
+            return False
+
+    def is_started_internally(self) -> bool:
+        """Check daemon was started internally."""
+        return bool(self.process)
+
     def is_started(self) -> bool:
         """Check daemon was started."""
-        return bool(self.process)
+        return self.is_started_externally() or self.is_started_internally()
 
     def start(self) -> None:
         """Run the ipfs daemon."""
@@ -77,7 +93,7 @@ class IPFSDaemon:
                     raise RuntimeError("Could not start IPFS daemon.")
 
     def stop(self) -> None:  # pragma: nocover
-        """Terminate the ipfs daemon."""
+        """Terminate the ipfs daemon if it was started internally."""
         if self.process is None:
             return
         self.process.stdout.close()
