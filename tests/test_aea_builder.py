@@ -1018,3 +1018,96 @@ def test_builder_pypi_dependencies():
         "open-aea-ledger-ethereum",
         "open-aea-ledger-cosmos",
     }
+
+
+class TestApplyEnvironmentVariables(AEATestCase):
+    """Test builder set from project dir, to make a skill 'abstract'."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+    override = dedent(
+        """
+        ---
+        public_id: dummy_author/dummy:0.1.0
+        type: skill
+        models:
+          dummy:
+            args:
+                model_arg_1: ${HOST:int:8}
+        ...
+        """
+    )
+
+    def teardown(self):
+        """Removes the over-ride"""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        configuration = configuration.replace(self.override, "")
+        aea_config_file.write_text(configuration)
+
+    def _add_skill_override_config(self):
+        """Add custom stub connection config."""
+        cwd = self._get_cwd()
+        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        configuration = aea_config_file.read_text()
+        # here we change all the dummy skill configurations
+        configuration += self.override
+        aea_config_file.write_text(configuration)
+
+    def test_builds_without_flag_without_env_var_override(self):
+        """Tests fails to build with override and without flag."""
+        with cd(self._get_cwd()):
+            builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+            builder.call_all_build_entrypoints()
+            aea = builder.build()
+            assert "aea" in locals()
+
+    def test_fails_to_build_without_flag_with_env_var_override(self):
+        """Tests fails to build with override and without flag."""
+        self._add_skill_override_config()
+        with cd(self._get_cwd()):
+            try:
+                builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+                builder.call_all_build_entrypoints()
+                aea = builder.build()
+            except ValueError:
+                assert "aea" not in locals()
+
+    def test_builds_with_flag_with_env_var_override(self):
+        """Tests fails to build with override and without flag."""
+        with cd(self._get_cwd()):
+            self._add_skill_override_config()
+            builder = AEABuilder.from_aea_project(
+                Path(self._get_cwd()), apply_environment_variables=True
+            )
+            builder.call_all_build_entrypoints()
+            aea = builder.build()
+            assert "aea" in locals()
+
+    def test_builds_with_flag_without_env_var_override(self):
+        """Tests builds without override and with flag."""
+        with cd(self._get_cwd()):
+            builder = AEABuilder.from_aea_project(Path(self._get_cwd()), apply_environment_variables=True)
+            builder.call_all_build_entrypoints()
+            aea = builder.build()
+            assert "aea" in locals()
+
+    def test_applies_override(self):
+        """Tests actually applies over-ride."""
+        with cd(self._get_cwd()):
+            builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+            builder.call_all_build_entrypoints()
+            aea1 = builder.build()
+            self._add_skill_override_config()
+            builder = AEABuilder.from_aea_project(
+                Path(self._get_cwd()), apply_environment_variables=True
+            )
+            builder.call_all_build_entrypoints()
+            aea2 = builder.build()
+            model_1 = aea1.resources.get_skill(
+                DUMMY_SKILL_PUBLIC_ID
+            ).configuration.models.read("dummy")
+            model_2 = aea2.resources.get_skill(
+                DUMMY_SKILL_PUBLIC_ID
+            ).configuration.models.read("dummy")
+            assert model_1.args["model_arg_1"] != model_2.args["model_arg_1"]
