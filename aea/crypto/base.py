@@ -452,7 +452,6 @@ class LedgerApi(Helper, ABC):
         :param contract_instance: the contract to use
         :param method_name: the contract methof to call
         :param method_args: the contract call parameters
-        :return: the call result
         """
         raise NotImplementedError
 
@@ -469,12 +468,14 @@ class LedgerApi(Helper, ABC):
         :param method_name: the contract methof to call
         :param method_args: the contract parameters
         :param tx_args: the transaction parameters
-        :return: the transaction
         """
         raise NotImplementedError
 
     def get_transaction_transfer_logs(
-        self, contract_instance: Any, tx_hash: str, target_address: Optional[str] = None,
+        self,
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Get all transfer events derived from a transaction.
@@ -482,7 +483,6 @@ class LedgerApi(Helper, ABC):
         :param contract_instance: the contract
         :param tx_hash: the transaction hash
         :param target_address: optional address to filter tranfer events to just those that affect it
-        :return: the transfer logs
         """
         raise NotImplementedError
 
