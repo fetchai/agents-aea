@@ -1087,7 +1087,9 @@ class TestApplyEnvironmentVariables(AEATestCase):
     def test_builds_with_flag_without_env_var_override(self):
         """Tests builds without override and with flag."""
         with cd(self._get_cwd()):
-            builder = AEABuilder.from_aea_project(Path(self._get_cwd()), apply_environment_variables=True)
+            builder = AEABuilder.from_aea_project(
+                Path(self._get_cwd()), apply_environment_variables=True
+            )
             builder.call_all_build_entrypoints()
             aea = builder.build()
             assert "aea" in locals()
