@@ -726,7 +726,8 @@ whether the address is valid
 #### contract`_`method`_`call
 
 ```python
- | contract_method_call(contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
+ | @classmethod
+ | contract_method_call(cls, contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
 ```
 
 Call a contract's method

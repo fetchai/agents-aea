@@ -1214,8 +1214,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         return Web3.isAddress(address)
 
+    @classmethod
     def contract_method_call(
-        self, contract_instance: Any, method_name: str, **method_args: Any,
+        cls, contract_instance: Any, method_name: str, **method_args: Any,
     ) -> Optional[JSONLike]:
         """Call a contract's method
 
