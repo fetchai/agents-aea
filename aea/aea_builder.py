@@ -1634,7 +1634,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def try_to_load_agent_configuration_file(
         cls,
         aea_project_path: Union[str, Path],
-        apply_environment_variables: bool = False,
+        apply_environment_variables: bool = True,
     ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
@@ -1868,13 +1868,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         )
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
-        # check and create missing, do not replace env variables. updates config
-        AgentConfigManager.verify_private_keys(
-            aea_project_path,
-            substitude_env_vars=apply_environment_variables,
-            private_key_helper=private_key_verify,
-            password=password,
-        ).dump_config()
+        if not apply_environment_variables:
+            # check and create missing, do not replace env variables. updates config
+            AgentConfigManager.verify_private_keys(
+                aea_project_path,
+                substitude_env_vars=False,
+                private_key_helper=private_key_verify,
+                password=password,
+            ).dump_config()
 
         # just validate
         agent_configuration = AgentConfigManager.verify_private_keys(

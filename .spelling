@@ -285,3 +285,5 @@ packages.fetchai.skills.my_search.dialogues
  - docs/demos/echo_demo.md
 my_first_aea
 output_file
+ - HISTORY.md
+aea-cli-ipfs

@@ -27,7 +27,7 @@ from aea.helpers.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE, JSON_T
 
 
 ENV_VARIABLE_RE = re.compile(
-    r"^\$\{(?P<name>\w+)(:(?P<type>\w+)(:(?P<default>\w+))?)?\}$", re.I
+    r"^\$\{(?P<name>\w+)(:(?P<type>\w+)(:(?P<default>.+))?)?\}$", re.I
 )
 
 

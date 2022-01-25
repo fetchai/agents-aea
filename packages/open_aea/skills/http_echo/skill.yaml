@@ -1,0 +1,33 @@
+name: http_echo
+author: open_aea
+version: 0.1.0
+type: skill
+description: The scaffold skill is a scaffold for your own skill implementation.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: QmZVLBayethUtbeUdmjao8Jh9kkbsoQ5LQThhVCaZPS9uy
+  dialogues.py: QmNiJaDU5nghBp4hbg5hbCUjZYSffgb8NAkP1aTnSNd3NV
+  handlers.py: QmXwsQ1yF45NxNHwfPrTSdGjkv4tuFtVUKtK8DMX7RMPcY
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_server:0.22.0
+contracts: []
+protocols:
+- fetchai/default:1.0.0
+- fetchai/http:1.0.0
+skills: []
+behaviours: {}
+handlers:
+  http_handler:
+    args: {}
+    class_name: HttpHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+dependencies: {}
+is_abstract: false
