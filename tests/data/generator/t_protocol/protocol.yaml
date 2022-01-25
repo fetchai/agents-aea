@@ -7,6 +7,11 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
+  .history/custom_types_20211228133134.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
+  .history/custom_types_20220125155343.py: QmU95xh629dyewpvHvZaCJVX1JDGoSxVUNy3c7hGpnefYr
+  .history/dialogues_20220125102242.py: Qmb4BMtfTZcJudghJmPBNkakGVnHhHSsCRM6NqVj9U1bGK
+  .history/dialogues_20220125155336.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
+  .history/dialogues_20220125155353.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
   __init__.py: QmaZmjid2aZXBAp7Ym5yax2P3DcYkH5f9gPRW5hpQGoTZe
   custom_types.py: QmU95xh629dyewpvHvZaCJVX1JDGoSxVUNy3c7hGpnefYr
   dialogues.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
