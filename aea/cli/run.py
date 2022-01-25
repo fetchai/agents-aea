@@ -197,7 +197,7 @@ def run_aea(
     connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
-    apply_environment_variables: bool,
+    apply_environment_variables: bool = False,
     password: Optional[str] = None,
 ) -> None:
     """
@@ -251,7 +251,7 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
 def _build_aea(
     connection_ids: Optional[List[PublicId]],
     skip_consistency_check: bool,
-    apply_environment_variables: bool,
+    apply_environment_variables: bool = False,
     password: Optional[str] = None,
 ) -> AEA:
     """Build the AEA."""

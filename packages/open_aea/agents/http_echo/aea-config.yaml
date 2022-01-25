@@ -14,7 +14,7 @@ protocols:
 - fetchai/http:1.0.0
 - open_aea/signing:1.0.0
 skills:
-- open_aea/http_echo:0.1.0
+- fetchai/http_echo:0.2.0
 default_ledger: ethereum
 required_ledgers:
 - ethereum
@@ -33,4 +33,4 @@ type: connection
 config:
   host: ${HOST:str:localhost}
   port: ${PORT:int:5000}
-  target_skill_id: ${TARGET_SKILL:str:open_aea/http_echo:0.1.0}
+  target_skill_id: ${TARGET_SKILL:str:fetchai/http_echo:0.20.0}

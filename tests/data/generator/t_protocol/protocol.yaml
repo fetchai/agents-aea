@@ -7,11 +7,16 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmNpqrjdWYpKHNWb9mLfqDJxweZwUM396AmFZ1fSiSPrTk
-  custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
-  dialogues.py: Qmb4BMtfTZcJudghJmPBNkakGVnHhHSsCRM6NqVj9U1bGK
-  message.py: QmQkCLUw9BujAGLDjUft9AyGuya6wZ8Stpe29xypxM5a12
-  serialization.py: QmUWey5RWEhkeBVisbUmNVBdjGbbo92mi8dAK5MScJC9k4
+  .history/custom_types_20211228133134.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
+  .history/custom_types_20220125155343.py: QmU95xh629dyewpvHvZaCJVX1JDGoSxVUNy3c7hGpnefYr
+  .history/dialogues_20220125102242.py: Qmb4BMtfTZcJudghJmPBNkakGVnHhHSsCRM6NqVj9U1bGK
+  .history/dialogues_20220125155336.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
+  .history/dialogues_20220125155353.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
+  __init__.py: QmaZmjid2aZXBAp7Ym5yax2P3DcYkH5f9gPRW5hpQGoTZe
+  custom_types.py: QmU95xh629dyewpvHvZaCJVX1JDGoSxVUNy3c7hGpnefYr
+  dialogues.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
+  message.py: Qmf4gpNQ6Rexoa3mDNVvhWB7WhVQmSr14Uc5aVQW6EWb2z
+  serialization.py: QmUrmzWbMBWTp5oKK8U2r95b2Rimbi3iB5TTYAkF56uQ9j
   t_protocol.proto: QmedX13Z6cNgbTJ8L9LyYG3HtSKhkY8ntq6uVdtepmt2cg
   t_protocol_pb2.py: QmcuygK3LNZYrM9Fryqj5qVWBuvfqQvwXPtoJp1cagdL8E
 fingerprint_ignore_patterns: []
