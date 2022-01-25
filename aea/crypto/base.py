@@ -444,7 +444,6 @@ class LedgerApi(Helper, ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def contract_method_call(
         self, contract_instance: Any, method_name: str, **method_args: Any,
     ) -> Optional[JSONLike]:
@@ -457,7 +456,6 @@ class LedgerApi(Helper, ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def build_transaction(
         self,
         contract_instance: Any,
@@ -475,7 +473,6 @@ class LedgerApi(Helper, ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def get_transaction_transfer_logs(
         self, contract_instance: Any, tx_hash: str, target_address: Optional[str] = None,
     ) -> Optional[JSONLike]:
