@@ -193,3 +193,39 @@ def test_scaffold():
         scaffold.get_raw_message("ledger_api", "contract_address", **kwargs)
     with pytest.raises(NotImplementedError):
         scaffold.get_state("ledger_api", "contract_address", **kwargs)
+
+
+def test_contract_method_call():
+    """Tests a contract method call."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    ledger_api = ledger_apis_registry.make(
+        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+    )
+    with pytest.raises(NotImplementedError):
+        contract.contract_method_call(ledger_api, "dummy_method")
+
+
+def test_build_transaction():
+    """Tests a transaction build."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    ledger_api = ledger_apis_registry.make(
+        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+    )
+    with pytest.raises(NotImplementedError):
+        contract.build_transaction(ledger_api, "dummy_method", {}, {})
+
+
+def test_get_transaction_transfer_logs():
+    """Tests a transaction log retrieval."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    ledger_api = ledger_apis_registry.make(
+        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+    )
+    with pytest.raises(NotImplementedError):
+        contract.get_transaction_transfer_logs(ledger_api, "dummy_hash")
