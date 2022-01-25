@@ -1217,7 +1217,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def contract_method_call(
         self, contract_instance: Any, method_name: str, **method_args: Any,
     ) -> Optional[JSONLike]:
-        """Call method."""
+        """Call a contract's method
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract call parameters
+        :return: the call result
+        """
         method = getattr(contract_instance.functions, method_name)
         result = method(**method_args).call()
         return result
@@ -1229,12 +1235,19 @@ class EthereumApi(LedgerApi, EthereumHelper):
         method_args: Dict,
         tx_args: Dict,
     ) -> Optional[JSONLike]:
-        """Prepare tx method."""
+        """Prepare a transaction
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract parameters
+        :param tx_args: the transaction parameters
+        :return: the transaction
+        """
         method = getattr(contract_instance.functions, method_name)
         tx = method(**method_args)
         tx = self._build_transaction(
-            tx_args["sender_address"],
             tx,
+            tx_args["sender_address"],
             tx_args["eth_value"],
             tx_args["gas"],
             tx_args["gas_price"],
@@ -1245,15 +1258,25 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     def _build_transaction(  # pylint: disable=too-many-arguments
         self,
-        sender_address: str,
         tx: Any,
+        sender_address: str,
         eth_value: int = 0,
         gas: Optional[int] = None,
         gas_price: Optional[int] = None,
         max_fee_per_gas: Optional[int] = None,
         max_priority_fee_per_gas: Optional[int] = None,
     ) -> Optional[JSONLike]:
-        """Build transaction method."""
+        """Adds parameters to a transaction
+
+        :param tx: the transaction
+        :param sender_address: the sender's address
+        :param eth_value: the value of ETH to move
+        :param gas: the transaction gas
+        :param gas_price: the transaction gas price
+        :param max_fee_per_gas: the transaction max_fee_per_gas
+        :param max_priority_fee_per_gas: the transaction max_priority_fee_per_gas
+        :return: the final transaction
+        """
         nonce = self.api.eth.get_transaction_count(sender_address)
         tx_params = {
             "nonce": nonce,
@@ -1281,13 +1304,17 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return tx
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
-        self, contract_instance: Any, tx_hash: str,
+        self,
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Get all transfer events derived from a transaction.
 
         :param contract_instance: the contract
         :param tx_hash: the transaction hash
+        :param target_address: optional address to filter tranfer events to just those that affect it
         :return: the transfer logs
         """
         try:

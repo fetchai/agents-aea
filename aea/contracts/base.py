@@ -223,34 +223,45 @@ class Contract(Component):
 
     @classmethod
     def build_transaction(
-        cls, ledger_api: LedgerApi, **kwargs: Any
+        cls,
+        ledger_api: LedgerApi,
+        method_name: str,
+        method_args: Optional[Dict],
+        tx_args: Optional[Dict],
     ) -> Optional[JSONLike]:
         """
         Build a transaction.
 
         :param ledger_api: the ledger apis.
-        :param kwargs: keyword arguments.
+        :param method_name: method name.
+        :param method_args: method arguments.
+        :param tx_args: transaction arguments.
         :return: the transaction
         """
 
         contract_instance = cls.get_instance(ledger_api)
-        tx = ledger_api.build_transaction(contract_instance, **kwargs)
+        tx = ledger_api.build_transaction(
+            contract_instance, method_name, method_args, tx_args
+        )
         return tx
 
     @classmethod
     def get_transaction_transfer_logs(
-        cls, ledger_api: LedgerApi, tx_hash: str,
+        cls, ledger_api: LedgerApi, tx_hash: str, target_address: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Retrieve the logs from a transaction.
 
         :param ledger_api: the ledger apis.
         :param tx_hash: The transaction hash to check logs from.
+        :param target_address: optional address to filter tranfer events to just those that affect it
         :return: the tx logs
         """
 
         contract_instance = cls.get_instance(ledger_api)
-        tx_logs = ledger_api.get_transaction_transfer_logs(contract_instance, tx_hash)
+        tx_logs = ledger_api.get_transaction_transfer_logs(
+            contract_instance, tx_hash, target_address
+        )
         return tx_logs
 
 

@@ -446,9 +446,15 @@ class LedgerApi(Helper, ABC):
 
     @abstractmethod
     def contract_method_call(
-        self, contract_instance: Any, method_name: str, **kwargs: Any,
+        self, contract_instance: Any, method_name: str, **method_args: Any,
     ) -> Optional[JSONLike]:
-        """Call method"""
+        """Call a contract's method
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract call parameters
+        :return: the call result
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -459,18 +465,26 @@ class LedgerApi(Helper, ABC):
         method_args: Optional[Dict],
         tx_args: Optional[Dict],
     ) -> Optional[JSONLike]:
-        """Prepare tx method"""
+        """Prepare a transaction
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract parameters
+        :param tx_args: the transaction parameters
+        :return: the transaction
+        """
         raise NotImplementedError
 
     @abstractmethod
     def get_transaction_transfer_logs(
-        self, contract_instance: Any, tx_hash: str
+        self, contract_instance: Any, tx_hash: str, target_address: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Get all transfer events derived from a transaction.
 
         :param contract_instance: the contract
         :param tx_hash: the transaction hash
+        :param target_address: optional address to filter tranfer events to just those that affect it
         :return: the transfer logs
         """
         raise NotImplementedError
