@@ -1,4 +1,4 @@
-Our vision is that the AEA framework enables businesses of all sizes, from single independent developers to large corporations and consortiums, to create and deploy agent-based solutions in different domains, thus contributing to and advancing a decentralized agent economy as envisaged by Fetch.ai.
+Our vision is that the AEA framework enables businesses of all sizes, from single independent developers to large corporations and consortiums, to create and deploy agent-based solutions in different domains, thus contributing to and advancing a decentralized agent economy as envisaged by Valory.
 
 ## Open source technology for everyone
 
