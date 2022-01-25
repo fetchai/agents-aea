@@ -39,8 +39,10 @@ from eth_keys import keys
 from eth_typing import HexStr
 from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
+from requests import HTTPError
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+from web3.exceptions import SolidityError
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
@@ -1050,6 +1052,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx receipt, if present
         """
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
+
+        if not bool(tx_receipt["status"]):
+            tx = self.get_transaction(tx_digest)
+            tx_receipt["revert_reason"] = self._try_get_revert_reason(tx)
+
         return tx_receipt
 
     @try_decorator(
@@ -1089,6 +1096,37 @@ class EthereumApi(LedgerApi, EthereumHelper):
             cast(HexStr, tx_digest)
         )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
+
+    @try_decorator(
+        "Error when attempting getting tx revert reason: {}", logger_method="debug"
+    )
+    def _try_get_revert_reason(self, tx: TxData) -> str:
+        """Try to check the revert reason of a transaction.
+
+        :param tx: the transaction for which we want to get the revert reason.
+
+        :return: the revert reason message.
+        """
+        # build a new transaction to replay:
+        replay_tx = {
+            "to": tx["to"],
+            "from": tx["from"],
+            "value": tx["value"],
+            "data": tx["input"],
+        }
+
+        try:
+            # replay the transaction locally:
+            self.api.eth.call(replay_tx, tx["blockNumber"] - 1)
+        except SolidityError as e:
+            # execution reverted exception
+            return repr(e)
+        except HTTPError as e:
+            # http exception
+            raise e
+        else:
+            # given tx not reverted
+            raise ValueError(f"The given transaction has not been reverted!\ntx: {tx}")
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
