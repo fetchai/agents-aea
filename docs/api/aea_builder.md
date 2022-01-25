@@ -979,7 +979,7 @@ the list of required ledgers.
 
 ```python
  | @classmethod
- | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path], apply_environment_variables: bool = False) -> AgentConfig
+ | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path], apply_environment_variables: bool = True) -> AgentConfig
 ```
 
 Try to load the agent configuration file..
