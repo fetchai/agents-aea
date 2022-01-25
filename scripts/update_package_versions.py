@@ -120,28 +120,6 @@ def parse_arguments() -> argparse.Namespace:
 arguments: argparse.Namespace = None  # type: ignore
 
 
-def check_if_running_allowed() -> None:
-    """
-    Check if we can run the script.
-
-    Script should only be run on a clean branch.
-    """
-    git_call = subprocess.Popen(["git", "diff"], stdout=subprocess.PIPE)  # nosec
-    (stdout, _) = git_call.communicate()
-    git_call.wait()
-    if len(stdout) > 0:
-        print("Cannot run script in unclean git state.")
-        sys.exit(1)
-
-
-def run_hashing() -> None:
-    """Run the hashing script."""
-    hashing_call = update_hashes()
-    if hashing_call == 1:
-        print("Problem when running IPFS script!")
-        sys.exit(1)
-
-
 def get_hashes_from_last_release() -> Dict[str, str]:
     """Get hashes from last release."""
     svn_call = subprocess.Popen(  # nosec
@@ -454,7 +432,7 @@ def _can_disambiguate_from_context(
     return None
 
 
-def _ask_to_user(
+def _ask_user(
     lines: List[str], line: str, idx: int, old_string: str, type_: str, lines_num: int
 ) -> str:
     print("=" * 50)
@@ -591,14 +569,11 @@ def bump_version_in_yaml(
 class Updater:
     """PAckage versions updter tool."""
 
-    def __init__(
-        self, ask_version, update_version, replace_by_default, no_interactive, context
-    ):
+    def __init__(self, ask_version, update_version, replace_by_default, context):
         """Init updater."""
         self.option_ask_version = ask_version
         self.option_update_version = update_version
         self.option_replace_by_default = replace_by_default
-        self.option_no_interactive = no_interactive
         self.option_context = context
 
     @staticmethod
@@ -790,14 +765,14 @@ class Updater:
         if not is_ambiguous:
             content = content.replace(old_string, new_string)
         else:
-            content = self._ask_to_user_and_replace_if_allowed(
+            content = self._ask_user_and_replace_if_allowed(
                 content, old_string, new_string, type_
             )
 
         with fp.open(mode="w") as f:
             f.write(content)
 
-    def _ask_to_user_and_replace_if_allowed(
+    def _ask_user_and_replace_if_allowed(
         self, content: str, old_string: str, new_string: str, type_: str
     ) -> str:
         """
@@ -809,7 +784,7 @@ class Updater:
         :param type_: the type of the package.
         :return: the updated content.
         """
-        if self.option_no_interactive and self.option_replace_by_default:
+        if self.option_replace_by_default:
             content = content.replace(old_string, new_string)
             return content
 
@@ -827,9 +802,7 @@ class Updater:
                 continue
 
             # otherwise, forget the attempts and ask the user.
-            answer = _ask_to_user(
-                lines, line, idx, old_string, type_, self.option_context
-            )
+            answer = _ask_user(lines, line, idx, old_string, type_, self.option_context)
             if answer == "y":
                 lines[idx] = line.replace(old_string, new_string)
         return "".join(lines)
@@ -856,16 +829,10 @@ class Updater:
     help="Increase patch version",
 )
 @click.option(
-    "--no-interactive",
-    "-n",
-    is_flag=True,
-    help="Don't ask user confirmation for replacement.",
-)
-@click.option(
     "--context",
     "-C",
     type=int,
-    help="Don't ask user confirmation for replacement.",
+    help="The number of above/below rows to display.",
     default=3,
 )
 @click.option(
@@ -874,11 +841,9 @@ class Updater:
     is_flag=True,
     help="If --no-interactive is set, apply the replacement (default: False).",
 )
-def command(ask_version, update_version, replace_by_default, no_interactive, context):
+def command(ask_version, update_version, replace_by_default, context):
     """Run cli command."""
-    Updater(
-        ask_version, update_version, replace_by_default, no_interactive, context
-    ).run()
+    Updater(ask_version, update_version, replace_by_default, context).run()
 
 
 if __name__ == "__main__":
