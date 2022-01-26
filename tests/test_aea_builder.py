@@ -60,7 +60,7 @@ from aea.helpers.install_dependency import call_pip
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
-from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections.http_server.connection import (
     PUBLIC_ID as HTTP_SERVER_CONNECTION_PUBLIC_ID,
@@ -81,6 +81,29 @@ from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+
+
+class CleanDirectoryClass(BaseAEATestCase):
+    """
+    Loads the default aea into a clean temp directory and cleans up after.
+
+    Used when testing code which leaves artifacts
+    """
+
+    working_dir = None
+    path_to_aea = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
+
+    def setup(self):
+        """Sets up the working directory for the test method."""
+        self.old_cwd = os.getcwd()
+        self.working_dir = Path(tempfile.TemporaryDirectory().name)
+        shutil.copytree(self.path_to_aea, self.working_dir)
+        os.chdir(self.working_dir)
+
+    def teardown(self):
+        """Removes the over-ride"""
+        shutil.rmtree(self.working_dir, ignore_errors=True)
+        os.chdir(self.old_cwd)
 
 
 def test_default_timeout_for_agent():
@@ -910,12 +933,14 @@ class TestExtraDeps(AEATestCaseEmpty):
             pass
 
 
-class TestBuildEntrypoint(AEATestCaseEmpty):
+class TestBuildEntrypoint(AEATestCaseEmpty, CleanDirectoryClass):
     """Test build entrypoint."""
 
     def setup(self):
         """Set up the test."""
-        self.builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        super().setup()
+
+        self.builder = AEABuilder.from_aea_project(Path(self.working_dir))
         self.component_id = "component_id"
         # add project-wide build entrypoint
         self.script_path = Path("script.py")
@@ -923,7 +948,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
 
     def test_build_positive_aea(self):
         """Test build project-wide entrypoint, positive."""
-        with cd(self._get_cwd()):
+        with cd(self.working_dir):
             self.script_path.write_text("")
             with patch.object(self.builder.logger, "info") as info_mock:
                 self.builder.call_all_build_entrypoints()
@@ -933,7 +958,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
 
     def test_build_positive_package(self):
         """Test build package entrypoint, positive."""
-        with cd(self._get_cwd()):
+        with cd(self.working_dir):
             self.script_path.write_text("")
             # add mock configuration build entrypoint
             with patch.object(self.builder, "_package_dependency_manager") as _mock_mgr:
@@ -955,7 +980,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
     def test_build_negative_syntax_error(self):
         """Test build, negative due to a syntax error in the script."""
         match = r"The Python script at 'script.py' has a syntax error: invalid syntax \(<unknown>, line 1\): syntax\+\.error\n"
-        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+        with cd(self.working_dir), pytest.raises(AEAException, match=match):
             self.script_path.write_text("syntax+.error")
             self.builder.call_all_build_entrypoints()
 
@@ -966,7 +991,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
     def test_build_negative_subprocess(self, *_mocks):
         """Test build, negative due to script error at runtime."""
         match = "An error occurred while running command '.*script.py .+':\nsome error."
-        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+        with cd(self.working_dir), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()
 
@@ -1022,7 +1047,7 @@ def test_builder_pypi_dependencies():
     }
 
 
-class TestApplyEnvironmentVariables(AEATestCaseEmpty):
+class TestApplyEnvironmentVariables(AEATestCaseEmpty, CleanDirectoryClass):
     """Test builder set from project dir, to make a skill 'abstract'."""
 
     path_to_aea = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
@@ -1038,18 +1063,6 @@ class TestApplyEnvironmentVariables(AEATestCaseEmpty):
         ...
         """
     )
-
-    def setup(self):
-        """Sets up the working directory for the test method."""
-        self.old_cwd = os.getcwd()
-        self.working_dir = Path(tempfile.TemporaryDirectory().name)
-        shutil.copytree(self.path_to_aea, self.working_dir)
-        os.chdir(self.working_dir)
-
-    def teardown(self):
-        """Removes the over-ride"""
-        shutil.rmtree(self.working_dir)
-        os.chdir(self.old_cwd)
 
     def _add_skill_override_config(self):
         """Add custom stub connection config."""
