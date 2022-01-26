@@ -742,6 +742,52 @@ Attempts to update the transaction with a gas estimate
 - `transaction`: the transaction
 :raises: NotImplementedError
 
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.contract_method_call"></a>
+#### contract`_`method`_`call
+
+```python
+ | contract_method_call(contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
+```
+
+Call a contract's method
+
+**Arguments**:
+
+- `contract_instance`: the contract to use
+- `method_name`: the contract methof to call
+- `method_args`: the contract call parameters
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.build_transaction"></a>
+#### build`_`transaction
+
+```python
+ | build_transaction(contract_instance: Any, method_name: str, method_args: Optional[Dict], tx_args: Optional[Dict]) -> Optional[JSONLike]
+```
+
+Prepare a transaction
+
+**Arguments**:
+
+- `contract_instance`: the contract to use
+- `method_name`: the contract methof to call
+- `method_args`: the contract parameters
+- `tx_args`: the transaction parameters
+
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_transaction_transfer_logs"></a>
+#### get`_`transaction`_`transfer`_`logs
+
+```python
+ | get_transaction_transfer_logs(contract_instance: Any, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
+```
+
+Get all transfer events derived from a transaction.
+
+**Arguments**:
+
+- `contract_instance`: the contract
+- `tx_hash`: the transaction hash
+- `target_address`: optional address to filter tranfer events to just those that affect it
+
 <a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosApi"></a>
 ## CosmosApi Objects
 

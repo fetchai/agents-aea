@@ -642,6 +642,7 @@ the updated transaction
 #### contract`_`method`_`call
 
 ```python
+ | @abstractmethod
  | contract_method_call(contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
 ```
 
@@ -657,6 +658,7 @@ Call a contract's method
 #### build`_`transaction
 
 ```python
+ | @abstractmethod
  | build_transaction(contract_instance: Any, method_name: str, method_args: Optional[Dict], tx_args: Optional[Dict]) -> Optional[JSONLike]
 ```
 
@@ -673,6 +675,7 @@ Prepare a transaction
 #### get`_`transaction`_`transfer`_`logs
 
 ```python
+ | @abstractmethod
  | get_transaction_transfer_logs(contract_instance: Any, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
 ```
 

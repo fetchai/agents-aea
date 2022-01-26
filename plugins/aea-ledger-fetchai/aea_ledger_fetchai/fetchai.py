@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
-from typing import Any, Optional, Dict
-from aea.common import JSONLike
+from typing import Any, Dict, Optional
 
 from aea_ledger_fetchai._cosmos import (
     CosmosCrypto,
@@ -27,6 +26,8 @@ from aea_ledger_fetchai._cosmos import (
     CosmosHelper,
     _CosmosApi,
 )
+
+from aea.common import JSONLike
 
 
 _FETCHAI = "fetchai"
