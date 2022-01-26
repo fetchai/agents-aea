@@ -6,7 +6,7 @@
     framework</a> that gives no priority to any package vendor.
 
 
-## What are AEAs (Autonomous Economic Agents)?
+## What are Autonomous Economic Agents (AEAs)?
 
 We define an AEA as:
 
@@ -47,31 +47,28 @@ A modular design of components facilitates their reuse as parts
 of other applications that might serve an entirely different set of needs. The 
 framework provided offers the user:
 
-* A peer-to-peer <a href="acn">Agent Communication Network (ACN)</a> (ACN)
-* To interact directly with blockchains such as
-  <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
+* A peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your
+  AEAs to interact with all other AEAs over the public internet.
+* The framework's <a href="ledger-integration">crypto and ledger APIs</a> make 
+  it possible for AEAs to interact with blockchains such as 
+  <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>,
   and use these as a financial settlement and commitment layer. 
-* A registry for sharing implementations of agent component designs  
-
-
-## Why build with the AEA Framework?
-
-The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
-
-* The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
-* The <a href="registry">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
-* The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
-* The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts on various decentralised ledgers. 
+* A <a href="registry">registry</a> that enables code sharing and re-use by 
+  providing a space in which AEAs or their individual components may be shared. 
+* The <a href="contract">contract</a> packages enable AEAs to interact with 
+  smart contracts on various decentralised ledgers.
 
 
 ## Next steps
 
-To get started developing your own AEA, check out the <a href="quickstart">getting started</a> section.
+To get started developing your own AEA, check out the 
+<a href="quickstart">getting started</a> section.
 
 If you want to run a demo, check out the <a href="demos">demo guides</a>.
 
-To learn more about the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
-
+To learn more about the distinctive characteristics of agent-oriented 
+development, check out the guide on 
+<a href="agent-oriented-development">agent-oriented development</a>.
 
 
 ## Help us improve
