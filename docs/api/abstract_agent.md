@@ -16,7 +16,8 @@ This class provides an abstract base  interface for an agent.
 #### name
 
 ```python
- | @abstractproperty
+ | @property
+ | @abstractmethod
  | name() -> str
 ```
 
@@ -26,7 +27,8 @@ Get agent's name.
 #### storage`_`uri
 
 ```python
- | @abstractproperty
+ | @property
+ | @abstractmethod
  | storage_uri() -> Optional[str]
 ```
 
