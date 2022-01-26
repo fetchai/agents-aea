@@ -1,16 +1,30 @@
 # Release History - open AEA
 
+## 1.4.0 (2022-01-26)
+
+AEA:
+- Exposes agent data directory on skill context.
+- Adds support for environment variables loading from aea-config files.
+- Extends contract base class to support new plugin functionality.
+
+Plugins:
+- Adds support for transaction preparation and log retrieval into the ethereum plugin.
+- Adds support for retrieving the revert reason when transaction is not verified in ethereum plugin.
+
+Docs: 
+- Simplifies documentation further and updates with latest features
+
 ## Plugins patch (2022-01-15)
 
 Plugins:
-- Bumps open-aea-ethereum-ledger to `1.3.2` after adding tip increase logic
+- Bumps `open-aea-ethereum-ledger` to `1.3.2` after adding tip increase logic
 
 ## Plugins patch (2022-01-05)
 
 Plugins:
 - Fixes dynamic gas pricing on open-aea-ethereum
-- Improves daemon availability check in `IPFSDaemon` on open-aea-cli-ipfs
-- Bumps open-aea-cli-ipfs and open-aea-ethereum-ledger to `1.3.1`
+- Improves daemon availability check in `IPFSDaemon` on `open-aea-cli-ipfs`
+- Bumps `open-aea-cli-ipfs` and open-aea-ethereum-ledger to `1.3.1`
 
 Docs: 
 - Removes reference to fetch.ai.
@@ -24,8 +38,8 @@ AEA:
 
 Plugins:
 - Adds support for EIP1559 based gas estimation strategy on aea-ledger-ethereum.
-- Adds support for package hashing and local ipfs registry on aea-cli-ipfs.
-- Bumps aea-ledger-ethereum and aea-cli-ipfs to `1.3.0`.
+- Adds support for package hashing and local IPFS registry on `aea-cli-ipfs`.
+- Bumps `aea-ledger-ethereum` and `aea-cli-ipfs` to `1.3.0`.
 
 Docs: 
 - Applies new styling
