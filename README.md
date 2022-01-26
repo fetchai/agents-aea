@@ -82,7 +82,7 @@ This approach is not recommended!
 
 This repository contains submodules. Clone with recursive strategy:
 
-    git clone https://github.com/valory-xyz/open-aea.git --recursive && cd agents-aea
+    git clone https://github.com/valory-xyz/open-aea.git --recursive && cd open-aea
 
 - To fetch/update submodules (for existing local repo):
 
