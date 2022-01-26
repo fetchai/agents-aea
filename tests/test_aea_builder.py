@@ -20,7 +20,9 @@
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
+import shutil
 import sys
+import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
@@ -1020,10 +1022,10 @@ def test_builder_pypi_dependencies():
     }
 
 
-class TestApplyEnvironmentVariables(AEATestCase):
+class TestApplyEnvironmentVariables(AEATestCaseEmpty):
     """Test builder set from project dir, to make a skill 'abstract'."""
 
-    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+    path_to_aea = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
     override = dedent(
         """
         ---
@@ -1037,18 +1039,21 @@ class TestApplyEnvironmentVariables(AEATestCase):
         """
     )
 
+    def setup(self):
+        """Sets up the working directory for the test method."""
+        self.old_cwd = os.getcwd()
+        self.working_dir = Path(tempfile.TemporaryDirectory().name)
+        shutil.copytree(self.path_to_aea, self.working_dir)
+        os.chdir(self.working_dir)
+
     def teardown(self):
         """Removes the over-ride"""
-        cwd = self._get_cwd()
-        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
-        configuration = aea_config_file.read_text()
-        configuration = configuration.replace(self.override, "")
-        aea_config_file.write_text(configuration)
+        shutil.rmtree(self.working_dir)
+        os.chdir(self.old_cwd)
 
     def _add_skill_override_config(self):
         """Add custom stub connection config."""
-        cwd = self._get_cwd()
-        aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
+        aea_config_file = self.working_dir / DEFAULT_AEA_CONFIG_FILE
         configuration = aea_config_file.read_text()
         # here we change all the dummy skill configurations
         configuration += self.override
@@ -1056,29 +1061,29 @@ class TestApplyEnvironmentVariables(AEATestCase):
 
     def test_builds_without_flag_without_env_var_override(self):
         """Tests fails to build with override and without flag."""
-        with cd(self._get_cwd()):
-            builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self.working_dir):
+            builder = AEABuilder.from_aea_project(self.working_dir)
             builder.call_all_build_entrypoints()
             aea = builder.build()
             assert "aea" in locals()
 
     def test_fails_to_build_without_flag_with_env_var_override(self):
         """Tests fails to build with override and without flag."""
-        self._add_skill_override_config()
-        with cd(self._get_cwd()):
+        with cd(self.working_dir):
+            self._add_skill_override_config()
             try:
-                builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+                builder = AEABuilder.from_aea_project(self.working_dir)
                 builder.call_all_build_entrypoints()
                 aea = builder.build()
             except ValueError:
                 assert "aea" not in locals()
 
     def test_builds_with_flag_with_env_var_override(self):
-        """Tests fails to build with override and without flag."""
-        with cd(self._get_cwd()):
+        """Tests builds with override and with flag."""
+        with cd(self.working_dir):
             self._add_skill_override_config()
             builder = AEABuilder.from_aea_project(
-                Path(self._get_cwd()), apply_environment_variables=True
+                self.working_dir, apply_environment_variables=True
             )
             builder.call_all_build_entrypoints()
             aea = builder.build()
@@ -1086,9 +1091,9 @@ class TestApplyEnvironmentVariables(AEATestCase):
 
     def test_builds_with_flag_without_env_var_override(self):
         """Tests builds without override and with flag."""
-        with cd(self._get_cwd()):
+        with cd(self.working_dir):
             builder = AEABuilder.from_aea_project(
-                Path(self._get_cwd()), apply_environment_variables=True
+                self.working_dir, apply_environment_variables=True
             )
             builder.call_all_build_entrypoints()
             aea = builder.build()
@@ -1096,13 +1101,13 @@ class TestApplyEnvironmentVariables(AEATestCase):
 
     def test_applies_override(self):
         """Tests actually applies over-ride."""
-        with cd(self._get_cwd()):
-            builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        with cd(self.working_dir):
+            builder = AEABuilder.from_aea_project(self.working_dir)
             builder.call_all_build_entrypoints()
             aea1 = builder.build()
             self._add_skill_override_config()
             builder = AEABuilder.from_aea_project(
-                Path(self._get_cwd()), apply_environment_variables=True
+                self.working_dir, apply_environment_variables=True
             )
             builder.call_all_build_entrypoints()
             aea2 = builder.build()
