@@ -1246,36 +1246,27 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         method = getattr(contract_instance.functions, method_name)
         tx = method(**method_args)
-        tx = self._build_transaction(tx, tx_args,)
-        return tx
 
-    def _build_transaction(  # pylint: disable=too-many-arguments
-        self, tx: Any, tx_args: Dict,
-    ) -> Optional[JSONLike]:
-        """Adds parameters to a transaction
-
-        :param tx: the transaction
-        :param tx_args: the tx's parameters
-        :return: the final transaction
-        """
         nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
         tx_params = {
             "nonce": nonce,
             "value": tx_args["eth_value"] if "eth_value" in tx_args else 0,
         }
 
+        # Parameter camel-casing due to contract api requirements
         for field in [
             "gas",
-            "gas_price",
-            "max_fee_per_gas",
-            "max_priority_fee_per_gas",
+            "gasPrice",
+            "maxFeePerGas",
+            "maxPriorityFeePerGas",
         ]:
-            if field in tx_params and tx_args[field] is not None:
+            if field in tx_args and tx_args[field] is not None:
                 tx_params[field] = tx_args[field]
+
         if (
-            "gas_price" not in tx_params
-            and "max_fee_per_gas" not in tx_params
-            and "max_priority_fee_per_gas" not in tx_params
+            "gasPrice" not in tx_params
+            and "maxFeePerGas" not in tx_params
+            and "maxPriorityFeePerGas" not in tx_params
         ):
             gas_data = self.try_get_gas_pricing()
             if gas_data:
