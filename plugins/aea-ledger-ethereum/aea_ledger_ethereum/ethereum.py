@@ -1246,59 +1246,33 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         method = getattr(contract_instance.functions, method_name)
         tx = method(**method_args)
-        tx = self._build_transaction(
-            tx,
-            tx_args["sender_address"],
-            tx_args["eth_value"],
-            tx_args["gas"],
-            tx_args["gas_price"],
-            tx_args["max_fee_per_gas"],
-            tx_args["max_priority_fee_per_gas"],
-        )
-        return tx
 
-    def _build_transaction(  # pylint: disable=too-many-arguments
-        self,
-        tx: Any,
-        sender_address: str,
-        eth_value: int = 0,
-        gas: Optional[int] = None,
-        gas_price: Optional[int] = None,
-        max_fee_per_gas: Optional[int] = None,
-        max_priority_fee_per_gas: Optional[int] = None,
-    ) -> Optional[JSONLike]:
-        """Adds parameters to a transaction
-
-        :param tx: the transaction
-        :param sender_address: the sender's address
-        :param eth_value: the value of ETH to move
-        :param gas: the transaction gas
-        :param gas_price: the transaction gas price
-        :param max_fee_per_gas: the transaction max_fee_per_gas
-        :param max_priority_fee_per_gas: the transaction max_priority_fee_per_gas
-        :return: the final transaction
-        """
-        nonce = self.api.eth.get_transaction_count(sender_address)
+        nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
         tx_params = {
             "nonce": nonce,
-            "value": eth_value,
+            "value": tx_args["value"] if "value" in tx_args else 0,
         }
-        if gas is not None:
-            tx_params["gas"] = gas
-        if gas_price is not None:
-            tx_params["gasPrice"] = gas_price
-        if max_fee_per_gas is not None:
-            tx_params["maxFeePerGas"] = max_fee_per_gas  # pragma: nocover
-        if max_priority_fee_per_gas is not None:
-            tx_params[
-                "maxPriorityFeePerGas"
-            ] = max_priority_fee_per_gas  # pragma: nocover
+
+        # Parameter camel-casing due to contract api requirements
+        for field in [
+            "gas",
+            "gasPrice",
+            "maxFeePerGas",
+            "maxPriorityFeePerGas",
+        ]:
+            if field in tx_args and tx_args[field] is not None:
+                tx_params[field] = tx_args[field]
+
         if (
-            gas_price is None
-            and max_fee_per_gas is None
-            and max_priority_fee_per_gas is None
+            "gasPrice" not in tx_params
+            and "maxFeePerGas" not in tx_params
+            and "maxPriorityFeePerGas" not in tx_params
         ):
-            gas_data = self.try_get_gas_pricing()
+            gas_data = (
+                self.try_get_gas_pricing(old_tip=tx_args["old_tip"])
+                if "old_tip" in tx_args
+                else self.try_get_gas_pricing()
+            )
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)
