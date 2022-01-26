@@ -569,10 +569,9 @@ def bump_version_in_yaml(
 class Updater:
     """PAckage versions updter tool."""
 
-    def __init__(self, ask_version, update_version, replace_by_default, context):
+    def __init__(self, new_version, replace_by_default, context):
         """Init updater."""
-        self.option_ask_version = ask_version
-        self.option_update_version = update_version
+        self.option_new_version = new_version
         self.option_replace_by_default = replace_by_default
         self.option_context = context
 
@@ -677,7 +676,7 @@ class Updater:
 
         ver = semver.VersionInfo.parse(current_public_id.version)
 
-        if self.option_ask_version:
+        if self.option_new_version == ASK_VERSION:
             while True:
                 new_version = click.prompt(
                     f"Please enter a new version for {current_public_id}", type=str
@@ -692,9 +691,9 @@ class Updater:
                 except Exception as e:  # pylint: disable=broad-except
                     print(f"Version parse error: {e}. Please enter a new version.")
                     continue
-        elif self.option_update_version == "minor":
+        elif self.option_new_version == UPDATE_MINOR:
             new_version = ver.bump_minor()
-        elif self.option_update_version == "patch":
+        elif self.option_new_version == UPDATE_PATCH:
             new_version = ver.bump_patch()
         else:
             raise Exception("unknown version update mode")
@@ -808,42 +807,37 @@ class Updater:
         return "".join(lines)
 
 
+UPDATE_PATCH = "bump_patch"
+UPDATE_MINOR = "bump_minor"
+ASK_VERSION = "ask"
+
+NEW_VERSION_OPTIONS = [ASK_VERSION, UPDATE_PATCH, UPDATE_MINOR]
+
+
 @click.command()
 @click.option(
-    "--ask-version",
-    "-a",
-    is_flag=True,
-    help="Ask for every package version interactively",
-)
-@click.option(
-    "--update-minor",
-    "update_version",
-    flag_value="minor",
-    default=True,
-    help="Increase minor version",
-)
-@click.option(
-    "--update-patch",
-    "update_version",
-    flag_value="patch",
-    help="Increase patch version",
+    "--new-version",
+    "-n",
+    type=click.Choice(NEW_VERSION_OPTIONS),
+    help=f"Mode to determine a new package version: {', '.join(NEW_VERSION_OPTIONS)}",
+    default=ASK_VERSION,
 )
 @click.option(
     "--context",
     "-C",
-    type=int,
+    type=click.IntRange(0, 5),
     help="The number of above/below rows to display.",
-    default=3,
+    default=1,
 )
 @click.option(
     "--replace-by-default",
     "-r",
     is_flag=True,
-    help="If --no-interactive is set, apply the replacement (default: False).",
+    help="Automatically replace package reference (default: False).",
 )
-def command(ask_version, update_version, replace_by_default, context):
+def command(new_version, replace_by_default, context):
     """Run cli command."""
-    Updater(ask_version, update_version, replace_by_default, context).run()
+    Updater(new_version, replace_by_default, context).run()
 
 
 if __name__ == "__main__":
