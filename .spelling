@@ -230,6 +230,18 @@ open_aea
 ethereum
 EIP1159-style
 Valory
+Microtransactions
+my_first_aea
+output_file
+AgentContext
+SkillContext
+DecisionMaker
+ABMs
+meso
+anymore
+echos
+config
+fetch.ai.
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

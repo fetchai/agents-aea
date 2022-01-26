@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmVzD8i4VPm36TKUn8yfuswTJbeaMBSuSqb4amokQCDc9d
-  __init__.py: QmRtaGPVrYkTqqU15Sm3AG9YfYQZPYRzWHvwMje1NM2Nm3
+  __init__.py: QmVZchuJ13XJ2uCx4XH5ebp8aBD88K4qZ7GPtirVfXJTZL
   dialogues.py: Qmc7ZyMiofAp95bwty32Ty3bgtEuWN2A76LWhKeYVpDNWj
   http.proto: QmfJj4aoNpVCZs8HsQNmf1Zx2y8b9JbuPG2Dysow4LwRQU
   http_pb2.py: QmbNnrdF9ZHJkERdhe7GW2wAENGDo1YnZEEbY4szMTLJHw
