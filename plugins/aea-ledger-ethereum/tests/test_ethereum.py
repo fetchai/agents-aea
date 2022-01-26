@@ -26,7 +26,7 @@ import random
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, cast
+from typing import Dict, cast, Tuple
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -50,6 +50,7 @@ from aea_ledger_ethereum.ethereum import (
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 
+from aea.common import JSONLike
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
@@ -225,31 +226,11 @@ def test_get_state(ethereum_testnet_config, ganache):
     assert "number" in block, "response to get_block() does not contain 'number'"
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_construct_sign_and_submit_transfer_transaction(
-    ethereum_testnet_config, ganache, ethereum_private_key_file
-):
-    """Test the construction, signing and submitting of a transfer transaction."""
-    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
-    ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi(**ethereum_testnet_config)
-
-    amount = 40000
-    tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, account.address)
-    max_priority_fee_per_gas = 1_000_000_000
-    max_fee_per_gas = 1_000_000_000
-    transfer_transaction = ethereum_api.get_transfer_transaction(
-        sender_address=account.address,
-        destination_address=ec2.address,
-        amount=amount,
-        tx_fee=30000,
-        tx_nonce=tx_nonce,
-        chain_id=DEFAULT_GANACHE_CHAIN_ID,
-        max_priority_fee_per_gas=max_priority_fee_per_gas,
-        max_fee_per_gas=max_fee_per_gas,
-    )
+def _construct_and_settle_tx(
+    ethereum_api: EthereumApi, account: EthereumCrypto, tx_params: dict,
+) -> Tuple[str, JSONLike, bool]:
+    """Construct and settle a transaction."""
+    transfer_transaction = ethereum_api.get_transfer_transaction(**tx_params)
     assert (
         isinstance(transfer_transaction, dict) and len(transfer_transaction) == 8
     ), "Incorrect transfer_transaction constructed."
@@ -262,22 +243,55 @@ def test_construct_sign_and_submit_transfer_transaction(
     transaction_digest = ethereum_api.send_signed_transaction(signed_transaction)
     assert transaction_digest is not None, "Failed to submit transfer transaction!"
 
+    transaction_receipt = None
     not_settled = True
     elapsed_time = 0
-    while not_settled and elapsed_time < 20:
-        elapsed_time += 1
-        time.sleep(2)
+    time_to_wait = 40
+    sleep_time = 2
+    while not_settled and elapsed_time < time_to_wait:
+        elapsed_time += sleep_time
+        time.sleep(sleep_time)
         transaction_receipt = ethereum_api.get_transaction_receipt(transaction_digest)
         if transaction_receipt is None:
             continue
         is_settled = ethereum_api.is_transaction_settled(transaction_receipt)
         not_settled = not is_settled
+
     assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
-    assert is_settled, "Failed to verify tx!"
+
+    return transaction_digest, transaction_receipt, not_settled
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_construct_sign_and_submit_transfer_transaction(
+    ethereum_testnet_config, ganache, ethereum_private_key_file
+):
+    """Test the construction, signing and submitting of a transfer transaction."""
+    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    tx_params = {
+        "sender_address": account.address,
+        "destination_address": ec2.address,
+        "amount": 40000,
+        "tx_fee": 30000,
+        "tx_nonce": ethereum_api.generate_tx_nonce(ec2.address, account.address),
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
+        "max_priority_fee_per_gas": 1_000_000_000,
+        "max_fee_per_gas": 1_000_000_000,
+    }
+
+    transaction_digest, transaction_receipt, not_settled = _construct_and_settle_tx(
+        ethereum_api, account, tx_params,
+    )
+    assert not not_settled, "Failed to verify tx!"
 
     tx = ethereum_api.get_transaction(transaction_digest)
     is_valid = ethereum_api.is_transaction_valid(
-        tx, ec2.address, account.address, tx_nonce, amount
+        tx, ec2.address, account.address, tx_params["tx_nonce"], tx_params["amount"]
     )
     assert is_valid, "Failed to settle tx correctly!"
     assert tx != transaction_receipt, "Should not be same!"
