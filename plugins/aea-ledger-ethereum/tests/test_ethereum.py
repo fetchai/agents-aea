@@ -607,6 +607,7 @@ def test_contract_method_call():
 
 def test_build_transaction(ethereum_testnet_config):
     """Test EthereumApi.build_transaction."""
+
     def pass_tx_params(tx_params):
         return tx_params
 
@@ -631,10 +632,10 @@ def test_build_transaction(ethereum_testnet_config):
                 sender_address="sender_address",
                 eth_value=0,
                 gas=0,
-                gasPrice=0,             # camel-casing due to contract api requirements
-                maxFeePerGas=0,         # camel-casing due to contract api requirements
-                maxPriorityFeePerGas=0, # camel-casing due to contract api requirements
-            )
+                gasPrice=0,  # camel-casing due to contract api requirements
+                maxFeePerGas=0,  # camel-casing due to contract api requirements
+                maxPriorityFeePerGas=0,  # camel-casing due to contract api requirements
+            ),
         )
 
         assert result == dict(
@@ -642,23 +643,16 @@ def test_build_transaction(ethereum_testnet_config):
         )
 
         with mock.patch.object(
-            EthereumApi,
-            "try_get_gas_pricing",
-            return_value={"gas": 0},
+            EthereumApi, "try_get_gas_pricing", return_value={"gas": 0},
         ):
             result = eth_api.build_transaction(
                 contract_instance=contract_instance,
                 method_name="dummy_method",
                 method_args={},
-                tx_args=dict(
-                    sender_address="sender_address",
-                    eth_value=0,
-                )
+                tx_args=dict(sender_address="sender_address", eth_value=0,),
             )
 
-            assert result == dict(
-                nonce=0, value=0, gas=0
-            )
+            assert result == dict(nonce=0, value=0, gas=0)
 
 
 def test_get_transaction_transfer_logs(ethereum_testnet_config):
