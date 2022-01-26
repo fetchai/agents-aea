@@ -6,7 +6,8 @@
     framework</a> that gives no priority to any package vendor.
 
 The latest version of the Python implementation of the
-<a href="https://pypi.org/project/open-aea/">AEA Framework</a> on PyPI.
+<a href="https://pypi.org/project/open-aea/" target="_blank">AEA Framework</a>
+on PyPI.
 
 If you are upgrading your AEA project from a previous version of the AEA framework, please check out <a href="../upgrading/">the upgrading guide</a>.
 
