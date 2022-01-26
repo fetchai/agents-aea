@@ -66,6 +66,15 @@ get_gas_price_strategy(gas_price_strategy: Optional[str] = None, gas_price_api_k
 
 Get the gas price strategy.
 
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.rebuild_receipt"></a>
+#### rebuild`_`receipt
+
+```python
+rebuild_receipt(tx_receipt: JSONLike) -> JSONLike
+```
+
+Convert all tx receipt's event topics to HexBytes
+
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator"></a>
 ## SignedTransactionTranslator Objects
 
@@ -712,6 +721,65 @@ Check if the address is valid.
 **Returns**:
 
 whether the address is valid
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.contract_method_call"></a>
+#### contract`_`method`_`call
+
+```python
+ | @classmethod
+ | contract_method_call(cls, contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
+```
+
+Call a contract's method
+
+**Arguments**:
+
+- `contract_instance`: the contract to use
+- `method_name`: the contract methof to call
+- `method_args`: the contract call parameters
+
+**Returns**:
+
+the call result
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.build_transaction"></a>
+#### build`_`transaction
+
+```python
+ | build_transaction(contract_instance: Any, method_name: str, method_args: Dict, tx_args: Dict) -> Optional[JSONLike]
+```
+
+Prepare a transaction
+
+**Arguments**:
+
+- `contract_instance`: the contract to use
+- `method_name`: the contract methof to call
+- `method_args`: the contract parameters
+- `tx_args`: the transaction parameters
+
+**Returns**:
+
+the transaction
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction_transfer_logs"></a>
+#### get`_`transaction`_`transfer`_`logs
+
+```python
+ | get_transaction_transfer_logs(contract_instance: Any, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
+```
+
+Get all transfer events derived from a transaction.
+
+**Arguments**:
+
+- `contract_instance`: the contract
+- `tx_hash`: the transaction hash
+- `target_address`: optional address to filter tranfer events to just those that affect it
+
+**Returns**:
+
+the transfer logs
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects
