@@ -24,6 +24,7 @@ import logging
 import os
 from pathlib import Path
 from typing import cast
+from unittest.mock import MagicMock
 
 import pytest
 import web3
@@ -207,6 +208,17 @@ def test_contract_method_call():
         contract.contract_method_call(ledger_api, "dummy_method")
 
 
+def test_contract_method_call_2():
+    """Tests a contract method call."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    ledger_api = MagicMock()
+    ledger_api.contract_method_call.return_value = {}
+    result = contract.contract_method_call(ledger_api, "dummy_method")
+    assert result == {}
+
+
 def test_build_transaction():
     """Tests a transaction build."""
     contract = Contract.from_dir(
@@ -219,6 +231,17 @@ def test_build_transaction():
         contract.build_transaction(ledger_api, "dummy_method", {}, {})
 
 
+def test_build_transaction_2():
+    """Tests a contract method call."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    ledger_api = MagicMock()
+    ledger_api.build_transaction.return_value = {}
+    result = contract.build_transaction(ledger_api, "dummy_method", {}, {})
+    assert result == {}
+
+
 def test_get_transaction_transfer_logs():
     """Tests a transaction log retrieval."""
     contract = Contract.from_dir(
@@ -229,3 +252,13 @@ def test_get_transaction_transfer_logs():
     )
     with pytest.raises(NotImplementedError):
         contract.get_transaction_transfer_logs(ledger_api, "dummy_hash")
+
+
+def test_get_transaction_transfer_logs_2():
+    """Tests a transaction log retrieval."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    ledger_api = MagicMock()
+    ledger_api.get_transaction_transfer_logs.return_value = {}
+    contract.get_transaction_transfer_logs(ledger_api, "dummy_hash")
