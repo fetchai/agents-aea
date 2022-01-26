@@ -39,9 +39,10 @@ from eth_keys import keys
 from eth_typing import HexStr
 from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
+from requests import HTTPError
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
-from web3.exceptions import TransactionNotFound
+from web3.exceptions import SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
@@ -1058,6 +1059,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx receipt, if present
         """
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
+
+        if tx_receipt is not None and not bool(tx_receipt["status"]):
+            tx = self.get_transaction(tx_digest)
+            tx_receipt["revert_reason"] = self._try_get_revert_reason(tx)
+
         return tx_receipt
 
     @try_decorator(
@@ -1097,6 +1103,37 @@ class EthereumApi(LedgerApi, EthereumHelper):
             cast(HexStr, tx_digest)
         )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
+
+    @try_decorator(
+        "Error when attempting getting tx revert reason: {}", logger_method="debug"
+    )
+    def _try_get_revert_reason(self, tx: TxData) -> str:
+        """Try to check the revert reason of a transaction.
+
+        :param tx: the transaction for which we want to get the revert reason.
+
+        :return: the revert reason message.
+        """
+        # build a new transaction to replay:
+        replay_tx = {
+            "to": tx["to"],
+            "from": tx["from"],
+            "value": tx["value"],
+            "data": tx["input"],
+        }
+
+        try:
+            # replay the transaction on the provider
+            self.api.eth.call(replay_tx, tx["blockNumber"] - 1)
+        except SolidityError as e:
+            # execution reverted exception
+            return str(e)
+        except HTTPError as e:
+            # http exception
+            raise e
+        else:
+            # given tx not reverted
+            raise ValueError(f"The given transaction has not been reverted!\ntx: {tx}")
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
@@ -1246,59 +1283,33 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         method = getattr(contract_instance.functions, method_name)
         tx = method(**method_args)
-        tx = self._build_transaction(
-            tx,
-            tx_args["sender_address"],
-            tx_args["eth_value"],
-            tx_args["gas"],
-            tx_args["gas_price"],
-            tx_args["max_fee_per_gas"],
-            tx_args["max_priority_fee_per_gas"],
-        )
-        return tx
 
-    def _build_transaction(  # pylint: disable=too-many-arguments
-        self,
-        tx: Any,
-        sender_address: str,
-        eth_value: int = 0,
-        gas: Optional[int] = None,
-        gas_price: Optional[int] = None,
-        max_fee_per_gas: Optional[int] = None,
-        max_priority_fee_per_gas: Optional[int] = None,
-    ) -> Optional[JSONLike]:
-        """Adds parameters to a transaction
-
-        :param tx: the transaction
-        :param sender_address: the sender's address
-        :param eth_value: the value of ETH to move
-        :param gas: the transaction gas
-        :param gas_price: the transaction gas price
-        :param max_fee_per_gas: the transaction max_fee_per_gas
-        :param max_priority_fee_per_gas: the transaction max_priority_fee_per_gas
-        :return: the final transaction
-        """
-        nonce = self.api.eth.get_transaction_count(sender_address)
+        nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
         tx_params = {
             "nonce": nonce,
-            "value": eth_value,
+            "value": tx_args["value"] if "value" in tx_args else 0,
         }
-        if gas is not None:
-            tx_params["gas"] = gas
-        if gas_price is not None:
-            tx_params["gasPrice"] = gas_price
-        if max_fee_per_gas is not None:
-            tx_params["maxFeePerGas"] = max_fee_per_gas  # pragma: nocover
-        if max_priority_fee_per_gas is not None:
-            tx_params[
-                "maxPriorityFeePerGas"
-            ] = max_priority_fee_per_gas  # pragma: nocover
+
+        # Parameter camel-casing due to contract api requirements
+        for field in [
+            "gas",
+            "gasPrice",
+            "maxFeePerGas",
+            "maxPriorityFeePerGas",
+        ]:
+            if field in tx_args and tx_args[field] is not None:
+                tx_params[field] = tx_args[field]
+
         if (
-            gas_price is None
-            and max_fee_per_gas is None
-            and max_priority_fee_per_gas is None
+            "gasPrice" not in tx_params
+            and "maxFeePerGas" not in tx_params
+            and "maxPriorityFeePerGas" not in tx_params
         ):
-            gas_data = self.try_get_gas_pricing()
+            gas_data = (
+                self.try_get_gas_pricing(old_tip=tx_args["old_tip"])
+                if "old_tip" in tx_args
+                else self.try_get_gas_pricing()
+            )
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)

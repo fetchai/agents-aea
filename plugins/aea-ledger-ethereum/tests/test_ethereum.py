@@ -26,7 +26,7 @@ import random
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, cast
+from typing import Dict, Generator, Optional, Tuple, cast
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -49,7 +49,10 @@ from aea_ledger_ethereum.ethereum import (
 )
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
+from web3.datastructures import AttributeDict
+from web3.exceptions import SolidityError
 
+from aea.common import JSONLike
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
@@ -225,31 +228,31 @@ def test_get_state(ethereum_testnet_config, ganache):
     assert "number" in block, "response to get_block() does not contain 'number'"
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_construct_sign_and_submit_transfer_transaction(
-    ethereum_testnet_config, ganache, ethereum_private_key_file
-):
-    """Test the construction, signing and submitting of a transfer transaction."""
-    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
-    ec2 = EthereumCrypto()
-    ethereum_api = EthereumApi(**ethereum_testnet_config)
+def _wait_get_receipt(
+    ethereum_api: EthereumApi, transaction_digest: str
+) -> Tuple[Optional[JSONLike], bool]:
+    transaction_receipt = None
+    not_settled = True
+    elapsed_time = 0
+    time_to_wait = 40
+    sleep_time = 2
+    while not_settled and elapsed_time < time_to_wait:
+        elapsed_time += sleep_time
+        time.sleep(sleep_time)
+        transaction_receipt = ethereum_api.get_transaction_receipt(transaction_digest)
+        if transaction_receipt is None:
+            continue
+        is_settled = ethereum_api.is_transaction_settled(transaction_receipt)
+        not_settled = not is_settled
 
-    amount = 40000
-    tx_nonce = ethereum_api.generate_tx_nonce(ec2.address, account.address)
-    max_priority_fee_per_gas = 1_000_000_000
-    max_fee_per_gas = 1_000_000_000
-    transfer_transaction = ethereum_api.get_transfer_transaction(
-        sender_address=account.address,
-        destination_address=ec2.address,
-        amount=amount,
-        tx_fee=30000,
-        tx_nonce=tx_nonce,
-        chain_id=DEFAULT_GANACHE_CHAIN_ID,
-        max_priority_fee_per_gas=max_priority_fee_per_gas,
-        max_fee_per_gas=max_fee_per_gas,
-    )
+    return transaction_receipt, not not_settled
+
+
+def _construct_and_settle_tx(
+    ethereum_api: EthereumApi, account: EthereumCrypto, tx_params: dict,
+) -> Tuple[str, JSONLike, bool]:
+    """Construct and settle a transaction."""
+    transfer_transaction = ethereum_api.get_transfer_transaction(**tx_params)
     assert (
         isinstance(transfer_transaction, dict) and len(transfer_transaction) == 8
     ), "Incorrect transfer_transaction constructed."
@@ -262,22 +265,45 @@ def test_construct_sign_and_submit_transfer_transaction(
     transaction_digest = ethereum_api.send_signed_transaction(signed_transaction)
     assert transaction_digest is not None, "Failed to submit transfer transaction!"
 
-    not_settled = True
-    elapsed_time = 0
-    while not_settled and elapsed_time < 20:
-        elapsed_time += 1
-        time.sleep(2)
-        transaction_receipt = ethereum_api.get_transaction_receipt(transaction_digest)
-        if transaction_receipt is None:
-            continue
-        is_settled = ethereum_api.is_transaction_settled(transaction_receipt)
-        not_settled = not is_settled
+    transaction_receipt, is_settled = _wait_get_receipt(
+        ethereum_api, transaction_digest
+    )
+
     assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
+
+    return transaction_digest, transaction_receipt, is_settled
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_construct_sign_and_submit_transfer_transaction(
+    ethereum_testnet_config, ganache, ethereum_private_key_file
+):
+    """Test the construction, signing and submitting of a transfer transaction."""
+    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    tx_params = {
+        "sender_address": account.address,
+        "destination_address": ec2.address,
+        "amount": 40000,
+        "tx_fee": 30000,
+        "tx_nonce": ethereum_api.generate_tx_nonce(ec2.address, account.address),
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
+        "max_priority_fee_per_gas": 1_000_000_000,
+        "max_fee_per_gas": 1_000_000_000,
+    }
+
+    transaction_digest, transaction_receipt, is_settled = _construct_and_settle_tx(
+        ethereum_api, account, tx_params,
+    )
     assert is_settled, "Failed to verify tx!"
 
     tx = ethereum_api.get_transaction(transaction_digest)
     is_valid = ethereum_api.is_transaction_valid(
-        tx, ec2.address, account.address, tx_nonce, amount
+        tx, ec2.address, account.address, tx_params["tx_nonce"], tx_params["amount"]
     )
     assert is_valid, "Failed to settle tx correctly!"
     assert tx != transaction_receipt, "Should not be same!"
@@ -607,15 +633,22 @@ def test_contract_method_call():
 
 def test_build_transaction(ethereum_testnet_config):
     """Test EthereumApi.build_transaction."""
-    method_mock = MagicMock(return_value={"value": 0})
+
+    def pass_tx_params(tx_params):
+        return tx_params
+
+    tx_mock = MagicMock()
+    tx_mock.buildTransaction = pass_tx_params
+
+    method_mock = MagicMock(return_value=tx_mock)
 
     contract_instance = MagicMock()
     contract_instance.functions.dummy_method = method_mock
 
     eth_api = EthereumApi(**ethereum_testnet_config)
 
-    with mock.patch.object(
-        EthereumApi, "_build_transaction", return_value={},
+    with mock.patch(
+        "web3.eth.Eth.get_transaction_count", return_value=0,
     ):
         result = eth_api.build_transaction(
             contract_instance=contract_instance,
@@ -623,45 +656,29 @@ def test_build_transaction(ethereum_testnet_config):
             method_args={},
             tx_args=dict(
                 sender_address="sender_address",
-                eth_value="eth_value",
-                gas="gas",
-                gas_price="gas_price",
-                max_fee_per_gas="max_fee_per_gas",
-                max_priority_fee_per_gas="max_priority_fee_per_gas",
+                eth_value=0,
+                gas=0,
+                gasPrice=0,  # camel-casing due to contract api requirements
+                maxFeePerGas=0,  # camel-casing due to contract api requirements
+                maxPriorityFeePerGas=0,  # camel-casing due to contract api requirements
             ),
-        )
-        assert result == {}
-
-
-def test__build_transaction(ethereum_testnet_config):
-    """Test EthereumApi._build_transaction."""
-
-    eth_api = EthereumApi(**ethereum_testnet_config)
-
-    with mock.patch(
-        "web3.eth.Eth.get_transaction_count", return_value=0,
-    ):
-        eth_api = EthereumApi(**ethereum_testnet_config)
-
-        def mock_build_tx(tx):
-            return tx
-
-        tx = MagicMock()
-        tx.buildTransaction = mock_build_tx
-
-        result = eth_api._build_transaction(
-            tx=tx,
-            sender_address="sender_address",
-            eth_value=0,
-            gas=0,
-            gas_price=0,
-            max_fee_per_gas=0,
-            max_priority_fee_per_gas=0,
         )
 
         assert result == dict(
             nonce=0, value=0, gas=0, gasPrice=0, maxFeePerGas=0, maxPriorityFeePerGas=0,
         )
+
+        with mock.patch.object(
+            EthereumApi, "try_get_gas_pricing", return_value={"gas": 0},
+        ):
+            result = eth_api.build_transaction(
+                contract_instance=contract_instance,
+                method_name="dummy_method",
+                method_args={},
+                tx_args=dict(sender_address="sender_address", eth_value=0,),
+            )
+
+            assert result == dict(nonce=0, value=0, gas=0)
 
 
 def test_get_transaction_transfer_logs(ethereum_testnet_config):
@@ -698,3 +715,39 @@ def test_get_transaction_transfer_logs_raise(ethereum_testnet_config):
         )
 
         assert result == dict(logs=[])
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_revert_reason(
+    ethereum_private_key_file: str, ethereum_testnet_config: dict, ganache: Generator,
+) -> None:
+    """Test the retrieval of the revert reason for a transaction."""
+    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    tx_params = {
+        "sender_address": account.address,
+        "destination_address": ec2.address,
+        "amount": 40000,
+        "tx_fee": 30000,
+        "tx_nonce": 0,
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
+        "max_priority_fee_per_gas": 1_000_000_000,
+        "max_fee_per_gas": 1_000_000_000,
+    }
+
+    with mock.patch(
+        "web3.eth.Eth.get_transaction_receipt",
+        return_value=AttributeDict({"status": 0}),
+    ):
+        with mock.patch(
+            "web3.eth.Eth.call", side_effect=SolidityError("test revert reason"),
+        ):
+            _, transaction_receipt, is_settled = _construct_and_settle_tx(
+                ethereum_api, account, tx_params,
+            )
+
+            assert transaction_receipt["revert_reason"] == "test revert reason"
