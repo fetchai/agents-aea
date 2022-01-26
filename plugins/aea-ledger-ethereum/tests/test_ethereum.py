@@ -26,7 +26,7 @@ import random
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, cast, Tuple
+from typing import Dict, cast, Tuple, Optional
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -52,7 +52,6 @@ from web3._utils.request import _session_cache as session_cache
 
 from aea.common import JSONLike
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
-
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
@@ -226,6 +225,26 @@ def test_get_state(ethereum_testnet_config, ganache):
     assert "number" in block, "response to get_block() does not contain 'number'"
 
 
+def _wait_get_receipt(
+    ethereum_api: EthereumApi, transaction_digest: str
+) -> Tuple[Optional[JSONLike], bool]:
+    transaction_receipt = None
+    not_settled = True
+    elapsed_time = 0
+    time_to_wait = 40
+    sleep_time = 2
+    while not_settled and elapsed_time < time_to_wait:
+        elapsed_time += sleep_time
+        time.sleep(sleep_time)
+        transaction_receipt = ethereum_api.get_transaction_receipt(transaction_digest)
+        if transaction_receipt is None:
+            continue
+        is_settled = ethereum_api.is_transaction_settled(transaction_receipt)
+        not_settled = not is_settled
+
+    return transaction_receipt, not not_settled
+
+
 def _construct_and_settle_tx(
     ethereum_api: EthereumApi, account: EthereumCrypto, tx_params: dict,
 ) -> Tuple[str, JSONLike, bool]:
@@ -243,23 +262,13 @@ def _construct_and_settle_tx(
     transaction_digest = ethereum_api.send_signed_transaction(signed_transaction)
     assert transaction_digest is not None, "Failed to submit transfer transaction!"
 
-    transaction_receipt = None
-    not_settled = True
-    elapsed_time = 0
-    time_to_wait = 40
-    sleep_time = 2
-    while not_settled and elapsed_time < time_to_wait:
-        elapsed_time += sleep_time
-        time.sleep(sleep_time)
-        transaction_receipt = ethereum_api.get_transaction_receipt(transaction_digest)
-        if transaction_receipt is None:
-            continue
-        is_settled = ethereum_api.is_transaction_settled(transaction_receipt)
-        not_settled = not is_settled
+    transaction_receipt, is_settled = _wait_get_receipt(
+        ethereum_api, transaction_digest
+    )
 
     assert transaction_receipt is not None, "Failed to retrieve transaction receipt."
 
-    return transaction_digest, transaction_receipt, not_settled
+    return transaction_digest, transaction_receipt, is_settled
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -284,10 +293,10 @@ def test_construct_sign_and_submit_transfer_transaction(
         "max_fee_per_gas": 1_000_000_000,
     }
 
-    transaction_digest, transaction_receipt, not_settled = _construct_and_settle_tx(
+    transaction_digest, transaction_receipt, is_settled = _construct_and_settle_tx(
         ethereum_api, account, tx_params,
     )
-    assert not not_settled, "Failed to verify tx!"
+    assert is_settled, "Failed to verify tx!"
 
     tx = ethereum_api.get_transaction(transaction_digest)
     is_valid = ethereum_api.is_transaction_valid(
