@@ -1116,7 +1116,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         }
 
         try:
-            # replay the transaction locally:
+            # replay the transaction on the provider
             self.api.eth.call(replay_tx, tx["blockNumber"] - 1)
         except SolidityError as e:
             # execution reverted exception
