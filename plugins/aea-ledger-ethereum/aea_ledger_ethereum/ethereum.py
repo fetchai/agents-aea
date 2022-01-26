@@ -1120,7 +1120,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             self.api.eth.call(replay_tx, tx["blockNumber"] - 1)
         except SolidityError as e:
             # execution reverted exception
-            return repr(e)
+            return str(e)
         except HTTPError as e:
             # http exception
             raise e
