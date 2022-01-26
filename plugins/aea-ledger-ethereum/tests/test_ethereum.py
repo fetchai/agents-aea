@@ -26,7 +26,7 @@ import random
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, cast, Tuple, Optional
+from typing import Dict, Generator, Optional, Tuple, cast
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -49,9 +49,12 @@ from aea_ledger_ethereum.ethereum import (
 )
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
+from web3.datastructures import AttributeDict
+from web3.exceptions import SolidityError
 
 from aea.common import JSONLike
 from aea.crypto.helpers import DecryptError, KeyIsIncorrect
+
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
@@ -611,3 +614,39 @@ def test_decrypt_error():
 def test_helper_get_contract_address():
     """Test EthereumHelper.get_contract_address."""
     assert EthereumHelper.get_contract_address({"contractAddress": "123"}) == "123"
+
+
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_revert_reason(
+    ethereum_private_key_file: str, ethereum_testnet_config: dict, ganache: Generator,
+) -> None:
+    """Test the retrieval of the revert reason for a transaction."""
+    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
+    ec2 = EthereumCrypto()
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    tx_params = {
+        "sender_address": account.address,
+        "destination_address": ec2.address,
+        "amount": 40000,
+        "tx_fee": 30000,
+        "tx_nonce": 0,
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
+        "max_priority_fee_per_gas": 1_000_000_000,
+        "max_fee_per_gas": 1_000_000_000,
+    }
+
+    with mock.patch(
+        "web3.eth.Eth.get_transaction_receipt",
+        return_value=AttributeDict({"status": 0}),
+    ):
+        with mock.patch(
+            "web3.eth.Eth.call", side_effect=SolidityError("test revert reason"),
+        ):
+            _, transaction_receipt, is_settled = _construct_and_settle_tx(
+                ethereum_api, account, tx_params,
+            )
+
+            assert transaction_receipt["revert_reason"] == "test revert reason"
