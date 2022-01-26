@@ -1250,7 +1250,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
         tx_params = {
             "nonce": nonce,
-            "value": tx_args["eth_value"] if "eth_value" in tx_args else 0,
+            "value": tx_args["value"] if "value" in tx_args else 0,
         }
 
         # Parameter camel-casing due to contract api requirements
@@ -1268,7 +1268,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
             and "maxFeePerGas" not in tx_params
             and "maxPriorityFeePerGas" not in tx_params
         ):
-            gas_data = self.try_get_gas_pricing()
+            gas_data = (
+                self.try_get_gas_pricing(old_tip=tx_args["old_tip"])
+                if "old_tip" in tx_args
+                else self.try_get_gas_pricing()
+            )
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)
