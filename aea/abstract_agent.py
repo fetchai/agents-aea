@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the interface definition of the abstract agent."""
 import datetime
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from aea.mail.base import Envelope
@@ -27,11 +27,13 @@ from aea.mail.base import Envelope
 class AbstractAgent(ABC):
     """This class provides an abstract base  interface for an agent."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self) -> str:
         """Get agent's name."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def storage_uri(self) -> Optional[str]:
         """Return storage uri."""
 
