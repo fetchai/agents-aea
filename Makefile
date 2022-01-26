@@ -135,6 +135,18 @@ release:
 
 v := $(shell pip -V | grep virtualenvs)
 
+.PHONY: checks
+checks:
+	make clean \
+	&& make static \
+	&& make lint \
+	&& make pylint \
+	&& make copyright \
+	&& make docs \
+	&& make api-docs \
+	&& make hashes \
+	&& make security \
+
 .PHONY: new_env
 new_env: clean
 	if [ -z "$v" ];\

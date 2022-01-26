@@ -39,8 +39,10 @@ from eth_keys import keys
 from eth_typing import HexStr
 from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
+from requests import HTTPError
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+from web3.exceptions import SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
@@ -312,6 +314,13 @@ def get_gas_price_strategy(
         return {"gasPrice": wei_result}
 
     return gas_station_gas_price_strategy
+
+
+def rebuild_receipt(tx_receipt: JSONLike) -> JSONLike:
+    """Convert all tx receipt's event topics to HexBytes"""
+    for i in range(len(tx_receipt["logs"])):  # type: ignore
+        tx_receipt["logs"][i]["topics"] = [HexBytes(topic) for topic in tx_receipt["logs"][i]["topics"]]  # type: ignore
+    return tx_receipt
 
 
 class SignedTransactionTranslator:
@@ -1050,6 +1059,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx receipt, if present
         """
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
+
+        if tx_receipt is not None and not bool(tx_receipt["status"]):
+            tx = self.get_transaction(tx_digest)
+            tx_receipt["revert_reason"] = self._try_get_revert_reason(tx)
+
         return tx_receipt
 
     @try_decorator(
@@ -1089,6 +1103,37 @@ class EthereumApi(LedgerApi, EthereumHelper):
             cast(HexStr, tx_digest)
         )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
+
+    @try_decorator(
+        "Error when attempting getting tx revert reason: {}", logger_method="debug"
+    )
+    def _try_get_revert_reason(self, tx: TxData) -> str:
+        """Try to check the revert reason of a transaction.
+
+        :param tx: the transaction for which we want to get the revert reason.
+
+        :return: the revert reason message.
+        """
+        # build a new transaction to replay:
+        replay_tx = {
+            "to": tx["to"],
+            "from": tx["from"],
+            "value": tx["value"],
+            "data": tx["input"],
+        }
+
+        try:
+            # replay the transaction on the provider
+            self.api.eth.call(replay_tx, tx["blockNumber"] - 1)
+        except SolidityError as e:
+            # execution reverted exception
+            return str(e)
+        except HTTPError as e:
+            # http exception
+            raise e
+        else:
+            # given tx not reverted
+            raise ValueError(f"The given transaction has not been reverted!\ntx: {tx}")
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
@@ -1205,6 +1250,99 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: whether the address is valid
         """
         return Web3.isAddress(address)
+
+    @classmethod
+    def contract_method_call(
+        cls, contract_instance: Any, method_name: str, **method_args: Any,
+    ) -> Optional[JSONLike]:
+        """Call a contract's method
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract call parameters
+        :return: the call result
+        """
+        method = getattr(contract_instance.functions, method_name)
+        result = method(**method_args).call()
+        return result
+
+    def build_transaction(  # pylint: disable=too-many-arguments
+        self,
+        contract_instance: Any,
+        method_name: str,
+        method_args: Dict,
+        tx_args: Dict,
+    ) -> Optional[JSONLike]:
+        """Prepare a transaction
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract parameters
+        :param tx_args: the transaction parameters
+        :return: the transaction
+        """
+        method = getattr(contract_instance.functions, method_name)
+        tx = method(**method_args)
+
+        nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
+        tx_params = {
+            "nonce": nonce,
+            "value": tx_args["value"] if "value" in tx_args else 0,
+        }
+
+        # Parameter camel-casing due to contract api requirements
+        for field in [
+            "gas",
+            "gasPrice",
+            "maxFeePerGas",
+            "maxPriorityFeePerGas",
+        ]:
+            if field in tx_args and tx_args[field] is not None:
+                tx_params[field] = tx_args[field]
+
+        if (
+            "gasPrice" not in tx_params
+            and "maxFeePerGas" not in tx_params
+            and "maxPriorityFeePerGas" not in tx_params
+        ):
+            gas_data = (
+                self.try_get_gas_pricing(old_tip=tx_args["old_tip"])
+                if "old_tip" in tx_args
+                else self.try_get_gas_pricing()
+            )
+            if gas_data:
+                tx_params.update(gas_data)  # pragma: nocover
+        tx = tx.buildTransaction(tx_params)
+        return tx
+
+    def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
+        self,
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None,
+    ) -> Optional[JSONLike]:
+        """
+        Get all transfer events derived from a transaction.
+
+        :param contract_instance: the contract
+        :param tx_hash: the transaction hash
+        :param target_address: optional address to filter tranfer events to just those that affect it
+        :return: the transfer logs
+        """
+        try:
+            tx_receipt = self.api.eth.get_transaction_receipt(tx_hash)
+            if tx_receipt is None:
+                raise ValueError  # pragma: nocover
+
+        except (TransactionNotFound, ValueError):  # pragma: nocover
+            return dict(logs=[])
+
+        # Due to serialization, event topics must be converted again to HexBytes or processReceipt will fail
+        tx_receipt = rebuild_receipt(tx_receipt)
+
+        transfer_logs = contract_instance.events.Transfer().processReceipt(tx_receipt)
+
+        return dict(logs=transfer_logs)
 
 
 class EthereumFaucetApi(FaucetApi):
