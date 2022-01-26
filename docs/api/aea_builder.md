@@ -979,7 +979,7 @@ the list of required ledgers.
 
 ```python
  | @classmethod
- | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path]) -> AgentConfig
+ | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path], apply_environment_variables: bool = True) -> AgentConfig
 ```
 
 Try to load the agent configuration file..
@@ -1004,7 +1004,7 @@ Set builder variables from AgentConfig.
 
 ```python
  | @classmethod
- | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, password: Optional[str] = None) -> "AEABuilder"
+ | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, apply_environment_variables: bool = False, password: Optional[str] = None) -> "AEABuilder"
 ```
 
 Construct the builder from an AEA project.
@@ -1020,6 +1020,7 @@ Construct the builder from an AEA project.
 
 - `aea_project_path`: path to the AEA project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
+- `apply_environment_variables`: if True, environment variables are loaded.
 - `password`: the password to encrypt/decrypt private keys.
 
 **Returns**:

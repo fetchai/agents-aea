@@ -195,3 +195,64 @@ to handle the contract requests manually.
 
 the tx  # noqa: DAR202
 
+<a name="aea.contracts.base.Contract.contract_method_call"></a>
+#### contract`_`method`_`call
+
+```python
+ | @classmethod
+ | contract_method_call(cls, ledger_api: LedgerApi, method_name: str, **kwargs: Any) -> Optional[JSONLike]
+```
+
+Make a contract call.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `method_name`: the contract method name.
+- `kwargs`: keyword arguments.
+
+**Returns**:
+
+the call result
+
+<a name="aea.contracts.base.Contract.build_transaction"></a>
+#### build`_`transaction
+
+```python
+ | @classmethod
+ | build_transaction(cls, ledger_api: LedgerApi, method_name: str, method_args: Optional[Dict], tx_args: Optional[Dict]) -> Optional[JSONLike]
+```
+
+Build a transaction.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `method_name`: method name.
+- `method_args`: method arguments.
+- `tx_args`: transaction arguments.
+
+**Returns**:
+
+the transaction
+
+<a name="aea.contracts.base.Contract.get_transaction_transfer_logs"></a>
+#### get`_`transaction`_`transfer`_`logs
+
+```python
+ | @classmethod
+ | get_transaction_transfer_logs(cls, ledger_api: LedgerApi, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
+```
+
+Retrieve the logs from a transaction.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `tx_hash`: The transaction hash to check logs from.
+- `target_address`: optional address to filter tranfer events to just those that affect it
+
+**Returns**:
+
+the tx logs
+

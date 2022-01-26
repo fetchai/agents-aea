@@ -616,6 +616,116 @@ def test_helper_get_contract_address():
     assert EthereumHelper.get_contract_address({"contractAddress": "123"}) == "123"
 
 
+def test_contract_method_call():
+    """Test EthereumApi.contract_method_call."""
+
+    method_mock = MagicMock()
+    method_mock().call = MagicMock(return_value={"value": 0})
+
+    contract_instance = MagicMock()
+    contract_instance.functions.dummy_method = method_mock
+
+    result = EthereumApi.contract_method_call(
+        contract_instance=contract_instance, method_name="dummy_method", dummy_arg=1
+    )
+    assert result["value"] == 0
+
+
+def test_build_transaction(ethereum_testnet_config):
+    """Test EthereumApi.build_transaction."""
+    method_mock = MagicMock(return_value={"value": 0})
+
+    contract_instance = MagicMock()
+    contract_instance.functions.dummy_method = method_mock
+
+    eth_api = EthereumApi(**ethereum_testnet_config)
+
+    with mock.patch.object(
+        EthereumApi, "_build_transaction", return_value={},
+    ):
+        result = eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args={},
+            tx_args=dict(
+                sender_address="sender_address",
+                eth_value="eth_value",
+                gas="gas",
+                gas_price="gas_price",
+                max_fee_per_gas="max_fee_per_gas",
+                max_priority_fee_per_gas="max_priority_fee_per_gas",
+            ),
+        )
+        assert result == {}
+
+
+def test__build_transaction(ethereum_testnet_config):
+    """Test EthereumApi._build_transaction."""
+
+    eth_api = EthereumApi(**ethereum_testnet_config)
+
+    with mock.patch(
+        "web3.eth.Eth.get_transaction_count", return_value=0,
+    ):
+        eth_api = EthereumApi(**ethereum_testnet_config)
+
+        def mock_build_tx(tx):
+            return tx
+
+        tx = MagicMock()
+        tx.buildTransaction = mock_build_tx
+
+        result = eth_api._build_transaction(
+            tx=tx,
+            sender_address="sender_address",
+            eth_value=0,
+            gas=0,
+            gas_price=0,
+            max_fee_per_gas=0,
+            max_priority_fee_per_gas=0,
+        )
+
+        assert result == dict(
+            nonce=0, value=0, gas=0, gasPrice=0, maxFeePerGas=0, maxPriorityFeePerGas=0,
+        )
+
+
+def test_get_transaction_transfer_logs(ethereum_testnet_config):
+    """Test EthereumApi.get_transaction_transfer_logs."""
+    eth_api = EthereumApi(**ethereum_testnet_config)
+
+    dummy_receipt = {"logs": [{"topics": ["0x0", "0x0"]}]}
+
+    with mock.patch(
+        "web3.eth.Eth.get_transaction_receipt", return_value=dummy_receipt,
+    ):
+        contract_instance = MagicMock()
+        contract_instance.events.Transfer().processReceipt.return_value = {"log": "log"}
+
+        result = eth_api.get_transaction_transfer_logs(
+            contract_instance=contract_instance, tx_hash="dummy_hash",
+        )
+
+        assert result == dict(logs={"log": "log"})
+
+
+def test_get_transaction_transfer_logs_raise(ethereum_testnet_config):
+    """Test EthereumApi.get_transaction_transfer_logs."""
+    eth_api = EthereumApi(**ethereum_testnet_config)
+
+    with mock.patch(
+        "web3.eth.Eth.get_transaction_receipt", return_value=None,
+    ):
+        contract_instance = MagicMock()
+        contract_instance.events.Transfer().processReceipt.return_value = {"log": "log"}
+
+        result = eth_api.get_transaction_transfer_logs(
+            contract_instance=contract_instance, tx_hash="dummy_hash",
+        )
+
+        assert result == dict(logs=[])
+
+
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger

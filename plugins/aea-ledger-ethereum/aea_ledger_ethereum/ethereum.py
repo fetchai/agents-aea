@@ -42,7 +42,7 @@ from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from requests import HTTPError
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
-from web3.exceptions import SolidityError
+from web3.exceptions import SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
@@ -314,6 +314,13 @@ def get_gas_price_strategy(
         return {"gasPrice": wei_result}
 
     return gas_station_gas_price_strategy
+
+
+def rebuild_receipt(tx_receipt: JSONLike) -> JSONLike:
+    """Convert all tx receipt's event topics to HexBytes"""
+    for i in range(len(tx_receipt["logs"])):  # type: ignore
+        tx_receipt["logs"][i]["topics"] = [HexBytes(topic) for topic in tx_receipt["logs"][i]["topics"]]  # type: ignore
+    return tx_receipt
 
 
 class SignedTransactionTranslator:
@@ -1243,6 +1250,125 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: whether the address is valid
         """
         return Web3.isAddress(address)
+
+    @classmethod
+    def contract_method_call(
+        cls, contract_instance: Any, method_name: str, **method_args: Any,
+    ) -> Optional[JSONLike]:
+        """Call a contract's method
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract call parameters
+        :return: the call result
+        """
+        method = getattr(contract_instance.functions, method_name)
+        result = method(**method_args).call()
+        return result
+
+    def build_transaction(  # pylint: disable=too-many-arguments
+        self,
+        contract_instance: Any,
+        method_name: str,
+        method_args: Dict,
+        tx_args: Dict,
+    ) -> Optional[JSONLike]:
+        """Prepare a transaction
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract parameters
+        :param tx_args: the transaction parameters
+        :return: the transaction
+        """
+        method = getattr(contract_instance.functions, method_name)
+        tx = method(**method_args)
+        tx = self._build_transaction(
+            tx,
+            tx_args["sender_address"],
+            tx_args["eth_value"],
+            tx_args["gas"],
+            tx_args["gas_price"],
+            tx_args["max_fee_per_gas"],
+            tx_args["max_priority_fee_per_gas"],
+        )
+        return tx
+
+    def _build_transaction(  # pylint: disable=too-many-arguments
+        self,
+        tx: Any,
+        sender_address: str,
+        eth_value: int = 0,
+        gas: Optional[int] = None,
+        gas_price: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[int] = None,
+    ) -> Optional[JSONLike]:
+        """Adds parameters to a transaction
+
+        :param tx: the transaction
+        :param sender_address: the sender's address
+        :param eth_value: the value of ETH to move
+        :param gas: the transaction gas
+        :param gas_price: the transaction gas price
+        :param max_fee_per_gas: the transaction max_fee_per_gas
+        :param max_priority_fee_per_gas: the transaction max_priority_fee_per_gas
+        :return: the final transaction
+        """
+        nonce = self.api.eth.get_transaction_count(sender_address)
+        tx_params = {
+            "nonce": nonce,
+            "value": eth_value,
+        }
+        if gas is not None:
+            tx_params["gas"] = gas
+        if gas_price is not None:
+            tx_params["gasPrice"] = gas_price
+        if max_fee_per_gas is not None:
+            tx_params["maxFeePerGas"] = max_fee_per_gas  # pragma: nocover
+        if max_priority_fee_per_gas is not None:
+            tx_params[
+                "maxPriorityFeePerGas"
+            ] = max_priority_fee_per_gas  # pragma: nocover
+        if (
+            gas_price is None
+            and max_fee_per_gas is None
+            and max_priority_fee_per_gas is None
+        ):
+            gas_data = self.try_get_gas_pricing()
+            if gas_data:
+                tx_params.update(gas_data)  # pragma: nocover
+        tx = tx.buildTransaction(tx_params)
+        return tx
+
+    def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
+        self,
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None,
+    ) -> Optional[JSONLike]:
+        """
+        Get all transfer events derived from a transaction.
+
+        :param contract_instance: the contract
+        :param tx_hash: the transaction hash
+        :param target_address: optional address to filter tranfer events to just those that affect it
+        :return: the transfer logs
+        """
+        try:
+            tx_receipt = self.api.eth.get_transaction_receipt(tx_hash)
+            if tx_receipt is None:
+                raise ValueError  # pragma: nocover
+
+        except (TransactionNotFound, ValueError):  # pragma: nocover
+            return dict(logs=[])
+
+        # Due to serialization, event topics must be converted again to HexBytes or processReceipt will fail
+        tx_receipt = rebuild_receipt(tx_receipt)
+
+        transfer_logs = contract_instance.events.Transfer().processReceipt(tx_receipt)
+
+        return dict(logs=transfer_logs)
 
 
 class EthereumFaucetApi(FaucetApi):
