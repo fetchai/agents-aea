@@ -5,9 +5,8 @@
     <a href="https://github.com/fetchai/agents-aea" target="_blank">legacy AEA 
     framework</a> that gives no priority to any package vendor.
 
-The latest version of the Python implementation of the AEA Framework:
-
-<a href="https://pypi.org/project/open-aea/" target="_blank"><img alt="PyPI" src="https://pypi.org/project/open-aea/" /></a>.
+The latest version of the Python implementation of the
+<a href="https://pypi.org/project/open-aea/">AEA Framework</a> on PyPI.
 
 If you are upgrading your AEA project from a previous version of the AEA framework, please check out <a href="../upgrading/">the upgrading guide</a>.
 
