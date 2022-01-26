@@ -1053,7 +1053,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
 
-        if not bool(tx_receipt["status"]):
+        if tx_receipt is not None and not bool(tx_receipt["status"]):
             tx = self.get_transaction(tx_digest)
             tx_receipt["revert_reason"] = self._try_get_revert_reason(tx)
 
