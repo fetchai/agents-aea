@@ -66,15 +66,6 @@ get_gas_price_strategy(gas_price_strategy: Optional[str] = None, gas_price_api_k
 
 Get the gas price strategy.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.rebuild_receipt"></a>
-#### rebuild`_`receipt
-
-```python
-rebuild_receipt(tx_receipt: JSONLike) -> JSONLike
-```
-
-Convert all tx receipt's event topics to HexBytes
-
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator"></a>
 ## SignedTransactionTranslator Objects
 
