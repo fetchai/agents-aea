@@ -1,5 +1,10 @@
 # Release History - open AEA
 
+## Plugins patch (2022-01-27)
+
+Plugins:
+- Bumps `open-aea-ethereum-ledger` to `1.4.1` after fixing a bug in the log retrieval logic.
+
 ## 1.4.0 (2022-01-26)
 
 AEA:
