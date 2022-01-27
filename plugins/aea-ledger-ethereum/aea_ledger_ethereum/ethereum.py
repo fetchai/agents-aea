@@ -316,13 +316,6 @@ def get_gas_price_strategy(
     return gas_station_gas_price_strategy
 
 
-def rebuild_receipt(tx_receipt: JSONLike) -> JSONLike:
-    """Convert all tx receipt's event topics to HexBytes"""
-    for i in range(len(tx_receipt["logs"])):  # type: ignore
-        tx_receipt["logs"][i]["topics"] = [HexBytes(topic) for topic in tx_receipt["logs"][i]["topics"]]  # type: ignore
-    return tx_receipt
-
-
 class SignedTransactionTranslator:
     """Translator for SignedTransaction."""
 
@@ -1336,9 +1329,6 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         except (TransactionNotFound, ValueError):  # pragma: nocover
             return dict(logs=[])
-
-        # Due to serialization, event topics must be converted again to HexBytes or processReceipt will fail
-        tx_receipt = rebuild_receipt(tx_receipt)
 
         transfer_logs = contract_instance.events.Transfer().processReceipt(tx_receipt)
 
