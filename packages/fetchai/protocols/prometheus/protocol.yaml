@@ -8,12 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTJiHJz5CACiYNZDUX56uBezVuNnPgCHNhczwnVKmNXnK
-  __init__.py: QmNx43NNQrncrJf2kYByaZ9Ze2YkSAC4D8Yv9joTxoEheK
-  dialogues.py: Qmejf795ebtMxeHBkqnwwxGpTPJiko4E9eK3BY3Ker3pPb
-  message.py: QmWUV1UnfGSM3n5B28P35BwMymbVP3ekiB2nVTmLuE3t6Q
+  __init__.py: QmQdw3RUrvcVHtu3RSGCTAKYHBVtd3kWQd6ThtUMTUcw4K
+  dialogues.py: QmVNNWsEzorKdYWxGSW1yUKd8PNXYjcRprtJijuuFSepkQ
+  message.py: QmWoPxzoxiXdw9qSodSKr8qsXHospVpSvqUvBJbsk27bHr
   prometheus.proto: QmXMxMXbDH1LoFcV9QB7TvewUPu62poka43aKuujL73UN1
-  prometheus_pb2.py: QmaTCT2Fu2RtDYjbvvLM1CLuM5htptZKh3Av6eV5bcSYMw
-  serialization.py: QmUGGyoFhpzjL8mBiVpu2yxo35a8Qh3oRSGwBB1JL6xRzs
+  prometheus_pb2.py: QmcMyJuWMbsLHWvxjPVRB4Sox1UMNCWfBVrADmz9yEvxEF
+  serialization.py: QmYXXhfSkq4Xo93Yah4QhtriFpGZjr97sW8nozA6LpxzaQ
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

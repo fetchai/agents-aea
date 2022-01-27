@@ -8,13 +8,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmbvj5ZRLSJAi7n42F9Gd8HmTF6Tk25mTrQv5baRcRCjPp
-  __init__.py: QmZ248E8gNUpncL52g3ADwaY3yjBvMkt2vuPtXaHor4uum
+  __init__.py: QmRXiDmemhaJMxnt1qq85pyvQ1YKxAxguPp7AMACm32rjG
   custom_types.py: QmSgwoNvSK11m8wjCRQaGsw5srG5b8pWzvjRKwLGAcZ1ho
   default.proto: QmWYzTSHVbz7FBS84iKFMhGSXPxay2mss29vY7ufz2BFJ8
-  default_pb2.py: QmfWXDoi4JYDDjosaW1AoHauqW9xoepZF5Sv9iGq37tyyG
-  dialogues.py: Qmf8f7w8vr1zNgcRFiiNSd2EcrwQdffhv61X9qQ2tSNUxj
-  message.py: QmVKNvdbabgwqKCWuogitLaaLcAHBkZYG2En9T1EzRBm3c
-  serialization.py: QmXKrfcSiUzHnP6Jh5zXsTT4yktNSFZTUbyEQJ6M7Qbjt9
+  default_pb2.py: Qmd9Kp827U1DkGWAY3DYTK5QwWfwsvXJrM7U2US8aSho1S
+  dialogues.py: QmZhspQD1MV1Cv49DN1uQti8YVjV6sA78v8gD1fobabEUu
+  message.py: QmSF8XpLieCEzCUiHZbgGDhYJPmJKtFbyMGNgRNLP6C8pB
+  serialization.py: QmRdfN4CZovYR1jukwb2RkQDHVjQqha9Wu9PmVLSao1o5j
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

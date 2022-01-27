@@ -9,13 +9,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWaCju5s4uS1jkyLKGs94nF13RuRzGiwxfscjubS2W4Pv
-  __init__.py: QmfMQPeanJuJmyWTFfBBxfXMmnRRychMXAsvZyvkZTAEhT
+  __init__.py: QmPpTszn55oN8WEF6Z2Krj4iDrBu1XiXgvdWk5FQru644h
   custom_types.py: QmQ1ygDWcBnRzkpyf7epNFT5Mwf4FKJHz3PRRZp7J2q3F6
-  dialogues.py: QmPmqYyKNJLrfS2kyuujoK4qMzeyJ9yfEQmWeETXXgZ7Lr
-  message.py: QmeXJ2FoWFC4iADcQhVNMnbQQBSzeVwEA6ci8t3jfDiA8h
-  serialization.py: QmaaUfm1tKj77JBXfdhVWVzKyrFuNCdA9TGc7oonCZm9Uf
+  dialogues.py: QmRmCJ4CscK8yBQKfobv6XAXeRgVygD5i2SwQQ6RTKqkeM
+  message.py: QmdiJL21ZH1xQbXPN1t81e4YduM2Zd46RJMjXN2eK8c3NF
+  serialization.py: QmcoX3JNxsnia3AtA53Peb13jonKgtzRDM1ZfZEtEmcbCh
   tac.proto: QmTjxGkEoMdvdDvBMoKhjkBV4CNNgsn6JWt6rJEwXfnq7Z
-  tac_pb2.py: Qma7PAWmAe2N3e7ds6VV3pPnyo7oKyEsigcNC44XaJTBCD
+  tac_pb2.py: QmeaKP4yMtMD4ay2gT32yMTR18hXeJSPc9esrMSRxYCNvx
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

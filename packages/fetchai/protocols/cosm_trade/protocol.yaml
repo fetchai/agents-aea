@@ -9,13 +9,13 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmZnnrELDnJY6tJLBg12orufw1KqahRcTNdJJHN16Qo425
-  __init__.py: QmW9nunb7XfNW5Qa4tVbTRcSdJ1CtnFwwf2CZoo76E4p6f
+  __init__.py: QmSmWXVz5DPx9DankdzYJxtwQt3QWcdhNV4LB8zuBchcvE
   cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
-  cosm_trade_pb2.py: QmV58tzxiRXsC414VfjYWBye8JPyQ3Y5X7tc5p7HArqA9z
+  cosm_trade_pb2.py: QmWjw8hLs6DBr52hmawCtSFye6ZL9ahWxx7qG6nryWUthM
   custom_types.py: QmS4h6s3ZnbzrDrud9ZPfaUesN3CczZHC4LPqFX8VGFPcj
-  dialogues.py: QmXuvrQqkFjxVXSS73FProQtxDnEn8wXJWGdoscaBwTmxS
-  message.py: QmUwvsTP2ebR8wQvFvSFGVBPqXNs7gUeV6pcxQupFRRZsh
-  serialization.py: QmaJ89jE6VWsRxgrkZVhaY2YRwBLXhN6pvdnKRUKwHqbmj
+  dialogues.py: QmNWYxmPJJEuqyc8NS5zxXMB3w2avNxZwBVdvX1Fms6oDD
+  message.py: QmZQ3u7oD94xM2Pi4W8PrPNAJs4XHVTdQ3V3mnvYeoAoaT
+  serialization.py: QmU8ZVMYPB3AMhjCxbTdqfK8HiYsSGcUrRwg5zaR3HLw2u
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
