@@ -21,6 +21,7 @@ from typing import Dict, List, Union
 
 
 FALSE_EQUIVALENTS = ["f", "false", "False", "0"]
+NULL_EQUIVALENTS = ["Null", "null", "None", "none"]
 FROM_STRING_TO_TYPE = dict(
     str=str, int=int, bool=bool, float=float, dict=dict, list=list, none=None,
 )

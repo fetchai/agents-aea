@@ -23,7 +23,12 @@ import re
 from collections.abc import Mapping as MappingType
 from typing import Any, Dict, List, Mapping, Union
 
-from aea.helpers.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE, JSON_TYPES
+from aea.helpers.constants import (
+    FALSE_EQUIVALENTS,
+    FROM_STRING_TO_TYPE,
+    JSON_TYPES,
+    NULL_EQUIVALENTS,
+)
 
 
 ENV_VARIABLE_RE = re.compile(
@@ -101,7 +106,7 @@ def convert_value_str_to_type(value: str, type_str: str) -> JSON_TYPES:
         type_ = FROM_STRING_TO_TYPE[type_str]
         if type_ == bool:
             return value not in FALSE_EQUIVALENTS
-        if type_ is None:
+        if type_ is None or value in NULL_EQUIVALENTS:
             return None
         if type_ in (dict, list):
             return json.loads(value)
