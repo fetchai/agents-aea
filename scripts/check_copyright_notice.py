@@ -89,7 +89,9 @@ if __name__ == "__main__":
 
     # filter out protobuf files (*_pb2.py)
     python_files_filtered = filter(
-        lambda x: not str(x).endswith("_pb2.py"), python_files
+        lambda x: not str(x).endswith("_pb2.py")
+        and "data/reference_protocols/" not in str(x),
+        python_files,
     )
 
     bad_files = [

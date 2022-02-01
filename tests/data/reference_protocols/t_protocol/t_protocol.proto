@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package aea.some_author.some_protocol_name.v1_0_0;
+
+message TProtocolMessage{
+
+  // Custom Types
+  message DataModel{
+    bytes bytes_field = 1;
+    int32 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int32 set_field = 6;
+    repeated string list_field = 7;
+    map<int32, bool> dict_field = 8;
+  }
+
+
+  // Performatives and contents
+  message Performative_Ct_Performative{
+    DataModel content_ct = 1;
+  }
+
+  message Performative_Pt_Performative{
+    bytes content_bytes = 1;
+    int32 content_int = 2;
+    float content_float = 3;
+    bool content_bool = 4;
+    string content_str = 5;
+  }
+
+  message Performative_Pct_Performative{
+    repeated bytes content_set_bytes = 1;
+    repeated int32 content_set_int = 2;
+    repeated float content_set_float = 3;
+    repeated bool content_set_bool = 4;
+    repeated string content_set_str = 5;
+    repeated bytes content_list_bytes = 6;
+    repeated int32 content_list_int = 7;
+    repeated float content_list_float = 8;
+    repeated bool content_list_bool = 9;
+    repeated string content_list_str = 10;
+  }
+
+  message Performative_Pmt_Performative{
+    map<int32, bytes> content_dict_int_bytes = 1;
+    map<int32, int32> content_dict_int_int = 2;
+    map<int32, float> content_dict_int_float = 3;
+    map<int32, bool> content_dict_int_bool = 4;
+    map<int32, string> content_dict_int_str = 5;
+    map<bool, bytes> content_dict_bool_bytes = 6;
+    map<bool, int32> content_dict_bool_int = 7;
+    map<bool, float> content_dict_bool_float = 8;
+    map<bool, bool> content_dict_bool_bool = 9;
+    map<bool, string> content_dict_bool_str = 10;
+    map<string, bytes> content_dict_str_bytes = 11;
+    map<string, int32> content_dict_str_int = 12;
+    map<string, float> content_dict_str_float = 13;
+    map<string, bool> content_dict_str_bool = 14;
+    map<string, string> content_dict_str_str = 15;
+  }
+
+  message Performative_Mt_Performative{
+    DataModel content_union_1_type_DataModel = 1;
+    bytes content_union_1_type_bytes = 2;
+    int32 content_union_1_type_int = 3;
+    float content_union_1_type_float = 4;
+    bool content_union_1_type_bool = 5;
+    string content_union_1_type_str = 6;
+    repeated int32 content_union_1_type_set_of_int = 7;
+    repeated bool content_union_1_type_list_of_bool = 8;
+    map<string, int32> content_union_1_type_dict_of_str_int = 9;
+    repeated bytes content_union_2_type_set_of_bytes = 10;
+    repeated int32 content_union_2_type_set_of_int = 11;
+    repeated string content_union_2_type_set_of_str = 12;
+    repeated float content_union_2_type_list_of_float = 13;
+    repeated bool content_union_2_type_list_of_bool = 14;
+    repeated bytes content_union_2_type_list_of_bytes = 15;
+    map<string, int32> content_union_2_type_dict_of_str_int = 16;
+    map<int32, float> content_union_2_type_dict_of_int_float = 17;
+    map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 18;
+  }
+
+  message Performative_O_Performative{
+    DataModel content_o_ct = 1;
+    bool content_o_ct_is_set = 2;
+    bool content_o_bool = 3;
+    bool content_o_bool_is_set = 4;
+    repeated int32 content_o_set_int = 5;
+    bool content_o_set_int_is_set = 6;
+    repeated bytes content_o_list_bytes = 7;
+    bool content_o_list_bytes_is_set = 8;
+    map<string, int32> content_o_dict_str_int = 9;
+    bool content_o_dict_str_int_is_set = 10;
+  }
+
+  message Performative_Empty_Contents_Performative{
+  }
+
+
+  oneof performative{
+    Performative_Ct_Performative performative_ct = 5;
+    Performative_Empty_Contents_Performative performative_empty_contents = 6;
+    Performative_Mt_Performative performative_mt = 7;
+    Performative_O_Performative performative_o = 8;
+    Performative_Pct_Performative performative_pct = 9;
+    Performative_Pmt_Performative performative_pmt = 10;
+    Performative_Pt_Performative performative_pt = 11;
+  }
+}

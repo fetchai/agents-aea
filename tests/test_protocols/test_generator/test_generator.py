@@ -174,7 +174,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         path_to_generated_protocol = self.t
         dotted_path_to_package_for_imports = "tests.data.generator."
         path_to_protocol = os.path.join(
-            ROOT_DIR, "tests", "data", "generator", protocol_name
+            ROOT_DIR, "tests", "data", "reference_protocols", protocol_name
         )
 
         # Generate the protocol
