@@ -182,11 +182,10 @@ class TestContractTestCase(BaseContractTestCase):
     ):
         """Test the sign_send_confirm_receipt_multisig_transaction static method: digest not found."""
         tx = "tx"
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="Transaction digest not found!"):
             self.sign_send_confirm_receipt_multisig_transaction(
                 tx, self.ledger_api, [self.deployer_crypto],
             )
-            assert str(e) == "Transaction digest not found!"
         is_transaction_settled_mock.assert_not_called()
         get_transaction_receipt_mock.assert_not_called()
         send_signed_transaction_mock.assert_called_once_with(tx)
@@ -206,11 +205,10 @@ class TestContractTestCase(BaseContractTestCase):
         """Test the sign_send_confirm_receipt_multisig_transaction static method: receipt not found."""
         tx = "tx"
         sleep_time = 0
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(ValueError, match="Transaction receipt not found!"):
             self.sign_send_confirm_receipt_multisig_transaction(
                 tx, self.ledger_api, [self.deployer_crypto], sleep_time=sleep_time
             )
-            assert str(e) == "Transaction receipt not found!"
         is_transaction_settled_mock.assert_not_called()
         get_transaction_receipt_mock.assert_called_with("tx_digest")
         send_signed_transaction_mock.assert_called_once_with(tx)
