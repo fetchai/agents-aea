@@ -492,23 +492,3 @@ class TestFlakyEmpty(AEATestCaseEmptyFlaky):
             raise AssertionError("Expected error to trigger rerun!")
         assert self.run_count == 2, "Should only be rerun once!"
         assert not os.path.isfile(file), "File should not exist"
-
-
-class TestBaseContractTestCase(TestCase):
-    """Test case for BaseContractTestCase ABC class."""
-
-    @mock.patch(
-        "aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_multisig_transaction"
-    )
-    def test_sign_send_confirm_receipt_transaction(
-        self, sign_send_confirm_receipt_multisig_transaction_mock
-    ):
-        """Test sign_send_confirm_receipt_multisig_transaction is called for backward compatibility."""
-
-        class ContractTestCase(BaseContractTestCase):
-            pass
-
-        ContractTestCase.sign_send_confirm_receipt_transaction(
-            "tx", "ledger_api", "crypto"
-        )
-        sign_send_confirm_receipt_multisig_transaction_mock.assert_called_once()

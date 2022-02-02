@@ -34,6 +34,8 @@ from tests.conftest import ROOT_DIR
 LEDGER_ID = "fetchai"
 CONTRACT_ADDRESS = "contract_address"
 
+TX_RECEIPT_EXAMPLE = {"json": "like"}
+
 
 class TestContractTestCase(BaseContractTestCase):
     """Test case for BaseContractTestCase."""
@@ -44,15 +46,17 @@ class TestContractTestCase(BaseContractTestCase):
     def setup(cls):
         """Setup the test class."""
         cls.ledger_identifier = LEDGER_ID
+        cls.fund_from_faucet = True
 
         with mock.patch.object(
             BaseContractTestCase,
             "sign_send_confirm_receipt_multisig_transaction",
-            return_value="",
+            return_value=TX_RECEIPT_EXAMPLE,
         ):
-            with mock.patch.object(CosmosCrypto, "sign_transaction"):
-                with mock.patch.object(FetchAIApi, "get_deploy_transaction"):
-                    super().setup()
+            with mock.patch.object(BaseContractTestCase, "refill_from_faucet"):
+                with mock.patch.object(CosmosCrypto, "sign_transaction"):
+                    with mock.patch.object(FetchAIApi, "get_deploy_transaction"):
+                        super().setup()
 
     @classmethod
     def finish_contract_deployment(cls):
@@ -73,7 +77,11 @@ class TestContractTestCase(BaseContractTestCase):
         assert type(self.faucet_api) is FetchAIFaucetApi
         assert self.faucet_api.identifier == LEDGER_ID
 
+        assert self._contract.__class__.__name__ == "DummyContract"
+
         assert self.contract_address == CONTRACT_ADDRESS
+        assert self.fund_from_faucet is True
+        assert self.deployment_tx_receipt == TX_RECEIPT_EXAMPLE
 
     @mock.patch.object(FetchAIFaucetApi, "get_wealth")
     def test_refill_from_faucet(self, get_wealth_mock):
@@ -85,11 +93,11 @@ class TestContractTestCase(BaseContractTestCase):
             assert str(e) == "Balance not increased!"
         get_wealth_mock.assert_called_once_with(CONTRACT_ADDRESS)
 
-    @mock.patch.object(FetchAIApi, "get_deploy_transaction", return_value="tx")
+    @mock.patch("aea.contracts.base.Contract.get_deploy_transaction", return_value="tx")
     @mock.patch.object(
         BaseContractTestCase,
         "sign_send_confirm_receipt_multisig_transaction",
-        return_value="tx_receipt",
+        return_value=TX_RECEIPT_EXAMPLE,
     )
     def test__deploy_contract(
         self,
@@ -101,17 +109,21 @@ class TestContractTestCase(BaseContractTestCase):
         result = self._deploy_contract(
             self.contract, self.ledger_api, self.deployer_crypto, gas
         )
-        assert result == "tx_receipt"
+        assert result == TX_RECEIPT_EXAMPLE
         sign_send_confirm_receipt_multisig_transaction_mock.assert_called_once_with(
             "tx", self.ledger_api, [self.deployer_crypto]
         )
-        get_deploy_transaction_mock.assert_called_once()
+        get_deploy_transaction_mock.assert_called_once_with(
+            ledger_api=self.ledger_api,
+            deployer_address=self.deployer_crypto.address,
+            gas=gas,
+        )
 
-    @mock.patch.object(FetchAIApi, "get_deploy_transaction", return_value=None)
+    @mock.patch("aea.contracts.base.Contract.get_deploy_transaction", return_value=None)
     @mock.patch.object(
         BaseContractTestCase,
         "sign_send_confirm_receipt_multisig_transaction",
-        return_value="tx_receipt",
+        return_value=TX_RECEIPT_EXAMPLE,
     )
     def test__deploy_contract_tx_not_found(
         self,
@@ -126,11 +138,17 @@ class TestContractTestCase(BaseContractTestCase):
             )
             assert str(e) == "Deploy transaction not found!"
         sign_send_confirm_receipt_multisig_transaction_mock.assert_not_called()
-        get_deploy_transaction_mock.assert_called_once()
+        get_deploy_transaction_mock.assert_called_once_with(
+            ledger_api=self.ledger_api,
+            deployer_address=self.deployer_crypto.address,
+            gas=gas,
+        )
 
     @mock.patch.object(FetchAICrypto, "sign_transaction", return_value="tx")
     @mock.patch.object(FetchAIApi, "send_signed_transaction", return_value="tx_digest")
-    @mock.patch.object(FetchAIApi, "get_transaction_receipt", return_value="tx_receipt")
+    @mock.patch.object(
+        FetchAIApi, "get_transaction_receipt", return_value=TX_RECEIPT_EXAMPLE
+    )
     @mock.patch.object(FetchAIApi, "is_transaction_settled", return_value=True)
     def test_sign_send_confirm_receipt_multisig_transaction(
         self,
@@ -145,8 +163,8 @@ class TestContractTestCase(BaseContractTestCase):
         result = self.sign_send_confirm_receipt_multisig_transaction(
             tx, self.ledger_api, [self.deployer_crypto], sleep_time=sleep_time
         )
-        assert result == "tx_receipt"
-        is_transaction_settled_mock.assert_called_once_with("tx_receipt")
+        assert result == TX_RECEIPT_EXAMPLE
+        is_transaction_settled_mock.assert_called_once_with(TX_RECEIPT_EXAMPLE)
         get_transaction_receipt_mock.assert_called_with("tx_digest")
         send_signed_transaction_mock.assert_called_once_with(tx)
         sign_transaction_mock.assert_called_once_with(tx)
@@ -223,3 +241,20 @@ class TestContractTestCase(BaseContractTestCase):
         get_transaction_receipt_mock.assert_called_with("tx_digest")
         send_signed_transaction_mock.assert_called_once_with(tx)
         sign_transaction_mock.assert_called_once_with(tx)
+
+    @mock.patch.object(
+        BaseContractTestCase,
+        "sign_send_confirm_receipt_multisig_transaction",
+        return_value=TX_RECEIPT_EXAMPLE,
+    )
+    def test_sign_send_confirm_receipt_transaction_positive(
+        self, sign_send_confirm_receipt_multisig_transaction_mock
+    ):
+        """Test sign_send_confirm_receipt_transaction method for positive result."""
+        tx = "tx"
+        sleep_time = 0.2
+        ledger_api, crypto = self.ledger_api, self.deployer_crypto
+        self.sign_send_confirm_receipt_transaction(tx, ledger_api, crypto, sleep_time)
+        sign_send_confirm_receipt_multisig_transaction_mock.assert_called_once_with(
+            tx, ledger_api, [crypto], sleep_time
+        )
