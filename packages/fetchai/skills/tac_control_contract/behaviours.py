@@ -91,6 +91,10 @@ class TacBehaviour(BaseTacBehaviour):
             < parameters.registration_end_time
         ):
             game.phase = Phase.GAME_REGISTRATION
+            registration_behaviour = cast(
+                SoefRegisterBehaviour, self.context.behaviours.soef_register
+            )
+            registration_behaviour.status = SoefRegisterBehaviour.Status.REGISTERING_TAC
             self.context.logger.info(
                 "TAC open for registration until: {}".format(
                     parameters.registration_end_time

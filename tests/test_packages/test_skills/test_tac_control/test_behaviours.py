@@ -33,7 +33,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_control.behaviours import TacBehaviour
+from packages.fetchai.skills.tac_control.behaviours import TacBehaviour, SoefRegisterBehaviour
 from packages.fetchai.skills.tac_control.dialogues import TacDialogues
 from packages.fetchai.skills.tac_control.game import Game, Phase
 from packages.fetchai.skills.tac_control.parameters import Parameters
@@ -51,6 +51,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.tac_behaviour = cast(TacBehaviour, cls._skill.skill_context.behaviours.tac)
+        cls.soef_register_behaviour = cast(SoefRegisterBehaviour, cls._skill.skill_context.behaviours.soef_register)
         cls.game = cast(Game, cls._skill.skill_context.game)
         cls.parameters = cast(Parameters, cls._skill.skill_context.parameters)
         cls.tac_dialogues = cast(TacDialogues, cls._skill.skill_context.tac_dialogues)
@@ -73,23 +74,23 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.registration_message = OefSearchMessage(
             dialogue_reference=("", ""),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description="some_service_description",
+            service_description=cls.mocked_description,
         )
         cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
         cls.registration_message.to = cls._skill.skill_context.search_service_address
 
     def test_init(self):
-        """Test the __init__ method of the tac behaviour."""
-        assert self.tac_behaviour._registered_description is None
+        """Test the __init__ method of the soef register behaviour."""
+        assert self.soef_register_behaviour._registered_description is None
 
     def test_setup(self):
-        """Test the setup method of the tac behaviour."""
+        """Test the setup method of the soef register behaviour."""
         # operation
         with patch.object(
             self.game, "get_location_description", return_value=self.mocked_description
         ):
-            with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
-                self.tac_behaviour.setup()
+            with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+                self.soef_register_behaviour.setup()
 
         # after
         self.assert_quantity_in_outbox(1)
@@ -109,11 +110,11 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     @staticmethod
     def _time(time: str):
-        date_time = "01 01 2020  " + time
+        date_time = "01 01 2025  " + time
         return datetime.datetime.strptime(date_time, "%d %m %Y %H:%M")
 
     def test_act_i(self):
-        """Test the act method of the tac behaviour where phase is pre_game and reg_start_time < now < start_time."""
+        """Test the act methods of the tac and soef behaviours where phase is pre_game and reg_start_time < now < start_time."""
         # setup
         self.game._phase = Phase.PRE_GAME
         self.game.is_registered_agent = True
@@ -133,6 +134,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.tac_behaviour.context.logger, "log"
                 ) as mock_logger:
                     self.tac_behaviour.act()
+                    self.soef_register_behaviour.act()
 
         # after
         # act
@@ -157,7 +159,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
 
     def test_act_ii(self):
-        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent < min_nb_agents."""
+        """Test the act methods of the tac and soef behaviours where phase is game_registration and start_time < now < end_time and nb_agent < min_nb_agents."""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
@@ -192,6 +194,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     self.tac_behaviour.context.logger, "log"
                 ) as mock_logger:
                     self.tac_behaviour.act()
+                    self.soef_register_behaviour.act()
 
         # after
         self.assert_quantity_in_outbox(2)
@@ -252,6 +255,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                         ValueError, match="Error when retrieving dialogue."
                     ):
                         self.tac_behaviour.act()
+                        self.soef_register_behaviour.act()
 
     def test_cancel_tac_empty_dialogue(self):
         """Test the _cancel_tac method of the tac behaviour where the dialogue is empty."""
@@ -291,6 +295,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                         ValueError, match="Error when retrieving dialogue."
                     ):
                         self.tac_behaviour.act()
+                        self.soef_register_behaviour.act()
 
     def _assert_tac_message_and_logging_output(
         self, tac_message: TacMessage, participant_address: Address, mocked_logger,
@@ -309,7 +314,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
 
     def test_act_iii(self):
-        """Test the act method of the tac behaviour where phase is game_registration and start_time < now < end_time and nb_agent >= min_nb_agents"""
+        """Test the act methods of the tac and soef behaviours where phase is game_registration and start_time < now < end_time and nb_agent >= min_nb_agents"""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
@@ -370,9 +375,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
                             self.tac_behaviour.context.logger, "log"
                         ) as mock_logger:
                             self.tac_behaviour.act()
+                            self.soef_register_behaviour.act()
 
         # after
-        self.assert_quantity_in_outbox(3)
+        self.assert_quantity_in_outbox(2)
 
         # _start_tac
         mock_logger.assert_any_call(
@@ -392,36 +398,19 @@ class TestSkillBehaviour(BaseSkillTestCase):
             tac_message_2_in_outbox, self.agent_2_address, mock_logger
         )
 
-        # phase is POST_GAME
+        # phase is GAME
         assert self.game.phase == Phase.GAME
 
-        # _unregister_tac
-        has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=OefSearchMessage,
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            to=self.skill.skill_context.search_service_address,
-            sender=str(self.skill.skill_context.skill_id),
-            service_description=self.mocked_description,
-        )
-        assert has_attributes, error_str
-
-        assert self.tac_behaviour._registered_description is None
-
-        mock_logger.assert_any_call(
-            logging.INFO, "unregistering TAC data model from SOEF."
-        )
-
     def test_register_genus(self):
-        """Test the register_genus method of the service_registration behaviour."""
+        """Test the register_genus method of the soef register behaviour."""
         # operation
         with patch.object(
             self.game,
             "get_register_personality_description",
             return_value=self.mocked_description,
         ):
-            with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
-                self.tac_behaviour.register_genus()
+            with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+                self.soef_register_behaviour.register_genus()
 
         # after
         self.assert_quantity_in_outbox(1)
@@ -448,8 +437,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "get_register_classification_description",
             return_value=self.mocked_description,
         ):
-            with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
-                self.tac_behaviour.register_classification()
+            with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+                self.soef_register_behaviour.register_classification()
 
         # after
         self.assert_quantity_in_outbox(1)
@@ -636,10 +625,11 @@ class TestSkillBehaviour(BaseSkillTestCase):
     def test_act_v(self):
         """Test the act method of the tac behaviour where failed_registration_msg is NOT None."""
         # setup
-        self.tac_behaviour.failed_registration_msg = self.registration_message
+        self.soef_register_behaviour.failed_registration_msg = self.registration_message
 
-        with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
+        with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
             self.tac_behaviour.act()
+            self.soef_register_behaviour.act()
 
         # after
         self.assert_quantity_in_outbox(1)
@@ -657,25 +647,25 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         mock_logger.assert_any_call(
             logging.INFO,
-            f"Retrying registration on SOEF. Retry {self.tac_behaviour._nb_retries} out of {self.tac_behaviour._max_soef_registration_retries}.",
+            f"Retrying registration with sOEF. Retry {self.soef_register_behaviour.nb_retries} out of {self.soef_register_behaviour.max_soef_registration_retries}.",
         )
-        assert self.tac_behaviour.failed_registration_msg is None
+        assert self.soef_register_behaviour.failed_registration_msg is None
 
     def test_act_vi(self):
         """Test the act method of the tac behaviour where failed_registration_msg is NOT None and max retries is reached."""
         # setup
-        self.tac_behaviour.failed_registration_msg = self.registration_message
-        self.tac_behaviour._max_soef_registration_retries = 2
-        self.tac_behaviour._nb_retries = 2
+        self.soef_register_behaviour.failed_registration_msg = self.registration_message
+        self.soef_register_behaviour.max_soef_registration_retries = 2
+        self.soef_register_behaviour.nb_retries = 2
 
-        self.tac_behaviour.act()
+        self.soef_register_behaviour.act()
 
         # after
         self.assert_quantity_in_outbox(0)
         assert self.skill.skill_context.is_active is False
 
     def test_teardown(self):
-        """Test the teardown method of the service_registration behaviour."""
+        """Test the teardown method of the soef register behaviour."""
         # setup
         mocked_location_description = Description({"foo1": 1, "bar1": 2})
 
@@ -691,9 +681,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 return_value=mocked_location_description,
             ):
                 with patch.object(
-                    self.tac_behaviour.context.logger, "log"
+                    self.soef_register_behaviour.context.logger, "log"
                 ) as mock_logger:
-                    self.tac_behaviour.teardown()
+                    self.soef_register_behaviour.teardown()
 
         # after
         self.assert_quantity_in_outbox(2)

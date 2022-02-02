@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qma8pHCyMkeo5jifcxuC6pbq31EhKn4knxwvjB8frQccC5
   __init__.py: QmX6cAgJKG1tyPfVkgs1W1vh4CqMPueHgX7BdaYYJfpwbb
-  behaviours.py: QmSJ8xWpaut8Qdbgh6HnAWveZtBQnfBLAGoiBZnUZ4aiM9
+  behaviours.py: QmbUhkf5cJqbM5f3bVfaKirLcoWpkCWdpzBho4RCKyGhz6
   dialogues.py: QmRm7mganM64vhnRJG9eXkCpJJ2T2R5mcsMsTUkJCQrA8p
   game.py: QmQwskD5DBVNv1ouRpqGNLb3zQ5krLUcR6XXHUcJ5EVc8L
   handlers.py: QmQ5BEiM9VURGQdnpcKxG2RRoBznB4tEy6ib4QL6Sa3G8R
@@ -34,6 +34,9 @@ behaviours:
     args:
       tick_interval: 60
     class_name: SoefRegisterBehaviour
+  tac:
+    args: {}
+    class_name: TacBehaviour
 handlers:
   contract_api:
     args: {}
