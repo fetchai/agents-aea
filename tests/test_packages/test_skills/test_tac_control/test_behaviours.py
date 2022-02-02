@@ -33,7 +33,10 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_control.behaviours import TacBehaviour, SoefRegisterBehaviour
+from packages.fetchai.skills.tac_control.behaviours import (
+    SoefRegisterBehaviour,
+    TacBehaviour,
+)
 from packages.fetchai.skills.tac_control.dialogues import TacDialogues
 from packages.fetchai.skills.tac_control.game import Game, Phase
 from packages.fetchai.skills.tac_control.parameters import Parameters
@@ -51,7 +54,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.tac_behaviour = cast(TacBehaviour, cls._skill.skill_context.behaviours.tac)
-        cls.soef_register_behaviour = cast(SoefRegisterBehaviour, cls._skill.skill_context.behaviours.soef_register)
+        cls.soef_register_behaviour = cast(
+            SoefRegisterBehaviour, cls._skill.skill_context.behaviours.soef_register
+        )
         cls.game = cast(Game, cls._skill.skill_context.game)
         cls.parameters = cast(Parameters, cls._skill.skill_context.parameters)
         cls.tac_dialogues = cast(TacDialogues, cls._skill.skill_context.tac_dialogues)
@@ -89,7 +94,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         with patch.object(
             self.game, "get_location_description", return_value=self.mocked_description
         ):
-            with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+            with patch.object(
+                self.soef_register_behaviour.context.logger, "log"
+            ) as mock_logger:
                 self.soef_register_behaviour.setup()
 
         # after
@@ -409,7 +416,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "get_register_personality_description",
             return_value=self.mocked_description,
         ):
-            with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+            with patch.object(
+                self.soef_register_behaviour.context.logger, "log"
+            ) as mock_logger:
                 self.soef_register_behaviour.register_genus()
 
         # after
@@ -437,7 +446,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "get_register_classification_description",
             return_value=self.mocked_description,
         ):
-            with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+            with patch.object(
+                self.soef_register_behaviour.context.logger, "log"
+            ) as mock_logger:
                 self.soef_register_behaviour.register_classification()
 
         # after
@@ -627,7 +638,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # setup
         self.soef_register_behaviour.failed_registration_msg = self.registration_message
 
-        with patch.object(self.soef_register_behaviour.context.logger, "log") as mock_logger:
+        with patch.object(
+            self.soef_register_behaviour.context.logger, "log"
+        ) as mock_logger:
             self.tac_behaviour.act()
             self.soef_register_behaviour.act()
 
