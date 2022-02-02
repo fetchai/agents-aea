@@ -21,7 +21,7 @@
 import os
 import time
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 import yaml
@@ -41,7 +41,6 @@ from aea.test_tools.test_cases import (
     AEATestCaseManyFlaky,
     BaseAEATestCase,
 )
-from aea.test_tools.test_contract import BaseContractTestCase
 
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.dialogues import (
