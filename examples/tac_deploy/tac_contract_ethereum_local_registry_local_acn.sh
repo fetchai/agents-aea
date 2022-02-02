@@ -49,7 +49,7 @@ aea config get vendor.fetchai.skills.tac_control_contract.models.parameters.args
 aea install
 aea build
 aea issue-certificates
-PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.24.0 -u public_uri`
+PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri`
 cd ..
 
 empty_lines
