@@ -9,8 +9,8 @@ Core components for `ipfs cli command`.
 ```python
 @click.group()
 @click.pass_context
-@click.option("--online", is_flag=True)
-ipfs(click_context: click.Context, online: bool) -> None
+@click.option("--offline", is_flag=True, default=False)
+ipfs(click_context: click.Context, offline: bool) -> None
 ```
 
 IPFS Commands

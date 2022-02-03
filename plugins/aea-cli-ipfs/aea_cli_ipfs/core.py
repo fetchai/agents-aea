@@ -39,10 +39,10 @@ from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
 
 @click.group()
 @click.pass_context
-@click.option("--online", is_flag=True)
-def ipfs(click_context: click.Context, online: bool) -> None:
+@click.option("--offline", is_flag=True, default=False)
+def ipfs(click_context: click.Context, offline: bool) -> None:
     """IPFS Commands"""
-    ipfs_tool = IPFSTool(offline=not online)
+    ipfs_tool = IPFSTool(offline=offline)
     click_context.obj = ipfs_tool
     try:
         ipfs_tool.check_ipfs_node_running()
