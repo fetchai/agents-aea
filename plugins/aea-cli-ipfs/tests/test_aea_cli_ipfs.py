@@ -21,11 +21,11 @@ import os
 import re
 import sys
 from unittest.mock import patch
-from aea_cli_ipfs.ipfs_utils import addr_to_url, resolve_addr
 
 import click
 import ipfshttpclient  # type: ignore
 import pytest
+from aea_cli_ipfs.ipfs_utils import addr_to_url, resolve_addr
 from click.testing import CliRunner
 from urllib3.exceptions import NewConnectionError
 
