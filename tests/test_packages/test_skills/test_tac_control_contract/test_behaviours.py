@@ -30,6 +30,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_control_contract.behaviours import (
     LEDGER_API_ADDRESS,
+    SoefRegisterBehaviour,
     TacBehaviour,
 )
 from packages.fetchai.skills.tac_control_contract.dialogues import (
@@ -49,7 +50,7 @@ from tests.conftest import ROOT_DIR
 
 
 class TestSkillBehaviour(BaseSkillTestCase):
-    """Test tac behaviour of tac_control_contract."""
+    """Test behaviours of tac_control_contract."""
 
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
@@ -60,6 +61,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.tac_behaviour = cast(TacBehaviour, cls._skill.skill_context.behaviours.tac)
+        cls.soef_register_behaviour = cast(
+            SoefRegisterBehaviour, cls._skill.skill_context.behaviours.soef_register
+        )
         cls.game = cast(Game, cls._skill.skill_context.game)
         cls.parameters = cast(Parameters, cls._skill.skill_context.parameters)
         cls.tac_dialogues = cast(TacDialogues, cls._skill.skill_context.tac_dialogues)
@@ -106,7 +110,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
 
     def test_setup(self):
-        """Test the setup method of the tac behaviour."""
+        """Test the setup methods of the tac behaviours."""
         # operation
         with patch.object(self.logger, "log") as mock_logger:
             self.tac_behaviour.setup()
@@ -114,10 +118,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # after
         assert self.game.phase == Phase.CONTRACT_DEPLOYMENT_PROPOSAL
 
-        self.assert_quantity_in_outbox(2)
-
-        # first message is produced in superclass (from tac_control skill) which has its own unit tests
-        self.drop_messages_from_outbox(1)
+        self.assert_quantity_in_outbox(1)
 
         # _request_contract_deploy_transaction
         message = self.get_message_from_outbox()
@@ -176,9 +177,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # operation
         with patch("datetime.datetime", new=mocked_now):
-            with patch.object(self.tac_behaviour, "_register_tac") as mock_register_tac:
+            with patch.object(
+                self.soef_register_behaviour, "_register_tac"
+            ) as mock_register_tac:
                 with patch.object(self.logger, "log") as mock_logger:
                     self.tac_behaviour.act()
+                    self.soef_register_behaviour.act()
 
         # after
         assert self.game.phase == Phase.GAME_REGISTRATION
@@ -202,14 +206,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
             COUNTERPARTY_AGENT_ADDRESS, self.agent_1_name
         )
 
+        # Need this because this is normally set in _cancel_tac which is mocked below
+        self.soef_register_behaviour.status = SoefRegisterBehaviour.Status.UNREGISTERING
+
         # operation
         with patch("datetime.datetime", new=mocked_now):
             with patch.object(self.tac_behaviour, "_cancel_tac") as mock_cancel_tac:
                 with patch.object(
-                    self.tac_behaviour, "_unregister_tac"
+                    self.soef_register_behaviour, "_unregister_tac"
                 ) as mock_unregister_tac:
                     with patch.object(self.logger, "log") as mock_logger:
                         self.tac_behaviour.act()
+                        self.soef_register_behaviour.act()
 
         # after
         mock_logger.assert_any_call(logging.INFO, "closing registration!")
@@ -229,7 +237,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert self.skill.skill_context.is_active is False
 
     def test_act_iii(self):
-        """Test the act method of the tac behaviour where phase is game_registration and reg_end_time < now < start_time and nb_agent >= min_nb_agents."""
+        """Test the act method of the tac behaviours where phase is game_registration and reg_end_time < now < start_time and nb_agent >= min_nb_agents."""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
 
@@ -244,18 +252,19 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # operation
         with patch("datetime.datetime", new=mocked_now):
             with patch.object(
-                self.tac_behaviour, "_unregister_tac"
+                self.soef_register_behaviour, "_unregister_tac"
             ) as mock_unregister_tac:
                 with patch.object(self.logger, "log") as mock_logger:
                     self.tac_behaviour.act()
+                    self.soef_register_behaviour.act()
 
         # after
         mock_logger.assert_any_call(logging.INFO, "closing registration!")
         assert self.game.phase == Phase.GAME_SETUP
         assert self.game.conf.contract_address == self.parameters.contract_address
 
-        # _unregister_tac is a superclass method with its own unit test in test_tac_control
-        mock_unregister_tac.assert_called_once()
+        # unregister_tac should not be called in this situation
+        mock_unregister_tac.assert_not_called()
 
     def test_act_iv(self):
         """Test the act method of the tac behaviour where phase is GAME_SETUP and reg_end_time < now < start_time."""
