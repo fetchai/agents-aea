@@ -18,8 +18,10 @@
 # ------------------------------------------------------------------------------
 """Tests for aea cli ipfs plugin."""
 import os
+import re
 import sys
 from unittest.mock import patch
+from aea_cli_ipfs.ipfs_utils import addr_to_url, resolve_addr
 
 import click
 import ipfshttpclient  # type: ignore
@@ -39,6 +41,49 @@ from aea_cli_ipfs.core import (  # noqa # type: ignore  # pylint: disable=wrong-
 
 
 cli.add_command(ipfs)
+
+
+def test_addr_helpers():
+    """Test `resolve_addr` method."""
+
+    addr_scheme, host, conn_type, port, protocol = resolve_addr(
+        "/ip4/127.0.0.1/tcp/5001/http"
+    )
+
+    assert addr_scheme == "ip4"
+    assert host == "127.0.0.1"
+    assert conn_type == "tcp"
+    assert port == "5001"
+    assert protocol == "http"
+
+    *_, port, protocol = resolve_addr("/ip4/127.0.0.1/tcp")
+
+    assert port == "5001"
+    assert protocol == "http"
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Address type should be one of the ('ip4', 'dns'), provided: ip6"
+        ),
+    ):
+        resolve_addr("/ip6/127.0.0.1/tcp")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Connection should be one of the ('tcp',), provided: udp"),
+    ):
+        resolve_addr("/ip4/127.0.0.1/udp")
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Protocol should be one of the ('http', 'https'), provided: wss"
+        ),
+    ):
+        resolve_addr("/ip4/127.0.0.1/tcp/5001/wss")
+
+    assert addr_to_url("/ip4/127.0.0.1/tcp/5001/http") == "http://127.0.0.1:5001"
 
 
 def test_ipfs():
@@ -97,12 +142,15 @@ def test_node_not_alive_can_not_be_started():
         "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
     ):
 
+        env = os.environ.copy()
+        env["OPEN_AEA_IPFS_ADDR"] = "/ip4/127.0.0.1/tcp/5001"
         with pytest.raises(NewConnectionError):
             runner.invoke(
                 cli,
                 ["ipfs", "add", "-p"],
                 catch_exceptions=False,
                 standalone_mode=False,
+                env=env,
             )
 
 
