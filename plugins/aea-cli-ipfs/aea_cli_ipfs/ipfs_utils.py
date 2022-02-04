@@ -33,10 +33,11 @@ DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
 ALLOWED_CONNECTION_TYPES = ("tcp",)
 ALLOWED_ADDR_TYPES = ("ip4", "dns")
 ALLOWED_PROTOCOL_TYPES = ("http", "https")
-MULTIADDR_FORMAT = "/{dns,dns4,dns6,ip4,ip6}/<host>/tcp/<port>/protocol"
+MULTIADDR_FORMAT = "/{dns,dns4,dns6,ip4}/<host>/tcp/<port>/protocol"
+IPFS_NODE_CHECK_ENDPOINT = "/api/v0/id"
 
 
-def _varify_attr(name: str, attr: str, allowed: Tuple[str, ...]) -> None:
+def _verify_attr(name: str, attr: str, allowed: Tuple[str, ...]) -> None:
     """Varify various attributes of ipfs address."""
 
     if attr not in allowed:
@@ -65,9 +66,9 @@ def resolve_addr(addr: str) -> Tuple[str, ...]:
         port = "5001"
         protocol = "http"
 
-    _varify_attr("Address type", addr_scheme, ALLOWED_ADDR_TYPES)
-    _varify_attr("Connection", conn_type, ALLOWED_CONNECTION_TYPES)
-    _varify_attr("Protocol", protocol, ALLOWED_PROTOCOL_TYPES)
+    _verify_attr("Address type", addr_scheme, ALLOWED_ADDR_TYPES)
+    _verify_attr("Connection", conn_type, ALLOWED_CONNECTION_TYPES)
+    _verify_attr("Protocol", protocol, ALLOWED_PROTOCOL_TYPES)
 
     return addr_scheme, host, conn_type, port, protocol
 
@@ -88,11 +89,11 @@ class IPFSDaemon:
 
     def __init__(self, offline: bool = False, api_url: str = "http://127.0.0.1:5001"):
         """Initialise IPFS daemon."""
-        if api_url.endswith("/"):
-            self.api_url = api_url + "api/v0/id"
-        else:
-            self.api_url = api_url + "/api/v0/id"
 
+        if api_url.endswith("/"):
+            api_url = api_url[:-1]
+
+        self.api_url = api_url + IPFS_NODE_CHECK_ENDPOINT
         self.process = None  # type: Optional[subprocess.Popen]
         self.offline = offline
         self._check_ipfs()
