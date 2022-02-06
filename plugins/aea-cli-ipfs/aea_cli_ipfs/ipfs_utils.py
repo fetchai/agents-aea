@@ -29,6 +29,57 @@ import ipfshttpclient  # type: ignore
 import requests
 
 
+DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
+ALLOWED_CONNECTION_TYPES = ("tcp",)
+ALLOWED_ADDR_TYPES = ("ip4", "dns")
+ALLOWED_PROTOCOL_TYPES = ("http", "https")
+MULTIADDR_FORMAT = "/{dns,dns4,dns6,ip4}/<host>/tcp/<port>/protocol"
+IPFS_NODE_CHECK_ENDPOINT = "/api/v0/id"
+
+
+def _verify_attr(name: str, attr: str, allowed: Tuple[str, ...]) -> None:
+    """Varify various attributes of ipfs address."""
+
+    if attr not in allowed:
+        raise ValueError(f"{name} should be one of the {allowed}, provided: {attr}")
+
+
+def resolve_addr(addr: str) -> Tuple[str, ...]:
+    """
+    Multiaddr resolver.
+
+    :param addr: multiaddr string.
+    :return: http URL
+    """
+    _, addr_scheme, host, conn_type, *extra_data = addr.split("/")
+
+    if len(extra_data) > 2:  # pylint: disable=no-else-raise
+        raise ValueError(
+            f"Invalid multiaddr string provided, valid format: {MULTIADDR_FORMAT}. Provided: {addr}"
+        )
+    elif len(extra_data) == 2:
+        port, protocol, *_ = extra_data
+    elif len(extra_data) == 1:
+        (port,) = extra_data
+        protocol = "http"
+    else:
+        port = "5001"
+        protocol = "http"
+
+    _verify_attr("Address type", addr_scheme, ALLOWED_ADDR_TYPES)
+    _verify_attr("Connection", conn_type, ALLOWED_CONNECTION_TYPES)
+    _verify_attr("Protocol", protocol, ALLOWED_PROTOCOL_TYPES)
+
+    return addr_scheme, host, conn_type, port, protocol
+
+
+def addr_to_url(addr: str) -> str:
+    """Convert address to url."""
+
+    _, host, _, port, protocol = resolve_addr(addr)
+    return f"{protocol}://{host}:{port}"
+
+
 class IPFSDaemon:
     """
     Set up the IPFS daemon.
@@ -36,19 +87,20 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(
-        self, offline: bool = False, api_url: str = "http://127.0.0.1:5001/api/v0/id"
-    ):
+    def __init__(self, offline: bool = False, api_url: str = "http://127.0.0.1:5001"):
         """Initialise IPFS daemon."""
 
+        if api_url.endswith("/"):
+            api_url = api_url[:-1]
+
+        self.api_url = api_url + IPFS_NODE_CHECK_ENDPOINT
         self.process = None  # type: Optional[subprocess.Popen]
         self.offline = offline
-        self.api_url = api_url
         self._check_ipfs()
 
     @staticmethod
     def _check_ipfs() -> None:
-        # check we have ipfs
+        """Check if IPFS node is running."""
         res = shutil.which("ipfs")
         if res is None:
             raise Exception("Please install IPFS first!")
@@ -136,15 +188,29 @@ class DownloadError(BaseIPFSToolException):
 class IPFSTool:
     """IPFS tool to add, publish, remove, download directories."""
 
-    def __init__(self, client_options: Optional[Dict] = None, offline: bool = True):
+    _addr: Optional[str] = None
+
+    def __init__(self, addr: Optional[str] = None, offline: bool = True):
         """
         Init tool.
 
-        :param client_options: dict, options for ipfshttpclient instance.
+        :param addr: multiaddr string for IPFS client.
         :param offline: ipfs mode.
         """
-        self.client = ipfshttpclient.Client(**(client_options or {}))
-        self.daemon = IPFSDaemon(offline=offline)
+
+        if addr is not None:
+            _ = resolve_addr(addr)  # verify addr
+            self._addr = addr
+
+        self.client = ipfshttpclient.Client(addr=self.addr)
+        self.daemon = IPFSDaemon(offline=offline, api_url=addr_to_url(self.addr))
+
+    @property
+    def addr(self,) -> str:
+        """Node address"""
+        if self._addr is None:
+            self._addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
+        return self._addr
 
     def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
         """

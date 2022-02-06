@@ -3,6 +3,32 @@
 
 Ipfs utils for `ipfs cli command`.
 
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.resolve_addr"></a>
+#### resolve`_`addr
+
+```python
+resolve_addr(addr: str) -> Tuple[str, ...]
+```
+
+Multiaddr resolver.
+
+**Arguments**:
+
+- `addr`: multiaddr string.
+
+**Returns**:
+
+http URL
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.addr_to_url"></a>
+#### addr`_`to`_`url
+
+```python
+addr_to_url(addr: str) -> str
+```
+
+Convert address to url.
+
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon"></a>
 ## IPFSDaemon Objects
 
@@ -20,7 +46,7 @@ Set up the IPFS daemon.
 #### `__`init`__`
 
 ```python
- | __init__(offline: bool = False, api_url: str = "http://127.0.0.1:5001/api/v0/id")
+ | __init__(offline: bool = False, api_url: str = "http://127.0.0.1:5001")
 ```
 
 Initialise IPFS daemon.
@@ -146,15 +172,25 @@ IPFS tool to add, publish, remove, download directories.
 #### `__`init`__`
 
 ```python
- | __init__(client_options: Optional[Dict] = None, offline: bool = True)
+ | __init__(addr: Optional[str] = None, offline: bool = True)
 ```
 
 Init tool.
 
 **Arguments**:
 
-- `client_options`: dict, options for ipfshttpclient instance.
+- `addr`: multiaddr string for IPFS client.
 - `offline`: ipfs mode.
+
+<a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.addr"></a>
+#### addr
+
+```python
+ | @property
+ | addr() -> str
+```
+
+Node address
 
 <a name="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.add"></a>
 #### add
