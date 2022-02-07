@@ -63,7 +63,7 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
             performative=HttpMessage.Performative.REQUEST,
             method=model.method,
             url=model.url,
-            headers="",
+            headers="Content-Type: application/json",
             version="",
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )

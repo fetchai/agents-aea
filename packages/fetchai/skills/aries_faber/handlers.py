@@ -80,21 +80,42 @@ class HttpHandler(Handler):
             raise ValueError("schema_id not set")
         return self._schema_id
 
-    def _send_invitation_message(self, target: Address, content: Dict) -> None:
+    def _send_invitation_message(self, connection: Dict) -> None:
         """
         Send a default message to Alice.
 
-        :param content: the content of the message.
+        :param connection: the content of the connection message.
         """
+        strategy = cast(Strategy, self.context.strategy)
         # context
+        connections_unsent = list(
+            set(strategy.aea_addresses) - set(self.connections_sent.values())
+        )
+        if not connections_unsent:
+            self.context.logger.info(
+                "Every invitation pushed, skip this new connection"
+            )
+            return
+        target = connections_unsent[0]
+        invitation = connection["invitation"]
+
+        self.connections_sent[connection["connection_id"]] = target
+
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         message, _ = default_dialogues.create(
             counterparty=target,
             performative=DefaultMessage.Performative.BYTES,
-            content=json.dumps(content).encode("utf-8"),
+            content=json.dumps(invitation).encode("utf-8"),
         )
         # send
         self.context.outbox.put_message(message=message)
+
+        self.context.logger.info(f"connection: {str(connection)}")
+        self.context.logger.info(f"connection id: {connection['connection_id']}")  # type: ignore
+        self.context.logger.info(f"invitation: {str(invitation)}")
+        self.context.logger.info(
+            f"Sent invitation to {target}. Waiting for the invitation from agent {target} to finalise the connection..."
+        )
 
     def _register_public_did(self) -> None:
         """Register DID on the ledger."""
@@ -219,28 +240,10 @@ class HttpHandler(Handler):
                         method="POST",
                         url=strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION,
                     )
-            elif "connection_id" in content:
+            elif "invitation" in content:
                 connection = content
-                connections_unsent = list(
-                    set(strategy.aea_addresses) - set(self.connections_sent.values())
-                )
-                if not connections_unsent:
-                    self.context.logger.info(
-                        "Every invitation pushed, skip this new connection"
-                    )
-                    return
-                target = connections_unsent[0]
-                invitation = connection["invitation"]
+                self._send_invitation_message(connection)
 
-                self.connections_sent[connection["connection_id"]] = target
-                self._send_invitation_message(target, invitation)
-
-                self.context.logger.info(f"connection: {str(connection)}")
-                self.context.logger.info(f"connection id: {connection['connection_id']}")  # type: ignore
-                self.context.logger.info(f"invitation: {str(invitation)}")
-                self.context.logger.info(
-                    f"Sent invitation to {target}. Waiting for the invitation from agent {target} to finalise the connection..."
-                )
             elif "credential_proposal_dict" in content:
                 connection_id = content["connection_id"]
                 addr = self.connections_set[connection_id]
@@ -249,7 +252,7 @@ class HttpHandler(Handler):
                     f"Credential issued for {name}({addr}): {content['credential_offer_dict']['credential_preview']}"
                 )
             else:
-                print("UNKNOWN HTTP MESSAGE RESPONSE", message)
+                self.context.logger.warning("UNKNOWN HTTP MESSAGE RESPONSE", message)
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request
@@ -286,11 +289,14 @@ class HttpHandler(Handler):
                     {"name": "date", "value": "2022-01-01"},
                     {
                         "name": "degree",
-                        "value": random.choice(
+                        "value": random.choice(  # nosec
                             ["Physics", "Chemistry", "Mathematics", "History"]
                         ),
                     },
-                    {"name": "average", "value": str(random.choice([3, 4, 5]))},
+                    {
+                        "name": "average",
+                        "value": str(random.choice([3, 4, 5])),  # nosec
+                    },
                 ],
             },
         }

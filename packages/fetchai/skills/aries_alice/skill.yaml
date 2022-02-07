@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
   __init__.py: QmSoASTCVEULo9SGtapYcFJvChoYpgYyqdqM68vAwcX27y
-  behaviours.py: QmWgBRGi2jdbkPNHdAq9q4Q5LtgmJPX5DBjVNH8tnED1Yk
+  behaviours.py: QmTc7wNnbY3q9V1x1amPjL5XrJHgihzDjr3mzo5YDABFFf
   dialogues.py: QmQPPeeLL7cmi3cJbEHLZfPPMzmSNdtAxXzF8YpRxqTEBb
-  handlers.py: QmZXC4Y293Jzo17A1rRif9nFTc3Hwqy8KLnw7bbVs6ca99
-  strategy.py: QmesRU5Lz9R6Yj1xov4KicBve3EawmL2fZEvssEqiznywP
+  handlers.py: QmSzZWCZj9Zf8sDDB8r9pq1vgf3wJpyX4Bc544NBHDPbKw
+  strategy.py: QmNY8mNvstybkqUjetofmcW5syNn2cR4RDLnPZKf8jM9k7
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.0
@@ -61,6 +61,10 @@ models:
       personality_data:
         piece: genus
         value: data
+      search_query:
+        constraint_type: ==
+        search_key: intro_service
+        search_value: intro_alice
       seed: null
       service_data:
         key: intro_service

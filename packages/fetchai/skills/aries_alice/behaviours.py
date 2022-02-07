@@ -76,7 +76,7 @@ class AliceBehaviour(TickerBehaviour):
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
-            headers="",
+            headers="Content-Type: application/json",
             version="",
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
@@ -91,6 +91,25 @@ class AliceBehaviour(TickerBehaviour):
     def act(self) -> None:
         """Implement the act."""
         self._retry_failed_registration()
+        self.perform_agents_search()
+
+    def perform_agents_search(self) -> None:
+        """Perform agents search to query proofs from."""
+        strategy = cast(Strategy, self.context.strategy)
+        if not strategy.is_searching:
+            return
+
+        query = strategy.get_location_and_service_query()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("Searching for agents on SOEF...")
 
     def teardown(self) -> None:
         """Implement the task teardown."""

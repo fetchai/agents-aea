@@ -85,6 +85,7 @@ class FaberBehaviour(TickerBehaviour):
         strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching:
             query = strategy.get_location_and_service_query()
+            print(100000000000000000000000, query)
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )

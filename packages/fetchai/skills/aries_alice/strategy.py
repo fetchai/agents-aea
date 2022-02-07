@@ -18,8 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains the strategy class."""
 import random
-from typing import Any
+from typing import Any, Dict, List
 
+from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
@@ -27,8 +28,24 @@ from aea.helpers.search.generic import (
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
 )
-from aea.helpers.search.models import Description, Location
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Location,
+    Query,
+)
 from aea.skills.base import Model
+
+
+# Search
+DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
+DEFAULT_SEARCH_QUERY = {
+    "search_key": "intro_service",
+    "search_value": "intro_alice",
+    "constraint_type": "==",
+}
+DEFAULT_SEARCH_RADIUS = 5.0
 
 
 # default configs
@@ -37,6 +54,7 @@ DEFAULT_ADMIN_PORT = 8031
 
 # commands
 ADMIN_COMMAND_RECEIVE_INVITE = "/connections/receive-invitation"
+ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
 
 # convenience
 ALICE_ACA_IDENTITY = "Alice_ACA"
@@ -103,6 +121,14 @@ class Strategy(Model):
             "service_data must contain keys `key` and `value`",
         )
         self._remove_service_data = {"key": self._set_service_data["key"]}
+        self.is_searching = False
+        # Search
+        self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        location = kwargs.pop("location", DEFAULT_LOCATION)
+        self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+        self.invitations: Dict[str, Address] = {}
+        self.connections: Dict[str, Address] = {}
+        self.aea_addresses: List[Address] = []
 
         super().__init__(**kwargs)
 
@@ -125,6 +151,28 @@ class Strategy(Model):
     def seed(self) -> str:
         """Get the wallet seed."""
         return self._seed
+
+    def get_location_and_service_query(self) -> Query:
+        """
+        Get the location and service query of the agent.
+
+        :return: the query
+        """
+        close_to_my_service = Constraint(
+            "location",
+            ConstraintType(
+                "distance", (self._agent_location["location"], self._radius)
+            ),
+        )
+        service_key_filter = Constraint(
+            self._search_query["search_key"],
+            ConstraintType(
+                self._search_query["constraint_type"],
+                self._search_query["search_value"],
+            ),
+        )
+        query = Query([close_to_my_service, service_key_filter],)
+        return query
 
     def get_location_description(self) -> Description:
         """

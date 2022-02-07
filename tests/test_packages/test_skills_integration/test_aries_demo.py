@@ -66,6 +66,9 @@ class TestAriesSkillsDemo(AEATestCaseMany):
     """Test integrated aries skills."""
 
     capture_log = True
+    alice_seed: str
+    bob_seed: str
+    faber_seed: str
 
     @classmethod
     def get_port(cls) -> int:
@@ -92,6 +95,8 @@ class TestAriesSkillsDemo(AEATestCaseMany):
                 "--auto-respond-credential-proposal",
                 "--auto-respond-credential-offer",
                 "--auto-respond-credential-request",
+                "--auto-respond-presentation-proposal",
+                "--auto-respond-presentation-request",
                 # "--debug-credentials",
                 # "--debug-presentations",
                 # "--debug-connections",
@@ -135,7 +140,7 @@ class TestAriesSkillsDemo(AEATestCaseMany):
 
         cls.port = 10001  # type: ignore
         super(TestAriesSkillsDemo, cls).setup_class()
-
+        acapy_host = "192.168.1.43"
         cls.alice = "alice"  # type: ignore
         cls.soef_id = "intro_aries" + str(  # type: ignore
             randint(1000000, 99999999999999)  # nosec
@@ -212,6 +217,10 @@ class TestAriesSkillsDemo(AEATestCaseMany):
             cls.soef_id,  # type: ignore
         )
         cls.set_config(
+            "vendor.fetchai.skills.aries_alice.models.strategy.args.search_query.search_value",
+            cls.soef_id,  # type: ignore
+        )
+        cls.set_config(
             "vendor.fetchai.skills.aries_alice.models.strategy.args.admin_host",
             "127.0.0.1",
         )
@@ -243,6 +252,10 @@ class TestAriesSkillsDemo(AEATestCaseMany):
         )
         cls.set_config(
             "vendor.fetchai.skills.aries_alice.models.strategy.args.service_data.value",
+            cls.soef_id,  # type: ignore
+        )
+        cls.set_config(
+            "vendor.fetchai.skills.aries_alice.models.strategy.args.search_query.search_value",
             cls.soef_id,  # type: ignore
         )
         cls.set_config(
@@ -310,21 +323,17 @@ class TestAriesSkillsDemo(AEATestCaseMany):
                 "alice",
                 8030,
                 cls.alice_seed,
-                "192.168.1.43",
+                acapy_host,
                 "http://localhost:9000/genesis",
             ),
             cls.start_acapy(
-                "bob",
-                8040,
-                cls.bob_seed,
-                "192.168.1.43",
-                "http://localhost:9000/genesis",
+                "bob", 8040, cls.bob_seed, acapy_host, "http://localhost:9000/genesis",
             ),
             cls.start_acapy(
                 "faber",
                 8020,
                 cls.faber_seed,
-                "192.168.1.43",
+                acapy_host,
                 "http://localhost:9000/genesis",
             ),
         ]
@@ -372,19 +381,24 @@ class TestAriesSkillsDemo(AEATestCaseMany):
         ), "Strings {} didn't appear in faber output.".format(missing_strings)
 
         missing_strings = self.missing_from_output(
-            alice_process, ["Connected to Faber"], timeout=80, is_terminating=False
+            alice_process,
+            ["Connected to faber", "Got credentials proof from bob"],
+            timeout=80,
+            is_terminating=False,
         )
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in alice output.".format(missing_strings)
 
         missing_strings = self.missing_from_output(
-            bob_process, ["Connected to Faber"], timeout=80, is_terminating=False
+            bob_process,
+            ["Connected to faber", "Got credentials proof from alice"],
+            timeout=80,
+            is_terminating=False,
         )
         assert missing_strings == [], "Strings {} didn't appear in bob output.".format(
             missing_strings
         )
-        input("press")
 
     @classmethod
     def teardown_class(cls) -> None:
