@@ -30,18 +30,25 @@ It is assumed the script is run from the repository root.
 
 import itertools
 import re
+import shutil
+import subprocess  # nosec
 import sys
+from datetime import datetime
 from pathlib import Path
+from typing import List, Tuple
 
 
+GIT_PATH = shutil.which("git")
 SUPPORTED_YEARS_FETCHAI = ["2019", "2020", "2021"]
+SUPPORTED_YEARS_VALORY = ["2021", "2022"]
 
 
-HEADER_REGEX_FETCHAI = fr"""(#!/usr/bin/env python3
+HEADER_REGEX_FETCHAI = re.compile(
+    fr"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
-#   (Copyright 2018-({"|".join(SUPPORTED_YEARS_FETCHAI)}) Fetch.AI Limited|Copyright [0-9]{{4}}(-[0-9]{{4}})? [a-zA-Z_]+)
+#   Copyright ((20\d\d)(-20\d\d)?) Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
 #   you may not use this file except in compliance with the License\.
@@ -56,13 +63,16 @@ HEADER_REGEX_FETCHAI = fr"""(#!/usr/bin/env python3
 #   limitations under the License\.
 #
 # ------------------------------------------------------------------------------
-"""
+""",
+    re.MULTILINE,
+)
 
-HEADER_REGEX_VALORY = r"""(#!/usr/bin/env python3
+HEADER_REGEX_VALORY = re.compile(
+    r"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright ((202\d)(-202\d)?) Valory AG
 #
 #   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
 #   you may not use this file except in compliance with the License\.
@@ -77,14 +87,17 @@ HEADER_REGEX_VALORY = r"""(#!/usr/bin/env python3
 #   limitations under the License\.
 #
 # ------------------------------------------------------------------------------
-"""
+""",
+    re.MULTILINE,
+)
 
-HEADER_REGEX_MIXED = fr"""(#!/usr/bin/env python3
+HEADER_REGEX_MIXED = re.compile(
+    fr"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
-#   (Copyright 2018-({"|".join(SUPPORTED_YEARS_FETCHAI)}) Fetch.AI Limited|Copyright [0-9]{{4}}(-[0-9]{{4}})? [a-zA-Z_]+)
+#   Copyright ((202\d)(-202\d)?) Valory AG
+#   Copyright ((20\d\d)(-20\d\d)?) Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
 #   you may not use this file except in compliance with the License\.
@@ -99,7 +112,70 @@ HEADER_REGEX_MIXED = fr"""(#!/usr/bin/env python3
 #   limitations under the License\.
 #
 # ------------------------------------------------------------------------------
-"""
+""",
+    re.MULTILINE,
+)
+
+REGEX_LIST: List[Tuple[str, re.Pattern]] = [
+    ("FetchAI", HEADER_REGEX_FETCHAI),
+    ("Valory", HEADER_REGEX_VALORY),
+    ("Mixed", HEADER_REGEX_MIXED)
+]
+
+def _check_copyright(file: Path, match: re.Match) -> Tuple[bool, str]:
+    """
+    Given a file, check if the header stuff is in place.
+
+    Return True if the files has the encoding header and the copyright notice,
+    optionally prefixed by the shebang. Return False otherwise.
+
+    :param file: the file to check.
+    :return: True if the file is compliant with the checks, False otherwise.
+    """
+
+    copyright_years_str = match.groups(0)[1]  # type: ignore
+    copyright_years = tuple(int(i) for i in copyright_years_str.split("-"))
+    date_string, _ = subprocess.Popen(  # pylint: disable=consider-using-with  # nosec
+        [str(GIT_PATH), "log", "-1", '--format="%ad"', "--", str(file)],
+        stdout=subprocess.PIPE,
+    ).communicate()
+    date_string_ = date_string.decode().strip()
+    if date_string_ == "":
+        modification_date = datetime.now()
+    else:
+        modification_date = datetime.strptime(date_string_, '"%a %b %d %X %Y %z"')
+
+    # Start year is not 2021 or 2022
+    if copyright_years[0] not in [2018, 2019, 2020, 2021, 2022]:
+        return False, "Start year is not 2021 or 2022."
+
+    # Specified year is 2021 but the file has been last modified in another later year (missing -202x)
+    if (
+        copyright_years[0] == 2021
+        and len(copyright_years) == 1
+        and copyright_years[0] < modification_date.year
+    ):
+        return (
+            False,
+            f"Specified year is 2021 but the file has been last modified in another later year (missing -202x), date last modified {date_string_}",
+        )
+
+    # Specified year is 2022 but the file has been modified in an earlier year
+    if (
+        copyright_years[0] == 2022
+        and len(copyright_years) == 1
+        and copyright_years[0] > modification_date.year
+    ):
+        return (
+            False,
+            f"Specified year is 2022 but the file has been last modified in an earlier year, date last modified {date_string_}",
+        )
+
+    # End year does not match the last modification year
+    if len(copyright_years) > 1 and copyright_years[1] != modification_date.year:
+        return False, f"End year does not match the last modification year. Header has: {copyright_years[1]}; Last Modified: {modification_date.year}"
+
+    return True, ""
 
 
 def check_copyright(file: Path) -> bool:
@@ -113,14 +189,13 @@ def check_copyright(file: Path) -> bool:
     :return: True if the file is compliant with the checks, False otherwise.
     """
     content = file.read_text()
-    header_regex_fetchai = re.compile(HEADER_REGEX_FETCHAI, re.MULTILINE)
-    if re.match(header_regex_fetchai, content) is not None:
-        return True
-    header_regex_valory = re.compile(HEADER_REGEX_VALORY, re.MULTILINE)
-    if re.match(header_regex_valory, content) is not None:
-        return True
-    header_regex_mixed = re.compile(HEADER_REGEX_MIXED, re.MULTILINE)
-    return re.match(header_regex_mixed, content) is not None
+
+    for header_type, regex in REGEX_LIST:
+        match = regex.match(content)
+        if match is not None:
+            return *_check_copyright(file, match), header_type
+
+    return False, "Invalid copyright header.", "None"
 
 
 if __name__ == "__main__":
@@ -135,18 +210,24 @@ if __name__ == "__main__":
         [Path("setup.py")],
     )
 
-    # filter out protobuf files (*_pb2.py)
-    python_files_filtered = filter(
-        lambda x: not str(x).endswith("_pb2.py"), python_files
-    )
-
-    bad_files = [
-        filepath for filepath in python_files_filtered if not check_copyright(filepath)
-    ]
+    python_files = filter(lambda x: not str(x).endswith("_pb2.py"), python_files)
+    bad_files = set()
+    for path in python_files:
+        print("Processing {}".format(path))
+        result, message, header = check_copyright(path)
+        if not result:
+            bad_files.add((path, message, header))
 
     if len(bad_files) > 0:
         print("The following files are not well formatted:")
-        print("\n".join(map(str, bad_files)))
+        print(
+            "\n".join(
+                map(
+                    lambda x: f"File: {x[0]}\nReason: {x[1]}\nHeader: {x[2]}\n",
+                    sorted(bad_files, key=lambda x: x[0]),
+                )
+            )
+        )
         sys.exit(1)
     else:
         print("OK")
