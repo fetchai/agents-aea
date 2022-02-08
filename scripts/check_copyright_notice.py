@@ -119,8 +119,9 @@ HEADER_REGEX_MIXED = re.compile(
 REGEX_LIST: List[Tuple[str, re.Pattern]] = [
     ("FetchAI", HEADER_REGEX_FETCHAI),
     ("Valory", HEADER_REGEX_VALORY),
-    ("Mixed", HEADER_REGEX_MIXED)
+    ("Mixed", HEADER_REGEX_MIXED),
 ]
+
 
 def _check_copyright(file: Path, match: re.Match) -> Tuple[bool, str]:
     """
@@ -130,6 +131,7 @@ def _check_copyright(file: Path, match: re.Match) -> Tuple[bool, str]:
     optionally prefixed by the shebang. Return False otherwise.
 
     :param file: the file to check.
+    :param match: match object.
     :return: True if the file is compliant with the checks, False otherwise.
     """
 
@@ -173,12 +175,15 @@ def _check_copyright(file: Path, match: re.Match) -> Tuple[bool, str]:
 
     # End year does not match the last modification year
     if len(copyright_years) > 1 and copyright_years[1] != modification_date.year:
-        return False, f"End year does not match the last modification year. Header has: {copyright_years[1]}; Last Modified: {modification_date.year}"
+        return (
+            False,
+            f"End year does not match the last modification year. Header has: {copyright_years[1]}; Last Modified: {modification_date.year}",
+        )
 
     return True, ""
 
 
-def check_copyright(file: Path) -> bool:
+def check_copyright(file: Path) -> Tuple[bool, str, str]:
     """
     Given a file, check if the header stuff is in place.
 
@@ -193,7 +198,7 @@ def check_copyright(file: Path) -> bool:
     for header_type, regex in REGEX_LIST:
         match = regex.match(content)
         if match is not None:
-            return *_check_copyright(file, match), header_type
+            return (*_check_copyright(file, match), header_type)
 
     return False, "Invalid copyright header.", "None"
 
@@ -210,9 +215,11 @@ if __name__ == "__main__":
         [Path("setup.py")],
     )
 
-    python_files = filter(lambda x: not str(x).endswith("_pb2.py"), python_files)
+    python_files_filtered = filter(
+        lambda x: not str(x).endswith("_pb2.py"), python_files
+    )
     bad_files = set()
-    for path in python_files:
+    for path in python_files_filtered:
         print("Processing {}".format(path))
         result, message, header = check_copyright(path)
         if not result:
