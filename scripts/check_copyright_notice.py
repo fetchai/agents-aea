@@ -35,12 +35,20 @@ import subprocess  # nosec
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Optional, Tuple
 
 
 GIT_PATH = shutil.which("git")
-SUPPORTED_YEARS_FETCHAI = ["2019", "2020", "2021"]
-SUPPORTED_YEARS_VALORY = ["2021", "2022"]
+START_YEARS_FETCHAI = (2018, 2019, 2020, 2021)
+START_YEARS_VALORY = (2021, 2022)
+FETCHAI = "FetchAI"
+VALORY = "Valory"
+MIXED = "Mixed"
+
+FETCHAI_REGEX = re.compile(
+    r"Copyright ((20\d\d)(-20\d\d)?) Fetch.AI Limited", re.MULTILINE
+)
+VALORY_REGEX = re.compile(r"Copyright ((20\d\d)(-20\d\d)?) Valory AG", re.MULTILINE)
 
 
 HEADER_REGEX_FETCHAI = re.compile(
@@ -72,7 +80,7 @@ HEADER_REGEX_VALORY = re.compile(
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright ((202\d)(-202\d)?) Valory AG
+#   Copyright ((20\d\d)(-20\d\d)?) Valory AG
 #
 #   Licensed under the Apache License, Version 2\.0 \(the \"License\"\);
 #   you may not use this file except in compliance with the License\.
@@ -116,14 +124,45 @@ HEADER_REGEX_MIXED = re.compile(
     re.MULTILINE,
 )
 
-REGEX_LIST: List[Tuple[str, re.Pattern]] = [
-    ("FetchAI", HEADER_REGEX_FETCHAI),
-    ("Valory", HEADER_REGEX_VALORY),
-    ("Mixed", HEADER_REGEX_MIXED),
+REGEX_LIST = [
+    (FETCHAI, HEADER_REGEX_FETCHAI),
+    (VALORY, HEADER_REGEX_VALORY),
+    (MIXED, HEADER_REGEX_MIXED),
 ]
 
 
-def _check_copyright(file: Path, match: re.Match) -> Tuple[bool, str]:
+def get_modification_date(file: Path) -> datetime:
+    """Returns modification date for the file."""
+    date_string, _ = subprocess.Popen(  # pylint: disable=consider-using-with  # nosec
+        [str(GIT_PATH), "log", "-1", '--format="%ad"', "--", str(file)],
+        stdout=subprocess.PIPE,
+    ).communicate()
+    date_string_ = date_string.decode().strip()
+    if date_string_ == "":
+        return datetime.now()
+    return datetime.strptime(date_string_, '"%a %b %d %X %Y %z"')
+
+
+def get_year_data(match: re.Match, mixed: bool = False) -> Tuple[int, Optional[int]]:
+    """Get year data from match."""
+
+    if mixed:
+        year_string, *_ = match.groups()
+    else:
+        _, year_string, *_ = match.groups()
+
+    if "-" in year_string:
+        return (*map(int, year_string.split("-")),)  # type: ignore
+    return int(year_string), None
+
+
+def _validate_years(
+    file: Path,
+    allowed_start_years: Tuple[int, ...],
+    start_year: int,
+    end_year: int,
+    check_end_year: bool = True,
+) -> Tuple[bool, str]:
     """
     Given a file, check if the header stuff is in place.
 
@@ -131,56 +170,61 @@ def _check_copyright(file: Path, match: re.Match) -> Tuple[bool, str]:
     optionally prefixed by the shebang. Return False otherwise.
 
     :param file: the file to check.
-    :param match: match object.
+    :param allowed_start_years: list of allowed start years
+    :param start_year: year when the file was created
+    :param end_year: year when the file was last modified
+    :param check_end_year: whether to validate end year or not
     :return: True if the file is compliant with the checks, False otherwise.
     """
 
-    copyright_years_str = match.groups(0)[1]  # type: ignore
-    copyright_years = tuple(int(i) for i in copyright_years_str.split("-"))
-    date_string, _ = subprocess.Popen(  # pylint: disable=consider-using-with  # nosec
-        [str(GIT_PATH), "log", "-1", '--format="%ad"', "--", str(file)],
-        stdout=subprocess.PIPE,
-    ).communicate()
-    date_string_ = date_string.decode().strip()
-    if date_string_ == "":
-        modification_date = datetime.now()
-    else:
-        modification_date = datetime.strptime(date_string_, '"%a %b %d %X %Y %z"')
+    modification_date = get_modification_date(file)
 
-    # Start year is not 2021 or 2022
-    if copyright_years[0] not in [2018, 2019, 2020, 2021, 2022]:
-        return False, "Start year is not 2021 or 2022."
+    # Start year is not in allowed start years list
+    if start_year not in allowed_start_years:
+        return (
+            False,
+            f"Start year {start_year} is not in the list of allowed years; {allowed_start_years}.",
+        )
 
     # Specified year is 2021 but the file has been last modified in another later year (missing -202x)
-    if (
-        copyright_years[0] == 2021
-        and len(copyright_years) == 1
-        and copyright_years[0] < modification_date.year
-    ):
-        return (
-            False,
-            f"Specified year is 2021 but the file has been last modified in another later year (missing -202x), date last modified {date_string_}",
-        )
+    if end_year is not None and check_end_year:
 
-    # Specified year is 2022 but the file has been modified in an earlier year
-    if (
-        copyright_years[0] == 2022
-        and len(copyright_years) == 1
-        and copyright_years[0] > modification_date.year
-    ):
-        return (
-            False,
-            f"Specified year is 2022 but the file has been last modified in an earlier year, date last modified {date_string_}",
-        )
+        if start_year > end_year:
+            return False, "End year should be greater then start year."
 
-    # End year does not match the last modification year
-    if len(copyright_years) > 1 and copyright_years[1] != modification_date.year:
+        if end_year != modification_date.year:
+            return (
+                False,
+                f"End year does not match the last modification year. Header has: {end_year}; Last Modified: {modification_date.year}",
+            )
+
+    if end_year is None and modification_date.year > start_year:
         return (
             False,
-            f"End year does not match the last modification year. Header has: {copyright_years[1]}; Last Modified: {modification_date.year}",
+            f"Missing later year ({start_year}-20..)",
         )
 
     return True, ""
+
+
+def _check_mixed(file: Path, content: str) -> Tuple[bool, str, str]:
+
+    check_status, message = _validate_years(
+        file,
+        START_YEARS_FETCHAI,
+        *get_year_data(FETCHAI_REGEX.search(content), True),  # type: ignore
+        check_end_year=False,
+    )
+    if not check_status:
+        return check_status, message, f"{MIXED}-{FETCHAI}"
+
+    check_status, message = _validate_years(
+        file, START_YEARS_VALORY, *get_year_data(VALORY_REGEX.search(content), True)  # type: ignore
+    )
+    if not check_status:
+        return check_status, message, f"{MIXED}-{VALORY}"
+
+    return True, "", MIXED
 
 
 def check_copyright(file: Path) -> Tuple[bool, str, str]:
@@ -198,7 +242,20 @@ def check_copyright(file: Path) -> Tuple[bool, str, str]:
     for header_type, regex in REGEX_LIST:
         match = regex.match(content)
         if match is not None:
-            return (*_check_copyright(file, match), header_type)
+            if header_type == MIXED:
+                return _check_mixed(file, content)
+
+            elif header_type == VALORY:
+                return (
+                    *_validate_years(file, START_YEARS_VALORY, *get_year_data(match)),  # type: ignore
+                    header_type,
+                )
+            elif header_type == FETCHAI:
+                return (
+                    *_validate_years(file, START_YEARS_FETCHAI, *get_year_data(match)),  # type: ignore
+                    header_type,
+                )
+            break
 
     return False, "Invalid copyright header.", "None"
 
@@ -218,6 +275,7 @@ if __name__ == "__main__":
     python_files_filtered = filter(
         lambda x: not str(x).endswith("_pb2.py"), python_files
     )
+
     bad_files = set()
     for path in python_files_filtered:
         print("Processing {}".format(path))
