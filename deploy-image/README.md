@@ -11,7 +11,7 @@ The example uses the `fetchai/my_first_aea` project. You will likely want to mod
 Install subversion, then download the example directory to your local working directory
 
 ``` bash
-svn export https://github.com/valory-xyz/open-aea/trunk/deploy-image
+svn checkout https://github.com/valory-xyz/open-aea/trunk/packages packages
 ```
 
 ### Modify scripts
