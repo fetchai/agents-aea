@@ -1,4 +1,4 @@
-FROM python:3.8-alpine
+FROM python:3.7-alpine
 
 USER root
 
@@ -16,13 +16,13 @@ RUN apk add --no-cache go
 
 # aea installation
 RUN pip install --upgrade pip
-RUN pip install --upgrade --force-reinstall open-aea[all]==1.4.0
+RUN pip install --upgrade --force-reinstall open-aea[all]==1.4.0.post1
 
 # directories and aea cli config
 COPY /.aea /home/.aea
 WORKDIR /home/agents
 COPY ./packages /home/agents/packages
-
+RUN pip install --upgrade setuptools
 # aea build script
 COPY /build.sh /build.sh
 RUN ["chmod", "+x", "/build.sh"]
