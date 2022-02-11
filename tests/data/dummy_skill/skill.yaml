@@ -6,13 +6,13 @@ description: a dummy_skill for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmPSmhjCsXFdGcZtfyBEkqP6rCX1mWLuDST51YfkYCb4c5
+  __init__.py: QmT97g3TZ4iufPeScCSxjzv1Q1m7MaYAfzLcnnUPLAvids
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C
-  dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
-  dummy_subpackage/__init__.py: QmfDrbsUewXFcF3afdhCnzsZYrzDTUbQH69MHPnEpzp5qP
-  dummy_subpackage/foo.py: QmNrarFAJ1KDopGVz5Co8YtnRj6Q7CP29x7ywUMjnMr6KV
+  dummy.py: QmZgCu3AjKET8A1YJkiWgq6BqgPeqGHS1xx6pt5Qt5UzHz
+  dummy_subpackage/__init__.py: Qmbh6e21sRDSbAvRifTkNTuvQuDhRgTj4NHoWxWgPKN7pi
+  dummy_subpackage/foo.py: QmXxoY4GU6ziaQU4UXS5cJ4gXisJDB5ZR98jYHJfZrszGU
   handlers.py: QmTi2esLM7kvu69RBhriACA45YwGpfrAkva6MLTbmy8cxr
-  tasks.py: Qmb1T8irsgmXE5vWi6davaESTzJv8Z9DmNmHhDqvfPQUEZ
+  tasks.py: QmNPTyCk6PwwNdbXgBDuCqdVzx59sHQfw1trFFuK9E9z5c
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
