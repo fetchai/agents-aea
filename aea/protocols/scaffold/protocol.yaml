@@ -7,8 +7,8 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 protocol_specification_id: open_aea/scaffold:0.1.0
 fingerprint:
-  __init__.py: Qmc9Ln8THrWmwou4nr3Acag7vcZ1fv8v5oRSkCWtv1aH6t
+  __init__.py: QmW1D7VoPyXpBGFa8Wraey75QTAdxsmvUpvzkBjkXrXpE6
   message.py: QmbJBbc4KQKneFhSmFMwwQPzWqMdp6gXkFautpKQmzuZSm
-  serialization.py: QmZbSDKy54EuhX8QN5BFP8pgZyUYMZWwPKRkdiqHudRcVL
+  serialization.py: QmdhpcZwK6b1KSWBUjgJ8KL5xRh82UdYHHxWvQWGKhzCi1
 fingerprint_ignore_patterns: []
 dependencies: {}

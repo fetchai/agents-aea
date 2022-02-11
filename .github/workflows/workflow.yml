@@ -53,7 +53,7 @@ jobs:
           python-version: 3.7
       - uses: actions/setup-go@master
         with:
-          go-version: '^1.14.0'
+          go-version: "^1.14.0"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -131,8 +131,6 @@ jobs:
           make protolint_install
       - name: License Check
         run: tox -e liccheck
-      - name: Copyright Check
-        run: tox -e copyright_check
       - name: AEA Package Hashes Check
         run: tox -e hash_check -- --timeout 60.0
       - name: Check package versions in documentation
@@ -143,6 +141,27 @@ jobs:
         run: tox -e check_generate_all_protocols
       - name: Generate Documentation
         run: tox -e docs
+
+  copyright_check:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.7
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          pip install --user --upgrade setuptools
+      - name: Copyright Check
+        run: tox -e check-copyright
 
   common_checks_5:
     continue-on-error: False
@@ -186,10 +205,10 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
-        run : |
+        run: |
           pip install tox
       - name: Check Pipfile and tox.ini consistency
-        run : |
+        run: |
           python ./scripts/check_pipfile_and_toxini.py
       - name: Install current aea
         run: |
@@ -204,9 +223,9 @@ jobs:
     strategy:
       matrix:
         sys:
-          - { os: windows-latest, shell: 'msys2 {0}' }
-          - { os: ubuntu-latest,  shell: bash  }
-          - { os: macos-latest,   shell: bash  }
+          - { os: windows-latest, shell: "msys2 {0}" }
+          - { os: ubuntu-latest, shell: bash }
+          - { os: macos-latest, shell: bash }
         python_version: [3.7]
     timeout-minutes: 10
     steps:
@@ -217,19 +236,19 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
-        run : |
+        run: |
           pip install tox
       - name: Check plugin aea-ledger-cosmos
-        run : |
+        run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && aea generate-key cosmos && echo aea-ledger-cosmos checked!"
       - name: Check plugin aea-ledger-ethereum
-        run : |
+        run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-ethereum && aea generate-key ethereum && echo aea-ledger-ethereum checked!"
       - name: Check plugin aea-ledger-fetchai
-        run : |
+        run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-fetchai && aea generate-key fetchai && echo aea-ledger-fetchai checked!"
       - name: Check plugin aea-cli-ipfs
-        run : |
+        run: |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
 
   protolint:
@@ -243,7 +262,7 @@ jobs:
           python-version: 3.7
       - uses: actions/setup-go@master
         with:
-          go-version: '^1.14.0'
+          go-version: "^1.14.0"
       - name: Install protolint (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -257,34 +276,34 @@ jobs:
   integration_checks:
     continue-on-error: True
     needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
-    - dependencies_checks
-    - plugins_install_check
+      - common_checks_1
+      - common_checks_2
+      - common_checks_3
+      - common_checks_4
+      - dependencies_checks
+      - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: 3.8
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
-        unzip protoc-3.17.3-linux-x86_64.zip -d protoc
-        sudo mv protoc/bin/protoc /usr/local/bin/protoc
-    - name: Async integration tests
-      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.8
+      - uses: actions/setup-go@master
+        with:
+          go-version: "^1.14.0"
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
+          unzip protoc-3.17.3-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+      - name: Async integration tests
+        run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
 
   integration_checks_ledger:
     continue-on-error: True
@@ -314,12 +333,12 @@ jobs:
   platform_checks:
     continue-on-error: True
     needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
-    - dependencies_checks
-    - plugins_install_check
+      - common_checks_1
+      - common_checks_2
+      - common_checks_3
+      - common_checks_4
+      - dependencies_checks
+      - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -327,77 +346,77 @@ jobs:
         python_version: [3.7, 3.8, 3.9]
     timeout-minutes: 90
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: ${{ matrix.python_version }}
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - if: matrix.os == 'ubuntu-latest'
-      name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
-        unzip protoc-3.17.3-linux-x86_64.zip -d protoc
-        sudo mv protoc/bin/protoc /usr/local/bin/protoc
-        make protolint_install
-    # sudo apt-get install -y protobuf-compiler
-    # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
-    # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
-    - if: matrix.os == 'macos-latest'
-      name: Install dependencies (macos-latest)
-      run: |
-        pip install tox
-        brew install gcc
-        # brew install protobuf
-        # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-osx-x86_64.zip
-        unzip protoc-3.17.3-osx-x86_64.zip -d protoc
-        sudo mv protoc/bin/protoc /usr/local/bin/protoc
-        brew tap yoheimuta/protolint
-        brew install protolint
-    - if: matrix.os == 'windows-latest'
-      name: Install dependencies (windows-latest)
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      run: |
-        python -m pip install -U pip
-        echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-        choco install protoc --version 3.17.3
-        choco install mingw -y
-        choco install make -y
-        # to check make was installed
-        make --version
-        pip install tox
-        # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-win64.zip
-        # unzip protoc-3.17.3-win64.zip -d protoc
-        # sudo mv protoc/bin/protoc /usr/local/bin/protoc
-        python scripts/update_symlinks_cross_platform.py
-        make protolint_install_win
-        # just check protolint runs
-        protolint version
-    - if: True
-      name: Unit tests
-      run: |
-        tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
-    - name: Plugin tests
-      run: |
-        tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: ${{ matrix.python_version }}
+      - uses: actions/setup-go@master
+        with:
+          go-version: "^1.14.0"
+      - if: matrix.os == 'ubuntu-latest'
+        name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
+          unzip protoc-3.17.3-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          make protolint_install
+      # sudo apt-get install -y protobuf-compiler
+      # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
+      # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
+      - if: matrix.os == 'macos-latest'
+        name: Install dependencies (macos-latest)
+        run: |
+          pip install tox
+          brew install gcc
+          # brew install protobuf
+          # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-osx-x86_64.zip
+          unzip protoc-3.17.3-osx-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          brew tap yoheimuta/protolint
+          brew install protolint
+      - if: matrix.os == 'windows-latest'
+        name: Install dependencies (windows-latest)
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          python -m pip install -U pip
+          echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+          choco install protoc --version 3.17.3
+          choco install mingw -y
+          choco install make -y
+          # to check make was installed
+          make --version
+          pip install tox
+          # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-win64.zip
+          # unzip protoc-3.17.3-win64.zip -d protoc
+          # sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          python scripts/update_symlinks_cross_platform.py
+          make protolint_install_win
+          # just check protolint runs
+          protolint version
+      - if: True
+        name: Unit tests
+        run: |
+          tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
+      - name: Plugin tests
+        run: |
+          tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
 
   golang_checks:
     continue-on-error: True
     needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
-    - dependencies_checks
-    - plugins_install_check
+      - common_checks_1
+      - common_checks_2
+      - common_checks_3
+      - common_checks_4
+      - dependencies_checks
+      - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -405,13 +424,13 @@ jobs:
         python-version: [3.7]
     timeout-minutes: 45
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: ${{ matrix.python-version }}
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-go@master
+        with:
+          go-version: "^1.14.0"
     # - if: matrix.python-version == '3.7'
     #   name: Golang unit tests (aealite)
     #   working-directory: ./libs/go/aealite
@@ -420,45 +439,45 @@ jobs:
   coverage_checks:
     continue-on-error: True
     needs:
-    - integration_checks
-    - integration_checks_ledger
-    - platform_checks
+      - integration_checks
+      - integration_checks_ledger
+      - platform_checks
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-python@master
-      with:
-        python-version: 3.7
-    - uses: actions/setup-go@master
-      with:
-        go-version: '^1.14.0'
-    - name: Install dependencies (ubuntu-latest)
-      run: |
-        sudo apt-get update --fix-missing
-        sudo apt-get autoremove
-        sudo apt-get autoclean
-        pip install tox
-        pip install coverage
-        # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
-        unzip protoc-3.17.3-linux-x86_64.zip -d protoc
-        sudo mv protoc/bin/protoc /usr/local/bin/protoc
-        make protolint_install
-    # sudo apt-get install -y protobuf-compiler
-    - name: Run all tests
-      run: |
-        tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
-        tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
-      continue-on-error: true
-    - name: Show full coverage report
-      run: |
-        coverage report -m -i
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.7
+      - uses: actions/setup-go@master
+        with:
+          go-version: "^1.14.0"
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          pip install coverage
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
+          unzip protoc-3.17.3-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          make protolint_install
+      # sudo apt-get install -y protobuf-compiler
+      - name: Run all tests
+        run: |
+          tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+          tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
+        continue-on-error: true
+      - name: Show full coverage report
+        run: |
+          coverage report -m -i
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
