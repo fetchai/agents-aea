@@ -130,8 +130,9 @@ HEADER_REGEX_MIXED = re.compile(
     re.MULTILINE,
 )
 
-HEADER_TEMPLATE = """#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+SHEBANG = "#!/usr/bin/env python3"
+
+HEADER_TEMPLATE = """# -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
 {copyright_string}
@@ -376,6 +377,8 @@ def fix_header(check_info: Dict) -> bool:
 
     if is_update_needed:
         new_header = HEADER_TEMPLATE.format(copyright_string=copyright_string)
+        if SHEBANG in content:
+            new_header = SHEBANG + "\n" + new_header
         updated_content = cast(re.Pattern, check_info.get("regex")).sub(
             new_header, content
         )
