@@ -7,12 +7,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPwx59WZfJjauEiEXhcfQeUH1zFeEbkr1G8i2KVPWYao6
-  __init__.py: QmWuM4RXYqBHghYZV327g2XyZRXsBXMRCLjkUsXC6ev65Y
-  dialogues.py: Qmbj5N77MSG7ogLx3cva6xwMxFKBjo8mrXvEQfrbgeAE4o
-  handlers.py: QmcirvyAqzhJYR4dJMLGqiq4MAFqRMStH4Bhdjtfpv5UWt
-  helpers.py: QmfLt2rZprkaRPrH2DazjJAcfRuNuris9xPbFzef9e56HC
-  rl_agent.py: QmYyosywxzUvoof93D3hbZ4FvfZVWJWwPiotA2dBQBsXv3
-  tasks.py: QmPyadq6QETGknjY1DRf7JmuUdg9fLDvTAMTt9UidL1zCE
+  __init__.py: QmdbXPv9mGP9jhyjL8odSUrFxWESaMJD27Scze7RF9LwM4
+  dialogues.py: QmTXi5973ww57PSh1aEpZfy4Gt6CWsjQHui9amsiVNUryM
+  handlers.py: Qmenjg4jCoL6R7Qsbf26LZ5kp3nrVZzazFfvHHAdMakVyr
+  helpers.py: QmQQ69aze51AbVibqFGnZmnYMN6oq2i8SKysxSnK1CEQ9S
+  rl_agent.py: Qmc93aj586usDy5a34c9HPM1Pv1azD4VTvT7qTHoMuabEA
+  tasks.py: QmaZe6dwZU9G9FLsuzrVDE1oRCbxzi2GKSu6np1tAkJxre
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/gym:0.19.0
