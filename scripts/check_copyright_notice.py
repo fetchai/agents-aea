@@ -37,10 +37,13 @@ import subprocess  # nosec
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, Iterator, Optional, Tuple, cast
+
 
 CURRENT_YEAR = datetime.now().year
-VALORY_FORK = datetime.strptime("Sun Nov 01 00:00:00 2021 +0000", "%a %b %d %X %Y %z")
+VALORY_FORK_DATE = datetime.strptime(
+    "Sun Nov 01 00:00:00 2021 +0000", "%a %b %d %X %Y %z"
+)
 GIT_PATH = shutil.which("git")
 START_YEARS_FETCHAI = (2018, 2019, 2020, 2021)
 START_YEARS_VALORY = (2021, 2022)
@@ -55,7 +58,7 @@ FETCHAI_REGEX = re.compile(
 VALORY_REGEX = re.compile(r"Copyright ((20\d\d)(-20\d\d)?) Valory AG", re.MULTILINE)
 
 HEADER_REGEX_FETCHAI = re.compile(
-    fr"""(#!/usr/bin/env python3
+    r"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
@@ -103,7 +106,7 @@ HEADER_REGEX_VALORY = re.compile(
 )
 
 HEADER_REGEX_MIXED = re.compile(
-    fr"""(#!/usr/bin/env python3
+    r"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #
@@ -155,7 +158,9 @@ REGEX_LIST = [
 ]
 
 
-class ErrorTypes:
+class ErrorTypes:  # pylint: disable=too-few-public-methods
+    """Types of corrupt headers."""
+
     NO_ERROR = 0
     START_YEAR_NOT_ALLOWED = 1
     START_YEAR_GT_END_YEAR = 2
@@ -165,7 +170,7 @@ class ErrorTypes:
 
 def get_modification_date(file: Path) -> datetime:
     """Returns modification date for the file."""
-    date_string, _ = subprocess.Popen(  # pylint: disable=consider-using-with  # nosec
+    (date_string, _,) = subprocess.Popen(  # nosec
         [str(GIT_PATH), "log", "-1", '--format="%ad"', "--", str(file)],
         stdout=subprocess.PIPE,
     ).communicate()
@@ -194,7 +199,7 @@ def _validate_years(
     start_year: int,
     end_year: int,
     check_end_year: bool = True,
-) -> Tuple[bool, str]:
+) -> Dict:
     """
     Given a file, check if the header stuff is in place.
 
@@ -254,16 +259,16 @@ def _validate_years(
     return check_info
 
 
-def _check_mixed(file: Path, content: str) -> Tuple[bool, str, str]:
+def _check_mixed(file: Path, content: str) -> Tuple[Dict, str]:
     check_data = _validate_years(
         file, START_YEARS_VALORY, *get_year_data(VALORY_REGEX.search(content), True)  # type: ignore
     )
-    check_data["fetchai_year_data"] = get_year_data(FETCHAI_REGEX.search(content), True)
+    check_data["fetchai_year_data"] = get_year_data(FETCHAI_REGEX.search(content), True)  # type: ignore
 
     return check_data, MIXED
 
 
-def check_copyright(file: Path) -> Tuple[bool, str, str]:
+def check_copyright(file: Path) -> Tuple[Dict, str, re.Pattern]:
     """
     Given a file, check if the header stuff is in place.
 
@@ -278,7 +283,7 @@ def check_copyright(file: Path) -> Tuple[bool, str, str]:
     for header_type, regex in REGEX_LIST:
         match = regex.match(content)
         if match is not None:
-            if header_type == MIXED:
+            if header_type == MIXED:  # pylint: disable=no-else-return
                 return (*_check_mixed(file, content), regex)
 
             elif header_type == VALORY:
@@ -301,7 +306,7 @@ def check_copyright(file: Path) -> Tuple[bool, str, str]:
 def fix_header(check_info: Dict) -> bool:
     """Fix currupt headers."""
 
-    path: Path = check_info.get("path")
+    path = cast(Path, check_info.get("path"))
     content = path.read_text()
     copyright_string = ""
     is_update_needed = False
@@ -325,7 +330,7 @@ def fix_header(check_info: Dict) -> bool:
             is_update_needed = True
 
     elif check_info["header"] == FETCHAI:
-        if check_info["last_modification"] > VALORY_FORK:
+        if check_info["last_modification"] > VALORY_FORK_DATE:
             # modified after fork
             copyright_string = "#   Copyright {start_year} Valory AG".format(
                 start_year=check_info["last_modification"].year,
@@ -379,7 +384,7 @@ def fix_header(check_info: Dict) -> bool:
     return is_update_needed
 
 
-def update_headers(files: List[Path]) -> None:
+def update_headers(files: Iterator[Path]) -> None:
     """Update headers."""
 
     needs_update = []
@@ -408,7 +413,7 @@ def update_headers(files: List[Path]) -> None:
         print("No update needed.")
 
 
-def run_check(files: List[Path]) -> None:
+def run_check(files: Iterator[Path]) -> None:
     """Run copyright check."""
     bad_files = set()
     for path in files:
