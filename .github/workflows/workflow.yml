@@ -132,7 +132,7 @@ jobs:
       - name: License Check
         run: tox -e liccheck
       - name: Copyright Check
-        run: tox -e copyright_check
+        run: tox -e check-copyright
       - name: AEA Package Hashes Check
         run: tox -e hash_check -- --timeout 60.0
       - name: Check package versions in documentation
