@@ -826,7 +826,7 @@ NEW_VERSION_OPTIONS = [ASK_VERSION, UPDATE_PATCH, UPDATE_MINOR]
     "--context",
     "-C",
     type=click.IntRange(0, 5),
-    help="The number of above/below rows to display.",
+    help="Number of lines above and below the reference to display.",
     default=1,
 )
 @click.option(
