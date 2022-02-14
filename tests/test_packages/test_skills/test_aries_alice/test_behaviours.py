@@ -58,11 +58,19 @@ class TestAliceBehaviour(AriesAliceTestCase):
             sender=str(self.skill.skill_context.skill_id),
             method=self.mocked_method,
             url=self.mocked_url,
-            headers="",
+            headers="Content-Type: application/json",
             version="",
             body=json.dumps(self.body_dict).encode("utf-8"),
         )
         assert has_attributes, error_str
+
+    def test_perform_agents_search(self) -> None:
+        """Perform agents search to query proofs from."""
+        self.strategy.is_searching = True  # type: ignore
+        with patch.object(self.alice_behaviour.context.logger, "log") as mock_logger:  # type: ignore
+            self.alice_behaviour.perform_agents_search()  # type: ignore
+
+        mock_logger.assert_any_call(logging.INFO, "Searching for agents on SOEF...")
 
     def test_setup(self):
         """Test the setup method of the alice behaviour."""

@@ -49,16 +49,6 @@ class DefaultHandler(Handler):
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
-    @staticmethod
-    def _handle_received_invite(invite_detail: Dict) -> Dict:  # pragma: no cover
-        """
-        Prepare an invitation detail received from Faber_AEA to be send to the Alice ACA.
-
-        :param invite_detail: the invitation detail
-        :return: The prepared invitation detail
-        """
-        return invite_detail
-
     def setup(self) -> None:
         """Implement the setup."""
 
@@ -87,14 +77,13 @@ class DefaultHandler(Handler):
             # accept invite
             if "@type" in content:
                 strategy = cast(Strategy, self.context.strategy)
-                details = self._handle_received_invite(content)
-                strategy.invitations[details["@id"]] = message.sender
+                strategy.invitations[content["@id"]] = message.sender
                 self.context.behaviours.alice.send_http_request_message(
                     method="POST",
                     url=strategy.admin_url
                     + ADMIN_COMMAND_RECEIVE_INVITE
                     + "?auto_accept=true",
-                    content=details,
+                    content=content,
                 )
 
     def teardown(self) -> None:
@@ -162,11 +151,11 @@ class HttpHandler(Handler):
                         self.connected[content["connection_id"]] = self.invitations[
                             content["invitation_msg_id"]
                         ]
+                        name = content["their_label"]
                         self.addr_names[
                             self.invitations[content["invitation_msg_id"]]
-                        ] = content["their_label"]
-                        target = self.invitations[content["invitation_msg_id"]]
-                        if target in strategy.aea_addresses:
+                        ] = name
+                        if name != "faber":
                             body = {
                                 "connection_id": content["connection_id"],
                                 "proof_request": {
@@ -202,6 +191,9 @@ class HttpHandler(Handler):
                                 method="POST",
                                 url=strategy.admin_url + "/present-proof/send-request",
                                 content=body,
+                            )
+                            self.context.logger.info(
+                                f"Sent credentials proof request to {name}"
                             )
             elif "presentation_request_dict" in content:
                 if content["role"] == "prover":

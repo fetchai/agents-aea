@@ -53,7 +53,7 @@ class TestFaberBehaviour(AriesFaberTestCase):
             sender=str(self.skill.skill_context.skill_id),
             method=self.mocked_method,
             url=self.mocked_url,
-            headers="",
+            headers="Content-Type: application/json",
             version="",
             body=json.dumps(self.body_dict).encode("utf-8"),
         )

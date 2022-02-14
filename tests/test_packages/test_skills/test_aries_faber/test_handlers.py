@@ -20,7 +20,7 @@
 import json
 import logging
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 
@@ -35,6 +35,7 @@ from packages.fetchai.skills.aries_faber.handlers import SUPPORT_REVOCATION
 from packages.fetchai.skills.aries_faber.strategy import (
     ADMIN_COMMAND_CREATE_INVITATION,
     ADMIN_COMMAND_CREDDEF,
+    ADMIN_COMMAND_REGISTGER_PUBLIC_DID,
     ADMIN_COMMAND_SCEHMAS,
     ADMIN_COMMAND_STATUS,
     FABER_ACA_IDENTITY,
@@ -53,13 +54,16 @@ class TestHttpHandler(AriesFaberTestCase):
 
     def test__init__i(self):
         """Test the __init__ method of the http_request behaviour."""
+
         assert self.http_handler.faber_identity == FABER_ACA_IDENTITY
-        assert self.http_handler.seed[:-6] == "d_000000000000000000000000"
+
         assert self.http_handler.did is None
         assert self.http_handler._schema_id is None
         assert self.http_handler.credential_definition_id is None
-        assert self.http_handler.connection_id is None
-        assert self.http_handler.is_connected_to_Alice is False
+
+        assert self.http_handler.connections_sent == {}
+        assert self.http_handler.connections_set == {}
+        assert self.http_handler.counterparts_names == {}
 
     def test_setup(self):
         """Test the setup method of the http_handler handler."""
@@ -105,10 +109,13 @@ class TestHttpHandler(AriesFaberTestCase):
     def test_handle_request(self):
         """Test the handle method of the http handler where performative is REQUEST."""
         # setup
-        self.http_handler.connection_id = 123
+        con_id = 123
+        agent_addr = "agent_addr"
+        agent_name = "alice"
+        self.http_handler.connections_sent = {con_id: agent_addr}
         self.http_handler.is_connected_to_Faber = False
 
-        body = {"connection_id": 123, "state": "active"}
+        body = {"connection_id": con_id, "state": "active", "their_label": agent_name}
         mocked_body_bytes = json.dumps(body).encode("utf-8")
         incoming_message = cast(
             HttpMessage,
@@ -124,22 +131,32 @@ class TestHttpHandler(AriesFaberTestCase):
         )
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
+        with patch.object(self.logger, "log") as mock_logger, patch.object(
+            self.faber_behaviour, "send_http_request_message"
+        ) as mock_http_req:
             self.http_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.INFO, f"Received webhook message content:{str(body)}"
         )
-        mock_logger.assert_any_call(logging.INFO, "Connected to Alice")
-        assert self.http_handler.is_connected_to_Alice is True
+        mock_logger.assert_any_call(
+            logging.INFO, f"Connected to {agent_name}({agent_addr})"
+        )
+        mock_http_req.assert_any_call(
+            method="POST",
+            url=self.strategy.admin_url + "/issue-credential/send",
+            content=ANY,
+        )
+        assert self.http_handler.counterparts_names[agent_addr] == agent_name
+        assert self.http_handler.connections_set[con_id] == agent_addr
 
-    def test_handle_response_i(self):
+    def test_handle_response_1(self):
         """Test the handle method of the http handler where performative is RESPONSE and content has version."""
         # setup
         data = {
             "alias": self.http_handler.faber_identity,
-            "seed": self.http_handler.seed,
+            "seed": self.strategy.seed,
             "role": "TRUST_ANCHOR",
         }
         http_dialogue = cast(
@@ -173,10 +190,8 @@ class TestHttpHandler(AriesFaberTestCase):
 
         # after
         mock_logger.assert_any_call(logging.INFO, f"Received message: {str(body)}")
-
         mock_logger.assert_any_call(
-            logging.INFO,
-            f"Registering Faber_ACA with seed {str(self.http_handler.seed)}",
+            logging.INFO, f"Registering Faber_ACA with seed {str(self.strategy.seed)}",
         )
         mock_http_req.assert_any_call(
             method="POST",
@@ -184,15 +199,10 @@ class TestHttpHandler(AriesFaberTestCase):
             content=data,
         )
 
-    def test_handle_response_ii(self):
+    def test_handle_response_2(self):
         """Test the handle method of the http handler where performative is RESPONSE and content has did."""
         # setup
         did = "some_did"
-        schema_body = {
-            "schema_name": "degree schema",
-            "schema_version": "0.0.1",
-            "attributes": ["name", "date", "degree", "age", "timestamp"],
-        }
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
@@ -225,17 +235,68 @@ class TestHttpHandler(AriesFaberTestCase):
         # after
         mock_logger.assert_any_call(logging.INFO, f"Received message: {str(body)}")
 
+        mock_logger.assert_any_call(logging.INFO, f"Received DID: {did}")
+
+        mock_http_req.assert_any_call(
+            method="POST",
+            url=self.strategy.admin_url
+            + ADMIN_COMMAND_REGISTGER_PUBLIC_DID
+            + f"?did={did}",
+            content="",
+        )
+        assert self.http_handler.did == did
+
+    def test_handle_response_3(self):
+        """Test the handle method of the http handler where performative is RESPONSE and content has did."""
+        # setup
+        schema_body = {
+            "schema_name": "degree schema",
+            "schema_version": "0.0.1",
+            "attributes": ["average", "date", "degree", "name"],
+        }
+
+        http_dialogue = cast(
+            HttpDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+            ),
+        )
+
+        body = {"result": {"posture": 123}}
+        mocked_body_bytes = json.dumps(body).encode("utf-8")
+        incoming_message = cast(
+            HttpMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=http_dialogue,
+                performative=HttpMessage.Performative.RESPONSE,
+                status_code=200,
+                status_text="some_status_code",
+                headers=self.mocked_headers,
+                version=self.mocked_version,
+                body=mocked_body_bytes,
+            ),
+        )
+
+        # operation
+        with patch.object(
+            self.faber_behaviour, "send_http_request_message"
+        ) as mock_http_req:
+            with patch.object(self.logger, "log") as mock_logger:
+                self.http_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(logging.INFO, f"Received message: {str(body)}")
+
         mock_logger.assert_any_call(
             logging.INFO, f"Registering schema {str(schema_body)}"
         )
-        assert self.http_handler.did == did
         mock_http_req.assert_any_call(
             method="POST",
             url=self.strategy.admin_url + ADMIN_COMMAND_SCEHMAS,
             content=schema_body,
         )
 
-    def test_handle_response_iii(self):
+    def test_handle_response_4(self):
         """Test the handle method of the http handler where performative is RESPONSE and content has schema_id."""
         # setup
         schema_id = "some_schema_id"
@@ -282,10 +343,11 @@ class TestHttpHandler(AriesFaberTestCase):
             content=credential_definition_body,
         )
 
-    def test_handle_response_iv(self):
+    def test_handle_response_5(self):
         """Test the handle method of the http handler where performative is RESPONSE and content has credential_definition_id."""
         # setup
         credential_definition_id = "some_credential_definition_id"
+        self.strategy.aea_addresses = ["some"]
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
@@ -323,10 +385,12 @@ class TestHttpHandler(AriesFaberTestCase):
             method="POST", url=self.strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION
         )
 
-    def test_handle_response_v(self):
+    def test_handle_response_6(self):
         """Test the handle method of the http handler where performative is RESPONSE and content has connection_id."""
         # setup
         connection_id = 2342
+        addr = "someaddr"
+        self.strategy.aea_addresses = [addr]
         invitation = {"some_key": "some_value"}
         http_dialogue = cast(
             HttpDialogue,
@@ -359,13 +423,13 @@ class TestHttpHandler(AriesFaberTestCase):
 
         mock_logger.assert_any_call(logging.INFO, f"Received message: {str(body)}")
 
-        assert self.http_handler.connection_id == connection_id
+        assert connection_id in self.http_handler.connections_sent
         mock_logger.assert_any_call(logging.INFO, f"connection: {str(body)}")
         mock_logger.assert_any_call(logging.INFO, f"connection id: {connection_id}")
         mock_logger.assert_any_call(logging.INFO, f"invitation: {str(invitation)}")
         mock_logger.assert_any_call(
             logging.INFO,
-            "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection...",
+            f"Sent invitation to {addr}. Waiting for the invitation from agent someaddr to finalise the connection...",
         )
 
         # _send_default_message
@@ -374,11 +438,69 @@ class TestHttpHandler(AriesFaberTestCase):
             actual_message=message,
             message_type=DefaultMessage,
             performative=DefaultMessage.Performative.BYTES,
-            to=self.strategy.alice_aea_address,
+            to=addr,
             sender=self.skill.skill_context.agent_address,
             content=json.dumps(invitation).encode("utf-8"),
         )
         assert has_attributes, error_str
+
+    def test_handle_response_7(self):
+        """Test the handle method of the http handler where performative is RESPONSE and credentials issued."""
+        # setup
+
+        connection_id = 2342
+        addr = "someaddr"
+        name = "bob"
+        self.strategy.aea_addresses = [addr]
+        self.http_handler.connections_set[connection_id] = addr
+        self.http_handler.counterparts_names[addr] = name
+
+        http_dialogue = cast(
+            HttpDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+            ),
+        )
+
+        body = {
+            "credential_proposal_dict": {},
+            "connection_id": connection_id,
+            "credential_offer_dict": {
+                "credential_preview": {
+                    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+                    "attributes": [
+                        {"name": "name", "value": "bob"},
+                        {"name": "date", "value": "2022-01-01"},
+                        {"name": "degree", "value": "History"},
+                        {"name": "average", "value": "4"},
+                    ],
+                }
+            },
+        }
+        mocked_body_bytes = json.dumps(body).encode("utf-8")
+        incoming_message = cast(
+            HttpMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=http_dialogue,
+                performative=HttpMessage.Performative.RESPONSE,
+                status_code=200,
+                status_text="some_status_code",
+                headers=self.mocked_headers,
+                version=self.mocked_version,
+                body=mocked_body_bytes,
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.http_handler.handle(incoming_message)
+
+        mock_logger.assert_any_call(logging.INFO, f"Received message: {str(body)}")
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Credential issued for {name}({addr}): {body['credential_offer_dict']['credential_preview']}",
+        )
 
     def test_teardown(self):
         """Test the teardown method of the http handler."""
@@ -453,7 +575,7 @@ class TestOefSearchHandler(AriesFaberTestCase):
         """Test the _handle_search method of the oef_search handler where the number of agents found is NOT 0."""
         # setup
         alice_address = "alice"
-        agents = (alice_address,)
+        agents = (alice_address, "bob")
         oef_search_dialogue = cast(
             OefSearchDialogue,
             self.prepare_skill_dialogue(
@@ -485,11 +607,11 @@ class TestOefSearchHandler(AriesFaberTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"found Alice with address {alice_address}, stopping search.",
+            logging.INFO, f"found agents {', '.join(agents)}, stopping search.",
         )
 
         assert self.strategy.is_searching is False
-        assert self.strategy.alice_aea_address is alice_address
+        assert self.strategy.aea_addresses == list(agents)
         mock_http_req.assert_any_call(
             "GET", self.strategy.admin_url + ADMIN_COMMAND_STATUS
         )
@@ -521,7 +643,7 @@ class TestOefSearchHandler(AriesFaberTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "did not find Alice. found 0 agents. continue searching.",
+            logging.INFO, "Waiting for more agents.",
         )
 
     def test_handle_invalid(self):

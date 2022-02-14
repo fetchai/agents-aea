@@ -68,7 +68,7 @@ class HttpHandler(Handler):
         self._schema_id = None  # type: Optional[str]
         self.credential_definition_id = None  # type: Optional[str]
 
-        # Helpers
+        # connections
         self.connections_sent: Dict[str, Address] = {}
         self.connections_set: Dict[str, Address] = {}
         self.counterparts_names: Dict[Address, str] = {}
@@ -117,8 +117,8 @@ class HttpHandler(Handler):
             f"Sent invitation to {target}. Waiting for the invitation from agent {target} to finalise the connection..."
         )
 
-    def _register_public_did(self) -> None:
-        """Register DID on the ledger."""
+    def _register_public_did_on_acapy(self) -> None:
+        """Register DID on the ACA PY."""
         strategy = cast(Strategy, self.context.strategy)
         self.context.behaviours.faber.send_http_request_message(
             method="POST",
@@ -221,7 +221,7 @@ class HttpHandler(Handler):
             elif "did" in content:
                 self.did = content["did"]
                 self.context.logger.info(f"Received DID: {self.did}")
-                self._register_public_did()
+                self._register_public_did_on_acapy()
             elif "result" in content and "posture" in content["result"]:
                 self.context.logger.info(f"Registered public DID: {content}")
                 self._register_schema(
