@@ -365,7 +365,7 @@ async def test_bad_envelope():
         f.flush()
 
     with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(connection.receive(), timeout=0.1)
+        await asyncio.wait_for(connection.receive(), timeout=0.01)
 
     await connection.disconnect()
 
