@@ -53,10 +53,18 @@ class TestContractTestCase(BaseContractTestCase):
             "sign_send_confirm_receipt_multisig_transaction",
             return_value=TX_RECEIPT_EXAMPLE,
         ):
-            with mock.patch.object(BaseContractTestCase, "refill_from_faucet"):
+            with mock.patch.object(
+                BaseContractTestCase, "refill_from_faucet"
+            ) as refill_from_faucet_mock:
                 with mock.patch.object(CosmosCrypto, "sign_transaction"):
                     with mock.patch.object(FetchAIApi, "get_deploy_transaction"):
                         super().setup()
+
+                        refill_from_faucet_mock.assert_called_with(
+                            cls.ledger_api,
+                            cls.faucet_api,
+                            cls.item_owner_crypto.address,
+                        )
 
     @classmethod
     def finish_contract_deployment(cls):
