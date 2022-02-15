@@ -135,12 +135,12 @@ Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, m
 
 | Parameter      | Value                                                                      |
 | -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | stargateworld-3                                                            |
+| Chain ID       | capricorn-1                                                            |
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
 | Version        | v0.8.x                                                                     |
 | RPC Endpoint   | https://rpc-stargateworld.fetch.ai:443                                     |
-| REST Endpoint  | https://rest-stargateworld.fetch.ai:443                                    |
+| REST Endpoint  | https://rest-capricorn.fetch.ai:443                                    |
 | Block Explorer | <a href="https://explore-stargateworld.fetch.ai" target="_blank">https://explore-stargateworld.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 

@@ -6,7 +6,7 @@ description: The scaffold contract scaffolds a contract to be implemented by the
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmPBwWhEg3wcH1q9612srZYAYdANVdWLDFWKs7TviZmVj6
+  __init__.py: QmNyrstbfwi2i9ma4Ln4oR5KyrdAQacUK3t5mU3yHGmDjS
   contract.py: QmZZkVbFTPYaMybW98bsZi3ESqrCfAXLJYyqCS2jDpVmAg
 fingerprint_ignore_patterns: []
 class_name: MyScaffoldContract

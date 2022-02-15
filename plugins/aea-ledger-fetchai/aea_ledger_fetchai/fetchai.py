@@ -35,9 +35,9 @@ _FETCHAI = "fetchai"
 _FETCH = "fetch"
 TESTNET_NAME = "testnet"
 FETCHAI_TESTNET_FAUCET_URL = "https://faucet-stargateworld.t-v2-london-c.fetch-ai.com"
-DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
+DEFAULT_ADDRESS = "https://rest-capricorn.fetch.ai:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
-DEFAULT_CHAIN_ID = "stargateworld-3"
+DEFAULT_CHAIN_ID = "capricorn-1"
 
 
 class FetchAIHelper(CosmosHelper):

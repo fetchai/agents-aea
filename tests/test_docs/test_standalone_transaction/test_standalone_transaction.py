@@ -68,7 +68,7 @@ class TestStandaloneTransaction(BaseAEATestCase):
     def test_read_md_file(self):
         """Test the last code block, that is the full listing of the demo from the Markdown."""
         assert (
-            self.code_blocks[-1] == self.python_file
+            self.code_blocks[-1] == self.python_file[1:]
         ), "Files must be exactly the same."
 
     @pytest.mark.integration(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
