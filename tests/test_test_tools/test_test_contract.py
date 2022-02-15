@@ -34,7 +34,7 @@ from tests.conftest import ROOT_DIR
 LEDGER_ID = "fetchai"
 CONTRACT_ADDRESS = "contract_address"
 
-TX_RECEIPT_EXAMPLE = {"json": "like"}
+TX_RECEIPT_EXAMPLE = {"json": "like", "raw_log": "log"}
 
 
 class TestContractTestCase(BaseContractTestCase):
@@ -234,7 +234,7 @@ class TestContractTestCase(BaseContractTestCase):
     @mock.patch.object(FetchAICrypto, "sign_transaction", return_value="tx")
     @mock.patch.object(FetchAIApi, "send_signed_transaction", return_value="tx_digest")
     @mock.patch.object(
-        FetchAIApi, "get_transaction_receipt", return_value={"raw_log": "log"}
+        FetchAIApi, "get_transaction_receipt", return_value=TX_RECEIPT_EXAMPLE
     )
     @mock.patch.object(FetchAIApi, "is_transaction_settled", return_value=False)
     def test_sign_send_confirm_receipt_multisig_transaction_receipt_not_valid(
@@ -252,7 +252,7 @@ class TestContractTestCase(BaseContractTestCase):
                 tx, self.ledger_api, [self.deployer_crypto], sleep_time=sleep_time
             )
             assert str(e) == "Transaction receipt not valid!\nlog"
-        is_transaction_settled_mock.assert_called_with({"raw_log": "log"})
+        is_transaction_settled_mock.assert_called_with(TX_RECEIPT_EXAMPLE)
         get_transaction_receipt_mock.assert_called_with("tx_digest")
         send_signed_transaction_mock.assert_called_once_with(tx)
         sign_transaction_mock.assert_called_once_with(tx)
