@@ -111,7 +111,7 @@ class BaseTestDecisionMaker:
             default_address_key=FetchAICrypto.identifier,
         )
         cls.config = {}
-        cls.decision_maker_handler = decision_maker_handler_cls(
+        cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet, config=cls.config
         )
         cls.decision_maker = decision_maker_cls(cls.decision_maker_handler)
