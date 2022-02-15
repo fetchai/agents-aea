@@ -91,6 +91,15 @@ class TestContractTestCase(BaseContractTestCase):
         assert self.fund_from_faucet is True
         assert self.deployment_tx_receipt == TX_RECEIPT_EXAMPLE
 
+    def test_contract_property(self):
+        """Test contract property."""
+        assert self.contract is self._contract
+        delattr(self.__class__, "_contract")
+        with pytest.raises(
+            ValueError, match="Ensure the contract is set during setup."
+        ):
+            self.contract
+
     @mock.patch.object(FetchAIFaucetApi, "get_wealth")
     def test_refill_from_faucet(self, get_wealth_mock):
         """Test the refill_from_faucet static method."""
