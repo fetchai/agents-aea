@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the last code-block from the standalone-transaction.md file."""
 
 import logging

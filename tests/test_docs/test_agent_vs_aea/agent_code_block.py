@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This scripts contains code from agent-vs-aea.md file."""
 
 import os
