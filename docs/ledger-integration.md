@@ -128,9 +128,9 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
-## Stargate World - Fetch.ai testnet for agents
+## Capricorn - Fetch.ai testnet for agents
 
-Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
+Capricorn is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
 
 | Parameter      | Value                                                                      |
@@ -139,12 +139,11 @@ Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, m
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
 | Version        | v0.8.x                                                                     |
-| RPC Endpoint   | https://rpc-stargateworld.fetch.ai:443                                     |
+| RPC Endpoint   | https://rpc-capricorn.fetch.ai:443                                     |
 | REST Endpoint  | https://rest-capricorn.fetch.ai:443                                    |
-| Block Explorer | <a href="https://explore-stargateworld.fetch.ai" target="_blank">https://explore-stargateworld.fetch.ai</a> |
+| Block Explorer | <a href="https://explore-capricorn.fetch.ai" target="_blank">https://explore-capricorn.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
-You can access more details on <a href="https://github.com/fetchai/networks-stargateworld" target="_blank">GitHub</a>.
 
 The configurations can be specified for the `fetchai/ledger:0.19.0` connection.
 
