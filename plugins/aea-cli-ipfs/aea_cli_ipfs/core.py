@@ -162,8 +162,8 @@ def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool,) -> str:
     path_data = _get_path_data(dir_path)
     if path_data is not None:
         package_path, item_type = path_data
-        package_path = Path(package_path)
-        item_config = load_item_config(item_type=item_type, package_path=package_path)
+        package_path_ = Path(package_path)
+        item_config = load_item_config(item_type=item_type, package_path=package_path_)
         register_item_to_local_registry(
             item_type=item_type,
             public_id=item_config.public_id,

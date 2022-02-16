@@ -23,7 +23,7 @@ import shutil
 import signal
 import subprocess  # nosec
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 import ipfshttpclient  # type: ignore
 import requests
@@ -210,7 +210,7 @@ class IPFSTool:
         """Node address"""
         if self._addr is None:
             self._addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
-        return self._addr
+        return cast(str, self._addr)
 
     def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
         """

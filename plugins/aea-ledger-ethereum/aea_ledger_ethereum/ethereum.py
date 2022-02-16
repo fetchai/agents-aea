@@ -156,7 +156,7 @@ def estimate_priority_fee(
         return default_priority_fee
 
     fee_history = web3_object.eth.fee_history(
-        fee_history_blocks, block_number, [fee_history_percentile]
+        fee_history_blocks, block_number, [fee_history_percentile]  # type: ignore
     )
 
     # This is going to break if more percentiles are introduced in the future,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -100,8 +100,6 @@ from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.fetchai.connections.stub.connection import StubConnection
-
 from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
@@ -115,6 +113,7 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import (
 from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
+from packages.fetchai.connections.stub.connection import StubConnection
 
 from tests.common.docker_image import (
     DockerImage,
@@ -979,6 +978,7 @@ def _make_libp2p_mailbox_connection(
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
+    """Get a libp2p mailbox connection."""
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
@@ -1016,6 +1016,7 @@ def _make_libp2p_mailbox_connection(
 def libp2p_log_on_failure(fn: Callable) -> Callable:
     """
     Decorate a pytest method running a libp2p node to print its logs in case test fails.
+
     :return: decorated method.
     """
 
@@ -1041,6 +1042,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
 def libp2p_log_on_failure_all(cls):
     """
     Decorate every method of a class with `libp2p_log_on_failure`.
+
     :return: class with decorated methods.
     """
     for name, fn in inspect.getmembers(cls):
