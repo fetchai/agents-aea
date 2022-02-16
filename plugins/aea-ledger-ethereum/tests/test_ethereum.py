@@ -75,7 +75,10 @@ def get_history_data(n_blocks: int, base_multiplier: int = 100) -> Dict:
     return {
         "oldestBlock": 1,
         "reward": [
-            math.ceil(random.random() * base_multiplier) * 1e1 for _ in range(n_blocks)
+            [
+                math.ceil(random.random() * base_multiplier) * 1e1,
+            ]
+            for _ in range(n_blocks)
         ],
         "baseFeePerGas": [
             math.ceil(random.random() * base_multiplier) * 1e9 for _ in range(n_blocks)
@@ -249,7 +252,9 @@ def _wait_get_receipt(
 
 
 def _construct_and_settle_tx(
-    ethereum_api: EthereumApi, account: EthereumCrypto, tx_params: dict,
+    ethereum_api: EthereumApi,
+    account: EthereumCrypto,
+    tx_params: dict,
 ) -> Tuple[str, JSONLike, bool]:
     """Construct and settle a transaction."""
     transfer_transaction = ethereum_api.get_transfer_transaction(**tx_params)
@@ -297,7 +302,9 @@ def test_construct_sign_and_submit_transfer_transaction(
     }
 
     transaction_digest, transaction_receipt, is_settled = _construct_and_settle_tx(
-        ethereum_api, account, tx_params,
+        ethereum_api,
+        account,
+        tx_params,
     )
     assert is_settled, "Failed to verify tx!"
 
@@ -460,7 +467,11 @@ def test_gas_price_strategy_eip1559() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+        web3.eth,
+        "fee_history",
+        return_value=get_history_data(
+            n_blocks=5,
+        ),
     )
 
     with get_block_mock:
@@ -483,7 +494,11 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+        web3.eth,
+        "fee_history",
+        return_value=get_history_data(
+            n_blocks=5,
+        ),
     )
     with get_block_mock:
         with fee_history_mock:
@@ -511,7 +526,11 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
     )
 
     fee_history_mock = mock.patch.object(
-        web3.eth, "fee_history", return_value=get_history_data(n_blocks=5,),
+        web3.eth,
+        "fee_history",
+        return_value=get_history_data(
+            n_blocks=5,
+        ),
     )
     with get_block_mock:
         with fee_history_mock:
@@ -648,7 +667,8 @@ def test_build_transaction(ethereum_testnet_config):
     eth_api = EthereumApi(**ethereum_testnet_config)
 
     with mock.patch(
-        "web3.eth.Eth.get_transaction_count", return_value=0,
+        "web3.eth.Eth.get_transaction_count",
+        return_value=0,
     ):
         result = eth_api.build_transaction(
             contract_instance=contract_instance,
@@ -665,17 +685,27 @@ def test_build_transaction(ethereum_testnet_config):
         )
 
         assert result == dict(
-            nonce=0, value=0, gas=0, gasPrice=0, maxFeePerGas=0, maxPriorityFeePerGas=0,
+            nonce=0,
+            value=0,
+            gas=0,
+            gasPrice=0,
+            maxFeePerGas=0,
+            maxPriorityFeePerGas=0,
         )
 
         with mock.patch.object(
-            EthereumApi, "try_get_gas_pricing", return_value={"gas": 0},
+            EthereumApi,
+            "try_get_gas_pricing",
+            return_value={"gas": 0},
         ):
             result = eth_api.build_transaction(
                 contract_instance=contract_instance,
                 method_name="dummy_method",
                 method_args={},
-                tx_args=dict(sender_address="sender_address", eth_value=0,),
+                tx_args=dict(
+                    sender_address="sender_address",
+                    eth_value=0,
+                ),
             )
 
             assert result == dict(nonce=0, value=0, gas=0)
@@ -688,13 +718,15 @@ def test_get_transaction_transfer_logs(ethereum_testnet_config):
     dummy_receipt = {"logs": [{"topics": ["0x0", "0x0"]}]}
 
     with mock.patch(
-        "web3.eth.Eth.get_transaction_receipt", return_value=dummy_receipt,
+        "web3.eth.Eth.get_transaction_receipt",
+        return_value=dummy_receipt,
     ):
         contract_instance = MagicMock()
         contract_instance.events.Transfer().processReceipt.return_value = {"log": "log"}
 
         result = eth_api.get_transaction_transfer_logs(
-            contract_instance=contract_instance, tx_hash="dummy_hash",
+            contract_instance=contract_instance,
+            tx_hash="dummy_hash",
         )
 
         assert result == dict(logs={"log": "log"})
@@ -705,13 +737,15 @@ def test_get_transaction_transfer_logs_raise(ethereum_testnet_config):
     eth_api = EthereumApi(**ethereum_testnet_config)
 
     with mock.patch(
-        "web3.eth.Eth.get_transaction_receipt", return_value=None,
+        "web3.eth.Eth.get_transaction_receipt",
+        return_value=None,
     ):
         contract_instance = MagicMock()
         contract_instance.events.Transfer().processReceipt.return_value = {"log": "log"}
 
         result = eth_api.get_transaction_transfer_logs(
-            contract_instance=contract_instance, tx_hash="dummy_hash",
+            contract_instance=contract_instance,
+            tx_hash="dummy_hash",
         )
 
         assert result == dict(logs=[])
@@ -721,7 +755,9 @@ def test_get_transaction_transfer_logs_raise(ethereum_testnet_config):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_revert_reason(
-    ethereum_private_key_file: str, ethereum_testnet_config: dict, ganache: Generator,
+    ethereum_private_key_file: str,
+    ethereum_testnet_config: dict,
+    ganache: Generator,
 ) -> None:
     """Test the retrieval of the revert reason for a transaction."""
     account = EthereumCrypto(private_key_path=ethereum_private_key_file)
@@ -744,10 +780,13 @@ def test_revert_reason(
         return_value=AttributeDict({"status": 0}),
     ):
         with mock.patch(
-            "web3.eth.Eth.call", side_effect=SolidityError("test revert reason"),
+            "web3.eth.Eth.call",
+            side_effect=SolidityError("test revert reason"),
         ):
             _, transaction_receipt, is_settled = _construct_and_settle_tx(
-                ethereum_api, account, tx_params,
+                ethereum_api,
+                account,
+                tx_params,
             )
 
             assert transaction_receipt["revert_reason"] == "test revert reason"
