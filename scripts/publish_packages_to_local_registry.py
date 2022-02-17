@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +53,7 @@ def main() -> None:
     """Main function."""
     args = get_arguments()
     packages = get_package_list(args.package_dir)
-    ipfs_tool = IPFSTool()
+    ipfs_tool = IPFSTool(addr="/ip4/127.0.0.1/tcp/5001/http")
     with IPFSDaemon(offline=True):
         for package_path in packages:
             register_package(ipfs_tool=ipfs_tool, dir_path=package_path, no_pin=False)

@@ -171,6 +171,7 @@ def test_get_instance_no_address_cosmwasm(dummy_contract):
     assert instance is None
 
 
+@pytest.mark.skip
 def test_get_deploy_transaction_cosmwasm(dummy_contract):
     """Tests the deploy transaction classmethod for fetchai."""
     aea_ledger_fetchai = crypto_registry.make(FetchAICrypto.identifier)

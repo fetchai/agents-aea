@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -636,6 +636,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert self.ledger_api.is_transaction_settled(receipt)
 
 
+@pytest.mark.skip
 class TestCosmWasmContract(BaseContractTestCase):
     """Test the cosmwasm contract."""
 

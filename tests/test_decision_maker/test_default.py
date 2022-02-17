@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -146,6 +146,7 @@ class BaseTestDecisionMaker:
             )
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    @pytest.mark.skip
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
         fetchai_api = make_ledger_api(

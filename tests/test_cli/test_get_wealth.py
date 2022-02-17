@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.generate_wealth module."""
-
 from unittest import TestCase, mock
 
 from aea_ledger_fetchai import FetchAICrypto

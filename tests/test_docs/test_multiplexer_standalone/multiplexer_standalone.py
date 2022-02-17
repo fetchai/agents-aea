@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the full script from the multiplexer-standalone.md file."""
 
 import os

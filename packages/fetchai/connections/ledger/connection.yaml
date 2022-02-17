@@ -29,9 +29,9 @@ config:
           gas_price_strategy: fast
         eip1559: {}
     fetchai:
-      address: https://rest-stargateworld.fetch.ai:443
+      address: https://rest-capricorn.fetch.ai:443
       denom: atestfet
-      chain_id: stargateworld-3
+      chain_id: capricorn-1
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:1.0.0

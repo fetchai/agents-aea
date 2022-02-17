@@ -75,7 +75,8 @@ def get_history_data(n_blocks: int, base_multiplier: int = 100) -> Dict:
     return {
         "oldestBlock": 1,
         "reward": [
-            math.ceil(random.random() * base_multiplier) * 1e1 for _ in range(n_blocks)
+            [math.ceil(random.random() * base_multiplier) * 1e1]
+            for _ in range(n_blocks)
         ],
         "baseFeePerGas": [
             math.ceil(random.random() * base_multiplier) * 1e9 for _ in range(n_blocks)
