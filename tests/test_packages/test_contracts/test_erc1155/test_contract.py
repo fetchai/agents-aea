@@ -703,7 +703,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_create_and_mint_and_balances(self):
         """Test cosmwasm contract create, mint and balances functionalities."""
         # Create single token

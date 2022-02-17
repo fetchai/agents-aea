@@ -24,6 +24,7 @@ import json
 import logging
 import time
 from collections import namedtuple
+from itertools import chain
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, cast
@@ -60,8 +61,8 @@ from cosmpy.protos.cosmos.tx.v1beta1.tx_pb2 import (
     Tx,
     TxBody,
 )
-from cosmpy.protos.cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
-from cosmpy.protos.cosmwasm.wasm.v1beta1.tx_pb2 import (
+from cosmpy.protos.cosmwasm.wasm.v1.query_pb2 import QuerySmartContractStateRequest
+from cosmpy.protos.cosmwasm.wasm.v1.tx_pb2 import (
     MsgExecuteContract,
     MsgInstantiateContract,
     MsgStoreCode,
@@ -94,9 +95,9 @@ DEFAULT_FAUCET_URL = "INVALID_URL"
 DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
 DEFAULT_CURRENCY_DENOM = "uatom"
 DEFAULT_CHAIN_ID = "cosmoshub-3"
-DEFAULT_GAS_AMOUNT = 1500000
+DEFAULT_GAS_AMOUNT = 1550000
 # Txs will fail if gas_limit is higher than MAXIMUM_GAS_AMOUNT
-MAXIMUM_GAS_AMOUNT = 1500000
+MAXIMUM_GAS_AMOUNT = 2000000
 _BYTECODE = "wasm_byte_code"
 
 
@@ -227,8 +228,8 @@ class CosmosHelper(Helper):
                 )
         return is_successful
 
-    @staticmethod
-    def get_code_id(tx_receipt: JSONLike) -> Optional[int]:
+    @classmethod
+    def get_code_id(cls, tx_receipt: JSONLike) -> Optional[int]:
         """
         Retrieve the `code_id` from a transaction receipt.
 
@@ -237,18 +238,28 @@ class CosmosHelper(Helper):
         """
         code_id: Optional[int] = None
         try:
-            res = [
-                dic_["value"]  # type: ignore
-                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]  # type: ignore
-                if dic_["key"] == "code_id"  # type: ignore
-            ]
-            code_id = int(res[0])
+            attributes = cls.get_event_attributes(tx_receipt)
+
+            code_id = int(attributes["code_id"])
         except (KeyError, IndexError):  # pragma: nocover
             code_id = None
         return code_id
 
     @staticmethod
-    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+    def get_event_attributes(tx_receipt: JSONLike) -> Dict:
+        """
+        Retrieve events attributes from tx receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: dict
+        """
+        return {
+            i["key"]: i["value"]
+            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])
+        }
+
+    @classmethod
+    def get_contract_address(cls, tx_receipt: JSONLike) -> Optional[str]:
         """
         Retrieve the `contract_address` from a transaction receipt.
 
@@ -257,12 +268,8 @@ class CosmosHelper(Helper):
         """
         contract_address: Optional[str] = None
         try:
-            res = [
-                dic_["value"]  # type: ignore
-                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]  # type: ignore
-                if dic_["key"] == "contract_address"  # type: ignore
-            ]  # type: ignore
-            contract_address = res[0]
+            attributes = cls.get_event_attributes(tx_receipt)
+            contract_address = attributes["_contract_address"]
         except (KeyError, IndexError):  # pragma: nocover
             contract_address = None
         return contract_address
@@ -751,8 +758,6 @@ class _CosmosApi(LedgerApi):
         tx_fee: int = 0,
         gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
-        source: str = "",
-        builder: str = "",
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm bytecode deployment transaction.
@@ -766,15 +771,11 @@ class _CosmosApi(LedgerApi):
         :param tx_fee: the transaction fee.
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
-        :param source: the source.
-        :param builder: the builder.
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = MsgStoreCode(
             sender=str(deployer_address),
             wasm_byte_code=base64.b64decode(contract_interface[_BYTECODE]),
-            source=source,
-            builder=builder,
         )
         store_msg_packed = ProtoAny()
         store_msg_packed.Pack(store_msg, type_url_prefix="/")  # type: ignore
@@ -836,7 +837,7 @@ class _CosmosApi(LedgerApi):
         init_msg = MsgInstantiateContract(
             sender=str(deployer_address),
             code_id=code_id,
-            init_msg=json.dumps(init_msg).encode("UTF8"),
+            msg=json.dumps(init_msg).encode("UTF8"),
             label=label,
             funds=init_funds,
         )
@@ -1291,7 +1292,9 @@ class _CosmosApi(LedgerApi):
         if broad_tx_resp.tx_response.code != 0:
             raw_log = broad_tx_resp.tx_response.raw_log
 
-            _default_logger.warning(f"Sending transaction failed: {raw_log}")
+            _default_logger.warning(
+                f"Sending transaction failed: {raw_log} {broad_tx_resp}"
+            )
             tx_digest = None
         else:
             tx_digest = broad_tx_resp.tx_response.txhash
