@@ -45,7 +45,7 @@ from packages.fetchai.connections.stub.connection import (
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
-from tests.conftest import ROOT_DIR, _make_stub_connection
+from tests.conftest import MAX_FLAKY_RERUNS, ROOT_DIR, _make_stub_connection
 
 
 SEPARATOR = ","
@@ -348,6 +348,7 @@ async def test_multiple_envelopes():
     await connection.disconnect()
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.asyncio
 async def test_bad_envelope():
     """Test bad format envelop."""
