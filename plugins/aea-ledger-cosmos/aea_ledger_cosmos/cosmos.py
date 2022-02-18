@@ -21,11 +21,11 @@
 import base64
 import gzip
 import hashlib
-from itertools import chain
 import json
 import logging
 import time
 from collections import namedtuple
+from itertools import chain
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
@@ -249,6 +249,7 @@ class CosmosHelper(Helper):
     def get_event_attributes(tx_receipt: JSONLike) -> Dict:
         """
         Retrieve events attributes from tx receipt.
+
         :param tx_receipt: the receipt of the transaction.
         :return: dict
         """

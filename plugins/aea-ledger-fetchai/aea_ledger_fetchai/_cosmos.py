@@ -249,6 +249,7 @@ class CosmosHelper(Helper):
     def get_event_attributes(tx_receipt: JSONLike) -> Dict:
         """
         Retrieve events attributes from tx receipt.
+
         :param tx_receipt: the receipt of the transaction.
         :return: dict
         """
