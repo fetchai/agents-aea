@@ -45,6 +45,7 @@ from tests.conftest import (
 DEFAULT_PORT = 10234
 
 
+@pytest.mark.skip
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
 class BaseTestLibp2pRelay:
     """Base test class for libp2p connection relay."""
@@ -88,6 +89,7 @@ class BaseTestLibp2pRelay:
             pass
 
 
+@pytest.mark.skip
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay):
     """Test that connection will reliably receive envelopes after its relay node restarted"""
@@ -302,6 +304,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
 
+@pytest.mark.skip
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay):
     """Test that connection will reliably route envelope to destination in case of relay node restart within timeout"""
@@ -433,6 +436,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
 
+@pytest.mark.skip
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
     """Test that connection will correctly route envelope to destination that changed its peer"""
