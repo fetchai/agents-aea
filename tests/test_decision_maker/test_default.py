@@ -146,7 +146,6 @@ class BaseTestDecisionMaker:
             )
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    @pytest.mark.skip
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
         fetchai_api = make_ledger_api(

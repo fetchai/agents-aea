@@ -636,7 +636,6 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert self.ledger_api.is_transaction_settled(receipt)
 
 
-@pytest.mark.skip
 class TestCosmWasmContract(BaseContractTestCase):
     """Test the cosmwasm contract."""
 
