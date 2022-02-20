@@ -120,8 +120,12 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         self.add_private_key(
             ledger_api_id=Ethereum.identifier, private_key_filepath=key_path
         )
-        self.generate_private_key(FetchAI.identifier, private_key_file=self.conn_key_file)
-        self.add_private_key(FetchAI.identifier, private_key_filepath=self.conn_key_file, connection=True)
+        self.generate_private_key(
+            FetchAI.identifier, private_key_file=self.conn_key_file
+        )
+        self.add_private_key(
+            FetchAI.identifier, private_key_filepath=self.conn_key_file, connection=True
+        )
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_ledger", Ethereum.identifier)
