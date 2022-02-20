@@ -25,7 +25,6 @@ import time
 
 import pytest
 
-from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
@@ -113,7 +112,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         genesis_peer = self.genesis.node.multiaddrs[0]
 
         file = "node_key"
-        make_crypto(DEFAULT_LEDGER).dump(file)
+        make_crypto("fetchai").dump(file)
         self.relay_key_path = file
 
         temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
@@ -327,7 +326,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         genesis_peer = self.genesis.node.multiaddrs[0]
 
         file = "node_key"
-        make_crypto(DEFAULT_LEDGER).dump(file)
+        make_crypto("fetchai").dump(file)
         self.relay_key_path = file
 
         temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
@@ -465,7 +464,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         self.multiplexer1.connect()
         self.multiplexers.append(self.multiplexer1)
 
-        self.connection_key = make_crypto(DEFAULT_LEDGER)
+        self.connection_key = make_crypto("fetchai")
         temp_dir_2 = os.path.join(self.t, "temp_dir_2")
         os.mkdir(temp_dir_2)
         self.connection2 = _make_libp2p_connection(

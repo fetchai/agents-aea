@@ -43,6 +43,7 @@ cert_requests:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
+  aea-ledger-fetchai: {}
   asn1crypto:
     version: <1.5.0,>=1.4.0
 is_abstract: false

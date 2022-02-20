@@ -20,6 +20,7 @@
 
 """This test module contains integration tests for P2PLibp2p connection."""
 
+import json
 import os
 import shutil
 import tempfile
@@ -488,15 +489,20 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         """Test connectivity."""
         self.log_files = []
         self.agent_name = "some"
+        ledger_id = "fetchai"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
         self.conn_key_file = os.path.join(
             os.path.abspath(os.getcwd()), "./conn_key.txt"
         )
-        self.generate_private_key()
-        self.add_private_key()
-        self.generate_private_key(private_key_file=self.conn_key_file)
-        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
+        self.generate_private_key(ledger_id, private_key_file=self.conn_key_file)
+        self.set_config("agent.default_ledger", ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
+        self.add_private_key(
+            ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        )
+        self.generate_private_key(ledger_id)
+        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
 
@@ -513,6 +519,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
                 "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
                 "entry_peers": maddrs,
                 "log_file": log_file,
+                "ledger_id": ledger_id,
             },
         )
 
@@ -555,12 +562,15 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     )
     def test_connectivity(self, delegate_uris_public_keys):
         """Test connectivity."""
+        ledger_id = "fetchai"
         delegate_uris, public_keys = delegate_uris_public_keys
         self.agent_name = "some"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
-        self.generate_private_key()
-        self.add_private_key()
+        self.generate_private_key(ledger_id)
+        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
+        self.set_config("agent.default_ledger", ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
@@ -584,7 +594,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
             [
                 CertRequest(
                     identifier="acn",
-                    ledger_id="fetchai",
+                    ledger_id=ledger_id,
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=public_key,

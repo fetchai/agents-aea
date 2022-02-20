@@ -79,5 +79,6 @@ cert_requests:
   save_path: .certs/conn_cert.txt
 excluded_protocols: []
 restricted_to_protocols: []
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai: {}
 is_abstract: false

@@ -271,6 +271,14 @@ PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
 PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
     "0321bac023b7f7cf655cf5e0f988a4c1cf758f7b530528362c4ba8d563f7b090c4"
 )
+# TODO: temporary overwriting of addresses, URIs and public keys
+#  used in test_p2p_libp2p/test_public_dht.py
+PUBLIC_DHT_P2P_MADDR_1 = PUBLIC_STAGING_DHT_P2P_MADDR_1
+PUBLIC_DHT_P2P_MADDR_2 = PUBLIC_STAGING_DHT_P2P_MADDR_2
+PUBLIC_DHT_DELEGATE_URI_1 = PUBLIC_STAGING_DHT_DELEGATE_URI_1
+PUBLIC_DHT_DELEGATE_URI_2 = PUBLIC_STAGING_DHT_DELEGATE_URI_2
+PUBLIC_DHT_P2P_PUBLIC_KEY_1 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1
+PUBLIC_DHT_P2P_PUBLIC_KEY_2 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
@@ -853,18 +861,23 @@ def _make_libp2p_connection(
         os.remove(log_file)
     key = agent_key
     if key is None:
-        key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("identity", address=key.address, public_key=key.public_key)
+        key = make_crypto("fetchai")  # TODO: replace with DEFAULT_LEDGER
+    identity = Identity(
+        "identity",
+        address=key.address,
+        public_key=key.public_key,
+        default_address_key=key.identifier,
+    )
     conn_crypto_store = None
     if node_key_file is not None:
-        conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
+        conn_crypto_store = CryptoStore({"fetchai": node_key_file})
     else:
-        node_key = make_crypto(DEFAULT_LEDGER)
+        node_key = make_crypto("fetchai")
         node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
         node_key.dump(node_key_path)
-        conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_path})
+        conn_crypto_store = CryptoStore({node_key.identifier: node_key_path})
     cert_request = CertRequest(
-        conn_crypto_store.public_keys[DEFAULT_LEDGER],
+        conn_crypto_store.public_keys["fetchai"],
         POR_DEFAULT_SERVICE_ID,
         key.identifier,
         "2021-01-01",
@@ -875,6 +888,7 @@ def _make_libp2p_connection(
     _process_cert(key, cert_request, path_prefix=data_dir)
     if not build_directory:
         build_directory = os.getcwd()
+    config = {"ledger_id": node_key.identifier}
     if relay and delegate:
         configuration = ConnectionConfig(
             node_key_file=node_key_file,
@@ -887,6 +901,7 @@ def _make_libp2p_connection(
             connection_id=P2PLibp2pConnection.connection_id,
             build_directory=build_directory,
             cert_requests=[cert_request],
+            **config,  # type: ignore
         )
     elif relay and not delegate:
         configuration = ConnectionConfig(
@@ -899,6 +914,7 @@ def _make_libp2p_connection(
             connection_id=P2PLibp2pConnection.connection_id,
             build_directory=build_directory,
             cert_requests=[cert_request],
+            **config,  # type: ignore
         )
     else:
         configuration = ConnectionConfig(
@@ -910,6 +926,7 @@ def _make_libp2p_connection(
             connection_id=P2PLibp2pConnection.connection_id,
             build_directory=build_directory,
             cert_requests=[cert_request],
+            **config,  # type: ignore
         )
 
     if mailbox:
@@ -934,13 +951,16 @@ def _make_libp2p_client_connection(
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = "fetchai",  # TOFIX: DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
-        "identity", address=crypto.address, public_key=crypto.public_key
+        "identity",
+        address=crypto.address,
+        public_key=crypto.public_key,
+        default_address_key=crypto.identifier,
     )
     cert_request = CertRequest(
         peer_public_key,
@@ -952,6 +972,7 @@ def _make_libp2p_client_connection(
         f"./{crypto.address}_cert.txt",
     )
     _process_cert(crypto, cert_request, path_prefix=data_dir)
+    config = {"ledger_id": crypto.identifier}
     configuration = ConnectionConfig(
         tcp_key_file=None,
         nodes=[
@@ -964,6 +985,7 @@ def _make_libp2p_client_connection(
         ],
         connection_id=P2PLibp2pClientConnection.connection_id,
         cert_requests=[cert_request],
+        **config,  # type: ignore
     )
     return P2PLibp2pClientConnection(
         configuration=configuration, data_dir=data_dir, identity=identity
@@ -976,14 +998,17 @@ def _make_libp2p_mailbox_connection(
     node_port: int = 8888,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = "fetchai",  # DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
     """Get a libp2p mailbox connection."""
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
-        "identity", address=crypto.address, public_key=crypto.public_key
+        "identity",
+        address=crypto.address,
+        public_key=crypto.public_key,
+        default_address_key=crypto.identifier,
     )
     cert_request = CertRequest(
         peer_public_key,
@@ -995,6 +1020,7 @@ def _make_libp2p_mailbox_connection(
         f"./{crypto.address}_cert.txt",
     )
     _process_cert(crypto, cert_request, path_prefix=data_dir)
+    config = {"ledger_id": crypto.identifier}
     configuration = ConnectionConfig(
         tcp_key_file=None,
         nodes=[
@@ -1007,6 +1033,7 @@ def _make_libp2p_mailbox_connection(
         ],
         connection_id=P2PLibp2pMailboxConnection.connection_id,
         cert_requests=[cert_request],
+        **config,  # type: ignore
     )
     return P2PLibp2pMailboxConnection(
         configuration=configuration, data_dir=data_dir, identity=identity

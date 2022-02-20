@@ -294,7 +294,7 @@ class TestLibp2pClientConnectionCheckSignature:
     @pytest.mark.asyncio
     async def test_signature_check_fail(self):
         """Test signature check failed."""
-        key = make_crypto(DEFAULT_LEDGER)
+        key = make_crypto("fetchai")
 
         assert self.connection.is_connected is False
         await self.connection_node.connect()

@@ -19,9 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
+import json
 import os
-
-from aea_ledger_fetchai import FetchAICrypto
 
 from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
@@ -76,8 +75,11 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
 
     def test_connection(self):
         """Test the connection can be used in an aea."""
-        self.generate_private_key()
-        self.add_private_key()
+        ledger_id = "fetchai"
+        self.generate_private_key(ledger_id)
+        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
+        self.set_config("agent.default_ledger", ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
         self.add_item("connection", str(PUBLIC_ID))
         conn_path = "vendor.fetchai.connections.p2p_libp2p_mailbox"
         self.nested_set_config(
@@ -98,7 +100,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
             [
                 CertRequest(
                     identifier="acn",
-                    ledger_id=FetchAICrypto.identifier,
+                    ledger_id=ledger_id,
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=self.node_connection.node.pub,
