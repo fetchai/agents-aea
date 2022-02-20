@@ -83,8 +83,8 @@ True if the transaction has been settled, False o/w.
 #### get`_`code`_`id
 
 ```python
- | @staticmethod
- | get_code_id(tx_receipt: JSONLike) -> Optional[int]
+ | @classmethod
+ | get_code_id(cls, tx_receipt: JSONLike) -> Optional[int]
 ```
 
 Retrieve the `code_id` from a transaction receipt.
@@ -97,12 +97,30 @@ Retrieve the `code_id` from a transaction receipt.
 
 the code id, if present
 
+<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_event_attributes"></a>
+#### get`_`event`_`attributes
+
+```python
+ | @staticmethod
+ | get_event_attributes(tx_receipt: JSONLike) -> Dict
+```
+
+Retrieve events attributes from tx receipt.
+
+**Arguments**:
+
+- `tx_receipt`: the receipt of the transaction.
+
+**Returns**:
+
+dict
+
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosHelper.get_contract_address"></a>
 #### get`_`contract`_`address
 
 ```python
- | @staticmethod
- | get_contract_address(tx_receipt: JSONLike) -> Optional[str]
+ | @classmethod
+ | get_contract_address(cls, tx_receipt: JSONLike) -> Optional[str]
 ```
 
 Retrieve the `contract_address` from a transaction receipt.
