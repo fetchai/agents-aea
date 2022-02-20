@@ -41,6 +41,7 @@ cert_requests:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
+  aea-ledger-fetchai: {}
   aiohttp:
     version: <3.8,>=3.7.4
   asn1crypto:

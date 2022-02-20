@@ -55,10 +55,15 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
-        self.generate_private_key()
-        self.add_private_key()
-        self.generate_private_key(private_key_file=self.conn_key_file)
-        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
+        ledger_id = "fetchai"
+        self.generate_private_key(ledger_id)
+        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
+        self.set_config("agent.default_ledger", ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
+        self.generate_private_key(ledger_id, private_key_file=self.conn_key_file)
+        self.add_private_key(
+            ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        )
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
@@ -115,8 +120,12 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         self.add_private_key(
             ledger_api_id=Ethereum.identifier, private_key_filepath=key_path
         )
-        self.generate_private_key(private_key_file=self.conn_key_file)
-        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
+        self.generate_private_key(
+            FetchAI.identifier, private_key_file=self.conn_key_file
+        )
+        self.add_private_key(
+            FetchAI.identifier, private_key_filepath=self.conn_key_file, connection=True
+        )
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_ledger", Ethereum.identifier)
@@ -186,10 +195,15 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
-        self.generate_private_key()
-        self.add_private_key()
-        self.generate_private_key(private_key_file=self.conn_key_file)
-        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
+        ledger_id = "fetchai"
+        self.generate_private_key(ledger_id)
+        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
+        self.set_config("agent.default_ledger", ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
+        self.generate_private_key(ledger_id, private_key_file=self.conn_key_file)
+        self.add_private_key(
+            ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        )
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
 
