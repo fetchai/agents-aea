@@ -8,12 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmXUyoQ3NTF9EBSSk7ENNRbCANwABKJvfbrKi2Pmoc2JkT
-  __init__.py: QmXr9kVoLrL677CP5i1WuZ5cDM1sZQFw53sDJQhAd3u8MH
+  __init__.py: QmT1zCFgxSbayHK3xGZNomkAUbxvbdFgukW3iFKRB3HSFd
   dialogues.py: QmPKGuXmBsC62b4WGojPrYNH1cXSWj4ir5oAS9v3xfZvKa
   message.py: QmP9uR4AvQv1A1Fx41bVC3cbQj4veRuEY1yERCdV8HvcQj
   serialization.py: QmZTJMieof5uL3zDQXRMnZso8Fs1CqgNn4Tua7DqihkFdk
   state_update.proto: QmPqvqnUQtcE475C3kCctNUsmi46JkMFGYE3rqMmqvbyEz
-  state_update_pb2.py: QmQzivAQzA7T7sNTAECdhjnNos5cLkGnKY1wCZhviNR2Ga
+  state_update_pb2.py: QmNQesScq6QBFtf1A6aRXBoawrLoTGr1TrfatHWx6wdujL
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,12 +54,12 @@ base_deps = [
     "jsonschema>=3.0.0,<4.0.0",
     "packaging>=20.3,<21.0",
     "semver>=2.9.1,<3.0.0",
-    "protobuf==3.13.0",
+    "protobuf>=3.19.0,<4.0.0",
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1,<6.0",
     "requests>=2.22.0,<3.0.0",
     "python-dotenv>=0.14.0,<0.18.0",
-    "ecdsa>=0.15,<0.17.0"
+    "ecdsa>=0.15,<0.17.0",
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":

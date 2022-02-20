@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUjEQqcfDm1F1ARmG2fVp9J6nBdeHrXQiFAPKawtgR1g6
-  __init__.py: QmbdJgmEr1UuqPQWm9AuZjtagRYxQkwVMR6MZopVS3sedc
+  __init__.py: QmPy3UCgJw19WcKDngKE8iWwRZ2b1ZKWYNTrUXJxHXsg7g
   custom_types.py: QmT3aUh6HP2LaD5HziEEvjxVpv4G671P5EKV3rfh77epgy
   dialogues.py: QmcYRdn3UNeyCD8aSrcrc19Witznb2LqeMwyNRCVFkBmDb
   ledger_api.proto: QmdSbtU1eXT1ZLFZkdCzTpBD8NyDMWgiA4MJBoHJLdCkz3
-  ledger_api_pb2.py: QmQTtNeQJEFJrveRPvvwrA6EyGynfFpBn2wDZpQavDjYZp
+  ledger_api_pb2.py: QmfHR13iNQKBCr8SD4CR2gue1w6Uy5cMLaZLxSiBRe4GG7
   message.py: QmTSksrYwk9E2LVN6K3ByduWQuWFR4ZmangEvckVioeTiB
   serialization.py: QmU8zQRrdpz7BKazcE1iPb5HT9pWcdcA8YvJpbDxEYjPKZ
 fingerprint_ignore_patterns: []

@@ -453,7 +453,7 @@ def test_get_storage_transaction_cosmwasm():
     # Check msg
     assert len(deploy_transaction["tx"]["body"]["messages"]) == 1
     msg = deploy_transaction["tx"]["body"]["messages"][0]
-    assert "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1beta1.MsgStoreCode"
+    assert "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1.MsgStoreCode"
 
     assert msg["sender"] == deployer_address
     assert msg["wasmByteCode"] == contract_interface["wasm_byte_code"]
@@ -501,13 +501,10 @@ def test_get_init_transaction_cosmwasm():
     # Check msg
     assert len(init_transaction["tx"]["body"]["messages"]) == 1
     msg = init_transaction["tx"]["body"]["messages"][0]
-    assert (
-        "@type" in msg
-        and msg["@type"] == "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
-    )
+    assert "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1.MsgInstantiateContract"
     assert msg["sender"] == deployer_address
     assert msg["codeId"] == str(code_id)
-    assert base64.b64decode(msg["initMsg"]).decode() == f'"{init_msg}"'
+    assert base64.b64decode(msg["msg"]).decode() == f'"{init_msg}"'
     assert msg["funds"] == [{"denom": "abc", "amount": str(amount)}]
 
 
@@ -556,9 +553,7 @@ def test_get_handle_transaction_cosmwasm():
     # Check msg
     assert len(handle_transaction["tx"]["body"]["messages"]) == 1
     msg = handle_transaction["tx"]["body"]["messages"][0]
-    assert (
-        "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
-    )
+    assert "@type" in msg and msg["@type"] == "/cosmwasm.wasm.v1.MsgExecuteContract"
     assert msg["sender"] == sender_address
     assert msg["contract"] == contract_address
     assert base64.b64decode(msg["msg"]).decode() == f'"{handle_msg}"'
@@ -676,7 +671,7 @@ def test_helper_get_contract_address():
                                     },
                                     {"key": "code_id", "value": "631"},
                                     {
-                                        "key": "contract_address",
+                                        "key": "_contract_address",
                                         "value": "fetch1lhd5t8jdjn0n4q27hsah6c0907nxrswcp5l4nw",
                                     },
                                 ],
@@ -721,7 +716,7 @@ def test_construct_init_transaction():
     ), "Incorrect transfer_transaction constructed."
     assert (
         init_transaction["tx"]["body"]["messages"][0]["@type"]
-        == "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
+        == "/cosmwasm.wasm.v1.MsgInstantiateContract"
     )
 
 
@@ -748,7 +743,7 @@ def test_construct_handle_transaction():
     ), "Incorrect transfer_transaction constructed."
     assert (
         transaction["tx"]["body"]["messages"][0]["@type"]
-        == "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
+        == "/cosmwasm.wasm.v1.MsgExecuteContract"
     )
 
 
