@@ -7,6 +7,8 @@ A full break down of the development flow is covered within the <a href="../quic
 
 It is highly recommended that developers begin by following the quick start!
 
+It is assumed that developers are within a pipenv virtual environment.
+
 A full break down of the development flow is covered within the <a href="../quickstart/">Development Quickstart</a>. 
 The easiest way to get started with the http server is to use our pre-built example skill.
 
@@ -52,7 +54,7 @@ curl 0.0.0.0:5000
 Congratulations! You have just used an AEA successfully as a web server!
 
 # Tear Down
-```
+``` bash
 aea delete http_echo
 ```
 
