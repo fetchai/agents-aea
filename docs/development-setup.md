@@ -61,6 +61,7 @@ This advice partially overlaps with the previous two sections:
 For VSCode modify the ```launch.json``` to include the following information:
 
 
+``` json
 
     {
         "version": "0.2.0",
@@ -76,6 +77,7 @@ For VSCode modify the ```launch.json``` to include the following information:
             }
         ]
     }
+```
 
 where ```PATH_TO_VIRTUAL_ENV``` should be replaced with the path to the virtual environment and CWD with the working directory for the agent to debug (where the ```aea-config.yaml``` file is).
 
