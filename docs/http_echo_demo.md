@@ -1,6 +1,6 @@
 # HTTP Echo Demo
 
-The purpose of this demonstration is to show the Open-AEA framework can be used as a HTTP server.
+The purpose of this demonstration is to show the `open-aea` framework can be used as a HTTP server. More concretely, an AEA with a http server connection and an appropriate skill can be used as a server.
 
 
 A full break down of the development flow is covered within the <a href="../quickstart/">Development Quickstart</a>. 
