@@ -1,5 +1,5 @@
 name: p2p_libp2p_client
-author: fetchai
+author: open_aea
 version: 0.20.0
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
@@ -10,7 +10,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmQZQyYpobMCzc3g8x1FhuRfu2Lm7NNocDDZPsYG9nzKRQ
   __init__.py: QmWYz6a1UrsXsG55CQj6X2snQZWU7isUGBiWJWwDqEpYyS
-  connection.py: QmQcxnk1TCkT37SuECNsH68NyvFNDg9c7LdZrXb2RREmhe
+  connection.py: QmPGaYG1SWdzDyryTSdLDRbTeJFVdRQWewTe8zkppzSjiS
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

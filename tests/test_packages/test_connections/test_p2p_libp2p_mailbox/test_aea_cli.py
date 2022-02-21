@@ -81,7 +81,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.set_config("agent.default_ledger", ledger_id)
         self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
         self.add_item("connection", str(PUBLIC_ID))
-        conn_path = "vendor.fetchai.connections.p2p_libp2p_mailbox"
+        conn_path = "vendor.open_aea.connections.p2p_libp2p_mailbox"
         self.nested_set_config(
             conn_path + ".config",
             {

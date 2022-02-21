@@ -57,10 +57,10 @@ except ImportError:  # pragma: nocover
 
 
 _default_logger = logging.getLogger(
-    "aea.packages.fetchai.connections.p2p_libp2p_client"
+    "aea.packages.open_aea.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_mailbox:0.2.0")
+PUBLIC_ID = PublicId.from_str("open_aea/p2p_libp2p_mailbox:0.2.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
