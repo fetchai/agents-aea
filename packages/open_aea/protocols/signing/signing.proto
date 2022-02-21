@@ -7,8 +7,8 @@ message SigningMessage{
   // Custom Types
   message ErrorCode{
     enum ErrorCodeEnum {
-      UNSUCCESSFUL_MESSAGE_SIGNING = 0;
-      UNSUCCESSFUL_TRANSACTION_SIGNING = 1;
+      ERROR_CODE_ENUM_UNSUCCESSFUL_MESSAGE_SIGNING = 0;
+      ERROR_CODE_ENUM_UNSUCCESSFUL_TRANSACTION_SIGNING = 1;
     }
     ErrorCodeEnum error_code = 1;
   }
