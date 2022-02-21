@@ -28,7 +28,7 @@ nav:
   - Demos:
     - Demos: 'demos.md'
     - Echo Demo: 'echo_demo.md'
-    - Gym example: 'gym-example.md'
+    - HTTP Echo Demo: 'http_echo_demo.md'
     - Gym skill: 'gym-skill.md'
   - Development - Beginner:
     - AEA quick start: 'quickstart.md'
