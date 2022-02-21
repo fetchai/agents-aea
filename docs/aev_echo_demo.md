@@ -1,5 +1,6 @@
 # Configuring with Environment Variables
-The purpose of this demonstration is to show the Open-AEA framework can dynamically configure agents from environment variables.
+
+The purpose of this demonstration is to show the `open-aea` framework can dynamically configure agents from environment variables.
 
 A full break down of the development flow is covered within the <a href="../quickstart/">Development Quickstart</a>.
 
