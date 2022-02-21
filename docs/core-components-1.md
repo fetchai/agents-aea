@@ -14,7 +14,7 @@ The following sections discuss the inner workings of the AEA framework and how i
 
 * `sender`: defines the sender address.
 
-* `protocol_id`: defines the id of the `Protocol`.
+* `protocol_specification_id`: defines the id of the `Protocol`.
 
 * `message`: is a bytes field which holds the `Message` in serialized form.
 
