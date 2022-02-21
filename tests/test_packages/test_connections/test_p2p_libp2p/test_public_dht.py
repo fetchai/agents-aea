@@ -32,13 +32,13 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.open_aea.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.open_aea.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
     PUBLIC_DHT_DELEGATE_URI_1,

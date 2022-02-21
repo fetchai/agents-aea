@@ -28,7 +28,7 @@ from aea_ledger_fetchai import FetchAICrypto as FetchAI
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.open_aea.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 

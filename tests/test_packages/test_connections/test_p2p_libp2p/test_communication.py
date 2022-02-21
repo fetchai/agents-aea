@@ -33,9 +33,9 @@ from aea.crypto.registries import make_crypto
 from aea.mail.base import Empty, Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p.connection import NodeClient, Uri
 from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.open_aea.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.conftest import (
     _make_libp2p_connection,

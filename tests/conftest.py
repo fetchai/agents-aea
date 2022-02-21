@@ -100,20 +100,20 @@ from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
-from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.open_aea.connections.p2p_libp2p.check_dependencies import build_node
+from packages.open_aea.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     MultiAddr,
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
 )
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.open_aea.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
-from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
+from packages.open_aea.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
-from packages.fetchai.connections.stub.connection import StubConnection
 
 from tests.common.docker_image import (
     DockerImage,
