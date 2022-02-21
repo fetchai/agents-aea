@@ -8,7 +8,7 @@ It is highly recommended that developers begin by following the quick start!
 After you have followed the quick start, create a <a href="../http_echo_demo/">HTTP Echo Agent</a>. 
 
 
-Notice, that the configuration of the aea is looks like so;
+Notice, that the configuration of the AEA is as so;
 
     (open-aea) ~/D/c/v/o/http_echo> cat aea-config.yaml
     agent_name: http_echo
@@ -61,7 +61,7 @@ Please notice the values provided to the over-rides. The syntax is as follows;
     ${ENVIRONMENT_VALUE:PYTHON_TYPE:DEFAULT_VALUE}
 
 
-We can use environment variables to override these default values like so
+We can use environment variables to override these default values.
 
 First run the agent with the default port (assuming you are within the agent directory created within <a href="../http_echo_demo/">HTTP Echo Agent</a>) as so:
 
@@ -69,7 +69,7 @@ First run the agent with the default port (assuming you are within the agent dir
 
 The ```--aev``` flag specifies to apply environment overrides
 
-The aea will ten start a webserver as so:
+The AEA will then start a web server as so:
 
         _     _____     _    
        / \   | ____|   / \   
@@ -111,51 +111,9 @@ We can confirm that we are now serving on a different port as so;
     curl localhost:8081
     {"tom": {"type": "cat", "age": 10}}
 
-A full break down of the development flow is covered within the <a href="../quickstart/">Development Quickstart</a>. 
-The easiest way to get started with the http server is to use our pre-built example skill.
 
-
-
-```bash
-pipenv shell
-aea fetch open_aea/http_echo:0.1.0 --local 
-cd http_echo
-aea generate-key ethereum; aea add-key ethereum
-aea run --aev
-Adding protocol 'open_aea/signing:1.0.0'...
-Successfully added protocol 'open_aea/signing:1.0.0'.
-Adding protocol 'fetchai/http:1.0.0'...
-Successfully added protocol 'fetchai/http:1.0.0'.
-Adding protocol 'fetchai/default:1.0.0'...
-Successfully added protocol 'fetchai/default:1.0.0'.
-Adding connection 'fetchai/http_server:0.22.0'...
-Successfully added connection 'fetchai/http_server:0.22.0'.
-Adding skill 'fetchai/http_echo:0.20.0'...
-Successfully added skill 'fetchai/http_echo:0.20.0'.
-Agent http_echo successfully fetched.
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
-/_/   \_\|_____|/_/   \_\
-                         
-v1.3.0
-
-Starting AEA 'http_echo' in 'async' mode...
-info: [http_echo] HTTP Server has connected to port: 5000.
-info: [http_echo] Start processing messages...
-```
-
-in a second terminal
-
-```bash
-curl 0.0.0.0:5000
-{"tom": {"type": "cat", "age": 10}}
-```
 Congratulations! You have just used an AEA successfully as a web server!
 
 # Tear Down
-```
-aea delete http_echo
-```
+    aea delete http_echo
 
