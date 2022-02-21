@@ -7,6 +7,7 @@ A full break down of the development flow is covered within the <a href="../quic
 
 It is highly recommended that developers begin by following the quick start!
 
+A full break down of the development flow is covered within the <a href="../quickstart/">Development Quickstart</a>. 
 The easiest way to get started with the http server is to use our pre-built example skill.
 
 
