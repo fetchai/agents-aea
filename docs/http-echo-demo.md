@@ -14,7 +14,7 @@ The easiest way to get started with the http server is to use our pre-built exam
 
 
 
-```bash
+``` bash
 pipenv shell
 aea fetch open_aea/http_echo:0.1.0 --local 
 cd http_echo
@@ -36,8 +36,8 @@ Agent http_echo successfully fetched.
   / _ \  |  _|    / _ \  
  / ___ \ | |___  / ___ \ 
 /_/   \_\|_____|/_/   \_\
-                         
-v1.3.0
+
+v1.4.0
 
 Starting AEA 'http_echo' in 'async' mode...
 info: [http_echo] HTTP Server has connected to port: 5000.
@@ -46,7 +46,7 @@ info: [http_echo] Start processing messages...
 
 in a second terminal
 
-```bash
+``` bash
 curl 0.0.0.0:5000
 {"tom": {"type": "cat", "age": 10}}
 ```

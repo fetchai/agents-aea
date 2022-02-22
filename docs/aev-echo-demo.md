@@ -6,7 +6,7 @@ A full break down of the development flow is covered within the <a href="../quic
 
 It is highly recommended that developers begin by following the quick start!
 
-After you have followed the quick start, create a <a href="../http_echo_demo/">HTTP Echo Agent</a>. 
+After you have followed the quick start, create a <a href="../http-echo-demo/">HTTP Echo Agent</a>. 
 
 It is assumed that developers are within a pipenv virtual environment.
 
@@ -69,7 +69,7 @@ ${ENVIRONMENT_VALUE:PYTHON_TYPE:DEFAULT_VALUE}
 
 We can use environment variables to override these default values.
 
-First run the agent with the default port (assuming you are within the agent directory created within <a href="../http_echo_demo/">HTTP Echo Agent</a>) as so:
+First run the agent with the default port (assuming you are within the agent directory created within <a href="../http-echo-demo/">HTTP Echo Agent</a>) as so:
 
 ``` bash
 aea run --aev
@@ -79,13 +79,14 @@ The ```--aev``` flag specifies to apply environment overrides
 
 The AEA will then start a web server as so:
 
+
 ``` bash
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
+
 v1.4.0
 
 Starting AEA 'http_echo' in 'async' mode...
@@ -105,14 +106,14 @@ curl localhost:5000
 In order to use the environment overrides, we must first stop our AEA. Once the AEA is stopped:
 
 ``` bash
-export PORT=8081 
+export PORT=8081
 aea run --aev
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
-                         
+
 v1.4.0
 
 Starting AEA 'http_echo' in 'async' mode...
