@@ -45,7 +45,7 @@ svn checkout https://github.com/valory-xyz/open-aea/trunk/packages packages
 sudo apt-get install python3.7-dev
 ```
 ``` bash 
-aea init
+aea init --local
 ```
 ``` bash
 Do you have a Registry account? [y/N]: n
