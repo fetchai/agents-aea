@@ -144,7 +144,7 @@ info: Echo Behaviour: teardown method called.
 aea interact
 ```
 ``` bash
-pytest test.py
+pipenv run pytest test.py
 ```
 ``` bash
 aea delete my_first_aea
