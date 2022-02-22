@@ -55,3 +55,31 @@ This advice partially overlaps with the previous two sections:
 - When working on an AEA, it may help to provide a symbolic link to the packages directory, so that the import paths are detected by your editor. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to the `packages` directory with `ln -s ../packages packages`.
 
 - Alternatively, it can help to provide symbolic links within an AEA to align import paths with folder structure. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to `ln -s vendor packages`.
+
+
+## VSCode
+For VSCode modify the ```launch.json``` to include the following information:
+
+
+``` json
+
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "aea run",
+                "type": "python",
+                "request": "launch",
+                "program": "PATH_TO_VIRTUAL_ENV/bin/aea",
+                "args": ["-v","DEBUG","--skip-consistency-check","run"],
+                "cwd": "CWD",
+                "console": "integratedTerminal"
+            }
+        ]
+    }
+```
+
+where ```PATH_TO_VIRTUAL_ENV``` should be replaced with the path to the virtual environment and CWD with the working directory for the agent to debug (where the ```aea-config.yaml``` file is).
+
+
+Note, if packages are not contained within the CWD, the step referencing packages in ```Approach 2``` will need to be completed.

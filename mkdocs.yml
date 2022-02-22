@@ -28,8 +28,9 @@ nav:
   - Demos:
     - Demos: 'demos.md'
     - Echo Demo: 'echo_demo.md'
-    - Gym example: 'gym-example.md'
+    - HTTP Echo Demo: 'http-echo-demo.md'
     - Gym skill: 'gym-skill.md'
+    - Configure with Environment Variables: 'aev-echo-demo.md'
   - Development - Beginner:
     - AEA quick start: 'quickstart.md'
     - Core components - Part 1: 'core-components-1.md'
