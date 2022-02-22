@@ -32,13 +32,13 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.open_aea.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.open_aea.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
     PUBLIC_DHT_DELEGATE_URI_1,
@@ -512,7 +512,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
 
-        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
         self.nested_set_config(
             config_path,
             {
@@ -572,12 +572,12 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
         self.set_config("agent.default_ledger", ledger_id)
         self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
-        config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
+        config_path = "vendor.open_aea.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,
             {"nodes": [{"uri": "{}".format(uri)} for uri in delegate_uris]},
         )
-        conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
+        conn_path = "vendor.open_aea.connections.p2p_libp2p_client"
         self.nested_set_config(
             conn_path + ".config",
             {

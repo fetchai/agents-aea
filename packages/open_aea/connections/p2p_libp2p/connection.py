@@ -41,12 +41,12 @@ from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
 from packages.fetchai.protocols.acn import acn_pb2
 from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.open_aea.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
 
 
-_default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
+_default_logger = logging.getLogger("aea.packages.open_aea.connections.p2p_libp2p")
 
 ACN_CURRENT_VERSION = "0.1.0"
 
@@ -59,7 +59,7 @@ LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
 PIPE_CONN_TIMEOUT = 10.0
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.26.0")
+PUBLIC_ID = PublicId.from_str("open_aea/p2p_libp2p:0.26.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 

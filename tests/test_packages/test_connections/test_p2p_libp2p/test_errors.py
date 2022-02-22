@@ -36,14 +36,14 @@ from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.open_aea.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
     P2PLibp2pConnection,
     _golang_module_run,
     _ip_all_private_or_all_public,
 )
-from packages.fetchai.protocols.acn.message import AcnMessage
 
 from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
@@ -243,7 +243,7 @@ async def test_reconnect_on_write_failed():
     host = "localhost"
     port = "10000"
     with patch(
-        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
+        "packages.open_aea.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
         return_value="./",
     ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
@@ -277,7 +277,7 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
     host = "localhost"
     port = "10000"
     with patch(
-        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
+        "packages.open_aea.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
         return_value="./",
     ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
@@ -317,7 +317,7 @@ async def test_reconnect_on_read_failed():
     host = "localhost"
     port = "10000"
     with patch(
-        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
+        "packages.open_aea.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
         return_value="./",
     ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(

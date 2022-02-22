@@ -33,9 +33,9 @@ from aea_ledger_fetchai import FetchAICrypto
 from aea.mail.base import Empty, Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p_client.connection import NodeClient, Uri
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
+from packages.open_aea.connections.p2p_libp2p_client.connection import NodeClient, Uri
 
 from tests.common.mocks import RegexComparator
 from tests.common.utils import wait_for_condition

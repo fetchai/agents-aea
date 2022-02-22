@@ -29,9 +29,9 @@ from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
+from packages.open_aea.connections.p2p_libp2p.check_dependencies import build_node
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (

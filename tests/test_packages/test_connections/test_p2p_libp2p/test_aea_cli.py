@@ -28,7 +28,7 @@ from aea_ledger_fetchai import FetchAICrypto as FetchAI
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.open_aea.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 
@@ -69,7 +69,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
         # for logging
-        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
@@ -135,12 +135,12 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
         # for logging
-        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         self.log_files.append(log_file)
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        setting_path = "vendor.open_aea.connections.p2p_libp2p.cert_requests"
         settings = json.dumps(
             [
                 {
@@ -208,7 +208,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         self.run_cli_command("build", cwd=self._get_cwd())
 
         # setup a full node: with public uri, relay service, and delegate service
-        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
         self.set_config(
             "{}.local_uri".format(config_path), "127.0.0.1:{}".format(DEFAULT_PORT)
         )

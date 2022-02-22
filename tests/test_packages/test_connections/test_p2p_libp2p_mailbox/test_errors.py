@@ -34,10 +34,10 @@ from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.open_aea.connections.p2p_libp2p_client.connection import (
     POR_DEFAULT_SERVICE_ID,
 )
-from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
+from packages.open_aea.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 

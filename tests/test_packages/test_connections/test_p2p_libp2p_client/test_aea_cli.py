@@ -26,7 +26,7 @@ from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.fetchai.connections.p2p_libp2p_client.connection import PUBLIC_ID
+from packages.open_aea.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
 from tests.conftest import (
     _make_libp2p_connection,
@@ -78,7 +78,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.set_config("agent.default_ledger", ledger_id)
         self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
         self.add_item("connection", str(PUBLIC_ID))
-        conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
+        conn_path = "vendor.open_aea.connections.p2p_libp2p_client"
         self.nested_set_config(
             conn_path + ".config",
             {
