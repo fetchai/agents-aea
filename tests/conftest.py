@@ -338,8 +338,8 @@ connection_config_files = [
     os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "stub", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
+    os.path.join(OPEN_AEA_REF, "connections", "p2p_libp2p", CONNECTION_YAML),
+    os.path.join(OPEN_AEA_REF, "connections", "p2p_libp2p_client", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "dummy_connection", CONNECTION_YAML),
     os.path.join(CUR_PATH, "data", "gym-connection.yaml"),
 ]
