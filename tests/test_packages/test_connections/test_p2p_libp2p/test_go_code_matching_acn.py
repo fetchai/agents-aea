@@ -23,6 +23,7 @@ import difflib
 import filecmp
 import os
 import shutil
+import stat
 import tempfile
 from collections import Counter, namedtuple
 from typing import Iterable, List
@@ -65,10 +66,17 @@ def get_relative_file_paths(root: str, *abs_paths) -> List[str]:
 def acn_repo_dir():
     """We keep the ACN repo around for all tests."""
 
+    def readonly_handler(func, path, execinfo) -> None:
+        """If permission is readonly, we change and retry."""
+
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
     tmp_dir = tempfile.mkdtemp()
     acn_repo = git.Repo.clone_from(ACN_GITHUB_URL, tmp_dir)
     yield tmp_dir, acn_repo
-    shutil.rmtree(tmp_dir)  # destroy once tests are done
+    # we need `onerror` to deal with permissions on Windows
+    shutil.rmtree(tmp_dir, onerror=readonly_handler)  # destroy once tests are done
 
 
 @pytest.fixture(scope="class")
