@@ -135,9 +135,19 @@ pip install 'open-aea-ledger-ethereum'
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
+## Setup Open-AEA Author
+
+To configure the aea with an author.
+
+``` bash
+aea init --local
+```
+
+
+
 ## Setup Open-AEA Components
 
-AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
+AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
 
 
 To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">SVN</a> to checkout the specific folders;
@@ -356,7 +366,7 @@ class TestEchoSkill(AEATestCase):
         sent_envelope = Envelope(
             to=self.agent_name,
             sender=sender_aea,
-            protocol_id=message.protocol_id,
+            protocol_specification_id=message.protocol_specification_id,
             message=DefaultSerializer().encode(message),
         )
 
@@ -367,7 +377,7 @@ class TestEchoSkill(AEATestCase):
 
         assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
-        assert sent_envelope.protocol_id == received_envelope.protocol_id
+        assert sent_envelope.protocol_specification_id == received_envelope.protocol_specification_id
         received_message = DefaultMessage.serializer.decode(received_envelope.message)
         assert message.content == received_message.content
 
@@ -393,7 +403,7 @@ Place the above code into a file <code>test.py</code> in your AEA project direct
 To run, execute the following:
 
 ``` bash
-pytest test.py
+pipenv run pytest test.py
 ```
 
 </details>
