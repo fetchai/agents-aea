@@ -33,7 +33,8 @@ import pytest
 from tests.conftest import libp2p_log_on_failure_all
 
 
-AEA_ROOT_DIR = "packages/open_aea/connections/p2p_libp2p/libp2p_node"
+PACKAGE = "packages.open_aea.connections.p2p_libp2p.libp2p_node"
+AEA_ROOT_DIR = os.path.join(*PACKAGE.split("."))
 ACN_GITHUB_URL = "https://github.com/valory-xyz/open-acn/"
 
 FilePaths = namedtuple("FilePaths", "abs_aea abs_acn rel_aea rel_acn")
