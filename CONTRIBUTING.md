@@ -52,6 +52,22 @@ First, setup your environment by either using the `develop-image` or by followin
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
+##  For a clean workflow run checks in the following order before pushing the code on a PR
+
+- make clean
+- make formatters
+- make code-checks
+- make security
+
+> Only run following if you have modified a file in `packages/`
+- make generators
+- make common-checks
+
+> else run
+- make check-copyright
+
+> run this after making a commit
+- make doc-checks
 ## Further commands needed during development
 
 We have various commands which are helpful during development.
