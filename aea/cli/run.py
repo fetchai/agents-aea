@@ -29,6 +29,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
 from aea.cli.utils.click_utils import ConnectionsOption, password_option
+from aea.cli.utils.config import load_item_config
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
@@ -38,6 +39,7 @@ from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAWalletNoAddressException
 from aea.helpers.base import load_env_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
 from aea.protocols.dialogue.base import Dialogue
@@ -193,6 +195,50 @@ def _profiling_context(period: int) -> Generator:
         sys.stderr = open(os.devnull, "w")
 
 
+def print_hash_table(ctx: Context,) -> None:
+    """Print hash table of all available components."""
+
+    public_id_to_hash = []
+    ipfs_hash = IPFSHashOnly()
+    components = list(Path(ctx.cwd).absolute().glob("vendor/**/*.yaml"))
+    max_col_1_length = 0
+    max_col_2_length = 48
+    for component_dir in components:
+        *_, component_type, _, _ = component_dir.parts
+        component_type = component_type[:-1]
+        config = load_item_config(component_type, component_dir.parent)
+        public_id_to_hash.append(
+            (str(config.public_id), ipfs_hash.get(str(component_dir)))
+        )
+        max_col_1_length = max(max_col_1_length, len(str(config.package_id)))
+
+    table_width = max_col_2_length + max_col_1_length + 9
+    row_separator = "=" * table_width
+    padding = " " * 2
+
+    def format_row(col_1: str, col_2: str) -> str:
+        """Format a row."""
+        return (
+            "|"
+            + padding
+            + col_1
+            + " " * (max_col_1_length - len(col_1))
+            + "|"
+            + padding
+            + col_2
+            + " " * (max_col_2_length - len(col_2))
+            + padding
+            + "|"
+        )
+
+    click.echo(row_separator)
+    click.echo(format_row("PublicId", "IPFSHash"))
+    click.echo(row_separator)
+    for public_id, file_hash in public_id_to_hash:
+        click.echo(format_row(public_id, file_hash))
+    click.echo(row_separator)
+
+
 def run_aea(
     ctx: Context,
     connection_ids: List[PublicId],
@@ -220,6 +266,7 @@ def run_aea(
     )
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
+    print_hash_table(ctx)
     click.echo(
         "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.runtime.loop_mode)
     )
