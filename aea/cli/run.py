@@ -198,7 +198,7 @@ def _profiling_context(period: int) -> Generator:
 def print_hash_table(ctx: Context,) -> None:
     """Print hash table of all available components."""
 
-    public_id_to_hash = []
+    hash_data = []
     ipfs_hash = IPFSHashOnly()
     components = list(Path(ctx.cwd).absolute().glob("vendor/**/*.yaml"))
     max_col_1_length = 0
@@ -207,8 +207,8 @@ def print_hash_table(ctx: Context,) -> None:
         *_, component_type, _, _ = component_dir.parts
         component_type = component_type[:-1]
         config = load_item_config(component_type, component_dir.parent)
-        public_id_to_hash.append(
-            (str(config.public_id), ipfs_hash.get(str(component_dir)))
+        hash_data.append(
+            (config.public_id, component_type, ipfs_hash.get(str(component_dir)))
         )
         max_col_1_length = max(max_col_1_length, len(str(config.package_id)))
 
@@ -231,12 +231,18 @@ def print_hash_table(ctx: Context,) -> None:
             + "|"
         )
 
+    csv_content = ""
     click.echo(row_separator)
     click.echo(format_row("PublicId", "IPFSHash"))
     click.echo(row_separator)
-    for public_id, file_hash in public_id_to_hash:
-        click.echo(format_row(public_id, file_hash))
+    for public_id, component_type, file_hash in hash_data:
+        click.echo(format_row(str(public_id), file_hash))
+        public_id = cast(PublicId, public_id)
+        csv_content += (
+            f"{public_id.author}/{component_type}s/{public_id.name},{file_hash}\n"
+        )
     click.echo(row_separator)
+    Path(ctx.cwd, "hashes.csv").write_text(csv_content)
 
 
 def run_aea(
