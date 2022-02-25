@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,6 +57,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE
 from aea.configurations.loader import ConfigLoaders
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
+
 
 AUTHOR = "fetchai"
 CORE_PATH = Path("aea")
@@ -458,7 +459,7 @@ def update_hashes(timeout: float = 15.0) -> int:
                     package_hashes[key] = package_hash
                     for result in result_list:
                         if cast(str, result["Name"]).endswith(
-                            PACKAGE_TYPE_TO_CONFIG_FILE.get(package_type.value)
+                            str(PACKAGE_TYPE_TO_CONFIG_FILE.get(package_type.value))
                         ):
                             package_hashes[
                                 key
