@@ -34,6 +34,7 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
+from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE
 from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
@@ -238,9 +239,7 @@ def print_hash_table(ctx: Context,) -> None:
     for public_id, component_type, file_hash in hash_data:
         click.echo(format_row(str(public_id), file_hash))
         public_id = cast(PublicId, public_id)
-        csv_content += (
-            f"{public_id.author}/{component_type}s/{public_id.name},{file_hash}\n"
-        )
+        csv_content += f"{public_id.author}/{component_type}s/{public_id.name}/{PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type)},{file_hash}\n"
     click.echo(row_separator)
     Path(ctx.cwd, "hashes.csv").write_text(csv_content)
 

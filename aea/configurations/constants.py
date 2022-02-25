@@ -87,6 +87,10 @@ CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_AEA_CONFIG_FILE: AGENT,
 }  # type: Dict[str, str]
 
+PACKAGE_TYPE_TO_CONFIG_FILE = {
+    value: key for key, value in CONFIG_FILE_TO_PACKAGE_TYPE.items()
+}  # type: Dict[str, str]
+
 CRYPTO_PLUGIN_GROUP = "aea.cryptos"
 LEDGER_APIS_PLUGIN_GROUP = "aea.ledger_apis"
 FAUCET_APIS_PLUGIN_GROUP = "aea.faucet_apis"
