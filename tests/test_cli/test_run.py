@@ -1656,7 +1656,8 @@ class RunAEATestCase(TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             ctx.cwd = str(temp_dir)
             with mock.patch("aea.cli.run._build_aea", return_value=aea):
-                run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
+                with mock.patch("aea.cli.run._print_hash_table"):
+                    run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
 
     def test_run_aea_positive_install_deps_mock(self):
         """Test run_aea method for positive result (mocked), install deps true."""
@@ -1668,7 +1669,8 @@ class RunAEATestCase(TestCase):
             ctx.cwd = str(temp_dir)
             with mock.patch("aea.cli.run.do_install"):
                 with mock.patch("aea.cli.run._build_aea", return_value=aea):
-                    run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
+                    with mock.patch("aea.cli.run._print_hash_table"):
+                        run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
 
     @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
     def test_run_aea_negative(self, *mocks):

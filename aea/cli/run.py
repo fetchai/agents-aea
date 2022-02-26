@@ -217,6 +217,13 @@ def _print_hash_table(ctx: Context, aea: AEA) -> None:
                 component.public_id.name,
                 cast(str, PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type.value)),
             )
+            if not path.exists():
+                path = Path(
+                    ctx.cwd,
+                    component_type.to_plural(),
+                    component.public_id.name,
+                    cast(str, PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type.value)),
+                )
             hash_data.append((component.component_id, ipfs_hash.get(str(path))))
             max_col_1_length = max(max_col_1_length, len(str(component.component_id)))
 
