@@ -1,5 +1,31 @@
 # Release History - open AEA
 
+
+## 1.5.0 (2022-02-26)
+
+AEA:
+- Adds in null equivalents so that environment variables can default to a none value
+- Adds support for remote IPFS registry usage in CLI tool
+- Adds support to show IPFS hashes of each component yaml at start of `aea run`
+
+Plugins:
+- Adds support for remote IPFS registry usage in IPFS plugin
+- Fixes gas price repricing strategy in ethereum ledger plugin
+
+Packages:
+- Ports `acn` packages from fetchai repo
+- Bumps protobuf compiler version and updates protocols
+
+Docs: 
+- Adds demo of http connections and skills
+- Adds demo of environment variable usage
+- Adds miscellaneous updates to documentation based on developer feedback
+
+Chores:
+- Updates copyright script to support all patterns
+- Simplifies Dockerfiles and removes unneeded dependencies
+
+
 ## Plugins patch (2022-01-27)
 
 Plugins:
