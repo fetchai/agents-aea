@@ -7,6 +7,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.4.0` to `v1.5.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.3.0` to `v1.4.0`
 
 No backwards incompatible changes.
