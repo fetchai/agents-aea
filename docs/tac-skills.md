@@ -272,7 +272,7 @@ aea build
 
 ### Add keys for all AEAs
 
-Create the private key for the AEA for Fetch.ai `StargateWorld`:
+Create the private key for the AEA for Fetch.ai `Capricorn`:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt

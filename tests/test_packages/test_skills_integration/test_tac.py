@@ -852,7 +852,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_tac(self):
         """Run the tac skills sequence."""
         tac_aea_one = "tac_participant_one"
