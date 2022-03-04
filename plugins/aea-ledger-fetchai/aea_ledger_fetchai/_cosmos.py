@@ -779,7 +779,6 @@ class _CosmosApi(LedgerApi):
         )
         store_msg_packed = ProtoAny()
         store_msg_packed.Pack(store_msg, type_url_prefix="/")  # type: ignore
-
         tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
         tx = self._get_transaction(
             account_numbers=[account_number],

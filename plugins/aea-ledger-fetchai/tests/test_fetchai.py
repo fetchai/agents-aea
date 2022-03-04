@@ -186,7 +186,7 @@ def test_construct_sign_and_submit_transfer_transaction():
         sender_address=account.address,
         destination_address=fc2.address,
         amount=amount,
-        tx_fee=1000,
+        tx_fee=7750000000000000,
         tx_nonce="something",
     )
     assert (
