@@ -32,12 +32,14 @@ from aea.cli.utils.click_utils import ConnectionsOption, password_option
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.configurations.base import PublicId
+from aea.configurations.base import ComponentType, PublicId
+from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE, VENDOR
 from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAWalletNoAddressException
 from aea.helpers.base import load_env_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
 from aea.protocols.dialogue.base import Dialogue
@@ -193,6 +195,65 @@ def _profiling_context(period: int) -> Generator:
         sys.stderr = open(os.devnull, "w")
 
 
+def _print_hash_table(ctx: Context, aea: AEA) -> None:
+    """Print hash table of all available components."""
+    hash_data = []
+    ipfs_hash = IPFSHashOnly()
+    max_col_1_length = 0
+    max_col_2_length = 48
+    for component_type in [
+        ComponentType.PROTOCOL,
+        ComponentType.CONNECTION,
+        ComponentType.CONTRACT,
+        ComponentType.SKILL,
+    ]:
+        components = aea.resources.component_registry.fetch_by_type(component_type)
+        for component in components:
+            path = Path(
+                ctx.cwd,
+                VENDOR,
+                component.public_id.author,
+                component_type.to_plural(),
+                component.public_id.name,
+                cast(str, PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type.value)),
+            )
+            if not path.exists():
+                path = Path(
+                    ctx.cwd,
+                    component_type.to_plural(),
+                    component.public_id.name,
+                    cast(str, PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type.value)),
+                )
+            hash_data.append((component.component_id, ipfs_hash.get(str(path))))
+            max_col_1_length = max(max_col_1_length, len(str(component.component_id)))
+
+    table_width = max_col_2_length + max_col_1_length + 9
+    row_separator = "=" * table_width
+    padding = " " * 2
+
+    def format_row(col_1: str, col_2: str) -> str:
+        """Format a row."""
+        return (
+            "|"
+            + padding
+            + col_1
+            + " " * (max_col_1_length - len(col_1))
+            + "|"
+            + padding
+            + col_2
+            + " " * (max_col_2_length - len(col_2))
+            + padding
+            + "|"
+        )
+
+    click.echo(row_separator)
+    click.echo(format_row("ComponentId", "IPFSHash"))
+    click.echo(row_separator)
+    for component_id, file_hash in hash_data:
+        click.echo(format_row(str(component_id), file_hash))
+    click.echo(row_separator)
+
+
 def run_aea(
     ctx: Context,
     connection_ids: List[PublicId],
@@ -220,6 +281,7 @@ def run_aea(
     )
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
+    _print_hash_table(ctx, aea)
     click.echo(
         "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.runtime.loop_mode)
     )

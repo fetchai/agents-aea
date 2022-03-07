@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,6 +85,10 @@ CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_CONNECTION_CONFIG_FILE: CONNECTION,
     DEFAULT_CONTRACT_CONFIG_FILE: CONTRACT,
     DEFAULT_AEA_CONFIG_FILE: AGENT,
+}  # type: Dict[str, str]
+
+PACKAGE_TYPE_TO_CONFIG_FILE = {
+    value: key for key, value in CONFIG_FILE_TO_PACKAGE_TYPE.items()
 }  # type: Dict[str, str]
 
 CRYPTO_PLUGIN_GROUP = "aea.cryptos"
