@@ -107,6 +107,7 @@ class DockerImage(ABC):
             if self.tag in container.image.tags:
                 logger.info(f"Stopping image {self.tag}...")
                 container.stop()
+                container.wait()
 
     @abstractmethod
     def create(self) -> Container:

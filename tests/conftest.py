@@ -781,26 +781,32 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     :return: None
     """
     image.check_skip()
-    image.stop_if_already_running()
-    # sleep after stop called
-    time.sleep(1)
-    container = image.create()
-
-    logger.info(f"Setting up image {image.tag}...")
-    container.start()
+    image.pull_image(30)
 
     for _ in range(10):
+        image.stop_if_already_running()
+        # sleep after stop called
         time.sleep(1)
+        container = image.create()
+
+        logger.info(f"Setting up image {image.tag}...")
+        try:
+            container.start()
+        except Exception:
+            logger.exception("Error on container start")
+            continue
+        time.sleep(1)
+
         container.reload()
         if container.status == "running":
             break
 
-        container.start()
         logger.info("Retry to start the container")
     else:
         logger.info("Failed to start the container")
         logger.info(container.logs())
         raise Exception("Failed to start container")
+
     success = image.wait(max_attempts, timeout)
 
     if not success:
