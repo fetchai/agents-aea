@@ -12,7 +12,7 @@ Here is a list of suggestion on how to measure the cost of running an AEA:
 
 The `aea run --profiling SECONDS` command can be used to report measures in all of the above scenarios.
 
-## Running and profiling a locally modified AEAs
+## Running and profiling a locally modified framework instance
 
 In order to run a locally modified version of the framework, you will need to build the container using the Dockerfile_local at develop_image and tag it. From the open-aea root, run:
 
