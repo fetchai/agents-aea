@@ -18,7 +18,7 @@ In order to run a locally modified version of the framework, you will need to bu
 
 ```docker build . -t valory/open-aea-user:0.1.0 --file ./develop-image/Dockerfile_local```
 
-Now let's run some agents from the [consensus-alorithms's](https://github.com/valory-xyz/consensus-algorithms/pulls) repository, for example price_estimation, an oracle that aggregates bitcoin prices from different sources. This repository can also have some local modifications.
+Now let's run some agents from the consensus-alorithms's repository, for example price_estimation, an oracle that aggregates bitcoin prices from different sources. This repository can also have some local modifications.
 
 Enable profiling by adding the corresponding flag in ```deployments/Dockerfiles/open-aea/start.sh```. Last line should look like this:
 
