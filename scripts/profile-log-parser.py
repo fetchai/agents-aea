@@ -26,7 +26,7 @@ import matplotlib.patches as mpatches  # type: ignore
 from matplotlib import pyplot as plt
 
 
-LOG_FILE_PATH = "/tmp/docker_log"
+LOG_FILE_PATH = "/tmp/docker_log"  # nosec
 LOG_INSTANCE_LINES = 19
 TIME_FORMAT = "relative"
 
