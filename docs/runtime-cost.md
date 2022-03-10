@@ -16,34 +16,34 @@ The `aea run --profiling SECONDS` command can be used to report measures in all 
 
 In order to run a locally modified version of the framework, you will need to build the container using the `Dockerfile_local` in `develop_image/` and tag it. From the open-aea root, run:
 
-```docker build . -t valory/open-aea-user:0.1.0 --file ./develop-image/Dockerfile_local```
+```bash
+docker build . -t valory/open-aea-user:<tag> --file ./develop-image/Dockerfile_local
+```
 
-Now let's run some agents from the consensus-alorithms's repository, for example price_estimation, an oracle that aggregates bitcoin prices from different sources. This repository can also have some local modifications.
+It's time to build the image for the agent or service, that will build on top of the open-aea one. First, enable profiling by adding the corresponding flag in your start script. The run line should look like this:
 
-Enable profiling by adding the corresponding flag in ```deployments/Dockerfiles/open-aea/start.sh```. Last line should look like this:
+```bash
+aea run --aev --profiling 15  # This runs profiling every 15 seconds
+```
 
-```aea run --aev --profiling 15 # This runs profiling every 15 seconds```
+Now build the image. If you have local changes to open-aea, you'll need to comment out any lines corresponding to the installation of open-aea and its plugins in your Dockerfile to avoid the pypi versions being used instead of the local ones:
 
-Also, double check that you are not broadcasting data to the server by setting ```broadcast_to_server: false``` in ```deployments/deployment_specifications/price_estimation_hardhat.yaml```. In this file you can also configure the number of agents that you would like to run in the test.
+```bash
+docker build . -t <agent_image>:<tag> --file ./Dockerfile --no-cache
+```
 
-Build the image from the consensus-algorithms repository's root:
+Please double-check your tags to be sure that you are using the correct images with local modifications. Once the build has finished, run a Hardhat node before using it:
 
-```cd /deployments/Dockerfiles/open_aea && docker build . -t valory/consensus-algorithms-open-aea:dev --file ./Dockerfile_local --no-cache```
+```bash
+docker run -p 8545:8545 -it valory/consensus-algorithms-hardhat:0.1.0
+```
 
-Please double-check your tags to be sure that you are using the correct images with local modifications.
+Run the deployment. You can check the logs using ```docker logs <container> -f``` or even copy them from the container like this:
 
-Now, run a hardhate node:
+```bash
+sudo cp $(docker inspect --format='{{.LogPath}}' <container>) /tmp/docker_log && sudo chown <user> /tmp/docker_log
+```
 
-```docker run -p 8545:8545 -it valory/consensus-algorithms-hardhat:0.1.0```
+If you used the profiling flag, the logs will contain information about the memory used and object count for certain predefined classes. You can even plot that information using the script in open-aea's repository at `scripts/profile-log-parser.py`.
 
-And build and run the deployment, also from the repository's root:
-
-```export VERSION=dev && python deployments/click_create.py build-deployment --valory-app oracle_hardhat --deployment-type docker-compose --configure-tendermint && cd deployments/build && docker-compose up --force-recreate```
-
-The example should be running now. You can check the logs using ```docker logs abci0 -f``` or even copy them from the container like this:
-
-```sudo cp $(docker inspect --format='{{.LogPath}}' abci0) /tmp/docker_log && sudo chown <user> /tmp/docker_log```
-
-If you used the profiling flag, the logs will contain information about the memory used and object count for certain predefined classes. You can even plot that information using the script in open-aea's repository at ```scripts/profile-log-parser.py```.
-
-If you need further information, just log it directly if all you need is insight about the code execution or modify ```open-aea/aea/helpers/profiling.py``` if your code needs to run with the profiling. After this, some updates to the plot script ```open-aea/scripts/profile-log-parser.py``` should be enough to account for the new data.
+If you need further information, just log it directly if all you need is insight about the code execution or modify `open-aea/aea/helpers/profiling.py` if your code needs to run with the profiling. After this, some updates to the plot script `open-aea/scripts/profile-log-parser.py` should be enough to account for the new data.
