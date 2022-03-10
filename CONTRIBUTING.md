@@ -59,20 +59,20 @@ First, setup your environment by either using the `develop-image` or by followin
 - make code-checks
 - make security
 
-> Only run following if you have modified a file in `packages/`
+**Only run following if you have modified a file in `packages/`**
 - make generators
 - make common-checks
 
-> else run
+**else run**
 - make check-copyright
 
-> run this after making a commit
+**run this after making a commit**
 - make doc-checks
 ## Further commands needed during development
 
 We have various commands which are helpful during development.
 
-- For linting and static analysis use:
+- For independent linting and static analysis use:
 
       make lint
       make static
