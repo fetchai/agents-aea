@@ -52,16 +52,6 @@ lint:
 pylint:
 	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs examples/*
 
-.PHONY: security
-security:
-	bandit -r aea benchmark examples packages \
-        plugins/aea-ledger-fetchai/aea_ledger_fetchai \
-        plugins/aea-ledger-ethereum/aea_ledger_ethereum \
-        plugins/aea-ledger-cosmos/aea_ledger_cosmos \
-        plugins/aea-cli-ipfs/aea_cli_ipfs
-	bandit -s B101 -r tests scripts
-	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706
-
 .PHONY: static
 static:
 	mypy aea benchmark examples --disallow-untyped-defs
@@ -171,3 +161,52 @@ protolint_install_win:
 	powershell -command '$$env:GO111MODULE="on"; go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
 protolint_win:
 	protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
+
+# isort: fix import orders
+# black: format files according to the pep standards
+.PHONY: formatters
+formatters:
+	tox -e isort
+	tox -e black
+
+# black-check: check code style
+# isort-check: check for import order
+# flake8: wrapper around various code checks, https://flake8.pycqa.org/en/latest/user/error-codes.html
+# mypy: static type checker
+# pylint: code analysis for code smells and refactoring suggestions
+# vulture: finds dead code
+# darglint: docstring linter
+.PHONY: code-checks
+code-checks:
+	tox -p -e black-check -e isort-check -e flake8 -e mypy -e pylint -e vulture -e darglint
+
+# safety: checks dependencies for known security vulnerabilities
+# bandit: security linter
+.PHONY: security
+security:
+	tox -p -e safety -e bandit
+
+# generate latest hashes for updated packages
+# generate docs for updated packages
+# update copyright headers
+.PHONY: generators
+generators:
+	python scripts/generate_ipfs_hashes.py
+	python scripts/generate_api_docs.py
+	python scripts/check_copyright_notice.py
+
+.PHONY: common-checks
+common-checks:
+	tox -p -e check-copyright -e hash_check -e package_dependencies_checks
+
+.PHONY: doc-checks
+doc-checks:
+	tox -p -e check_doc_links -e check_api_docs
+
+.PHONY: copyright
+copyright:
+	python scripts/check_copyright_notice.py
+
+.PHONY: check-copyright
+check-copyright:
+	tox -e check-copyright
