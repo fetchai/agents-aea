@@ -21,8 +21,10 @@
 import codecs
 import hashlib
 import io
+import os
 import re
-from typing import Generator, Sized, cast
+from pathlib import Path
+from typing import Dict, Generator, Sized, cast
 
 import base58
 
@@ -84,6 +86,13 @@ class IPFSHashOnly:
     # according to https://pkg.go.dev/github.com/ipfs/go-ipfs-chunker#pkg-constants
 
     def get(self, file_path: str) -> str:
+        """Get the IPFS hash."""
+        if os.path.isdir(file_path):
+            return self.hash_directory(file_path)
+
+        return self.hash_file(file_path)
+
+    def hash_file(self, file_path: str) -> str:
         """
         Get the IPFS hash for a single file.
 
@@ -92,8 +101,63 @@ class IPFSHashOnly:
         """
         file_b = _read(file_path)
         file_pb = self._pb_serialize_file(file_b)
-        ipfs_hash = self._generate_multihash(file_pb)
-        return ipfs_hash
+        return self._generate_multihash(file_pb)
+
+    def hash_directory(self, dir_path: str) -> str:
+        """
+        Get the IPFS hash for a directory.
+
+        :param dir_path: the dirctory path
+        :return: the ipfs hash
+        """
+
+        return str(self._hash_directory_recursively(Path(dir_path)).get("hash"))
+
+    def _hash_directory_recursively(self, root: Path) -> Dict:
+        """Hash directories recursively, starting from provided root directory."""
+
+        root_node = PBNode()
+        content_size = 0
+
+        for child in sorted(os.listdir(str(root))):
+            child_path = root / child
+            if child_path.is_dir():
+                metadata = self._hash_directory_recursively(child_path)
+                link = merkledag_pb2.PBLink()
+                link.Hash = metadata.get("hash_bytes")
+                link.Tsize = len(cast(bytes, metadata.get("serialization"))) + cast(
+                    int, metadata.get("content_size")
+                )
+                link.Name = child
+                root_node.Links.append(link)
+
+            else:
+                data = _read(str(child_path))
+                file_pb = self._pb_serialize_file(data)
+                child_hash = self._generate_multihash_bytes(file_pb)
+                tsize = len(file_pb)
+                content_size += tsize
+
+                link = merkledag_pb2.PBLink()
+                link.Hash = child_hash
+                link.Tsize = tsize
+                link.Name = child
+                root_node.Links.append(link)
+
+        root_node_data = unixfs_pb2.Data()
+        root_node_data.Type = unixfs_pb2.Data.Directory  # type: ignore
+        root_node.Data = root_node_data.SerializeToString(deterministic=True)
+
+        root_node_serialization = self._serialize(root_node)
+        root_node_hash_bytes = self._generate_multihash_bytes(root_node_serialization)
+        root_node_hash = str(base58.b58encode(root_node_hash_bytes), "utf-8")
+
+        return {
+            "serialization": root_node_serialization,
+            "hash_bytes": root_node_hash_bytes,
+            "hash": root_node_hash,
+            "content_size": content_size,
+        }
 
     @classmethod
     def _make_unixfs_pb2(cls, data: bytes) -> bytes:
