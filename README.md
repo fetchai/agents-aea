@@ -129,7 +129,7 @@ consider to cite it with the following BibTex entry:
 
 ```
 @misc{agents-aea,
-  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál and James Riehl},
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál and James Riehl and 8baller and Adamantios Zaras and David Vilela and Michiel Karrenbelt and Viraj Patel},
   Title = {Open Autonomous Economic Agent (AEA) Framework},
   Year = {2021},
 }
