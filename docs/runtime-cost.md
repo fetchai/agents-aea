@@ -14,7 +14,7 @@ The `aea run --profiling SECONDS` command can be used to report measures in all 
 
 ## Running and profiling a locally modified framework instance
 
-In order to run a locally modified version of the framework, you will need to build the container using the Dockerfile_local at develop_image and tag it. From the open-aea root, run:
+In order to run a locally modified version of the framework, you will need to build the container using the `Dockerfile_local` in `develop_image/` and tag it. From the open-aea root, run:
 
 ```docker build . -t valory/open-aea-user:0.1.0 --file ./develop-image/Dockerfile_local```
 
