@@ -220,7 +220,6 @@ def _print_hash_table(ctx: Context, aea: AEA) -> None:
                 path = Path(
                     ctx.cwd, component_type.to_plural(), component.public_id.name
                 )
-            print(path, ipfs_hash.get(str(path), wrap=False))
             hash_data.append(
                 (component.component_id, ipfs_hash.get(str(path), wrap=False))
             )
