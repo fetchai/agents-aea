@@ -21,9 +21,9 @@
 """This module contains the tests for the ipfs helper module."""
 
 from pathlib import Path
+from platform import system
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
-from platform import system
 
 import pytest
 from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
