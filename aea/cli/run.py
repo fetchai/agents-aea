@@ -33,7 +33,7 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE, VENDOR
+from aea.configurations.constants import VENDOR
 from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
