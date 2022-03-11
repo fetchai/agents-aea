@@ -365,6 +365,14 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           make protolint_install
+
+          # install ipfs
+          wget https://dist.ipfs.io/go-ipfs/v0.11.0/go-ipfs_v0.11.0_linux-amd64.tar.gz
+          tar -xvzf go-ipfs_v0.11.0_linux-amd64.tar.gz
+          cd go-ipfs
+          sudo ./install.sh
+          cd ..
+          rm -rf go-ipfs
       # sudo apt-get install -y protobuf-compiler
       # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
       # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
@@ -380,6 +388,15 @@ jobs:
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           brew tap yoheimuta/protolint
           brew install protolint
+
+          # install ipfs
+          curl -O https://dist.ipfs.io/go-ipfs/v0.11.0/go-ipfs_v0.11.0_darwin-amd64.tar.gz
+          tar -xvzf go-ipfs_v0.11.0_darwin-amd64.tar.gz
+          cd go-ipfs
+          sudo ./install.sh
+          cd ..
+          rm -rf go-ipfs
+          
       - if: matrix.os == 'windows-latest'
         name: Install dependencies (windows-latest)
         env:
