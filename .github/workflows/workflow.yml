@@ -373,6 +373,7 @@ jobs:
           sudo ./install.sh
           cd ..
           rm -rf go-ipfs
+          ipfs init
       # sudo apt-get install -y protobuf-compiler
       # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
       # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
@@ -396,6 +397,7 @@ jobs:
           sudo ./install.sh
           cd ..
           rm -rf go-ipfs
+          ipfs init
           
       - if: matrix.os == 'windows-latest'
         name: Install dependencies (windows-latest)
