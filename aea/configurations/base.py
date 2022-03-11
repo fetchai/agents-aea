@@ -1840,7 +1840,7 @@ def _compute_fingerprint(  # pylint: disable=unsubscriptable-object
     ]
 
     for file in all_files:
-        file_hash = hasher.get(str(file))
+        file_hash = hasher.get(str(file), wrap=False)
         key = str(file.relative_to(package_directory))
         enforce(key not in fingerprints, "Key in fingerprints!")  # nosec
         # use '/' as path separator

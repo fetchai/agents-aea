@@ -88,15 +88,16 @@ class IPFSHashOnly:
     def get(self, file_path: str, wrap: bool = True) -> str:
         """Get the IPFS hash."""
         if os.path.isdir(file_path):
-            return self.hash_directory(file_path)
+            return self.hash_directory(file_path, wrap=wrap)
 
-        return self.hash_file(file_path)
+        return self.hash_file(file_path, wrap=wrap)
 
     def hash_file(self, file_path: str, wrap: bool = True) -> str:
         """
         Get the IPFS hash for a single file.
 
         :param file_path: the file path
+        :param wrap: weather to wrap the content in wrapper node or not
         :return: the ipfs hash
         """
         file_b = _read(file_path)
@@ -109,13 +110,14 @@ class IPFSHashOnly:
                 Path(file_path).name,
             )
 
-        return self._generate_hash(file_pb)
+        return self._generate_multihash(file_pb)
 
     def hash_directory(self, dir_path: str, wrap: bool = True) -> str:
         """
         Get the IPFS hash for a directory.
 
         :param dir_path: the directory path
+        :param wrap: weather to wrap the content in wrapper node or not
         :return: the ipfs hash
         """
 
