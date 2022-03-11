@@ -52,6 +52,7 @@ import docker as docker
 import gym
 import pytest
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
+from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.ethereum import (
@@ -114,7 +115,7 @@ from packages.open_aea.connections.p2p_libp2p_client.connection import (
 from packages.open_aea.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
-from aea_cli_ipfs.ipfs_utils import IPFSDaemon
+
 from tests.common.docker_image import (
     DockerImage,
     FetchLedgerDockerImage,
@@ -369,18 +370,9 @@ agent_config_files = [
 ]
 
 protocol_specification_files = [
-    os.path.join(
-        PROTOCOL_SPECS_PREF_1,
-        "sample.yaml",
-    ),
-    os.path.join(
-        PROTOCOL_SPECS_PREF_2,
-        "sample_specification.yaml",
-    ),
-    os.path.join(
-        PROTOCOL_SPECS_PREF_2,
-        "sample_specification_no_custom_types.yaml",
-    ),
+    os.path.join(PROTOCOL_SPECS_PREF_1, "sample.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
+    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
 
 
@@ -718,9 +710,7 @@ def ganache(
 @pytest.fixture(scope="class")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration,
-    timeout: float = 2.0,
-    max_attempts: int = 20,
+    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20,
 ):
     """Launch the Fetch ledger image."""
     client = docker.from_env()
@@ -798,9 +788,7 @@ def double_escape_windows_path_separator(path):
 
 
 def _make_dummy_connection() -> Connection:
-    configuration = ConnectionConfig(
-        connection_id=DummyConnection.connection_id,
-    )
+    configuration = ConnectionConfig(connection_id=DummyConnection.connection_id,)
     dummy_connection = DummyConnection(
         configuration=configuration,
         data_dir=MagicMock(),
@@ -1362,8 +1350,7 @@ def fund_accounts_from_local_validator(
 def fund_fetchai_accounts(fetchd):
     """Fund test accounts from local validator."""
     fund_accounts_from_local_validator(
-        [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO],
-        10000000000000000000,
+        [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
     )
 
 
@@ -1505,7 +1492,8 @@ def disable_logging_handlers_cleanup(request) -> Generator:
 
 
 @pytest.fixture(scope="class")
-def use_ipfs_daemon() -> None:
+def use_ipfs_daemon() -> Generator:
+    """Use IPFS daemon."""
     ipfs_daemon = IPFSDaemon(offline=True)
     ipfs_daemon.start()
 

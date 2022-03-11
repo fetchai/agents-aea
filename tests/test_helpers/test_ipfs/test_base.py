@@ -20,16 +20,14 @@
 
 """This module contains the tests for the ipfs helper module."""
 
-import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
+from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
 
 from aea.helpers.ipfs.base import IPFSHashOnly, _is_text
-
-from aea_cli_ipfs.ipfs_utils import IPFSTool
 
 
 def test_is_text_negative():
@@ -124,4 +122,4 @@ class TestDirectoryHashing:
 
             assert (
                 hash_daemon == hash_local
-            ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}\n{d}"
+            ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}"

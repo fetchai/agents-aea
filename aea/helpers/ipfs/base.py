@@ -24,7 +24,7 @@ import io
 import os
 import re
 from pathlib import Path
-from typing import Dict, Generator, Sized, Tuple, cast
+from typing import Any, Dict, Generator, Sized, Tuple, cast
 
 import base58
 
@@ -85,14 +85,14 @@ class IPFSHashOnly:
     DEFAULT_CHUNK_SIZE = 262144
     # according to https://pkg.go.dev/github.com/ipfs/go-ipfs-chunker#pkg-constants
 
-    def get(self, file_path: str) -> str:
+    def get(self, file_path: str, wrap: bool = True) -> str:
         """Get the IPFS hash."""
         if os.path.isdir(file_path):
             return self.hash_directory(file_path)
 
         return self.hash_file(file_path)
 
-    def hash_file(self, file_path: str) -> str:
+    def hash_file(self, file_path: str, wrap: bool = True) -> str:
         """
         Get the IPFS hash for a single file.
 
@@ -101,11 +101,17 @@ class IPFSHashOnly:
         """
         file_b = _read(file_path)
         file_pb, file_length = self._pb_serialize_file(file_b)
-        return self.wrap_in_a_node(
-            self._generate_multihash_bytes(file_pb), file_length, Path(file_path).name,
-        )
 
-    def hash_directory(self, dir_path: str) -> str:
+        if wrap:
+            return self.wrap_in_a_node(
+                self._generate_multihash_bytes(file_pb),
+                file_length,
+                Path(file_path).name,
+            )
+
+        return self._generate_hash(file_pb)
+
+    def hash_directory(self, dir_path: str, wrap: bool = True) -> str:
         """
         Get the IPFS hash for a directory.
 
@@ -115,15 +121,19 @@ class IPFSHashOnly:
 
         path = Path(dir_path)
         hashed_dir = self._hash_directory_recursively(path)
-        return self.wrap_in_a_node(
-            hashed_dir.get("hash_bytes"),
-            len(cast(bytes, hashed_dir.get("serialization")))
-            + cast(int, hashed_dir.get("content_size")),
-            path.name,
-        )
+
+        if wrap:
+            return self.wrap_in_a_node(
+                cast(bytes, hashed_dir.get("hash_bytes")),
+                len(cast(bytes, hashed_dir.get("serialization")))
+                + cast(int, hashed_dir.get("content_size")),
+                path.name,
+            )
+
+        return cast(str, hashed_dir.get("hash"))
 
     @staticmethod
-    def create_link(link_hash: bytes, tsize: int, name: str) -> merkledag_pb2.PBLink:
+    def create_link(link_hash: bytes, tsize: int, name: str) -> Any:
         """Create PBLink object."""
         link = merkledag_pb2.PBLink()
         link.Hash = link_hash
@@ -165,7 +175,9 @@ class IPFSHashOnly:
                 ) + cast(int, metadata.get("content_size"))
                 root_node.Links.append(  # type: ignore # pylint: disable=no-member
                     self.create_link(
-                        metadata.get("hash_bytes"), content_size_child, child_path.name,
+                        cast(bytes, metadata.get("hash_bytes")),
+                        content_size_child,
+                        child_path.name,
                     )
                 )
                 content_size += content_size_child
@@ -240,11 +252,11 @@ class IPFSHashOnly:
                 block = cls._pb_serialize_data(chunk)
                 block_length = len(block)
                 content_size += block_length
-                outer_node.Links.append(
+                outer_node.Links.append(  # type: ignore # pylint: disable=no-member
                     cls.create_link(
                         cls._generate_multihash_bytes(block), block_length, ""
                     )
-                )  # type: ignore # pylint: disable=no-member
+                )
                 data_pb.blocksizes.append(len(chunk))  # type: ignore # pylint: disable=no-member
             outer_node.Data = data_pb.SerializeToString(deterministic=True)
             file_pb = cls._serialize(outer_node)
@@ -280,4 +292,3 @@ class IPFSHashOnly:
         """Generate hash for data."""
         pb_data, _ = cls._pb_serialize_file(data)
         return cls._generate_multihash(pb_data)
-
