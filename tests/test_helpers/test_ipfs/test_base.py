@@ -23,6 +23,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from platform import system
 
 import pytest
 from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
@@ -49,6 +50,7 @@ def test_hash_for_big_file():
 
 
 @pytest.mark.usefixtures("use_ipfs_daemon")
+@pytest.mark.skipif(system() == "Windows")
 class TestDirectoryHashing:
     """Test recursive directory hashing."""
 
