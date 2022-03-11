@@ -171,6 +171,8 @@ class IPFSHashOnly:
 
         for child_path in sorted(root.iterdir()):
             if child_path.is_dir():
+                if child_path.name == "__pycache__":
+                    continue
                 metadata = self._hash_directory_recursively(child_path)
                 content_size_child = len(
                     cast(bytes, metadata.get("serialization"))
@@ -185,6 +187,8 @@ class IPFSHashOnly:
                 content_size += content_size_child
 
             else:
+                if child_path.name.endswith(".pyc"):
+                    continue
                 data = _read(str(child_path))
                 file_pb, file_length = self._pb_serialize_file(data)
                 child_hash = self._generate_multihash_bytes(file_pb)
