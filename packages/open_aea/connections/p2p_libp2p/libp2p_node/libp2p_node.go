@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/pkgerrors"
 
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
@@ -53,6 +54,10 @@ func check(err error) {
 }
 
 func main() {
+	// Traceback and stacktrace
+	// debug.SetTraceback("all")
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 
 	var err error
 
