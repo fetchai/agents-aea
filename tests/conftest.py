@@ -837,6 +837,7 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     )
 
 
+DEFAULT_LEDGER_LIBP2P_NODE = "fetchai"  # Sepc2561k keys
 def _make_libp2p_connection(
     data_dir: str,
     port: int = 10234,
@@ -870,14 +871,14 @@ def _make_libp2p_connection(
     )
     conn_crypto_store = None
     if node_key_file is not None:
-        conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
+        conn_crypto_store = CryptoStore({DEFAULT_LEDGER_LIBP2P_NODE: node_key_file})
     else:
-        node_key = make_crypto(DEFAULT_LEDGER)
+        node_key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
         node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
         node_key.dump(node_key_path)
         conn_crypto_store = CryptoStore({node_key.identifier: node_key_path})
     cert_request = CertRequest(
-        conn_crypto_store.public_keys[DEFAULT_LEDGER],
+        conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
         key.identifier,
         "2021-01-01",
@@ -951,7 +952,7 @@ def _make_libp2p_client_connection(
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER_LIBP2P_NODE,
 ) -> P2PLibp2pClientConnection:
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
@@ -998,7 +999,7 @@ def _make_libp2p_mailbox_connection(
     node_port: int = 8888,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER_LIBP2P_NODE,
 ) -> P2PLibp2pMailboxConnection:
     """Get a libp2p mailbox connection."""
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):

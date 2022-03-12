@@ -32,6 +32,7 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
+    DEFAULT_LEDGER,
 )
 
 
@@ -75,7 +76,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
 
     def test_connection(self):
         """Test the connection can be used in an aea."""
-        ledger_id = "fetchai"
+        ledger_id = DEFAULT_LEDGER
         self.generate_private_key(ledger_id)
         self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
         self.set_config("agent.default_ledger", ledger_id)
