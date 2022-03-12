@@ -29,7 +29,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	aea "libp2p_node/aea"
+	"libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhtpeer"

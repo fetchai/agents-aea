@@ -28,7 +28,7 @@ import (
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhttests"
-	utils "libp2p_node/utils"
+	"libp2p_node/utils"
 )
 
 //

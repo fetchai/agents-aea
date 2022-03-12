@@ -1,3 +1,4 @@
+//go:build windows || linux || darwin
 // +build windows linux darwin
 
 /* -*- coding: utf-8 -*-
@@ -25,7 +26,7 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
-	common "libp2p_node/common"
+	"libp2p_node/common"
 	"math"
 	"net"
 	"strconv"

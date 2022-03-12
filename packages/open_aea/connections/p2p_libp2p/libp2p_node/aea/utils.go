@@ -23,10 +23,10 @@ package aea
 import (
 	"errors"
 
-	acn "libp2p_node/acn"
-	common "libp2p_node/common"
+	"libp2p_node/acn"
+	"libp2p_node/common"
 
-	proto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 func HandleAcnMessageFromPipe(

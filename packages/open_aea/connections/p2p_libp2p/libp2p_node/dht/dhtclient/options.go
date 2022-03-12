@@ -21,7 +21,7 @@
 package dhtclient
 
 import (
-	acn "libp2p_node/acn"
+	"libp2p_node/acn"
 	"libp2p_node/utils"
 )
 
