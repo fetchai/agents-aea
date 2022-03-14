@@ -513,7 +513,6 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-
         tx = ParseDict(transaction["tx"], Tx())
 
         # If public key is not already part of transaction
@@ -1123,9 +1122,10 @@ class _CosmosApi(LedgerApi):
 
         :return: the transaction
         """
-
         if pub_keys is not None and len(pub_keys) != len(from_addresses):
-            raise RuntimeError("Number of pubkeys is not equal to number of addresses")
+            raise RuntimeError(
+                "Number of pubkeys is not equal to number of addresses"
+            )  # pragma: nocover
 
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
@@ -1268,7 +1268,7 @@ class _CosmosApi(LedgerApi):
         if account_response.account.Is(BaseAccount.DESCRIPTOR):
             account_response.account.Unpack(account)
         else:
-            raise TypeError("Unexpected account type")
+            raise TypeError("Unexpected account type")  # pragma: nocover
 
         return account.account_number, account.sequence
 
@@ -1279,7 +1279,6 @@ class _CosmosApi(LedgerApi):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-
         tx = ParseDict(tx_signed["tx"], Tx())
 
         tx_data = tx.SerializeToString()
@@ -1339,7 +1338,7 @@ class _CosmosApi(LedgerApi):
         # Cosmos does not distinguish between transaction receipt and transaction
         tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
         if tx_with_receipt is None:
-            return None
+            return None  # pragma: nocover
         return {"tx": tx_with_receipt.get("tx")}
 
     def get_contract_instance(

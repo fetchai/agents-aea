@@ -99,7 +99,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ## Demo instructions (Fetchai):
 
-Follow this instruction to run TAC against the fetch.ai Capricorn test-net.
+Follow this instruction to run TAC against the fetch.ai Capricorn testnet.
 
 ### Fetch TAC controller AEA
 

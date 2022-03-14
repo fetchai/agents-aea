@@ -650,7 +650,6 @@ class TestCosmWasmContract(BaseContractTestCase):
         ledger_api: LedgerApi,
         deployer_crypto: Crypto,
         gas: int,
-        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Deploy contract on network.

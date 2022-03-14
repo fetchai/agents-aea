@@ -23,13 +23,16 @@ import logging
 import shutil
 import tempfile
 import time
+from collections import OrderedDict
 from pathlib import Path
+from typing import List
 from unittest import mock
 from unittest.mock import MagicMock, call, patch
 from uuid import uuid4
 
 import pytest
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from aea_ledger_fetchai._cosmos import MAXIMUM_GAS_AMOUNT
 from cosmpy.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
 from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 from google.protobuf.any_pb2 import Any as ProtoAny
@@ -443,6 +446,12 @@ def test_get_storage_transaction_cosmwasm():
     deploy_transaction = cosmos_api.get_deploy_transaction(
         contract_interface, deployer_address, account_number=1, sequence=0,
     )
+    with patch.object(
+        cosmos_api, "_try_get_account_number_and_sequence", return_value=(1, 0)
+    ):
+        deploy_transaction = cosmos_api.get_deploy_transaction(
+            contract_interface, deployer_address
+        )
 
     assert type(deploy_transaction) == dict and len(deploy_transaction) == 2
     # Check sign_data
@@ -521,19 +530,20 @@ def test_get_handle_transaction_cosmwasm():
     tx_fee = 1
     amount = 10
     gas_limit = 1234
-    handle_transaction = cosmos_api.get_handle_transaction(
-        sender_address,
-        contract_address,
-        handle_msg,
-        amount,
-        tx_fee,
-        gas=gas_limit,
-        memo="memo",
-        account_number=1,
-        sequence=0,
-        denom="abc",
-        tx_fee_denom="def",
-    )
+    with patch.object(
+        cosmos_api, "_try_get_account_number_and_sequence", return_value=(1, 0)
+    ):
+        handle_transaction = cosmos_api.get_handle_transaction(
+            sender_address,
+            contract_address,
+            handle_msg,
+            amount,
+            tx_fee,
+            gas=gas_limit,
+            memo="memo",
+            denom="abc",
+            tx_fee_denom="def",
+        )
 
     assert type(handle_transaction) == dict and len(handle_transaction) == 2
 
@@ -856,3 +866,205 @@ def test_multiple_signatures_transaction_wrong_number_of_params():
             pub_keys=[b"123"],
             msgs=[send_msg_packed],
         )
+
+
+@pytest.mark.ledger
+def test_fail_sign_multisig():
+    """Test sign_transaction failed."""
+    tx = {
+        "tx": {
+            "body": {
+                "messages": [
+                    OrderedDict(
+                        [
+                            ("@type", "/cosmos.bank.v1beta1.MsgSend"),
+                            (
+                                "fromAddress",
+                                "fetch17yh6gwf48ac8m2rdmze0sy55l369x6t75972jf",
+                            ),
+                            (
+                                "toAddress",
+                                "fetch1sf6xalwvvgafcn5lg80358dt8gn7sf4dt0d9vj",
+                            ),
+                            ("amount", [{"denom": "atestfet", "amount": "10000"}]),
+                        ]
+                    )
+                ]
+            },
+            "authInfo": {
+                "signerInfos": [
+                    {
+                        "publicKey": OrderedDict(
+                            [("@type", "/cosmos.crypto.secp256k1.PubKey")]
+                        ),
+                        "modeInfo": {"single": {"mode": "SIGN_MODE_DIRECT"}},
+                    },
+                    {
+                        "publicKey": OrderedDict(
+                            [("@type", "/cosmos.crypto.secp256k1.PubKey")]
+                        ),
+                        "modeInfo": {"single": {"mode": "SIGN_MODE_DIRECT"}},
+                    },
+                ],
+                "fee": {
+                    "amount": [{"denom": "atestfet", "amount": "7750000000000000"}],
+                    "gasLimit": "1550000",
+                },
+            },
+        },
+        "sign_data": {
+            "fetch17yh6gwf48ac8m2rdmze0sy55l369x6t75972jf": {
+                "account_number": 16964,
+                "chain_id": "capricorn-1",
+            },
+            "fetch17yh6gwf48ac8m2rdmze0sy55l369x6t75972j1": {
+                "account_number": 16964,
+                "chain_id": "capricorn-1",
+            },
+        },
+    }
+    ec = FetchAICrypto()
+    ec._pritvate_key = FetchAICrypto.generate_private_key()
+    with pytest.raises(
+        RuntimeError,
+        match=r"Public key can be added during singing only for single message transactions.",
+    ):
+        ec.sign_transaction(tx)
+
+
+@pytest.mark.ledger
+def test_send_signed_tx_failed():
+    """Test send signed tx failed."""
+    tx_signed = {
+        "tx": {
+            "body": {
+                "messages": [
+                    OrderedDict(
+                        [
+                            ("@type", "/cosmos.bank.v1beta1.MsgSend"),
+                            (
+                                "fromAddress",
+                                "fetch14a92pzm55djc80xhztkz5ccemnm2kem2g5dzvh",
+                            ),
+                            (
+                                "toAddress",
+                                "fetch127emdsu23u7u8zy7dpjn25ng7f8v5fkmecae0s",
+                            ),
+                            ("amount", [{"denom": "atestfet", "amount": "10000"}]),
+                        ]
+                    )
+                ]
+            },
+            "authInfo": {
+                "signerInfos": [
+                    {
+                        "publicKey": OrderedDict(
+                            [
+                                ("@type", "/cosmos.crypto.secp256k1.PubKey"),
+                                ("key", "A+SP+gGzrTSNwZ3ntRInSVVhRrslSBRMCh3B7OI6oc75"),
+                            ]
+                        ),
+                        "modeInfo": {"single": {"mode": "SIGN_MODE_DIRECT"}},
+                    }
+                ],
+                "fee": {
+                    "amount": [{"denom": "atestfet", "amount": "7750000000000000"}],
+                    "gasLimit": "1550000",
+                },
+            },
+            "signatures": [
+                "GUy8kL26D3EbK6K4sY4OBbkXpP4PFKXXtO+IqunPoKBUOYV/+iI4sRShJS3uGAejNRGNP/fgM9AwJIwl8z4z+Q=="
+            ],
+        },
+        "sign_data": {
+            "fetch14a92pzm55djc80xhztkz5ccemnm2kem2g5dzvh": {
+                "account_number": 16991,
+                "chain_id": "capricorn-1",
+            }
+        },
+    }
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    resp_mock = MagicMock()
+    resp_mock.tx_response.code = 10
+    with patch.object(fetchai_api.tx_client, "BroadcastTx", return_value=resp_mock):
+        assert fetchai_api.send_signed_transaction(tx_signed) is None
+
+
+@pytest.mark.ledger
+def test_max_gas():
+    """Test max gas limit set."""
+    coins = [Coin(denom="DENOM", amount="1234")]
+    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    send_msg_packed = ProtoAny()
+    send_msg_packed.Pack(msg_send, type_url_prefix="/")
+
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    tx = fetchai_api._get_transaction(
+        account_numbers=[1, 2],
+        from_addresses=["adr1", "adr2"],
+        pub_keys=[b"1", b"2"],
+        chain_id="chain_id",
+        tx_fee=coins,
+        gas=MAXIMUM_GAS_AMOUNT * 1.5,
+        memo="MEMO",
+        sequences=[1, 2],
+        msgs=[send_msg_packed, send_msg_packed],
+    )
+    assert tx["tx"]["authInfo"]["fee"]["gasLimit"] == str(MAXIMUM_GAS_AMOUNT)
+
+
+@pytest.mark.ledger
+def test_get_multi_transaction():
+    """Test get_multi_transaction."""
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    msgs: List[ProtoAny] = []
+    gas = 100
+    from_address = "123123"
+    to_address = "23423434"
+    token_id = "sdfsf"
+    from_supply = "23423443"
+    contract_address = "some addr"
+    to_pubkey = ""
+    tx_fee = 123123
+
+    contract_msg = {
+        "transfer_single": {
+            "operator": str(from_address),
+            "from_address": str(from_address),
+            "to_address": str(to_address),
+            "id": str(token_id),
+            "value": str(from_supply),
+        }
+    }
+    msgs.append(
+        fetchai_api.get_packed_exec_msg(
+            sender_address=from_address,
+            contract_address=contract_address,
+            msg=contract_msg,
+            funds=10,
+            denom="test",
+        )
+    )
+    msgs.append(
+        fetchai_api.get_packed_exec_msg(
+            sender_address=from_address,
+            contract_address=contract_address,
+            msg=contract_msg,
+        )
+    )
+    msgs.append(
+        fetchai_api.get_packed_send_msg(
+            from_address=from_address, to_address=contract_address, amount=10
+        )
+    )
+    with patch.object(
+        fetchai_api, "_try_get_account_number_and_sequence", return_value=(1, 0)
+    ):
+        tx = fetchai_api.get_multi_transaction(
+            from_addresses=[to_address],
+            pub_keys=[bytes.fromhex(to_pubkey)],
+            msgs=msgs,
+            gas=gas,
+            tx_fee=tx_fee,
+        )
+    assert tx

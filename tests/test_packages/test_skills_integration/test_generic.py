@@ -306,23 +306,22 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.add_item("skill", "fetchai/generic_buyer:0.27.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.set_config(
-            "vendor.fetchai.skills.generic_buyer.models.strategy.args.max_tx_fee",
-            7750000000000000,
-        )
 
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
             "fetchai/generic_buyer:0.30.0", buyer_aea_name
         )
-        assert diff == [
-            "aea-config.yaml",
-            "Difference in aea-config.yaml: [] vs. [{'public_id': 'fetchai/generic_buyer:0.27.0', 'type': 'skill', 'models': {'strategy': {'args': {'max_tx_fee': 7750000000000000}}}}]",
-        ], "Difference between created and fetched project for files={}".format(diff)
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
 
         setting_path = "vendor.fetchai.skills.generic_buyer.is_abstract"
         self.set_config(setting_path, False, "bool")
+        self.set_config(
+            "vendor.fetchai.skills.generic_buyer.models.strategy.args.max_tx_fee",
+            7750000000000000,
+        )
 
         # add keys
         self.generate_private_key(FetchAICrypto.identifier)
