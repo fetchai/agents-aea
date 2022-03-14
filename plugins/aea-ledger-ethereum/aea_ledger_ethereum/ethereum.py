@@ -1036,6 +1036,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         Try send a signed transaction.
 
         :param tx_signed: the signed transaction
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: tx_digest, if present
         """
         signed_transaction = SignedTransactionTranslator.from_dict(tx_signed)
