@@ -25,7 +25,8 @@ A helper class which allows construction of an IPFS hash without interacting wit
 #### get
 
 ```python
- | get(file_path: str, wrap: bool = True) -> str
+ | @classmethod
+ | get(cls, file_path: str, wrap: bool = True) -> str
 ```
 
 Get the IPFS hash.
@@ -34,7 +35,8 @@ Get the IPFS hash.
 #### hash`_`file
 
 ```python
- | hash_file(file_path: str, wrap: bool = True) -> str
+ | @classmethod
+ | hash_file(cls, file_path: str, wrap: bool = True) -> str
 ```
 
 Get the IPFS hash for a single file.
@@ -52,7 +54,8 @@ the ipfs hash
 #### hash`_`directory
 
 ```python
- | hash_directory(dir_path: str, wrap: bool = True) -> str
+ | @classmethod
+ | hash_directory(cls, dir_path: str, wrap: bool = True) -> str
 ```
 
 Get the IPFS hash for a directory.
@@ -81,7 +84,7 @@ Create PBLink object.
 
 ```python
  | @classmethod
- | wrap_in_a_node(cls, hash_bytes: bytes, tsize: int, name: str) -> str
+ | wrap_in_a_node(cls, link: Any) -> str
 ```
 
 Wrap content in a wrapper node.
