@@ -1025,11 +1025,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-        tx_digest = self._try_send_signed_transaction(tx_signed)
+        tx_digest = self._try_send_signed_transaction(tx_signed, raise_on_try=True)
         return tx_digest
 
     @try_decorator("Unable to send transaction: {}", logger_method="warning")
-    def _try_send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def _try_send_signed_transaction(
+        self, tx_signed: JSONLike, **_kwargs: Any
+    ) -> Optional[str]:
         """
         Try send a signed transaction.
 
