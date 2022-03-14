@@ -20,21 +20,15 @@
 
 """This module contains the tests for the ipfs helper module."""
 
-import os
+from pathlib import Path
+from platform import system
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+import pytest
+from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
+
 from aea.helpers.ipfs.base import IPFSHashOnly, _is_text
-
-from tests.conftest import CUR_PATH
-
-
-FILE_PATH = "__init__.py"
-
-
-def test_get_hash():
-    """Test get hash IPFSHashOnly."""
-    ipfs_hash = IPFSHashOnly().get(file_path=os.path.join(CUR_PATH, FILE_PATH))
-    assert ipfs_hash == "QmWeMu9JFPUcYdz4rwnWiJuQ6QForNFRsjBiN5PtmkEg4A"
 
 
 def test_is_text_negative():
@@ -53,3 +47,83 @@ def test_hash_for_big_file():
     data = b"1" * int(IPFSHashOnly.DEFAULT_CHUNK_SIZE * 1.5)
     my_hash = IPFSHashOnly._generate_hash(data)
     assert my_hash == VALID_HASH
+
+
+@pytest.mark.usefixtures("use_ipfs_daemon")
+@pytest.mark.skipif(
+    system() == "Windows", reason="Need to find a way to setup IPFS on windows workflow"
+)
+class TestDirectoryHashing:
+    """Test recursive directory hashing."""
+
+    def setup(self,) -> None:
+        """Setup test."""
+
+        self.hash_tool = IPFSHashOnly()
+        self.ipfs_tool = IPFSTool(addr="/ip4/127.0.0.1/tcp/5001")
+
+    def test_depth_0(self,) -> None:
+        """Test directory with only one file and no child directories."""
+
+        with TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "dummy_file.txt").write_text("Hello, World!")
+
+            hash_local = self.hash_tool.get(temp_dir)
+            d, hash_daemon, _ = self.ipfs_tool.add(temp_dir)
+
+            assert (
+                hash_daemon == hash_local
+            ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}\n{d}"
+
+    def test_depth_1(self,) -> None:
+        """Test directory with only one file and a child directory."""
+
+        with TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "dummy_file.txt").write_text("Hello, World!")
+            Path(temp_dir, "inner_0").mkdir()
+            Path(temp_dir, "inner_0", "dummy_file_inner.txt").write_text("Foo, Bar!")
+
+            hash_local = self.hash_tool.get(temp_dir)
+            d, hash_daemon, _ = self.ipfs_tool.add(temp_dir)
+
+            assert (
+                hash_daemon == hash_local
+            ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}\n{d}"
+
+    def test_depth_multi(self,) -> None:
+        """Test directory with only one file and a child directory."""
+
+        with TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "dummy_file.txt").write_text("Hello, World!")
+            for i in range(3, 7):
+                if i % 2:
+                    Path(temp_dir, f"inner_{i}").mkdir()
+                    Path(
+                        temp_dir, f"inner_{i}", f"dummy_file_inner_{i}.txt"
+                    ).write_text(f"Foo, Bar! {i}")
+                else:
+                    Path(temp_dir, f"inner_{i}").mkdir()
+                    for j in range(i):
+                        Path(
+                            temp_dir, f"inner_{i}", f"dummy_file_inner_{i}_{j}.txt"
+                        ).write_text(f"Foo, Bar! {i}_{j}")
+                        Path(temp_dir, f"inner_{i}", f"inner_{i}_{j}").mkdir()
+                        for k in range(i):
+                            Path(
+                                temp_dir,
+                                f"inner_{i}",
+                                f"inner_{i}_{j}",
+                                f"dummy_file_inner_{i}_{j}_{k}.txt",
+                            ).write_text(f"Foo, Bar! {i}_{j}_{k}")
+
+            # file larger then default chunk size
+            Path(temp_dir, "dummy_file_large.txt").write_text(
+                "1" * int(IPFSHashOnly.DEFAULT_CHUNK_SIZE * 1.5)
+            )
+
+            hash_local = self.hash_tool.get(temp_dir)
+            _, hash_daemon, _ = self.ipfs_tool.add(temp_dir)
+
+            assert (
+                hash_daemon == hash_local
+            ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}"

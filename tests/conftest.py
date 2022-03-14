@@ -52,6 +52,7 @@ import docker as docker
 import gym
 import pytest
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
+from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.ethereum import (
@@ -1488,3 +1489,13 @@ def disable_logging_handlers_cleanup(request) -> Generator:
     with MonkeyPatch().context() as mp:
         mp.setattr(logging.config, "_clearExistingHandlers", do_nothing)
         yield
+
+
+@pytest.fixture(scope="class")
+def use_ipfs_daemon() -> Generator:
+    """Use IPFS daemon."""
+    ipfs_daemon = IPFSDaemon(offline=True)
+    ipfs_daemon.start()
+
+    yield
+    ipfs_daemon.stop()

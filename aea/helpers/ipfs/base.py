@@ -21,8 +21,10 @@
 import codecs
 import hashlib
 import io
+import os
 import re
-from typing import Generator, Sized, cast
+from pathlib import Path
+from typing import Any, Dict, Generator, Sized, Tuple, cast
 
 import base58
 
@@ -83,17 +85,133 @@ class IPFSHashOnly:
     DEFAULT_CHUNK_SIZE = 262144
     # according to https://pkg.go.dev/github.com/ipfs/go-ipfs-chunker#pkg-constants
 
-    def get(self, file_path: str) -> str:
+    @classmethod
+    def get(cls, file_path: str, wrap: bool = True) -> str:
+        """Get the IPFS hash."""
+        if os.path.isdir(file_path):
+            return cls.hash_directory(file_path, wrap=wrap)
+
+        return cls.hash_file(file_path, wrap=wrap)
+
+    @classmethod
+    def hash_file(cls, file_path: str, wrap: bool = True) -> str:
         """
         Get the IPFS hash for a single file.
 
         :param file_path: the file path
+        :param wrap: weather to wrap the content in wrapper node or not
         :return: the ipfs hash
         """
         file_b = _read(file_path)
-        file_pb = self._pb_serialize_file(file_b)
-        ipfs_hash = self._generate_multihash(file_pb)
-        return ipfs_hash
+        file_pb, file_length = cls._pb_serialize_file(file_b)
+
+        if wrap:
+            link_hash = cls._generate_multihash_bytes(file_pb)
+            link = cls.create_link(link_hash, file_length, Path(file_path).name)
+            return cls.wrap_in_a_node(link)
+
+        return cls._generate_multihash(file_pb)
+
+    @classmethod
+    def hash_directory(cls, dir_path: str, wrap: bool = True) -> str:
+        """
+        Get the IPFS hash for a directory.
+
+        :param dir_path: the directory path
+        :param wrap: weather to wrap the content in wrapper node or not
+        :return: the ipfs hash
+        """
+
+        path = Path(dir_path)
+        hashed_dir = cls._hash_directory_recursively(path)
+
+        if wrap:
+            link = cls.create_link(
+                cast(bytes, hashed_dir.get("hash_bytes")),
+                len(cast(bytes, hashed_dir.get("serialization")))
+                + cast(int, hashed_dir.get("content_size")),
+                path.name,
+            )
+            return cls.wrap_in_a_node(link)
+
+        return cast(str, hashed_dir.get("hash"))
+
+    @staticmethod
+    def create_link(link_hash: bytes, tsize: int, name: str) -> Any:
+        """Create PBLink object."""
+        link = merkledag_pb2.PBLink()
+        link.Hash = link_hash
+        link.Tsize = tsize
+        link.Name = name
+
+        return link
+
+    @classmethod
+    def wrap_in_a_node(cls, link: Any) -> str:
+        """Wrap content in a wrapper node."""
+        wrapper_node = PBNode()
+        wrapper_node.Links.append(link)  # type: ignore # pylint: disable=no-member
+
+        wrapper_node_data = unixfs_pb2.Data()
+        wrapper_node_data.Type = unixfs_pb2.Data.Directory  # type: ignore  # pylint: disable=no-member
+        wrapper_node.Data = wrapper_node_data.SerializeToString(deterministic=True)  # type: ignore # pylint: disable=no-member
+
+        wrapper_node_serialization = cls._serialize(wrapper_node)
+        wrapper_node_hash_bytes = cls._generate_multihash_bytes(
+            wrapper_node_serialization
+        )
+
+        return base58.b58encode(wrapper_node_hash_bytes).decode()
+
+    @classmethod
+    def _hash_directory_recursively(cls, root: Path) -> Dict:
+        """Hash directories recursively, starting from provided root directory."""
+
+        root_node = PBNode()
+        content_size = 0
+
+        for child_path in sorted(root.iterdir()):
+            if child_path.is_dir():
+                if child_path.name == "__pycache__":
+                    continue
+                metadata = cls._hash_directory_recursively(child_path)
+                content_size_child = len(
+                    cast(bytes, metadata.get("serialization"))
+                ) + cast(int, metadata.get("content_size"))
+                root_node.Links.append(  # type: ignore # pylint: disable=no-member
+                    cls.create_link(
+                        cast(bytes, metadata.get("hash_bytes")),
+                        content_size_child,
+                        child_path.name,
+                    )
+                )
+                content_size += content_size_child
+
+            else:
+                if child_path.name.endswith(".pyc"):
+                    continue
+                data = _read(str(child_path))
+                file_pb, file_length = cls._pb_serialize_file(data)
+                child_hash = cls._generate_multihash_bytes(file_pb)
+                content_size += file_length
+                root_node.Links.append(  # type: ignore # pylint: disable=no-member
+                    cls.create_link(child_hash, file_length, child_path.name)
+                )
+
+        root_node_data = unixfs_pb2.Data()
+        root_node_data.Type = unixfs_pb2.Data.Directory  # type: ignore  # pylint: disable=no-member
+        root_node.Data = root_node_data.SerializeToString(deterministic=True)  # type: ignore # pylint: disable=no-member
+
+        root_node_serialization = cls._serialize(root_node)
+        root_node_hash_bytes = cls._generate_multihash_bytes(root_node_serialization)
+        root_node_hash = base58.b58encode(root_node_hash_bytes).decode()
+
+        return {
+            "serialization": root_node_serialization,
+            "hash_bytes": root_node_hash_bytes,
+            "hash": root_node_hash,
+            "content_size": content_size,
+        }
 
     @classmethod
     def _make_unixfs_pb2(cls, data: bytes) -> bytes:
@@ -114,29 +232,46 @@ class IPFSHashOnly:
         return result
 
     @classmethod
-    def _pb_serialize_file(cls, data: bytes) -> bytes:
+    def _serialize(cls, pb_node: PBNode) -> bytes:  # type: ignore
+        """Serialize PBNode instance with fixed fields sequence."""
+        f = io.BytesIO()
+        for field_descriptor, field_value in reversed(pb_node.ListFields()):  # type: ignore
+            field_descriptor._encoder(  # pylint: disable=protected-access
+                f.write, field_value, True
+            )
+        return f.getvalue()
+
+    @classmethod
+    def _pb_serialize_file(cls, data: bytes) -> Tuple[bytes, int]:
         """
         Serialize a bytes object representing a file.
 
         :param data: a bytes string representing a file
-        :return: a bytes string representing a file in protobuf serialization
+        :return: a bytes string representing a file in protobuf serialization, content size
         """
         if len(data) > cls.DEFAULT_CHUNK_SIZE:
+            content_size = 0
             outer_node = PBNode()  # type: ignore
             data_pb = unixfs_pb2.Data()  # type: ignore
             data_pb.Type = unixfs_pb2.Data.File  # type: ignore # pylint: disable=no-member
             data_pb.filesize = len(data)
             for chunk in chunks(data, cls.DEFAULT_CHUNK_SIZE):
-                link = merkledag_pb2.PBLink()
                 block = cls._pb_serialize_data(chunk)
-                link.Hash = cls._generate_multihash_bytes(block)
-                link.Tsize = len(block)
-                link.Name = ""
-                outer_node.Links.append(link)  # type: ignore # pylint: disable=no-member
+                block_length = len(block)
+                content_size += block_length
+                outer_node.Links.append(  # type: ignore # pylint: disable=no-member
+                    cls.create_link(
+                        cls._generate_multihash_bytes(block), block_length, ""
+                    )
+                )
                 data_pb.blocksizes.append(len(chunk))  # type: ignore # pylint: disable=no-member
             outer_node.Data = data_pb.SerializeToString(deterministic=True)
-            return cls._serialize(outer_node)
-        return cls._pb_serialize_data(data)
+            file_pb = cls._serialize(outer_node)
+            content_size += len(file_pb)
+            return file_pb, content_size
+
+        file_pb = cls._pb_serialize_data(data)
+        return file_pb, len(file_pb)
 
     @staticmethod
     def _generate_multihash_bytes(pb_data: bytes) -> bytes:
@@ -157,20 +292,10 @@ class IPFSHashOnly:
         """
         multihash_bytes = cls._generate_multihash_bytes(pb_data)
         ipfs_hash = base58.b58encode(multihash_bytes)
-        return str(ipfs_hash, "utf-8")
+        return ipfs_hash.decode()
 
     @classmethod
     def _generate_hash(cls, data: bytes) -> str:
         """Generate hash for data."""
-        pb_data = cls._pb_serialize_file(data)
+        pb_data, _ = cls._pb_serialize_file(data)
         return cls._generate_multihash(pb_data)
-
-    @classmethod
-    def _serialize(cls, pb_node: PBNode) -> bytes:  # type: ignore
-        """Serialize PBNode instance with fixed fields sequence."""
-        f = io.BytesIO()
-        for field_descriptor, field_value in reversed(pb_node.ListFields()):  # type: ignore
-            field_descriptor._encoder(  # pylint: disable=protected-access
-                f.write, field_value, True
-            )
-        return f.getvalue()
