@@ -96,6 +96,7 @@ func ignore(err error) {
 */
 
 func newConsoleLogger() zerolog.Logger {
+	// only used here for default loggers
 	return zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		NoColor:    false,
@@ -106,14 +107,14 @@ func newConsoleLogger() zerolog.Logger {
 // NewDefaultLogger basic zerolog console writer
 func NewDefaultLogger() zerolog.Logger {
 	return newConsoleLogger().
-		With().Timestamp().
+		With().Caller().Stack().Timestamp().
 		Logger().Level(loggerGlobalLevel)
 }
 
 // NewDefaultLoggerWithFields zerolog console writer
 func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 	logger := newConsoleLogger().
-		With().Timestamp()
+		With().Caller().Stack().Timestamp()
 	for key, val := range fields {
 		logger = logger.Str(key, val)
 	}

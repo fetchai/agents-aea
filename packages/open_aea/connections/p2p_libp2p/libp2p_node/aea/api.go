@@ -42,12 +42,13 @@ const SendQueueSize = 100
 const OutQueueSize = 100
 
 // code redandency to avoid import cycle
+
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
 	NoColor:    false,
 	TimeFormat: "15:04:05.000",
 }).
-	With().Timestamp().
+	With().Caller().Stack().Timestamp().
 	Str("package", "AeaApi").
 	Logger()
 
