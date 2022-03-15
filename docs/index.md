@@ -1,4 +1,5 @@
 
+This is an exercise 
 
 The AEA framework provides the tools for creating Autonomous Economic Agents (AEA).
 
