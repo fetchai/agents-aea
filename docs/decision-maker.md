@@ -31,7 +31,7 @@ class SigningHandler(Handler):
 
 ## Custom `DecisionMaker`
 
-The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a> and an advanced <a href="https://valory-xyz.github.io/open-aea/api/decision_maker/gop/#decisionmakerhandler-objects" target="_blank">`DecisionMakerHandler`</a>. You can also implement your own and mount it.
+The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects#decisionmakerhandler-objects">`DecisionMakerHandler`. You can also implement your own and mount it.
 
 No further configuration is needed to use the default. To use the advanced decision maker handler, add the following configuration to the `aea-config.yaml` of your AEA (on page 1):
 
