@@ -25,7 +25,18 @@ A helper class which allows construction of an IPFS hash without interacting wit
 #### get
 
 ```python
- | get(file_path: str) -> str
+ | @classmethod
+ | get(cls, file_path: str, wrap: bool = True) -> str
+```
+
+Get the IPFS hash.
+
+<a name="aea.helpers.ipfs.base.IPFSHashOnly.hash_file"></a>
+#### hash`_`file
+
+```python
+ | @classmethod
+ | hash_file(cls, file_path: str, wrap: bool = True) -> str
 ```
 
 Get the IPFS hash for a single file.
@@ -33,8 +44,48 @@ Get the IPFS hash for a single file.
 **Arguments**:
 
 - `file_path`: the file path
+- `wrap`: weather to wrap the content in wrapper node or not
 
 **Returns**:
 
 the ipfs hash
+
+<a name="aea.helpers.ipfs.base.IPFSHashOnly.hash_directory"></a>
+#### hash`_`directory
+
+```python
+ | @classmethod
+ | hash_directory(cls, dir_path: str, wrap: bool = True) -> str
+```
+
+Get the IPFS hash for a directory.
+
+**Arguments**:
+
+- `dir_path`: the directory path
+- `wrap`: weather to wrap the content in wrapper node or not
+
+**Returns**:
+
+the ipfs hash
+
+<a name="aea.helpers.ipfs.base.IPFSHashOnly.create_link"></a>
+#### create`_`link
+
+```python
+ | @staticmethod
+ | create_link(link_hash: bytes, tsize: int, name: str) -> Any
+```
+
+Create PBLink object.
+
+<a name="aea.helpers.ipfs.base.IPFSHashOnly.wrap_in_a_node"></a>
+#### wrap`_`in`_`a`_`node
+
+```python
+ | @classmethod
+ | wrap_in_a_node(cls, link: Any) -> str
+```
+
+Wrap content in a wrapper node.
 
