@@ -604,7 +604,7 @@ the updated transaction
 #### send`_`signed`_`transaction
 
 ```python
- | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
+ | send_signed_transaction(tx_signed: JSONLike, raise_on_try: bool = False) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -612,6 +612,7 @@ Send a signed transaction and wait for confirmation.
 **Arguments**:
 
 - `tx_signed`: the signed transaction
+- `raise_on_try`: whether the method will raise or log on error
 
 **Returns**:
 

@@ -1283,11 +1283,14 @@ class _CosmosApi(LedgerApi):
 
         return account.account_number, account.sequence
 
-    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def send_signed_transaction(
+        self, tx_signed: JSONLike, raise_on_try: bool = False
+    ) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
         :param tx_signed: the signed transaction
+        :param raise_on_try: whether the method will raise or log on error
         :return: tx_digest, if present
         """
 
@@ -1301,15 +1304,12 @@ class _CosmosApi(LedgerApi):
 
         if broad_tx_resp.tx_response.code != 0:
             raw_log = broad_tx_resp.tx_response.raw_log
-
-            _default_logger.warning(
-                f"Sending transaction failed: {raw_log} {broad_tx_resp}"
-            )
-            tx_digest = None
-        else:
-            tx_digest = broad_tx_resp.tx_response.txhash
-
-        return tx_digest
+            error = f"Sending transaction failed: {raw_log} {broad_tx_resp}"
+            if raise_on_try:
+                raise ValueError(error)
+            _default_logger.warning(error)
+            return None
+        return broad_tx_resp.tx_response.txhash
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """

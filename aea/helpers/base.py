@@ -313,7 +313,7 @@ def try_decorator(
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
-                if len(args) > 0 and getattr(args[0], "raise_on_try", False):
+                if len(kwargs) > 0 and kwargs.get("raise_on_try", False):
                     raise e
                 if error_message:
                     log = get_logger_method(fn, logger_method)

@@ -1018,22 +1018,31 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return gas_estimate
 
-    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def send_signed_transaction(
+        self, tx_signed: JSONLike, raise_on_try: bool = False
+    ) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
         :param tx_signed: the signed transaction
+        :param raise_on_try: whether the method will raise or log on error
         :return: tx_digest, if present
         """
-        tx_digest = self._try_send_signed_transaction(tx_signed)
+        tx_digest = self._try_send_signed_transaction(
+            tx_signed, raise_on_try=raise_on_try
+        )
         return tx_digest
 
     @try_decorator("Unable to send transaction: {}", logger_method="warning")
-    def _try_send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def _try_send_signed_transaction(
+        self, tx_signed: JSONLike, **_kwargs: Any
+    ) -> Optional[str]:
         """
         Try send a signed transaction.
 
         :param tx_signed: the signed transaction
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: tx_digest, if present
         """
         signed_transaction = SignedTransactionTranslator.from_dict(tx_signed)
