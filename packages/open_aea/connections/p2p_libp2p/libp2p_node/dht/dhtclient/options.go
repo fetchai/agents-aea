@@ -69,3 +69,12 @@ func BootstrapFrom(entryPeers []string) Option {
 		return nil
 	}
 }
+
+// IdentityFromEthereumKey for dhtclient.New
+func IdentityFromEthereumKey(key string) Option {
+	return func(dhtClient *DHTClient) error {
+		var err error
+		dhtClient.key, dhtClient.publicKey, err = utils.KeyPairFromEthereumKey(key)
+		return err
+	}
+}
