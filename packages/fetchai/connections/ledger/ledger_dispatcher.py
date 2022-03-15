@@ -279,7 +279,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """
         try:
             transaction_digest = api.send_signed_transaction(
-                message.signed_transaction.body
+                message.signed_transaction.body, raise_on_try=True
             )
         except Exception as e:  # pylint: disable=broad-except
             return self.get_error_message(e, api, message, dialogue)
