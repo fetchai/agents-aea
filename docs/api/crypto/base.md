@@ -537,7 +537,7 @@ the transfer transaction
 
 ```python
  | @abstractmethod
- | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
+ | send_signed_transaction(tx_signed: JSONLike, raise_on_try: bool = False) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -547,6 +547,11 @@ Use keyword arguments for the specifying the signed transaction payload.
 **Arguments**:
 
 - `tx_signed`: the signed transaction
+- `raise_on_try`: whether the method will raise or log on error
+
+**Returns**:
+
+tx_digest, if present
 
 <a name="aea.crypto.base.LedgerApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt

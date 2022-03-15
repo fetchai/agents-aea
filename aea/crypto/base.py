@@ -379,13 +379,17 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def send_signed_transaction(
+        self, tx_signed: JSONLike, raise_on_try: bool = False
+    ) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
         Use keyword arguments for the specifying the signed transaction payload.
 
         :param tx_signed: the signed transaction
+        :param raise_on_try: whether the method will raise or log on error
+        :return: tx_digest, if present
         """
 
     @abstractmethod
