@@ -10,7 +10,7 @@ Protocols in the AEA world provide definitions for:
 
 <img src="../assets/protocol.jpg" alt="Protocol simplified" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
-The framework provides a `default` protocol. This protocol provides a bare-bones implementation for an AEA protocol which includes a <a href="https://valory-xyz.github.io/open-aea/aea/api/protocols/default/message/#packages.fetchai.protocols.default.message" target="_blank">`DefaultMessage`</a>  class and associated <a href="https://valory-xyz.github.io/open-aea/aea/api/protocols/default/serialization/#packages.fetchai.protocols.default.serialization" target="_blank">`DefaultSerializer`</a> and <a href="https://valory-xyz.github.io/open-aea/aea/api/protocols/default/dialogues/#packages.fetchai.protocols.default.dialogues" target="_blank">`DefaultDialogue`</a> classes.
+The framework provides a `base` protocol. This protocol provides a bare-bones implementation for an AEA protocol which includes a <a href="https://valory-xyz.github.io/open-aea/api/protocols/base/#message-objects" target="_blank">`DefaultMessage`</a>  class and associated <a href="https://valory-xyz.github.io/open-aea/api/protocols/base/#serializer-objects" target="_blank">`DefaultSerializer`</a> and <a href="https://valory-xyz.github.io/open-aea/api/protocols/dialogue/base/" target="_blank">`DefaultDialogue`</a> classes.
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
 
