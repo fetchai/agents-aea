@@ -135,7 +135,7 @@ aea build
 
 ### Add keys for the seller AEA
 
-First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
+First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Capricorn` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -162,7 +162,7 @@ aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for the buyer based on the network you want to transact with. On the Fetch.ai `StargateWorld` network:
+Then, create some wealth for the buyer based on the network you want to transact with. On the Fetch.ai `Capricorn` network:
 ``` bash
 aea generate-wealth fetchai
 ```
