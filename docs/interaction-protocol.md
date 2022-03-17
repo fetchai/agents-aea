@@ -26,6 +26,12 @@ The `fetchai/http_client` connection can be used to make requests to third party
 
 Note that in general, third party SDKs can be wrapped in a connection and shared with other developers as a package. Often this also involves creating a custom protocol to enforce the type of interactions permitted between skills and the connection wrapping the SDK.
 
+## Next steps
+
+### Recommended
+
+We recommend you continue with the : <a href="../development-setup/">Development Setup</a>
+
 ### Relevant deep-dives
 
 Most AEA development focuses on developing the `Skills` and `Protocols` necessary for an AEA to deliver against its economic objectives and implement interaction protocols.
