@@ -23,7 +23,6 @@ package utils
 import (
 	"bufio"
 	"context"
-	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/binary"
@@ -779,55 +778,3 @@ func (streamPipe StreamPipe) Write(data []byte) error {
 func (streamPipe StreamPipe) Close() error {
 	return nil
 }
-
-// KeyPairFromEthereumKey key pair from hex encoded ECDSA private key
-func KeyPairFromEthereumKey(key string) (p2pCrypto.PrivKey, p2pCrypto.PubKey, error) {
-	privateKey, err := ethCrypto.HexToECDSA(key[2:]) // slice off the "0x"
-	if err != nil {
-		logger.Error().Msg("Cannot encode ETH hexadecimal key to PrivateKey")
-		return nil, nil, err
-	}
-	privKey, pubKey, err := p2pCrypto.ECDSAKeyPairFromKey(privateKey)
-	return privKey, pubKey, err
-
-}
-
-// EthereumPublicKeyFromPubKey return Ethereum's format serialized public key
-func EthereumPublicKeyFromPubKey(pubKey p2pCrypto.PubKey) (string, error) {
-	// pubKeyBytes, err = pubKey.Raw() // x509: unsupported elliptic curve
-	publicKey, err := p2pCrypto.PubKeyToStdKey(pubKey)
-	if err != nil {
-		return "", err
-	}
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		err := errors.New("cannot cast publicKey to publicKeyECDSA")
-		return "", err
-	}
-	publicKeyBytes := ethCrypto.FromECDSAPub(publicKeyECDSA)
-	publicKeyHex := hexutil.Encode(publicKeyBytes[1:]) // remove EC prefix
-	return publicKeyHex, nil
-}
-
-// // IDFromEthereumPublicKey get PeerID (multihash) from ethereum public key
-// func IDFromEthereumPublicKey(publicKey string) (peer.ID, error) {
-
-// 	// WIP: TestIDFromEthereumPublicKey still gives error
-// 	//      "invalid length, need 256 bits"
-// 	_, pubKey, err := KeyPairFromEthereumKey(publicKey)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	pKey, err := p2pCrypto.PubKeyToStdKey(pubKey)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	publicKeyECDSA, ok := pKey.(*ecdsa.PublicKey)
-// 	if !ok {
-// 		return "", errors.New("ecdsa.PublicKey casting failed")
-// 	}
-// 	multihash, err := peer.IDFromPublicKey((*p2pCrypto.Secp256k1PublicKey)(publicKeyECDSA))
-// 	if err != nil {
-// 		return "", err
-// 	}
-// }

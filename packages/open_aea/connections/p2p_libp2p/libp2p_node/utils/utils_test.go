@@ -23,7 +23,6 @@ package utils
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"libp2p_node/aea"
@@ -40,11 +39,6 @@ import (
 	multiaddr "github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
-
-	"crypto/ecdsa"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethCrypto "github.com/ethereum/go-ethereum/crypto"
-	p2pCrypto "github.com/libp2p/go-libp2p-core/crypto"
 )
 
 // Crypto operations
@@ -427,137 +421,3 @@ func TestBootstrapConnect(t *testing.T) {
 	})
 
 }
-
-// test default features of Secp256k1 keys (cosmos, fetchai)
-func TestP2pCryptoSecp256k1GenerateKeyFeatures(t *testing.T) {
-	// testing key features
-
-	bits := 1000000000000 // arbitrary
-
-	// Secp256k1
-	privKey, pubKey, err := p2pCrypto.GenerateKeyPair(2, bits)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, "Secp256k1", privKey.Type().String())
-	assert.Equal(t, "Secp256k1", pubKey.Type().String())
-
-	privKeyBytes, err := privKey.Raw()
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 32, len(privKeyBytes))
-	pubKeyBytes, err := pubKey.Raw()
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 33, len(pubKeyBytes))
-	privKeyHex := hexutil.Encode(privKeyBytes)
-	assert.Equal(t, 66, len(privKeyHex))
-	pubKeyHex := hexutil.Encode(pubKeyBytes)
-	assert.Equal(t, 68, len(pubKeyHex))
-}
-
-// type env_variables struct {
-// 	ID          string // node_key.private_key
-// 	ADDRESS     string // agent_key.address (== AEA_AGENT_ADDR and AEA_P2P_POR_ADDRESS)
-// 	PUBKEY      string // agent_key.public_key
-// 	PEER_PUBKEY string // node_key.public_key
-// 	SIGNATURE   string
-// 	LEDGER_ID   string
-// }
-
-// func newEnvVariables(
-// 	id string,
-// 	address string,
-// 	pubkey string,
-// 	peer_pubkey string,
-// 	signature string,
-// 	ledger_id string,
-// ) *env_variables {
-// 	variables := env_variables{id, address, pubkey, peer_pubkey, signature, ledger_id}
-// 	return variables
-// }
-//
-// // Define the environmental variables (example from temp_dir/.env_file.txt)
-// const (
-// 	FETCH_ENV_VARS = newEnvVariables( // pass tests
-// 		"17d0eb590228d1418d0693bbbf41a3e1fd51b516b2fd37ed16301232c18b4e8e",
-// 		"fetch16k3x9vw8jraxxddkhmz6rh3j74xjjrsdvcs2gz",
-// 		"0296bd7ad062c2ca5a85ada147c7cb951cb0e1672778aa99abf0f641de578e0e65",
-// 		"021aed1ce78a449109de6cc7ef516602a60d76e771b0cc2fef448b81d234d5b06b",
-// 		"iUcIQWrj+9KACugzIRDlyRuoNL7UThexSOn/l8ukBn9jEs1w4HJCcdfbNLEjfUrwOkMK3tX+Yaw3q80UicaNAQ==",
-// 		"fetchai",
-// 	)
-// 	ETH_ENV_VARS = newEnvVariables( // fail tests
-// 		"0xeddbb87bd92c82f5e6700e8b9960a044a23cb2323ea4b827fa5927f0af03e564",
-// 		"0x0B2F0C90222badbBC3C03b762FaB51c4192748F5",
-// 		"0x03ec9f0a631d746b97c101bb442558ac9a57da7152a5761593a96046ef85f7c7e4577aa95ff47ede6eb74a1f13c4c74ec408a9e75ca5f548e5ada6f4f1adffc0",
-// 		"0x5355ba6a065dfe10619f080894d66343b952ca6768988112afd5f2228fbf813d331097564d8fb5ec9e8dbd8ff0f8d2b72e02a61956d2f89a731af4626ec3753c",
-// 		"0x8dd7a585dc4a9c7186dfe66b728f610f4aeb422a27e79ec2bc7b11cd4ea0fdaf0ea7bb8efa2bb8844bb38a38b2df6675c87bcb444525bec22f7f7f69530d92861b",
-// 		"ethereum",
-// 	)
-// 	ETH_ENV_VARS = newEnvVariables( // mixed: pass tests
-// 		"a369b5be68d3b5c166c782a50247a688f4018b06b6308f8cc72081840eaadcbc",
-// 		"0x011a6845c7a09d5bF1316B783d9fB7C803bbfc8b",
-// 		"0x7d8d0de693e1b80b78ff8e616ec47e8f70414ac3104cd85abab119d2da2877a5a6fff91081b49c3d2e7c094d91c161be5bef4989aad8ee692d98dc1d60f9e813",
-// 		"035f0610ebb6be14c631c5463d095008a3e421474acc24b3d2cd4a9e7de01622f8",
-// 		"0x46e8a9a7acd315482ba9e43d576c7596efca50a68c01ef3a528dd8b241c85a863ddf7e8df8de286b843bb0d8435eedb8857f2cb69cbd55a85ad7a497b639f81c1c",
-// 		"ethereum",
-// 	)
-// )
-
-// test default features of ECDSA keys (ethereum)
-func TestP2pCryptoECDSAGenerateKeyFeatures(t *testing.T) {
-	bits := 1000000000000 // arbitrary
-
-	privKey, pubKey, err := p2pCrypto.GenerateKeyPair(3, bits)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, "ECDSA", privKey.Type().String())
-	assert.Equal(t, "ECDSA", pubKey.Type().String())
-
-	privKeyBytes, err := privKey.Raw()
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 121, len(privKeyBytes))
-	pubKeyBytes, err := pubKey.Raw()
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 91, len(pubKeyBytes))
-	privKeyHex := hexutil.Encode(privKeyBytes)
-	assert.Equal(t, 244, len(privKeyHex))
-	pubKeyHex := hexutil.Encode(pubKeyBytes)
-	assert.Equal(t, 184, len(pubKeyHex))
-}
-
-func TestFetchAIKeyType(t *testing.T) {
-	privateKeyHex := "17d0eb590228d1418d0693bbbf41a3e1fd51b516b2fd37ed16301232c18b4e8e"
-	expectedPublicKeyHex := "021aed1ce78a449109de6cc7ef516602a60d76e771b0cc2fef448b81d234d5b06b"
-	// expectedAddress := "fetch16k3x9vw8jraxxddkhmz6rh3j74xjjrsdvcs2gz"
-	privKey, pubKey, err := KeyPairFromFetchAIKey(privateKeyHex)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, "Secp256k1", privKey.Type().String())
-	assert.Equal(t, "Secp256k1", pubKey.Type().String())
-	pubKeyBytes, err := pubKey.Raw()
-	assert.Equal(t, nil, err)
-	// don't use hexutil.Encode for non-ETH, it will prepend "0x"
-	PublicKeyHex := hex.EncodeToString(pubKeyBytes)
-	assert.Equal(t, expectedPublicKeyHex, PublicKeyHex)
-	// TODO: get from public key to address
-}
-
-func TestEthereumKeyType(t *testing.T) {
-	privateKeyHex := "0xeddbb87bd92c82f5e6700e8b9960a044a23cb2323ea4b827fa5927f0af03e564"
-	expectedPublicKeyHex := "0x5355ba6a065dfe10619f080894d66343b952ca6768988112afd5f2228fbf813d331097564d8fb5ec9e8dbd8ff0f8d2b72e02a61956d2f89a731af4626ec3753c"
-	_, pubKey, err := KeyPairFromEthereumKey(privateKeyHex)
-	assert.Equal(t, nil, err)
-	// pubKeyBytes, err := pubKey.Raw() // x509: unsupported elliptic curve
-	// assert.Equal(t, nil, err)Z
-	publicKey, err := p2pCrypto.PubKeyToStdKey(pubKey)
-	assert.Equal(t, nil, err)
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	assert.Equal(t, true, ok)
-	publicKeyBytes := ethCrypto.FromECDSAPub(publicKeyECDSA)
-	publicKeyHex := hexutil.Encode(publicKeyBytes[1:]) // remove EC prefix "04"
-	assert.Equal(t, expectedPublicKeyHex, publicKeyHex)
-}
-
-// func TestEthereumKeyType(t *testing.T) {
-// 	privateKeyHex := "0xbb0c01836c9ddfc89a890d829dfaa569be545bac71cf20bbff8e02a114a2f042"
-// 	privKey, pubKey, err := KeyPairFromEthereumKey(privateKeyHex)
-// 	assert.Equal(t, nil, err)
-// 	assert.Equal(t, "ECDSA", privKey.Type().String())
-// 	assert.Equal(t, "ECDSA", pubKey.Type().String())
-// }
