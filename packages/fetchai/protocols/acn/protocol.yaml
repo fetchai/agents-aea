@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTC2bW7X9szcSXsGo4x3CtK9WST4fc5r5Kv4mVsVcY4RM
-  __init__.py: QmWR44Db5wtu1HFePtE2DSRgAfeZ4cLo2ahVAN86kiNMKT
+  __init__.py: QmaHUMVtRYZusHPunBSfkSxuM7ZuRF5HmNJ6iajHEHhjua
   acn.proto: QmVWvXETUNe7QZTvBgzwpofNP3suFthwyxbTVUqSx8mdnE
   acn_pb2.py: Qmf3HYmJtGwugpCuWSmJEDVHwZcnCF6BWmeEouUSpBRs45
   custom_types.py: QmS9xN5EPy8pZRbwpUdewH7TocNGCx7xv3GwupxSQRRVgM

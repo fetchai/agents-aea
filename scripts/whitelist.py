@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -288,3 +288,5 @@ _._generate_hash  # unused method (/home/solarw/MyData/work/fetchai/agents-aea/a
 register_item_to_local_registry  # unused function in (aea/cli/registry/ipfs.py:59)
 find_item_in_distribution  # unused function in (aea/cli/utils/package_utils.py:353)
 is_distributed_item  # unused function in (aea/cli/utils/package_utils.py:618)
+PACKAGE_TYPE_TO_CONFIG_FILE  # unused variable in (aea/configurations/constants.py:90)
+raise_on_try  # unused variable (aea/crypto/base.py:383)

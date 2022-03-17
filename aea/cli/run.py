@@ -33,7 +33,7 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE, VENDOR
+from aea.configurations.constants import VENDOR
 from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
@@ -215,16 +215,14 @@ def _print_hash_table(ctx: Context, aea: AEA) -> None:
                 component.public_id.author,
                 component_type.to_plural(),
                 component.public_id.name,
-                cast(str, PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type.value)),
             )
             if not path.exists():
                 path = Path(
-                    ctx.cwd,
-                    component_type.to_plural(),
-                    component.public_id.name,
-                    cast(str, PACKAGE_TYPE_TO_CONFIG_FILE.get(component_type.value)),
+                    ctx.cwd, component_type.to_plural(), component.public_id.name
                 )
-            hash_data.append((component.component_id, ipfs_hash.get(str(path))))
+            hash_data.append(
+                (component.component_id, ipfs_hash.get(str(path), wrap=False))
+            )
             max_col_1_length = max(max_col_1_length, len(str(component.component_id)))
 
     table_width = max_col_2_length + max_col_1_length + 9

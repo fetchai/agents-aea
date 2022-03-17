@@ -151,14 +151,20 @@ def test_reg_exp_not_match():
         MyReString("anystring")
 
 
-def test_try_decorator():
+@pytest.mark.parametrize("raise_on_try", (True, False))
+def test_try_decorator(raise_on_try: bool):
     """Test try and log decorator."""
     # for pydocstyle
-    @try_decorator("oops", default_return="failed")
-    def fn():
-        raise Exception("expected")
+    @try_decorator("oops", default_return=lambda _: "failed")
+    def fn(**_):
+        """Dummy function that raises an Exception."""
+        raise ValueError("expected")
 
-    assert fn() == "failed"
+    if raise_on_try:
+        with pytest.raises(ValueError, match="expected"):
+            fn(raise_on_try=raise_on_try)
+    else:
+        assert fn(raise_on_try=raise_on_try)("test_arg") == "failed"
 
 
 def test_retry_decorator():
