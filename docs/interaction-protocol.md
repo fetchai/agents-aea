@@ -16,11 +16,11 @@ There are multiple types of interactions an AEA can have:
 
 Usually, an interaction involves three types of framework packages: <a href="../skill">skills</a>, <a href="../protocol">protocols</a> and <a href="../connection">connections</a>.
 
-### Example 2: AEA <> web client 
+### Example 1: AEA <> web client 
 
 In the <a href="../http-connection-and-skill">http connection guide</a> we demonstrate how an AEA with an http server connection (e.g. `fetchai/http_server`) receives http payloads from web clients, translates them to messages conforming with the `fetchai/http` protocol and passes it to a skill (e.g. `fetchai/http_echo`) to process. The `fetchai/http` protocol in this case is used for communication between the connection and the skill.
 
-### Example 3 : AEA <> 3rd party server
+### Example 2 : AEA <> 3rd party server
 
 The `fetchai/http_client` connection can be used to make requests to third party servers. In this case, a skill containing the logic for the production of http requests would create messages conforming with the `fetchai/http` protocol and sends it to the `fetchai/http_client` connection which in turn translates it into http payload and sends it to the destination server. 
 
