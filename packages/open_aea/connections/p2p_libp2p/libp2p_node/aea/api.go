@@ -41,8 +41,7 @@ const AcnStatusTimeout = 15.0 * time.Second
 const SendQueueSize = 100
 const OutQueueSize = 100
 
-// code redandency to avoid import cycle
-
+// code redundancy to avoid import cycle
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
 	NoColor:    false,

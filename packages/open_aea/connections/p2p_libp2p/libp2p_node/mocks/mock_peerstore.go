@@ -5,13 +5,13 @@
 package mocks
 
 import (
-	context "context"
-	reflect "reflect"
-	time "time"
+	"context"
+	"reflect"
+	"time"
 
-	gomock "github.com/golang/mock/gomock"
-	crypto "github.com/libp2p/go-libp2p-core/crypto"
-	peer "github.com/libp2p/go-libp2p-core/peer"
+	"github.com/golang/mock/gomock"
+	p2pCrypto "github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p-core/peer"
 	multiaddr "github.com/multiformats/go-multiaddr"
 )
 
@@ -63,7 +63,7 @@ func (mr *MockPeerstoreMockRecorder) AddAddrs(arg0, arg1, arg2 interface{}) *gom
 }
 
 // AddPrivKey mocks base method.
-func (m *MockPeerstore) AddPrivKey(arg0 peer.ID, arg1 crypto.PrivKey) error {
+func (m *MockPeerstore) AddPrivKey(arg0 peer.ID, arg1 p2pCrypto.PrivKey) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddPrivKey", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -96,7 +96,7 @@ func (mr *MockPeerstoreMockRecorder) AddProtocols(arg0 interface{}, arg1 ...inte
 }
 
 // AddPubKey mocks base method.
-func (m *MockPeerstore) AddPubKey(arg0 peer.ID, arg1 crypto.PubKey) error {
+func (m *MockPeerstore) AddPubKey(arg0 peer.ID, arg1 p2pCrypto.PubKey) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddPubKey", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -264,10 +264,10 @@ func (mr *MockPeerstoreMockRecorder) PeersWithKeys() *gomock.Call {
 }
 
 // PrivKey mocks base method.
-func (m *MockPeerstore) PrivKey(arg0 peer.ID) crypto.PrivKey {
+func (m *MockPeerstore) PrivKey(arg0 peer.ID) p2pCrypto.PrivKey {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PrivKey", arg0)
-	ret0, _ := ret[0].(crypto.PrivKey)
+	ret0, _ := ret[0].(p2pCrypto.PrivKey)
 	return ret0
 }
 
@@ -278,10 +278,10 @@ func (mr *MockPeerstoreMockRecorder) PrivKey(arg0 interface{}) *gomock.Call {
 }
 
 // PubKey mocks base method.
-func (m *MockPeerstore) PubKey(arg0 peer.ID) crypto.PubKey {
+func (m *MockPeerstore) PubKey(arg0 peer.ID) p2pCrypto.PubKey {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PubKey", arg0)
-	ret0, _ := ret[0].(crypto.PubKey)
+	ret0, _ := ret[0].(p2pCrypto.PubKey)
 	return ret0
 }
 

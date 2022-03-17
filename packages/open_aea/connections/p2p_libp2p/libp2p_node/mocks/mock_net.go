@@ -5,11 +5,11 @@
 package mocks
 
 import (
-	net "net"
-	reflect "reflect"
-	time "time"
+	"net"
+	"reflect"
+	"time"
 
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 )
 
 // MockConn is a mock of Conn interface.

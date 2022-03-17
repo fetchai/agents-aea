@@ -54,7 +54,7 @@ import (
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
-	proto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	"libp2p_node/aea"
 )
@@ -95,8 +95,7 @@ func ignore(err error) {
 	Logging
 */
 
-func newConsoleLogger() zerolog.Logger {
-	// only used here for default loggers
+func newConsoleLogger() zerolog.Logger {  // only used here to setup default loggers
 	return zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		NoColor:    false,
