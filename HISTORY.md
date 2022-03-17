@@ -12,6 +12,7 @@ Plugins:
 
 Docs:
 - Adds documentation for the newly introduced profiling script
+- Removes reference to `docs.fetch.ai`
 
 Chores:
 - Adds a script to analyze and visualize profiling data from agent runs
