@@ -1,6 +1,23 @@
 # Release History - open AEA
 
 
+## 1.6.0 (2022-03-17)
+
+AEA:
+- Adds support for packages hashing with `IPFSHashOnly` from `aea.helpers.ipfs.base`
+- Updates the `aea run` command to print hash table for available packages in an agent project
+
+Plugins:
+- Makes error rasing optional when sending transactions and adds error logging for the same
+
+Docs:
+- Adds documentation for the newly introduced profiling script
+
+Chores:
+- Adds a script to analyze and visualize profiling data from agent runs
+- Updates authors list
+
+
 ## 1.5.0 (2022-02-26)
 
 AEA:
