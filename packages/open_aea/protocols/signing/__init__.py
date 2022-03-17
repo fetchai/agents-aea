@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the signing protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.5.0`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.6.0`.
 """
 
 from packages.open_aea.protocols.signing.message import SigningMessage
