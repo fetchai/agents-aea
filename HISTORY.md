@@ -8,7 +8,7 @@ AEA:
 - Updates the `aea run` command to print hash table for available packages in an agent project
 
 Plugins:
-- Makes error rasing optional when sending transactions and adds error logging for the same
+- Makes error raising optional when sending transactions and adds error logging for the same
 
 Docs:
 - Adds documentation for the newly introduced profiling script
