@@ -7,7 +7,7 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmQwQ5wdcczb82UySmHaGr96Bww8ECfste7ecPowxueD5g
+  __init__.py: Qmczj8sYisEixuRuR92UKHHfmkgsWU4tepqZmiwYxFj6aM
   custom_types.py: QmU95xh629dyewpvHvZaCJVX1JDGoSxVUNy3c7hGpnefYr
   dialogues.py: QmcTd7JwySDRZzM4dRZfQhYfJpCrWuf4bTp6VeJUMHRZkH
   message.py: Qmf4gpNQ6Rexoa3mDNVvhWB7WhVQmSr14Uc5aVQW6EWb2z
