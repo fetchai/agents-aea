@@ -16,28 +16,21 @@ There are multiple types of interactions an AEA can have:
 
 Usually, an interaction involves three types of framework packages: <a href="../skill">skills</a>, <a href="../protocol">protocols</a> and <a href="../connection">connections</a>.
 
-### Example 1: negotiation
-
-The <a href="https://docs.fetch.ai/aea/generic-skills/" target="_blank">generic buyer/seller skills</a> use the `fetchai/fipa` protocol which defines the negotiation dialogue between two AEAs. The `fetchai/generic_buyer` and `fetchai/generic_seller` skills implement specific strategies for engaging in such negotiations, by providing the logic for producing negotiation messages to be sent, handling negotiation messages received. The `fetchai/p2p_libp2p` connection is then used for connecting to the <a href="../acn">agent communication network</a> enabling two AEAs with these skills to deliver negotiation messages to each other.
-
-### Example 2: AEA <> web client 
+### Example 1: AEA <> web client 
 
 In the <a href="../http-connection-and-skill">http connection guide</a> we demonstrate how an AEA with an http server connection (e.g. `fetchai/http_server`) receives http payloads from web clients, translates them to messages conforming with the `fetchai/http` protocol and passes it to a skill (e.g. `fetchai/http_echo`) to process. The `fetchai/http` protocol in this case is used for communication between the connection and the skill.
 
-### Example 3 : AEA <> 3rd party server
+### Example 2 : AEA <> 3rd party server
 
 The `fetchai/http_client` connection can be used to make requests to third party servers. In this case, a skill containing the logic for the production of http requests would create messages conforming with the `fetchai/http` protocol and sends it to the `fetchai/http_client` connection which in turn translates it into http payload and sends it to the destination server. 
 
 Note that in general, third party SDKs can be wrapped in a connection and shared with other developers as a package. Often this also involves creating a custom protocol to enforce the type of interactions permitted between skills and the connection wrapping the SDK.
 
-
 ## Next steps
 
 ### Recommended
 
-We recommend you continue with the next step in the 'Getting Started' series:
-
-- <a href="https://docs.fetch.ai/aea/generic-skills-step-by-step/" target="_blank">Trade between two AEAs</a>
+We recommend you continue with the : <a href="../development-setup/">Development Setup</a>
 
 ### Relevant deep-dives
 

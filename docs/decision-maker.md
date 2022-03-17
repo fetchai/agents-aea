@@ -6,8 +6,6 @@ Skills communicate with the decision maker via <a href="../api/protocols/base#me
 
 - <a href="../api/protocols/signing/message#signingmessage-objects">`SigningMessage`</a>: it is used by skills to propose a transaction to the decision-maker for signing.
 
-- <a href="https://docs.fetch.ai/aea/api/protocols/state_update/message/#stateupdatemessage-objects" target="_blank">`StateUpdateMessage`</a>: it is used to initialize the decision maker with preferences and ownership states. It can also be used to update the ownership states in the decision maker if the settlement of transaction takes place.
-
 A message, say `msg`, is sent to the decision maker like so from any skill:
 ```
 self.context.decision_maker_message_queue.put_nowait(msg)
@@ -33,7 +31,7 @@ class SigningHandler(Handler):
 
 ## Custom `DecisionMaker`
 
-The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a> and an advanced <a href="https://docs.fetch.ai/aea/api/decision_maker/gop/#decisionmakerhandler-objects" target="_blank">`DecisionMakerHandler`</a>. You can also implement your own and mount it.
+The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects#decisionmakerhandler-objects">`DecisionMakerHandler`. You can also implement your own and mount it.
 
 No further configuration is needed to use the default. To use the advanced decision maker handler, add the following configuration to the `aea-config.yaml` of your AEA (on page 1):
 
