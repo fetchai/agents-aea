@@ -24,11 +24,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/multiformats/go-multiaddr"
+	multiaddr "github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 
-	acn "libp2p_node/acn"
-	utils "libp2p_node/utils"
+	"libp2p_node/acn"
+	"libp2p_node/utils"
 )
 
 // Option for dhtpeer.New

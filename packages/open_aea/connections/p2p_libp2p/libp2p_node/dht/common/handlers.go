@@ -33,10 +33,10 @@ import (
 	"github.com/rs/zerolog"
 	"google.golang.org/protobuf/proto"
 
-	acn "libp2p_node/acn"
-	aea "libp2p_node/aea"
+	"libp2p_node/acn"
+	"libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
-	utils "libp2p_node/utils"
+	"libp2p_node/utils"
 )
 
 func ignore(err error) {

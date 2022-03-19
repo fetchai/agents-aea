@@ -21,7 +21,7 @@
 package dhtpeer
 
 import (
-	utils "libp2p_node/utils"
+	"libp2p_node/utils"
 	"net"
 )
 

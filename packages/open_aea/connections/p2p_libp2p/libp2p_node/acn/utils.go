@@ -29,7 +29,7 @@ import (
 	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
 
 	"github.com/rs/zerolog"
-	proto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 type StatusBody = acn_protocol.AcnMessage_StatusBody

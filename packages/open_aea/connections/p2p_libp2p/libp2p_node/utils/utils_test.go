@@ -26,17 +26,17 @@ import (
 	"encoding/json"
 	"errors"
 	"libp2p_node/aea"
-	mocks "libp2p_node/mocks"
+	"libp2p_node/mocks"
 	"net"
 	"reflect"
 	"testing"
 
 	"bou.ke/monkey"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	"github.com/libp2p/go-libp2p-core/peer"
-	dht "github.com/libp2p/go-libp2p-kad-dht"
-	kb "github.com/libp2p/go-libp2p-kbucket"
-	ma "github.com/multiformats/go-multiaddr"
+	kaddht "github.com/libp2p/go-libp2p-kad-dht"
+	kbucket "github.com/libp2p/go-libp2p-kbucket"
+	multiaddr "github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
@@ -328,12 +328,12 @@ func TestBootstrapConnect(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	defer monkey.UnpatchAll()
-	var ipfsdht *dht.IpfsDHT
-	var routingTable *kb.RoutingTable
+	var ipfsdht *kaddht.IpfsDHT
+	var routingTable *kbucket.RoutingTable
 
 	mockPeerstore := mocks.NewMockPeerstore(mockCtrl)
 	peers := make([]peer.AddrInfo, 2)
-	var addrs []ma.Multiaddr
+	var addrs []multiaddr.Multiaddr
 	peers[0] = peer.AddrInfo{ID: peer.ID("peer1"), Addrs: addrs}
 	peers[1] = peer.AddrInfo{ID: peer.ID("peer2"), Addrs: addrs}
 
@@ -348,14 +348,14 @@ func TestBootstrapConnect(t *testing.T) {
 		monkey.PatchInstanceMethod(
 			reflect.TypeOf(routingTable),
 			"Find",
-			func(_ *kb.RoutingTable, _ peer.ID) peer.ID {
+			func(_ *kbucket.RoutingTable, _ peer.ID) peer.ID {
 				return peer.ID("som peer")
 			},
 		)
 		monkey.PatchInstanceMethod(
 			reflect.TypeOf(ipfsdht),
 			"RoutingTable",
-			func(_ *dht.IpfsDHT) *kb.RoutingTable {
+			func(_ *kaddht.IpfsDHT) *kbucket.RoutingTable {
 				return routingTable
 			},
 		)
@@ -375,14 +375,14 @@ func TestBootstrapConnect(t *testing.T) {
 		monkey.PatchInstanceMethod(
 			reflect.TypeOf(routingTable),
 			"Find",
-			func(_ *kb.RoutingTable, _ peer.ID) peer.ID {
+			func(_ *kbucket.RoutingTable, _ peer.ID) peer.ID {
 				return peer.ID("")
 			},
 		)
 		monkey.PatchInstanceMethod(
 			reflect.TypeOf(ipfsdht),
 			"RoutingTable",
-			func(_ *dht.IpfsDHT) *kb.RoutingTable {
+			func(_ *kaddht.IpfsDHT) *kbucket.RoutingTable {
 				return routingTable
 			},
 		)
@@ -403,14 +403,14 @@ func TestBootstrapConnect(t *testing.T) {
 		monkey.PatchInstanceMethod(
 			reflect.TypeOf(routingTable),
 			"Find",
-			func(_ *kb.RoutingTable, _ peer.ID) peer.ID {
+			func(_ *kbucket.RoutingTable, _ peer.ID) peer.ID {
 				return peer.ID("")
 			},
 		)
 		monkey.PatchInstanceMethod(
 			reflect.TypeOf(ipfsdht),
 			"RoutingTable",
-			func(_ *dht.IpfsDHT) *kb.RoutingTable {
+			func(_ *kaddht.IpfsDHT) *kbucket.RoutingTable {
 				return routingTable
 			},
 		)

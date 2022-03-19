@@ -53,22 +53,22 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	libp2p "github.com/libp2p/go-libp2p"
-	cryptop2p "github.com/libp2p/go-libp2p-core/crypto"
+	p2pCrypto "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
-	"github.com/multiformats/go-multiaddr"
+	multiaddr "github.com/multiformats/go-multiaddr"
 
 	circuit "github.com/libp2p/go-libp2p-circuit"
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
-	acn "libp2p_node/acn"
-	aea "libp2p_node/aea"
-	common "libp2p_node/dht/common"
+	"libp2p_node/acn"
+	"libp2p_node/aea"
+	"libp2p_node/dht/common"
 	"libp2p_node/dht/dhtnode"
-	monitoring "libp2p_node/dht/monitoring"
-	utils "libp2p_node/utils"
+	"libp2p_node/dht/monitoring"
+	"libp2p_node/utils"
 )
 
 const AcnStatusTimeout = 5.0 * time.Second
@@ -132,8 +132,8 @@ type DHTPeer struct {
 
 	registrationDelay time.Duration
 
-	key             cryptop2p.PrivKey
-	publicKey       cryptop2p.PubKey
+	key             p2pCrypto.PrivKey
+	publicKey       p2pCrypto.PubKey
 	localMultiaddr  multiaddr.Multiaddr
 	publicMultiaddr multiaddr.Multiaddr
 	bootstrapPeers  []peer.AddrInfo
@@ -772,7 +772,7 @@ func (dhtPeer *DHTPeer) launchMailboxService() {
 }
 
 // Make signature for session public key using peer private key
-func makeSessionKeySignature(cert *tls.Certificate, privateKey cryptop2p.PrivKey) ([]byte, error) {
+func makeSessionKeySignature(cert *tls.Certificate, privateKey p2pCrypto.PrivKey) ([]byte, error) {
 	cert_pub_key := cert.PrivateKey.(*ecdsa.PrivateKey).Public().(*ecdsa.PublicKey)
 	cert_pub_key_bytes := elliptic.Marshal(cert_pub_key.Curve, cert_pub_key.X, cert_pub_key.Y)
 	signature, err := privateKey.Sign(cert_pub_key_bytes)

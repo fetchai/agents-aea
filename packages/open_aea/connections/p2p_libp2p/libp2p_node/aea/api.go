@@ -31,23 +31,23 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
-	proto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
-	acn "libp2p_node/acn"
-	common "libp2p_node/common"
+	"libp2p_node/acn"
+	"libp2p_node/common"
 )
 
 const AcnStatusTimeout = 15.0 * time.Second
 const SendQueueSize = 100
 const OutQueueSize = 100
 
-// code redandency to avoid import cycle
+// code redundancy to avoid import cycle
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
 	NoColor:    false,
 	TimeFormat: "15:04:05.000",
 }).
-	With().Timestamp().
+	With().Caller().Stack().Timestamp().
 	Str("package", "AeaApi").
 	Logger()
 

@@ -81,7 +81,7 @@ class TestMailboxAPI:
 
     @pytest.mark.asyncio
     async def test_message_delivery(self):  # nosec
-        """Test connnect then disconnect."""
+        """Test connect then disconnect."""
         r = requests.get("https://localhost:8888/ssl_signature", verify=False)  # nosec
         assert r.status_code == 200, r.text
 

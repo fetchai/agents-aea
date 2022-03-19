@@ -36,22 +36,22 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	libp2p "github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/crypto"
+	p2pCrypto "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
-	"github.com/multiformats/go-multiaddr"
+	multiaddr "github.com/multiformats/go-multiaddr"
 
-	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
+	"github.com/libp2p/go-libp2p-core/peerstore"
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
-	acn "libp2p_node/acn"
-	aea "libp2p_node/aea"
-	common "libp2p_node/dht/common"
+	"libp2p_node/acn"
+	"libp2p_node/aea"
+	"libp2p_node/dht/common"
 	"libp2p_node/dht/dhtnode"
-	utils "libp2p_node/utils"
+	"libp2p_node/utils"
 )
 
 func ignore(err error) {
@@ -134,8 +134,8 @@ func (notifee *Notifee) ClosedStream(network.Network, network.Stream) {}
 type DHTClient struct {
 	bootstrapPeers []peer.AddrInfo
 	relayPeer      peer.ID
-	key            crypto.PrivKey
-	publicKey      crypto.PubKey
+	key            p2pCrypto.PrivKey
+	publicKey      p2pCrypto.PubKey
 
 	dht        *kaddht.IpfsDHT
 	routedHost *routedhost.RoutedHost

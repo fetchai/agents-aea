@@ -281,6 +281,8 @@ PUBLIC_DHT_DELEGATE_URI_2 = PUBLIC_STAGING_DHT_DELEGATE_URI_2
 PUBLIC_DHT_P2P_PUBLIC_KEY_1 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1
 PUBLIC_DHT_P2P_PUBLIC_KEY_2 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2
 
+DEFAULT_LEDGER_LIBP2P_NODE = "cosmos"  # Secp256k1 keys
+
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
@@ -862,7 +864,7 @@ def _make_libp2p_connection(
         os.remove(log_file)
     key = agent_key
     if key is None:
-        key = make_crypto("fetchai")  # TODO: replace with DEFAULT_LEDGER
+        key = make_crypto(DEFAULT_LEDGER)
     identity = Identity(
         "identity",
         address=key.address,
@@ -871,14 +873,14 @@ def _make_libp2p_connection(
     )
     conn_crypto_store = None
     if node_key_file is not None:
-        conn_crypto_store = CryptoStore({"fetchai": node_key_file})
+        conn_crypto_store = CryptoStore({DEFAULT_LEDGER_LIBP2P_NODE: node_key_file})
     else:
-        node_key = make_crypto("fetchai")
+        node_key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
         node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
         node_key.dump(node_key_path)
         conn_crypto_store = CryptoStore({node_key.identifier: node_key_path})
     cert_request = CertRequest(
-        conn_crypto_store.public_keys["fetchai"],
+        conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
         key.identifier,
         "2021-01-01",
@@ -952,7 +954,7 @@ def _make_libp2p_client_connection(
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = "fetchai",  # TOFIX: DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
@@ -999,7 +1001,7 @@ def _make_libp2p_mailbox_connection(
     node_port: int = 8888,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = "fetchai",  # DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
     """Get a libp2p mailbox connection."""
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):

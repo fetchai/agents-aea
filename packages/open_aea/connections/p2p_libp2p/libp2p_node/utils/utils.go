@@ -36,25 +36,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ipfs/go-cid"
-	"github.com/libp2p/go-libp2p-core/crypto"
+	cid "github.com/ipfs/go-cid"
+	p2pCrypto "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
-	dht "github.com/libp2p/go-libp2p-kad-dht"
-	"github.com/multiformats/go-multiaddr"
-	"github.com/multiformats/go-multihash"
+	kaddht "github.com/libp2p/go-libp2p-kad-dht"
+	multiaddr "github.com/multiformats/go-multiaddr"
+	multihash "github.com/multiformats/go-multihash"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/ripemd160" // nolint:staticcheck
 	"golang.org/x/crypto/sha3"
 
-	host "github.com/libp2p/go-libp2p-core/host"
-	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
+	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/peerstore"
 
-	btcec "github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
-	proto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	"libp2p_node/aea"
 )
@@ -95,7 +95,7 @@ func ignore(err error) {
 	Logging
 */
 
-func newConsoleLogger() zerolog.Logger {
+func newConsoleLogger() zerolog.Logger {  // only used here to setup default loggers
 	return zerolog.New(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		NoColor:    false,
@@ -106,14 +106,14 @@ func newConsoleLogger() zerolog.Logger {
 // NewDefaultLogger basic zerolog console writer
 func NewDefaultLogger() zerolog.Logger {
 	return newConsoleLogger().
-		With().Timestamp().
+		With().Caller().Stack().Timestamp().
 		Logger().Level(loggerGlobalLevel)
 }
 
 // NewDefaultLoggerWithFields zerolog console writer
 func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 	logger := newConsoleLogger().
-		With().Timestamp()
+		With().Caller().Stack().Timestamp()
 	for key, val := range fields {
 		logger = logger.Str(key, val)
 	}
@@ -130,7 +130,7 @@ func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 func BootstrapConnect(
 	ctx context.Context,
 	ph host.Host,
-	kaddht *dht.IpfsDHT,
+	dht *kaddht.IpfsDHT,
 	peers []peer.AddrInfo,
 ) error {
 	if len(peers) < 1 {
@@ -185,7 +185,7 @@ func BootstrapConnect(
 	for _, peer := range peers {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		for kaddht.RoutingTable().Find(peer.ID) == "" {
+		for dht.RoutingTable().Find(peer.ID) == "" {
 			select {
 			case <-ctx.Done():
 				return errors.New(
@@ -236,13 +236,13 @@ func GetPeersAddrInfo(peers []string) ([]peer.AddrInfo, error) {
 */
 
 // PubKeyFromFetchAIPublicKey create libp2p public key from fetchai hex encoded secp256k1 key
-func PubKeyFromFetchAIPublicKey(publicKey string) (crypto.PubKey, error) {
+func PubKeyFromFetchAIPublicKey(publicKey string) (p2pCrypto.PubKey, error) {
 	hexBytes, _ := hex.DecodeString(publicKey)
-	return crypto.UnmarshalSecp256k1PublicKey(hexBytes)
+	return p2pCrypto.UnmarshalSecp256k1PublicKey(hexBytes)
 }
 
 // FetchAIPublicKeyFromPubKey return FetchAI's format serialized public key
-func FetchAIPublicKeyFromPubKey(publicKey crypto.PubKey) (string, error) {
+func FetchAIPublicKeyFromPubKey(publicKey p2pCrypto.PubKey) (string, error) {
 	raw, err := publicKey.Raw()
 	if err != nil {
 		return "", err
@@ -439,14 +439,14 @@ func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string)
 }
 
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
-func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
+func KeyPairFromFetchAIKey(key string) (p2pCrypto.PrivKey, p2pCrypto.PubKey, error) {
 	pkBytes, err := hex.DecodeString(key)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	btcPrivateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
-	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btcPrivateKey)
+	prvKey, pubKey, err := p2pCrypto.KeyPairFromStdKey(btcPrivateKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -559,7 +559,7 @@ func IDFromFetchAIPublicKey(publicKey string) (peer.ID, error) {
 		return "", err
 	}
 
-	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pubKey))
+	multihash, err := peer.IDFromPublicKey((*p2pCrypto.Secp256k1PublicKey)(pubKey))
 	if err != nil {
 		return "", err
 	}
@@ -588,7 +588,7 @@ func IDFromFetchAIPublicKeyUncompressed(publicKey string) (peer.ID, error) {
 		return "", err
 	}
 
-	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pubKey))
+	multihash, err := peer.IDFromPublicKey((*p2pCrypto.Secp256k1PublicKey)(pubKey))
 	if err != nil {
 		return "", err
 	}

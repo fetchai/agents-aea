@@ -21,6 +21,7 @@
 
 import difflib
 import filecmp
+import logging
 import os
 import shutil
 import stat
@@ -36,6 +37,7 @@ from tests.conftest import libp2p_log_on_failure_all
 
 PACKAGE = "packages.open_aea.connections.p2p_libp2p.libp2p_node"
 AEA_ROOT_DIR = os.path.join(*PACKAGE.split("."))
+# if testing locally: tmp_dir = "../open-acn/"  # WARNING: will be `/` prefix missing still
 ACN_GITHUB_URL = "https://github.com/valory-xyz/open-acn/"
 
 FilePaths = namedtuple("FilePaths", "abs_aea abs_acn rel_aea rel_acn")
@@ -145,6 +147,9 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
             acn_content = open(acn_file).readlines()
             detected = difflib.unified_diff(aea_content, acn_content)
             file_name = aea_file.split(AEA_ROOT_DIR).pop()
-            differences[file_name] = "\n".join(detected)
+            differences[file_name] = "".join(detected)
 
-        assert not differences
+        if differences:
+            report: str = "\n".join(f">> {k}:{v}" for k, v in differences.items())
+            logging.error(f"Non-matching code:\n{report}")
+        assert not bool(differences)
