@@ -293,6 +293,10 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	lerror, _, linfo, ldebug := dhtPeer.GetLoggers()
 
+	basicHost.Network().Notify(&Notifee{
+		logger: dhtPeer.logger,
+	})
+
 	// connect to the booststrap nodes
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		linfo().Msgf("Bootstrapping from %s", dhtPeer.bootstrapPeers)
@@ -310,7 +314,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 		return nil, err
 	}
 
-	linfo().Msg("INFO My ID is ")
+	linfo().Msgf("My Peer ID is %s", dhtPeer.PeerID())
 
 	linfo().Msg("successfully created libp2p node!")
 
@@ -583,6 +587,10 @@ func (dhtPeer *DHTPeer) setupLogger() {
 		fields["peerid"] = dhtPeer.routedHost.ID().Pretty()
 	}
 	dhtPeer.logger = utils.NewDefaultLoggerWithFields(fields)
+}
+
+func (dhtPeer *DHTPeer) PeerID() string {
+	return dhtPeer.routedHost.ID().Pretty()
 }
 
 func (dhtPeer *DHTPeer) GetLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
@@ -1607,8 +1615,8 @@ func (dhtPeer *DHTPeer) HandleAeaAddressRequest(
 func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	lerror, _, _, ldebug := dhtPeer.GetLoggers()
 
-	//linfo().Str("op", "notif").
-	//	Msgf("Got a new notif stream")
+	ldebug().Str("op", "notif").
+		Msgf("Got a new notif stream. peerid: %s", stream.Conn().RemotePeer().Pretty())
 	opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 	timer := dhtPeer.monitor.Timer()
 	start := timer.NewTimer()
@@ -1672,11 +1680,12 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 	}
 	duration := timer.GetTimer(start)
 	opLatencyRegister.Observe(float64(duration.Microseconds()))
-	ldebug().Msg("Address was announced")
+	ldebug().Msgf("Address was announced: peerid: %s", stream.Conn().RemotePeer().Pretty())
 	// got a connection to a peer, so now we can allow address announcements
 	dhtPeer.enableAddressAnnouncementLock.Lock()
 	dhtPeer.enableAddressAnnouncement = true
 	dhtPeer.enableAddressAnnouncementLock.Unlock()
+
 }
 
 func (dhtPeer *DHTPeer) IsAddressAnnouncementEnabled() bool {
