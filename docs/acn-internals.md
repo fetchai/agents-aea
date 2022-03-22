@@ -4,9 +4,9 @@ the main implementation of the Agent Communication Network (ACN).
 
 In particular:
 
-- <a href="https://github.com/fetchai/agents-aea/tree/main/libs/go/libp2p_node" target="_blank">the `libp2p_node` Golang library<a/>;
-- <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">the `p2p_libp2p` AEA connection, written in Python, that implements the _direct connection_ with an ACN peer<a/>;
-- <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the `p2p_libp2p_client` AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer<a/>.
+- The <a href="https://github.com/valory-xyz/open-acn" target="_blank">`open-acn`<a/> Golang library; At the moment a copy resides locally in open-aea here as [`libp2p_node`](https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p/libp2p_node). 
+- The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">`p2p_libp2p`<a/> AEA connection, written in Python, that implements the _direct connection_ with an ACN peer;
+- The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`<a/> AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer.
 
 It is assumed the reader already knows what is the ACN and
 its purposes; if not, we suggest reading <a href="../acn">this page<a/>.
@@ -24,7 +24,7 @@ and the message exchange involved;
   destination agent to the target agent;
 - The following section describes the functionalities
   of the AEA connections that allow to communicate through
-  the ACN: `fetchai/p2p_libp2p` and `fetchia/p2p_libp2p_delegate`;
+  the ACN: `p2p_libp2p` and `p2p_libp2p_client`;
 - The documentation ends with a section of known issues and limitations
   of the current implementation.
 
@@ -32,12 +32,11 @@ and the message exchange involved;
 
 At the foundation of the ACN there is the _ACN protocol_.
 The protocol messages and the reply structure are generated from this 
-<a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>,
+<a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>,
 using the <a href="../protocol-generator" target="_blank">protocol generator</a>.
 Therefore, it uses <a href="https://developers.google.com/protocol-buffers" target="_blank">Protocol Buffers</a>
-as a serialization format,
-and the definition of the data structures involved is defined in this
-<a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
+as a serialization format, and the definition of the data structures involved is defined in this
+<a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
 
 To know more about the protocol generator, refer to the relevant
 section of the documentation:
@@ -90,7 +89,7 @@ the sender about the handling of certain requests.
 The payload contains:
 
 - the `status_code`, a positive integer among the ones in the 
-  <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">Protobuf file</a>.
+  <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">Protobuf file</a>.
 - a list of error messages (string).
 
 A status code `0`, identified as `SUCCESS`, 
@@ -339,9 +338,9 @@ The following diagram explains the exchange of messages on entering an envelope 
 In the case of _direct connection_, 
 `Agent` is a Python process, whereas `Peer` is in a separate (Golang) process.
 The logic of the Python Agent client is implemented in 
-the <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">AEA connection `fetchai/p2p_libp2p`</a>
+the <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">AEA connection `p2p_libp2p`</a>
 The communication between `Agent` and `Peer` is done through 
-an OS pipe for Inter-Process Communication (IPC) between the AEA's process and the libp2p node process;
+an OS pipe for Inter-Process Communication (IPC) between the AEAs process and the libp2p node process;
 then, the message gets enqueued to an output queue by an input coroutine.
 Finally, the envelope ends up in an output queue, 
 which is processed by an output coroutine and routed to the next peer.
@@ -351,8 +350,9 @@ the message exchange is very similar; however, instead of using
 pipes, the communication is done through the network, i.e. TCP,
 with a peer which has the delegate service enabled.
 The logic of the `Agent` client connected with a delegate connection
-is implemented in 
-the <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">AEA connection `fetchai/p2p_libp2p_client`</a> 
+is implemented in the open-aea 
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`</a> connection.
+
 
 <div class="mermaid">
     sequenceDiagram
@@ -423,7 +423,7 @@ we may have different scenario:
         participant Peer2
         Agent->>Peer1: AeaEnvelope
         alt target == peer1.my_agent
-            note over Peer1: envelope destinated<br/> to local agent,<br/> not routing
+            note over Peer1: envelope designated<br/> to local agent,<br/> not routing
             loop agent not ready
                 note over Peer1: sleep for 100ms
             end
@@ -578,27 +578,25 @@ similarly for what has been described for the envelope entrance
 To connect the AEA to the ACN network,
 there are two AEA connections available:
 
-- the `fetchai/p2p_libp2p`, that implements
+- the `p2p_libp2p`, that implements
   a direct connection, and
-- the `fetchai/p2p_libp2p_delegate` connection,
+- the `p2p_libp2p_client` connection,
   that implements the delegate connection.
 
 For more information on the AEA connection package type,
 refer to <a href="../connection/" target="_blank">this guide</a>.
 
-### The `fetchai/p2p_libp2p` connection
+### The `p2p_libp2p` connection
 
-The source code of the `fetchai/p2p_libp2p` connection  
-can be downloaded from 
-<a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p/latest" target="_blank">the AEA Registry</a>,
-or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p" target="_blank">the main AEA framework repository.</a>
+The source code of the `p2p_libp2p` connection can be downloaded
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">here</a>.
 
 The package provides the connection class `P2PLibp2pConnection`,
 which implements the `Connection` interface and
 therefore can be used by the Multiplexer as any other connection.
 
 - The `connect` method of this connection spawns a new instance
-  of the <a href="https://github.com/fetchai/agents-aea/blob/main/libs/go/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
+  of the <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
 (i.e. an ACN peer node) and connects to it through OS pipes. 
 Then, it sets up the _message receiving loop_,
   which enqueues messages in the input queue to be read by `read` method calls,
@@ -693,12 +691,10 @@ which receives messages from the Libp2p node.
 - the `disconnect` method stops both the receiving loop and the sending loop,
   and stops the Libp2p node.
 
-### The `fetchai/p2p_libp2p_delegate` connection
+### The `p2p_libp2p_client` connection
 
-The source code of the `fetchai/p2p_libp2p_delegate` connection  
-can be downloaded from
-<a href="https://aea-registry.fetch.ai/details/connection/fetchai/p2p_libp2p_client/latest" target="_blank">the main AEA framework repository.</a>
-or from <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">the main AEA framework repository.</a>
+The source code of the `p2p_libp2p` connection can be downloaded
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">here</a>.
 
 The package provides the connection class `P2PLibp2pClientConnection`,
 which implements the `Connection` interface and
@@ -747,8 +743,7 @@ therefore can be used by the Multiplexer as any other connection.
 </div>
 
 - The `send` method and the `receive` methods behave similarly to
-  the `send` and `receive` methods of the
-  <a href="../acn-internals#the-fetchaip2p_libp2p-connection" target="_blank">`p2p_libp2p connection`</a>, 
+  the `send` and `receive` methods of the `p2p_libp2p` connection,
   in terms of message exchange;
   however, the communication is done via TCP rather than pipes.
 
@@ -776,8 +771,8 @@ Possible solutions:
 
 Code references:
 
-- record removed: <a href="https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L864" target="_blank">https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L864</a>
-- send code: <a href="https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L955" target="_blank">https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L955</a>
+- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/open_aea/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L994" target="_blank">agent record removal</a>
+- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/open_aea/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L1110" target="_blank">message routing</a>
 
 
 ### Golang Node <> Python Client `libp2p` connection
