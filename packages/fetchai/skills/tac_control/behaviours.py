@@ -20,10 +20,12 @@
 """This package contains a the behaviours."""
 
 import datetime
+from enum import Enum
 from typing import Any, Optional, cast
 
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
+from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
@@ -36,29 +38,17 @@ from packages.fetchai.skills.tac_control.parameters import Parameters
 
 
 DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
+SOEF_LOBBY_TIMEOUT = 60
 
 
 class TacBehaviour(Behaviour):
     """This class implements the TAC control behaviour."""
 
-    def __init__(self, **kwargs: Any):
-        """Instantiate the behaviour."""
-        self._max_soef_registration_retries = kwargs.pop(
-            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
-        )  # type: int
-        super().__init__(**kwargs)
-        self._registered_description = None  # type: Optional[Description]
-        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
-        self._nb_retries = 0
-
     def setup(self) -> None:
         """Implement the setup."""
-        self._register_agent()
 
     def act(self) -> None:
         """Implement the act."""
-        self._retry_failed_registration()
-
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
@@ -68,7 +58,10 @@ class TacBehaviour(Behaviour):
             and game.is_registered_agent
         ):
             game.phase = Phase.GAME_REGISTRATION
-            self._register_tac()
+            registration_behaviour = cast(
+                SoefRegisterBehaviour, self.context.behaviours.soef_register
+            )
+            registration_behaviour.status = SoefRegisterBehaviour.Status.REGISTERING_TAC
             self.context.logger.info(
                 "TAC open for registration until: {}".format(parameters.start_time)
             )
@@ -79,121 +72,14 @@ class TacBehaviour(Behaviour):
             if game.registration.nb_agents < parameters.min_nb_agents:
                 self._cancel_tac(game)
                 game.phase = Phase.POST_GAME
-                self._unregister_tac()
             else:
                 game.phase = Phase.GAME_SETUP
                 game.create()
                 self._start_tac(game)
-                self._unregister_tac()
                 game.phase = Phase.GAME
         elif game.phase.value == Phase.GAME.value and now > parameters.end_time:
             self._cancel_tac(game)
             game.phase = Phase.POST_GAME
-
-    def teardown(self) -> None:
-        """Implement the task teardown."""
-        self._unregister_tac()
-        self._unregister_agent()
-
-    def _retry_failed_registration(self) -> None:
-        """Retry a failed registration."""
-        if self.failed_registration_msg is not None:
-            self._nb_retries += 1
-            if self._nb_retries > self._max_soef_registration_retries:
-                self.context.is_active = False
-                return
-
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
-            )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.failed_registration_msg.to,
-                performative=self.failed_registration_msg.performative,
-                service_description=self.failed_registration_msg.service_description,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
-            self.context.logger.info(
-                f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
-            )
-
-            self.failed_registration_msg = None
-
-    def _register(self, description: Description, logger_msg: str) -> None:
-        """
-        Register something on the SOEF.
-
-        :param description: the description of what is being registered
-        :param logger_msg: the logger message to print after the registration
-        """
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info(logger_msg)
-
-    def _register_agent(self) -> None:
-        """Register the agent's location."""
-        game = cast(Game, self.context.game)
-        description = game.get_location_description()
-        self._register(description, "registering agent on SOEF.")
-
-    def register_genus(self) -> None:
-        """Register the agent's personality genus."""
-        game = cast(Game, self.context.game)
-        description = game.get_register_personality_description()
-        self._register(
-            description, "registering agent's personality genus on the SOEF."
-        )
-
-    def register_classification(self) -> None:
-        """Register the agent's personality classification."""
-        game = cast(Game, self.context.game)
-        description = game.get_register_classification_description()
-        self._register(
-            description, "registering agent's personality classification on the SOEF."
-        )
-
-    def _register_tac(self) -> None:
-        """Register the agent's TAC controller service on the SOEF."""
-        game = cast(Game, self.context.game)
-        description = game.get_register_tac_description()
-        self._register(description, "registering TAC data model on SOEF.")
-
-    def _unregister_tac(self) -> None:
-        """Unregister from the OEF as a TAC controller agent."""
-        game = cast(Game, self.context.game)
-        description = game.get_unregister_tac_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self._registered_description = None
-        self.context.logger.info("unregistering TAC data model from SOEF.")
-
-    def _unregister_agent(self) -> None:
-        """Unregister agent from the SOEF."""
-        game = cast(Game, self.context.game)
-        description = game.get_location_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("unregistering agent from SOEF.")
 
     def _start_tac(self, game: Game) -> None:
         """
@@ -270,6 +156,10 @@ class TacBehaviour(Behaviour):
                 performative=TacMessage.Performative.CANCELLED,
             )
             self.context.outbox.put_message(message=tac_msg)
+        registration_behaviour = cast(
+            SoefRegisterBehaviour, self.context.behaviours.soef_register
+        )
+        registration_behaviour.status = SoefRegisterBehaviour.Status.UNREGISTERING
         if game.phase == Phase.GAME:
             self.context.logger.info(
                 "finished competition:\n{}".format(game.holdings_summary)
@@ -278,3 +168,178 @@ class TacBehaviour(Behaviour):
                 "computed equilibrium:\n{}".format(game.equilibrium_summary)
             )
             self.context.is_active = False
+
+    def teardown(self) -> None:
+        """Implement the setup."""
+
+
+class SoefRegisterBehaviour(TickerBehaviour):
+    """This class implements the SOEF register behaviour."""
+
+    class Status(Enum):
+        """Registration status."""
+
+        REGISTERING_AGENT = "registering_agent"
+        REGISTERING_TAC = "registering_tac"
+        REGISTERED = "registered"
+        UNREGISTERING = "unregistering"
+        UNREGISTERED = "unregistered"
+
+    def __init__(self, **kwargs: Any):
+        """Instantiate the behaviour."""
+        self.max_soef_registration_retries = kwargs.pop(
+            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
+        super().__init__(**kwargs)
+        self._registered_description = None  # type: Optional[Description]
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self.failed_registration_reason = None  # type: Optional[Enum]
+        self.status = (
+            self.Status.REGISTERING_AGENT
+        )  # type: SoefRegisterBehaviour.Status
+        self._last_registration_attempt = datetime.datetime.now()
+        self.nb_retries = 0
+
+    def setup(self) -> None:
+        """Implement the setup."""
+        self._register_agent()
+
+    def act(self) -> None:
+        """Implement the act."""
+
+        if self.failed_registration_msg is not None:
+            self._retry_failed_registration()
+            return
+
+        if self.status == self.Status.REGISTERING_TAC:
+            self._register_tac()
+        elif self.status == self.Status.UNREGISTERING:
+            self._unregister_tac()
+
+    def teardown(self) -> None:
+        """Implement the task teardown."""
+        self._unregister_tac()
+        self._unregister_agent()
+
+    def _retry_failed_registration(self) -> None:
+        """Retry a failed registration."""
+        self.nb_retries += 1
+        if self.nb_retries > self.max_soef_registration_retries:
+            self.context.is_active = False
+            return
+
+        if (
+            self.failed_registration_reason
+            == OefSearchMessage.OefErrorOperation.ALREADY_IN_LOBBY
+        ):
+            self.context.logger.info(
+                "Already in OEF lobby from previous registration attempt."
+            )
+            now = datetime.datetime.now()
+            if now - self._last_registration_attempt < datetime.timedelta(
+                seconds=SOEF_LOBBY_TIMEOUT
+            ):
+                return
+
+        elif (
+            self.failed_registration_reason
+            == OefSearchMessage.OefErrorOperation.ALREADY_REGISTERED
+        ):
+            self.context.logger.info("Already registered with sOEF.")
+            return
+
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+
+        retry_msg = cast(OefSearchMessage, self.failed_registration_msg)
+
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=retry_msg.to,
+            performative=retry_msg.performative,
+            service_description=retry_msg.service_description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(
+            f"Retrying registration with sOEF. Retry {self.nb_retries} out of {self.max_soef_registration_retries}."
+        )
+
+        self.failed_registration_msg = None
+
+    def _register(self, description: Description, logger_msg: str) -> None:
+        """
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
+        """
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(logger_msg)
+
+    def _register_agent(self) -> None:
+        """Register the agent's location."""
+        game = cast(Game, self.context.game)
+        description = game.get_location_description()
+        self._register(description, "registering agent on SOEF.")
+
+    def register_genus(self) -> None:
+        """Register the agent's personality genus."""
+        game = cast(Game, self.context.game)
+        description = game.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
+        )
+
+    def register_classification(self) -> None:
+        """Register the agent's personality classification."""
+        game = cast(Game, self.context.game)
+        description = game.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
+        )
+
+    def _register_tac(self) -> None:
+        """Register the agent's TAC controller service on the SOEF."""
+        game = cast(Game, self.context.game)
+        description = game.get_register_tac_description()
+        self._register(description, "registering TAC data model on SOEF.")
+
+    def _unregister_tac(self) -> None:
+        """Unregister from the OEF as a TAC controller agent."""
+        game = cast(Game, self.context.game)
+        description = game.get_unregister_tac_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self._registered_description = None
+        self.status = self.Status.UNREGISTERED
+        self.context.logger.info("unregistering TAC data model from SOEF.")
+
+    def _unregister_agent(self) -> None:
+        """Unregister agent from the SOEF."""
+        game = cast(Game, self.context.game)
+        description = game.get_location_description()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("unregistering agent from SOEF.")

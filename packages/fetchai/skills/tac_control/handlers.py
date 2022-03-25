@@ -25,9 +25,10 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.oef_search.custom_types import OefErrorOperation
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_control.behaviours import TacBehaviour
+from packages.fetchai.skills.tac_control.behaviours import SoefRegisterBehaviour
 from packages.fetchai.skills.tac_control.dialogues import (
     DefaultDialogues,
     OefSearchDialogue,
@@ -398,7 +399,9 @@ class OefSearchHandler(Handler):
         ):
             description = target_message.service_description
             data_model_name = description.data_model.name
-            registration_behaviour = cast(TacBehaviour, self.context.behaviours.tac,)
+            registration_behaviour = cast(
+                SoefRegisterBehaviour, self.context.behaviours.soef_register
+            )
             if "location_agent" in data_model_name:
                 registration_behaviour.register_genus()
             elif (
@@ -444,8 +447,30 @@ class OefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            registration_behaviour = cast(TacBehaviour, self.context.behaviours.tac,)
+            registration_behaviour = cast(
+                SoefRegisterBehaviour, self.context.behaviours.soef_register
+            )
             registration_behaviour.failed_registration_msg = target_message
+            registration_behaviour.failed_registration_reason = (
+                oef_search_error_msg.oef_error_operation
+            )
+            if (
+                registration_behaviour.failed_registration_reason
+                == OefErrorOperation.ALREADY_IN_LOBBY
+            ):
+                if (
+                    registration_behaviour.nb_retries
+                    < registration_behaviour.max_soef_registration_retries
+                ):
+                    self.context.logger.info(
+                        "registration failed because agent is already in lobby: next retry in {} seconds.".format(
+                            registration_behaviour.tick_interval
+                        )
+                    )
+                else:
+                    self.context.logger.info(
+                        "registration failed because agent is already in lobby: number of retries exceeded"
+                    )
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

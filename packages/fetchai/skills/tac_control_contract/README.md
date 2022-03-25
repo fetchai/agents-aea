@@ -9,6 +9,7 @@ This skill is part of the Fetch.ai TAC demo. It manages the smart contract (cont
 ## Behaviours
 
 * `tac`:  deploys smart contract, manages progression of the competition
+* `soef_register`:  handles registration on the SOEF
 
 ## Handlers
 

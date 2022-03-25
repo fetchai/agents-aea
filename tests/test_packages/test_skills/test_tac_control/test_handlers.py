@@ -32,7 +32,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_control.behaviours import TacBehaviour
+from packages.fetchai.skills.tac_control.behaviours import SoefRegisterBehaviour
 from packages.fetchai.skills.tac_control.dialogues import (
     OefSearchDialogues,
     TacDialogues,
@@ -809,7 +809,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
         cls.service_registration_behaviour = cast(
-            TacBehaviour, cls._skill.skill_context.behaviours.tac,
+            SoefRegisterBehaviour, cls._skill.skill_context.behaviours.soef_register,
         )
         cls.game = cast(Game, cls._skill.skill_context.game)
         cls.list_of_messages = (
@@ -1116,7 +1116,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=("1", ""),
             performative=invalid_performative,
-            service_description="some_service_description",
+            service_description=self.register_service_description,
         )
 
         # operation

@@ -1247,7 +1247,6 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             "registered as 'tac_participant_one'",
             "registered as 'tac_participant_two'",
             "closing registration!",
-            "unregistering TAC data model from SOEF.",
             "requesting create items transaction...",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
