@@ -21,7 +21,7 @@
 import os
 import time
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 import yaml
@@ -41,7 +41,6 @@ from aea.test_tools.test_cases import (
     AEATestCaseManyFlaky,
     BaseAEATestCase,
 )
-from aea.test_tools.test_contract import BaseContractTestCase
 
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.dialogues import (
@@ -492,23 +491,3 @@ class TestFlakyEmpty(AEATestCaseEmptyFlaky):
             raise AssertionError("Expected error to trigger rerun!")
         assert self.run_count == 2, "Should only be rerun once!"
         assert not os.path.isfile(file), "File should not exist"
-
-
-class TestBaseContractTestCase(TestCase):
-    """Test case for BaseContractTestCase ABC class."""
-
-    @mock.patch(
-        "aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_multisig_transaction"
-    )
-    def test_sign_send_confirm_receipt_transaction(
-        self, sign_send_confirm_receipt_multisig_transaction_mock
-    ):
-        """Test sign_send_confirm_receipt_multisig_transaction is called for backward compatibility."""
-
-        class ContractTestCase(BaseContractTestCase):
-            pass
-
-        ContractTestCase.sign_send_confirm_receipt_transaction(
-            "tx", "ledger_api", "crypto"
-        )
-        sign_send_confirm_receipt_multisig_transaction_mock.assert_called_once()

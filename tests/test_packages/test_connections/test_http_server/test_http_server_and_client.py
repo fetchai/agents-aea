@@ -219,7 +219,7 @@ class TestClientServer:
 
         parsed_query = dict(
             urllib.parse.parse_qsl(
-                urllib.parse.splitquery(cast(HttpMessage, request.message).url)[1]
+                urllib.parse.urlparse(cast(HttpMessage, request.message).url).query
             )
         )
         assert parsed_query == query

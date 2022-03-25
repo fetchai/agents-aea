@@ -161,6 +161,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
     _stopped_future: Optional[Future] = None
     _start_count: int = 0
     _lock: Lock = Lock()
+    _thread_started_event = threading.Event()
 
     def __init__(self, timeout: float = 0.0) -> None:
         """
@@ -187,11 +188,11 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
                 return
 
             cls._loop = asyncio.new_event_loop()
-            cls._stopped_future = Future(loop=cls._loop)
             cls._supervisor_thread = threading.Thread(
                 target=cls._supervisor_event_loop, daemon=True, name="ExecTimeout"
             )
             cls._supervisor_thread.start()
+            cls._thread_started_event.wait()
 
     @classmethod
     def stop(cls, force: bool = False) -> None:
@@ -227,6 +228,8 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         """Start supervisor thread to execute asyncio task controlling execution time."""
         # pydocstyle: noqa # cause black reformats with pydocstyle conflict # noqa: E800
         async def wait_stopped() -> None:
+            cls._stopped_future = Future()
+            cls._thread_started_event.set()
             await cls._stopped_future  # type: ignore
 
         cls._loop.run_until_complete(wait_stopped())  # type: ignore

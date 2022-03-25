@@ -9,7 +9,7 @@ fingerprint:
   README.md: QmY2q7knhZcLFja5oswD7rauVtN1pDVVnkjHuUj1JWrVv7
   __init__.py: QmY7cPhXj7suon5jahiWCZgsCtQr5zfwYtR7yu5CJ6y5nD
   base.py: QmT7A1QqcUcgjBhLWpjY1nEsMK6g6eocScM868g5GHFHPh
-  connection.py: QmTxLAjS6N3UYbENSgymhGfbXjTAhRf681iq1XQkHeFC7W
+  connection.py: QmbzG7jcRAashSNcso3reesk3E7jHZanBKm8QTjGT1iijq
   contract_dispatcher.py: QmWKkFTskC2ThnLFG3hEXSCksHBeJJa6mkcR2eedeRSk3M
   ledger_dispatcher.py: QmfZ9cG99sknPZMB9Dmd7inM1UABdjDi9EUavpqL8aGSvE
 fingerprint_ignore_patterns: []
@@ -24,9 +24,9 @@ config:
       address: http://127.0.0.1:8545
       gas_price_api_key: null
     fetchai:
-      address: https://rest-stargateworld.fetch.ai:443
+      address: https://rest-capricorn.fetch.ai:443
       denom: atestfet
-      chain_id: stargateworld-3
+      chain_id: capricorn-1
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:1.1.0

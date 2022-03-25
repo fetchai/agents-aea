@@ -98,6 +98,10 @@ def _run_agent(
         selector = selectors.SelectSelector()
         loop = asyncio.SelectorEventLoop(selector)  # type: ignore
         asyncio.set_event_loop(loop)
+    try:
+        asyncio.get_event_loop()
+    except Exception:  # pylint: disable=broad-except
+        asyncio.set_event_loop(asyncio.new_event_loop())
 
     _set_logger(log_level=log_level)
 

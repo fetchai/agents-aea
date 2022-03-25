@@ -116,8 +116,9 @@ class BaseContractTestCase(ABC):
 
         # deploy contract
         cls.deployment_tx_receipt = cls._deploy_contract(
-            cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas
+            cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas,
         )
+
         cls.contract_address = cls.finish_contract_deployment()
 
     @classmethod

@@ -86,7 +86,7 @@ FETCHAI_DEPLOY_RECEIPT = {
                 {
                     "attributes": [
                         {"key": "code_id", "value": "8888"},
-                        {"key": "contract_address", "value": "some_contract_address"},
+                        {"key": "_contract_address", "value": "some_contract_address"},
                     ]
                 }
             ]

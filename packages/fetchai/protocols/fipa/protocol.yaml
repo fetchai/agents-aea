@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPtQvNaEmoaEq7uMSeU6rokM3ev6C1vjh5HLfA6fFYo2i
-  __init__.py: QmUjmwUUUmjqgdfbko47DraQuosE7Zf3vvggXX4xopnVeh
+  __init__.py: QmdjoWRR6Kx1vbLMfBXNRC38ZshKVxDNdNSFY1bC1yP1vc
   custom_types.py: QmaYgpGGoEiVRyjaSK7JCUj8bveA7azyCQeK2E4R7e86ZG
   dialogues.py: QmVLKtuTwgCLK9jMWvHdJEnprd5nkdM4GAs5mowNkxL7r4
   fipa.proto: QmS7aXZ2JoG3oyMHWiPYoP9RJ7iChsoTC9KQLsj6vi3ejR
-  fipa_pb2.py: QmbAkJGqhTVPynew575ZnxM2xMAMM6UVaFkSDMtLEXamtU
+  fipa_pb2.py: QmSgA9gHsp3xhJDjiXyf6faBj1QxS3A5XYEm5HpNBU2rqD
   message.py: Qmbk9bi8MqsYE6xwqpnDVj8Pfyx1MikW9ijism2PjVYBUH
   serialization.py: QmbkVSdDye2oEfVV8aySeddKu9gqAJnYqMavyGoVxz3oWg
 fingerprint_ignore_patterns: []

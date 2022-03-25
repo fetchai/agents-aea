@@ -95,5 +95,5 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-stargateworld.fetch.ai:443
-      chain_id: stargateworld-3
+      address: https://rest-capricorn.fetch.ai:443
+      chain_id: capricorn-1

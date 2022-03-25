@@ -7,13 +7,13 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmbdGhxLEVwRZuLi8gmKpNcGw7EW6fokuo1hiuNqTBojPV
+  __init__.py: QmWu8qaPs1JGhTUz21zHR5wK4P3k41mXvqw5pdAcZPATbG
   custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
   dialogues.py: Qmaaa73ZuSE85xwkXaiKHUFXjG7aMECvAGxAZQvmyWc55X
   message.py: QmaPVDsoC7sdGE2x7u7KuVqeimHvPEsvJNcZzKb78kBqwS
   serialization.py: Qmd4bz59ZHqrCtKnnmqBwLe4jCsmGJJnKifaQcmLyW7o1z
   t_protocol.proto: QmedX13Z6cNgbTJ8L9LyYG3HtSKhkY8ntq6uVdtepmt2cg
-  t_protocol_pb2.py: Qmbotj3ZRvVRgYEGeuKgDsroP7pDv37mR3Ahp64WrebrfJ
+  t_protocol_pb2.py: QmPcuH3pERHd1nZv3Bp2kPKGVrFtpKs16tPPTm6kQxpQi1
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

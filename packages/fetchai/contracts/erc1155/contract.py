@@ -96,6 +96,7 @@ class ERC1155Contract(Contract):
         token_ids: List[int],
         data: Optional[bytes] = b"",
         gas: Optional[int] = None,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get the transaction to create a batch of tokens.
@@ -106,6 +107,7 @@ class ERC1155Contract(Contract):
         :param token_ids: the list of token ids for creation
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param tx_fee: the tx_fee to be used
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -134,7 +136,12 @@ class ERC1155Contract(Contract):
             }
             cosmos_api = cast(CosmosApi, ledger_api)
             tx = cosmos_api.get_handle_transaction(
-                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+                deployer_address,
+                contract_address,
+                msg,
+                amount=0,
+                tx_fee=tx_fee,
+                gas=gas,
             )
             return tx
         raise NotImplementedError
@@ -148,6 +155,7 @@ class ERC1155Contract(Contract):
         token_id: int,
         data: Optional[bytes] = b"",
         gas: Optional[int] = None,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get the transaction to create a single token.
@@ -158,6 +166,7 @@ class ERC1155Contract(Contract):
         :param token_id: the token id for creation
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param tx_fee: the tx_fee to be used
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -186,7 +195,12 @@ class ERC1155Contract(Contract):
             }
             cosmos_api = cast(CosmosApi, ledger_api)
             tx = cosmos_api.get_handle_transaction(
-                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+                deployer_address,
+                contract_address,
+                msg,
+                amount=0,
+                tx_fee=tx_fee,
+                gas=gas,
             )
             return tx
         raise NotImplementedError
@@ -202,6 +216,7 @@ class ERC1155Contract(Contract):
         mint_quantities: List[int],
         data: Optional[bytes] = b"",
         gas: Optional[int] = None,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get the transaction to mint a batch of tokens.
@@ -214,6 +229,7 @@ class ERC1155Contract(Contract):
         :param mint_quantities: the quantity to mint for each token
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param tx_fee: the tx_fee to be used
         :return: the transaction object
         """
         cls.validate_mint_quantities(token_ids, mint_quantities)
@@ -247,7 +263,12 @@ class ERC1155Contract(Contract):
             }
             cosmos_api = cast(CosmosApi, ledger_api)
             tx = cosmos_api.get_handle_transaction(
-                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+                deployer_address,
+                contract_address,
+                msg,
+                amount=0,
+                tx_fee=tx_fee,
+                gas=gas,
             )
             return tx
         raise NotImplementedError
@@ -298,6 +319,7 @@ class ERC1155Contract(Contract):
         mint_quantity: int,
         data: Optional[bytes] = b"",
         gas: Optional[int] = None,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get the transaction to mint a single token.
@@ -310,6 +332,7 @@ class ERC1155Contract(Contract):
         :param mint_quantity: the quantity to mint
         :param data: the data to include in the transaction
         :param gas: the gas to be used
+        :param tx_fee: the tx_fee to be used
         :return: the transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -339,7 +362,12 @@ class ERC1155Contract(Contract):
             }
             cosmos_api = cast(CosmosApi, ledger_api)
             tx = cosmos_api.get_handle_transaction(
-                deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+                deployer_address,
+                contract_address,
+                msg,
+                amount=0,
+                tx_fee=tx_fee,
+                gas=gas,
             )
             return tx
         raise NotImplementedError
@@ -396,6 +424,7 @@ class ERC1155Contract(Contract):
         gas: Optional[int] = None,
         from_pubkey: Optional[str] = None,
         to_pubkey: Optional[str] = None,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
@@ -414,6 +443,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :param from_pubkey: Public key associated with from_address - Used on Cosmos/Fetch
         :param to_pubkey: Public key associated with to_address - Used on Cosmos/Fetch
+        :param tx_fee: the tx_fee to be used
         :return: a ledger transaction object
         """
         if from_supply > 0 and to_supply > 0:
@@ -525,6 +555,7 @@ class ERC1155Contract(Contract):
                     pub_keys=[bytes.fromhex(to_pubkey)],
                     msgs=msgs,
                     gas=gas,
+                    tx_fee=tx_fee,
                 )
             elif to_pubkey_required and from_pubkey_required:
                 if from_pubkey is None:
@@ -540,6 +571,7 @@ class ERC1155Contract(Contract):
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
                     msgs=msgs,
                     gas=gas,
+                    tx_fee=tx_fee,
                 )
             else:
                 if from_pubkey is None:
@@ -551,6 +583,7 @@ class ERC1155Contract(Contract):
                     pub_keys=[bytes.fromhex(from_pubkey)],
                     msgs=msgs,
                     gas=gas,
+                    tx_fee=tx_fee,
                 )
 
             return tx
@@ -619,6 +652,7 @@ class ERC1155Contract(Contract):
         gas: Optional[int] = None,
         from_pubkey: Optional[str] = None,
         to_pubkey: Optional[str] = None,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
@@ -637,6 +671,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :param from_pubkey: Public key associated with from_address - Used on Cosmos/Fetch
         :param to_pubkey: Public key associated with to_address - Used on Cosmos/Fetch
+        :param tx_fee: the tx_fee to be used
         :return: a ledger transaction object
         """
         if ledger_api.identifier == EthereumApi.identifier:
@@ -752,6 +787,7 @@ class ERC1155Contract(Contract):
                     pub_keys=[bytes.fromhex(to_pubkey)],
                     msgs=msgs,
                     gas=gas,
+                    tx_fee=tx_fee,
                 )
             elif to_pubkey_required and from_pubkey_required:
                 if from_pubkey is None:
@@ -767,6 +803,7 @@ class ERC1155Contract(Contract):
                     pub_keys=[bytes.fromhex(from_pubkey), bytes.fromhex(to_pubkey)],
                     msgs=msgs,
                     gas=gas,
+                    tx_fee=tx_fee,
                 )
             else:
                 if from_pubkey is None:
@@ -778,6 +815,7 @@ class ERC1155Contract(Contract):
                     pub_keys=[bytes.fromhex(from_pubkey)],
                     msgs=msgs,
                     gas=gas,
+                    tx_fee=tx_fee,
                 )
 
             return tx
