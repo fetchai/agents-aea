@@ -33,6 +33,12 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogue as BaseLedgerApiDialogue,
+)
+from packages.fetchai.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -141,5 +147,37 @@ class TacDialogues(Model, BaseTacDialogues):
         BaseTacDialogues.__init__(
             self,
             self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+        )
+
+
+LedgerApiDialogue = BaseLedgerApiDialogue
+
+
+class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """
+        Initialize dialogues.
+
+        :param kwargs: keyword arguments
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseLedgerApiDialogue.Role.AGENT
+
+        BaseLedgerApiDialogues.__init__(
+            self,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )

@@ -201,6 +201,8 @@ class Game(Model):
         self._ledger_id = (
             ledger_id if ledger_id is not None else self.context.default_ledger_id
         )
+        self.is_balance_received = False
+        self.is_balance_empty = False
 
     @property
     def ledger_id(self) -> str:

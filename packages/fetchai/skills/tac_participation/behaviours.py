@@ -24,10 +24,20 @@ from typing import Any, Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
-from packages.fetchai.skills.tac_participation.dialogues import OefSearchDialogues
+from packages.fetchai.skills.tac_participation.dialogues import (
+    LedgerApiDialogues,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.tac_participation.game import Game, Phase
+
+
+LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
 class TacSearchBehaviour(TickerBehaviour):
@@ -35,6 +45,7 @@ class TacSearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup."""
+        self._fund_wallet()
 
     def act(self) -> None:
         """Implement the act."""
@@ -66,6 +77,22 @@ class TacSearchBehaviour(TickerBehaviour):
         self.context.logger.info(
             "searching for TAC, search_id={}".format(oef_search_msg.dialogue_reference)
         )
+
+    def _put_msg_get_balance(self):
+        game = cast(Game, self.context.game)
+        ledger_id = game.ledger_id
+        address = self.context.agent_address
+
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, _ = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=ledger_id,
+            address=address,
+        )
+        self.context.outbox.put_message(message=ledger_api_msg)
 
 
 class TransactionProcessBehaviour(TickerBehaviour):
