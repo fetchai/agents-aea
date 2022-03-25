@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains the integration test for the fetch beacon skill."""
+"""This test module contains the integration test for the fetch block skill."""
 
 import pytest
 
@@ -25,16 +25,16 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 
 @pytest.mark.integration
-class TestFetchBeaconSkill(AEATestCaseEmpty):
-    """Test that fetch beacon skill works."""
+class TestFetchBlockSkill(AEATestCaseEmpty):
+    """Test that fetch block skill works."""
 
-    def test_fetch_beacon(self):
-        """Run the fetch beacon skill sequence."""
+    def test_fetch_block(self):
+        """Run the fetch block skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/ledger:0.18.0")
-        self.add_item("skill", "fetchai/fetch_beacon:0.11.0")
-        self.set_config("agent.default_connection", "fetchai/ledger:0.18.0")
+        self.add_item("connection", "fetchai/ledger:0.20.0")
+        self.add_item("skill", "fetchai/fetch_block:0.12.0")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.20.0")
 
         self.run_install()
 
@@ -43,10 +43,9 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
         assert is_running, "AEA not running within timeout!"
 
         check_strings = (
-            "setting up FetchBeaconBehaviour",
-            "Fetching random beacon value...",
-            "Beacon info:",
-            "entropy not present",
+            "setting up FetchBlockBehaviour",
+            "Fetching latest block...",
+            "Retrieved latest block:",
         )
         missing_strings = self.missing_from_output(process, check_strings)
         assert len(missing_strings) in [
@@ -55,6 +54,4 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
         ], "Strings {} didn't appear in agent output.".format(missing_strings)
 
         self.terminate_agents()
-        assert (
-            self.is_successfully_terminated()
-        ), "Http echo agent wasn't successfully terminated."
+        assert self.is_successfully_terminated(), "AEA wasn't successfully terminated."

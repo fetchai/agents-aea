@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the behaviour to get the Fetch random beacon."""
+"""This package contains the behaviour to get the latest block from the Fetch ledger."""
 
 from typing import Any, cast
 
@@ -26,19 +26,19 @@ from aea.skills.behaviours import TickerBehaviour
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
 from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.skills.fetch_beacon.dialogues import LedgerApiDialogues
+from packages.fetchai.skills.fetch_block.dialogues import LedgerApiDialogues
 
 
-class FetchBeaconBehaviour(TickerBehaviour):
-    """This class provides a simple beacon fetch behaviour."""
+class FetchBlockBehaviour(TickerBehaviour):
+    """This class provides a behaviour to get the latest block from the Fetch ledger."""
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize the beacon fetch behaviour."""
+        """Initialize the fetch block behaviour."""
 
         super().__init__(**kwargs)
 
-    def _get_random_beacon(self) -> None:
-        """Request the latest random beacon value by sending a message to the ledger API."""
+    def _get_block(self) -> None:
+        """Request the latest block by sending a message to the ledger API."""
         ledger_api_dialogues = cast(
             LedgerApiDialogues, self.context.ledger_api_dialogues
         )
@@ -54,14 +54,14 @@ class FetchBeaconBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup."""
-        self.context.logger.info("setting up FetchBeaconBehaviour")
+        self.context.logger.info("setting up FetchBlockBehaviour")
 
     def act(self) -> None:
         """Implement the act."""
 
-        self.context.logger.info("Fetching random beacon value...")
-        self._get_random_beacon()
+        self.context.logger.info("Fetching latest block...")
+        self._get_block()
 
     def teardown(self) -> None:
         """Implement the task teardown."""
-        self.context.logger.info("tearing down FetchBeaconBehaviour")
+        self.context.logger.info("tearing down FetchBlockBehaviour")

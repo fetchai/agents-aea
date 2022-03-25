@@ -47,10 +47,7 @@ Initialize a dialogue.
 - `dialogue_label`: the identifier of the dialogue
 - `self_address`: the address of the entity for whom this dialogue is maintained
 - `role`: the role of the agent this dialogue is maintained for
-
-**Returns**:
-
-None
+- `message_class`: the message class used
 
 <a name="packages.fetchai.protocols.signing.dialogues.SigningDialogues"></a>
 ## SigningDialogues Objects
@@ -73,8 +70,6 @@ Initialize dialogues.
 **Arguments**:
 
 - `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
+- `dialogue_class`: the dialogue class used
+- `role_from_first_message`: the callable determining role from first message
 

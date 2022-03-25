@@ -92,12 +92,31 @@ merge_dependencies(dep1: Dependencies, dep2: Dependencies) -> Dependencies
 
 Merge two groups of dependencies.
 
-If some of them are not "simple" (see above), we just filter them out.
+If some of them are not "simple" (see above), and there is no risk
+of conflict because there is no other package with the same name,
+we leave them; otherwise we raise an error.
 
 **Arguments**:
 
 - `dep1`: the first operand
 - `dep2`: the second operand.
+
+**Returns**:
+
+the merged dependencies.
+
+<a name="aea.configurations.pypi.merge_dependencies_list"></a>
+#### merge`_`dependencies`_`list
+
+```python
+merge_dependencies_list(*deps: Dependencies) -> Dependencies
+```
+
+Merge a list of dependencies.
+
+**Arguments**:
+
+- `deps`: the list of dependencies
 
 **Returns**:
 

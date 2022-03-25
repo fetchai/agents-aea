@@ -41,6 +41,7 @@ WHITELIST_URL_TO_CODE = {
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
     "https://colab.research.google.com": 403,
+    "https://github.com/fetchai/networks-capricorn": 404,
 }
 
 IGNORE: Set[str] = {"https://faucet.metamask.io/"}
@@ -58,11 +59,11 @@ def is_url_reachable(url: str) -> bool:
     if url in IGNORE:
         return True
     try:
-        response = requests.head(url, timeout=3)
+        response = requests.head(url, timeout=20)
         if response.status_code == 200:
             return True
-        if response.status_code in [403, 405, 302]:
-            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302]
+        if response.status_code in [403, 405, 302, 404]:
+            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
         return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)

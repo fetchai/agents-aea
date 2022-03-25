@@ -24,6 +24,7 @@ import json
 import logging
 import time
 from collections import namedtuple
+from itertools import chain
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, cast
@@ -60,8 +61,8 @@ from cosmpy.protos.cosmos.tx.v1beta1.tx_pb2 import (
     Tx,
     TxBody,
 )
-from cosmpy.protos.cosmwasm.wasm.v1beta1.query_pb2 import QuerySmartContractStateRequest
-from cosmpy.protos.cosmwasm.wasm.v1beta1.tx_pb2 import (
+from cosmpy.protos.cosmwasm.wasm.v1.query_pb2 import QuerySmartContractStateRequest
+from cosmpy.protos.cosmwasm.wasm.v1.tx_pb2 import (
     MsgExecuteContract,
     MsgInstantiateContract,
     MsgStoreCode,
@@ -94,14 +95,10 @@ DEFAULT_FAUCET_URL = "INVALID_URL"
 DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
 DEFAULT_CURRENCY_DENOM = "uatom"
 DEFAULT_CHAIN_ID = "cosmoshub-3"
-DEFAULT_GAS_AMOUNT = 1500000
+DEFAULT_GAS_AMOUNT = 1550000
 # Txs will fail if gas_limit is higher than MAXIMUM_GAS_AMOUNT
-MAXIMUM_GAS_AMOUNT = 1500000
+MAXIMUM_GAS_AMOUNT = 2000000
 _BYTECODE = "wasm_byte_code"
-MSG_STORE_CODE = "/cosmwasm.wasm.v1beta1.MsgStoreCode"
-MSG_INSTANTIATE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgInstantiateContract"
-MSG_EXECUTE_CONTRACT = "/cosmwasm.wasm.v1beta1.MsgExecuteContract"
-MSG_SEND = "/cosmos.bank.v1beta1.MsgSend"
 
 
 class DataEncrypt:
@@ -231,8 +228,8 @@ class CosmosHelper(Helper):
                 )
         return is_successful
 
-    @staticmethod
-    def get_code_id(tx_receipt: JSONLike) -> Optional[int]:
+    @classmethod
+    def get_code_id(cls, tx_receipt: JSONLike) -> Optional[int]:
         """
         Retrieve the `code_id` from a transaction receipt.
 
@@ -241,18 +238,28 @@ class CosmosHelper(Helper):
         """
         code_id: Optional[int] = None
         try:
-            res = [
-                dic_["value"]  # type: ignore
-                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]  # type: ignore
-                if dic_["key"] == "code_id"  # type: ignore
-            ]
-            code_id = int(res[0])
+            attributes = cls.get_event_attributes(tx_receipt)
+
+            code_id = int(attributes["code_id"])
         except (KeyError, IndexError):  # pragma: nocover
             code_id = None
         return code_id
 
     @staticmethod
-    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+    def get_event_attributes(tx_receipt: JSONLike) -> Dict:
+        """
+        Retrieve events attributes from tx receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: dict
+        """
+        return {
+            i["key"]: i["value"]
+            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])
+        }
+
+    @classmethod
+    def get_contract_address(cls, tx_receipt: JSONLike) -> Optional[str]:
         """
         Retrieve the `contract_address` from a transaction receipt.
 
@@ -261,12 +268,8 @@ class CosmosHelper(Helper):
         """
         contract_address: Optional[str] = None
         try:
-            res = [
-                dic_["value"]  # type: ignore
-                for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"]  # type: ignore
-                if dic_["key"] == "contract_address"  # type: ignore
-            ]  # type: ignore
-            contract_address = res[0]
+            attributes = cls.get_event_attributes(tx_receipt)
+            contract_address = attributes["_contract_address"]
         except (KeyError, IndexError):  # pragma: nocover
             contract_address = None
         return contract_address
@@ -510,7 +513,6 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-
         tx = ParseDict(transaction["tx"], Tx())
 
         # If public key is not already part of transaction
@@ -672,6 +674,13 @@ class _CosmosApi(LedgerApi):
         denom = (
             kwargs.pop("denom") if kwargs.get("denom", None) is not None else self.denom
         )
+
+        tx_fee_denom = (
+            kwargs.pop("tx_fee_denom")
+            if kwargs.get("tx_fee_denom", None) is not None
+            else denom
+        )
+
         chain_id = (
             kwargs.pop("chain_id")
             if kwargs.get("chain_id", None) is not None
@@ -701,7 +710,7 @@ class _CosmosApi(LedgerApi):
             return self._get_storage_transaction(
                 contract_interface,
                 deployer_address,
-                denom,
+                tx_fee_denom,
                 chain_id,
                 account_number,
                 sequence,
@@ -733,6 +742,7 @@ class _CosmosApi(LedgerApi):
             code_id,
             init_msg,
             label,
+            tx_fee_denom,
             **kwargs,
         )
 
@@ -740,42 +750,35 @@ class _CosmosApi(LedgerApi):
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
-        denom: str,
+        tx_fee_denom: str,
         chain_id: str,
         account_number: int,
         sequence: int,
         tx_fee: int = 0,
         gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
-        source: str = "",
-        builder: str = "",
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm bytecode deployment transaction.
 
         :param contract_interface: the contract interface.
         :param deployer_address: the deployer address.
-        :param denom: the denomination.
+        :param tx_fee_denom: the denomination of tx_fee.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :param account_number: the account number.
         :param sequence: the sequence number.
         :param tx_fee: the transaction fee.
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
-        :param source: the source.
-        :param builder: the builder.
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = MsgStoreCode(
             sender=str(deployer_address),
             wasm_byte_code=base64.b64decode(contract_interface[_BYTECODE]),
-            source=source,
-            builder=builder,
         )
         store_msg_packed = ProtoAny()
         store_msg_packed.Pack(store_msg, type_url_prefix="/")  # type: ignore
-
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
         tx = self._get_transaction(
             account_numbers=[account_number],
             from_addresses=[str(deployer_address)],
@@ -799,6 +802,7 @@ class _CosmosApi(LedgerApi):
         code_id: int,
         init_msg: JSONLike,
         label: str,
+        tx_fee_denom: str,
         tx_fee: int = 0,
         gas: int = DEFAULT_GAS_AMOUNT,
         memo: str = "",
@@ -815,6 +819,7 @@ class _CosmosApi(LedgerApi):
         :param code_id: the ID of contract bytecode.
         :param init_msg: the InitMsg containing parameters for contract constructor.
         :param label: the label name of the contract.
+        :param tx_fee_denom: Denomination of tx_fee
         :param tx_fee: the tx fee accepted.
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
@@ -824,12 +829,13 @@ class _CosmosApi(LedgerApi):
             init_funds = []
         else:
             init_funds = [Coin(denom=denom, amount=str(amount))]
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         init_msg = MsgInstantiateContract(
             sender=str(deployer_address),
             code_id=code_id,
-            init_msg=json.dumps(init_msg).encode("UTF8"),
+            msg=json.dumps(init_msg).encode("UTF8"),
             label=label,
             funds=init_funds,
         )
@@ -861,6 +867,7 @@ class _CosmosApi(LedgerApi):
         chain_id: Optional[str] = None,
         account_number: Optional[int] = None,
         sequence: Optional[int] = None,
+        tx_fee_denom: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm HandleMsg transaction.
@@ -876,10 +883,12 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :param account_number: Account number
         :param sequence: Sequence
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :return: the unsigned CosmWasm HandleMsg
         """
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
@@ -892,7 +901,7 @@ class _CosmosApi(LedgerApi):
             funds = []
         else:
             funds = [Coin(denom=denom, amount=str(amount))]
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         execute_msg = MsgExecuteContract(
             sender=str(sender_address),
@@ -961,6 +970,7 @@ class _CosmosApi(LedgerApi):
         chain_id: Optional[str] = None,
         account_number: Optional[int] = None,
         sequence: Optional[int] = None,
+        tx_fee_denom: Optional[str] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -977,12 +987,13 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the chain ID of the transaction.
         :param account_number: Account number
         :param sequence: Sequence
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :param kwargs: keyword arguments.
         :return: the transfer transaction
         """
         denom = denom if denom is not None else self.denom
-
         chain_id = chain_id if chain_id is not None else self.chain_id
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
@@ -991,7 +1002,7 @@ class _CosmosApi(LedgerApi):
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
 
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
         amount_coins = [Coin(denom=denom, amount=str(amount))]
 
         msg_send = MsgSend(
@@ -1092,6 +1103,7 @@ class _CosmosApi(LedgerApi):
         memo: str = "",
         chain_id: Optional[str] = None,
         denom: Optional[str] = None,
+        tx_fee_denom: Optional[str] = None,
     ) -> JSONLike:
         """
         Generate transaction with multiple messages
@@ -1104,19 +1116,22 @@ class _CosmosApi(LedgerApi):
         :param memo: memo to include in tx.
         :param chain_id: the chain ID of the transaction.
         :param denom: the denomination of tx fee
+        :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
 
         :raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
 
         :return: the transaction
         """
-
         if pub_keys is not None and len(pub_keys) != len(from_addresses):
-            raise RuntimeError("Number of pubkeys is not equal to number of addresses")
+            raise RuntimeError(
+                "Number of pubkeys is not equal to number of addresses"
+            )  # pragma: nocover
 
         denom = denom if denom is not None else self.denom
         chain_id = chain_id if chain_id is not None else self.chain_id
+        tx_fee_denom = tx_fee_denom if tx_fee_denom is not None else denom
 
-        tx_fee_coins = [Coin(denom=denom, amount=str(tx_fee))]
+        tx_fee_coins = [Coin(denom=tx_fee_denom, amount=str(tx_fee))]
 
         account_numbers: List[int] = []
         sequences: List[int] = []
@@ -1253,7 +1268,7 @@ class _CosmosApi(LedgerApi):
         if account_response.account.Is(BaseAccount.DESCRIPTOR):
             account_response.account.Unpack(account)
         else:
-            raise TypeError("Unexpected account type")
+            raise TypeError("Unexpected account type")  # pragma: nocover
 
         return account.account_number, account.sequence
 
@@ -1264,7 +1279,6 @@ class _CosmosApi(LedgerApi):
         :param tx_signed: the signed transaction
         :return: tx_digest, if present
         """
-
         tx = ParseDict(tx_signed["tx"], Tx())
 
         tx_data = tx.SerializeToString()
@@ -1276,44 +1290,14 @@ class _CosmosApi(LedgerApi):
         if broad_tx_resp.tx_response.code != 0:
             raw_log = broad_tx_resp.tx_response.raw_log
 
-            _default_logger.warning(f"Sending transaction failed: {raw_log}")
+            _default_logger.warning(
+                f"Sending transaction failed: {raw_log} {broad_tx_resp}"
+            )
             tx_digest = None
         else:
             tx_digest = broad_tx_resp.tx_response.txhash
 
         return tx_digest
-
-    @staticmethod
-    def is_cosmwasm_transaction(tx_signed: JSONLike) -> bool:
-        """Check whether it is a cosmwasm tx."""
-        try:
-            _type = (
-                cast(dict, tx_signed.get("tx", {}))
-                .get("body", {})
-                .get("messages", [])[0]["@type"]
-            )
-            result = _type in [
-                MSG_STORE_CODE,
-                MSG_INSTANTIATE_CONTRACT,
-                MSG_EXECUTE_CONTRACT,
-            ]
-        except (KeyError, IndexError):  # pragma: nocover
-            result = False
-        return result
-
-    @staticmethod
-    def is_transfer_transaction(tx_signed: JSONLike) -> bool:
-        """Check whether it is a transfer tx."""
-        try:
-            _type = (
-                cast(dict, tx_signed.get("tx", {}))
-                .get("body", {})
-                .get("messages", [])[0]["@type"]
-            )
-            result = _type in [MSG_SEND]
-        except (KeyError, IndexError):  # pragma: nocover
-            result = False
-        return result
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
@@ -1354,7 +1338,7 @@ class _CosmosApi(LedgerApi):
         # Cosmos does not distinguish between transaction receipt and transaction
         tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
         if tx_with_receipt is None:
-            return None
+            return None  # pragma: nocover
         return {"tx": tx_with_receipt.get("tx")}
 
     def get_contract_instance(

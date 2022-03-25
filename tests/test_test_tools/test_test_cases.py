@@ -21,7 +21,7 @@
 import os
 import time
 from pathlib import Path
-from unittest import TestCase, mock
+from unittest import mock
 
 import pytest
 import yaml
@@ -41,7 +41,6 @@ from aea.test_tools.test_cases import (
     AEATestCaseManyFlaky,
     BaseAEATestCase,
 )
-from aea.test_tools.test_contract import BaseContractTestCase
 
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.dialogues import (
@@ -52,7 +51,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
-from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
+from tests.conftest import MAX_FLAKY_RERUNS, MY_FIRST_AEA_PUBLIC_ID
 from tests.test_cli import test_generate_wealth, test_interact
 
 
@@ -368,6 +367,7 @@ class TestGenerateAndAddKey(AEATestCaseEmpty):
 class TestGetWealth(AEATestCaseEmpty):
     """Test get_wealth."""
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_get_wealth(self):
         """Test get_wealth."""
         # just call it, network related and quite unstable
@@ -491,23 +491,3 @@ class TestFlakyEmpty(AEATestCaseEmptyFlaky):
             raise AssertionError("Expected error to trigger rerun!")
         assert self.run_count == 2, "Should only be rerun once!"
         assert not os.path.isfile(file), "File should not exist"
-
-
-class TestBaseContractTestCase(TestCase):
-    """Test case for BaseContractTestCase ABC class."""
-
-    @mock.patch(
-        "aea.test_tools.test_contract.BaseContractTestCase.sign_send_confirm_receipt_multisig_transaction"
-    )
-    def test_sign_send_confirm_receipt_transaction(
-        self, sign_send_confirm_receipt_multisig_transaction_mock
-    ):
-        """Test sign_send_confirm_receipt_multisig_transaction is called for backward compatibility."""
-
-        class ContractTestCase(BaseContractTestCase):
-            pass
-
-        ContractTestCase.sign_send_confirm_receipt_transaction(
-            "tx", "ledger_api", "crypto"
-        )
-        sign_send_confirm_receipt_multisig_transaction_mock.assert_called_once()

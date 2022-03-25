@@ -4,6 +4,20 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v1.1.0` to `v1.1.1`
+
+No backwards incompatible changes.
+
+Upgrade fetchai/p2p_libp2p connection package to the latest version which fixes a slow DHT lookup problem
+
+We advise everyone to upgrade their `fetchai` packages and plugins to get the latest fixes.
+
+## `v1.0.2` to `v1.1.0`
+
+No backwards incompatible changes.
+
+We advise everyone to upgrade their `fetchai` packages and plugins to get the latest fixes.
+
 ## `v1.0.1` to `v1.0.2`
 
 No backwards incompatible changes.

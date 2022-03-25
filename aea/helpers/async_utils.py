@@ -387,7 +387,6 @@ class Runnable(ABC):
         self._threaded = threaded
         self._task: Optional[asyncio.Task] = None
         self._thread: Optional[Thread] = None
-        self._completed_event: Optional[asyncio.Event] = None
         self._got_result = False
         self._was_cancelled = False
         self._is_running: bool = False
@@ -406,7 +405,6 @@ class Runnable(ABC):
         self._is_running = False
         self._got_result = False
         self._set_loop()
-        self._completed_event = asyncio.Event(loop=self._loop)
         self._was_cancelled = False
 
         if self._stop_called > 0:
@@ -459,14 +457,13 @@ class Runnable(ABC):
 
     async def _run_wrapper(self) -> None:
         """Wrap run() method."""
-        if not self._completed_event or not self._loop:  # pragma: nocover
+        if not self._loop:  # pragma: nocover
             raise ValueError("Start was not called!")
         self._is_running = True
         try:
             with suppress(asyncio.CancelledError):
                 return await self.run()
         finally:
-            self._loop.call_soon_threadsafe(self._completed_event.set)
             self._is_running = False
 
     @property
@@ -560,10 +557,8 @@ class Runnable(ABC):
 
     async def _wait(self) -> None:
         """Wait internal method."""
-        if not self._task or not self._completed_event:  # pragma: nocover
+        if not self._task:  # pragma: nocover
             raise ValueError("Not started")
-
-        await self._completed_event.wait()
 
         try:
             await self._task

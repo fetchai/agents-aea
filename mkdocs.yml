@@ -116,6 +116,7 @@ nav:
       - Components:
         - Base: 'api/components/base.md'
         - Loader: 'api/components/loader.md'
+        - Utils: 'api/components/utils.md'
       - Configurations:
         - Base: 'api/configurations/base.md'
         - Constants: 'api/configurations/constants.md'
@@ -163,6 +164,7 @@ nav:
         - IO: 'api/helpers/io.md'
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'
+          - Utils: 'api/helpers/ipfs/utils.md'
         - Logging: 'api/helpers/logging.md'
         - MultiAddress:
           - Base: 'api/helpers/multiaddr/base.md'
@@ -190,6 +192,7 @@ nav:
       - Manager:
         - Manager: 'api/manager/manager.md'
         - Project: 'api/manager/project.md'
+        - Utils: 'api/manager/utils.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
         - Dialogue:
@@ -226,6 +229,7 @@ nav:
         - Exceptions: 'api/test_tools/exceptions.md'
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
+        - Test Contract: 'api/test_tools/test_contract.md'
         - Test Skill: 'api/test_tools/test_skill.md'
       - Plugins:
         - CLI:

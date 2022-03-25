@@ -22,10 +22,12 @@ package dhtpeer
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"net"
 	"os"
 	"testing"
+	"time"
 
 	"libp2p_node/acn"
 	"libp2p_node/aea"
@@ -330,10 +332,12 @@ func benchmarkAgentLookup(npeers uint16, b *testing.B) {
 	}
 	defer peerCleanup()
 	ensureAddressAnnounced(peer)
+	ctx, cancel_lookup := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel_lookup()
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		_, _, err = peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
+		_, _, err = peer.lookupAddressDHT(ctx, addrs[len(peers)-1-i%len(peers)])
 		if err != nil {
 			b.Fail()
 		}

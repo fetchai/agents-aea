@@ -35,6 +35,8 @@ from aea.skills.base import Model
 
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue as BaseLedgerApiDialogue,
+)
+from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.oef_search.dialogues import (
