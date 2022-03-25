@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2022 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class CosmTradeMessage(Message):
     """A protocol for preparing an atomic swap bilateral transaction for cosmos-based ledgers, including fetchai's."""
 
-    protocol_id = PublicId.from_str("fetchai/cosm_trade:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/cosm_trade:0.2.0")
     protocol_specification_id = PublicId.from_str("fetchai/cosm_trade:1.0.0")
 
     SignedTransaction = CustomSignedTransaction
@@ -89,6 +89,7 @@ class CosmTradeMessage(Message):
         :param dialogue_reference: the dialogue reference.
         :param target: the message target.
         :param performative: the message performative.
+        :param **kwargs: extra options.
         """
         super().__init__(
             dialogue_reference=dialogue_reference,

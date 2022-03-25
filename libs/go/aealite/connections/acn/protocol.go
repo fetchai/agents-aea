@@ -1,0 +1,30 @@
+package acn
+
+import acn_protocol "aealite/protocols/acn/v1_0_0"
+
+type StatusBody = acn_protocol.AcnMessage_StatusBody
+type AgentRecord = acn_protocol.AcnMessage_AgentRecord
+type AcnMessage = acn_protocol.AcnMessage
+type LookupRequest = acn_protocol.AcnMessage_LookupRequest
+type LookupResponse = acn_protocol.AcnMessage_LookupResponse
+type Status = acn_protocol.AcnMessage_Status
+type LookupRequestPerformative = acn_protocol.AcnMessage_Lookup_Request_Performative
+type LookupResponsePerformative = acn_protocol.AcnMessage_Lookup_Response_Performative
+type StatusPerformative = acn_protocol.AcnMessage_Status_Performative
+type RegisterPerformative = acn_protocol.AcnMessage_Register_Performative
+type Register = acn_protocol.AcnMessage_Register
+type AeaEnvelope = acn_protocol.AcnMessage_AeaEnvelope
+type AeaEnvelopePerformative = acn_protocol.AcnMessage_Aea_Envelope_Performative
+
+const ERROR_DECODE = acn_protocol.AcnMessage_StatusBody_ERROR_DECODE
+const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
+const ERROR_UNEXPECTED_PAYLOAD = acn_protocol.AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD
+const ERROR_AGENT_NOT_READY = acn_protocol.AcnMessage_StatusBody_ERROR_AGENT_NOT_READY
+const ERROR_UNKNOWN_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_UNKNOWN_AGENT_ADDRESS
+const ERROR_GENERIC = acn_protocol.AcnMessage_StatusBody_ERROR_GENERIC
+const ERROR_WRONG_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_AGENT_ADDRESS
+const ERROR_UNSUPPORTED_LEDGER = acn_protocol.AcnMessage_StatusBody_ERROR_UNSUPPORTED_LEDGER
+const ERROR_WRONG_PUBLIC_KEY = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_PUBLIC_KEY
+const ERROR_INVALID_PROOF = acn_protocol.AcnMessage_StatusBody_ERROR_INVALID_PROOF
+
+type Status_ErrCode = acn_protocol.AcnMessage_StatusBody_StatusCodeEnum

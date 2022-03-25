@@ -58,7 +58,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.19.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.20.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -663,7 +663,7 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
         reader, writer = await asyncio.open_connection(
-            self._host, self._port, loop=self._loop, ssl=ssl_ctx,
+            self._host, self._port, ssl=ssl_ctx,
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 

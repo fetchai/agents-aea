@@ -27,7 +27,7 @@ from setuptools import setup  # type: ignore
 
 setup(
     name="aea-cli-ipfs",
-    version="1.0.1",
+    version="1.0.2",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="CLI extension for AEA framework wrapping IPFS functionality.",

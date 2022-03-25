@@ -17,26 +17,19 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains handlers for the fetch_beacon skill."""
+"""This package contains handlers for the fetch_block skill."""
 
 from typing import Any, Dict, Optional, cast
-
-from aea_ledger_ethereum import EthereumApi
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.skills.fetch_beacon.dialogues import (
+from packages.fetchai.skills.fetch_block.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
 )
-
-
-def keccak256(input_: bytes) -> bytes:
-    """Compute hash."""
-    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
 class LedgerApiHandler(Handler):
@@ -102,14 +95,6 @@ class LedgerApiHandler(Handler):
 
         block_info = ledger_api_msg.state.body  # type: Dict[str, Any]
 
-        # get entropy and block data
-        entropy = (
-            block_info.get("block", {})
-            .get("header", {})
-            .get("entropy", {})
-            .get("group_signature", None)
-        )
-        block_hash = block_info.get("block_id", {}).get("hash", {})
         block_height_str = (
             block_info.get("block", {}).get("header", {}).get("height", None)
         )
@@ -119,21 +104,13 @@ class LedgerApiHandler(Handler):
         else:
             block_height = None  #  pragma: nocover
 
-        if entropy is None:  # pragma: nocover
-            self.context.logger.info("entropy not present")
-        elif block_height is None:  # pragma: nocover
+        if block_height is None:  # pragma: nocover
             self.context.logger.info("block height not present")
         else:
-            beacon_data = {
-                "entropy": keccak256(entropy.encode("utf-8")),
-                "block_hash": bytes.fromhex(block_hash),
-                "block_height": block_height,
-            }
             self.context.logger.info(
-                "Beacon info: "
-                + str({"block_height": block_height, "entropy": entropy})
+                "Retrieved latest block: " + str({"block_height": block_height})
             )
-            self.context.shared_state["observation"] = {"beacon": beacon_data}
+            self.context.shared_state["observation"] = {"block": block_info}
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue

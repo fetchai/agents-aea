@@ -130,8 +130,8 @@ jobs:
           pip install tox
           pip install --user --upgrade setuptools
           # install Protobuf compiler
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-          unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           # install IPFS
           sudo apt-get install -y wget
@@ -296,8 +296,8 @@ jobs:
         sudo apt-get autoclean
         pip install tox
         # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
     - name: Configure Docker
       run: |
@@ -378,8 +378,8 @@ jobs:
         sudo apt-get autoclean
         pip install tox
         # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     # sudo apt-get install -y protobuf-compiler
@@ -392,8 +392,8 @@ jobs:
         brew install gcc
         # brew install protobuf
         # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-osx-x86_64.zip
-        unzip protoc-3.11.4-osx-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip
+        unzip protoc-3.19.4-osx-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         brew tap yoheimuta/protolint
         brew install protolint
@@ -404,14 +404,14 @@ jobs:
       run: |
         python -m pip install -U pip
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-        choco install protoc --version 3.11.4
+        choco install protoc --version 3.19.4
         choco install mingw -y
         choco install make -y
         # to check make was installed
         make --version
         pip install tox
-        # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-win64.zip
-        # unzip protoc-3.11.4-win64.zip -d protoc
+        # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
+        # unzip protoc-3.19.4-win64.zip -d protoc
         # sudo mv protoc/bin/protoc /usr/local/bin/protoc
         python scripts/update_symlinks_cross_platform.py
         make protolint_install_win
@@ -450,8 +450,8 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     - name: Unit tests with sync agent loop
@@ -551,8 +551,8 @@ jobs:
         pip install tox
         pip install coverage
         # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     # sudo apt-get install -y protobuf-compiler

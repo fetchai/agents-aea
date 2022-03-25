@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
-import asyncio
 import contextlib
 import logging
 import os
@@ -55,8 +54,8 @@ DEFAULT_TIMEOUT = 60
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
-class BaseTestMultiAgentManager(TestCase):
-    """Base test class for multi-agent manager"""
+class BaseCase(TestCase):
+    """Base case setup/teardown."""
 
     MODE = "async"
     PASSWORD: Optional[str] = None
@@ -107,6 +106,11 @@ class BaseTestMultiAgentManager(TestCase):
         finally:
             self.tmp_dir.cleanup()
 
+
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
+class TestMultiAgentManagerDependencies(BaseCase):
+    """Test plugin installed and loaded as a depencndecy."""
+
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
@@ -137,6 +141,11 @@ class BaseTestMultiAgentManager(TestCase):
         finally:
             call_pip("uninstall aea-ledger-fetchai -y".split(" "))
             call_pip(install_cmd)
+
+
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
+class BaseTestMultiAgentManager(BaseCase):
+    """Base test class for multi-agent manager"""
 
     def test_workdir_created_removed(self, *args):
         """Check work dit created removed on MultiAgentManager start and stop."""
@@ -484,14 +493,6 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager.stop_manager()
         assert not self.manager.is_running
 
-    def test_run_loop_direct_call(self, *args):
-        """Test do not allow to run MultiAgentManager_loop directly."""
-        loop = asyncio.new_event_loop()
-        with pytest.raises(
-            ValueError, match="Do not use this method directly, use start_manager"
-        ):
-            loop.run_until_complete(self.manager._manager_loop())
-
     def test_remove_running_agent(self, *args):
         """Test fail on remove running agent."""
         self.test_start_all()
@@ -658,26 +659,23 @@ class BaseTestMultiAgentManager(TestCase):
         assert len(agent_alias.get_connections_addresses()) == 1
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerAsyncMode(
     BaseTestMultiAgentManager
 ):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
     """Tests for MultiAgentManager in async mode."""
 
-
-class TestMultiAgentManagerAsyncModeWithPassword(
-    BaseTestMultiAgentManager
-):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
-    """Tests for MultiAgentManager in async mode, with password."""
-
     PASSWORD = "password"  # nosec
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in multiprocess mode."""
 
@@ -687,21 +685,7 @@ class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
         """Skip test cause multiprocess works another way."""
 
 
-class TestMultiAgentManagerMultiprocessModeWithPassword(
-    TestMultiAgentManagerMultiprocessMode
-):
-    """Tests for MultiAgentManager in multiprocess mode with password."""
-
-    PASSWORD = "password"  # nosec
-
-
-class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
-    """Tests for MultiAgentManager in threaded mode, with password."""
-
-    MODE = "threaded"
-    PASSWORD = "password"  # nosec
-
-
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerPackageConsistencyError:
     """
     Test that the MultiAgentManager (MAM) raises an error on package version inconsistency.
@@ -742,7 +726,7 @@ class TestMultiAgentManagerPackageConsistencyError:
         assert not os.path.exists(self.working_dir)
         self.manager = MultiAgentManager(self.working_dir)
 
-    def test_run(self):
+    def test_run(self, *args):
         """
         Run the test.
 
@@ -956,7 +940,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.19.0 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.0 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

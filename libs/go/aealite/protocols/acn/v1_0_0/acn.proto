@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package aea.aea.acn.v1_0_0;
+
+option go_package = "libp2p_node/protocols/acn/v1_0_0";
+
+message AcnMessage{
+
+  // Custom Types
+  message AgentRecord{
+    string service_id = 1;
+    string ledger_id = 2;
+    string address = 3;
+    string public_key = 4;
+    string peer_public_key = 5;
+    string signature = 6;
+    string not_before = 7;
+    string not_after = 8;
+  }
+
+  message StatusBody{
+    enum StatusCodeEnum {
+      // common (0x)
+      SUCCESS = 0;
+      ERROR_UNSUPPORTED_VERSION = 1;
+      ERROR_UNEXPECTED_PAYLOAD = 2;
+      ERROR_GENERIC = 3;
+      ERROR_DECODE = 4;
+      // register (1x)
+      ERROR_WRONG_AGENT_ADDRESS = 10;
+      ERROR_WRONG_PUBLIC_KEY = 11;
+      ERROR_INVALID_PROOF = 12;
+      ERROR_UNSUPPORTED_LEDGER = 13;
+      // lookup & delivery (2x) 
+      ERROR_UNKNOWN_AGENT_ADDRESS = 20;
+      ERROR_AGENT_NOT_READY = 21;
+    }
+    StatusCodeEnum code = 1;
+    repeated string msgs = 2;
+  }
+
+
+  // Performatives and contents
+  message Register_Performative{
+    AgentRecord record = 1;
+  }
+
+  message Lookup_Request_Performative{
+    string agent_address = 1;
+  }
+
+  message Lookup_Response_Performative{
+    AgentRecord record = 1;
+  }
+
+  message Aea_Envelope_Performative{
+    bytes envelope = 1;
+    AgentRecord record = 2;
+  }
+
+  message Status_Performative{
+    StatusBody body = 1;
+  }
+
+
+  oneof performative{
+    Aea_Envelope_Performative aea_envelope = 5;
+    Lookup_Request_Performative lookup_request = 6;
+    Lookup_Response_Performative lookup_response = 7;
+    Register_Performative register = 8;
+    Status_Performative status = 9;
+  }
+}

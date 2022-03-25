@@ -35,12 +35,15 @@ import (
 	protocols "aealite/protocols"
 	wallet "aealite/wallet"
 
+	acn "aealite/connections/acn"
+
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
 )
 
 const retryAttempts = 5
+const acnStatusTimeout = 5 * time.Second
 
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
@@ -70,7 +73,7 @@ type P2PClientConfig struct {
 
 type P2PClientApi struct {
 	clientConfig *P2PClientConfig
-	agentRecord  *protocols.AgentRecord
+	agentRecord  *acn.AgentRecord
 
 	socket   Socket
 	outQueue chan *protocols.Envelope
@@ -78,6 +81,8 @@ type P2PClientApi struct {
 	closing     bool
 	connected   bool
 	initialised bool
+
+	acn_status_chan chan *acn.StatusBody
 }
 
 func (client *P2PClientApi) InitFromEnv(envFile string) error {
@@ -96,7 +101,7 @@ func (client *P2PClientApi) InitFromEnv(envFile string) error {
 	}
 	address := os.Getenv("AEA_ADDRESS")
 	publicKey := os.Getenv("AEA_PUBLIC_KEY")
-	agentRecord := &protocols.AgentRecord{Address: address, PublicKey: publicKey}
+	agentRecord := &acn.AgentRecord{Address: address, PublicKey: publicKey}
 	agentRecord.ServiceId = os.Getenv("AEA_P2P_POR_SERVICE_ID")
 	agentRecord.LedgerId = os.Getenv("AEA_P2P_POR_LEDGER_ID")
 	agentRecord.PeerPublicKey = os.Getenv("AEA_P2P_POR_PEER_PUBKEY")
@@ -122,13 +127,20 @@ func (client *P2PClientApi) InitFromEnv(envFile string) error {
 	}
 	client.clientConfig = &P2PClientConfig{host: host, port: uint16(portConv)}
 
-	client.socket = NewSocket(client.clientConfig.host, client.clientConfig.port)
+	client.socket = NewSocket(client.clientConfig.host, client.clientConfig.port, client.agentRecord.PeerPublicKey)
 	client.initialised = true
 	return nil
 }
 
 func (client *P2PClientApi) Put(envelope *protocols.Envelope) error {
-	return writeEnvelope(client.socket, envelope)
+
+	envelopeBytes, err := proto.Marshal(envelope)
+	if err != nil {
+		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
+		return err
+	}
+	return acn.SendEnvelopeMessageAndWaitForStatus(client.socket, envelopeBytes, client.acn_status_chan, acnStatusTimeout)
+
 }
 
 func (client *P2PClientApi) Get() *protocols.Envelope {
@@ -156,6 +168,7 @@ func (client *P2PClientApi) Disconnect() error {
 		return err
 	}
 	close(client.outQueue)
+	close(client.acn_status_chan)
 	client.connected = false
 	return nil
 }
@@ -183,6 +196,7 @@ func (client *P2PClientApi) Connect() error {
 
 	client.closing = false
 	client.outQueue = make(chan *protocols.Envelope, 10)
+	client.acn_status_chan = make(chan *acn.StatusBody, 10)
 	go client.listenForEnvelopes()
 	logger.Info().Msg("connected to p2p node")
 
@@ -242,60 +256,14 @@ func (client *P2PClientApi) registerWithRetry() error {
 }
 
 func (client *P2PClientApi) register() error {
-	registration := &protocols.Register{Record: client.agentRecord}
-	msg := &protocols.AcnMessage{
-		Version: protocols.ACNProtocolVersion,
-		Payload: &protocols.AcnMessage_Register{Register: registration},
-	}
-
-	buf, err := proto.Marshal(msg)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while serializing registration msg: %s", msg)
-		return err
-	}
-	err = client.socket.Write(buf)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).
-			Msg("while writing register envelope")
-		return err
-	}
-	data, err := client.socket.Read()
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while receiving data")
-		return err
-	}
-	response := &protocols.AcnMessage{}
-	err = proto.Unmarshal(data, response)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while deserializing response msg")
-		return err
-	}
-
-	// Get Status message
-	var status *protocols.Status
-	switch pl := response.Payload.(type) {
-	case *protocols.AcnMessage_Status:
-		status = pl.Status
-	default:
-		logger.Error().Str("err", err.Error()).Msgf("response not a status msg")
-		return err
-	}
-
-	if status.Code != protocols.Status_SUCCESS {
-		errMsg := fmt.Sprintf(
-			"registration to peer failed: %s %s",
-			status.Code.String(),
-			strings.Join(status.Msgs, ":"),
-		)
-		return errors.New(errMsg)
-	}
-	return nil
+	return acn.SendAgentRegisterMessage(client.socket, client.agentRecord)
 }
 
 func (client *P2PClientApi) listenForEnvelopes() {
 	for {
-		envel, err := readEnvelope(client.socket)
-		if err != nil {
+		envel, err := client.HandleAcnMessageFromPipe()
+
+		if err != nil && !client.closing {
 			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
 			logger.Info().Msg("disconnecting")
 			if !client.closing {
@@ -305,6 +273,10 @@ func (client *P2PClientApi) listenForEnvelopes() {
 				}
 			}
 			return
+		}
+		if envel == nil {
+			// got acn status, not an envelope
+			continue
 		}
 		if envel.To != client.agentRecord.Address {
 			logger.Error().
@@ -322,26 +294,6 @@ func (client *P2PClientApi) listenForEnvelopes() {
 
 func (client *P2PClientApi) stop() error {
 	return client.socket.Disconnect()
-}
-
-func writeEnvelope(socket Socket, envelope *protocols.Envelope) error {
-	data, err := proto.Marshal(envelope)
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
-		return err
-	}
-	return socket.Write(data)
-}
-
-func readEnvelope(socket Socket) (*protocols.Envelope, error) {
-	envelope := &protocols.Envelope{}
-	data, err := socket.Read()
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while receiving data")
-		return envelope, err
-	}
-	err = proto.Unmarshal(data, envelope)
-	return envelope, err
 }
 
 // Error type represents list of errors in retry
@@ -462,4 +414,69 @@ func BackOffDelay(n uint, _ error, config *Config) time.Duration {
 // RandomDelay is a DelayType which picks a random delay up to config.maxJitter
 func RandomDelay(_ uint, _ error, config *Config) time.Duration {
 	return time.Duration(rand.Int63n(int64(config.maxJitter)))
+}
+
+func (client *P2PClientApi) HandleAcnMessageFromPipe() (*protocols.Envelope, error) {
+	pipe := client.socket
+	envelope := &protocols.Envelope{}
+	var acn_err error
+
+	data, err := pipe.Read()
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	msg_type, acn_envelope, status, acnErr := acn.DecodeAcnMessage(data)
+
+	if acnErr != nil {
+		logger.Error().Str("err", acnErr.Error()).Msg("while handling acn message")
+		acn_err = acn.SendAcnError(
+			pipe,
+			acnErr.Error(),
+			acnErr.ErrorCode,
+		)
+		if acn_err != nil {
+			logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
+		}
+		return envelope, acnErr
+	}
+
+	switch msg_type {
+	case "aea_envelope":
+		{
+			err = proto.Unmarshal(acn_envelope.Envelope, envelope)
+			if err != nil {
+				logger.Error().Str("err", err.Error()).Msg("while decoding envelope")
+				acn_err = acn.SendAcnError(
+					pipe,
+					"error on decoding envelope",
+					acn.ERROR_DECODE,
+				)
+				if acn_err != nil {
+					logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
+				}
+				return envelope, err
+			}
+			err = acn.SendAcnSuccess(pipe)
+			return envelope, err
+
+		}
+	case "status":
+		{
+			logger.Debug().Msgf("got acn status %d", status.Code)
+			client.acn_status_chan <- status
+			return nil, nil
+
+		}
+	default:
+		{
+			acn_err = acn.SendAcnError(pipe, "Unsupported ACN message")
+			if acn_err != nil {
+				logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
+			}
+			return nil, errors.New("unsupported ACN message")
+		}
+	}
 }

@@ -45,6 +45,7 @@ Initialise an instance of StateUpdateMessage.
 - `dialogue_reference`: the dialogue reference.
 - `target`: the message target.
 - `performative`: the message performative.
+:param **kwargs: extra options.
 
 <a name="packages.fetchai.protocols.state_update.message.StateUpdateMessage.valid_performatives"></a>
 #### valid`_`performatives

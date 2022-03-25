@@ -215,7 +215,7 @@ utc-0
 docstring
 utils
 kademlia
-StargateWorld
+Capricorn
 stargateworld-3
 v0.8.x
 fetch.ai
@@ -226,6 +226,7 @@ CosmPy
 dockerised
 Mermaid-JS
 darglint
+aea-cli-ipfs
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -278,3 +279,4 @@ oef_search
 handlers.py
 skill.yaml
 packages.fetchai.skills.my_search.dialogues
+capricorn-1
