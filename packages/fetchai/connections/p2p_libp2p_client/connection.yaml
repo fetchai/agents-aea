@@ -1,6 +1,6 @@
 name: p2p_libp2p_client
 author: fetchai
-version: 0.19.0
+version: 0.20.0
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
@@ -8,13 +8,13 @@ description: The libp2p client connection implements a tcp connection to a runni
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmNNPgnbPCLcT8v3P8eurXya3wdDhX92Z6dmyamV7BYxcS
+  README.md: QmQZQyYpobMCzc3g8x1FhuRfu2Lm7NNocDDZPsYG9nzKRQ
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmPFWMoyC71rrVr9LZo9ucgmdSzpkqXKN76pBXK6Rur118
+  connection.py: QmT7BBQrSjZiBX2dZFjAQU1LZmPJwRqcH8iq1yZfuY6VZ4
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/acn:1.0.0
+- fetchai/acn:1.1.0
 class_name: P2PLibp2pClientConnection
 config:
   connect_retries: 3

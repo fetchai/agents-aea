@@ -21,25 +21,63 @@
 package connections
 
 import (
+	wallet "aealite/wallet"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/binary"
-	"net"
+	"errors"
 	"strconv"
 )
 
 type TCPSocketChannel struct {
-	address string
-	port    uint16
-	conn    net.Conn
+	address       string
+	port          uint16
+	conn          *tls.Conn
+	peerPublicKey string
 }
 
 func (sock *TCPSocketChannel) Connect() error {
 	var err error
-	sock.conn, err = net.Dial("tcp", sock.address+":"+strconv.FormatInt(int64(sock.port), 10))
+	conf := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+
+	sock.conn, err = tls.Dial("tcp", sock.address+":"+strconv.FormatInt(int64(sock.port), 10), conf)
 
 	if err != nil {
 		return err
 	}
 
+	state := sock.conn.ConnectionState()
+	var cert *x509.Certificate
+
+	for _, v := range state.PeerCertificates {
+		cert = v
+	}
+
+	pub := cert.PublicKey.(*ecdsa.PublicKey)
+	publicKeyBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
+
+	signature, err := sock.Read()
+	logger.Debug().Msgf("got signature %d bytes", len(signature))
+	if err != nil {
+		return err
+	}
+
+	pubkey, err := wallet.PubKeyFromFetchAIPublicKey(sock.peerPublicKey)
+	if err != nil {
+		return err
+	}
+	ok, err := pubkey.Verify(publicKeyBytes, signature)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("tls signature check failed")
+
+	}
 	return nil
 }
 
@@ -70,6 +108,6 @@ func (sock *TCPSocketChannel) Disconnect() error {
 	return sock.conn.Close()
 }
 
-func NewSocket(address string, port uint16) Socket {
-	return &TCPSocketChannel{address: address, port: port}
+func NewSocket(address string, port uint16, peerPublicKey string) Socket {
+	return &TCPSocketChannel{address: address, port: port, peerPublicKey: peerPublicKey}
 }

@@ -1,13 +1,13 @@
 name: simple_oracle
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 type: skill
 description: This skill deploys a Fetch oracle contract
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
-  __init__.py: QmRyWTCeVrBxrJq7eWdFGJawiZPp9eoMA3h1X9kQewhbg9
+  __init__.py: QmNhwgVgCY4HfS3hUkcrZ9ByeAb8pzznDR2EFNfoyUH77N
   behaviours.py: QmRQT3Qjx78DXh2QAFkr3ehRk82mvD1a7hdXdx9PmLAEBq
   dialogues.py: QmRdwAgCaR6ju5Tk8SW2AzT62JHDMzyA27DEr7a5F7i64Q
   handlers.py: QmaGUDZCqGePMwBoqPT2jz3va3gYoJr3AdL1mnGs25mZ64
@@ -16,11 +16,11 @@ fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.11.0
 protocols:
-- fetchai/contract_api:1.0.0
-- fetchai/default:1.0.0
-- fetchai/ledger_api:1.0.0
-- fetchai/prometheus:1.0.0
-- fetchai/signing:1.0.0
+- fetchai/contract_api:1.1.0
+- fetchai/default:1.1.0
+- fetchai/ledger_api:1.1.0
+- fetchai/prometheus:1.1.0
+- fetchai/signing:1.1.0
 skills: []
 behaviours:
   simple_oracle_behaviour:
@@ -67,9 +67,9 @@ models:
     args:
       contract_address: null
       contract_address_file: null
-      default_gas_deploy: 10000000
-      default_gas_grant_role: 10000000
-      default_gas_update: 15000000
+      default_gas_deploy: 1500000
+      default_gas_grant_role: 1500000
+      default_gas_update: 1500000
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false

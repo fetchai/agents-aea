@@ -57,11 +57,11 @@ Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</
 
 The following steps assume you have launched the AEA Manager Desktop app.
 
-1. Add a new AEA called `car_detector` with public id `fetchai/car_detector:0.31.0`.
+1. Add a new AEA called `car_detector` with public id `fetchai/car_detector:0.32.0`.
 
-2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.32.0`.
+2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.33.0`.
 
-3. Copy the address from the `car_data_buyer` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">StargateWorld block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `car_data_buyer` into your clip board. Then go to the <a href="https://explore-capricorn.fetch.ai" target="_blank">Capricorn block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `car_detector` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -97,7 +97,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.31.0
+aea fetch fetchai/car_detector:0.32.0
 cd car_detector
 aea install
 aea build
@@ -110,19 +110,19 @@ The following steps create the car detector from scratch:
 ``` bash
 aea create car_detector
 cd car_detector
-aea add connection fetchai/p2p_libp2p:0.25.0
-aea add connection fetchai/soef:0.26.0
-aea add connection fetchai/ledger:0.19.0
-aea add skill fetchai/carpark_detection:0.26.0
+aea add connection fetchai/p2p_libp2p:0.26.0
+aea add connection fetchai/soef:0.27.0
+aea add connection fetchai/ledger:0.20.0
+aea add skill fetchai/carpark_detection:0.27.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.25.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.19.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.26.0"
+  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
+  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
 }'
 aea install
 aea build
@@ -135,7 +135,7 @@ aea build
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.32.0
+aea fetch fetchai/car_data_buyer:0.33.0
 cd car_data_buyer
 aea install
 aea build
@@ -148,19 +148,19 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create car_data_buyer
 cd car_data_buyer
-aea add connection fetchai/p2p_libp2p:0.25.0
-aea add connection fetchai/soef:0.26.0
-aea add connection fetchai/ledger:0.19.0
-aea add skill fetchai/carpark_client:0.26.0
+aea add connection fetchai/p2p_libp2p:0.26.0
+aea add connection fetchai/soef:0.27.0
+aea add connection fetchai/ledger:0.20.0
+aea add skill fetchai/carpark_client:0.27.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.25.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.19.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.26.0"
+  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
+  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
 }'
 aea install
 aea build
@@ -172,7 +172,7 @@ aea build
 
 #### Add keys for the car data seller AEA
 
-First, create the private key for the car data seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
+First, create the private key for the car data seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Capricorn` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -193,13 +193,13 @@ aea issue-certificates
 
 The buyer needs to have some wealth to purchase the service from the seller.
 
-First, create the private key for the car data buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
+First, create the private key for the car data buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Capricorn` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for your car data buyer based on the network you want to transact with. On the Fetch.ai `StargateWorld` network:
+Then, create some wealth for your car data buyer based on the network you want to transact with. On the Fetch.ai `Capricorn` network:
 ``` bash
 aea generate-wealth fetchai
 ```
@@ -225,7 +225,7 @@ First, run the car data seller AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.25.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the car data seller.
 
 Then, in the car data buyer, run this command (replace `SOME_ADDRESS` with the correct value as described above):

@@ -52,7 +52,7 @@ RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
 
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.20.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.21.0")
 
 
 OefSearchDialogue = BaseOefSearchDialogue
@@ -103,13 +103,14 @@ class LocalNode:
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop, daemon=True)
 
-        self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
+        self._in_queue = None  # type: Optional[asyncio.Queue]
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
         self._receiving_loop_task = None  # type: Optional[Future]
         self.address: Optional[Address] = None
         self._dialogues: Optional[OefSearchDialogues] = None
         self.logger = logger
+        self.started_event = threading.Event()
 
     def __enter__(self) -> "LocalNode":
         """Start the local node."""
@@ -160,12 +161,13 @@ class LocalNode:
         self._receiving_loop_task = asyncio.run_coroutine_threadsafe(
             self.receiving_loop(), loop=self._loop
         )
+        self.started_event.wait()
         self.logger.debug("Local node has been started.")
 
     def stop(self) -> None:
         """Stop the node."""
 
-        if self._receiving_loop_task is None:
+        if self._receiving_loop_task is None or self._in_queue is None:
             raise ValueError("Connection not started!")
         asyncio.run_coroutine_threadsafe(self._in_queue.put(None), self._loop).result()
         self._receiving_loop_task.result()
@@ -177,6 +179,8 @@ class LocalNode:
 
     async def receiving_loop(self) -> None:
         """Process incoming messages."""
+        self._in_queue = asyncio.Queue()
+        self.started_event.set()
         while True:
             envelope = await self._in_queue.get()
             if envelope is None:

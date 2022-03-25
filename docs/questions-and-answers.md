@@ -37,7 +37,7 @@ You can find more details on the application areas of the AEA framework <a href=
 </details>
 
 <details><summary>When a new AEA is created, is the <code>vendor</code> folder populated with some default packages?</summary>
-All AEA projects by default hold the <code>fetchai/default:1.0.0</code>, <code>fetchai/state_update:1.0.0</code> and <code>fetchai/signing:1.0.0</code> protocols. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder. 
+All AEA projects by default hold the <code>fetchai/default:1.1.0</code>, <code>fetchai/state_update:1.1.0</code> and <code>fetchai/signing:1.1.0</code> protocols. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder. 
 <br><br>
 You can find more details about the file structure <a href="../package-imports/">here</a>.
 </details>

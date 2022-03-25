@@ -160,14 +160,14 @@ DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 
 # URL to local Fetch ledger instance
-DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.9.0"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
-DEFAULT_FETCH_ADDR_REMOTE = "https://rest-stargateworld.fetch.ai:443"
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-capricorn.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "stargateworld-3"
+DEFAULT_FETCH_CHAIN_ID = "capricorn-1"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -282,7 +282,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.27.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.28.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -781,12 +781,41 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     :return: None
     """
     image.check_skip()
-    image.stop_if_already_running()
-    container = image.create()
-    container.start()
-    logger.info(f"Setting up image {image.tag}...")
+    image.pull_image(30)
+
+    for _ in range(10):
+        image.stop_if_already_running()
+        # sleep after stop called
+        time.sleep(1)
+        container = image.create()
+
+        logger.info(f"Setting up image {image.tag}...")
+        try:
+            container.start()
+        except Exception:
+            logger.exception("Error on container start")
+            continue
+        time.sleep(1)
+
+        container.reload()
+        if container.status == "running":
+            break
+
+        logger.info("Retry to start the container")
+    else:
+        logger.info("Failed to start the container")
+        logger.info(container.logs())
+        raise Exception("Failed to start container")
+
     success = image.wait(max_attempts, timeout)
+
     if not success:
+        logger.info(
+            "containers list: {}".format(
+                [f"{i.image}:{i.status}" for i in image._client.containers.list()],
+            )
+        )
+        logger.info(container.logs())
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
