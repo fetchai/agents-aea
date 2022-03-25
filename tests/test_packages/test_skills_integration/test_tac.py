@@ -33,6 +33,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 
 from tests.conftest import (
     DEFAULT_DENOMINATION,
+    DEFAULT_FETCH_CHAIN_ID,
     DEFAULT_FETCH_LEDGER_ADDR,
     DEFAULT_FETCH_LEDGER_REST_PORT,
     ETHEREUM_PRIVATE_KEY_FILE,
@@ -847,7 +848,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
     """Test that tac skills work."""
 
     capture_log = True
-    LOCAL_TESTNET_CHAIN_ID = "stargateworld-3"
+    LOCAL_TESTNET_CHAIN_ID = DEFAULT_FETCH_CHAIN_ID
 
     @pytest.mark.integration
     @pytest.mark.ledger

@@ -168,7 +168,7 @@ set_PEER(){
 	  # do nothing
 	    ;;
 	  local)
-	  	PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.24.0 -u public_uri`
+	  	PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri`
 	    ;;
 	esac
 }
