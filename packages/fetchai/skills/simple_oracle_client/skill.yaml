@@ -52,9 +52,9 @@ models:
     args:
       approve_amount: 1000000000000000000
       client_contract_address: null
-      default_gas_approve: 200000
-      default_gas_deploy: 10000000
-      default_gas_query: 250000
+      default_gas_approve: 300000
+      default_gas_deploy: 1500000
+      default_gas_query: 500000
       erc20_address: null
       ledger_id: null
       oracle_contract_address: null

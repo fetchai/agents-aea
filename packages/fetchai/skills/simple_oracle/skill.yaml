@@ -67,9 +67,9 @@ models:
     args:
       contract_address: null
       contract_address_file: null
-      default_gas_deploy: 10000000
-      default_gas_grant_role: 10000000
-      default_gas_update: 15000000
+      default_gas_deploy: 1500000
+      default_gas_grant_role: 1500000
+      default_gas_update: 1500000
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false

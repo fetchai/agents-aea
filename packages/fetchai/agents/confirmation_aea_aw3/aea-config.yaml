@@ -93,8 +93,8 @@ config:
     ethereum:
       address: null
     fetchai:
-      address: https://rest-stargateworld.fetch.ai:443
-      chain_id: stargateworld-3
+      address: https://rest-capricorn.fetch.ai:443
+      chain_id: capricorn-1
 ---
 public_id: fetchai/confirmation_aw3:0.12.0
 type: skill

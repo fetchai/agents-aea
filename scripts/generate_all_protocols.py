@@ -61,7 +61,7 @@ from scripts.common import (
 )
 
 
-LIBPROTOC_VERSION = "libprotoc 3.13.0"
+LIBPROTOC_VERSION = "libprotoc 3.19.4"
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PACKAGES_DIR = Path("packages")

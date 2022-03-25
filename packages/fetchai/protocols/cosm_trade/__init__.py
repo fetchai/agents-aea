@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the cosm_trade protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.13.0` and aea version `1.1.1`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.1.1`.
 """
 
 from packages.fetchai.protocols.cosm_trade.message import CosmTradeMessage
