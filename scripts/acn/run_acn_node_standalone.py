@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021-2022 Valory AG : todo confirm correct
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -338,46 +338,48 @@ def parse_commandline():
 
 if __name__ == "__main__":
 
-    args = parse_commandline()
+    run_args = parse_commandline()
 
     node_config: Optional[AcnNodeConfig] = None
 
-    if args.config_from_env:
-        key = os.environ[AcnNodeConfig.KEY]
-        uri = os.environ[AcnNodeConfig.URI]
-        external_uri = os.environ.get(AcnNodeConfig.EXTERNAL_URI)
-        delegate_uri = os.environ.get(AcnNodeConfig.DELEGATE_URI)
-        monitoring_uri = os.environ.get(AcnNodeConfig.MONITORING_URI)
-        entry_peers = os.environ.get(AcnNodeConfig.ENTRY_PEERS_MADDRS)
-        entry_peers_list = entry_peers.split(",") if entry_peers is not None else []
-        log_file = os.environ.get(AcnNodeConfig.ACN_LOG_FILE, "")
+    if run_args.config_from_env:
+        run_key = os.environ[AcnNodeConfig.KEY]
+        run_uri = os.environ[AcnNodeConfig.URI]
+        run_external_uri = os.environ.get(AcnNodeConfig.EXTERNAL_URI)
+        run_delegate_uri = os.environ.get(AcnNodeConfig.DELEGATE_URI)
+        run_monitoring_uri = os.environ.get(AcnNodeConfig.MONITORING_URI)
+        run_entry_peers = os.environ.get(AcnNodeConfig.ENTRY_PEERS_MADDRS)
+        run_entry_peers_list = (
+            run_entry_peers.split(",") if run_entry_peers is not None else []
+        )
+        run_log_file = os.environ.get(AcnNodeConfig.ACN_LOG_FILE, "")
         node_config = AcnNodeConfig(
-            key,
-            uri,
-            external_uri,
-            delegate_uri,
-            monitoring_uri,
-            entry_peers_list,
-            log_file,
+            run_key,
+            run_uri,
+            run_external_uri,
+            run_delegate_uri,
+            run_monitoring_uri,
+            run_entry_peers_list,
+            run_log_file,
         )
 
-    elif args.config_from_file is not None:
-        node_config = AcnNodeConfig.from_file(args.config_from_file)
+    elif run_args.config_from_file is not None:
+        node_config = AcnNodeConfig.from_file(run_args.config_from_file)
 
     else:
-        with open(args.key, "r") as f:
-            key = f.read().strip()
+        with open(run_args.key, "r") as file:
+            run_key = file.read().strip()
         node_config = AcnNodeConfig(
-            key,
-            args.uri,
-            args.external_uri,
-            args.delegate_uri,
-            args.monitoring_uri,
-            args.entry_peers_maddrs,
-            args.log_file,
+            run_key,
+            run_args.uri,
+            run_args.external_uri,
+            run_args.delegate_uri,
+            run_args.monitoring_uri,
+            run_args.entry_peers_maddrs,
+            run_args.log_file,
         )
 
-    node = AcnNodeStandalone(node_config, args.libp2p_node)
+    node = AcnNodeStandalone(node_config, run_args.libp2p_node)
     try:
         node.run()
     except Exception:
