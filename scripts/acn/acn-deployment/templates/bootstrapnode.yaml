@@ -90,58 +90,6 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: "public"
- #  cert-manager.io/cluster-issuer: letsencrypt-prod
-  name: acn-node-ingress
-spec:
-  tls:
-    - hosts:
-        - {{ $.Values.dns.publicdnsname }}
-      secretName: acn-node-tls
-  rules:
-    - host: {{$.Values.dns.publicdnsname}}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name:  acn-node-{{ .p2pport }}
-                port:
-                  number: 443
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: "public"
-    nginx.org/proxy-connect-timeout: "30s"
-    nginx.org/proxy-read-timeout: "20s"
-    nginx.ingress.kubernetes.io/service-upstream: "true"
-  #  cert-manager.io/cluster-issuer: letsencrypt-prod
-  name: acn-node-ingress-2
-spec:
-#  tls:
-#    - hosts:
-#        - {{ $.Values.dns.publicdnsname }}
-#      secretName: acn-node-tls
-  rules:
-    - host: staging-2.acn.autonolas.tech # {{$.Values.dns.publicdnsname}}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name:  acn-node-{{ .p2pport }}
-                port:
-                  name: tcp-libp2p
-
 {{- end }}
 {{- end }}
 {{- end }}

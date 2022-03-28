@@ -2,7 +2,7 @@
 # DON'T add enything secret here and upload to the git repo
 dns:
   enabled: true
-  dnsname: staging.acn.autonolas.tech
+  dnsname: acn-node-443
   publicdnsname: staging.acn.autonolas.tech
 
 acnnodes:
