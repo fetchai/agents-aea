@@ -56,7 +56,7 @@ spec:
           - name: AEA_P2P_URI
             value: 0.0.0.0:9000
           - name: AEA_P2P_DELEGATE_URI
-            value: 127.0.0.1:11000
+            value: 0.0.0.0:11000
           - name: AEA_P2P_URI_MONITORING
             value: 127.0.0.1:8080
           - name: AEA_P2P_ENTRY_URIS
