@@ -19,7 +19,7 @@ _Put an `x` in the boxes that apply_
 
 _Put an `x` in the boxes that apply._
 
-- [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) doc
+- [ ] I have read the [CONTRIBUTING](https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md) doc
 - [ ] I am making a pull request against the `develop` branch (left side). Also you should start your branch off our `develop`.
 - [ ] Lint and unit tests pass locally with my changes and CI passes too
 - [ ] I have added tests that prove my fix is effective or that my feature works
@@ -47,7 +47,7 @@ Describe in short the main changes with the new release.
 
 _Put an `x` in the boxes that apply._
 
-- [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) doc
+- [ ] I have read the [CONTRIBUTING](https://github.com/fetchai/agents-aea/blob/master/CONTRIBUTING.md) doc
 - [ ] I am making a pull request against the `main` branch (left side), from `develop`
 - [ ] Lint and unit tests pass locally and in CI
 - [ ] I have checked the fingerprint hashes are correct by running (`scripts/generate_ipfs_hashes.py`)
@@ -56,8 +56,8 @@ _Put an `x` in the boxes that apply._
 - [ ] I have added an item in `HISTORY.md` for this release
 - [ ] I bumped the version number in the `aea/__version__.py` file.
 - [ ] I bumped the version number in every Docker image of the repo and published it. Also, I built and published them with tag `latest`  
-      (check the READMEs of [`aea-develop`](../develop-image/README.md#publish) 
-      and [`aea-user`](../user-image/README.md#publish))
+      (check the READMEs of [`aea-develop`](https://github.com/fetchai/agents-aea/blob/master/develop-image/README.md#publish) 
+      and [`aea-user`](https://github.com/fetchai/agents-aea/blob/master/develop-image/user-image/README.md#publish))
 - [ ] I have pushed the latest packages to the registry.
 - [ ] I have uploaded the latest `aea` to PyPI.
 - [ ] I have uploaded the latest plugins to PyPI.
