@@ -132,7 +132,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             finally:
                 multiplexer.disconnect()
 
-    @pytest.mark.flaky(reruns=3)
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -200,7 +200,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    @pytest.mark.flaky(reruns=3)
+    @pytest.mark.flaky(reruns=5, reruns_delay=2)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
