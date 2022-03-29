@@ -180,7 +180,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                 multiplexer1.put(envelope)
-                delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
@@ -254,7 +254,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                     multiplexer1.put(envelope)
-                    delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                    delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
