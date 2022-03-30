@@ -59,6 +59,9 @@ This <a href="https://github.com/bcgov/von-network#running-the-network-locally" 
 172.17.0.1 - is ip address of the docker0 network interface, can be used  any address assigned to the host except 127.0.0.1
 """
 
+# set to False to run it manually
+SKIP_TEST = True
+
 
 @pytest.mark.unstable
 @pytest.mark.integration
@@ -135,6 +138,9 @@ class TestAriesSkillsDemo(AEATestCaseMany):
     @classmethod
     def setup_class(cls) -> None:
         """Setup test case."""
+        if SKIP_TEST:
+            cls._is_teardown_class_called = True  # fix for teardown check fixture
+            raise pytest.skip("test skipped, check code to enable it")
         check_acapy = subprocess.run("aca-py", shell=True, capture_output=True)  # nosec
         assert b"usage: aca-py" in check_acapy.stdout, "aca-py is not installed!"
 
