@@ -41,6 +41,8 @@ from packages.open_aea.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    DEFAULT_LEDGER,
+    DEFAULT_LEDGER_LIBP2P_NODE,
     PUBLIC_DHT_DELEGATE_URI_1,
     PUBLIC_DHT_DELEGATE_URI_2,
     PUBLIC_DHT_P2P_MADDR_1,
@@ -57,8 +59,6 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
-    DEFAULT_LEDGER,
-    DEFAULT_LEDGER_LIBP2P_NODE,
 )
 
 
@@ -78,8 +78,8 @@ PUBLIC_STAGING_DHT_PUBLIC_KEYS = [
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
 ]
-AEA_DEFAULT_LAUNCH_TIMEOUT = 20
-AEA_LIBP2P_LAUNCH_TIMEOUT = 20
+AEA_DEFAULT_LAUNCH_TIMEOUT = 30
+AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 
 
 @pytest.fixture
