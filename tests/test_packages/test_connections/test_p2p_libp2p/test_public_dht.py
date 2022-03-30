@@ -498,7 +498,11 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         )
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
         self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([agent_ledger_id, node_ledger_id]), "list")
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
         # agent keys
         self.generate_private_key(agent_ledger_id)
@@ -572,7 +576,11 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
 
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
         self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([agent_ledger_id, node_ledger_id]), "list")
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
         # agent keys
         self.generate_private_key(agent_ledger_id)
         self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
