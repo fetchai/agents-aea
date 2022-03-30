@@ -564,15 +564,19 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     )
     def test_connectivity(self, delegate_uris_public_keys):
         """Test connectivity."""
-        ledger_id = "fetchai"
+
         delegate_uris, public_keys = delegate_uris_public_keys
         self.agent_name = "some"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
-        self.generate_private_key(ledger_id)
-        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
-        self.set_config("agent.default_ledger", ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
+
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        self.set_config("agent.default_ledger", agent_ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([agent_ledger_id, node_ledger_id]), "list")
+        # agent keys
+        self.generate_private_key(agent_ledger_id)
+        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
+
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
         config_path = "vendor.open_aea.connections.p2p_libp2p_client.config"
         self.nested_set_config(
@@ -596,7 +600,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
             [
                 CertRequest(
                     identifier="acn",
-                    ledger_id=ledger_id,
+                    ledger_id=agent_ledger_id,
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=public_key,
