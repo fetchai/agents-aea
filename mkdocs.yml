@@ -6,8 +6,6 @@ site_author: developer@fetch.ai,info@valory.xyz
 
 theme:
   name: 'material'
-  logo:
-    icon: code
   feature:
     tabs: true
 
