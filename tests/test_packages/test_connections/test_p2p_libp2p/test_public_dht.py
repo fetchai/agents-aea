@@ -57,6 +57,8 @@ from tests.conftest import (
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
+    DEFAULT_LEDGER,
+    DEFAULT_LEDGER_LIBP2P_NODE,
 )
 
 
@@ -489,25 +491,25 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         """Test connectivity."""
         self.log_files = []
         self.agent_name = "some"
-        ledger_id = "fetchai"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
         self.conn_key_file = os.path.join(
             os.path.abspath(os.getcwd()), "./conn_key.txt"
         )
-        self.generate_private_key(ledger_id, private_key_file=self.conn_key_file)
-        self.set_config("agent.default_ledger", ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        self.set_config("agent.default_ledger", agent_ledger_id)
+        self.set_config("agent.required_ledgers", json.dumps([agent_ledger_id, node_ledger_id]), "list")
+        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
+        # agent keys
+        self.generate_private_key(agent_ledger_id)
+        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
+        # libp2p node keys
+        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
         self.add_private_key(
-            ledger_id, private_key_filepath=self.conn_key_file, connection=True
+            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
         )
-        self.generate_private_key(ledger_id)
-        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
-
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
@@ -519,7 +521,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
                 "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
                 "entry_peers": maddrs,
                 "log_file": log_file,
-                "ledger_id": ledger_id,
+                "ledger_id": node_ledger_id,
             },
         )
 

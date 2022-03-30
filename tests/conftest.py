@@ -272,6 +272,18 @@ PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
 PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
     "0321bac023b7f7cf655cf5e0f988a4c1cf758f7b530528362c4ba8d563f7b090c4"
 )
+
+PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/staging.acn.autonolas.tech/tcp/9003/p2p/16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2"
+PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/staging.acn.autonolas.tech/tcp/9004/p2p/16Uiu2HAmCQqXLFWaqqUv8hFdFPDwwNQf9qEQox8Kcf78heb33e7x"
+PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "staging.acn.autonolas.tech:9005"
+PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "staging.acn.autonolas.tech:9006"
+PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
+    "0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d"
+)
+PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
+    "02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7"
+)
+
 # TODO: temporary overwriting of addresses, URIs and public keys
 #  used in test_p2p_libp2p/test_public_dht.py
 PUBLIC_DHT_P2P_MADDR_1 = PUBLIC_STAGING_DHT_P2P_MADDR_1

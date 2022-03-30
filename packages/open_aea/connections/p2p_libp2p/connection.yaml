@@ -75,10 +75,11 @@ cert_requests:
   message_format: '{public_key}'
   not_after: '2022-01-01'
   not_before: '2021-01-01'
-  public_key: ethereum
+  public_key: cosmos
   save_path: .certs/conn_cert.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
+  aea-ledger-cosmos: {}
   aea-ledger-ethereum: {}
 is_abstract: false
