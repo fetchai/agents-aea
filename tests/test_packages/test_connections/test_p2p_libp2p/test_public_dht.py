@@ -76,8 +76,8 @@ PUBLIC_STAGING_DHT_PUBLIC_KEYS = [
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
 ]
-AEA_DEFAULT_LAUNCH_TIMEOUT = 20
-AEA_LIBP2P_LAUNCH_TIMEOUT = 20
+AEA_DEFAULT_LAUNCH_TIMEOUT = 30
+AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 
 
 @pytest.fixture
@@ -200,7 +200,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    @pytest.mark.flaky(reruns=5, reruns_delay=2)
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
