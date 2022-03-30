@@ -174,6 +174,7 @@ async def test_get_balance(
 
 @pytest.mark.integration
 @pytest.mark.ledger
+@pytest.mark.flaky(reruns=2, reruns_delay=5)
 @pytest.mark.asyncio
 @ledger_ids
 async def test_get_state(
