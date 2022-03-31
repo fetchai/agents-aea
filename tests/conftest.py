@@ -262,6 +262,7 @@ PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
 PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
     "02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7"
 )
+
 # TODO: temporary overwriting of addresses, URIs and public keys
 #  used in test_p2p_libp2p/test_public_dht.py
 PUBLIC_DHT_P2P_MADDR_1 = PUBLIC_STAGING_DHT_P2P_MADDR_1
