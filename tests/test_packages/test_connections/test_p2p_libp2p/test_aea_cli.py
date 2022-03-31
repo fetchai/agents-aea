@@ -23,8 +23,8 @@
 import json
 import os
 
-from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
 from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -32,7 +32,11 @@ from packages.open_aea.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 
-from tests.conftest import libp2p_log_on_failure, DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+from tests.conftest import (
+    DEFAULT_LEDGER,
+    DEFAULT_LEDGER_LIBP2P_NODE,
+    libp2p_log_on_failure,
+)
 
 
 DEFAULT_PORT = 10234
@@ -58,7 +62,11 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
         # set config
         self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([agent_ledger_id, node_ledger_id]), "list")
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
         # agent keys
         self.generate_private_key(agent_ledger_id)
@@ -127,7 +135,9 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
             CosmosCrypto.identifier, private_key_file=self.conn_key_file
         )
         self.add_private_key(
-            CosmosCrypto.identifier, private_key_filepath=self.conn_key_file, connection=True
+            CosmosCrypto.identifier,
+            private_key_filepath=self.conn_key_file,
+            connection=True,
         )
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
@@ -201,7 +211,11 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
         # set config
         self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([agent_ledger_id, node_ledger_id]), "list")
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
         # agent keys
         self.generate_private_key(agent_ledger_id)
         self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
