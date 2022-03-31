@@ -489,7 +489,7 @@ jobs:
     - if: matrix.os == 'macos-latest'
       working-directory: ./libs/go/libp2p_node
       run: |
-         export LINKPATH=$GOROOT/pkg/tool/darwin_amd64/link
+         export LINKPATH=`go env GOTOOLDIR`/link
          echo $LINKPATH
          sudo cp $LINKPATH ${LINKPATH}_orig
          sudo cp link $LINKPATH
