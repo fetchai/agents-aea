@@ -499,6 +499,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
             os.path.abspath(os.getcwd()), "./conn_key.txt"
         )
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        # set config
         self.set_config("agent.default_ledger", agent_ledger_id)
         self.set_config(
             "agent.required_ledgers",
@@ -514,6 +515,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         self.add_private_key(
             node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
         )
+        # add connection and build
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         # for logging
