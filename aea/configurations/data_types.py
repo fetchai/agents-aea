@@ -461,7 +461,7 @@ class ExtendedPublicId(PublicId):
     __slots__ = ("_author", "_name", "_package_version", "_package_hash")
 
     IPFS_HASH_REGEX = IPFS_HASH_REGEX
-    PUBLIC_ID_REGEX = fr"^({PublicId.AUTHOR_REGEX})/({PublicId.PACKAGE_NAME_REGEX}):({PublicId.VERSION_REGEX}):({IPFS_HASH_REGEX})"
+    PUBLIC_ID_REGEX = fr"^({PublicId.AUTHOR_REGEX})/({PublicId.PACKAGE_NAME_REGEX})(:({PublicId.VERSION_REGEX}))?:({IPFS_HASH_REGEX})"
 
     def __init__(
         self,
@@ -491,14 +491,14 @@ class ExtendedPublicId(PublicId):
     def from_str(cls, public_id_string: str) -> "ExtendedPublicId":
         """Initialize the public id from the string.
 
-        >>> str(ExtendedPublicId.from_str("author/package_name:0.1.0:QmSomeipfshash"))
-        'author/package_name:0.1.0:QmSomeipfshash'
+        >>> str(ExtendedPublicId.from_str("author/package_name:0.1.0:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe"))
+        'author/package_name:0.1.0:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe'
 
-        A bad formatted input raises value error:
-        >>> ExtendedPublicId.from_str("bad/formatted:input")
-        Traceback (most recent call last):
-        ...
-        ValueError: Input 'bad/formatted:input' is not well formatted.
+        Extended public id has also version as an optional param, But an IPFS hash
+        needs to be there
+
+        >>> str(ExtendedPublicId.from_str("author/package_name:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe"))
+        'author/package_name:latest:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe'
 
         :param public_id_string: the public id in string format.
         :return: the public id object.
@@ -509,10 +509,13 @@ class ExtendedPublicId(PublicId):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
+
         username = match.group(1)
         package_name = match.group(2)
         version = match.group(3)
-        package_hash = match.group(len(match.groups()))
+        if version is not None:
+            version = version.replace(":", "")
+        package_hash = match.group(14)
         return ExtendedPublicId(username, package_name, package_hash, version)
 
     @classmethod
@@ -607,6 +610,7 @@ class PackageId:
     @property
     def public_id(self) -> PublicId:
         """Get the public id."""
+        # TODO : Figure out how to use ExtendedPublicId
         return self._public_id
 
     @property
