@@ -123,6 +123,8 @@ temp_private_key.pem
 input_file
 output_file
 
+packages/default_author/
+
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build
 !packages/fetchai/contracts/oracle/build
