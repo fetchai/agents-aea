@@ -134,6 +134,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             finally:
                 multiplexer.disconnect()
 
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -181,7 +182,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                 multiplexer1.put(envelope)
-                delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
@@ -201,6 +202,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -254,7 +256,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                     multiplexer1.put(envelope)
-                    delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                    delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
