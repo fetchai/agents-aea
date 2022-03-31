@@ -4,7 +4,7 @@ the main implementation of the Agent Communication Network (ACN).
 
 In particular:
 
-- The <a href="https://github.com/valory-xyz/open-acn" target="_blank">`open-acn`<a/> Golang library; At the moment a copy resides locally in open-aea here as [`libp2p_node`](https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p/libp2p_node). 
+- The <a href="https://github.com/valory-xyz/open-acn" target="_blank">`open-acn`<a/> Golang library; At the moment a copy resides locally in open-aea here as `libp2p_node`. 
 - The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">`p2p_libp2p`<a/> AEA connection, written in Python, that implements the _direct connection_ with an ACN peer;
 - The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`<a/> AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer.
 
@@ -307,7 +307,7 @@ during a registration request:
 ### Delegate connections
 
 If the ACN node is configured to run the delegate service,
-it start listening from a TCP socket at a configurable URI.
+it starts listening from a TCP socket at a configurable URI.
 
 To see a diagram of the message exchanged
 during a registration request read 

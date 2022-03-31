@@ -1,4 +1,4 @@
-The `open_aea/p2p_libp2p:0.1.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `open_aea/p2p_libp2p:0.26.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local demo
 
@@ -26,8 +26,8 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection open_aea/p2p_libp2p:0.1.0
-aea config set agent.default_connection open_aea/p2p_libp2p:0.1.0
+aea add connection open_aea/p2p_libp2p:0.26.0
+aea config set agent.default_connection open_aea/p2p_libp2p:0.26.0
 aea install
 aea build
 ```
@@ -45,10 +45,10 @@ aea issue-certificates
 Run the AEA:
 
 ``` bash
-aea run --connections open_aea/p2p_libp2p:0.1.0
+aea run --connections open_aea/p2p_libp2p:0.26.0
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.1.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress open-aea -c -i open-aea/p2p_libp2p:0.26.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the genesis AEA.
 
 ### Create and run another AEA
@@ -58,8 +58,8 @@ Create a second AEA:
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection open_aea/p2p_libp2p:0.1.0
-aea config set agent.default_connection open_aea/p2p_libp2p:0.1.0
+aea add connection open_aea/p2p_libp2p:0.26.0
+aea config set agent.default_connection open_aea/p2p_libp2p:0.26.0
 aea install
 aea build
 ```
@@ -91,7 +91,7 @@ Here `[<AEA_P2P_ENTRY_URI_1>, <AEA_P2P_ENTRY_URI_2>]` represents a list of multi
 Run the AEA:
 
 ``` bash
-aea run --connections open_aea/p2p_libp2p:0.1.0
+aea run --connections open_aea/p2p_libp2p:0.26.0
 ```
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
@@ -101,11 +101,6 @@ You can inspect the `libp2p_node.log` log files of the AEA to see how they disco
   <p>Currently <code>p2p_libp2p</code> connection limits the total message size to 3 MB.
 </p>
 </div>
-
-
-## Local demo with skills
-
-Explore the <a href="../weather-skills">demo section</a> for further examples.
 
 ## Deployed agent communication network
 
@@ -121,7 +116,7 @@ You can connect to the deployed public test network by adding one or multiple of
 Specifically, in an AEAs configuration `aea-config.yaml` add the above addresses for `entry_peers` as follows:
 ``` yaml
 ---
-public_id: open_aea/p2p_libp2p:0.1.0
+public_id: open_aea/p2p_libp2p:0.26.0
 type: connection
 config:
   delegate_uri: null
@@ -135,7 +130,7 @@ Note, this configuration change must be made for all agents attempting to commun
 
 ## Configuring the `connection.yaml` entries:
 
-To learn more about how to configure your `open_aea/p2p_libp2p:0.1.0` connection consult the `README.md` file supplied with the connection package.
+To learn more about how to configure your `open_aea/p2p_libp2p:0.26.0` connection consult the `README.md` file supplied with the connection package.
 
 ## Running Go peer standalone
 
