@@ -50,7 +50,27 @@ NOT_PERMITTED_AUTHORS = [
     PACKAGES,
     "aea",
 ]
-
+DEFAULT_CLI_CONFIG = {
+    "author": None,
+    "registry_config": {
+        "default": None,
+        "settings": {
+            "http": {
+                "auth_token": None,  # auth token for registry
+                "registry_api_url": None,  # registry url
+            },
+            "ipfs": {
+                "ipfs_node": None,  # IPFS url (in multiaddr format)
+                "hash_resolver": None,  # Url to hash resolver service,
+                "registries": {
+                    "component": {"contract_address": None},
+                    "agent": {"contract_address": None},
+                },
+            },
+            "local": {"default_packages": None},
+        },
+    },
+}
 
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
 REQUIREMENTS = "requirements.txt"

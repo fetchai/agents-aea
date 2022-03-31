@@ -27,7 +27,8 @@ REGISTRY_CONFIG_KEY: str = "registry_config"
 
 REGISTRY_HTTP = "http"
 REGISTRY_IPFS = "ipfs"
-REGISTRY_TYPES: Tuple[str, str] = (REGISTRY_HTTP, REGISTRY_IPFS)
+REGISTRY_LOCAL = "local"
+REGISTRY_TYPES: Tuple[str, ...] = (REGISTRY_HTTP, REGISTRY_IPFS, REGISTRY_LOCAL)
 
 REGISTRY_API_URL_KEY = "registry_api_url"
 # we ignore issue B105 because this is not an hard-coded authentication token,
@@ -35,9 +36,22 @@ REGISTRY_API_URL_KEY = "registry_api_url"
 AUTH_TOKEN_KEY = "auth_token"  # nosec
 
 DEFAULT_REGISTRY_CONFIG: Dict = {
-    "default": REGISTRY_HTTP,
+    "default": None,
     "settings": {
-        REGISTRY_HTTP: {REGISTRY_API_URL_KEY: None, AUTH_TOKEN_KEY: None},
-        REGISTRY_IPFS: {},
+        REGISTRY_HTTP: {
+            "auth_token": None,  # auth token for registry
+            "registry_api_url": None,  # registry url
+        },
+        REGISTRY_IPFS: {
+            "ipfs_node": None,  # IPFS url (in multiaddr format)
+            "hash_resolver": None,  # Url to hash resolver service,
+            "registries": {
+                "component": {"contract_address": None},
+                "agent": {"contract_address": None},
+                "chain_id": None,
+                "rpc_url": None,
+            },
+        },
+        REGISTRY_LOCAL: {"default_packages_path": None},
     },
 }

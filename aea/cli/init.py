@@ -25,7 +25,13 @@ import click
 from aea import __version__
 from aea.cli.login import do_login
 from aea.cli.register import do_register
-from aea.cli.registry.settings import DEFAULT_REGISTRY_CONFIG, REGISTRY_CONFIG_KEY
+from aea.cli.registry.settings import (
+    DEFAULT_REGISTRY_CONFIG,
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_HTTP,
+    REGISTRY_IPFS,
+    REGISTRY_LOCAL,
+)
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
 from aea.cli.utils.config import get_or_create_cli_config, update_cli_config
 from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY
@@ -36,26 +42,18 @@ from aea.cli.utils.package_utils import validate_author_name, validate_registry_
 
 @click.command()
 @click.option("--author", type=str, required=False)
-@click.option("--default-registry", type=str, required=False)
+@click.option("--registry-type", "-r", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
-@click.option("--local", is_flag=True, help="For init AEA locally.")
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 @pass_ctx
 def init(  # pylint: disable=unused-argument
-    ctx: Context,
-    author: str,
-    reset: bool,
-    local: bool,
-    no_subscribe: bool,
-    default_registry: str,
+    ctx: Context, author: str, reset: bool, no_subscribe: bool, registry_type: str,
 ) -> None:
     """Initialize your AEA configurations."""
-    do_init(author, reset, not local, no_subscribe, default_registry)
+    do_init(author, reset, no_subscribe, registry_type)
 
 
-def do_init(
-    author: str, reset: bool, registry: bool, no_subscribe: bool, default_registry: str
-) -> None:
+def do_init(author: str, reset: bool, no_subscribe: bool, registry_type: str) -> None:
     """
     Initialize your AEA configurations.
 
@@ -63,20 +61,24 @@ def do_init(
     :param reset: True, if resetting the author name
     :param registry: True, if registry is used
     :param no_subscribe: bool flag for developers subscription skip on register.
-    :param default_registry: default registry type.
+    :param registry_type: default registry type.
     """
     config = get_or_create_cli_config()
     if reset or config.get(AUTHOR_KEY, None) is None:
         author = validate_author_name(author)
-        registry_type = validate_registry_type(default_registry)
-        if registry:
-            _registry_init(username=author, no_subscribe=no_subscribe)
+        registry_type = validate_registry_type(registry_type)
+        if registry_type == REGISTRY_HTTP:
+            raise click.ClickException(
+                "We don't have support for HTTP registry right now."
+            )
 
-        registry_config = DEFAULT_REGISTRY_CONFIG.copy()
-        registry_config.update({"default": registry_type})
-
-        update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
         update_cli_config({AUTHOR_KEY: author})
+        if registry_type == REGISTRY_HTTP:
+            _registry_init_http(username=author, no_subscribe=no_subscribe)
+        elif registry_type == REGISTRY_IPFS:
+            _registry_init_ipfs()
+        else:
+            _registry_init_local()
 
         config = get_or_create_cli_config()
         config.pop(REGISTRY_CONFIG_KEY, None)  # for security reasons
@@ -90,7 +92,21 @@ def do_init(
     click.echo(success_msg)
 
 
-def _registry_init(username: str, no_subscribe: bool) -> None:
+def _registry_init_ipfs() -> None:
+    """Initialize ipfs registry"""
+    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
+    registry_config["default"] = REGISTRY_IPFS
+    update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
+
+
+def _registry_init_local() -> None:
+    """Initialize ipfs local"""
+    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
+    registry_config["default"] = REGISTRY_LOCAL
+    update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
+
+
+def _registry_init_http(username: str, no_subscribe: bool) -> None:
     """
     Create an author name on the registry.
 
