@@ -8,15 +8,15 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0
+- fetchai/gym:0.19.0:QmXyeF5CGT5gM2u9aRAeAmsYF8gySjzhsvbaHmRQ3VKuUS
 contracts: []
 protocols:
-- fetchai/default:1.0.0
-- fetchai/gym:1.0.0
-- fetchai/state_update:1.0.0
-- open_aea/signing:1.0.0
+- fetchai/default:1.0.0:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe
+- fetchai/gym:1.0.0:QmQipkePBnsrAPMSSv5URUAnGwLDBDvtBZ7joGKPRcbQS7
+- fetchai/state_update:1.0.0:QmeqdZUZcoQ6HxYtY3Wa1jFECEEXux4fHJpVnmyJwWdpc6
+- open_aea/signing:1.0.0:QmTCQKD2iSjBUC3QCQRc7ZyNbnnrvoyw7EcQdJa7mQYLUW
 skills:
-- fetchai/gym:0.20.0
+- fetchai/gym:0.20.0:QmWXFVFN4TyopDaCfrWF2Z7bZh64KGJLULzekJNQF1bHkD
 default_connection: fetchai/gym:0.19.0
 default_ledger: fetchai
 required_ledgers:

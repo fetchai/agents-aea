@@ -15,16 +15,16 @@ fingerprint:
   strategy.py: QmPerQFTS2mtPfgkMmpnTup3CaYHWmDRNhCphcRU22VaYN
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0
+- fetchai/ledger:0.19.0:QmbeWYjrjpGogmm6b1ehfxupAjDJ3vNEeUoyrRiFnWVKcg
 contracts:
-- fetchai/erc1155:0.22.0
+- fetchai/erc1155:0.22.0:QmcWju76BLXDzeH6po8nHhkZL7BgSEq4KqgvTgP1Y1ZUQ2
 protocols:
-- fetchai/contract_api:1.0.0
-- fetchai/default:1.0.0
-- fetchai/fipa:1.0.0
-- fetchai/ledger_api:1.0.0
-- fetchai/oef_search:1.0.0
-- open_aea/signing:1.0.0
+- fetchai/contract_api:1.0.0:QmebupHda1FRUf3aH2GZyGv4F3YA5LntiHymxRiexeXn85
+- fetchai/default:1.0.0:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe
+- fetchai/fipa:1.0.0:QmbdA48eNWfAAHqPh8WTJoUamxeEo62LFkZs6sxRgmhFHf
+- fetchai/ledger_api:1.0.0:QmX2meqUx217qGo717EkrgZEUq8dCr2cMxxaYxZSkfrVij
+- fetchai/oef_search:1.0.0:QmY53toaNJzZ1fBBzEYNzeS4TgZJWNJ8PNakhx2crNyof3
+- open_aea/signing:1.0.0:QmTCQKD2iSjBUC3QCQRc7ZyNbnnrvoyw7EcQdJa7mQYLUW
 skills: []
 behaviours:
   search:
