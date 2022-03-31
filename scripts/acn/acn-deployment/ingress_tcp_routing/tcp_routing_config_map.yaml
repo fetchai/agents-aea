@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress
+data:
+  9003: "dht-node/acn-node-9003:9003"
+  9004: "dht-node/acn-node-9004:9004"
+  9005: "dht-node/acn-node-9003:11003"
+  9006: "dht-node/acn-node-9004:11004"
+---
+# additionally, these ports need to be patched into the deployment, so it knows how to listen.
+# the start command needs to be patched to the deployment of the ingress.

@@ -1,6 +1,6 @@
 The framework has two distinctive parts.
 
-- A **core** that is developed by the Fetch.ai team as well as external contributors.
+- A **core** that was originally developed by the Fetch.ai team, that has now been forked by Valory-xyz.
 - **Extensions** (also known as **packages**) developed by any developer.
 
 Currently, the framework supports four types of packages which can be added to the core as modules:
@@ -8,7 +8,7 @@ Currently, the framework supports four types of packages which can be added to t
 - <a href="../skill">Skills</a> encapsulate logic that deliver economic value to the AEA. Skills are the main focus of the framework's extensibility. 
 - <a href="../protocol">Protocols</a> define the structure of agent-to-agent and component-to-component interactions (messages and dialogues) for agents.
 - <a href="../connection">Connections</a> provide interfaces for the agent to connect with the outside world. They wrap SDKs or APIs and provide interfaces to networks, ledgers and other services.
-- <a href="../contract">Contracts</a> wrap smart contracts for Fetch.ai and third-party decentralized ledgers.
+- <a href="../contract">Contracts</a> wrap smart contracts for Ethereum and third-party decentralized ledgers.
 
 The following figure illustrates the framework's architecture:
 

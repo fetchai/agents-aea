@@ -41,6 +41,7 @@ from packages.open_aea.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    DEFAULT_LEDGER_LIBP2P_NODE,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,
@@ -294,7 +295,7 @@ class TestLibp2pClientConnectionCheckSignature:
     @pytest.mark.asyncio
     async def test_signature_check_fail(self):
         """Test signature check failed."""
-        key = make_crypto("fetchai")
+        key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
 
         assert self.connection.is_connected is False
         await self.connection_node.connect()

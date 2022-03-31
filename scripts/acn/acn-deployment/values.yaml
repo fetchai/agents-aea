@@ -1,0 +1,50 @@
+# The values here are only for testing. These are not deployed in the production environment
+# DON'T add enything secret here and upload to the git repo
+dns:
+  enabled: true
+  dnsname: acn-node-443
+  publicdnsname: staging.acn.autonolas.tech
+
+acnnodes:
+  enabled: true
+  image: valory/acn-node:v1.6.0-17-g5e35f68ad-dirty
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 150m
+      memory: 64Mi
+  config:
+    - p2pport: 9003
+      delegateport: 11003
+      privkey: SECRET_KEY
+      peerid: 16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2
+      address: cosmos1uwyrqt6kxs4xmz7520kynet70w04y7ef226vxr
+    - p2pport: 9004
+      delegateport: 11004
+      privkey: SECRET_KEY
+      peerid: 16Uiu2HAmCQqXLFWaqqUv8hFdFPDwwNQf9qEQox8Kcf78heb33e7x
+  bootstrap:
+    p2pport: 443
+    peerid: 16Uiu2HAmA1NeRBkio6e3HMiBhaW1br29GJ38XPs7UhFWMwyLvTYS
+
+bootstrap:
+  enabled: true
+  image: valory/acn-node:v1.6.0-17-g5e35f68ad-dirty
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 150m
+      memory: 64Mi
+  config:
+    - p2pport: 443
+      delegateport: 11005
+      privkey: SECRET_KEY
+      peerid: 16Uiu2HAmA1NeRBkio6e3HMiBhaW1br29GJ38XPs7UhFWMwyLvTYS
+
+persistence:
+  enabled: false
+
