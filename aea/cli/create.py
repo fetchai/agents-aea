@@ -127,7 +127,9 @@ def create_aea(
 
     if author is not None:
         if is_local:
-            do_init(author, False, False, False, REGISTRY_HTTP)  # pragma: nocover
+            do_init(  # pragma: nocover
+                author, False, False, False, REGISTRY_HTTP  # type: ignore
+            )
         else:
             raise click.ClickException(
                 "Author is not set up. Please use 'aea init' to initialize."

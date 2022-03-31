@@ -45,7 +45,7 @@ import jsonschema
 import yaml
 
 from aea.cli.registry.settings import REGISTRY_CONFIG_KEY
-from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH
+from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH, DEFAULT_CLI_CONFIG
 from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
@@ -108,7 +108,7 @@ def _init_cli_config() -> None:
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
     with open_file(CLI_CONFIG_PATH, "w+") as f:
-        yaml.dump({}, f, default_flow_style=False)
+        yaml.dump(DEFAULT_CLI_CONFIG, f, default_flow_style=False)
 
 
 def update_cli_config(dict_conf: Dict) -> None:
