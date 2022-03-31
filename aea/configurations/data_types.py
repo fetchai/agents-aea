@@ -49,6 +49,9 @@ from aea.configurations.constants import (
 )
 from aea.exceptions import enforce
 from aea.helpers.base import (
+    IPFSHash,
+    IPFSHashOrStr,
+    IPFS_HASH_REGEX,
     RegexConstrainedString,
     SIMPLE_ID_REGEX,
     SimpleId,
@@ -449,6 +452,122 @@ class PublicId(JSONSerializable):
             "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
                 self, other
             )
+        )
+
+
+class ExtendedPublicId(PublicId):
+    """Extended public id for hash."""
+
+    __slots__ = ("_author", "_name", "_package_version", "_package_hash")
+
+    IPFS_HASH_REGEX = IPFS_HASH_REGEX
+    PUBLIC_ID_REGEX = fr"^({PublicId.AUTHOR_REGEX})/({PublicId.PACKAGE_NAME_REGEX}):({PublicId.VERSION_REGEX}):({IPFS_HASH_REGEX})"
+
+    def __init__(
+        self,
+        author: SimpleIdOrStr,
+        name: SimpleIdOrStr,
+        package_hash: IPFSHashOrStr,
+        version: Optional[PackageVersionLike] = None,
+    ) -> None:
+        """Initialize object."""
+        super().__init__(author, name, version)
+        self._package_hash = IPFSHash(package_hash)
+
+    @property
+    def hash(self,) -> str:
+        """Returns the hash for the package."""
+        return str(self._package_hash)
+
+    def to_any(self) -> "ExtendedPublicId":
+        """Return the same public id, but with any version."""
+        return ExtendedPublicId(self.author, self.name, self.hash, self.ANY_VERSION)
+
+    def to_latest(self) -> "ExtendedPublicId":
+        """Return the same public id, but with latest version."""
+        return ExtendedPublicId(self.author, self.name, self.hash, self.LATEST_VERSION)
+
+    @classmethod
+    def from_str(cls, public_id_string: str) -> "ExtendedPublicId":
+        """Initialize the public id from the string.
+
+        >>> str(ExtendedPublicId.from_str("author/package_name:0.1.0:QmSomeipfshash"))
+        'author/package_name:0.1.0:QmSomeipfshash'
+
+        A bad formatted input raises value error:
+        >>> ExtendedPublicId.from_str("bad/formatted:input")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'bad/formatted:input' is not well formatted.
+
+        :param public_id_string: the public id in string format.
+        :return: the public id object.
+        :raises ValueError: if the string in input is not well formatted.
+        """
+        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
+        if match is None:
+            raise ValueError(
+                "Input '{}' is not well formatted.".format(public_id_string)
+            )
+        username = match.group(1)
+        package_name = match.group(2)
+        version = match.group(3)
+        package_hash = match.group(len(match.groups()))
+        return ExtendedPublicId(username, package_name, package_hash, version)
+
+    @classmethod
+    def try_from_str(cls, public_id_string: str) -> Optional["ExtendedPublicId"]:
+        """
+        Safely try to get public id from string.
+
+        :param public_id_string: the public id in string format.
+        :return: the public id object or None
+        """
+        result: Optional[ExtendedPublicId] = None
+        try:
+            result = cls.from_str(public_id_string)
+        except ValueError:
+            pass
+        return result
+
+    @classmethod
+    def from_uri_path(cls, public_id_uri_path: str) -> "ExtendedPublicId":
+        """Initialize the public id from the string."""
+        raise NotImplementedError()
+
+    @property
+    def to_uri_path(self) -> str:
+        """Turn the public id into a uri path string."""
+        raise NotImplementedError()
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        return {
+            "author": self.author,
+            "name": self.name,
+            "version": self.version,
+            "package_hash": self.hash,
+        }
+
+    @classmethod
+    def from_json(cls, obj: Dict) -> "ExtendedPublicId":
+        """Build from a JSON object."""
+        return ExtendedPublicId(
+            obj["author"], obj["name"], obj["package_hash"], obj["version"]
+        )
+
+    def __hash__(self) -> int:
+        """Get the hash."""
+        return hash((self.author, self.name, self.version, self.hash))
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return "{author}/{name}:{version}:{package_hash}".format(
+            author=self.author,
+            name=self.name,
+            version=self.version,
+            package_hash=self.hash,
         )
 
 
