@@ -53,7 +53,7 @@ def main() -> None:
     args = get_arguments()
     packages = get_package_list(args.package_dir)
     ipfs_tool = IPFSTool(addr="/ip4/127.0.0.1/tcp/5001/http")
-    with IPFSDaemon(offline=True):
+    with IPFSDaemon():
         for package_path in packages:
             register_package(ipfs_tool=ipfs_tool, dir_path=package_path, no_pin=False)
     print("Done!")

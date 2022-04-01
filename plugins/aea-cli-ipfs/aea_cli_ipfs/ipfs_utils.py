@@ -187,7 +187,6 @@ class IPFSTool:
         Init tool.
 
         :param addr: multiaddr string for IPFS client.
-        :param offline: ipfs mode.
         """
 
         if addr is not None:

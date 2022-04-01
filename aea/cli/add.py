@@ -27,10 +27,10 @@ import click
 
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.settings import REGISTRY_IPFS
-from aea.cli.utils.click_utils import PublicIdOrHashParameter, registry_flag_
+from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import get_registry_config, load_item_config
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project, clean_after
+from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import (
     copy_package_directory,
@@ -51,25 +51,62 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.exceptions import enforce
 
 
-@click.command()
-@click.argument(
-    "item_type", type=click.Choice(choices=(CONNECTION, CONTRACT, PROTOCOL, SKILL))
-)
-@click.argument("identifier", type=PublicIdOrHashParameter(), required=True)
-@registry_flag_()
+@click.group()
+@registry_flag()
 @click.pass_context
 @check_aea_project
-def add(
-    click_context: click.Context,
-    item_type: str,
-    registry: str,
-    identifier: Union[PublicId, str],
-) -> None:
+def add(click_context: click.Context, local: bool, remote: bool) -> None:
     """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
-    add_item(ctx, item_type, identifier)
+
+    enforce(
+        not (local and remote), "'local' and 'remote' options are mutually exclusive."
+    )
+    if not local and not remote:
+        try:
+            ctx.registry_path
+        except ValueError as e:
+            click.echo(f"{e}\nTrying remote registry (`--remote`).")
+            remote = True
+
+    is_mixed = not local and not remote
+    ctx.set_config("is_local", local and not remote)
+    ctx.set_config("is_mixed", is_mixed)
+
+
+@add.command()
+@click.argument("connection_public_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def connection(ctx: Context, connection_public_id: PublicId) -> None:
+    """Add a connection to the agent."""
+    add_item(ctx, CONNECTION, connection_public_id)
+
+
+@add.command()
+@click.argument("contract_public_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def contract(ctx: Context, contract_public_id: PublicId) -> None:
+    """Add a contract to the agent."""
+    add_item(ctx, CONTRACT, contract_public_id)
+
+
+@add.command()
+@click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def protocol(ctx: Context, protocol_public_id: PublicId) -> None:
+    """Add a protocol to the agent."""
+    add_item(ctx, PROTOCOL, protocol_public_id)
+
+
+@add.command()
+@click.argument("skill_public_id", type=PublicIdParameter(), required=True)
+@pass_ctx
+def skill(ctx: Context, skill_public_id: PublicId) -> None:
+    """Add a skill to the agent."""
+    add_item(ctx, SKILL, skill_public_id)
 
 
 @clean_after
@@ -214,10 +251,7 @@ def fetch_item_mixed(
     ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
 ) -> Path:
     """
-    Find item, mixed mode.
-
-    That is, give priority to local registry, and fall back to remote registry
-    in case of failure.
+    Find item, mixed mode.That is, give priority to local registry, and fall back to remote registry in case of failure.
 
     :param ctx: the CLI context.
     :param item_type: the item type.

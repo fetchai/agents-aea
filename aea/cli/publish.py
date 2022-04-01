@@ -27,20 +27,13 @@ from shutil import copyfile
 from typing import cast
 
 import click
-from aea_cli_ipfs.core import IPFSTool  # type: ignore
 
-from aea.cli.push import push_item_local as _push_item_locally
+from aea.cli.push import _save_item_locally as _push_item_locally
 from aea.cli.registry.publish import publish_agent
 from aea.cli.registry.push import push_item as _push_item_remote
-from aea.cli.registry.settings import (
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
-    REGISTRY_IPFS,
-    REGISTRY_LOCAL,
-)
 from aea.cli.registry.utils import get_package_meta
-from aea.cli.utils.click_utils import registry_flag_
-from aea.cli.utils.config import get_or_create_cli_config, validate_item_config
+from aea.cli.utils.click_utils import registry_flag
+from aea.cli.utils.config import validate_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import AEAConfigException
@@ -65,35 +58,29 @@ PUSH_ITEMS_FLAG = "--push-missing"
 
 
 @click.command(name="publish")
-@registry_flag_()
+@registry_flag(
+    help_local="For publishing agent to local folder.",
+    help_remote="For publishing agent to remote registry.",
+)
 @click.option(
     "--push-missing", is_flag=True, help="Push missing components to registry."
 )
 @click.pass_context
 @check_aea_project
 def publish(
-    click_context: click.Context, registry: str, push_missing: bool
+    click_context: click.Context, local: bool, remote: bool, push_missing: bool
 ) -> None:  # pylint: disable=unused-argument
     """Publish the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
 
-    if registry == REGISTRY_HTTP:
+    if remote:
         _publish_agent_remote(ctx, push_missing=push_missing)
-    elif registry == REGISTRY_LOCAL:
-        # TOFIX: re-enable mixed with mixed flag
-        _save_agent_locally(ctx, is_mixed=False, push_missing=push_missing)
     else:
-        publish_to_ipfs()
-
-
-def publish_to_ipfs() -> None:
-    """Publish package to IPFS node."""
-
-    cli_config = get_or_create_cli_config()
-    addr = cli_config[REGISTRY_CONFIG_KEY]["settings"][REGISTRY_IPFS]["ipfs_node"]
-    ipfs_tool = IPFSTool(addr)
+        _save_agent_locally(
+            ctx, is_mixed=not local and not remote, push_missing=push_missing
+        )
 
 
 def _validate_config(ctx: Context) -> None:
@@ -101,7 +88,6 @@ def _validate_config(ctx: Context) -> None:
     Validate agent config.
 
     :param ctx: Context object.
-
     :raises ClickException: if validation is failed.
     """
     try:
@@ -129,13 +115,10 @@ class BaseRegistry(ABC):
     @abstractmethod
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-
-        Raise ClickException if not found.
+        Check item present in registry. Raise ClickException if not found.
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
-
         :return: None
         """
 
@@ -146,7 +129,6 @@ class BaseRegistry(ABC):
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
-
         :return: None
         """
 
@@ -154,13 +136,10 @@ class BaseRegistry(ABC):
         self, item_type_plural: str, public_id: PublicId
     ) -> None:
         """
-        Check item present in registry and push if needed.
-
-        Raise ClickException if not found.
+        Check item present in registry and push if needed.Raise ClickException if not found.
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
-
         :return: None
         """
 
@@ -195,9 +174,7 @@ class LocalRegistry(BaseRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-
-        Raise ClickException if not found.
+        Check item present in registry. Raise ClickException if not found.
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
@@ -219,7 +196,7 @@ class LocalRegistry(BaseRegistry):
         :param public_id: PublicId of the item to check.
         """
         item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
-        _push_item_locally(self.ctx, item_type, public_id)  # type: ignore
+        _push_item_locally(self.ctx, item_type, public_id)
 
 
 class MixedRegistry(LocalRegistry):
@@ -227,9 +204,7 @@ class MixedRegistry(LocalRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-
-        Raise ClickException if not found.
+        Check item present in registry. Raise ClickException if not found.
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
@@ -259,9 +234,7 @@ class RemoteRegistry(BaseRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-
-        Raise ClickException if not found.
+        Check item present in registry.Raise ClickException if not found.
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.

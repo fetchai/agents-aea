@@ -22,21 +22,14 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import click
 from click import Context, Option, UsageError, option
 
-from aea.cli.registry.settings import (
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
-    REGISTRY_IPFS,
-    REGISTRY_LOCAL,
-)
-from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
+from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
-from aea.helpers.base import IPFSHash
 from aea.helpers.io import open_file
 
 
@@ -108,46 +101,6 @@ class PublicIdParameter(click.ParamType):
             self.fail(value, param, ctx)
 
 
-class PublicIdOrHashParameter(click.ParamType):
-    """Define a public id parameter for Click applications."""
-
-    def get_metavar(self, param: Any) -> str:
-        """Return the metavar default for this param if it provides one."""
-        return "PUBLIC_ID_OR_HASH"
-
-    @staticmethod
-    def _parse_public_id(value: str) -> Optional[PublicId]:
-        """Parse public id from string."""
-        try:
-            return PublicId.from_str(value)
-        except ValueError:
-            return None
-
-    @staticmethod
-    def _parse_ipfs_hash(value: str) -> Optional[str]:
-        """Parse public id from string."""
-        try:
-            return str(IPFSHash(value))
-        except ValueError:
-            return None
-
-    def convert(
-        self, value: str, param: Any, ctx: Optional[click.Context]
-    ) -> Union[PublicId, str]:
-        """Convert the value. This is not invoked for values that are `None` (the missing value)."""
-        parsed_val: Optional[Union[PublicId, str]]
-        parsed_val = self._parse_public_id(value)
-
-        if parsed_val is not None:
-            return parsed_val
-
-        parsed_val = self._parse_ipfs_hash(value)
-        if parsed_val is not None:
-            return parsed_val
-
-        self.fail(value, param, ctx)
-
-
 class AgentDirectory(click.Path):
     """A click.Path, but with further checks  applications."""
 
@@ -201,41 +154,6 @@ def registry_flag(
             cls=MutuallyExclusiveOption,
             help=help_remote,
             mutually_exclusive=["local",],  # noqa: E231
-        )(f)
-        return f
-
-    return wrapper
-
-
-def registry_flag_() -> Callable:
-    """Choice of one flag between: '--local/--remote'."""
-
-    cli_config = get_or_create_cli_config()
-    default_registry = cast(
-        str, cli_config.get(REGISTRY_CONFIG_KEY, {}).get("default", REGISTRY_LOCAL)
-    )
-
-    def wrapper(f: Callable) -> Callable:
-        f = option(
-            "--local",
-            "registry",
-            flag_value=REGISTRY_LOCAL,
-            help="For pushing items to local folder.",
-            default=(REGISTRY_LOCAL == default_registry),
-        )(f)
-        f = option(
-            "--ipfs",
-            "registry",
-            flag_value=REGISTRY_IPFS,
-            help="For pushing items to ipfs node.",
-            default=(REGISTRY_IPFS == default_registry),
-        )(f)
-        f = option(
-            "--http",
-            "registry",
-            flag_value=REGISTRY_HTTP,
-            help="For pushing items to http registry.",
-            default=(REGISTRY_HTTP == default_registry),
         )(f)
         return f
 

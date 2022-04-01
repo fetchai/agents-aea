@@ -128,7 +128,7 @@ def create_aea(
     if author is not None:
         if is_local:
             do_init(  # pragma: nocover
-                author, False, False, False, REGISTRY_HTTP  # type: ignore
+                author, False, False, REGISTRY_HTTP  # type: ignore
             )
         else:
             raise click.ClickException(
