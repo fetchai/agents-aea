@@ -551,6 +551,166 @@ ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 canno
 
 whether or not the inequality is satisfied
 
+<a id="aea.configurations.data_types.ExtendedPublicId"></a>
+
+## ExtendedPublicId Objects
+
+```python
+class ExtendedPublicId(PublicId)
+```
+
+Extended public id for hash.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(author: SimpleIdOrStr,
+             name: SimpleIdOrStr,
+             package_hash: IPFSHashOrStr,
+             version: Optional[PackageVersionLike] = None) -> None
+```
+
+Initialize object.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.hash"></a>
+
+#### hash
+
+```python
+@property
+def hash() -> str
+```
+
+Returns the hash for the package.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.to_any"></a>
+
+#### to`_`any
+
+```python
+def to_any() -> "ExtendedPublicId"
+```
+
+Return the same public id, but with any version.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.to_latest"></a>
+
+#### to`_`latest
+
+```python
+def to_latest() -> "ExtendedPublicId"
+```
+
+Return the same public id, but with latest version.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.from_str"></a>
+
+#### from`_`str
+
+```python
+@classmethod
+def from_str(cls, public_id_string: str) -> "ExtendedPublicId"
+```
+
+Initialize the public id from the string.
+
+**Arguments**:
+
+- `public_id_string`: the public id in string format.
+
+**Raises**:
+
+- `ValueError`: if the string in input is not well formatted.
+
+**Returns**:
+
+the public id object.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.try_from_str"></a>
+
+#### try`_`from`_`str
+
+```python
+@classmethod
+def try_from_str(cls, public_id_string: str) -> Optional["ExtendedPublicId"]
+```
+
+Safely try to get public id from string.
+
+**Arguments**:
+
+- `public_id_string`: the public id in string format.
+
+**Returns**:
+
+the public id object or None
+
+<a id="aea.configurations.data_types.ExtendedPublicId.from_uri_path"></a>
+
+#### from`_`uri`_`path
+
+```python
+@classmethod
+def from_uri_path(cls, public_id_uri_path: str) -> "ExtendedPublicId"
+```
+
+Initialize the public id from the string.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.to_uri_path"></a>
+
+#### to`_`uri`_`path
+
+```python
+@property
+def to_uri_path() -> str
+```
+
+Turn the public id into a uri path string.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.json"></a>
+
+#### json
+
+```python
+@property
+def json() -> Dict
+```
+
+Compute the JSON representation.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.from_json"></a>
+
+#### from`_`json
+
+```python
+@classmethod
+def from_json(cls, obj: Dict) -> "ExtendedPublicId"
+```
+
+Build from a JSON object.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.__hash__"></a>
+
+#### `__`hash`__`
+
+```python
+def __hash__() -> int
+```
+
+Get the hash.
+
+<a id="aea.configurations.data_types.ExtendedPublicId.__str__"></a>
+
+#### `__`str`__`
+
+```python
+def __str__() -> str
+```
+
+Get the string representation.
+
 <a id="aea.configurations.data_types.PackageId"></a>
 
 ## PackageId Objects

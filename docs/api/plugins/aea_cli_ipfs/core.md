@@ -11,8 +11,7 @@ Core components for `ipfs cli command`.
 ```python
 @click.group()
 @click.pass_context
-@click.option("--offline", is_flag=True, default=False)
-def ipfs(click_context: click.Context, offline: bool) -> None
+def ipfs(click_context: click.Context) -> None
 ```
 
 IPFS Commands
