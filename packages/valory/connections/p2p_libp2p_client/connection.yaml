@@ -8,9 +8,9 @@ description: The libp2p client connection implements a tcp connection to a runni
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQZQyYpobMCzc3g8x1FhuRfu2Lm7NNocDDZPsYG9nzKRQ
+  README.md: QmRmDYNeEsKRgKjroGCJmLVJqjfnUm9FNXBXv3YYBBwsXq
   __init__.py: QmWYz6a1UrsXsG55CQj6X2snQZWU7isUGBiWJWwDqEpYyS
-  connection.py: QmYZhZS6g7unajJoqLGHJKLJXcYfxxM8DUWeg7tyMTnAkP
+  connection.py: QmYVhxT4DGNoTTewjE4MitvU99d9Baa6FXJSWPeURxYk9u
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

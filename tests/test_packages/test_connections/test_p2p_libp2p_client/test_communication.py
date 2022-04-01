@@ -33,7 +33,7 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
-from packages.valory.connections import NodeClient, Uri
+from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.common.mocks import RegexComparator
 from tests.common.utils import wait_for_condition

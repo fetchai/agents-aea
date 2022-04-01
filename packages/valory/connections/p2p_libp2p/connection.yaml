@@ -8,10 +8,10 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: Qmd6xGBWWvYaxZUryir7m2SWFZX7fpzoBC3ttJiKXEJVXK
+  README.md: QmZP7GPu67Ag2Fw8zgZnzpQPqaYJvr7w8Zy5VhQ8Jpekkg
   __init__.py: QmRo1DRePomRccoY2tB3GnKV2rUoNFaaE26WDRKp4ATs33
   check_dependencies.py: QmS7PnP2G3vMrjqPHeuuTH74Nfowd33FUZkqYTUb3269Pi
-  connection.py: QmePX6yBbpMtryq8vgR8N3WQVwu7obvzRa7avYns9tegyq
+  connection.py: QmQGfUKtUnCB8GjhpWLMxvbd4dbXWFr1obknYeb1oeK56C
   consts.py: QmWAHrbN2fhqEe8o6cVLtwhWaEFp6h5cUJtJddYWbibPJj
   libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
   libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
@@ -49,7 +49,7 @@ fingerprint:
   libp2p_node/mocks/mock_peerstore.go: QmeH1TucFNbbv9yrLFWHSMDMnsmUmZQbzJYfo25JLyFoYf
   libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmWDoniHr3wa5freLHDESv7SgC9ggYenrLyibw4jFkTc4r
   libp2p_node/protocols/acn/v1_0_0/acn.proto: QmcguMcKttJfsuPYrUVWFJ1Trr1VxrSSfan94Z3yNAxNEW
-  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmeqaYRWL5bVRE8FKgbiAspgFkoi5HKtkSncT7fCf1JAex
+  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUxjEyzwQP7TWad5RfCefS2qfpbhJgVFjaEN4LUoA3ys5
   libp2p_node/utils/utils.go: QmdVRRhcoWZE5tt9aD1zYapAcbs5hfJh7z8p4AwgnkT4i2
   libp2p_node/utils/utils_test.go: Qmd2tbXhEDQELjkyKHyCqmcBitECK9mrVENyPWaev5HF63
 fingerprint_ignore_patterns: []

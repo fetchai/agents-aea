@@ -5,7 +5,7 @@ The `libp2p_node` is an integral part of the ACN.
 
 The agent communication network (ACN) provides a system for agents to find each other and communicate, solely based on their wallet addresses. It addresses the message delivery problem.
 
-For more details check out the [docs](https://github.com/valory-xyz/open-aea/blob/main/docs/acn.md).
+For more details check out the [docs](https://github.com/fetchai/agents-aea/blob/main/docs/acn.md).
 
 ## Development
 

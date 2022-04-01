@@ -26,7 +26,8 @@ from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.valory.connections import PUBLIC_ID
+from packages.valory.connections import p2p_libp2p_client
+from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
 from tests.conftest import (
     DEFAULT_LEDGER,
@@ -35,7 +36,7 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
-
+p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
@@ -79,7 +80,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.set_config("agent.default_ledger", ledger_id)
         self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
         self.add_item("connection", str(PUBLIC_ID))
-        conn_path = "vendor.open_aea.connections.p2p_libp2p_client"
+        conn_path = p2p_libp2p_client_path
         self.nested_set_config(
             conn_path + ".config",
             {

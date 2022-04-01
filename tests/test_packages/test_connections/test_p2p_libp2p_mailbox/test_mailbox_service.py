@@ -30,11 +30,11 @@ import requests
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.valory.protocols.acn import acn_pb2
-from packages.valory.protocols.acn.message import AcnMessage
 from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.valory.connections.p2p_libp2p_mailbox import NodeClient
+from packages.valory.connections.p2p_libp2p_mailbox.connection import NodeClient
+from packages.valory.protocols.acn import acn_pb2
+from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import _make_libp2p_client_connection, _make_libp2p_connection

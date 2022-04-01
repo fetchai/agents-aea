@@ -34,12 +34,8 @@ from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
-from packages.valory.connections import (
-    POR_DEFAULT_SERVICE_ID,
-)
-from packages.valory.connections.p2p_libp2p_mailbox import (
-    P2PLibp2pMailboxConnection,
-)
+from packages.valory.connections.p2p_libp2p_mailbox.connection import POR_DEFAULT_SERVICE_ID
+from packages.valory.connections.p2p_libp2p_mailbox.connection import P2PLibp2pMailboxConnection
 
 from tests.conftest import (
     _make_libp2p_client_connection,

@@ -28,9 +28,8 @@ from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.valory.connections.p2p_libp2p import (
-    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
-)
+from packages.valory.connections import p2p_libp2p
+from packages.valory.connections.p2p_libp2p.connection import PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID
 
 from tests.conftest import (
     DEFAULT_LEDGER,
@@ -39,6 +38,7 @@ from tests.conftest import (
 )
 
 
+p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_NET_SIZE = 4
@@ -80,7 +80,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         # for logging
-        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
+        config_path = f"{p2p_libp2p_path}.config"
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
@@ -148,12 +148,12 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
         # for logging
-        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
+        config_path = f"{p2p_libp2p_path}.config"
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
         self.log_files.append(log_file)
-        setting_path = "vendor.open_aea.connections.p2p_libp2p.cert_requests"
+        setting_path = f"{p2p_libp2p_path}.cert_requests"
         settings = json.dumps(
             [
                 {
@@ -228,7 +228,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         # setup a full node: with public uri, relay service, and delegate service
-        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
+        config_path = f"{p2p_libp2p_path}.config"
         self.set_config(
             "{}.local_uri".format(config_path), "127.0.0.1:{}".format(DEFAULT_PORT)
         )
