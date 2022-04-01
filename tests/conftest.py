@@ -252,26 +252,17 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "fetchai",
 }
-PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
-PUBLIC_DHT_P2P_MADDR_2 = "/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-PUBLIC_DHT_DELEGATE_URI_1 = "acn.fetch.ai:11000"
-PUBLIC_DHT_DELEGATE_URI_2 = "acn.fetch.ai:11001"
-PUBLIC_DHT_P2P_PUBLIC_KEY_1 = (
-    "0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7"
-)
-PUBLIC_DHT_P2P_PUBLIC_KEY_2 = (
-    "03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d"
-)
-PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.fetch-ai.com/tcp/9003/p2p/16Uiu2HAmQo6EHbmwhkMJkyhjz1DCxE8Ahsy5zFZtw97tWCFckLUp"
-PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.fetch-ai.com/tcp/9004/p2p/16Uiu2HAmEvey5siPHzdEb5QcTYCkh16squbeFHYHvRCWP9Jzp4bV"
-PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "acn.fetch-ai.com:11003"
-PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "acn.fetch-ai.com:11004"
+PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/staging.acn.autonolas.tech/tcp/9003/p2p/16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2"
+PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/staging.acn.autonolas.tech/tcp/9004/p2p/16Uiu2HAmCQqXLFWaqqUv8hFdFPDwwNQf9qEQox8Kcf78heb33e7x"
+PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "staging.acn.autonolas.tech:9005"
+PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "staging.acn.autonolas.tech:9006"
 PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
-    "03b45f898bde437ace4728b3ba097988306930b1600b7991d384e6d08452e340e1"
+    "0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d"
 )
 PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
-    "0321bac023b7f7cf655cf5e0f988a4c1cf758f7b530528362c4ba8d563f7b090c4"
+    "02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7"
 )
+
 # TODO: temporary overwriting of addresses, URIs and public keys
 #  used in test_p2p_libp2p/test_public_dht.py
 PUBLIC_DHT_P2P_MADDR_1 = PUBLIC_STAGING_DHT_P2P_MADDR_1

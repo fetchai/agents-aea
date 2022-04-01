@@ -41,6 +41,8 @@ from packages.open_aea.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    DEFAULT_LEDGER,
+    DEFAULT_LEDGER_LIBP2P_NODE,
     PUBLIC_DHT_DELEGATE_URI_1,
     PUBLIC_DHT_DELEGATE_URI_2,
     PUBLIC_DHT_P2P_MADDR_1,
@@ -76,8 +78,8 @@ PUBLIC_STAGING_DHT_PUBLIC_KEYS = [
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
 ]
-AEA_DEFAULT_LAUNCH_TIMEOUT = 20
-AEA_LIBP2P_LAUNCH_TIMEOUT = 20
+AEA_DEFAULT_LAUNCH_TIMEOUT = 30
+AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 
 
 @pytest.fixture
@@ -132,6 +134,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             finally:
                 multiplexer.disconnect()
 
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -179,7 +182,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                 multiplexer1.put(envelope)
-                delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
@@ -199,6 +202,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -252,7 +256,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                     multiplexer1.put(envelope)
-                    delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                    delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
@@ -489,25 +493,31 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         """Test connectivity."""
         self.log_files = []
         self.agent_name = "some"
-        ledger_id = "fetchai"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
         self.conn_key_file = os.path.join(
             os.path.abspath(os.getcwd()), "./conn_key.txt"
         )
-        self.generate_private_key(ledger_id, private_key_file=self.conn_key_file)
-        self.set_config("agent.default_ledger", ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
-        self.add_private_key(
-            ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        # set config
+        self.set_config("agent.default_ledger", agent_ledger_id)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
         )
-        self.generate_private_key(ledger_id)
-        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
+        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
+        # agent keys
+        self.generate_private_key(agent_ledger_id)
+        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
+        # libp2p node keys
+        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
+        self.add_private_key(
+            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        )
+        # add connection and build
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
-
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
@@ -519,7 +529,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
                 "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
                 "entry_peers": maddrs,
                 "log_file": log_file,
-                "ledger_id": ledger_id,
+                "ledger_id": node_ledger_id,
             },
         )
 
@@ -562,15 +572,23 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     )
     def test_connectivity(self, delegate_uris_public_keys):
         """Test connectivity."""
-        ledger_id = "fetchai"
+
         delegate_uris, public_keys = delegate_uris_public_keys
         self.agent_name = "some"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
-        self.generate_private_key(ledger_id)
-        self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
-        self.set_config("agent.default_ledger", ledger_id)
-        self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
+
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        self.set_config("agent.default_ledger", agent_ledger_id)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
+        # agent keys
+        self.generate_private_key(agent_ledger_id)
+        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
+
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
         config_path = "vendor.open_aea.connections.p2p_libp2p_client.config"
         self.nested_set_config(
@@ -594,7 +612,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
             [
                 CertRequest(
                     identifier="acn",
-                    ledger_id=ledger_id,
+                    ledger_id=agent_ledger_id,
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=public_key,
