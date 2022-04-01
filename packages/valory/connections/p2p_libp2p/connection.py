@@ -43,7 +43,7 @@ from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.acn import acn_pb2
 from packages.fetchai.protocols.acn.message import AcnMessage
-from packages.open_aea.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
+from packages.valory.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
 
 
 _default_logger = logging.getLogger("aea.packages.open_aea.connections.p2p_libp2p")
