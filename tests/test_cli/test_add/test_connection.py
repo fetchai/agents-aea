@@ -71,15 +71,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -169,15 +161,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -260,15 +244,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -326,15 +302,7 @@ class TestAddConnectionFailsWhenDifferentPublicId:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -389,15 +357,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -465,15 +425,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -578,15 +530,7 @@ class TestAddConnectionMixedWhenNoLocalRegistryExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -646,15 +590,7 @@ class TestAddConnectionLocalWhenNoLocalRegistryExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
         assert result.exit_code == 0, result.stdout

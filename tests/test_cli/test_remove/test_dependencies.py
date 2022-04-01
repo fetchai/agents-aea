@@ -79,15 +79,7 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
         os.chdir(self.t)
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
         assert result.exit_code == 0

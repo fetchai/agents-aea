@@ -69,16 +69,7 @@ class TestCreate:
         self.agent_dir = temp_dir / self.agent_name
         self.runner = CliRunner()
         result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0, result.stdout
         result = self._run_command(["create", "--empty", "--local", self.agent_name])

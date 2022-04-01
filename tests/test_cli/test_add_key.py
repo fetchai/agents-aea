@@ -66,16 +66,7 @@ class TestAddFetchKey:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = cls.runner.invoke(
@@ -137,16 +128,7 @@ class TestAddEthereumhKey:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = cls.runner.invoke(
@@ -208,16 +190,7 @@ class TestAddManyKeys:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = cls.runner.invoke(
@@ -293,16 +266,7 @@ def test_add_key_fails_bad_key():
         ) as mock_logger_error:
 
             result = runner.invoke(
-                cli,
-                [
-                    *CLI_LOG_OPTION,
-                    "init",
-                    "--local",
-                    "--author",
-                    AUTHOR,
-                    "--default-registry",
-                    "http",
-                ],
+                cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             )
 
             result = runner.invoke(
@@ -348,16 +312,7 @@ def test_add_key_fails_bad_ledger_id():
     os.chdir(tmpdir)
     try:
         result = runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
