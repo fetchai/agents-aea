@@ -56,9 +56,7 @@ except ImportError:  # pragma: nocover
     from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
 
 
-_default_logger = logging.getLogger(
-    "aea.packages.valory.connections.p2p_libp2p_client"
-)
+_default_logger = logging.getLogger("aea.packages.valory.connections.p2p_libp2p_client")
 
 PUBLIC_ID = PublicId.from_str("valory/p2p_libp2p_mailbox:0.2.0")
 

@@ -29,7 +29,9 @@ from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.valory.connections import p2p_libp2p
-from packages.valory.connections.p2p_libp2p.connection import PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID
+from packages.valory.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
+)
 
 from tests.conftest import (
     DEFAULT_LEDGER,

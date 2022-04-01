@@ -36,6 +36,7 @@ from tests.conftest import (
     libp2p_log_on_failure_all,
 )
 
+
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234

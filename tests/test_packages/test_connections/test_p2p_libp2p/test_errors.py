@@ -48,7 +48,9 @@ from packages.valory.protocols.acn.message import AcnMessage
 from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
 
-check_node_built = f"{P2PLibp2pConnection.__module__}.{P2PLibp2pConnection.__name__}._check_node_built"
+check_node_built = (
+    f"{P2PLibp2pConnection.__module__}.{P2PLibp2pConnection.__name__}._check_node_built"
+)
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
@@ -244,8 +246,9 @@ async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
     host = "localhost"
     port = "10000"
-    with patch(check_node_built, return_value="./"), \
-            patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
+    with patch(check_node_built, return_value="./"), patch(
+        "tests.conftest.build_node"
+    ), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir
         )
@@ -276,8 +279,9 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
     """Test node restart on write fail."""
     host = "localhost"
     port = "10000"
-    with patch(check_node_built, return_value="./"), \
-            patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
+    with patch(check_node_built, return_value="./"), patch(
+        "tests.conftest.build_node"
+    ), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir
         )
@@ -314,8 +318,9 @@ async def test_reconnect_on_read_failed():
     """Test node restart on read fail."""
     host = "localhost"
     port = "10000"
-    with patch(check_node_built, return_value="./"), \
-            patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
+    with patch(check_node_built, return_value="./"), patch(
+        "tests.conftest.build_node"
+    ), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir
         )

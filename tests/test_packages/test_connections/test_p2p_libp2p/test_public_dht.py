@@ -34,8 +34,12 @@ from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
-from packages.valory.connections.p2p_libp2p.connection import PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID
-from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID
+from packages.valory.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
+)
+from packages.valory.connections.p2p_libp2p_client.connection import (
+    PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
+)
 
 from tests.conftest import (
     DEFAULT_LEDGER,

@@ -77,7 +77,7 @@ from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
 from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
     sigencode_string_canonize,
 )
-from google.protobuf.any_pb2 import Any as ProtoAny
+from google.protobuf.any_pb2 import Any as ProtoAny  # pylint: disable=no-name-in-module
 from google.protobuf.json_format import MessageToDict, ParseDict
 
 from aea.common import Address, JSONLike
