@@ -461,22 +461,26 @@ class ExtendedPublicId(PublicId):
     __slots__ = ("_author", "_name", "_package_version", "_package_hash")
 
     IPFS_HASH_REGEX = IPFS_HASH_REGEX
-    PUBLIC_ID_REGEX = fr"^({PublicId.AUTHOR_REGEX})/({PublicId.PACKAGE_NAME_REGEX})(:({PublicId.VERSION_REGEX}))?:({IPFS_HASH_REGEX})"
+    PUBLIC_ID_REGEX = fr"^({PublicId.AUTHOR_REGEX})/({PublicId.PACKAGE_NAME_REGEX})(:{PublicId.VERSION_REGEX})?(:{IPFS_HASH_REGEX})?"
 
     def __init__(
         self,
         author: SimpleIdOrStr,
         name: SimpleIdOrStr,
-        package_hash: IPFSHashOrStr,
+        package_hash: Optional[IPFSHashOrStr],
         version: Optional[PackageVersionLike] = None,
     ) -> None:
         """Initialize object."""
         super().__init__(author, name, version)
-        self._package_hash = IPFSHash(package_hash)
+        self._package_hash = (
+            IPFSHash(package_hash) if package_hash is not None else None
+        )
 
     @property
     def hash(self,) -> str:
         """Returns the hash for the package."""
+        if self._package_hash is None:
+            raise ValueError("Package hash was not provided.")
         return str(self._package_hash)
 
     def to_any(self) -> "ExtendedPublicId":
@@ -515,7 +519,10 @@ class ExtendedPublicId(PublicId):
         version = match.group(3)
         if version is not None:
             version = version.replace(":", "")
-        package_hash = match.group(14)
+        package_hash = match.group(13)
+        if package_hash is not None:
+            package_hash = package_hash.replace(":", "")
+
         return ExtendedPublicId(username, package_name, package_hash, version)
 
     @classmethod
@@ -566,6 +573,9 @@ class ExtendedPublicId(PublicId):
 
     def __str__(self) -> str:
         """Get the string representation."""
+        if self._package_hash is None:
+            return super().__str__()
+
         return "{author}/{name}:{version}:{package_hash}".format(
             author=self.author,
             name=self.name,
