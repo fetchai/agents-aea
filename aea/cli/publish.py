@@ -86,6 +86,7 @@ def publish(
 def _validate_config(ctx: Context) -> None:
     """
     Validate agent config.
+
     :param ctx: Context object.
     :raises ClickException: if validation is failed.
     """
@@ -98,6 +99,7 @@ def _validate_config(ctx: Context) -> None:
 def _validate_pkp(private_key_paths: CRUDCollection) -> None:
     """
     Prevent to publish agents with non-empty private_key_paths.
+
     :param private_key_paths: private_key_paths from agent config.
     :raises ClickException: if private_key_paths is not empty.
     """
@@ -113,8 +115,8 @@ class BaseRegistry(ABC):
     @abstractmethod
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-        Raise ClickException if not found.
+        Check item present in registry. Raise ClickException if not found.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         :return: None
@@ -124,6 +126,7 @@ class BaseRegistry(ABC):
     def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
         """
         Push item to registry.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         :return: None
@@ -133,8 +136,8 @@ class BaseRegistry(ABC):
         self, item_type_plural: str, public_id: PublicId
     ) -> None:
         """
-        Check item present in registry and push if needed.
-        Raise ClickException if not found.
+        Check item present in registry and push if needed.Raise ClickException if not found.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         :return: None
@@ -171,8 +174,8 @@ class LocalRegistry(BaseRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-        Raise ClickException if not found.
+        Check item present in registry. Raise ClickException if not found.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         """
@@ -188,6 +191,7 @@ class LocalRegistry(BaseRegistry):
     def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
         """
         Push item to registry.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         """
@@ -200,8 +204,8 @@ class MixedRegistry(LocalRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-        Raise ClickException if not found.
+        Check item present in registry. Raise ClickException if not found.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         """
@@ -230,8 +234,8 @@ class RemoteRegistry(BaseRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """
-        Check item present in registry.
-        Raise ClickException if not found.
+        Check item present in registry.Raise ClickException if not found.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         """
@@ -246,6 +250,7 @@ class RemoteRegistry(BaseRegistry):
     def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
         """
         Push item to registry.
+
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
         """
@@ -271,6 +276,7 @@ def _save_agent_locally(
 ) -> None:
     """
     Save agent to local packages.
+
     :param ctx: the context
     :param is_mixed: whether or not to fetch in mixed mode
     :param push_missing: bool. flag to push missing items
@@ -303,6 +309,7 @@ def _save_agent_locally(
 def _publish_agent_remote(ctx: Context, push_missing: bool) -> None:
     """
     Push agent to remote registry.
+
     :param ctx: the context
     :param push_missing: bool. flag to push missing items
     """

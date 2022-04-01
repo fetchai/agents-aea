@@ -59,7 +59,6 @@ def do_init(author: str, reset: bool, no_subscribe: bool, registry_type: str) ->
 
     :param author: str author username.
     :param reset: True, if resetting the author name
-    :param registry: True, if registry is used
     :param no_subscribe: bool flag for developers subscription skip on register.
     :param registry_type: default registry type.
     """
