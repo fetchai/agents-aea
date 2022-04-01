@@ -59,7 +59,7 @@ from aea.configurations.loader import ConfigLoaders
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 
 
-AUTHOR = "fetchai"
+AUTHOR = "valory"
 CORE_PATH = Path("aea")
 TEST_PATH = Path("tests") / "data"
 PACKAGE_HASHES_PATH = "packages/hashes.csv"

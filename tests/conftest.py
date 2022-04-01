@@ -102,17 +102,17 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
-from packages.valory.connections.p2p_libp2p import build_node
-from packages.valory.connections.p2p_libp2p import (
+from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
+from packages.valory.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     MultiAddr,
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
 )
-from packages.valory.connections import (
+from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
-from packages.valory.connections.p2p_libp2p_mailbox import (
+from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 

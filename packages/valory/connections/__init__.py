@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the connection packages authored by open-aea"""
+"""This module contains the connection packages authored by Valory AG"""

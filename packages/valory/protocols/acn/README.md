@@ -9,7 +9,7 @@ This is a protocol for ACN (agent communication network) envelope delivery.
 ```yaml
 ---
 name: acn
-author: fetchai
+author: valory
 version: 1.1.0
 description: The protocol used for envelope delivery on the ACN.
 license: Apache-2.0

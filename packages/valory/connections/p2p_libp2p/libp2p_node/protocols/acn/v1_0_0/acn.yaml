@@ -1,6 +1,6 @@
 ---
 name: acn
-author: fetchai
+author: valory
 version: 1.0.0
 description: The protocol used for envelope delivery on the ACN.
 license: Apache-2.0

@@ -1,5 +1,5 @@
 name: p2p_libp2p
-author: open_aea
+author: valory
 version: 0.26.0
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
@@ -11,7 +11,7 @@ fingerprint:
   README.md: Qmd6xGBWWvYaxZUryir7m2SWFZX7fpzoBC3ttJiKXEJVXK
   __init__.py: QmRo1DRePomRccoY2tB3GnKV2rUoNFaaE26WDRKp4ATs33
   check_dependencies.py: QmS7PnP2G3vMrjqPHeuuTH74Nfowd33FUZkqYTUb3269Pi
-  connection.py: QmQijVDdoPpo9Vqei86Z9odJhXiCEPEw87ygLQW5oXiSGB
+  connection.py: QmePX6yBbpMtryq8vgR8N3WQVwu7obvzRa7avYns9tegyq
   consts.py: QmWAHrbN2fhqEe8o6cVLtwhWaEFp6h5cUJtJddYWbibPJj
   libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
   libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
@@ -56,7 +56,7 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/acn:1.1.0
+- valory/acn:1.1.0
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

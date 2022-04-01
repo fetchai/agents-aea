@@ -588,7 +588,7 @@ refer to <a href="../connection/" target="_blank">this guide</a>.
 
 ### The `p2p_libp2p` connection
 
-The source code of the `p2p_libp2p` connection can be downloaded
+The source code of the `valory/p2p_libp2p` connection can be downloaded
 <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">here</a>.
 
 The package provides the connection class `P2PLibp2pConnection`,
