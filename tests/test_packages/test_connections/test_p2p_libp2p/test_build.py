@@ -27,15 +27,15 @@ import pytest
 
 from aea.exceptions import AEAException
 
-from packages.open_aea.connections.p2p_libp2p import check_dependencies
-from packages.open_aea.connections.p2p_libp2p.check_dependencies import (
+from packages.valory.connections.p2p_libp2p import check_dependencies
+from packages.valory.connections.p2p_libp2p import (
     MINIMUM_GCC_VERSION,
     MINIMUM_GO_VERSION,
     build_node,
     check_versions,
     version_to_string,
 )
-from packages.open_aea.connections.p2p_libp2p.connection import LIBP2P_NODE_MODULE_NAME
+from packages.valory.connections.p2p_libp2p import LIBP2P_NODE_MODULE_NAME
 
 
 def test_check_versions():
@@ -60,7 +60,7 @@ def test_check_versions_negative_binary_not_found():
 def test_check_versions_negative_version_too_low():
     """Test check_versions - negative case, version too low."""
     with mock.patch.object(
-        check_dependencies, "get_version", return_value=(0, 0, 0),
+            check_dependencies, "get_version", return_value=(0, 0, 0),
     ):
         with pytest.raises(
             AEAException,

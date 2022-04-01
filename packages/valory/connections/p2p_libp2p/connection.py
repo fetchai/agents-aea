@@ -41,8 +41,8 @@ from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
-from packages.fetchai.protocols.acn import acn_pb2
-from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.valory.protocols.acn import acn_pb2
+from packages.valory.protocols.acn.message import AcnMessage
 from packages.valory.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
 
 

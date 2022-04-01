@@ -31,7 +31,7 @@ from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
-from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.valory.protocols.acn.message import AcnMessage
 
 
 class AcnDialogue(Dialogue):

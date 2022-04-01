@@ -36,8 +36,8 @@ from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.protocols.acn.message import AcnMessage
-from packages.open_aea.connections.p2p_libp2p.connection import (
+from packages.valory.protocols.acn.message import AcnMessage
+from packages.valory.connections.p2p_libp2p import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
     P2PLibp2pConnection,

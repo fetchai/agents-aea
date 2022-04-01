@@ -26,7 +26,7 @@ from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.open_aea.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
+from packages.valory.connections.p2p_libp2p_mailbox import PUBLIC_ID
 
 from tests.conftest import (
     DEFAULT_LEDGER,
