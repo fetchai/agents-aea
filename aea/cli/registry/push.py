@@ -179,11 +179,3 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     finally:
         for fd in files.values():
             fd.close()
-
-
-def push_item_local() -> None:
-    """Push item to local registry."""
-
-
-def push_item_ipfs() -> None:
-    """Push item to ipfs registry"""
