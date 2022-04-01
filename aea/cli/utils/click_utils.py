@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +22,18 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import click
 from click import Context, Option, UsageError, option
 
-from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.registry.settings import (
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_HTTP,
+    REGISTRY_IPFS,
+    REGISTRY_LOCAL,
+)
+from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.helpers.io import open_file
@@ -154,6 +160,41 @@ def registry_flag(
             cls=MutuallyExclusiveOption,
             help=help_remote,
             mutually_exclusive=["local",],  # noqa: E231
+        )(f)
+        return f
+
+    return wrapper
+
+
+def registry_flag_() -> Callable:
+    """Choice of one flag between: '--local/--remote'."""
+
+    cli_config = get_or_create_cli_config()
+    default_registry = cast(
+        str, cli_config.get(REGISTRY_CONFIG_KEY, {}).get("default", REGISTRY_LOCAL)
+    )
+
+    def wrapper(f: Callable) -> Callable:
+        f = option(
+            "--local",
+            "registry",
+            flag_value=REGISTRY_LOCAL,
+            help="For pushing items to local folder.",
+            default=(REGISTRY_LOCAL == default_registry),
+        )(f)
+        f = option(
+            "--ipfs",
+            "registry",
+            flag_value=REGISTRY_IPFS,
+            help="For pushing items to ipfs node.",
+            default=(REGISTRY_IPFS == default_registry),
+        )(f)
+        f = option(
+            "--http",
+            "registry",
+            flag_value=REGISTRY_HTTP,
+            help="For pushing items to http registry.",
+            default=(REGISTRY_HTTP == default_registry),
         )(f)
         return f
 

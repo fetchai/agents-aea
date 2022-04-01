@@ -491,15 +491,6 @@ class ExtendedPublicId(PublicId):
     def from_str(cls, public_id_string: str) -> "ExtendedPublicId":
         """Initialize the public id from the string.
 
-        >>> str(ExtendedPublicId.from_str("author/package_name:0.1.0:QmSomeipfshash"))
-        'author/package_name:0.1.0:QmSomeipfshash'
-
-        A bad formatted input raises value error:
-        >>> ExtendedPublicId.from_str("bad/formatted:input")
-        Traceback (most recent call last):
-        ...
-        ValueError: Input 'bad/formatted:input' is not well formatted.
-
         :param public_id_string: the public id in string format.
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
