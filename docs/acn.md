@@ -51,9 +51,9 @@ To satisfy different resource constraints and flexible deployment the ACN is imp
 
 An agent can choose which connection to use depending on the resource and trust requirements:
 
-- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`p2p_libp2p`</a> 
+- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`</a> 
 connection: the agent maintains a peer of the ACN. The agent has full control over the peer and does not need to trust any other entity.
-- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`</a> 
+- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`</a> 
 connection: the agent maintains a client connection to a server which is operated by a peer of the ACN. The agent does need to trust the entity operating the peer.
 
 All communication protocols use public cryptography to ensure security (authentication, confidentiality, and availability) using TLS handshakes with pre-shared public keys.

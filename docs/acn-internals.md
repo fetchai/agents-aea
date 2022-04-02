@@ -5,8 +5,8 @@ the main implementation of the Agent Communication Network (ACN).
 In particular:
 
 - The <a href="https://github.com/valory-xyz/open-acn" target="_blank">`open-acn`<a/> Golang library; At the moment a copy resides locally in open-aea here as `libp2p_node`. 
-- The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">`p2p_libp2p`<a/> AEA connection, written in Python, that implements the _direct connection_ with an ACN peer;
-- The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`<a/> AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer.
+- The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`<a/> AEA connection, written in Python, that implements the _direct connection_ with an ACN peer;
+- The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`<a/> AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer.
 
 It is assumed the reader already knows what is the ACN and
 its purposes; if not, we suggest reading <a href="../acn">this page<a/>.
@@ -24,7 +24,7 @@ and the message exchange involved;
   destination agent to the target agent;
 - The following section describes the functionalities
   of the AEA connections that allow to communicate through
-  the ACN: `p2p_libp2p` and `p2p_libp2p_client`;
+  the ACN: `valory/p2p_libp2p` and `valory/p2p_libp2p_client`;
 - The documentation ends with a section of known issues and limitations
   of the current implementation.
 
@@ -338,7 +338,7 @@ The following diagram explains the exchange of messages on entering an envelope 
 In the case of _direct connection_, 
 `Agent` is a Python process, whereas `Peer` is in a separate (Golang) process.
 The logic of the Python Agent client is implemented in 
-the <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">AEA connection `p2p_libp2p`</a>
+the <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`</a> connection.
 The communication between `Agent` and `Peer` is done through 
 an OS pipe for Inter-Process Communication (IPC) between the AEAs process and the libp2p node process;
 then, the message gets enqueued to an output queue by an input coroutine.
@@ -351,7 +351,7 @@ pipes, the communication is done through the network, i.e. TCP,
 with a peer which has the delegate service enabled.
 The logic of the `Agent` client connected with a delegate connection
 is implemented in the open-aea 
-<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`</a> connection.
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`</a> connection.
 
 
 <div class="mermaid">
@@ -578,15 +578,15 @@ similarly for what has been described for the envelope entrance
 To connect the AEA to the ACN network,
 there are two AEA connections available:
 
-- the `p2p_libp2p`, that implements
+- the `valory/p2p_libp2p`, that implements
   a direct connection, and
-- the `p2p_libp2p_client` connection,
+- the `valory/p2p_libp2p_client` connection,
   that implements the delegate connection.
 
 For more information on the AEA connection package type,
 refer to <a href="../connection/" target="_blank">this guide</a>.
 
-### The `p2p_libp2p` connection
+### The `valory/p2p_libp2p` connection
 
 The source code of the `valory/p2p_libp2p` connection can be downloaded
 <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">here</a>.
@@ -691,9 +691,9 @@ which receives messages from the Libp2p node.
 - the `disconnect` method stops both the receiving loop and the sending loop,
   and stops the Libp2p node.
 
-### The `p2p_libp2p_client` connection
+### The `valory/p2p_libp2p_client` connection
 
-The source code of the `p2p_libp2p` connection can be downloaded
+The source code of the `valory/p2p_libp2p_client` connection can be downloaded
 <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">here</a>.
 
 The package provides the connection class `P2PLibp2pClientConnection`,
@@ -743,7 +743,7 @@ therefore can be used by the Multiplexer as any other connection.
 </div>
 
 - The `send` method and the `receive` methods behave similarly to
-  the `send` and `receive` methods of the `p2p_libp2p` connection,
+  the `send` and `receive` methods of the `valory/p2p_libp2p` connection,
   in terms of message exchange;
   however, the communication is done via TCP rather than pipes.
 
