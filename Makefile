@@ -191,6 +191,7 @@ security:
 # update copyright headers
 .PHONY: generators
 generators:
+	python scripts/generate_all_protocols.py
 	python scripts/generate_ipfs_hashes.py
 	python scripts/generate_api_docs.py
 	python scripts/check_copyright_notice.py
