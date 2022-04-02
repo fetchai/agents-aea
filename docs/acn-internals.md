@@ -338,7 +338,7 @@ The following diagram explains the exchange of messages on entering an envelope 
 In the case of _direct connection_, 
 `Agent` is a Python process, whereas `Peer` is in a separate (Golang) process.
 The logic of the Python Agent client is implemented in 
-the <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">AEA connection `p2p_libp2p`</a>
+the <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">AEA connection `p2p_libp2p`</a>
 The communication between `Agent` and `Peer` is done through 
 an OS pipe for Inter-Process Communication (IPC) between the AEAs process and the libp2p node process;
 then, the message gets enqueued to an output queue by an input coroutine.
@@ -351,7 +351,7 @@ pipes, the communication is done through the network, i.e. TCP,
 with a peer which has the delegate service enabled.
 The logic of the `Agent` client connected with a delegate connection
 is implemented in the open-aea 
-<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`</a> connection.
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`p2p_libp2p_client`</a> connection.
 
 
 <div class="mermaid">
@@ -589,14 +589,14 @@ refer to <a href="../connection/" target="_blank">this guide</a>.
 ### The `p2p_libp2p` connection
 
 The source code of the `valory/p2p_libp2p` connection can be downloaded
-<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p" target="_blank">here</a>.
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">here</a>.
 
 The package provides the connection class `P2PLibp2pConnection`,
 which implements the `Connection` interface and
 therefore can be used by the Multiplexer as any other connection.
 
 - The `connect` method of this connection spawns a new instance
-  of the <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
+  of the <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
 (i.e. an ACN peer node) and connects to it through OS pipes. 
 Then, it sets up the _message receiving loop_,
   which enqueues messages in the input queue to be read by `read` method calls,
@@ -694,7 +694,7 @@ which receives messages from the Libp2p node.
 ### The `p2p_libp2p_client` connection
 
 The source code of the `p2p_libp2p` connection can be downloaded
-<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/open_aea/connections/p2p_libp2p_client" target="_blank">here</a>.
+<a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">here</a>.
 
 The package provides the connection class `P2PLibp2pClientConnection`,
 which implements the `Connection` interface and
@@ -771,8 +771,8 @@ Possible solutions:
 
 Code references:
 
-- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/open_aea/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L994" target="_blank">agent record removal</a>
-- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/open_aea/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L1110" target="_blank">message routing</a>
+- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L994" target="_blank">agent record removal</a>
+- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L1110" target="_blank">message routing</a>
 
 
 ### Golang Node <> Python Client `libp2p` connection
