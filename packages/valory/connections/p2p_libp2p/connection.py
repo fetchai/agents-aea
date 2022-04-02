@@ -59,7 +59,7 @@ LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
 PIPE_CONN_TIMEOUT = 10.0
 
-PUBLIC_ID = PublicId.from_str("valory/p2p_libp2p:0.26.0")
+PUBLIC_ID = PublicId.from_str("valory/p2p_libp2p:0.1.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
