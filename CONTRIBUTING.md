@@ -97,7 +97,7 @@ We have various commands which are helpful during development.
 
 ### Go Development
 
-- The `fetchai/p2p_libp2p` package is partially developed in Go.
+- The `valory/p2p_libp2p` package is partially developed in Go.
 
 - To install Go visit the [Golang site](https://golang.org/doc/install).
 
