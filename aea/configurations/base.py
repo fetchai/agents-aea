@@ -720,10 +720,16 @@ class ConnectionConfig(ComponentConfiguration):
             ExtendedPublicId.from_str(id_) for id_ in restricted_to_protocols
         }
         excluded_protocols = obj.get("excluded_protocols", set())
-        excluded_protocols = {ExtendedPublicId.from_str(id_) for id_ in excluded_protocols}
+        excluded_protocols = {
+            ExtendedPublicId.from_str(id_) for id_ in excluded_protocols
+        }
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
-        protocols = {ExtendedPublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
-        connections = {ExtendedPublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
+        protocols = {
+            ExtendedPublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())
+        }
+        connections = {
+            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())
+        }
         cert_requests = (
             [
                 # notice: yaml.load resolves datetime strings to datetime.datetime objects
@@ -749,7 +755,9 @@ class ConnectionConfig(ComponentConfiguration):
             class_name=cast(str, obj.get("class_name")),
             protocols=cast(Set[ExtendedPublicId], protocols),
             connections=cast(Set[ExtendedPublicId], connections),
-            restricted_to_protocols=cast(Set[ExtendedPublicId], restricted_to_protocols),
+            restricted_to_protocols=cast(
+                Set[ExtendedPublicId], restricted_to_protocols
+            ),
             excluded_protocols=cast(Set[ExtendedPublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
@@ -1079,9 +1087,15 @@ class SkillConfig(ComponentConfiguration):
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
         build_entrypoint = cast(Optional[str], obj.get("build_entrypoint"))
-        connections = {ExtendedPublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
-        protocols = {ExtendedPublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
-        contracts = {ExtendedPublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
+        connections = {
+            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())
+        }
+        protocols = {
+            ExtendedPublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())
+        }
+        contracts = {
+            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())
+        }
         skills = {ExtendedPublicId.from_str(id_) for id_ in obj.get(SKILLS, set())}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
@@ -1322,10 +1336,10 @@ class AgentConfig(PackageConfiguration):
     def component_configurations(self, d: Dict[ComponentId, Dict]) -> None:
         """Set the component configurations."""
         package_type_to_set = {
-            PackageType.PROTOCOL: self.protocols,
-            PackageType.CONNECTION: self.connections,
-            PackageType.CONTRACT: self.contracts,
-            PackageType.SKILL: self.skills,
+            PackageType.PROTOCOL: {epid.to_public_id() for epid in self.protocols},
+            PackageType.CONNECTION: {epid.to_public_id() for epid in self.connections},
+            PackageType.CONTRACT: {epid.to_public_id() for epid in self.contracts},
+            PackageType.SKILL: {epid.to_public_id() for epid in self.skills},
         }
         for component_id, component_configuration in d.items():
             enforce(
@@ -1513,10 +1527,14 @@ class AgentConfig(PackageConfiguration):
         )
 
         # parse contracts public ids
-        agent_config.contracts = set(map(ExtendedPublicId.from_str, obj.get(CONTRACTS, []),))
+        agent_config.contracts = set(
+            map(ExtendedPublicId.from_str, obj.get(CONTRACTS, []),)
+        )
 
         # parse protocol public ids
-        agent_config.protocols = set(map(ExtendedPublicId.from_str, obj.get(PROTOCOLS, []),))
+        agent_config.protocols = set(
+            map(ExtendedPublicId.from_str, obj.get(PROTOCOLS, []),)
+        )
 
         # parse skills public ids
         agent_config.skills = set(map(ExtendedPublicId.from_str, obj.get(SKILLS, []),))
@@ -1792,7 +1810,9 @@ class ContractConfig(ComponentConfiguration):
         dependencies = cast(
             Dependencies, dependencies_from_json(obj.get("dependencies", {}))
         )
-        contracts = {ExtendedPublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
+        contracts = {
+            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())
+        }
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
