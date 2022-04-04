@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,16 +80,7 @@ class TestCreate:
         )
         cls.cli_config_patch.start()
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0, result.stdout
 
@@ -260,16 +251,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -325,16 +307,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -384,16 +357,7 @@ class TestCreateFailsWhenExceptionOccurs:
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -439,16 +403,7 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 

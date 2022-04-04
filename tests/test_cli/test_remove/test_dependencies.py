@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,15 +79,7 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
         os.chdir(self.t)
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
         assert result.exit_code == 0

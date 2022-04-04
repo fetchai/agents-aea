@@ -497,8 +497,12 @@ class ExtendedPublicId(PublicId):
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "ExtendedPublicId":
-        """Initialize the public id from the string."""
+        """Initialize the public id from the string.
 
+        :param public_id_string: the public id in string format.
+        :return: the public id object.
+        :raises ValueError: if the string in input is not well formatted.
+        """
         match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
         if match is None:
             raise ValueError(

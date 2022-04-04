@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,16 +77,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -172,16 +163,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -261,16 +243,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -327,16 +300,7 @@ class TestAddSkillFailsWhenDifferentPublicId:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -390,16 +354,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -471,16 +426,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 

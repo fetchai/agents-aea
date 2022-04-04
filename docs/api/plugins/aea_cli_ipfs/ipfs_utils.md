@@ -51,7 +51,7 @@ Set up the IPFS daemon.
 #### `__`init`__`
 
 ```python
-def __init__(offline: bool = False, api_url: str = "http://127.0.0.1:5001")
+def __init__(node_url: str = "http://127.0.0.1:5001")
 ```
 
 Initialise IPFS daemon.
@@ -126,56 +126,6 @@ def __exit__(exc_type, exc_val, exc_tb) -> None
 
 Terminate the ipfs daemon.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.BaseIPFSToolException"></a>
-
-## BaseIPFSToolException Objects
-
-```python
-class BaseIPFSToolException(Exception)
-```
-
-Base ipfs tool exception.
-
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.RemoveError"></a>
-
-## RemoveError Objects
-
-```python
-class RemoveError(BaseIPFSToolException)
-```
-
-Exception on remove.
-
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.PublishError"></a>
-
-## PublishError Objects
-
-```python
-class PublishError(BaseIPFSToolException)
-```
-
-Exception on publish.
-
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.NodeError"></a>
-
-## NodeError Objects
-
-```python
-class NodeError(BaseIPFSToolException)
-```
-
-Exception for node connection check.
-
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.DownloadError"></a>
-
-## DownloadError Objects
-
-```python
-class DownloadError(BaseIPFSToolException)
-```
-
-Exception on download failed.
-
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool"></a>
 
 ## IPFSTool Objects
@@ -191,7 +141,7 @@ IPFS tool to add, publish, remove, download directories.
 #### `__`init`__`
 
 ```python
-def __init__(addr: Optional[str] = None, offline: bool = True)
+def __init__(addr: Optional[str] = None)
 ```
 
 Init tool.
@@ -199,7 +149,6 @@ Init tool.
 **Arguments**:
 
 - `addr`: multiaddr string for IPFS client.
-- `offline`: ipfs mode.
 
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.addr"></a>
 
@@ -211,6 +160,16 @@ def addr() -> str
 ```
 
 Node address
+
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.all_pins"></a>
+
+#### all`_`pins
+
+```python
+def all_pins(recursive_only: bool = True) -> Set[str]
+```
+
+Returns a list of all pins.
 
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.add"></a>
 

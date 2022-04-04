@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ import click
 from aea import get_current_aea_version
 from aea.cli.add import add_item
 from aea.cli.init import do_init
-from aea.cli.registry.settings import REGISTRY_HTTP
+from aea.cli.registry.settings import REGISTRY_LOCAL
 from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
@@ -128,7 +128,7 @@ def create_aea(
     if author is not None:
         if is_local:
             do_init(  # pragma: nocover
-                author, False, False, REGISTRY_HTTP  # type: ignore
+                author, False, False, REGISTRY_LOCAL  # type: ignore
             )
         else:
             raise click.ClickException(

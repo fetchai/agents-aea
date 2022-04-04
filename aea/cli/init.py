@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,7 @@ from aea.cli.registry.settings import (
     REGISTRY_LOCAL,
 )
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
+from aea.cli.utils.click_utils import registry_flag_
 from aea.cli.utils.config import get_or_create_cli_config, update_cli_config
 from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY
 from aea.cli.utils.context import Context
@@ -42,15 +43,15 @@ from aea.cli.utils.package_utils import validate_author_name, validate_registry_
 
 @click.command()
 @click.option("--author", type=str, required=False)
-@click.option("--registry-type", "-r", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
+@registry_flag_()
 @pass_ctx
 def init(  # pylint: disable=unused-argument
-    ctx: Context, author: str, reset: bool, no_subscribe: bool, registry_type: str,
+    ctx: Context, author: str, reset: bool, no_subscribe: bool, registry: str,
 ) -> None:
     """Initialize your AEA configurations."""
-    do_init(author, reset, no_subscribe, registry_type)
+    do_init(author, reset, no_subscribe, registry)
 
 
 def do_init(author: str, reset: bool, no_subscribe: bool, registry_type: str) -> None:
@@ -66,10 +67,6 @@ def do_init(author: str, reset: bool, no_subscribe: bool, registry_type: str) ->
     if reset or config.get(AUTHOR_KEY, None) is None:
         author = validate_author_name(author)
         registry_type = validate_registry_type(registry_type)
-        if registry_type == REGISTRY_HTTP:
-            raise click.ClickException(
-                "We don't have support for HTTP registry right now."
-            )
 
         update_cli_config({AUTHOR_KEY: author})
         if registry_type == REGISTRY_HTTP:
