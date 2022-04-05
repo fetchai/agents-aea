@@ -257,7 +257,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - uses: actions/setup-go@master
