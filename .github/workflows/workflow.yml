@@ -48,12 +48,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - uses: actions/setup-go@master
         with:
-          go-version: "1.17.1"
+          go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -80,7 +80,7 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.28
+          version: v1.28.3
           working-directory: libs/go/aealite
 
   common_checks_3:
