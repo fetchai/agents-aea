@@ -26,11 +26,16 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-import click
 import jsonschema
 from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool, NodeError
 
-from aea.configurations.base import PublicId
+from aea.cli.registry.settings import (
+    DEFAULT_IPFS_URL,
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_IPFS,
+)
+from aea.cli.utils.config import get_or_create_cli_config
+from aea.configurations.base import ExtendedPublicId
 
 
 _default_logger = logging.getLogger(__name__)
@@ -106,16 +111,18 @@ def load_local_registry(registry_path: str = LOCAL_REGISTRY_PATH) -> LocalRegist
 
 
 def get_ipfs_hash_from_public_id(
-    item_type: str, public_id: PublicId, registry_path: str = LOCAL_REGISTRY_PATH,
+    item_type: str,
+    public_id: ExtendedPublicId,
+    registry_path: str = LOCAL_REGISTRY_PATH,
 ) -> Optional[str]:
     """Get IPFS hash from local registry."""
 
     registry_data = load_local_registry(registry_path=registry_path)
     if public_id.package_version.is_latest:
-        package_versions: List[PublicId] = [
-            PublicId.from_str(_public_id)
+        package_versions: List[ExtendedPublicId] = [
+            ExtendedPublicId.from_str(_public_id)
             for _public_id in registry_data.get(f"{item_type}s", {}).keys()
-            if public_id.same_prefix(PublicId.from_str(_public_id))
+            if public_id.same_prefix(ExtendedPublicId.from_str(_public_id))
         ]
         package_versions = list(
             reversed(sorted(package_versions, key=lambda x: x.package_version))
@@ -129,12 +136,12 @@ def get_ipfs_hash_from_public_id(
 
 def register_item_to_local_registry(
     item_type: str,
-    public_id: Union[str, PublicId],
+    public_id: Union[str, ExtendedPublicId],
     package_hash: str,
     registry_path: str = LOCAL_REGISTRY_PATH,
 ) -> None:
     """
-    Add PublicId to hash mapping in the local registry.
+    Add ExtendedPublicId to hash mapping in the local registry.
 
     :param item_type: item type.
     :param public_id: public id of package.
@@ -148,25 +155,41 @@ def register_item_to_local_registry(
 
 
 def fetch_ipfs(
-    item_type: str,
-    public_id: PublicId,
-    cwd: str,  # pylint: disable=unused-argument
-    dest: str,
+    item_type: str, public_id: ExtendedPublicId, dest: str, remote: bool = True,
 ) -> Optional[Path]:
     """Fetch a package from IPFS node."""
-    package_hash = get_ipfs_hash_from_public_id(item_type, public_id)
-    if package_hash is None:
-        return None
+    if remote:
+        multiaddr = (
+            get_or_create_cli_config()
+            .get(REGISTRY_CONFIG_KEY, {})
+            .get("settings", {})
+            .get(REGISTRY_IPFS, {})
+            .get("ipfs_node")
+        )
+        ipfs_tool = IPFSTool(multiaddr)
+    else:
 
-    ipfs_tool = IPFSTool()
+        ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL)
+
+    try:
+        package_hash = public_id.hash
+    except ValueError:
+        package_hash = (
+            None if remote else get_ipfs_hash_from_public_id(item_type, public_id)
+        )
+
+    if package_hash is None:
+        raise Exception("Please provide hash.")
+
     try:
         ipfs_tool.check_ipfs_node_running()
     except NodeError:  # pragma: nocover
-        click.echo("Can not connect to the local ipfs node. Starting own one.")
-        ipfs_tool.daemon.start()
+        if not remote:
+            ipfs_tool.daemon.start()
+        else:
+            raise Exception(f"Cannot connect to node with addr: {ipfs_tool.addr}")
 
     try:
-        click.echo(f"Downloading {public_id}.")
         *_download_dir, _ = os.path.split(dest)
         download_dir = os.path.sep.join(_download_dir)
         ipfs_tool.download(package_hash, download_dir)
@@ -176,4 +199,4 @@ def fetch_ipfs(
 
     except DownloadError as e:  # pragma: nocover
         ipfs_tool.daemon.stop()
-        raise click.ClickException(str(e)) from e
+        raise Exception(str(e)) from e
