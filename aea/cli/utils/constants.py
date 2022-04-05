@@ -33,6 +33,7 @@ from aea.configurations.constants import (
     SKILLS,
     VENDOR,
 )
+from aea.configurations.data_types import ExtendedPublicId
 from aea.helpers.constants import FROM_STRING_TO_TYPE
 
 
@@ -74,3 +75,8 @@ DEFAULT_CLI_CONFIG = {
 
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
 REQUIREMENTS = "requirements.txt"
+DUMMY_AUTHOR = "__DUMMY__AUTHOR__"
+DUMMY_PACKAGE = "__DUMMY_PACKAGE__"
+DUMMY_PACKAGE_ID = ExtendedPublicId.from_json(
+    {"author": DUMMY_AUTHOR, "name": DUMMY_PACKAGE, "version": "latest"}
+)

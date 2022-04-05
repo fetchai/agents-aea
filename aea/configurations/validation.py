@@ -33,7 +33,12 @@ from jsonschema._validators import additionalProperties
 from jsonschema.validators import extend
 
 from aea.configurations.constants import AGENT
-from aea.configurations.data_types import ComponentId, ComponentType, PublicId
+from aea.configurations.data_types import (
+    ComponentId,
+    ComponentType,
+    ExtendedPublicId,
+    PublicId,
+)
 from aea.exceptions import AEAValidationError
 from aea.helpers.base import dict_to_path_value
 from aea.helpers.env_vars import is_env_variable
@@ -169,7 +174,7 @@ class ConfigValidator:
             )
         public_id_str = component_configuration_json.pop("public_id")
         component_type = ComponentType(component_configuration_json.pop("type"))
-        component_public_id = PublicId.from_str(public_id_str)
+        component_public_id = ExtendedPublicId.from_str(public_id_str)
         component_id = ComponentId(component_type, component_public_id)
         return component_id
 

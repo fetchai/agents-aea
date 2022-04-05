@@ -61,7 +61,7 @@ class ConnectionStates(Enum):
 class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
-    connection_id = None  # type: PublicId
+    connection_id = None  # type: ExtendedPublicId
 
     def __init__(
         self,

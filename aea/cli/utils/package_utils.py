@@ -61,6 +61,7 @@ from aea.configurations.constants import (
     SKILL,
     VENDOR,
 )
+from aea.configurations.data_types import ExtendedPublicId
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
@@ -69,7 +70,9 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import compute_specifier_from_version, recursive_update
+from aea.helpers.dependency_tree import COMPONENTS
 from aea.helpers.io import open_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.sym_link import create_symlink
 
 
@@ -478,7 +481,9 @@ def is_fingerprint_correct(
     return item_config.fingerprint == fingerprint
 
 
-def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
+def register_item(
+    ctx: Context, item_type: str, item_public_id: ExtendedPublicId
+) -> None:
     """
     Register item in agent configuration.
 
@@ -525,7 +530,7 @@ def is_item_present(
     path: str,
     agent_config: AgentConfig,
     item_type: str,
-    item_public_id: PublicId,
+    item_public_id: ExtendedPublicId,
     is_vendor: bool = True,
     with_version: bool = False,
 ) -> bool:
@@ -558,6 +563,25 @@ def is_item_present(
     component_id = ComponentId(ComponentType(item_type), item_public_id)
     component_is_registered = component_id in agent_config.package_dependencies
     return component_is_registered and does_path_exist
+
+
+def is_item_with_hash_present(
+    path: str, agent_config: AgentConfig, package_hash: str, is_vendor: bool = True
+) -> Optional[ExtendedPublicId]:
+    """Returns a public id if item with provided hash is present."""
+
+    for component_id in agent_config.all_components_id:
+        if component_id.public_id.hash == package_hash:
+            return component_id.public_id
+
+    hash_tool = IPFSHashOnly()
+    package_path = Path(path) / ("vendor" if is_vendor else "packages")
+    for component_type, config_file_name in COMPONENTS:
+        for config_file_path in package_path.glob(f"**/{config_file_name}"):
+            component_path = config_file_path.parent
+            calculated_hash = hash_tool.hash_directory(component_path)
+            if package_hash == calculated_hash:
+                return load_item_config(component_type, component_path).public_id
 
 
 def get_item_id_present(

@@ -19,76 +19,101 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea push' subcommand."""
 import os
+from pathlib import Path
 from shutil import copytree
 from typing import cast
 
 import click
 from click.exceptions import ClickException
 
-from aea.cli.registry.push import check_package_public_id, push_item
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.registry.push import check_package_public_id
+from aea.cli.registry.settings import REGISTRY_CONFIG_KEY, REGISTRY_HTTP, REGISTRY_LOCAL
+from aea.cli.utils.click_utils import component_flag, registry_flag_
+from aea.cli.utils.config import get_or_create_cli_config, load_item_config
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
 )
 from aea.configurations.base import PublicId
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.configurations.data_types import ExtendedPublicId
 
 
-@click.group()
-@click.option("--local", is_flag=True, help="For pushing items to local folder.")
+try:
+    from aea_cli_ipfs.core import IPFSTool
+
+    IS_IPFS_PLUGIN_INSTALLED = True
+except ImportError:
+    IS_IPFS_PLUGIN_INSTALLED = False
+
+
+@click.command()
 @click.pass_context
-@check_aea_project
-def push(click_context: click.Context, local: bool) -> None:
+@registry_flag_()
+@component_flag(wrap_public_id=False)
+@click.argument("path", type=click.Path(exists=True, dir_okay=True))
+def push(
+    click_context: click.Context, component_type: str, path: Path, registry: str,
+) -> None:
     """Push a non-vendor package of the agent to the registry."""
     ctx = cast(Context, click_context.obj)
-    ctx.set_config("local", local)
+    component_path = Path(path)
+    item_config = load_item_config(component_type, component_path)
 
-
-@push.command(name=CONNECTION)
-@click.argument("connection-id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def connection(ctx: Context, connection_id: PublicId) -> None:
-    """Push a connection to the registry or save it in local registry."""
-    if ctx.config.get("local"):
-        _save_item_locally(ctx, CONNECTION, connection_id)
+    if registry == REGISTRY_LOCAL:
+        push_item_local(ctx, component_type, component_path, item_config.public_id)
+    elif registry == REGISTRY_HTTP:
+        push_item_http()
     else:
-        push_item(ctx, CONNECTION, connection_id)
+        push_item_ipfs(component_path, item_config.public_id)
 
 
-@push.command(name=CONTRACT)
-@click.argument("contract-id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def contract(ctx: Context, contract_id: PublicId) -> None:
-    """Push a contract to the registry or save it in local registry."""
-    if ctx.config.get("local"):
-        _save_item_locally(ctx, CONTRACT, contract_id)
-    else:
-        push_item(ctx, CONTRACT, contract_id)
+def push_item_local(
+    ctx: Context, item_type: str, component_path: Path, item_id: ExtendedPublicId
+) -> None:
+    """Push items to the local registry."""
+    item_type_plural = item_type + "s"
+
+    try:
+        registry_path = ctx.registry_path
+    except ValueError:  # pragma: nocover
+        registry_path = (
+            get_or_create_cli_config()
+            .get(REGISTRY_CONFIG_KEY, {})
+            .get("settings", {})
+            .get(REGISTRY_LOCAL, {})
+            .get("default_packages_path")
+        )
+        if registry_path is None:
+            raise click.ClickException(f"Registry path was not provided.")
+        registry_path = cast(str, registry_path)
+
+    target_path = try_get_item_target_path(
+        registry_path, item_id.author, item_type_plural, item_id.name,
+    )
+    copytree(component_path, target_path)
+    click.echo(
+        f'{item_type.title()} "{item_id}" successfully saved in packages folder.'
+    )
 
 
-@push.command(name=PROTOCOL)
-@click.argument("protocol-id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def protocol(ctx: Context, protocol_id: PublicId) -> None:
-    """Push a protocol to the registry or save it in local registry."""
-    if ctx.config.get("local"):
-        _save_item_locally(ctx, PROTOCOL, protocol_id)
-    else:
-        push_item(ctx, PROTOCOL, protocol_id)
+def push_item_http() -> None:
+    """Push items to the http registry."""
 
 
-@push.command(name=SKILL)
-@click.argument("skill-id", type=PublicIdParameter(), required=True)
-@pass_ctx
-def skill(ctx: Context, skill_id: PublicId) -> None:
-    """Push a skill to the registry or save it in local registry."""
-    if ctx.config.get("local"):
-        _save_item_locally(ctx, SKILL, skill_id)
-    else:
-        push_item(ctx, SKILL, skill_id)
+def push_item_ipfs(component_path: Path, public_id: ExtendedPublicId) -> None:
+    """Push items to the ipfs registry."""
+
+    if not IS_IPFS_PLUGIN_INSTALLED:
+        raise click.ClickException(
+            "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
+        )
+
+    ipfs_tool = IPFSTool()
+    _, package_hash, _ = ipfs_tool.add(component_path)
+    click.echo("Pushed component with:")
+    click.echo(f"\tPublicId: {public_id}")
+    click.echo(f"\tPackage hash: {package_hash}")
 
 
 def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:

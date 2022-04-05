@@ -575,6 +575,15 @@ class ExtendedPublicId(PublicId):
             package_hash=self.hash,
         )
 
+    def __eq__(self, other: Any) -> bool:
+        """Compare with another object."""
+        return (
+            (isinstance(other, PublicId) or isinstance(other, ExtendedPublicId))
+            and self.author == other.author
+            and self.name == other.name
+            and self.version == other.version
+        )
+
 
 class PackageId:
     """A package identifier."""
@@ -665,7 +674,7 @@ class PackageId:
             cls.PACKAGE_ID_URI_REGEX, package_id_uri_path
         )[0][:4]
         package_type = PackageType(package_type_str)
-        public_id = PublicId(username, package_name, version)
+        public_id = ExtendedPublicId(username, package_name, version)
         return PackageId(package_type, public_id)
 
     @property

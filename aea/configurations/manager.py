@@ -44,7 +44,12 @@ from aea.configurations.constants import (
     SKILLS,
     VENDOR,
 )
-from aea.configurations.data_types import ComponentType, PackageIdPrefix, PublicId
+from aea.configurations.data_types import (
+    ComponentType,
+    ExtendedPublicId,
+    PackageIdPrefix,
+    PublicId,
+)
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.validation import SAME_MARK, filter_data
 from aea.exceptions import AEAException, enforce
@@ -206,7 +211,7 @@ def handle_dotted_path(
                 f"'{resource_type_plural}' is not a valid component type. Please use one of {ComponentType.plurals()}."
             ) from e
         component_id = ComponentId(
-            component_type, PublicId(resource_author, resource_name)
+            component_type, ExtendedPublicId(resource_author, resource_name)
         )
 
         # find path to the resource directory
@@ -238,7 +243,7 @@ def handle_dotted_path(
         component_type = ComponentType(resource_type_singular)
         resource_author = author
         component_id = ComponentId(
-            component_type, PublicId(resource_author, resource_name)
+            component_type, ExtendedPublicId(resource_author, resource_name)
         )
 
         # find path to the resource directory

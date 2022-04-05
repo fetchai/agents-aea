@@ -42,16 +42,8 @@ DEFAULT_REGISTRY_CONFIG: Dict = {
             "auth_token": None,  # auth token for registry
             "registry_api_url": None,  # registry url
         },
-        REGISTRY_IPFS: {
-            "ipfs_node": None,  # IPFS url (in multiaddr format)
-            "hash_resolver": None,  # Url to hash resolver service,
-            "registries": {
-                "component": {"contract_address": None},
-                "agent": {"contract_address": None},
-                "chain_id": None,
-                "rpc_url": None,
-            },
-        },
+        REGISTRY_IPFS: {"ipfs_node": None},  # IPFS url (in multiaddr format)
         REGISTRY_LOCAL: {"default_packages_path": None},
     },
 }
+DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"

@@ -349,10 +349,9 @@ class PackageConfiguration(Configuration, ABC):
         return self._aea_version_specifiers
 
     @property
-    def public_id(self) -> PublicId:
+    def public_id(self) -> ExtendedPublicId:
         """Get the public id."""
-        # TODO : Figure out how to update this method for ExtendedPublicId
-        return PublicId(self.author, self.name, self.version)
+        return ExtendedPublicId(self.author, self.name, self.version)
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:

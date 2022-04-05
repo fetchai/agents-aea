@@ -22,14 +22,28 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import click
-from click import Context, Option, UsageError, option
+from click import Context, Option, UsageError, argument, option
 
-from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.registry.settings import (
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_HTTP,
+    REGISTRY_IPFS,
+    REGISTRY_LOCAL,
+)
+from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
+from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
+)
+from aea.configurations.data_types import ExtendedPublicId
 from aea.helpers.io import open_file
 
 
@@ -101,6 +115,47 @@ class PublicIdParameter(click.ParamType):
             self.fail(value, param, ctx)
 
 
+class ExtendedPublicIdParameter(click.ParamType):
+    """Define a public id parameter for Click applications."""
+
+    def get_metavar(self, param: Any) -> str:
+        """Return the metavar default for this param if it provides one."""
+        return "PUBLIC_ID_OR_HASH"
+
+    @staticmethod
+    def _parse_public_id(value: str) -> Optional[ExtendedPublicId]:
+        """Parse extended public from string."""
+        try:
+            return ExtendedPublicId.from_str(value)
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _parse_hash(value: str) -> Optional[ExtendedPublicId]:
+        """Parse extended public from string."""
+        try:
+            return ExtendedPublicId.from_json(
+                {**DUMMY_PACKAGE_ID.json, "package_hash": value}
+            )
+        except ValueError:
+            return None
+
+    def convert(
+        self, value: str, param: Any, ctx: Optional[click.Context]
+    ) -> ExtendedPublicId:
+        """Convert the value. This is not invoked for values that are `None` (the missing value)."""
+
+        parsed = self._parse_public_id(value)
+        if parsed is not None:
+            return parsed
+
+        parsed = self._parse_hash(value)
+        if parsed is None:
+            self.fail(value, param, ctx)
+
+        return parsed
+
+
 class AgentDirectory(click.Path):
     """A click.Path, but with further checks  applications."""
 
@@ -168,6 +223,61 @@ def registry_path_option(f: Callable) -> Callable:
         required=False,
         help="Provide a local registry directory full path.",
     )(f)
+
+
+def registry_flag_() -> Callable:
+    """Choice of one flag between: '--local/--remote'."""
+
+    cli_config = get_or_create_cli_config()
+    default_registry = cast(
+        str, cli_config.get(REGISTRY_CONFIG_KEY, {}).get("default", REGISTRY_LOCAL)
+    )
+
+    def wrapper(f: Callable) -> Callable:
+        f = option(
+            "--local",
+            "registry",
+            flag_value=REGISTRY_LOCAL,
+            help="For pushing items to local folder.",
+            default=(REGISTRY_LOCAL == default_registry),
+        )(f)
+        f = option(
+            "--ipfs",
+            "registry",
+            flag_value=REGISTRY_IPFS,
+            help="For pushing items to ipfs node.",
+            default=(REGISTRY_IPFS == default_registry),
+        )(f)
+        f = option(
+            "--http",
+            "registry",
+            flag_value=REGISTRY_HTTP,
+            help="For pushing items to http registry.",
+            default=(REGISTRY_HTTP == default_registry),
+        )(f)
+        return f
+
+    return wrapper
+
+
+def component_flag(wrap_public_id: bool = False,) -> Callable:
+    """Wraps a command with component types argument"""
+
+    def wrapper(f: Callable) -> Callable:
+        if wrap_public_id:
+            f = argument("public_id", type=ExtendedPublicIdParameter(), required=True)(
+                f
+            )
+
+        f = argument(
+            "component_type",
+            type=click.Choice((CONNECTION, CONTRACT, PROTOCOL, SKILL)),
+            required=True,
+        )(f)
+
+        return f
+
+    return wrapper
 
 
 class MutuallyExclusiveOption(Option):
