@@ -18,10 +18,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Script to update PublicIds to ExtendedPublicIds for package dependencies."""
+"""Script to update PublicIds to PublicIds for package dependencies."""
 
 from pathlib import Path
-from typing import Dict
+from typing import Dict, cast
 
 import click
 
@@ -37,13 +37,13 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import ExtendedPublicId, PublicId
+from aea.configurations.data_types import PublicId
 from aea.helpers.dependency_tree import (
     DependecyTree,
     dump_yaml,
     load_yaml,
     to_plural,
-    to_public_id,
+    without_hash,
 )
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -70,7 +70,7 @@ def extend_public_ids(
         if components in item_config:
             item_config[components] = [
                 str(
-                    ExtendedPublicId.from_json(
+                    PublicId.from_json(
                         dict(
                             **dependency.json,
                             package_hash=public_id_to_hash_mappings.get(str(dependency))
@@ -78,7 +78,7 @@ def extend_public_ids(
                     )
                 )
                 for dependency in map(
-                    lambda x: to_public_id(str(x)), item_config.get(components)
+                    lambda x: without_hash(str(x)), item_config.get(components, {})
                 )
             ]
 
@@ -95,7 +95,7 @@ def main(packages_dir: Path) -> None:
 
     hash_tool = IPFSHashOnly()
 
-    public_id_to_hash_mappings = {}
+    public_id_to_hash_mappings: Dict = {}
     dependency_tree = DependecyTree.generate(packages_dir)
 
     for tree_level in dependency_tree:
@@ -109,13 +109,15 @@ def main(packages_dir: Path) -> None:
                 / public_id.name
             )
 
-            config_file = package_path / COMPONENT_TO_FILE.get(component_type)
+            config_file = package_path / cast(
+                str, COMPONENT_TO_FILE.get(component_type)
+            )
             item_config, extra_config = load_yaml(config_file)
 
             extend_public_ids(item_config, public_id_to_hash_mappings)
             dump_yaml(config_file, item_config, extra_config)
 
-            package_hash = hash_tool.hash_directory(package_path)
+            package_hash = hash_tool.hash_directory(str(package_path))
             public_id_to_hash_mappings[str(public_id)] = package_hash
 
 
