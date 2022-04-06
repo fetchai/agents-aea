@@ -235,16 +235,18 @@ class PublicId(JSONSerializable):
     True
     """
 
-    __slots__ = ("_author", "_name", "_package_version")
+    __slots__ = ("_author", "_name", "_package_version", "_package_hash")
 
     AUTHOR_REGEX = SIMPLE_ID_REGEX
+    IPFS_HASH_REGEX = IPFS_HASH_REGEX
     PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
+
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
     VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
     PUBLIC_ID_URI_REGEX = (
         fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
+    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:{VERSION_REGEX})?(:{IPFS_HASH_REGEX})?$"
 
     ANY_VERSION = "any"
     LATEST_VERSION = "latest"
@@ -254,6 +256,7 @@ class PublicId(JSONSerializable):
         author: SimpleIdOrStr,
         name: SimpleIdOrStr,
         version: Optional[PackageVersionLike] = None,
+        package_hash: Optional[IPFSHashOrStr] = None,
     ) -> None:
         """Initialize the public identifier."""
         self._author = SimpleId(author)
@@ -262,6 +265,9 @@ class PublicId(JSONSerializable):
             PackageVersion(version)
             if version is not None
             else PackageVersion(self.LATEST_VERSION)
+        )
+        self._package_hash = (
+            IPFSHash(package_hash) if package_hash is not None else None
         )
 
     @property
@@ -284,17 +290,24 @@ class PublicId(JSONSerializable):
         """Get the package version object."""
         return self._package_version
 
-    def to_any(self) -> "PublicId":
-        """Return the same public id, but with any version."""
-        return PublicId(self.author, self.name, self.ANY_VERSION)
+    @property
+    def hash(self,) -> str:
+        """Returns the hash for the package."""
+        if self._package_hash is None:
+            raise ValueError("Package hash was not provided.")
+        return str(self._package_hash)
 
     def same_prefix(self, other: "PublicId") -> bool:
         """Check if the other public id has the same author and name of this."""
         return self.name == other.name and self.author == other.author
 
+    def to_any(self) -> "PublicId":
+        """Return the same public id, but with any version."""
+        return PublicId(self.author, self.name, self.ANY_VERSION, self._package_hash)
+
     def to_latest(self) -> "PublicId":
         """Return the same public id, but with latest version."""
-        return PublicId(self.author, self.name, self.LATEST_VERSION)
+        return PublicId(self.author, self.name, self.LATEST_VERSION, self._package_hash)
 
     @classmethod
     def is_valid_str(cls, public_id_string: str) -> bool:
@@ -309,17 +322,7 @@ class PublicId(JSONSerializable):
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
-        """
-        Initialize the public id from the string.
-
-        >>> str(PublicId.from_str("author/package_name:0.1.0"))
-        'author/package_name:0.1.0'
-
-        A bad formatted input raises value error:
-        >>> PublicId.from_str("bad/formatted:input")
-        Traceback (most recent call last):
-        ...
-        ValueError: Input 'bad/formatted:input' is not well formatted.
+        """Initialize the public id from the string.
 
         :param public_id_string: the public id in string format.
         :return: the public id object.
@@ -330,10 +333,17 @@ class PublicId(JSONSerializable):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
+
         username = match.group(1)
         package_name = match.group(2)
-        version = match.group(3)[1:] if ":" in public_id_string else None
-        return PublicId(username, package_name, version)
+        version = match.group(3)
+        if version is not None:
+            version = version.replace(":", "")
+        package_hash = match.group(13)
+        if package_hash is not None:
+            package_hash = package_hash.replace(":", "")
+
+        return PublicId(username, package_name, version, package_hash)
 
     @classmethod
     def try_from_str(cls, public_id_string: str) -> Optional["PublicId"]:
@@ -391,22 +401,26 @@ class PublicId(JSONSerializable):
     @property
     def json(self) -> Dict:
         """Compute the JSON representation."""
-        return {"author": self.author, "name": self.name, "version": self.version}
+        return {
+            "author": self.author,
+            "name": self.name,
+            "version": self.version,
+            "package_hash": self._package_hash,
+        }
 
     @classmethod
     def from_json(cls, obj: Dict) -> "PublicId":
         """Build from a JSON object."""
-        return PublicId(obj["author"], obj["name"], obj["version"],)
+        return PublicId(
+            obj["author"],
+            obj["name"],
+            obj.get("version", None),
+            obj.get("package_hash", None),
+        )
 
     def __hash__(self) -> int:
         """Get the hash."""
         return hash((self.author, self.name, self.version))
-
-    def __str__(self) -> str:
-        """Get the string representation."""
-        return "{author}/{name}:{version}".format(
-            author=self.author, name=self.name, version=self.version
-        )
 
     def __repr__(self) -> str:
         """Get the representation."""
@@ -454,134 +468,22 @@ class PublicId(JSONSerializable):
             )
         )
 
-
-class ExtendedPublicId(PublicId):
-    """Extended public id for hash."""
-
-    __slots__ = ("_author", "_name", "_package_version", "_package_hash")
-
-    IPFS_HASH_REGEX = IPFS_HASH_REGEX
-    PUBLIC_ID_REGEX = fr"^({PublicId.AUTHOR_REGEX})/({PublicId.PACKAGE_NAME_REGEX})(:{PublicId.VERSION_REGEX})?(:{IPFS_HASH_REGEX})?"
-
-    def __init__(
-        self,
-        author: SimpleIdOrStr,
-        name: SimpleIdOrStr,
-        version: Optional[PackageVersionLike] = None,
-        package_hash: Optional[IPFSHashOrStr] = None,
-    ) -> None:
-        """Initialize object."""
-        super().__init__(author, name, version)
-        self._package_hash = (
-            IPFSHash(package_hash) if package_hash is not None else None
-        )
-
-    @property
-    def hash(self,) -> str:
-        """Returns the hash for the package."""
-        if self._package_hash is None:
-            raise ValueError("Package hash was not provided.")
-        return str(self._package_hash)
-
-    def to_any(self) -> "ExtendedPublicId":
-        """Return the same public id, but with any version."""
-        return ExtendedPublicId(
-            self.author, self.name, self.ANY_VERSION, self._package_hash
-        )
-
-    def to_latest(self) -> "ExtendedPublicId":
-        """Return the same public id, but with latest version."""
-        return ExtendedPublicId(
-            self.author, self.name, self.LATEST_VERSION, self._package_hash
-        )
-
-    @classmethod
-    def from_str(cls, public_id_string: str) -> "ExtendedPublicId":
-        """Initialize the public id from the string.
-
-        :param public_id_string: the public id in string format.
-        :return: the public id object.
-        :raises ValueError: if the string in input is not well formatted.
-        """
-        match = re.match(cls.PUBLIC_ID_REGEX, public_id_string)
-        if match is None:
-            raise ValueError(
-                "Input '{}' is not well formatted.".format(public_id_string)
-            )
-
-        username = match.group(1)
-        package_name = match.group(2)
-        version = match.group(3)
-        if version is not None:
-            version = version.replace(":", "")
-        package_hash = match.group(13)
-        if package_hash is not None:
-            package_hash = package_hash.replace(":", "")
-
-        return ExtendedPublicId(username, package_name, version, package_hash)
-
-    @classmethod
-    def try_from_str(cls, public_id_string: str) -> Optional["ExtendedPublicId"]:
-        """
-        Safely try to get public id from string.
-
-        :param public_id_string: the public id in string format.
-        :return: the public id object or None
-        """
-        result: Optional[ExtendedPublicId] = None
-        try:
-            result = cls.from_str(public_id_string)
-        except ValueError:
-            pass
-        return result
-
-    @property
-    def json(self) -> Dict:
-        """Compute the JSON representation."""
-        return {
-            "author": self.author,
-            "name": self.name,
-            "version": self.version,
-            "package_hash": self._package_hash,
-        }
-
-    @classmethod
-    def from_json(cls, obj: Dict) -> "ExtendedPublicId":
-        """Build from a JSON object."""
-        return ExtendedPublicId(
-            obj["author"],
-            obj["name"],
-            obj.get("version", None),
-            obj.get("package_hash", None),
-        )
-
-    def to_public_id(self,) -> PublicId:
+    def without_hash(self,) -> "PublicId":
         """Returns a `PublicId` object with same parameters."""
         return PublicId(self.author, self.name, self.version)
-
-    def __hash__(self) -> int:
-        """Get the hash."""
-        return hash((self.author, self.name, self.version, self._package_hash))
 
     def __str__(self) -> str:
         """Get the string representation."""
         if self._package_hash is None:
-            return super().__str__()
+            return "{author}/{name}:{version}".format(
+                author=self.author, name=self.name, version=self.version
+            )
 
         return "{author}/{name}:{version}:{package_hash}".format(
             author=self.author,
             name=self.name,
             version=self.version,
             package_hash=self.hash,
-        )
-
-    def __eq__(self, other: Any) -> bool:
-        """Compare with another object."""
-        return (
-            (isinstance(other, PublicId) or isinstance(other, ExtendedPublicId))
-            and self.author == other.author
-            and self.name == other.name
-            and self.version == other.version
         )
 
 
@@ -596,13 +498,13 @@ class PackageId:
         PackageType.CONTRACT,
     )
     PACKAGE_ID_URI_REGEX = r"{}/{}".format(
-        PACKAGE_TYPE_REGEX, ExtendedPublicId.PUBLIC_ID_URI_REGEX[1:-1]
+        PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
     )
 
     __slots__ = ("_package_type", "_public_id")
 
     def __init__(
-        self, package_type: Union[PackageType, str], public_id: ExtendedPublicId
+        self, package_type: Union[PackageType, str], public_id: PublicId
     ) -> None:
         """
         Initialize the package id.
@@ -619,7 +521,7 @@ class PackageId:
         return self._package_type
 
     @property
-    def public_id(self) -> ExtendedPublicId:
+    def public_id(self) -> PublicId:
         """Get the public id."""
         return self._public_id
 
@@ -674,7 +576,7 @@ class PackageId:
             cls.PACKAGE_ID_URI_REGEX, package_id_uri_path
         )[0][:4]
         package_type = PackageType(package_type_str)
-        public_id = ExtendedPublicId(username, package_name, version)
+        public_id = PublicId(username, package_name, version)
         return PackageId(package_type, public_id)
 
     @property
@@ -685,6 +587,10 @@ class PackageId:
         :return: uri path string
         """
         return f"{str(self.package_type)}/{self.author}/{self.name}/{self.version}"
+
+    def without_hash(self,) -> "PackageId":
+        """Returns PackageId object without hash"""
+        return PackageId(self.package_type, self.public_id.without_hash())
 
     def __hash__(self) -> int:
         """Get the hash."""
@@ -729,7 +635,7 @@ class ComponentId(PackageId):
     """
 
     def __init__(
-        self, component_type: Union[ComponentType, str], public_id: ExtendedPublicId
+        self, component_type: Union[ComponentType, str], public_id: PublicId
     ) -> None:
         """
         Initialize the component id.
@@ -775,9 +681,12 @@ class ComponentId(PackageId):
     def from_json(cls, json_data: Dict) -> "ComponentId":
         """Create  component id from json data."""
         return cls(
-            component_type=json_data["type"],
-            public_id=ExtendedPublicId.from_json(json_data),
+            component_type=json_data["type"], public_id=PublicId.from_json(json_data),
         )
+
+    def without_hash(self,) -> "ComponentId":
+        """Returns PackageId object without hash"""
+        return ComponentId(self.component_type, self.public_id.without_hash())
 
 
 class PyPIPackageName(RegexConstrainedString):
