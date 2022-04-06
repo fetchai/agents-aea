@@ -83,7 +83,7 @@ def test_envelope_initialisation():
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
     assert envelope.context is None
     assert not envelope.is_sender_public_id
-    assert not envelope.is_to_public_id
+    assert not envelope.is_without_hash
 
 
 def test_inbox_empty():

@@ -166,7 +166,7 @@ class PublicIdParameterTestCase(TestCase):
     def test_get_metavar_positive(self):
         """Test for get_metavar positive result."""
         result = PublicIdParameter.get_metavar("obj", "param")
-        expected_result = "PUBLIC_ID"
+        expected_result = "PUBLIC_ID_OR_HASH"
         self.assertEqual(result, expected_result)
 
 

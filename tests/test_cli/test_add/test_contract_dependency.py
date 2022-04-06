@@ -80,7 +80,8 @@ class TestCreate:
         agent_config = self._load_agent_config()
         assert all(
             [
-                PublicId.from_str(pid) in agent_config.contracts
+                PublicId.from_str(pid)
+                in {p.without_hash() for p in agent_config.contracts}
                 for pid in [
                     "default_author/stub_0:0.1.0",
                     "default_author/stub_1:0.1.0",

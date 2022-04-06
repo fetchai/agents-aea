@@ -122,7 +122,7 @@ class BaseTestMultiAgentManager(TestCase):
             load_all_plugins(is_raising_exception=False)
             assert "fetchai" not in ledger_apis_registry.specs
 
-            self.manager.add_project(self.project_public_id, local=True)
+            self.manager.add_project(self.project_public_id, "local")
             assert "fetchai" not in ledger_apis_registry.specs
 
             self.manager.remove_project(self.project_public_id)
@@ -133,7 +133,7 @@ class BaseTestMultiAgentManager(TestCase):
             with patch(
                 "aea.aea_builder.AEABuilder.install_pypi_dependencies", install_deps
             ):
-                self.manager.add_project(self.project_public_id, local=True)
+                self.manager.add_project(self.project_public_id, "local")
 
             assert "fetchai" in ledger_apis_registry.specs
         finally:
@@ -176,13 +176,13 @@ class BaseTestMultiAgentManager(TestCase):
         """Test add and remove project."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
 
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
 
         with pytest.raises(ValueError, match=r".*was already added.*"):
-            self.manager.add_project(self.project_public_id, local=True)
+            self.manager.add_project(self.project_public_id, "local")
 
         self.manager.remove_project(self.project_public_id)
         assert self.project_public_id not in self.manager.list_projects()
@@ -190,7 +190,7 @@ class BaseTestMultiAgentManager(TestCase):
         with pytest.raises(ValueError, match=r"is not present"):
             self.manager.remove_project(self.project_public_id)
 
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
 
@@ -202,7 +202,7 @@ class BaseTestMultiAgentManager(TestCase):
         """Test add agent alias."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
 
         new_tick_interval = 0.2111
 
@@ -337,7 +337,7 @@ class BaseTestMultiAgentManager(TestCase):
         """Add agent and start manager."""
         self.manager.start_manager()
 
-        self.manager.add_project(project_id, local=True)
+        self.manager.add_project(project_id, "local")
 
         self.manager.add_agent(
             project_id, agent_name,
@@ -444,7 +444,7 @@ class BaseTestMultiAgentManager(TestCase):
         """Do not allo to override some values in agent config."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
 
         BAD_OVERRIDES = [
             "skills",
@@ -522,7 +522,7 @@ class BaseTestMultiAgentManager(TestCase):
     def test_save_load_positive(self, *args):
         """Test save-load func of MultiAgentManager for positive result."""
         self.manager.start_manager()
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
 
         self.manager.add_agent(self.project_public_id, self.agent_name)
         self.manager.stop_manager(save=True)
@@ -535,7 +535,7 @@ class BaseTestMultiAgentManager(TestCase):
     def test_list_agents_info_positive(self, *args):
         """Test list_agents_info method for positive result."""
         self.manager.start_manager()
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
 
         self.manager.add_agent(self.project_public_id, self.agent_name)
         result = self.manager.list_agents_info()
@@ -555,18 +555,18 @@ class BaseTestMultiAgentManager(TestCase):
         """Test add the same project twice."""
         self.manager.start_manager()
 
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
         with pytest.raises(
             ValueError, match=r"The project \(fetchai/my_first_aea\) was already added!"
         ):
             self.manager.add_project(
-                PublicId.from_str("fetchai/my_first_aea:0.15.0"), local=False
+                PublicId.from_str("fetchai/my_first_aea:0.15.0"), "http"
             )
 
     def test_get_overridables(self, *args):
         """Test get overridables."""
         self.manager.start_manager()
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
         self.manager.add_agent(self.project_public_id, self.agent_name)
 
         (
@@ -582,7 +582,7 @@ class BaseTestMultiAgentManager(TestCase):
     def test_issue_certificates(self, *args):
         """Test agent alias issue certificates."""
         self.manager.start_manager()
-        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_project(self.project_public_id, "local")
 
         cert_filename = "cert.txt"
         cert_path = os.path.join(self.manager.data_dir, self.agent_name, cert_filename)
@@ -842,9 +842,7 @@ def test_project_auto_added_removed():
         try:
             manager.start_manager()
             assert not manager.list_projects()
-            manager.add_agent(
-                PublicId("fetchai", "my_first_aea"), agent_name, local=True
-            )
+            manager.add_agent(PublicId("fetchai", "my_first_aea"), agent_name, "local")
             assert manager.list_projects()
             assert manager.list_agents()
             manager.remove_agent(agent_name)
@@ -869,9 +867,7 @@ def test_dump():
         try:
             manager.start_manager()
             assert not manager.list_projects()
-            manager.add_agent(
-                PublicId("fetchai", "my_first_aea"), agent_name, local=True
-            )
+            manager.add_agent(PublicId("fetchai", "my_first_aea"), agent_name, "local")
             alias = manager.get_agent_alias(agent_name)
             data = pickle.dumps(alias)
             alias2 = pickle.loads(data)  # nosec
@@ -906,9 +902,7 @@ def test_handle_error_on_load_state():
             state_loaded, *_ = manager.last_start_status
             assert not state_loaded
             assert not manager.list_projects()
-            manager.add_agent(
-                PublicId("fetchai", "my_first_aea"), agent_name, local=True
-            )
+            manager.add_agent(PublicId("fetchai", "my_first_aea"), agent_name, "local")
             assert manager.list_projects()
             manager._save_state()
         finally:

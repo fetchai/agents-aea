@@ -295,7 +295,7 @@ class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
     """Test 'aea fetch' in remote mode when it fails."""
 
     EXPECTED_ERROR_MESSAGE = rf".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
-    MODE = "--remote"
+    MODE = "--http"
 
 
 @pytest.mark.skip  # need remote registry
@@ -398,7 +398,7 @@ def test_fetch_twice_remote():
                         "--registry-path",
                         PACKAGES_DIR,
                         "fetch",
-                        "--remote",
+                        "--http",
                         "fetchai/my_first_aea",
                     ],
                     standalone_mode=False,
