@@ -39,7 +39,7 @@ from typing import (
 )
 
 from aea.common import Address
-from aea.configurations.base import ExtendedPublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
@@ -95,8 +95,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
         exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         threaded: bool = False,
         agent_name: str = "standalone",
-        default_routing: Optional[Dict[ExtendedPublicId, ExtendedPublicId]] = None,
-        default_connection: Optional[ExtendedPublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
         protocols: Optional[List[Union[Protocol, Message]]] = None,
     ) -> None:
         """
@@ -120,7 +120,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         Runnable.__init__(self, loop=loop, threaded=threaded)
 
         self._connections: List[Connection] = []
-        self._id_to_connection: Dict[ExtendedPublicId, Connection] = {}
+        self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
 
         connections = connections or []
@@ -142,7 +142,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 f"Default connection {default_connection} does not present in connections list!",
             )
 
-        self._default_routing = {}  # type: Dict[ExtendedPublicId, ExtendedPublicId]
+        self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
         self._setup(connections or [], default_routing, default_connection)
 
@@ -150,7 +150,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._specification_id_to_protocol_id = {
             p.protocol_specification_id: p.protocol_id for p in protocols or []
         }
-        self._routing_helper: Dict[Address, ExtendedPublicId] = {}
+        self._routing_helper: Dict[Address, PublicId] = {}
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
@@ -190,14 +190,12 @@ class AsyncMultiplexer(Runnable, WithLogger):
         return self.connection_status.is_connected
 
     @property
-    def default_routing(self) -> Dict[ExtendedPublicId, ExtendedPublicId]:
+    def default_routing(self) -> Dict[PublicId, PublicId]:
         """Get the default routing."""
         return self._default_routing
 
     @default_routing.setter
-    def default_routing(
-        self, default_routing: Dict[ExtendedPublicId, ExtendedPublicId]
-    ) -> None:
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]) -> None:
         """Set the default routing."""
         self._default_routing = default_routing
 
@@ -219,7 +217,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         finally:
             await self.disconnect()
 
-    def _get_protocol_id_for_envelope(self, envelope: Envelope) -> ExtendedPublicId:
+    def _get_protocol_id_for_envelope(self, envelope: Envelope) -> PublicId:
         """Get protocol id for envelope."""
         if isinstance(envelope.message, Message):
             return cast(Message, envelope.message).protocol_id
@@ -269,7 +267,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         if connection.connection_id in self._id_to_connection:  # pragma: nocover
             self.logger.warning(
-                f"A connection with id {connection.connection_id.to_public_id()} was already added. Replacing it..."
+                f"A connection with id {connection.connection_id.without_hash()} was already added. Replacing it..."
             )
 
         self._connections.append(connection)
@@ -408,7 +406,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
     async def _connect_all(self) -> None:
         """Set all the connection up."""
         self.logger.debug("Starting multiplexer connections.")
-        connected = []  # type: List[ExtendedPublicId]
+        connected = []  # type: List[PublicId]
         for connection_id, connection in self._id_to_connection.items():
             try:
                 await asyncio.wait_for(
@@ -425,7 +423,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 raise
         self.logger.debug("Multiplexer connections are set.")
 
-    async def _connect_one(self, connection_id: ExtendedPublicId) -> None:
+    async def _connect_one(self, connection_id: PublicId) -> None:
         """
         Set a connection up.
 
@@ -464,7 +462,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                     )
                 )
 
-    async def _disconnect_one(self, connection_id: ExtendedPublicId) -> None:
+    async def _disconnect_one(self, connection_id: PublicId) -> None:
         """
         Tear a connection down.
 
@@ -580,8 +578,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
             self._handle_exception(self._send, e)
 
     def _get_connection_id_from_envelope(
-        self, envelope: Envelope, envelope_protocol_id: ExtendedPublicId
-    ) -> Optional[ExtendedPublicId]:
+        self, envelope: Envelope, envelope_protocol_id: PublicId
+    ) -> Optional[PublicId]:
         """
         Get the connection id from an envelope.
 
@@ -642,7 +640,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self.logger.debug("Using default connection: {}".format(connection_id))
         return connection_id
 
-    def _get_connection(self, connection_id: ExtendedPublicId) -> Optional[Connection]:
+    def _get_connection(self, connection_id: PublicId) -> Optional[Connection]:
         """Check if the connection id is registered."""
         conn_ = self._id_to_connection.get(connection_id, None)
         if conn_ is not None:
@@ -654,7 +652,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         return None
 
     def _is_connection_supported_protocol(
-        self, connection: Connection, protocol_id: ExtendedPublicId
+        self, connection: Connection, protocol_id: PublicId
     ) -> bool:
         """Check protocol id is supported by the connection."""
         if protocol_id in connection.excluded_protocols:
@@ -736,8 +734,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
     def _setup(
         self,
         connections: Collection[Connection],
-        default_routing: Optional[Dict[ExtendedPublicId, ExtendedPublicId]] = None,
-        default_connection: Optional[ExtendedPublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
     ) -> None:
         """
         Set up the multiplexer.

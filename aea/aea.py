@@ -37,7 +37,7 @@ from typing import (
 
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
-from aea.configurations.base import ExtendedPublicId
+from aea.configurations.base import PublicId
 from aea.configurations.constants import (
     DEFAULT_BUILD_DIR_NAME,
     DEFAULT_SEARCH_SERVICE_ADDRESS,
@@ -90,9 +90,9 @@ class AEA(Agent):
         runtime_mode: Optional[str] = None,
         default_ledger: Optional[str] = None,
         currency_denominations: Optional[Dict[str, str]] = None,
-        default_connection: Optional[ExtendedPublicId] = None,
-        default_routing: Optional[Dict[ExtendedPublicId, ExtendedPublicId]] = None,
-        connection_ids: Optional[Collection[ExtendedPublicId]] = None,
+        default_connection: Optional[PublicId] = None,
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
         task_manager_mode: Optional[str] = None,

@@ -35,7 +35,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import ExtendedPublicId, PublicId
+from aea.configurations.data_types import PublicId
 from aea.helpers.yaml_utils import _AEAYamlDumper, _AEAYamlLoader
 
 
@@ -67,12 +67,12 @@ def dump_yaml(
             yaml.dump(data, fp, Dumper=_AEAYamlDumper)
 
 
-def to_public_id(public_id: str) -> PublicId:
+def without_hash(public_id: str) -> PublicId:
     """Convert to public id."""
     try:
         return PublicId.from_str(public_id)
     except ValueError:
-        return PublicId.from_json(ExtendedPublicId.from_str(public_id).json)
+        return PublicId.from_json(PublicId.from_str(public_id).json)
 
 
 def to_plural(string: str) -> str:
@@ -92,7 +92,7 @@ def from_package_id(public_id: str, separator: str = "-") -> str:
     """Convert to public id."""
 
     component_type, component_id = public_id.split(separator)
-    component_id = str(to_public_id(component_id))
+    component_id = str(without_hash(component_id))
     return component_type + separator + component_id
 
 
@@ -152,7 +152,7 @@ class DependecyTree:
         package_to_dependency_mappings = {}
         for component_type, component_file in COMPONENTS:
             for file_path in packages_dir.glob(f"**/{component_file}"):
-                item_config, extra_data = load_yaml(file_path)
+                item_config, _ = load_yaml(file_path)
                 item_config["name"] = item_config.get(
                     "name", item_config.get("agent_name")
                 )
@@ -174,13 +174,7 @@ class DependecyTree:
         for tree_level in reversed(flat_tree_dirty[:-1]):
             flat_tree.append(
                 sorted(
-                    set(
-                        [
-                            package
-                            for package in tree_level
-                            if package not in dirty_packages
-                        ]
-                    )
+                    {package for package in tree_level if package not in dirty_packages}
                 )
             )
             dirty_packages += tree_level

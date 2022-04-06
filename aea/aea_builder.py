@@ -46,9 +46,9 @@ from aea.configurations.base import (
     ConnectionConfig,
     ContractConfig,
     Dependencies,
-    ExtendedPublicId,
     PackageType,
     ProtocolConfig,
+    PublicId,
     SkillConfig,
 )
 from aea.configurations.constants import (
@@ -69,7 +69,7 @@ from aea.configurations.constants import (
     SIGNING_PROTOCOL,
     SKILLS,
 )
-from aea.configurations.data_types import PackageId, PackageIdPrefix, PublicId
+from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.manager import (
     AgentConfigManager,
@@ -385,7 +385,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._required_ledgers: Optional[List[str]] = None
         self._build_entrypoint: Optional[str] = None
         self._currency_denominations: Dict[str, str] = {}
-        self._default_connection: Optional[ExtendedPublicId] = None
+        self._default_connection: Optional[PublicId] = None
         self._context_namespace: Dict[str, Any] = {}
         self._period: Optional[float] = None
         self._execution_timeout: Optional[float] = None
@@ -400,7 +400,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._error_handler_config: Optional[Dict[str, Any]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
-        self._default_routing: Dict[ExtendedPublicId, ExtendedPublicId] = {}
+        self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
         self._task_manager_mode: Optional[str] = None
@@ -608,7 +608,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return self
 
     def set_default_routing(
-        self, default_routing: Dict[ExtendedPublicId, ExtendedPublicId]
+        self, default_routing: Dict[PublicId, PublicId]
     ) -> "AEABuilder":
         """
         Set default routing.
@@ -727,7 +727,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def _add_default_packages(self) -> None:
         """Add default packages."""
         # add signing protocol
-        signing_protocol = ExtendedPublicId.from_str(SIGNING_PROTOCOL)
+        signing_protocol = PublicId.from_str(SIGNING_PROTOCOL)
         self.add_protocol(
             Path(
                 self.registry_dir,
@@ -772,7 +772,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return self
 
     def set_default_connection(
-        self, public_id: Optional[ExtendedPublicId] = None
+        self, public_id: Optional[PublicId] = None
     ) -> "AEABuilder":  # pragma: nocover
         """
         Set the default connection.
@@ -1005,7 +1005,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.add_component(ComponentType.PROTOCOL, directory)
         return self
 
-    def remove_protocol(self, public_id: ExtendedPublicId) -> "AEABuilder":
+    def remove_protocol(self, public_id: PublicId) -> "AEABuilder":
         """
         Remove protocol.
 
@@ -1025,7 +1025,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.add_component(ComponentType.CONNECTION, directory)
         return self
 
-    def remove_connection(self, public_id: ExtendedPublicId) -> "AEABuilder":
+    def remove_connection(self, public_id: PublicId) -> "AEABuilder":
         """
         Remove a connection.
 
@@ -1045,7 +1045,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.add_component(ComponentType.SKILL, directory)
         return self
 
-    def remove_skill(self, public_id: ExtendedPublicId) -> "AEABuilder":
+    def remove_skill(self, public_id: PublicId) -> "AEABuilder":
         """
         Remove protocol.
 
@@ -1065,7 +1065,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.add_component(ComponentType.CONTRACT, directory)
         return self
 
-    def remove_contract(self, public_id: ExtendedPublicId) -> "AEABuilder":
+    def remove_contract(self, public_id: PublicId) -> "AEABuilder":
         """
         Remove protocol.
 
@@ -1242,8 +1242,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return identity
 
     def _process_connection_ids(  # pylint: disable=unsubscriptable-object
-        self, connection_ids: Optional[Collection[ExtendedPublicId]] = None,
-    ) -> List[ExtendedPublicId]:
+        self, connection_ids: Optional[Collection[PublicId]] = None,
+    ) -> List[PublicId]:
         """
         Process connection ids.
 
@@ -1306,7 +1306,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def build(  # pylint: disable=unsubscriptable-object
         self,
-        connection_ids: Optional[Collection[ExtendedPublicId]] = None,
+        connection_ids: Optional[Collection[PublicId]] = None,
         password: Optional[str] = None,
     ) -> AEA:
         """
@@ -1493,7 +1493,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             else self.DEFAULT_CURRENCY_DENOMINATIONS
         )
 
-    def _get_default_routing(self) -> Dict[ExtendedPublicId, ExtendedPublicId]:
+    def _get_default_routing(self) -> Dict[PublicId, PublicId]:
         """
         Return the default routing.
 
@@ -1501,7 +1501,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._default_routing
 
-    def _get_default_connection(self) -> Optional[ExtendedPublicId]:
+    def _get_default_connection(self) -> Optional[PublicId]:
         """
         Return the default connection.
 
@@ -1599,15 +1599,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param configuration: the component configuration
         :raises AEAException: if there's a missing dependency.
         """
-        # dependencies in configuration.package_dependencies is instantiated as
-        # ExtendedPublicId, whereas dependencies in _package_dependency_manager.all_dependencies
-        # use PublicId to store mappings. So to check if a dependency is initilized
-        # not we need re instantiate PackageIds from configuration.package_dependencies
-        # without hashes
 
         not_supported_packages = {
-            PackageId(dep.package_type, PublicId(dep.author, dep.name, dep.version))
-            for dep in configuration.package_dependencies
+            dep.without_hash() for dep in configuration.package_dependencies
         }.difference(
             self._package_dependency_manager.all_dependencies
         )  # type: Set[ComponentId]
@@ -1815,6 +1809,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             ComponentId, Set[ComponentId]
         ] = defaultdict(set)
         for component_id in component_ids:
+            component_id = component_id.without_hash()
             component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
@@ -1835,7 +1830,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
             for dependency in dependencies:
                 dependency_to_supported_dependencies[
-                    ComponentId(component_type[:-1], dependency)
+                    ComponentId(component_type[:-1], dependency).without_hash()
                 ].add(component_id)
 
         try:

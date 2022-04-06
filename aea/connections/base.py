@@ -29,8 +29,8 @@ from pathlib import Path
 from typing import Any, Callable, Generator, Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
-from aea.configurations.data_types import ExtendedPublicId
+from aea.configurations.base import ComponentType, ConnectionConfig
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import (
@@ -61,7 +61,7 @@ class ConnectionStates(Enum):
 class Connection(Component, ABC):
     """Abstract definition of a connection."""
 
-    connection_id = None  # type: ExtendedPublicId
+    connection_id = None  # type: PublicId
 
     def __init__(
         self,
@@ -69,8 +69,8 @@ class Connection(Component, ABC):
         data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
-        restricted_to_protocols: Optional[Set[ExtendedPublicId]] = None,
-        excluded_protocols: Optional[Set[ExtendedPublicId]] = None,
+        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -125,7 +125,7 @@ class Connection(Component, ABC):
         :param envelope: the envelope
         """
         enforce(
-            not envelope.is_sender_public_id and not envelope.is_to_public_id,
+            not envelope.is_sender_public_id and not envelope.is_without_hash,
             f"Sender and to field of envelope is public id, needs to be address. Found: sender={envelope.sender}, to={envelope.to}",
         )
 
@@ -178,14 +178,14 @@ class Connection(Component, ABC):
         return cast(ConnectionConfig, super().configuration)
 
     @property
-    def restricted_to_protocols(self) -> Set[ExtendedPublicId]:  # pragma: nocover
+    def restricted_to_protocols(self) -> Set[PublicId]:  # pragma: nocover
         """Get the ids of the protocols this connection is restricted to."""
         if self._configuration is None:
             return self._restricted_to_protocols
         return self.configuration.restricted_to_protocols
 
     @property
-    def excluded_protocols(self) -> Set[ExtendedPublicId]:  # pragma: nocover
+    def excluded_protocols(self) -> Set[PublicId]:  # pragma: nocover
         """Get the ids of the excluded protocols for this connection."""
         if self._configuration is None:
             return self._excluded_protocols
@@ -347,8 +347,8 @@ class BaseSyncConnection(Connection):
         data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
-        restricted_to_protocols: Optional[Set[ExtendedPublicId]] = None,
-        excluded_protocols: Optional[Set[ExtendedPublicId]] = None,
+        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
         **kwargs: Any,
     ) -> None:
         """
