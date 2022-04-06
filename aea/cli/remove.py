@@ -208,18 +208,20 @@ class ItemRemoveHelper:
             item, self._ignore_non_vendor
         ):
             if package_id is None:
-                _ = result[dep_package_id]  # init default dict value
+                _ = result[dep_package_id.without_hash()]  # init default dict value
             else:
-                result[dep_package_id].add(package_id)
+                result[dep_package_id.without_hash()].add(package_id.without_hash())
 
-            if not self.is_present_in_agent_config(dep_package_id):  # pragma: nocover
+            if not self.is_present_in_agent_config(
+                dep_package_id.without_hash()
+            ):  # pragma: nocover
                 continue
 
             dep_item = self.get_item_config(dep_package_id)
             for item_key, deps in self.get_item_dependencies_with_reverse_dependencies(
                 dep_item, dep_package_id
             ).items():
-                result[item_key] = result[item_key].union(deps)
+                result[item_key.without_hash()] = result[item_key].union(deps)
 
         return result
 
@@ -247,7 +249,7 @@ class ItemRemoveHelper:
         :param item_public_id: the item public id.
         :return: Tuple[required by, can be deleted, can not be deleted.]
         """
-        package_id = PackageId(item_type, item_public_id)
+        package_id = PackageId(item_type, item_public_id).without_hash()
         item = self.get_item_config(package_id)
         agent_deps = self.get_agent_dependencies_with_reverse_dependencies()
         item_deps = self.get_item_dependencies_with_reverse_dependencies(

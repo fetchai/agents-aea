@@ -51,7 +51,7 @@ from aea.configurations.constants import (
     SKILLS,
     VENDOR,
 )
-from aea.configurations.data_types import ExtendedPublicId
+from aea.configurations.data_types import PublicId
 from aea.helpers.base import compute_specifier_from_version
 from aea.helpers.io import open_file
 
@@ -92,8 +92,7 @@ def create_aea(
 
     :param ctx: Context object.
     :param agent_name: agent name.
-    :param local: boolean flag for local registry usage.
-    :param remote: boolean flag for remote registry usage.
+    :param registry: type of registry to use.
     :param author: optional author name (valid with local=True and remote=False only).
     :param empty: optional boolean flag for skip adding default dependencies.
 
@@ -157,10 +156,7 @@ def create_aea(
         if not empty:
             click.echo("Adding default packages ...")
             add_item(
-                ctx,
-                PROTOCOL,
-                ExtendedPublicId.from_str(SIGNING_PROTOCOL_WITH_HASH),
-                registry,
+                ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL_WITH_HASH), registry,
             )
 
     except Exception as e:

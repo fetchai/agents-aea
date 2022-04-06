@@ -50,16 +50,15 @@ from aea.configurations.base import (
     ConnectionConfig,
     ContractConfig,
     PackageConfiguration,
-    PublicId,
     SkillConfig,
 )
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
-from aea.configurations.data_types import ExtendedPublicId
+from aea.configurations.data_types import PublicId
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 try:
-    from aea_cli_ipfs.registry import fetch_ipfs
+    from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
     IS_IPFS_PLUGIN_INSTALLED = True
 except ImportError:
@@ -74,7 +73,7 @@ except ImportError:
 def add(
     click_context: click.Context,
     component_type: str,
-    public_id: ExtendedPublicId,
+    public_id: PublicId,
     registry: str,
 ) -> None:
     """Add a package to the agent."""
@@ -86,7 +85,7 @@ def add(
 def add_item(
     ctx: Context,
     item_type: str,
-    item_public_id: ExtendedPublicId,
+    item_public_id: PublicId,
     registry: str,
     is_dependency: bool = False,
 ) -> None:
@@ -95,7 +94,9 @@ def add_item(
 
     :param ctx: Context object.
     :param item_type: the item type.
+    :param registry: type of registry to use.
     :param item_public_id: the item public id.
+    :param is_dependency: whether it's dependency or not.
     """
 
     from_hash = item_public_id == DUMMY_PACKAGE_ID
@@ -121,7 +122,7 @@ def add_item(
 
         raise click.ClickException(
             "A {} with id '{}' already exists. Aborting...".format(
-                item_type, present_item_id.to_public_id()
+                item_type, present_item_id.without_hash()
             )
         )
 
@@ -167,7 +168,7 @@ def add_item(
     register_item(
         ctx,
         item_type,
-        ExtendedPublicId.from_json(
+        PublicId.from_json(
             {**item_config.public_id.json, "package_hash": package_hash}
         ),
     )
@@ -183,6 +184,7 @@ def _add_item_deps(
     :param ctx: Context object.
     :param item_type: type of item.
     :param item_config: item configuration object.
+    :param registry: type of registry to use.
     """
     if item_type in {CONNECTION, SKILL}:
         item_config = cast(Union[SkillConfig, ConnectionConfig], item_config)
@@ -260,6 +262,6 @@ def fetch_item_mixed(
         )
         # the following might raise exception, but we don't catch it this time
         package_path = fetch_package(
-            item_type, item_public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
+            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path
         )
     return package_path

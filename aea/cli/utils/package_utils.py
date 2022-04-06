@@ -45,7 +45,6 @@ from aea.configurations.base import (
     ComponentType,
     PackageConfiguration,
     PackageType,
-    PublicId,
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
@@ -61,7 +60,7 @@ from aea.configurations.constants import (
     SKILL,
     VENDOR,
 )
-from aea.configurations.data_types import ExtendedPublicId
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
@@ -481,9 +480,7 @@ def is_fingerprint_correct(
     return item_config.fingerprint == fingerprint
 
 
-def register_item(
-    ctx: Context, item_type: str, item_public_id: ExtendedPublicId
-) -> None:
+def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     """
     Register item in agent configuration.
 
@@ -530,7 +527,7 @@ def is_item_present(
     path: str,
     agent_config: AgentConfig,
     item_type: str,
-    item_public_id: ExtendedPublicId,
+    item_public_id: PublicId,
     is_vendor: bool = True,
     with_version: bool = False,
 ) -> bool:
@@ -560,14 +557,16 @@ def is_item_present(
         return is_item_registered_no_version and does_path_exist
 
     # the following makes sense because public id is not latest
-    component_id = ComponentId(ComponentType(item_type), item_public_id)
-    component_is_registered = component_id in agent_config.package_dependencies
+    component_id = ComponentId(ComponentType(item_type), item_public_id.without_hash())
+    component_is_registered = component_id in {
+        cid.without_hash() for cid in agent_config.package_dependencies
+    }
     return component_is_registered and does_path_exist
 
 
 def is_item_with_hash_present(
     path: str, agent_config: AgentConfig, package_hash: str, is_vendor: bool = True
-) -> Optional[ExtendedPublicId]:
+) -> Optional[PublicId]:
     """Returns a public id if item with provided hash is present."""
 
     for component_id in agent_config.all_components_id:
@@ -579,9 +578,10 @@ def is_item_with_hash_present(
     for component_type, config_file_name in COMPONENTS:
         for config_file_path in package_path.glob(f"**/{config_file_name}"):
             component_path = config_file_path.parent
-            calculated_hash = hash_tool.hash_directory(component_path)
+            calculated_hash = hash_tool.hash_directory(str(component_path))
             if package_hash == calculated_hash:
                 return load_item_config(component_type, component_path).public_id
+    return None
 
 
 def get_item_id_present(
@@ -843,6 +843,7 @@ def fingerprint_all(ctx: Context) -> None:
 
     :param ctx: the CLI context.
     """
+
     aea_project_path = Path(ctx.cwd)
     for package_path in get_non_vendor_package_path(aea_project_path):
         item_type = package_path.parent.name[:-1]

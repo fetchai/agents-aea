@@ -20,10 +20,12 @@
 """Implementation of the 'aea publish' subcommand."""
 
 import os
+import shutil
 from abc import ABC, abstractmethod
 from contextlib import suppress
 from pathlib import Path
 from shutil import copyfile
+from tempfile import TemporaryDirectory
 from typing import cast
 
 import click
@@ -31,9 +33,15 @@ import click
 from aea.cli.push import _save_item_locally as _push_item_locally
 from aea.cli.registry.publish import publish_agent
 from aea.cli.registry.push import push_item as _push_item_remote
+from aea.cli.registry.settings import (
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_HTTP,
+    REGISTRY_IPFS,
+    REGISTRY_LOCAL,
+)
 from aea.cli.registry.utils import get_package_meta
-from aea.cli.utils.click_utils import registry_flag
-from aea.cli.utils.config import validate_item_config
+from aea.cli.utils.click_utils import registry_flag_
+from aea.cli.utils.config import get_or_create_cli_config, validate_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import AEAConfigException
@@ -48,39 +56,44 @@ from aea.configurations.constants import (
     CONNECTIONS,
     CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_README_FILE,
     ITEM_TYPE_PLURAL_TO_TYPE,
     PROTOCOLS,
     SKILLS,
 )
 
 
+try:
+    from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
+
+    IS_IPFS_PLUGIN_INSTALLED = True
+except ImportError:
+    IS_IPFS_PLUGIN_INSTALLED = False
+
 PUSH_ITEMS_FLAG = "--push-missing"
 
 
 @click.command(name="publish")
-@registry_flag(
-    help_local="For publishing agent to local folder.",
-    help_remote="For publishing agent to remote registry.",
-)
+@registry_flag_()
 @click.option(
     "--push-missing", is_flag=True, help="Push missing components to registry."
 )
 @click.pass_context
 @check_aea_project
 def publish(
-    click_context: click.Context, local: bool, remote: bool, push_missing: bool
+    click_context: click.Context, registry: str, push_missing: bool
 ) -> None:  # pylint: disable=unused-argument
     """Publish the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
 
-    if remote:
+    if registry == REGISTRY_HTTP:
         _publish_agent_remote(ctx, push_missing=push_missing)
+    elif registry == REGISTRY_LOCAL:
+        _save_agent_locally(ctx, is_mixed=False, push_missing=push_missing)
     else:
-        _save_agent_locally(
-            ctx, is_mixed=not local and not remote, push_missing=push_missing
-        )
+        _publish_agent_ipfs(ctx, push_missing)
 
 
 def _validate_config(ctx: Context) -> None:
@@ -159,6 +172,56 @@ class BaseRegistry(ABC):
             raise click.ClickException(
                 f"Failed to find item after push: {item_type_plural} {public_id}: {e}"
             ) from e
+
+
+class IPFSRegistry(BaseRegistry):
+    """IPFS registry."""
+
+    def __init__(self, ctx: Context) -> None:
+        """Initialize object."""
+        super().__init__()
+
+        self.ctx = ctx
+        multiaddr = (
+            get_or_create_cli_config()
+            .get(REGISTRY_CONFIG_KEY, {})
+            .get("settings", {})
+            .get(REGISTRY_IPFS, {})
+            .get("ipfs_node")
+        )
+        self.ipfs_tool = IPFSTool(multiaddr)
+
+    def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
+        """Check if item is pinned on the node."""
+        if not self.ipfs_tool.is_a_package(public_id.hash):
+            raise click.ClickException(
+                f"Dependency {public_id} is missing from registry.\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically."
+            )
+
+    def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
+        """Push item to an ipfs registry."""
+
+        if not IS_IPFS_PLUGIN_INSTALLED:
+            raise click.ClickException(
+                "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
+            )
+
+        try:
+            component_path = try_get_item_source_path(
+                self.ctx.cwd, None, item_type_plural, public_id.name
+            )
+        except click.ClickException:
+            component_path = try_get_item_source_path(
+                os.path.join(self.ctx.cwd, "vendor"),
+                public_id.author,
+                item_type_plural,
+                public_id.name,
+            )
+
+        _, package_hash, _ = self.ipfs_tool.add(component_path)
+        click.echo("Pushed missing package with:")
+        click.echo(f"\tPublicId: {public_id}")
+        click.echo(f"\tPackage hash: {package_hash}")
 
 
 class LocalRegistry(BaseRegistry):
@@ -316,3 +379,35 @@ def _publish_agent_remote(ctx: Context, push_missing: bool) -> None:
     registry = RemoteRegistry(ctx)
     _check_dependencies_in_registry(registry, ctx.agent_config, push_missing)
     publish_agent(ctx)
+
+
+def _publish_agent_ipfs(ctx: Context, push_missing: bool) -> None:
+    """
+    Push agent to remote registry.
+
+    :param ctx: the context
+    :param push_missing: bool. flag to push missing items
+    """
+    if not IS_IPFS_PLUGIN_INSTALLED:
+        raise click.ClickException("Please install IPFS cli plugin.")
+
+    registry = IPFSRegistry(ctx)
+    _check_dependencies_in_registry(registry, ctx.agent_config, push_missing)
+
+    name = ctx.agent_config.agent_name
+    config_file_source_path = os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE)
+    readme_source_path = os.path.join(ctx.cwd, DEFAULT_README_FILE)
+
+    with TemporaryDirectory() as temp_dir:
+        package_dir = os.path.join(temp_dir, name)
+        os.makedirs(package_dir)
+        config_file_target_path = os.path.join(package_dir, DEFAULT_AEA_CONFIG_FILE)
+        shutil.copy(config_file_source_path, config_file_target_path)
+        if os.path.exists(readme_source_path):
+            readme_file_target_path = os.path.join(package_dir, DEFAULT_README_FILE)
+            shutil.copy(readme_source_path, readme_file_target_path)
+        _, package_hash, _ = registry.ipfs_tool.add(package_dir)
+
+    click.echo(
+        f"Successfully published agent {name} to the Registry with.\n\tPublic ID: {ctx.agent_config.public_id}\n\tPackage hash: {package_hash}"
+    )

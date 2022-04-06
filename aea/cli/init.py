@@ -45,7 +45,7 @@ from aea.cli.utils.package_utils import validate_author_name, validate_registry_
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
-@registry_flag_()
+@registry_flag_(mark_default=False)
 @pass_ctx
 def init(  # pylint: disable=unused-argument
     ctx: Context, author: str, reset: bool, no_subscribe: bool, registry: str,
