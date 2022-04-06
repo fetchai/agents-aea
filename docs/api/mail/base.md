@@ -508,13 +508,13 @@ def is_sender_public_id() -> bool
 
 Check if sender is a public id.
 
-<a id="aea.mail.base.Envelope.is_to_public_id"></a>
+<a id="aea.mail.base.Envelope.is_without_hash"></a>
 
-#### is`_`to`_`public`_`id
+#### is`_`without`_`hash
 
 ```python
 @property
-def is_to_public_id() -> bool
+def is_without_hash() -> bool
 ```
 
 Check if to is a public id.

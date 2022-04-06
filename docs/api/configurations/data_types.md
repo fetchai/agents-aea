@@ -258,7 +258,8 @@ True
 ```python
 def __init__(author: SimpleIdOrStr,
              name: SimpleIdOrStr,
-             version: Optional[PackageVersionLike] = None) -> None
+             version: Optional[PackageVersionLike] = None,
+             package_hash: Optional[IPFSHashOrStr] = None) -> None
 ```
 
 Initialize the public identifier.
@@ -307,15 +308,16 @@ def package_version() -> PackageVersion
 
 Get the package version object.
 
-<a id="aea.configurations.data_types.PublicId.to_any"></a>
+<a id="aea.configurations.data_types.PublicId.hash"></a>
 
-#### to`_`any
+#### hash
 
 ```python
-def to_any() -> "PublicId"
+@property
+def hash() -> str
 ```
 
-Return the same public id, but with any version.
+Returns the hash for the package.
 
 <a id="aea.configurations.data_types.PublicId.same_prefix"></a>
 
@@ -326,6 +328,16 @@ def same_prefix(other: "PublicId") -> bool
 ```
 
 Check if the other public id has the same author and name of this.
+
+<a id="aea.configurations.data_types.PublicId.to_any"></a>
+
+#### to`_`any
+
+```python
+def to_any() -> "PublicId"
+```
+
+Return the same public id, but with any version.
 
 <a id="aea.configurations.data_types.PublicId.to_latest"></a>
 
@@ -366,15 +378,6 @@ def from_str(cls, public_id_string: str) -> "PublicId"
 ```
 
 Initialize the public id from the string.
-
->>> str(PublicId.from_str("author/package_name:0.1.0"))
-'author/package_name:0.1.0'
-
-A bad formatted input raises value error:
->>> PublicId.from_str("bad/formatted:input")
-Traceback (most recent call last):
-...
-ValueError: Input 'bad/formatted:input' is not well formatted.
 
 **Arguments**:
 
@@ -486,16 +489,6 @@ def __hash__() -> int
 
 Get the hash.
 
-<a id="aea.configurations.data_types.PublicId.__str__"></a>
-
-#### `__`str`__`
-
-```python
-def __str__() -> str
-```
-
-Get the string representation.
-
 <a id="aea.configurations.data_types.PublicId.__repr__"></a>
 
 #### `__`repr`__`
@@ -551,157 +544,17 @@ ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 canno
 
 whether or not the inequality is satisfied
 
-<a id="aea.configurations.data_types.ExtendedPublicId"></a>
+<a id="aea.configurations.data_types.PublicId.without_hash"></a>
 
-## ExtendedPublicId Objects
-
-```python
-class ExtendedPublicId(PublicId)
-```
-
-Extended public id for hash.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.__init__"></a>
-
-#### `__`init`__`
+#### without`_`hash
 
 ```python
-def __init__(author: SimpleIdOrStr,
-             name: SimpleIdOrStr,
-             package_hash: IPFSHashOrStr,
-             version: Optional[PackageVersionLike] = None) -> None
+def without_hash() -> "PublicId"
 ```
 
-Initialize object.
+Returns a `PublicId` object with same parameters.
 
-<a id="aea.configurations.data_types.ExtendedPublicId.hash"></a>
-
-#### hash
-
-```python
-@property
-def hash() -> str
-```
-
-Returns the hash for the package.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.to_any"></a>
-
-#### to`_`any
-
-```python
-def to_any() -> "ExtendedPublicId"
-```
-
-Return the same public id, but with any version.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.to_latest"></a>
-
-#### to`_`latest
-
-```python
-def to_latest() -> "ExtendedPublicId"
-```
-
-Return the same public id, but with latest version.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.from_str"></a>
-
-#### from`_`str
-
-```python
-@classmethod
-def from_str(cls, public_id_string: str) -> "ExtendedPublicId"
-```
-
-Initialize the public id from the string.
-
-**Arguments**:
-
-- `public_id_string`: the public id in string format.
-
-**Raises**:
-
-- `ValueError`: if the string in input is not well formatted.
-
-**Returns**:
-
-the public id object.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.try_from_str"></a>
-
-#### try`_`from`_`str
-
-```python
-@classmethod
-def try_from_str(cls, public_id_string: str) -> Optional["ExtendedPublicId"]
-```
-
-Safely try to get public id from string.
-
-**Arguments**:
-
-- `public_id_string`: the public id in string format.
-
-**Returns**:
-
-the public id object or None
-
-<a id="aea.configurations.data_types.ExtendedPublicId.from_uri_path"></a>
-
-#### from`_`uri`_`path
-
-```python
-@classmethod
-def from_uri_path(cls, public_id_uri_path: str) -> "ExtendedPublicId"
-```
-
-Initialize the public id from the string.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.to_uri_path"></a>
-
-#### to`_`uri`_`path
-
-```python
-@property
-def to_uri_path() -> str
-```
-
-Turn the public id into a uri path string.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.json"></a>
-
-#### json
-
-```python
-@property
-def json() -> Dict
-```
-
-Compute the JSON representation.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.from_json"></a>
-
-#### from`_`json
-
-```python
-@classmethod
-def from_json(cls, obj: Dict) -> "ExtendedPublicId"
-```
-
-Build from a JSON object.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.__hash__"></a>
-
-#### `__`hash`__`
-
-```python
-def __hash__() -> int
-```
-
-Get the hash.
-
-<a id="aea.configurations.data_types.ExtendedPublicId.__str__"></a>
+<a id="aea.configurations.data_types.PublicId.__str__"></a>
 
 #### `__`str`__`
 
@@ -792,6 +645,17 @@ def version() -> str
 
 Get the version of the package.
 
+<a id="aea.configurations.data_types.PackageId.package_hash"></a>
+
+#### package`_`hash
+
+```python
+@property
+def package_hash() -> str
+```
+
+Get the version of the package.
+
 <a id="aea.configurations.data_types.PackageId.package_prefix"></a>
 
 #### package`_`prefix
@@ -849,6 +713,16 @@ Turn the package id into a uri path string.
 **Returns**:
 
 uri path string
+
+<a id="aea.configurations.data_types.PackageId.without_hash"></a>
+
+#### without`_`hash
+
+```python
+def without_hash() -> "PackageId"
+```
+
+Returns PackageId object without hash
 
 <a id="aea.configurations.data_types.PackageId.__hash__"></a>
 
@@ -1000,6 +874,16 @@ def from_json(cls, json_data: Dict) -> "ComponentId"
 ```
 
 Create  component id from json data.
+
+<a id="aea.configurations.data_types.ComponentId.without_hash"></a>
+
+#### without`_`hash
+
+```python
+def without_hash() -> "ComponentId"
+```
+
+Returns PackageId object without hash
 
 <a id="aea.configurations.data_types.PyPIPackageName"></a>
 
