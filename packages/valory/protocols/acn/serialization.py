@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 fetchai
+#   Copyright 2022 valory
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ from aea.mail.base_pb2 import DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
-from packages.fetchai.protocols.acn import acn_pb2
-from packages.fetchai.protocols.acn.custom_types import AgentRecord, StatusBody
-from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.valory.protocols.acn import acn_pb2
+from packages.valory.protocols.acn.custom_types import AgentRecord, StatusBody
+from packages.valory.protocols.acn.message import AcnMessage
 
 
 class AcnSerializer(Serializer):

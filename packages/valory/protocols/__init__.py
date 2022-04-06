@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 fetchai
+#   Copyright 2022 Valory AG
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,14 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This module contains the support resources for the acn protocol.
-
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.6.0`.
-"""
-
-from packages.fetchai.protocols.acn.message import AcnMessage
-from packages.fetchai.protocols.acn.serialization import AcnSerializer
-
-
-AcnMessage.serializer = AcnSerializer
+"""This module contains the protocol packages authored by Valory AG"""

@@ -19,20 +19,22 @@
 # ------------------------------------------------------------------------------
 """This module contains the libp2p client connection."""
 import asyncio
-import contextlib
 import hashlib
 import logging
 import random
+import re
 import ssl
 from asyncio import CancelledError
-from asyncio.events import AbstractEventLoop
 from asyncio.streams import StreamWriter
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, cast
+from urllib.parse import urlparse
 
+import aiohttp
+from aiohttp.client_reqrep import ClientResponse
 from asn1crypto import x509  # type: ignore
 from ecdsa.curves import SECP256k1
-from ecdsa.keys import BadSignatureError, VerifyingKey
+from ecdsa.keys import VerifyingKey
 from ecdsa.util import sigdecode_der
 
 from aea.configurations.base import PublicId
@@ -42,11 +44,10 @@ from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
-from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient, TCPSocketProtocol
 from aea.mail.base import Envelope
 
-from packages.fetchai.protocols.acn import acn_pb2
-from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.valory.protocols.acn import acn_pb2
+from packages.valory.protocols.acn.message import AcnMessage
 
 
 try:
@@ -55,11 +56,9 @@ except ImportError:  # pragma: nocover
     from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
 
 
-_default_logger = logging.getLogger(
-    "aea.packages.open_aea.connections.p2p_libp2p_client"
-)
+_default_logger = logging.getLogger("aea.packages.valory.connections.p2p_libp2p_client")
 
-PUBLIC_ID = PublicId.from_str("open_aea/p2p_libp2p_client:0.20.0")
+PUBLIC_ID = PublicId.from_str("valory/p2p_libp2p_mailbox:0.1.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -71,84 +70,51 @@ ACN_CURRENT_VERSION = "0.1.0"
 class NodeClient:
     """Client to communicate with node using ipc channel(pipe)."""
 
-    ACN_ACK_TIMEOUT = 5.0
+    NO_ENVELOPES_SLEEP_TIME: float = 2.0
 
-    def __init__(self, pipe: IPCChannelClient, node_por: AgentRecord) -> None:
+    def __init__(self, node_uri: Uri, node_por: AgentRecord) -> None:
         """Set node client with pipe."""
-        self.pipe = pipe
-        self._wait_status: Optional[asyncio.Future] = None
+        self.node_uri = node_uri
         self.agent_record = node_por
-
-    async def wait_for_status(self) -> Any:
-        """Get status."""
-        if self._wait_status is None:  # pragma: nocover
-            raise ValueError("waiter for status not set!")
-        return await asyncio.wait_for(self._wait_status, timeout=self.ACN_ACK_TIMEOUT)
-
-    @staticmethod
-    def make_acn_envelope_message(envelope: Envelope) -> bytes:
-        """Make acn message with envelope in."""
-        acn_msg = acn_pb2.AcnMessage()
-        performative = acn_pb2.AcnMessage.Aea_Envelope_Performative()  # type: ignore
-        performative.envelope = envelope.encode()
-        acn_msg.aea_envelope.CopyFrom(performative)  # pylint: disable=no-member
-        buf = acn_msg.SerializeToString()
-        return buf
-
-    async def write_acn_status_ok(self) -> None:
-        """Send acn status ok."""
-        acn_msg = acn_pb2.AcnMessage()
-        performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
-        status = AcnMessage.StatusBody(
-            status_code=AcnMessage.StatusBody.StatusCode.SUCCESS, msgs=[]
-        )
-        AcnMessage.StatusBody.encode(
-            performative.body, status  # pylint: disable=no-member
-        )
-        acn_msg.status.CopyFrom(performative)  # pylint: disable=no-member
-        buf = acn_msg.SerializeToString()
-        await self._write(buf)
-
-    async def write_acn_status_error(
-        self,
-        msg: str,
-        status_code: AcnMessage.StatusBody.StatusCode = AcnMessage.StatusBody.StatusCode.ERROR_GENERIC,  # type: ignore
-    ) -> None:
-        """Send acn status error generic."""
-        acn_msg = acn_pb2.AcnMessage()
-        performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
-        status = AcnMessage.StatusBody(status_code=status_code, msgs=[msg])
-        AcnMessage.StatusBody.encode(
-            performative.body, status  # pylint: disable=no-member
-        )
-        acn_msg.status.CopyFrom(performative)  # pylint: disable=no-member
-
-        buf = acn_msg.SerializeToString()
-
-        await self._write(buf)
+        self._session_token: Optional[str] = None
+        self.ssl_ctx = Optional[ssl.SSLContext]
 
     async def connect(self) -> bool:
         """Connect to node with pipe."""
-        return await self.pipe.connect()
+        url = f"https://{self.node_uri}/ssl_signature"
+        self.ssl_ctx = await SSLValidator(
+            url, self.agent_record.representative_public_key
+        ).check()
+        await self.register()
+        return True
 
     async def send_envelope(self, envelope: Envelope) -> None:
         """Send envelope to node."""
-        self._wait_status = asyncio.Future()
-        buf = self.make_acn_envelope_message(envelope)
-        await self._write(buf)
-        try:
-            status = await self.wait_for_status()
-            if status.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore  # pylint: disable=no-member
-                raise ValueError(  # pragma: nocover
-                    f"failed to send envelope. got error confirmation: {status}"
-                )
-        except asyncio.TimeoutError:  # pragma: nocover
-            if not self._wait_status.done():  # pragma: nocover
-                self._wait_status.set_exception(Exception("Timeout"))
-            await asyncio.sleep(0)
-            raise ValueError("acn status await timeout!")
-        finally:
-            self._wait_status = None
+        if not self._session_token:  # pragma: nocover
+            raise ValueError("not connected!")
+
+        envelope_data = envelope.encode()
+        # send here
+        response, _ = await self._perform_http_request(
+            method="POST",
+            url="/send_envelope",
+            data=envelope_data,
+            headers={"Session-Id": self._session_token},
+        )
+
+        if response.status != 200:  # pragma: nocover
+            text = await response.text()
+            raise ValueError(f"Bad response code: {response.status} {text}")
+
+    async def _perform_http_request(
+        self, method: str, url: str, **kwargs: Any
+    ) -> Tuple[ClientResponse, bytes]:
+        async with aiohttp.ClientSession() as session:
+            async with session.request(
+                method, url=f"https://{self.node_uri}{url}", ssl=self.ssl_ctx, **kwargs
+            ) as response:
+                data = await response.read()
+                return response, data
 
     def make_agent_record(self) -> AcnMessage.AgentRecord:  # type: ignore
         """Make acn agent record."""
@@ -163,109 +129,59 @@ class NodeClient:
         return agent_record
 
     async def read_envelope(self) -> Optional[Envelope]:
-        """Read envelope from the node."""
+        """Read envelope from the mailbox node."""
         while True:
-            buf = await self._read()
+            if not self._session_token:  # pragma: nocover
+                raise ValueError("Client not registered!")
+            response, data = await self._perform_http_request(
+                "GET", "/get_envelope", headers={"Session-Id": self._session_token}
+            )
+            if response.status != 200:  # pragma: nocover
+                raise ValueError(f"Bad response code: {response.status}")
 
-            if not buf:
-                return None
+            if not data:
+                await asyncio.sleep(self.NO_ENVELOPES_SLEEP_TIME)
+                continue
 
-            try:
-                acn_msg = acn_pb2.AcnMessage()
-                acn_msg.ParseFromString(buf)
+            envelope = Envelope.decode(data)
+            return envelope
 
-            except Exception as e:  # pragma: nocover
-                await self.write_acn_status_error(
-                    f"Failed to parse acn message {e}",
-                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
-                )
-                raise ValueError(f"Error parsing acn message: {e}") from e
-
-            performative = acn_msg.WhichOneof("performative")
-            if performative == "aea_envelope":  # pragma: nocover
-                aea_envelope = acn_msg.aea_envelope  # pylint: disable=no-member
-                try:
-                    envelope = Envelope.decode(aea_envelope.envelope)
-                    await self.write_acn_status_ok()
-                    return envelope
-                except Exception as e:
-                    await self.write_acn_status_error(
-                        f"Failed to decode envelope: {e}",
-                        status_code=AcnMessage.StatusBody.StatusCode.ERROR_DECODE,
-                    )
-                    raise
-
-            elif performative == "status":
-                if self._wait_status is not None:
-                    self._wait_status.set_result(
-                        acn_msg.status.body  # pylint: disable=no-member
-                    )
-            else:  # pragma: nocover
-                await self.write_acn_status_error(
-                    f"Bad acn message {performative}",
-                    status_code=AcnMessage.StatusBody.StatusCode.ERROR_UNEXPECTED_PAYLOAD,
-                )
-
-    async def _write(self, data: bytes) -> None:
-        """
-        Write to the writer stream.
-
-        :param data: data to write to stream
-        """
-        await self.pipe.write(data)
-
-    async def _read(self) -> Optional[bytes]:
-        """
-        Read from the reader stream.
-
-        :return: bytes
-        """
-        return await self.pipe.read()
-
-    async def register(self,) -> None:
+    async def register(self) -> None:
         """Register agent on the remote node."""
         agent_record = self.make_agent_record()
-        acn_msg = acn_pb2.AcnMessage()
         performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
         AcnMessage.AgentRecord.encode(
             performative.record, agent_record  # pylint: disable=no-member
         )
-        acn_msg.register.CopyFrom(performative)  # pylint: disable=no-member
+        data = performative.record.SerializeToString()  # pylint: disable=no-member
+        response, _ = await self._perform_http_request(
+            "POST", url="/register", data=data
+        )
 
-        buf = acn_msg.SerializeToString()
-        await self._write(buf)
+        if response.status != 200:  # pragma: nocover
+            raise ValueError(f"Bad response code: {response.status}")
 
-        try:
-            buf = await asyncio.wait_for(self._read(), timeout=self.ACN_ACK_TIMEOUT)
-        except ConnectionError as e:  # pragma: nocover
-            raise e
-        except IncompleteReadError as e:  # pragma: no cover
-            raise e
+        token = await response.text()
+        if not re.match("[0-9a-f]{32}", token, re.I):  # pragma: nocover
+            raise ValueError(f"invalid response: {token}")
 
-        if buf is None:  # pragma: nocover
-            raise ConnectionError(
-                "Error on connection setup. Incoming buffer is empty!"
-            )
-        acn_msg = acn_pb2.AcnMessage()
-        acn_msg.ParseFromString(buf)
-        performative = acn_msg.WhichOneof("performative")
-        if performative != "status":  # pragma: nocover
-            raise Exception(f"Wrong response message from peer: {performative}")
-        response = acn_msg.status  # pylint: disable=no-member
-
-        if response.body.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore # pylint: disable=no-member
-            raise Exception(  # pragma: nocover
-                "Registration to peer failed: {}".format(
-                    AcnMessage.StatusBody.StatusCode(response.body.code)  # type: ignore # pylint: disable=no-member
-                )
-            )
+        self._session_token = token
 
     async def close(self) -> None:
-        """Close client and pipe."""
-        await self.pipe.close()
+        """Close node connection."""
+        if not self._session_token:  # pragma: nocover
+            raise ValueError("not connected!")
+
+        response, _ = await self._perform_http_request(
+            "GET", "/unregister", headers={"Session-Id": self._session_token}
+        )
+        if response.status != 200:  # pragma: nocover
+            raise ValueError(f"Bad response code: {response.status}")
+
+        self._session_token = None
 
 
-class P2PLibp2pClientConnection(Connection):
+class P2PLibp2pMailboxConnection(Connection):
     """
     A libp2p client connection.
 
@@ -430,18 +346,7 @@ class P2PLibp2pClientConnection(Connection):
                         str(self.node_uri), attempt + 1
                     )
                 )
-                pipe = TCPSocketChannelClientTLS(
-                    f"{self.node_uri.host}:{self.node_uri._port}",  # pylint: disable=protected-access
-                    "",
-                    server_pub_key=self.node_por.representative_public_key,
-                    verification_signature_wait_timeout=self.tls_connection_signature_timeout,
-                )
-                if not await pipe.connect():
-                    raise ValueError(
-                        f"Pipe connection error: {pipe.last_exception or ''}"
-                    )
-
-                self._node_client = NodeClient(pipe, self.node_por)
+                self._node_client = NodeClient(self.node_uri, self.node_por)
                 await self._setup_connection()
 
                 self.logger.info(
@@ -472,7 +377,7 @@ class P2PLibp2pClientConnection(Connection):
         if not self._node_client:  # pragma: nocover
             raise ValueError("Connection was not connected!")
 
-        await self._node_client.register()
+        await self._node_client.connect()
 
     async def disconnect(self) -> None:
         """Disconnect from the channel."""
@@ -567,7 +472,7 @@ class P2PLibp2pClientConnection(Connection):
             self.logger.debug("Read envelope retry! Reconnect first!")
             await self._perform_connection_to_node()
             envelope = await self._node_client.read_envelope()
-            return envelope
+            return envelope  # pragma: no cover
         except Exception:  # pragma: no cover  # pylint: disable=broad-except
             self.logger.exception("Failed to read with reconnect!")
             return None
@@ -586,37 +491,51 @@ class P2PLibp2pClientConnection(Connection):
                 break  # pragma: no cover
 
 
-class TCPSocketChannelClientTLS(TCPSocketChannelClient):
+class SSLValidator:
     """Interprocess communication channel client using tcp sockets with TLS."""
 
-    DEFAULT_VERIFICATION_SIGNATURE_WAIT_TIMEOUT = 5.0
-
     def __init__(
-        self,
-        in_path: str,
-        out_path: str,
-        server_pub_key: str,
-        logger: logging.Logger = _default_logger,
-        loop: Optional[AbstractEventLoop] = None,
-        verification_signature_wait_timeout: Optional[float] = None,
+        self, url: str, server_pub_key: str, logger: logging.Logger = _default_logger,
     ) -> None:
         """
-        Initialize a tcp socket communication channel client.
+        Check ssl certificate with server pub key.
 
-        :param in_path: rendezvous point for incoming data
-        :param out_path: rendezvous point for outgoing data
+        :param url: url to get signature
         :param server_pub_key: str, server public key to verify identity
         :param logger: the logger
-        :param loop: the event loop
-        :param verification_signature_wait_timeout: optional float, if not provided, default value will be used
         """
-        super().__init__(in_path, out_path, logger, loop)
-        self.verification_signature_wait_timeout = (
-            self.DEFAULT_VERIFICATION_SIGNATURE_WAIT_TIMEOUT
-            if verification_signature_wait_timeout is None
-            else verification_signature_wait_timeout
-        )
         self.server_pub_key = server_pub_key
+        o = urlparse(url)
+        self.url = url
+        self.logger = logger
+        self.host: str = cast(str, o.hostname)
+        self.port: int = cast(int, o.port)
+
+    async def check(self) -> ssl.SSLContext:
+        """Check ssl/pubkey for mailbox service and return ssl context."""
+        ssl_ctx, session_pub_key = await self.get_ssl_ctx_and_session_pub_key(
+            self.host, self.port
+        )
+        signature = await self.get_signature(ssl_ctx)
+        self._verify_session_key_signature(
+            self.server_pub_key, signature, session_pub_key
+        )
+        return ssl_ctx
+
+    async def get_signature(self, ssl_ctx: ssl.SSLContext) -> bytes:
+        """
+        Get signature for mailbox service (ssl pubkey signed with node private key).
+
+        :param ssl_ctx: ssl context.
+
+        :return: signature in bytes
+        """
+        async with aiohttp.ClientSession() as client:
+            async with client.get(self.url, ssl=ssl_ctx) as resp:
+                if resp.status != 200:  # pragma: nocover
+                    raise ValueError("Bad server response")
+                signature = await resp.read()
+        return signature
 
     @staticmethod
     def _get_session_pub_key(writer: StreamWriter) -> bytes:  # pragma: nocover
@@ -629,55 +548,34 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         )
         return session_pub_key
 
-    async def _open_connection(self) -> TCPSocketProtocol:
-        """Open a connection with TLS support and verify peer."""
-        sock = await self._open_tls_connection()
-        session_pub_key = self._get_session_pub_key(sock.writer)
-
-        try:
-            signature = await asyncio.wait_for(
-                sock.read(), timeout=self.verification_signature_wait_timeout
-            )
-        except asyncio.TimeoutError:  # pragma: nocover
-            raise ValueError(
-                f"Failed to get peer verification record in timeout: {self.verification_signature_wait_timeout}"
-            )
-
-        if not signature:  # pragma: nocover
-            raise ValueError("Unexpected socket read data!")
-
-        try:
-            self._verify_session_key_signature(signature, session_pub_key)
-        except BadSignatureError as e:  # pragma: nocover
-            with contextlib.suppress(Exception):
-                await sock.close()
-            raise ValueError(f"Invalid TLS session key signature: {e}")
-        return sock
-
-    async def _open_tls_connection(self) -> TCPSocketProtocol:
+    async def get_ssl_ctx_and_session_pub_key(
+        self, host: str, port: int
+    ) -> Tuple[ssl.SSLContext, bytes]:
         """Open a connection with TLS support."""
         cadata = await asyncio.get_event_loop().run_in_executor(
-            None, lambda: ssl.get_server_certificate((self._host, self._port))
+            None, lambda: ssl.get_server_certificate((host, port))
         )
 
         ssl_ctx = ssl.create_default_context(cadata=cadata)
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
-        reader, writer = await asyncio.open_connection(
-            self._host, self._port, loop=self._loop, ssl=ssl_ctx,
-        )
-        return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
+        _, writer = await asyncio.open_connection(self.host, self.port, ssl=ssl_ctx,)
+        session_pub_key = self._get_session_pub_key(writer)
+        writer.close()
+        return ssl_ctx, session_pub_key
 
+    @staticmethod
     def _verify_session_key_signature(
-        self, signature: bytes, session_pub_key: bytes
+        server_pub_key: str, signature: bytes, session_pub_key: bytes
     ) -> None:
         """
         Validate signature of session public key.
 
+        :param server_pub_key: node pub key/addr.
         :param signature: bytes, signature of session public key made with server private key
         :param session_pub_key: session public key to check signature for.
         """
-        vk = VerifyingKey.from_string(bytes.fromhex(self.server_pub_key), SECP256k1)
+        vk = VerifyingKey.from_string(bytes.fromhex(server_pub_key), SECP256k1)
         vk.verify(
             signature, session_pub_key, hashfunc=hashlib.sha256, sigdecode=sigdecode_der
         )

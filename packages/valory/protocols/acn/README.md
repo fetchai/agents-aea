@@ -1,7 +1,16 @@
+# ACN Protocol
+
+## Description
+
+This is a protocol for ACN (agent communication network) envelope delivery.
+
+## Specification
+
+```yaml
 ---
 name: acn
-author: fetchai
-version: 1.0.0
+author: valory
+version: 1.1.0
 description: The protocol used for envelope delivery on the ACN.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -62,3 +71,6 @@ roles: {node}
 end_states: [successful, failed]
 keep_terminal_state_dialogues: false
 ...
+```
+
+## Links

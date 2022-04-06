@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 fetchai
+#   Copyright 2022 valory
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from packages.fetchai.protocols.acn.custom_types import AgentRecord as CustomAgentRecord
-from packages.fetchai.protocols.acn.custom_types import StatusBody as CustomStatusBody
+from packages.valory.protocols.acn.custom_types import AgentRecord as CustomAgentRecord
+from packages.valory.protocols.acn.custom_types import StatusBody as CustomStatusBody
 
 
-_default_logger = logging.getLogger("aea.packages.fetchai.protocols.acn.message")
+_default_logger = logging.getLogger("aea.packages.valory.protocols.acn.message")
 
 DEFAULT_BODY_SIZE = 4
 
@@ -39,7 +39,7 @@ DEFAULT_BODY_SIZE = 4
 class AcnMessage(Message):
     """The protocol used for envelope delivery on the ACN."""
 
-    protocol_id = PublicId.from_str("fetchai/acn:1.1.0")
+    protocol_id = PublicId.from_str("valory/acn:1.1.0")
     protocol_specification_id = PublicId.from_str("aea/acn:1.0.0")
 
     AgentRecord = CustomAgentRecord
