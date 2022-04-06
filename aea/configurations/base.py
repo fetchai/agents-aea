@@ -67,7 +67,6 @@ from aea.configurations.data_types import (
     ComponentType,
     Dependencies,
     Dependency,
-    ExtendedPublicId,
     JSONSerializable,
     PackageId,
     PackageType,
@@ -349,9 +348,9 @@ class PackageConfiguration(Configuration, ABC):
         return self._aea_version_specifiers
 
     @property
-    def public_id(self) -> ExtendedPublicId:
+    def public_id(self) -> PublicId:
         """Get the public id."""
-        return ExtendedPublicId(self.author, self.name, self.version)
+        return PublicId(self.author, self.name, self.version)
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -596,13 +595,13 @@ class ConnectionConfig(ComponentConfiguration):
         build_entrypoint: Optional[str] = None,
         build_directory: Optional[str] = None,
         class_name: str = "",
-        protocols: Optional[Set[ExtendedPublicId]] = None,
-        connections: Optional[Set[ExtendedPublicId]] = None,
-        restricted_to_protocols: Optional[Set[ExtendedPublicId]] = None,
-        excluded_protocols: Optional[Set[ExtendedPublicId]] = None,
+        protocols: Optional[Set[PublicId]] = None,
+        connections: Optional[Set[PublicId]] = None,
+        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
-        connection_id: Optional[ExtendedPublicId] = None,
+        connection_id: Optional[PublicId] = None,
         is_abstract: bool = False,
         cert_requests: Optional[List[CertRequest]] = None,
         **config: Any,
@@ -716,19 +715,13 @@ class ConnectionConfig(ComponentConfiguration):
         obj = {**(instance.json if instance else {}), **copy(obj)}
         restricted_to_protocols = obj.get("restricted_to_protocols", set())
         restricted_to_protocols = {
-            ExtendedPublicId.from_str(id_) for id_ in restricted_to_protocols
+            PublicId.from_str(id_) for id_ in restricted_to_protocols
         }
         excluded_protocols = obj.get("excluded_protocols", set())
-        excluded_protocols = {
-            ExtendedPublicId.from_str(id_) for id_ in excluded_protocols
-        }
+        excluded_protocols = {PublicId.from_str(id_) for id_ in excluded_protocols}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
-        protocols = {
-            ExtendedPublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())
-        }
-        connections = {
-            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())
-        }
+        protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
+        connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         cert_requests = (
             [
                 # notice: yaml.load resolves datetime strings to datetime.datetime objects
@@ -752,12 +745,10 @@ class ConnectionConfig(ComponentConfiguration):
             build_entrypoint=cast(Optional[str], obj.get("build_entrypoint")),
             build_directory=cast(Optional[str], obj.get("build_directory")),
             class_name=cast(str, obj.get("class_name")),
-            protocols=cast(Set[ExtendedPublicId], protocols),
-            connections=cast(Set[ExtendedPublicId], connections),
-            restricted_to_protocols=cast(
-                Set[ExtendedPublicId], restricted_to_protocols
-            ),
-            excluded_protocols=cast(Set[ExtendedPublicId], excluded_protocols),
+            protocols=cast(Set[PublicId], protocols),
+            connections=cast(Set[PublicId], connections),
+            restricted_to_protocols=cast(Set[PublicId], restricted_to_protocols),
+            excluded_protocols=cast(Set[PublicId], excluded_protocols),
             dependencies=cast(Dependencies, dependencies),
             description=cast(str, obj.get("description", "")),
             is_abstract=obj.get("is_abstract", False),
@@ -820,7 +811,7 @@ class ProtocolConfig(ComponentConfiguration):
             raise ValueError(  # pragma: nocover
                 "protocol_specification_id not provided!"
             )
-        self.protocol_specification_id = ExtendedPublicId.from_str(
+        self.protocol_specification_id = PublicId.from_str(
             str(protocol_specification_id)
         )
 
@@ -976,10 +967,10 @@ class SkillConfig(ComponentConfiguration):
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
         build_directory: Optional[str] = None,
-        connections: Optional[Set[ExtendedPublicId]] = None,
-        protocols: Optional[Set[ExtendedPublicId]] = None,
-        contracts: Optional[Set[ExtendedPublicId]] = None,
-        skills: Optional[Set[ExtendedPublicId]] = None,
+        connections: Optional[Set[PublicId]] = None,
+        protocols: Optional[Set[PublicId]] = None,
+        contracts: Optional[Set[PublicId]] = None,
+        skills: Optional[Set[PublicId]] = None,
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         is_abstract: bool = False,
@@ -1086,16 +1077,10 @@ class SkillConfig(ComponentConfiguration):
             Sequence[str], obj.get("fingerprint_ignore_patterns")
         )
         build_entrypoint = cast(Optional[str], obj.get("build_entrypoint"))
-        connections = {
-            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())
-        }
-        protocols = {
-            ExtendedPublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())
-        }
-        contracts = {
-            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())
-        }
-        skills = {ExtendedPublicId.from_str(id_) for id_ in obj.get(SKILLS, set())}
+        connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
+        protocols = {PublicId.from_str(id_) for id_ in obj.get(PROTOCOLS, set())}
+        contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
+        skills = {PublicId.from_str(id_) for id_ in obj.get(SKILLS, set())}
         dependencies = dependencies_from_json(obj.get("dependencies", {}))
         description = cast(str, obj.get("description", ""))
         params = dict(
@@ -1285,14 +1270,14 @@ class AgentConfig(PackageConfiguration):
             currency_denominations if currency_denominations is not None else {}
         )
         self.default_connection = (
-            ExtendedPublicId.from_str(default_connection)
+            PublicId.from_str(default_connection)
             if default_connection is not None
             else None
         )
-        self.connections = set()  # type: Set[ExtendedPublicId]
-        self.contracts = set()  # type: Set[ExtendedPublicId]
-        self.protocols = set()  # type: Set[ExtendedPublicId]
-        self.skills = set()  # type: Set[ExtendedPublicId]
+        self.connections = set()  # type: Set[PublicId]
+        self.contracts = set()  # type: Set[PublicId]
+        self.protocols = set()  # type: Set[PublicId]
+        self.skills = set()  # type: Set[PublicId]
 
         self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout
@@ -1308,12 +1293,12 @@ class AgentConfig(PackageConfiguration):
 
         self.default_routing = (
             {
-                ExtendedPublicId.from_str(key): ExtendedPublicId.from_str(value)
+                PublicId.from_str(key): PublicId.from_str(value)
                 for key, value in default_routing.items()
             }
             if default_routing is not None
             else {}
-        )  # type: Dict[ExtendedPublicId, ExtendedPublicId]
+        )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
         self.task_manager_mode = task_manager_mode
@@ -1335,14 +1320,14 @@ class AgentConfig(PackageConfiguration):
     def component_configurations(self, d: Dict[ComponentId, Dict]) -> None:
         """Set the component configurations."""
         package_type_to_set = {
-            PackageType.PROTOCOL: {epid.to_public_id() for epid in self.protocols},
-            PackageType.CONNECTION: {epid.to_public_id() for epid in self.connections},
-            PackageType.CONTRACT: {epid.to_public_id() for epid in self.contracts},
-            PackageType.SKILL: {epid.to_public_id() for epid in self.skills},
+            PackageType.PROTOCOL: {epid.without_hash() for epid in self.protocols},
+            PackageType.CONNECTION: {epid.without_hash() for epid in self.connections},
+            PackageType.CONTRACT: {epid.without_hash() for epid in self.contracts},
+            PackageType.SKILL: {epid.without_hash() for epid in self.skills},
         }
         for component_id, component_configuration in d.items():
             enforce(
-                component_id.public_id
+                component_id.public_id.without_hash()
                 in package_type_to_set[component_id.package_type],
                 f"Component {component_id} not declared in the agent configuration.",
             )
@@ -1522,27 +1507,23 @@ class AgentConfig(PackageConfiguration):
 
         # parse connection public ids
         agent_config.connections = set(
-            map(ExtendedPublicId.from_str, obj.get(CONNECTIONS, []),)
+            map(PublicId.from_str, obj.get(CONNECTIONS, []),)
         )
 
         # parse contracts public ids
-        agent_config.contracts = set(
-            map(ExtendedPublicId.from_str, obj.get(CONTRACTS, []),)
-        )
+        agent_config.contracts = set(map(PublicId.from_str, obj.get(CONTRACTS, []),))
 
         # parse protocol public ids
-        agent_config.protocols = set(
-            map(ExtendedPublicId.from_str, obj.get(PROTOCOLS, []),)
-        )
+        agent_config.protocols = set(map(PublicId.from_str, obj.get(PROTOCOLS, []),))
 
         # parse skills public ids
-        agent_config.skills = set(map(ExtendedPublicId.from_str, obj.get(SKILLS, []),))
+        agent_config.skills = set(map(PublicId.from_str, obj.get(SKILLS, []),))
 
         # parse component configurations
         component_configurations = {}
         for config in obj.get("component_configurations", []):
             tmp = deepcopy(config)
-            public_id = ExtendedPublicId.from_str(tmp.pop("public_id"))
+            public_id = PublicId.from_str(tmp.pop("public_id"))
             type_ = tmp.pop("type")
             component_id = ComponentId(ComponentType(type_), public_id)
             component_configurations[component_id] = tmp
@@ -1751,7 +1732,7 @@ class ContractConfig(ComponentConfiguration):
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
-        contracts: Optional[Set[ExtendedPublicId]] = None,
+        contracts: Optional[Set[PublicId]] = None,
     ) -> None:
         """Initialize a protocol configuration object."""
         super().__init__(
@@ -1809,9 +1790,7 @@ class ContractConfig(ComponentConfiguration):
         dependencies = cast(
             Dependencies, dependencies_from_json(obj.get("dependencies", {}))
         )
-        contracts = {
-            ExtendedPublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())
-        }
+        contracts = {PublicId.from_str(id_) for id_ in obj.get(CONTRACTS, set())}
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
@@ -1937,7 +1916,7 @@ class AEAVersionError(ValueError):
     """Special Exception for version error."""
 
     def __init__(
-        self, package_id: ExtendedPublicId, aea_version_specifiers: SpecifierSet
+        self, package_id: PublicId, aea_version_specifiers: SpecifierSet
     ) -> None:
         """Init exception."""
         self.package_id = package_id
@@ -1982,7 +1961,7 @@ def _get_public_id_from_file(
     component_configuration: ComponentConfiguration,
     package_directory: Path,
     filename: str,
-) -> Optional[ExtendedPublicId]:
+) -> Optional[PublicId]:
     """
     Get the public id from an init if present.
 
