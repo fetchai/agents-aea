@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ from aea.cli.registry.settings import (
     REGISTRY_IPFS,
 )
 from aea.cli.utils.config import get_or_create_cli_config
-from aea.configurations.base import ExtendedPublicId
+from aea.configurations.base import PublicId
 
 
 _default_logger = logging.getLogger(__name__)
@@ -111,18 +111,16 @@ def load_local_registry(registry_path: str = LOCAL_REGISTRY_PATH) -> LocalRegist
 
 
 def get_ipfs_hash_from_public_id(
-    item_type: str,
-    public_id: ExtendedPublicId,
-    registry_path: str = LOCAL_REGISTRY_PATH,
+    item_type: str, public_id: PublicId, registry_path: str = LOCAL_REGISTRY_PATH,
 ) -> Optional[str]:
     """Get IPFS hash from local registry."""
 
     registry_data = load_local_registry(registry_path=registry_path)
     if public_id.package_version.is_latest:
-        package_versions: List[ExtendedPublicId] = [
-            ExtendedPublicId.from_str(_public_id)
+        package_versions: List[PublicId] = [
+            PublicId.from_str(_public_id)
             for _public_id in registry_data.get(f"{item_type}s", {}).keys()
-            if public_id.same_prefix(ExtendedPublicId.from_str(_public_id))
+            if public_id.same_prefix(PublicId.from_str(_public_id))
         ]
         package_versions = list(
             reversed(sorted(package_versions, key=lambda x: x.package_version))
@@ -136,12 +134,12 @@ def get_ipfs_hash_from_public_id(
 
 def register_item_to_local_registry(
     item_type: str,
-    public_id: Union[str, ExtendedPublicId],
+    public_id: Union[str, PublicId],
     package_hash: str,
     registry_path: str = LOCAL_REGISTRY_PATH,
 ) -> None:
     """
-    Add ExtendedPublicId to hash mapping in the local registry.
+    Add PublicId to hash mapping in the local registry.
 
     :param item_type: item type.
     :param public_id: public id of package.
@@ -155,7 +153,7 @@ def register_item_to_local_registry(
 
 
 def fetch_ipfs(
-    item_type: str, public_id: ExtendedPublicId, dest: str, remote: bool = True,
+    item_type: str, public_id: PublicId, dest: str, remote: bool = True,
 ) -> Optional[Path]:
     """Fetch a package from IPFS node."""
     if remote:
