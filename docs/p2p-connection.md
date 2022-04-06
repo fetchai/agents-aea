@@ -1,4 +1,4 @@
-The `open_aea/p2p_libp2p:0.26.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `valory/p2p_libp2p:0.26.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local demo
 
@@ -77,7 +77,7 @@ aea issue-certificates
 Provide the AEA with the information it needs to find the genesis:
 
 ``` bash
-aea config set --type dict vendor.open_aea.connections.p2p_libp2p.config \
+aea config set --type dict vendor.valory.connections.p2p_libp2p.config \
 '{
   "delegate_uri": "127.0.0.1:11001",
   "entry_peers": [<AEA_P2P_ENTRY_URI_1>, <AEA_P2P_ENTRY_URI_2>],
@@ -160,7 +160,7 @@ Next, to run the node binary in standalone mode, it requires values for the foll
 - `AEA_P2P_URI`: the local host and port to use by node
 - `AEA_P2P_URI_PUBLIC`: the URI under which the peer is publicly reachable
 - `AEA_P2P_DELEGATE_URI`: the URI under which the peer receives delegate connections
-- `AEA_P2P_ENTRY_URIS`: an optionally supplied list of comma-separated (`,`) entry Multiaddresses for the peer to bootstrap 
+- `AEA_P2P_ENTRY_URIS`: an optionally supplied list of comma-separated (`,`) entry <a href="https://multiformats.io/multiaddr/" target="_blank">Multiaddrs</a> for the peer to bootstrap 
 
 The script allows different methods to pass these values to the node:
 

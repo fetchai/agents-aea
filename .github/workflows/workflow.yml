@@ -51,7 +51,7 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: 3.7
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
@@ -76,11 +76,12 @@ jobs:
       - name: Static type check
         run: tox -e mypy
       - name: Golang code style check (aealite)
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.29
+          version: v1.28
+          args: --version
           working-directory: libs/go/aealite
 
   common_checks_3:
@@ -291,7 +292,7 @@ jobs:
           python-version: 3.8
       - uses: actions/setup-go@master
         with:
-          go-version: "^1.14.0"
+          go-version: "1.17.0"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -352,7 +353,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
       - uses: actions/setup-go@master
         with:
-          go-version: "^1.14.0"
+          go-version: "1.17.7"
       - if: matrix.os == 'ubuntu-latest'
         name: Install dependencies (ubuntu-latest)
         run: |
@@ -398,7 +399,7 @@ jobs:
           cd ..
           rm -rf go-ipfs
           ipfs init
-          
+
       - if: matrix.os == 'windows-latest'
         name: Install dependencies (windows-latest)
         env:
@@ -449,7 +450,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: actions/setup-go@master
         with:
-          go-version: "^1.14.0"
+          go-version: "1.17.7"
     # - if: matrix.python-version == '3.7'
     #   name: Golang unit tests (aealite)
     #   working-directory: ./libs/go/aealite
@@ -470,7 +471,7 @@ jobs:
           python-version: 3.7
       - uses: actions/setup-go@master
         with:
-          go-version: "^1.14.0"
+          go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
