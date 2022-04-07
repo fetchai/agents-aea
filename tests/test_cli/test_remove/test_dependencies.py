@@ -167,7 +167,9 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
 
         Done with mocking _add_item_deps to avoid dependencies installation.
         """
-        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        assert self.DEPENDENCY_PUBLIC_ID in {
+            p.without_hash() for p in self.load_config().protocols
+        }
 
         self.runner.invoke(
             cli,
@@ -207,7 +209,9 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
 
     def test_not_removed_cause_required(self):
         """Test dependency is not removed after upgrade cause required by another item."""
-        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        assert self.DEPENDENCY_PUBLIC_ID in {
+            p.without_hash() for p in self.load_config().protocols
+        }
         # do not add dependencies for the package
         with pytest.raises(
             ClickException,
@@ -226,4 +230,6 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
                 standalone_mode=False,
                 catch_exceptions=False,
             )
-        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        assert self.DEPENDENCY_PUBLIC_ID in {
+            p.without_hash() for p in self.load_config().protocols
+        }

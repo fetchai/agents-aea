@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,7 +83,7 @@ def test_envelope_initialisation():
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
     assert envelope.context is None
     assert not envelope.is_sender_public_id
-    assert not envelope.is_to_public_id
+    assert not envelope.is_without_hash
 
 
 def test_inbox_empty():

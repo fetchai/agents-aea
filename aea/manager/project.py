@@ -93,8 +93,7 @@ class Project(_Base):
         cls,
         working_dir: str,
         public_id: PublicId,
-        is_local: bool = False,
-        is_remote: bool = False,
+        registry: str,
         is_restore: bool = False,
         cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
@@ -110,8 +109,7 @@ class Project(_Base):
 
         :param working_dir: the working directory
         :param public_id: the public id
-        :param is_local: whether to fetch from local
-        :param is_remote: whether to fetch from remote
+        :param registry: type of registry to use.
         :param is_restore: whether to restore or not
         :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
@@ -129,7 +127,7 @@ class Project(_Base):
         target_dir = os.path.join(public_id.author, public_id.name)
 
         if not is_restore and not os.path.exists(target_dir):
-            do_fetch(ctx, public_id, is_local, is_remote, target_dir=target_dir)
+            do_fetch(ctx, public_id, registry=registry, target_dir=target_dir)
         return cls(public_id, path)
 
     def remove(self) -> None:

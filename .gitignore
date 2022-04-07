@@ -122,6 +122,7 @@ temp_private_key.pem
 
 input_file
 output_file
+joined-path
 
 packages/default_author/
 
@@ -148,3 +149,4 @@ libs/go/libp2p_node/dht/dhtpeer/agent_records_store*
 coverage.txt
 
 temp/
+agent_name/

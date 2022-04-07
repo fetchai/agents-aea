@@ -38,6 +38,7 @@ from packaging.version import Version
 import aea
 from aea.cli import cli
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
 from packages.open_aea.protocols.signing.message import SigningMessage
@@ -165,9 +166,10 @@ class TestCreate:
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        assert self.agent_config["protocols"] == [
-            str(SigningMessage.protocol_id),
-        ]
+        assert [
+            str(PublicId.from_str(p).without_hash())
+            for p in self.agent_config["protocols"]
+        ] == [str(SigningMessage.protocol_id)]
 
     def test_skills_field_is_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
@@ -455,7 +457,7 @@ class CreateCommandTestCase(TestCase):
         """Test for CLI create no init result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "create", "agent_name", "--author=some"],
+            [*CLI_LOG_OPTION, "create", "--http", "agent_name", "--author=some"],
             standalone_mode=False,
         )
         self.assertEqual(

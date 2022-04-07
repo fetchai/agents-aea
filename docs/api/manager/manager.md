@@ -411,8 +411,7 @@ Add error callback to call on error raised.
 #### start`_`manager
 
 ```python
-def start_manager(local: bool = False,
-                  remote: bool = False) -> "MultiAgentManager"
+def start_manager(registry: Optional[str] = None) -> "MultiAgentManager"
 ```
 
 Start manager.
@@ -423,8 +422,7 @@ registry, and then from remote registry in case of failure).
 
 **Arguments**:
 
-- `local`: whether or not to fetch from local registry.
-- `remote`: whether or not to fetch from remote registry.
+- `registry`: type of registry to use.
 
 **Returns**:
 
@@ -470,8 +468,7 @@ None
 
 ```python
 def add_project(public_id: PublicId,
-                local: bool = False,
-                remote: bool = False,
+                registry: str,
                 restore: bool = False) -> "MultiAgentManager"
 ```
 
@@ -484,8 +481,7 @@ registry, and then from remote registry in case of failure).
 **Arguments**:
 
 - `public_id`: the public if of the agent project.
-- `local`: whether or not to fetch from local registry.
-- `remote`: whether or not to fetch from remote registry.
+- `registry`: type of registry to use.
 - `restore`: bool flag for restoring already fetched agent.
 
 **Returns**:
@@ -526,8 +522,7 @@ def add_agent(public_id: PublicId,
               agent_name: Optional[str] = None,
               agent_overrides: Optional[dict] = None,
               component_overrides: Optional[List[dict]] = None,
-              local: bool = False,
-              remote: bool = False,
+              registry: Optional[str] = None,
               restore: bool = False) -> "MultiAgentManager"
 ```
 
@@ -541,8 +536,7 @@ Alias is stored in memory only!
 - `agent_name`: unique name for the agent
 - `agent_overrides`: overrides for agent config.
 - `component_overrides`: overrides for component section.
-- `local`: whether or not to fetch from local registry.
-- `remote`: whether or not to fetch from remote registry.
+- `registry`: type of registry to use.
 - `restore`: bool flag for restoring already fetched agent.
 
 **Returns**:

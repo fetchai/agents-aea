@@ -56,7 +56,7 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- fetchai/acn:1.1.0
+- fetchai/acn:1.1.0:QmNbUc63gLMWJjT6qP7Z4JnSESAfQyqbbEfzrZGA5fLY6Z
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

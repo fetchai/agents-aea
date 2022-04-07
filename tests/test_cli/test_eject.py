@@ -209,7 +209,7 @@ class TestEjectCommandReplacesReferences(BaseTestEjectCommand):
     def test_aea_config_references_updated_correctly(self):
         """Test that the references in the AEA configuration is updated correctly."""
         agent_config = self.load_agent_config(self.agent_name)
-        assert agent_config.protocols == {
+        assert {p.without_hash() for p in agent_config.protocols} == {
             PublicId(
                 self.EXPECTED_AUTHOR, DefaultMessage.protocol_id.name, DEFAULT_VERSION
             )
@@ -254,7 +254,7 @@ class TestEjectCommandReplacesCustomConfigurationReference(BaseTestEjectCommand)
     def test_aea_config_references_updated_correctly(self):
         """Test that the references in the AEA configuration is updated correctly."""
         agent_config = self.load_agent_config(self.agent_name)
-        assert agent_config.skills == {
+        assert {p.without_hash() for p in agent_config.skills} == {
             PublicId(self.EXPECTED_AUTHOR, ERROR_PUBLIC_ID.name, DEFAULT_VERSION)
         }
 

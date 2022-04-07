@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,7 +122,7 @@ class PublishCommandTestCase(TestCase):
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--remote"], standalone_mode=False,
+            cli, [*CLI_LOG_OPTION, "publish", "--http"], standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
@@ -251,7 +251,7 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
         ) as e, mock.patch(
             "aea.cli.publish.get_package_meta", side_effect=ClickException("expected"),
         ):
-            self.invoke("publish", "--remote")
+            self.invoke("publish", "--http")
         assert "--push-missing" in str(e)
         publish_agent_mock.assert_not_called()
 
@@ -259,7 +259,7 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
             "aea.cli.publish.get_package_meta",
             side_effect=[ClickException("expected")] + [mock.DEFAULT] * 100,
         ):
-            self.invoke("publish", "--remote", "--push-missing")
+            self.invoke("publish", "--http", "--push-missing")
 
         push_item_remote_mock.assert_called()
         publish_agent_mock.assert_called()

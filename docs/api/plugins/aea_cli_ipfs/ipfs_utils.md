@@ -161,6 +161,16 @@ def addr() -> str
 
 Node address
 
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.is_a_package"></a>
+
+#### is`_`a`_`package
+
+```python
+def is_a_package(package_hash: str) -> bool
+```
+
+Checks if a package with `package_hash` is pinned or not
+
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.all_pins"></a>
 
 #### all`_`pins
@@ -220,12 +230,22 @@ Remove dir added by it's hash.
 
 dict with unlinked items.
 
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.remove_unpinned_files"></a>
+
+#### remove`_`unpinned`_`files
+
+```python
+def remove_unpinned_files() -> None
+```
+
+Remove dir added by it's hash.
+
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.download"></a>
 
 #### download
 
 ```python
-def download(hash_id: str, target_dir: str, fix_path: bool = True) -> None
+def download(hash_id: str, target_dir: str, fix_path: bool = True) -> str
 ```
 
 Download dir by it's hash.
@@ -235,6 +255,10 @@ Download dir by it's hash.
 - `hash_id`: str. hash of file to download
 - `target_dir`: str. directory to place downloaded
 - `fix_path`: bool. default True. on download don't wrap result in to hash_id directory.
+
+**Returns**:
+
+downloaded path
 
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSTool.publish"></a>
 

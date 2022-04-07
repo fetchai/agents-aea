@@ -211,6 +211,10 @@ class IPFSTool:
 
         return cast(str, self._addr)
 
+    def is_a_package(self, package_hash: str) -> bool:
+        """Checks if a package with `package_hash` is pinned or not"""
+        return package_hash in self.all_pins()
+
     def all_pins(self, recursive_only: bool = True) -> Set[str]:
         """Returns a list of all pins."""
         pinned_hashes = self.client.pin.ls(
@@ -238,7 +242,7 @@ class IPFSTool:
         """Pin content with hash_id"""
 
         try:
-            return self.client.pin.rm(hash_id, recursive=True)
+            return self.client.pin.add(hash_id, recursive=True)
         except ipfshttpclient.exceptions.ErrorResponse as e:
             raise PinError(f"Error on while pinning {hash_id}: {str(e)}") from e
 
@@ -255,13 +259,23 @@ class IPFSTool:
         except ipfshttpclient.exceptions.ErrorResponse as e:
             raise RemoveError(f"Error on {hash_id} remove: {str(e)}") from e
 
-    def download(self, hash_id: str, target_dir: str, fix_path: bool = True) -> None:
+    def remove_unpinned_files(self) -> None:
+        """Remove dir added by it's hash."""
+        try:
+            return self.client.repo.gc()
+        except ipfshttpclient.exceptions.ErrorResponse as e:
+            raise RemoveError(
+                f"Error while performing garbage collection: {str(e)}"
+            ) from e
+
+    def download(self, hash_id: str, target_dir: str, fix_path: bool = True) -> str:
         """
         Download dir by it's hash.
 
         :param hash_id: str. hash of file to download
         :param target_dir: str. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
+        :return: downloaded path
         """
         if not os.path.exists(target_dir):  # pragma: nocover
             os.makedirs(target_dir, exist_ok=True)
@@ -271,6 +285,14 @@ class IPFSTool:
 
         self.client.get(hash_id, target_dir)
         downloaded_path = str(Path(target_dir) / hash_id)
+
+        downloaded_files = os.listdir(downloaded_path)
+        if len(downloaded_files) > 0:
+            package_name, *_ = os.listdir(downloaded_path)
+            package_path = str(Path(target_dir) / package_name)
+        else:
+            package_path = target_dir
+
         if fix_path:
             # self.client.get creates result with hash name
             # and content, but we want content in the target dir
@@ -280,7 +302,10 @@ class IPFSTool:
             except shutil.Error as e:  # pragma: nocover
                 raise DownloadError(f"error on move files {str(e)}") from e
 
+        # TODO: use shutil
         os.rmdir(downloaded_path)
+
+        return package_path
 
     def publish(self, hash_id: str) -> Dict:
         """

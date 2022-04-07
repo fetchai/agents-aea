@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,7 @@
 from unittest import TestCase, mock
 
 from aea.cli.add import _add_item_deps
+from aea.cli.registry.settings import REGISTRY_LOCAL
 
 from tests.test_cli.tools_for_testing import ContextMock
 
@@ -37,4 +39,4 @@ class AddItemDepsTestCase(TestCase):
         item_config.contracts = []
         item_config.connections = []
         item_config.skills = ["skill-1", "skill-2"]
-        _add_item_deps(ctx, "skill", item_config)
+        _add_item_deps(ctx, "skill", item_config, REGISTRY_LOCAL)

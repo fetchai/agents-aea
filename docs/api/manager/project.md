@@ -74,8 +74,7 @@ Call all build entry points.
 def load(cls,
          working_dir: str,
          public_id: PublicId,
-         is_local: bool = False,
-         is_remote: bool = False,
+         registry: str,
          is_restore: bool = False,
          cli_verbosity: str = "INFO",
          registry_path: str = DEFAULT_REGISTRY_NAME,
@@ -93,8 +92,7 @@ registry, and then from remote registry in case of failure).
 
 - `working_dir`: the working directory
 - `public_id`: the public id
-- `is_local`: whether to fetch from local
-- `is_remote`: whether to fetch from remote
+- `registry`: type of registry to use.
 - `is_restore`: whether to restore or not
 - `cli_verbosity`: the logging verbosity of the CLI
 - `registry_path`: the path to the registry locally

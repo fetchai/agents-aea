@@ -30,7 +30,7 @@
       "$ref": "definitions.json#/definitions/aea_version"
     },
     "protocol_specification_id": {
-      "$ref": "definitions.json#/definitions/public_id"
+      "$ref": "definitions.json#/definitions/extended_public_id"
     },
     "speech_acts": {
       "type": "object",

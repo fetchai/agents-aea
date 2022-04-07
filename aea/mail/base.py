@@ -299,7 +299,7 @@ class Envelope:
         self._sender = sender
 
         enforce(
-            self.is_to_public_id == self.is_sender_public_id,
+            self.is_without_hash == self.is_sender_public_id,
             "To and sender must either both be agent addresses or both be public ids of AEA components.",
         )
 
@@ -394,14 +394,14 @@ class Envelope:
         return PublicId.is_valid_str(self.sender)
 
     @property
-    def is_to_public_id(self) -> bool:
+    def is_without_hash(self) -> bool:
         """Check if to is a public id."""
         return PublicId.is_valid_str(self.to)
 
     @property
     def is_component_to_component_message(self) -> bool:
         """Whether or not the message contained is component to component."""
-        return self.is_to_public_id and self.is_sender_public_id
+        return self.is_without_hash and self.is_sender_public_id
 
     @staticmethod
     def _check_consistency(message: Message, to: str, sender: str) -> Message:

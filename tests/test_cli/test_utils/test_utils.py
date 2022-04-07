@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -166,7 +166,7 @@ class PublicIdParameterTestCase(TestCase):
     def test_get_metavar_positive(self):
         """Test for get_metavar positive result."""
         result = PublicIdParameter.get_metavar("obj", "param")
-        expected_result = "PUBLIC_ID"
+        expected_result = "PUBLIC_ID_OR_HASH"
         self.assertEqual(result, expected_result)
 
 
