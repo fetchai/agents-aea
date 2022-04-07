@@ -58,18 +58,14 @@ if platform.system() == "Windows":  # pragma: nocover
 
 else:
     import resource
+    import tracemalloc
 
     _MAC_MEM_STATS_MB = 1024 ** 2
     _LINUX_MEM_STATS_MB = 1024
 
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
-        if platform.system() == "Darwin":  # pragma: nocover
-            divider = _MAC_MEM_STATS_MB
-        else:
-            divider = _LINUX_MEM_STATS_MB
-
-        return 1.0 * resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / divider
+        return tracemalloc.get_traced_memory()[0] / 1024 ** 2
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
@@ -103,6 +99,11 @@ class Profiling(Runnable):
         self._objects_created_to_count = objects_created_to_count or []
         self._output_function = output_function
         self._counter: Dict[Type, int] = Counter()
+        tracemalloc.start()
+
+    def __del__(self) -> None:
+        """Profiler destructor"""
+        tracemalloc.stop()
 
     def set_counters(self) -> None:
         """Modify obj.__new__ to count objects created created."""
@@ -174,7 +175,7 @@ class Profiling(Runnable):
                 "names": [i.name for i in threading.enumerate()],
             },
             "objects_present": self.get_objects_instances(),
-            "objects_created": self.get_objecst_created(),
+            "objects_created": self.get_objects_created(),
         }
 
     def get_objects_instances(self) -> Dict:
@@ -194,6 +195,6 @@ class Profiling(Runnable):
             lock.release()
         return result
 
-    def get_objecst_created(self) -> Dict:
+    def get_objects_created(self) -> Dict:
         """Return dict with counted object instances created."""
         return self._counter
