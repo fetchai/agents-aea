@@ -36,6 +36,16 @@ Init profiler.
 - `objects_created_to_count`: object created to count
 - `output_function`: function to display output, one str argument.
 
+<a id="aea.helpers.profiling.Profiling.__del__"></a>
+
+#### `__`del`__`
+
+```python
+def __del__() -> None
+```
+
+Profiler destructor
+
 <a id="aea.helpers.profiling.Profiling.set_counters"></a>
 
 #### set`_`counters
@@ -86,12 +96,12 @@ def get_objects_instances() -> Dict
 
 Return dict with counted object instances present now.
 
-<a id="aea.helpers.profiling.Profiling.get_objecst_created"></a>
+<a id="aea.helpers.profiling.Profiling.get_objects_created"></a>
 
-#### get`_`objecst`_`created
+#### get`_`objects`_`created
 
 ```python
-def get_objecst_created() -> Dict
+def get_objects_created() -> Dict
 ```
 
 Return dict with counted object instances created.
