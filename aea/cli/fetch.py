@@ -34,7 +34,7 @@ from aea.cli.registry.settings import (
     REGISTRY_IPFS,
     REGISTRY_LOCAL,
 )
-from aea.cli.utils.click_utils import PublicIdParameter, registry_flag_
+from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
@@ -62,7 +62,7 @@ except ImportError:
 
 
 @click.command(name="fetch")
-@registry_flag_()
+@registry_flag()
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
@@ -73,13 +73,13 @@ def fetch(
 ) -> None:
     """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
-    do_fetch(ctx, public_id, registry, alias)
+    ctx.registry_type = registry
+    do_fetch(ctx, public_id, alias)
 
 
 def do_fetch(
     ctx: Context,
     public_id: PublicId,
-    registry: str,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
 ) -> None:
@@ -88,17 +88,16 @@ def do_fetch(
 
     :param ctx: the CLI context.
     :param public_id: the public id.
-    :param registry: type of registry to uaw
     :param alias: the agent alias.
     :param target_dir: the target directory, in case fetching locally.
     """
 
-    if registry == REGISTRY_HTTP:
+    if ctx.registry_type == REGISTRY_HTTP:
         fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
-    elif registry == REGISTRY_LOCAL:
+    elif ctx.registry_type == REGISTRY_LOCAL:
         ctx.set_config("is_local", True)
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
-    elif registry == REGISTRY_IPFS:
+    elif ctx.registry_type == REGISTRY_IPFS:
         fetch_agent_ipfs(ctx, public_id, alias, target_dir)
     else:
         fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
@@ -172,7 +171,7 @@ def fetch_agent_ipfs(
     )
 
     try_to_load_agent_config(ctx)
-    _fetch_agent_deps(ctx, REGISTRY_IPFS)
+    _fetch_agent_deps(ctx)
     click.echo("Agent {} successfully fetched.".format(ctx.agent_config.agent_name))
 
 
@@ -234,22 +233,21 @@ def fetch_agent_locally(
             open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
 
-    _fetch_agent_deps(ctx, REGISTRY_LOCAL)
+    _fetch_agent_deps(ctx)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
 
-def _fetch_agent_deps(ctx: Context, registry: str) -> None:
+def _fetch_agent_deps(ctx: Context) -> None:
     """
     Fetch agent dependencies.
 
-    :param registry: type of registry to use.
     :param ctx: context object.
     """
     for item_type in (PROTOCOL, CONTRACT, CONNECTION, SKILL):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:
-            add_item(ctx, item_type, item_id, registry)
+            add_item(ctx, item_type, item_id)
 
 
 def fetch_mixed(
