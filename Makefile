@@ -125,16 +125,14 @@ release:
 
 v := $(shell pip -V | grep virtualenvs)
 
-.PHONY: checks
-checks:
+.PHONY: all-checks
+all-checks:
 	make clean \
-	&& make static \
-	&& make lint \
-	&& make pylint \
-	&& make copyright \
+	&& make formatters \
+	&& make code-checks \
+	&& make common-checks \
 	&& make docs \
-	&& make api-docs \
-	&& make hashes \
+	&& python scripts/generate_api_docs.py \
 	&& make security \
 
 .PHONY: new_env
