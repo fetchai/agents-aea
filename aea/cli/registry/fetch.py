@@ -27,7 +27,6 @@ import click
 from click.exceptions import ClickException
 
 from aea.cli.add import add_item
-from aea.cli.registry.settings import REGISTRY_HTTP
 from aea.cli.registry.utils import download_file, extract, request_api
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
@@ -59,6 +58,7 @@ def fetch_agent(
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
     """
+
     author, name, version = public_id.author, public_id.name, public_id.version
 
     folder_name = target_dir or (name if alias is None else alias)
@@ -102,7 +102,7 @@ def fetch_agent(
         config = getattr(ctx.agent_config, item_type_plural)
         for item_public_id in config:
             try:
-                add_item(ctx, item_type, item_public_id, REGISTRY_HTTP)
+                add_item(ctx, item_type, item_public_id)
             except Exception as e:
                 raise click.ClickException(
                     f'Unable to fetch dependency for agent "{name}", aborting. {e}'

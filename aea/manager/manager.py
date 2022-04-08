@@ -34,7 +34,6 @@ from traceback import format_exc
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
-from aea.cli.utils.config import get_or_create_cli_config
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PackageIdPrefix, PublicId
@@ -484,7 +483,9 @@ class MultiAgentManager:
         self._error_callbacks.append(error_callback)
         return self
 
-    def start_manager(self, registry: Optional[str] = None) -> "MultiAgentManager":
+    def start_manager(
+        self, local: bool = False, remote: bool = False, ipfs: bool = False
+    ) -> "MultiAgentManager":
         """
         Start manager.
 
@@ -492,18 +493,14 @@ class MultiAgentManager:
         are fetched in mixed mode (i.e. first try from local
         registry, and then from remote registry in case of failure).
 
-        :param registry: type of registry to use.
         :return: the MultiAgentManager instance.
         """
-        if registry is None:
-            cli_config = get_or_create_cli_config()
-            registry = cli_config.get("registry_config", {}).get("default", "local")
 
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        self._last_start_status = self._load_state(registry)
+        self._last_start_status = self._load_state(local, remote, ipfs)
 
         self._started_event.clear()
         self._is_running = True
@@ -578,7 +575,12 @@ class MultiAgentManager:
                 rmtree(self.working_dir)
 
     def add_project(
-        self, public_id: PublicId, registry: str, restore: bool = False,
+        self,
+        public_id: PublicId,
+        local: bool = False,
+        remote: bool = False,
+        ipfs: bool = False,
+        restore: bool = False,
     ) -> "MultiAgentManager":
         """
         Fetch agent project and all dependencies to working_dir.
@@ -588,7 +590,6 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
-        :param registry: type of registry to use.
         :param restore: bool flag for restoring already fetched agent.
         :return: self
         """
@@ -600,7 +601,9 @@ class MultiAgentManager:
         project = Project.load(
             self.working_dir,
             public_id,
-            registry,
+            local,
+            remote,
+            ipfs,
             registry_path=self.registry_path,
             is_restore=restore,
             skip_aea_validation=False,
@@ -676,7 +679,9 @@ class MultiAgentManager:
         agent_name: Optional[str] = None,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
-        registry: Optional[str] = None,
+        local: bool = False,
+        remote: bool = False,
+        ipfs: bool = False,
         restore: bool = False,
     ) -> "MultiAgentManager":
         """
@@ -688,13 +693,9 @@ class MultiAgentManager:
         :param agent_name: unique name for the agent
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
-        :param registry: type of registry to use.
         :param restore: bool flag for restoring already fetched agent.
         :return: self
         """
-        if registry is None:
-            cli_config = get_or_create_cli_config()
-            registry = cli_config.get("registry_config", {}).get("default", "local")
 
         agent_name = agent_name or public_id.name
         if agent_name in self._agents:
@@ -703,7 +704,7 @@ class MultiAgentManager:
         project = self._projects.get(public_id, None)
 
         if project is None and self._auto_add_remove_project:
-            self.add_project(public_id, registry, restore)
+            self.add_project(public_id, local, remote, ipfs, restore)
             project = self._projects.get(public_id, None)
 
         if project is None:
@@ -1007,7 +1008,7 @@ class MultiAgentManager:
             os.makedirs(self.data_dir)
 
     def _load_state(
-        self, registry: str
+        self, local: bool = False, remote: bool = False, ipfs: bool = False,
     ) -> Tuple[
         bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
     ]:
@@ -1020,7 +1021,6 @@ class MultiAgentManager:
         are fetched in mixed mode (i.e. first try from local
         registry, and then from remote registry in case of failure).
 
-        :param registry: type of registry to use.
         :return: Tuple of bool indicating load success, settings of loaded, list of failed
         :raises: ValueError if failed to load state.
         """
@@ -1046,7 +1046,7 @@ class MultiAgentManager:
         for project_public_id, agents_settings in projects_agents.items():
             try:
                 self.add_project(
-                    project_public_id, registry, restore=True,
+                    project_public_id, local, remote, ipfs, restore=True,
                 )
             except ProjectCheckError as e:
                 failed_to_load.append((project_public_id, agents_settings, e))

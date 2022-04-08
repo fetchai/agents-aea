@@ -33,7 +33,7 @@ from aea.cli.registry.settings import (
     REGISTRY_LOCAL,
 )
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
-from aea.cli.utils.click_utils import registry_flag_
+from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_or_create_cli_config, update_cli_config
 from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY
 from aea.cli.utils.context import Context
@@ -45,7 +45,7 @@ from aea.cli.utils.package_utils import validate_author_name, validate_registry_
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
-@registry_flag_(mark_default=False)
+@registry_flag(mark_default=False)
 @pass_ctx
 def init(  # pylint: disable=unused-argument
     ctx: Context, author: str, reset: bool, no_subscribe: bool, registry: str,

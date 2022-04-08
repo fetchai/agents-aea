@@ -40,7 +40,7 @@ from aea.cli.registry.settings import (
     REGISTRY_LOCAL,
 )
 from aea.cli.registry.utils import get_package_meta
-from aea.cli.utils.click_utils import registry_flag_
+from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_or_create_cli_config, validate_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
@@ -74,7 +74,7 @@ PUSH_ITEMS_FLAG = "--push-missing"
 
 
 @click.command(name="publish")
-@registry_flag_()
+@registry_flag()
 @click.option(
     "--push-missing", is_flag=True, help="Push missing components to registry."
 )
