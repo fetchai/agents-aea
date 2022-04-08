@@ -22,10 +22,10 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, List, Optional, Union, cast
 
 import click
-from click import Context, Option, UsageError, argument, option
+from click import argument, option
 
 from aea.cli.registry.settings import (
     REGISTRY_CONFIG_KEY,
@@ -205,43 +205,7 @@ class AgentDirectory(click.Path):
             os.chdir(cwd)
 
 
-def registry_flag(
-    help_local: str = "Use only local registry.",
-    help_remote: str = "Use ony remote registry.",
-) -> Callable:
-    """Choice of one flag between: '--local/--remote'."""
-
-    def wrapper(f: Callable) -> Callable:
-        f = option(
-            "--local",
-            is_flag=True,
-            cls=MutuallyExclusiveOption,
-            help=help_local,
-            mutually_exclusive=["remote",],  # noqa: E231
-        )(f)
-        f = option(
-            "--remote",
-            is_flag=True,
-            cls=MutuallyExclusiveOption,
-            help=help_remote,
-            mutually_exclusive=["local",],  # noqa: E231
-        )(f)
-        return f
-
-    return wrapper
-
-
-def registry_path_option(f: Callable) -> Callable:
-    """Add registry path aea option."""
-    return option(
-        "--registry-path",
-        type=click.Path(dir_okay=True, exists=True, file_okay=False),
-        required=False,
-        help="Provide a local registry directory full path.",
-    )(f)
-
-
-def registry_flag_(mark_default: bool = True) -> Callable:
+def registry_flag(mark_default: bool = True) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
     cli_config = get_or_create_cli_config()
@@ -265,7 +229,7 @@ def registry_flag_(mark_default: bool = True) -> Callable:
             default=(REGISTRY_IPFS == default_registry) and mark_default,
         )(f)
         f = option(
-            "--http",
+            "--remote",
             "registry",
             flag_value=REGISTRY_HTTP,
             help="For pushing items to http registry.",
@@ -274,6 +238,16 @@ def registry_flag_(mark_default: bool = True) -> Callable:
         return f
 
     return wrapper
+
+
+def registry_path_option(f: Callable) -> Callable:
+    """Add registry path aea option."""
+    return option(
+        "--registry-path",
+        type=click.Path(dir_okay=True, exists=True, file_okay=False),
+        required=False,
+        help="Provide a local registry directory full path.",
+    )(f)
 
 
 def component_flag(wrap_public_id: bool = False,) -> Callable:
@@ -292,41 +266,6 @@ def component_flag(wrap_public_id: bool = False,) -> Callable:
         return f
 
     return wrapper
-
-
-class MutuallyExclusiveOption(Option):
-    """Represent a mutually exclusive option."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize the option."""
-        self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
-        help_ = kwargs.get("help", "")
-        if self.mutually_exclusive:
-            ex_str = ", ".join(self.mutually_exclusive)
-            kwargs["help"] = help_ + (
-                " NOTE: This argument is mutually exclusive with "
-                " arguments: [" + ex_str + "]."
-            )
-        super().__init__(*args, **kwargs)
-
-    def handle_parse_result(
-        self, ctx: Context, opts: Dict[str, Any], args: List[Any]
-    ) -> Tuple[Any, List[str]]:
-        """
-        Handle parse result.
-
-        :param ctx: the click context.
-        :param opts: the options.
-        :param args: the list of arguments (to be forwarded to the parent class).
-        :return: tuple of results
-        """
-        if self.mutually_exclusive.intersection(opts) and self.name in opts:
-            raise UsageError(
-                f"Illegal usage: `{self.name}` is mutually exclusive with "
-                f"arguments `{', '.join(self.mutually_exclusive)}`."
-            )
-
-        return super().handle_parse_result(ctx, opts, args)
 
 
 def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  # type: ignore
