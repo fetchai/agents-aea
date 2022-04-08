@@ -50,6 +50,11 @@ if platform.system() == "Windows":  # pragma: nocover
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
         return 1.0 * d["WorkingSetSize"] / 1024 ** 2
 
+    def get_peak_process_memory_usage() -> float:
+        """Get current process memory usage in MB."""
+        d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
+        return 1.0 * d["PeakWorkingSetSize"] / 1024 ** 2
+
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
         d = win32process.GetProcessTimes(win32process.GetCurrentProcess())  # type: ignore
@@ -64,7 +69,7 @@ else:
         """Get current process memory usage in MB."""
         return tracemalloc.get_traced_memory()[0] / 1024 ** 2
 
-    def get_max_process_memory_usage() -> float:
+    def get_peak_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
         return tracemalloc.get_traced_memory()[1] / 1024 ** 2
 
@@ -151,7 +156,7 @@ class Profiling(Runnable):
         Run time: {data["run_time"]:.6f} seconds
         Cpu time: {data["cpu_time"]:.6f} seconds,
         Cpu/Run time: {100*data["cpu_time"]/data["run_time"]:.6f}%
-        Memory: {data["mem"]:.6f} MB
+        Memory: {data["mem"]:.6f} MB [Peak {data["mem_peak"]:.6f} MB]
         Threads: {data["threads"]['amount']}  {data["threads"]['names']}
         Objects present:
         """
@@ -172,6 +177,7 @@ class Profiling(Runnable):
             "run_time": time.time() - self._start_ts,
             "cpu_time": get_current_process_cpu_time(),
             "mem": get_current_process_memory_usage(),
+            "mem_peak": get_peak_process_memory_usage(),
             "threads": {
                 "amount": threading.active_count(),
                 "names": [i.name for i in threading.enumerate()],
