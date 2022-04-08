@@ -60,12 +60,13 @@ else:
     import resource
     import tracemalloc
 
-    _MAC_MEM_STATS_MB = 1024 ** 2
-    _LINUX_MEM_STATS_MB = 1024
-
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
         return tracemalloc.get_traced_memory()[0] / 1024 ** 2
+
+    def get_max_process_memory_usage() -> float:
+        """Get current process memory usage in MB."""
+        return tracemalloc.get_traced_memory()[1] / 1024 ** 2
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
@@ -99,11 +100,9 @@ class Profiling(Runnable):
         self._objects_created_to_count = objects_created_to_count or []
         self._output_function = output_function
         self._counter: Dict[Type, int] = Counter()
-        tracemalloc.start()
 
-    def __del__(self) -> None:
-        """Profiler destructor"""
-        tracemalloc.stop()
+        if platform.system() != "Windows":
+            tracemalloc.start()
 
     def set_counters(self) -> None:
         """Modify obj.__new__ to count objects created created."""
@@ -137,6 +136,9 @@ class Profiling(Runnable):
         except Exception:  # pragma: nocover
             _default_logger.exception("Exception in Profiling")
             raise
+        finally:
+            if platform.system() != "Windows":
+                tracemalloc.stop()
 
     def output_profile_data(self) -> None:
         """Render profiling data and call output_function."""
