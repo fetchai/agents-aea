@@ -19,16 +19,17 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
+from enum import Enum
+from typing import Any
 
-class ErrorCode:
+
+class ErrorCode(Enum):
     """This class represents an instance of ErrorCode."""
 
-    def __init__(self):
-        """Initialise an instance of ErrorCode."""
-        raise NotImplementedError
+    INVALID_REQUEST = 0
 
     @staticmethod
-    def encode(error_code_protobuf_object, error_code_object: "ErrorCode") -> None:
+    def encode(error_code_protobuf_object: Any, error_code_object: "ErrorCode") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -37,10 +38,10 @@ class ErrorCode:
         :param error_code_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param error_code_object: an instance of this class to be encoded in the protocol buffer object.
         """
-        raise NotImplementedError
+        error_code_protobuf_object.error_code = error_code_object.value
 
     @classmethod
-    def decode(cls, error_code_protobuf_object) -> "ErrorCode":
+    def decode(cls, error_code_protobuf_object: Any) -> "ErrorCode":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -49,7 +50,5 @@ class ErrorCode:
         :param error_code_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'error_code_protobuf_object' argument.
         """
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        raise NotImplementedError
+        enum_value_from_pb2 = error_code_protobuf_object.error_code
+        return ErrorCode(enum_value_from_pb2)

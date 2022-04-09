@@ -20,8 +20,6 @@
 """This module contains tests for the register protocol."""
 
 import itertools
-import logging
-from typing import Type
 from unittest import mock
 
 import pytest
@@ -30,13 +28,13 @@ from aea.common import Address
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel
 
+from packages.valory.protocols.tendermint.dialogues import TendermintDialogue
 from packages.valory.protocols.tendermint.dialogues import (
-    TendermintDialogue,
     TendermintDialogues as BaseTendermintDialogues,
 )
 from packages.valory.protocols.tendermint.message import TendermintMessage
+
 
 PERFORMATIVE = TendermintMessage.Performative
 
@@ -57,11 +55,14 @@ def test_performative_name_value_matching():
     [
         (PERFORMATIVE.TENDERMINT_CONFIG_REQUEST, dict(query="")),
         (PERFORMATIVE.TENDERMINT_CONFIG_RESPONSE, dict(info=ALICE_TENDERMINT_INFO)),
-        # (TendermintMessage.Performative.ERROR, dict(
-        #     error_code=TendermintMessage.ErrorCode.INVALID_REQUEST,
-        #     error_msg="Invalid request",
-        #     info={"error": "Agent address not registered for this service."}
-        # )),
+        (
+            TendermintMessage.Performative.ERROR,
+            dict(
+                error_code=TendermintMessage.ErrorCode.INVALID_REQUEST,
+                error_msg="Invalid request",
+                info={"error": "Agent address not registered for this service."},
+            ),
+        ),
     ],
 )
 def test_serialization(performative, kwargs):
@@ -87,10 +88,6 @@ def test_serialization(performative, kwargs):
     )
     assert retrieved_envelope.sender == original_envelope.sender
     assert retrieved_envelope.context == original_envelope.context
-
-    # what? why don't we decode the message contained in the envelope?
-    logging.error(original_envelope.context)
-    logging.error(retrieved_envelope.context)
 
 
 def test_encoding_unknown_performative():
@@ -157,7 +154,7 @@ class TestDialogues:
             assert not dialogue_stats.self_initiated[end_state]
             for i, self_initiated in itertools.product(range(1, 3), [True, False]):
                 dialogue_stats.add_dialogue_endstate(end_state, self_initiated)
-                assert getattr(dialogue_stats, "self_initiated")[end_state] == i
+                assert dialogue_stats.self_initiated[end_state] == i
 
     def test_message_exchange(self):
         """Test message exchange between agents"""
