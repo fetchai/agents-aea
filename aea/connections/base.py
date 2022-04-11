@@ -125,7 +125,7 @@ class Connection(Component, ABC):
         :param envelope: the envelope
         """
         enforce(
-            not envelope.is_sender_public_id and not envelope.is_without_hash,
+            not envelope.is_sender_public_id and not envelope.is_to_public_id,
             f"Sender and to field of envelope is public id, needs to be address. Found: sender={envelope.sender}, to={envelope.to}",
         )
 
