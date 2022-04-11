@@ -982,7 +982,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         gas_price = cast(Dict[str, Wei], gas_price)
         if gas_price_strategy == EIP1559:
             updated_max_fee_per_gas = self.__reprice(old_price["maxFeePerGas"])
-            updated_max_priority_fee_per_gas = self.__reprice(old_price["maxPriorityFeePerGas"])
+            updated_max_priority_fee_per_gas = self.__reprice(
+                old_price["maxPriorityFeePerGas"]
+            )
 
             if gas_price["maxFeePerGas"] < updated_max_fee_per_gas:
                 gas_price["maxFeePerGas"] = updated_max_fee_per_gas
