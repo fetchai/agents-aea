@@ -36,6 +36,7 @@ from typing import Any, Callable, Dict, List, Type
 from aea.helpers.async_utils import Runnable
 from aea.protocols.dialogue.base import BasicDialoguesStorage, Dialogue
 
+
 BYTES_TO_MBYTES = 1024 ** -2
 
 lock = threading.Lock()
