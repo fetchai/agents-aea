@@ -42,7 +42,7 @@ from aea.helpers.base import load_env_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
-from aea.protocols.dialogue.base import Dialogue
+from aea.protocols.dialogue.base import Dialogue, DialogueLabel
 from aea.skills.base import Behaviour, Handler, Model, Skill
 
 
@@ -165,6 +165,7 @@ def _profiling_context(period: int) -> Generator:
     OBJECTS_INSTANCES = [
         Message,
         Dialogue,
+        DialogueLabel,
         Handler,
         Model,
         Behaviour,
@@ -173,7 +174,7 @@ def _profiling_context(period: int) -> Generator:
         Contract,
         Protocol,
     ]
-    OBJECTS_CREATED = [Message, Dialogue]
+    OBJECTS_CREATED = [Message, Dialogue, DialogueLabel]
 
     profiler = Profiling(
         period=period,

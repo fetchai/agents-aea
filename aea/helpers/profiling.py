@@ -34,6 +34,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Type
 
 from aea.helpers.async_utils import Runnable
+from aea.protocols.dialogue.base import BasicDialoguesStorage, Dialogue
 
 
 lock = threading.Lock()
@@ -161,11 +162,24 @@ class Profiling(Runnable):
         Objects present:
         """
             )
-            + "\n".join([f" * {i}:  {c}" for i, c in data["objects_present"].items()])
+            + "\n".join(
+                [f" * {i} (present):  {c}" for i, c in data["objects_present"].items()]
+            )
             + "\n"
             + """Objects created:\n"""
             + "\n".join(
-                [f" * {i.__name__}:  {c}" for i, c in data["objects_created"].items()]
+                [
+                    f" * {i.__name__} (created):  {c}"
+                    for i, c in data["objects_created"].items()
+                ]
+            )
+            + "\n"
+            + "Dialogues present:\n"
+            + "\n".join(
+                [
+                    f" * {i} (present):  {c}"
+                    for i, c in data["dialogues_by_type"].items()
+                ]
             )
             + "\n"
         )
@@ -184,6 +198,7 @@ class Profiling(Runnable):
             },
             "objects_present": self.get_objects_instances(),
             "objects_created": self.get_objects_created(),
+            "dialogues_by_type": get_dialogues_by_type(),
         }
 
     def get_objects_instances(self) -> Dict:
@@ -206,3 +221,42 @@ class Profiling(Runnable):
     def get_objects_created(self) -> Dict:
         """Return dict with counted object instances created."""
         return self._counter
+
+
+def get_dialogues_by_type() -> Dict:
+    """Return dict with the number of dialogues by type."""
+
+    seen_dialogue_ids: List[int] = []
+    seen_dialogue_storage_ids: List[int] = []
+    dialogues_by_type: Dict[str, int] = {"incomplete_to_complete_dialogue_labels": 0}
+
+    lock.acquire()
+    try:
+        for obj in gc.get_objects():
+            if isinstance(obj, Dialogue) and id(obj) not in seen_dialogue_ids:
+                # Remember this dialogue
+                seen_dialogue_ids.append(id(obj))
+
+                dialogue_type = str(type(obj).__name__)
+
+                if dialogue_type not in dialogues_by_type:
+                    dialogues_by_type[dialogue_type] = 1
+                else:
+                    dialogues_by_type[dialogue_type] += 1
+
+            elif (
+                isinstance(obj, BasicDialoguesStorage)
+                and id(obj) not in seen_dialogue_storage_ids
+            ):
+                # Remember this storage
+                seen_dialogue_storage_ids.append(id(obj))
+
+                # Count incomplete dialogues by type
+                dialogues_by_type["incomplete_to_complete_dialogue_labels"] += len(
+                    list(
+                        obj._incomplete_to_complete_dialogue_labels.values()  # pylint: disable=protected-access
+                    )
+                )
+    finally:
+        lock.release()
+    return dialogues_by_type
