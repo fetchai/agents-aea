@@ -905,11 +905,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         return transaction
 
-    def _get_gas_price_strategy_callable(
+    def _get_gas_price_strategy(
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
-    ) -> Callable:
+    ) -> Optional[Tuple[str, Callable]]:
         """
         Returns parameters for gas price callable.
 
@@ -918,7 +918,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         :param gas_price_strategy: name of the gas price strategy.
         :param extra_config: gas price strategy getter parameters.
-        :return: gas price callable.
+        :return: gas price strategy's name and callable.
         """
         gas_price_strategy = (
             gas_price_strategy
@@ -939,7 +939,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         parameters = DEFAULT_GAS_PRICE_STRATEGIES.get(gas_price_strategy)
         parameters.update(self._gas_price_strategies.get(gas_price_strategy, {}))
         parameters.update(extra_config or {})
-        return gas_price_strategy_getter(**parameters)
+        return gas_price_strategy, gas_price_strategy_getter(**parameters)
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
     def try_get_gas_pricing(
@@ -958,11 +958,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: a dictionary with the gas data.
         """
 
-        gas_price_strategy_callable = self._get_gas_price_strategy_callable(
+        retrieved_strategy = self._get_gas_price_strategy(
             gas_price_strategy, extra_config,
         )
-        if gas_price_strategy_callable is None:  # pragma: nocover
+        if retrieved_strategy is None:  # pragma: nocover
             return None
+        gas_price_strategy, gas_price_strategy_callable = retrieved_strategy
 
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
