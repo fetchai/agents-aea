@@ -198,7 +198,7 @@ def _profiling_context(period: int) -> Generator:
 
 
 def _print_instantiated_components(aea: AEA) -> None:
-    """Print table of only instantiated components."""
+    """Print table of only components."""
     components: List[str] = []
     max_col_1_length = 0
 
@@ -215,14 +215,21 @@ def _print_instantiated_components(aea: AEA) -> None:
             )
         ]
 
-    max_col_1_length = max(*map(len, components))
-    table_width = max_col_1_length + 4
+    max_col_1_length = max(list(map(len, components)))
+    table_width = max_col_1_length + 6
     row_separator = "=" * table_width
     padding = " " * 2
 
     def format_row(col_1: str) -> str:
         """Format a row."""
-        return "|" + padding + col_1 + " " * (max_col_1_length - len(col_1)) + "|"
+        return (
+            "|"
+            + padding
+            + col_1
+            + " " * (max_col_1_length - len(col_1))
+            + padding
+            + "|"
+        )
 
     click.echo("Intantiated packages.")
     click.echo(row_separator)
