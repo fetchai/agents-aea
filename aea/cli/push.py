@@ -36,7 +36,7 @@ from aea.cli.registry.settings import (
 from aea.cli.utils.click_utils import (
     PublicIdOrPathParameter,
     component_flag,
-    registry_flag_,
+    registry_flag,
 )
 from aea.cli.utils.config import get_or_create_cli_config, load_item_config
 from aea.cli.utils.context import Context
@@ -57,7 +57,7 @@ except ImportError:
 
 
 @click.command()
-@registry_flag_()
+@registry_flag()
 @component_flag(wrap_public_id=False)
 @click.argument("public_id_or_path", type=PublicIdOrPathParameter())
 @click.pass_context

@@ -197,7 +197,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         obj_type = "protocol"
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--http", obj_type, public_id],
+            [*CLI_LOG_OPTION, "add", "--remote", obj_type, public_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0

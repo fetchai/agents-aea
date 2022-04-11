@@ -28,7 +28,7 @@ import click
 
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.settings import REGISTRY_HTTP, REGISTRY_LOCAL
-from aea.cli.utils.click_utils import component_flag, registry_flag_
+from aea.cli.utils.click_utils import component_flag, registry_flag
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.cli.utils.context import Context
@@ -66,7 +66,7 @@ except ImportError:
 
 
 @click.command()
-@registry_flag_()
+@registry_flag()
 @component_flag(wrap_public_id=True)
 @click.pass_context
 @check_aea_project
@@ -78,23 +78,17 @@ def add(
 ) -> None:
     """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
-    add_item(ctx, component_type, public_id, registry)
+    ctx.registry_type = registry
+    add_item(ctx, component_type, public_id)
 
 
 @clean_after
-def add_item(
-    ctx: Context,
-    item_type: str,
-    item_public_id: PublicId,
-    registry: str,
-    is_dependency: bool = False,
-) -> None:
+def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     """
     Add an item.
 
     :param ctx: Context object.
     :param item_type: the item type.
-    :param registry: type of registry to use.
     :param item_public_id: the item public id.
     :param is_dependency: whether it's dependency or not.
     """
@@ -114,12 +108,6 @@ def add_item(
             )
 
     if present_item_id is not None:
-        if is_dependency:
-            click.echo(
-                f"A dependency with public id {present_item_id} already exists, no need to fetch."
-            )
-            return
-
         raise click.ClickException(
             "A {} with id '{}' already exists. Aborting...".format(
                 item_type, present_item_id.without_hash()
@@ -129,11 +117,11 @@ def add_item(
     dest_path = get_package_path(ctx.cwd, item_type, item_public_id)
     ctx.clean_paths.append(dest_path)
 
-    if registry == REGISTRY_LOCAL:
+    if ctx.registry_type == REGISTRY_LOCAL:
         package_path = find_item_locally_or_distributed(
             ctx, item_type, item_public_id, dest_path
         )
-    elif registry == REGISTRY_HTTP:
+    elif ctx.registry_type == REGISTRY_HTTP:
         package_path = fetch_package(
             item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path,
         )
@@ -158,7 +146,7 @@ def add_item(
         package_path, item_config
     ):  # pragma: no cover
         raise click.ClickException("Failed to add an item with incorrect fingerprint.")
-    _add_item_deps(ctx, item_type, item_config, registry)
+    _add_item_deps(ctx, item_type, item_config)
 
     try:
         package_hash = item_public_id.hash
@@ -176,7 +164,7 @@ def add_item(
 
 
 def _add_item_deps(
-    ctx: Context, item_type: str, item_config: PackageConfiguration, registry: str
+    ctx: Context, item_type: str, item_config: PackageConfiguration
 ) -> None:
     """
     Add item dependencies. Calls add_item recursively.
@@ -184,38 +172,37 @@ def _add_item_deps(
     :param ctx: Context object.
     :param item_type: type of item.
     :param item_config: item configuration object.
-    :param registry: type of registry to use.
     """
     if item_type in {CONNECTION, SKILL}:
         item_config = cast(Union[SkillConfig, ConnectionConfig], item_config)
         # add missing protocols
         for protocol_public_id in item_config.protocols:
             if protocol_public_id not in ctx.agent_config.protocols:
-                add_item(ctx, PROTOCOL, protocol_public_id, registry, True)
+                add_item(ctx, PROTOCOL, protocol_public_id)
 
     if item_type == SKILL:
         item_config = cast(SkillConfig, item_config)
         # add missing contracts
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
-                add_item(ctx, CONTRACT, contract_public_id, registry, True)
+                add_item(ctx, CONTRACT, contract_public_id)
 
         # add missing connections
         for connection_public_id in item_config.connections:
             if connection_public_id not in ctx.agent_config.connections:
-                add_item(ctx, CONNECTION, connection_public_id, registry, True)
+                add_item(ctx, CONNECTION, connection_public_id)
 
         # add missing skill
         for skill_public_id in item_config.skills:
             if skill_public_id not in ctx.agent_config.skills:
-                add_item(ctx, SKILL, skill_public_id, registry, True)
+                add_item(ctx, SKILL, skill_public_id)
 
     if item_type == CONTRACT:
         item_config = cast(ContractConfig, item_config)
         # add missing contracts
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
-                add_item(ctx, CONTRACT, contract_public_id, registry, True)
+                add_item(ctx, CONTRACT, contract_public_id)
 
 
 def find_item_locally_or_distributed(

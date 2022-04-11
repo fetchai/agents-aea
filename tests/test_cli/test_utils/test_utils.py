@@ -35,7 +35,6 @@ from jsonschema import ValidationError
 from yaml import YAMLError
 
 from aea.cli.utils.click_utils import (
-    MutuallyExclusiveOption,
     PublicIdParameter,
     password_option,
 )
@@ -534,16 +533,6 @@ def test_override_ledger_configurations_positive():
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
             == ETHEREUM_DEFAULT_CHAIN_ID
         )
-
-
-def test_mutually_exclusive_usage_error():
-    """Test MutuallyExclusiveOption.handle_parse_result."""
-    opt = MutuallyExclusiveOption(["--arg1"], mutually_exclusive=["arg2"])
-    with pytest.raises(
-        UsageError,
-        match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
-    ):
-        opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])
 
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config", return_value={})

@@ -261,7 +261,7 @@ class PushContractCommandTestCase(TestCase):
                 *CLI_LOG_OPTION,
                 "--skip-consistency-check",
                 "push",
-                "--http",
+                "--remote",
                 "contract",
                 "author/name:0.1.0",
             ],

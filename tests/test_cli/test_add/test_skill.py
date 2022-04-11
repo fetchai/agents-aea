@@ -105,7 +105,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
+        assert self.result.exit_code == 1, self.result.stdout
 
     def test_error_message_skill_already_existing(self):
         """Test that the log error message is fixed.
@@ -126,7 +126,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         obj_type = "skill"
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add", "--http", obj_type, public_id],
+            [*CLI_LOG_OPTION, "add", "--remote", obj_type, public_id],
             standalone_mode=False,
         )
         assert result.exit_code == 0

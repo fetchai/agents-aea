@@ -457,7 +457,7 @@ class CreateCommandTestCase(TestCase):
         """Test for CLI create no init result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "create", "--http", "agent_name", "--author=some"],
+            [*CLI_LOG_OPTION, "create", "--remote", "agent_name", "--author=some"],
             standalone_mode=False,
         )
         self.assertEqual(
