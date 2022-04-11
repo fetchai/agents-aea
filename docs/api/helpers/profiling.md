@@ -96,3 +96,13 @@ def get_objects_created() -> Dict
 
 Return dict with counted object instances created.
 
+<a id="aea.helpers.profiling.get_dialogues_by_type"></a>
+
+#### get`_`dialogues`_`by`_`type
+
+```python
+def get_dialogues_by_type() -> Dict
+```
+
+Return dict with the number of dialogues by type.
+
