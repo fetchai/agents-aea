@@ -22,10 +22,11 @@ import datetime
 import logging
 import time
 from abc import ABC, abstractmethod
+from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from collections.abc import Iterable
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from threading import Thread
 from typing import (
     Any,
@@ -461,8 +462,10 @@ class Runnable(ABC):
             raise ValueError("Start was not called!")
         self._is_running = True
         try:
-            with suppress(asyncio.CancelledError):
-                return await self.run()
+            return await self.run()
+        except CancelledError:
+            if not self._was_cancelled:
+                raise
         finally:
             self._is_running = False
 
@@ -497,8 +500,7 @@ class Runnable(ABC):
         if sync:
             self._wait_sync(timeout)
             return ready_future
-
-        return self._wait_async(timeout)
+        return asyncio.wait_for(self._wait_async(timeout), timeout=timeout)
 
     def _wait_sync(self, timeout: Optional[float] = None) -> None:
         """Wait task completed in sync manner."""
@@ -562,6 +564,9 @@ class Runnable(ABC):
 
         try:
             await self._task
+        except CancelledError:
+            if not self._was_cancelled:
+                raise
         finally:
             self._got_result = True
 

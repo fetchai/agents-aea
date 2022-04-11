@@ -55,9 +55,9 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: 3.6
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
-          go-version: '^1.14.0'
+          go-version: '^1.17.0'
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -80,18 +80,18 @@ jobs:
       - name: Static type check
         run: tox -e mypy
       - name: Golang code style check (libp2p_node)
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.28
+          version: v1.45.2
           working-directory: libs/go/libp2p_node
       - name: Golang code style check (aealite)
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.28
+          version: v1.45.2
           working-directory: libs/go/aealite
 
   common_checks_3:
@@ -122,6 +122,9 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: 3.6
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17.0'
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -252,7 +255,7 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: 3.6
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
           go-version: '^1.14.0'
       - name: Install protolint (ubuntu-latest)
@@ -275,13 +278,13 @@ jobs:
     - dependencies_checks
     - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@v3
       with:
         python-version: 3.8
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - name: Setup GCloud - production
@@ -321,7 +324,7 @@ jobs:
       - dependencies_checks
       - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
@@ -367,7 +370,7 @@ jobs:
     - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python_version }}
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - if: matrix.os == 'ubuntu-latest'
@@ -435,13 +438,13 @@ jobs:
     - dependencies_checks
     - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@v3
       with:
         python-version: 3.8
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - name: Install dependencies (ubuntu-latest)
@@ -478,7 +481,7 @@ jobs:
     - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - if: matrix.os == 'macos-latest'
@@ -540,7 +543,7 @@ jobs:
     - uses: actions/setup-python@v3
       with:
         python-version: 3.7
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - name: Install dependencies (ubuntu-latest)

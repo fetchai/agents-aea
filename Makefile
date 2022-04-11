@@ -149,10 +149,10 @@ new_env: clean
 		echo "In a virtual environment! Exit first: 'exit'.";\
 	fi
 protolint_install:
-	GO111MODULE=on GOPATH=~/go go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0
+	GO111MODULE=on GOPATH=~/go go install github.com/yoheimuta/protolint/cmd/protolint@v0.27.0
 protolint:
 	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
 protolint_install_win:
-	powershell -command '$$env:GO111MODULE="on"; go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
+	powershell -command '$$env:GO111MODULE="on"; go install github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
 protolint_win:
 	protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
