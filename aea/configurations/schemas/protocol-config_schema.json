@@ -56,7 +56,7 @@
       "$ref": "definitions.json#/definitions/description"
     },
     "protocol_specification_id": {
-      "$ref": "definitions.json#/definitions/extended_public_id"
+      "$ref": "definitions.json#/definitions/public_id"
     }
   }
 }

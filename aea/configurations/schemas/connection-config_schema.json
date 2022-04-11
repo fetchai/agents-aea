@@ -63,7 +63,7 @@
       "additionalProperties": false,
       "uniqueItems": true,
       "items": {
-        "$ref": "definitions.json#/definitions/extended_public_id"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "connections": {
@@ -71,21 +71,21 @@
       "additionalProperties": false,
       "uniqueItems": true,
       "items": {
-        "$ref": "definitions.json#/definitions/extended_public_id"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "restricted_to_protocols": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "definitions.json#/definitions/extended_public_id"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "excluded_protocols": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "$ref": "definitions.json#/definitions/extended_public_id"
+        "$ref": "definitions.json#/definitions/public_id"
       }
     },
     "config": {
