@@ -198,7 +198,7 @@ def _profiling_context(period: int) -> Generator:
 
 
 def _print_instantiated_components(aea: AEA) -> None:
-    """Print hash table of all available components."""
+    """Print table of only instantiated components."""
     components: List[str] = []
     max_col_1_length = 0
 
