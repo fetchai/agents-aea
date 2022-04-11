@@ -36,6 +36,7 @@ from typing import Any, Callable, Dict, List, Type
 from aea.helpers.async_utils import Runnable
 from aea.protocols.dialogue.base import BasicDialoguesStorage, Dialogue
 
+BYTES_TO_MBYTES = 1024 ** -2
 
 lock = threading.Lock()
 
@@ -49,12 +50,12 @@ if platform.system() == "Windows":  # pragma: nocover
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
-        return 1.0 * d["WorkingSetSize"] / 1024 ** 2
+        return float(d["WorkingSetSize"]) * BYTES_TO_MBYTES
 
     def get_peak_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
-        return 1.0 * d["PeakWorkingSetSize"] / 1024 ** 2
+        return float(d["PeakWorkingSetSize"]) * BYTES_TO_MBYTES
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
@@ -68,11 +69,11 @@ else:
 
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
-        return tracemalloc.get_traced_memory()[0] / 1024 ** 2
+        return tracemalloc.get_traced_memory()[0] * BYTES_TO_MBYTES
 
     def get_peak_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
-        return tracemalloc.get_traced_memory()[1] / 1024 ** 2
+        return tracemalloc.get_traced_memory()[1] * BYTES_TO_MBYTES
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
