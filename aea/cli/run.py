@@ -29,11 +29,13 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
 from aea.cli.utils.click_utils import ConnectionsOption, password_option
+from aea.cli.utils.config import load_item_config
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.constants import VENDOR
+from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE
+from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
@@ -195,35 +197,62 @@ def _profiling_context(period: int) -> Generator:
         sys.stderr = open(os.devnull, "w")
 
 
-def _print_hash_table(ctx: Context, aea: AEA) -> None:
+def _print_instantiated_components(aea: AEA) -> None:
     """Print hash table of all available components."""
-    hash_data = []
-    ipfs_hash = IPFSHashOnly()
+    components: List[str] = []
     max_col_1_length = 0
-    max_col_2_length = 48
+
     for component_type in [
         ComponentType.PROTOCOL,
         ComponentType.CONNECTION,
         ComponentType.CONTRACT,
         ComponentType.SKILL,
     ]:
-        components = aea.resources.component_registry.fetch_by_type(component_type)
-        for component in components:
-            path = Path(
-                ctx.cwd,
-                VENDOR,
-                component.public_id.author,
-                component_type.to_plural(),
-                component.public_id.name,
+        components += [
+            str(component.component_id)
+            for component in aea.resources.component_registry.fetch_by_type(
+                component_type
             )
-            if not path.exists():
-                path = Path(
-                    ctx.cwd, component_type.to_plural(), component.public_id.name
-                )
-            hash_data.append(
-                (component.component_id, ipfs_hash.get(str(path), wrap=False))
-            )
-            max_col_1_length = max(max_col_1_length, len(str(component.component_id)))
+        ]
+
+    max_col_1_length = max(*map(len, components))
+    table_width = max_col_1_length + 4
+    row_separator = "=" * table_width
+    padding = " " * 2
+
+    def format_row(col_1: str) -> str:
+        """Format a row."""
+        return "|" + padding + col_1 + " " * (max_col_1_length - len(col_1)) + "|"
+
+    click.echo("Intantiated packages.")
+    click.echo(row_separator)
+    click.echo(format_row("ComponentId"))
+    click.echo(row_separator)
+    for component_id in components:
+        click.echo(format_row(component_id))
+    click.echo(row_separator)
+    click.echo()
+    click.echo()
+
+
+def _print_all_available_packages(ctx: Context) -> None:
+    """Print hashes for all available packages"""
+    ipfs_hash = IPFSHashOnly()
+    max_col_1_length = 0
+    max_col_2_length = 48
+
+    rows = []
+    for component_type, config_file_name in PACKAGE_TYPE_TO_CONFIG_FILE.items():
+        config_files = Path(ctx.cwd).glob(f"**/{config_file_name}")
+        for config_file in config_files:
+            if config_file.parent == Path(ctx.cwd):
+                continue
+
+            package_hash = ipfs_hash.hash_directory(str(config_file.parent), wrap=False)
+            item_config = load_item_config(component_type, config_file.parent)
+            package_id = ComponentId(component_type, item_config.public_id)
+            rows.append((str(package_id), package_hash))
+            max_col_1_length = max(max_col_1_length, len(str(package_id)))
 
     table_width = max_col_2_length + max_col_1_length + 9
     row_separator = "=" * table_width
@@ -244,12 +273,14 @@ def _print_hash_table(ctx: Context, aea: AEA) -> None:
             + "|"
         )
 
+    click.echo("Available packages.")
     click.echo(row_separator)
-    click.echo(format_row("ComponentId", "IPFSHash"))
+    click.echo(format_row("Package", "IPFSHash"))
     click.echo(row_separator)
-    for component_id, file_hash in hash_data:
-        click.echo(format_row(str(component_id), file_hash))
+    for row in rows:
+        click.echo(format_row(*row))
     click.echo(row_separator)
+    click.echo()
 
 
 def run_aea(
@@ -279,7 +310,9 @@ def run_aea(
     )
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
-    _print_hash_table(ctx, aea)
+    _print_all_available_packages(ctx)
+    _print_instantiated_components(aea)
+
     click.echo(
         "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.runtime.loop_mode)
     )
