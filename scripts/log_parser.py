@@ -29,7 +29,7 @@ from typing import Dict, List, Optional
 from matplotlib import pyplot as plt  # type: ignore
 
 
-LOG_FILE_DIR_BASE = "/home/david/Descargas/ologs"
+LOG_FILE_DIR_BASE = "/tmp/oracle_logs"
 
 
 class TimeFormat(Enum):
