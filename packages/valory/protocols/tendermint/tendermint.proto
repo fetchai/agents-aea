@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package aea.valory.tendermint.v0_1_0;
+
+message TendermintMessage{
+
+  // Custom Types
+  message ErrorCode{
+    enum ErrorCodeEnum {
+      INVALID_REQUEST = 0;
+    }
+    ErrorCodeEnum error_code = 1;
+  }
+
+
+  // Performatives and contents
+  message Tendermint_Config_Request_Performative{
+    string query = 1;
+  }
+
+  message Tendermint_Config_Response_Performative{
+    map<string, string> info = 1;
+  }
+
+  message Error_Performative{
+    ErrorCode error_code = 1;
+    string error_msg = 2;
+    map<string, string> info = 3;
+  }
+
+
+  oneof performative{
+    Error_Performative error = 5;
+    Tendermint_Config_Request_Performative tendermint_config_request = 6;
+    Tendermint_Config_Response_Performative tendermint_config_response = 7;
+  }
+}
