@@ -42,3 +42,7 @@ class NodeError(BaseIPFSToolException):
 
 class DownloadError(BaseIPFSToolException):
     """Exception on download failed."""
+
+
+class HashNotProvided(BaseIPFSToolException):
+    """Exception when hash is not provided."""
