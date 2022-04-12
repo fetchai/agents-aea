@@ -1315,12 +1315,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             and "maxFeePerGas" not in tx_params
             and "maxPriorityFeePerGas" not in tx_params
         ):
-            gas_data = self.try_get_gas_pricing(
-                **{
-                    repricing_arg: tx_args.get(repricing_arg)
-                    for repricing_arg in ("old_gas", "old_tip")
-                }
-            )
+            gas_data = self.try_get_gas_pricing(old_price=tx_args.get("old_price"))
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)
