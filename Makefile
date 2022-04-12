@@ -131,8 +131,7 @@ all-checks:
 	&& make formatters \
 	&& make code-checks \
 	&& make common-checks \
-	&& make docs \
-	&& python scripts/generate_api_docs.py \
+	&& make doc-checks \
 	&& make security \
 
 .PHONY: new_env
