@@ -182,7 +182,6 @@ class Profiling(Runnable):
                 ]
             )
             + "\n"
-
         )
         self._output_function(text)
 
