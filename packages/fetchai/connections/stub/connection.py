@@ -188,10 +188,11 @@ class StubConnection(Connection):
             return None
 
         try:
-            return await self.in_queue.get()
-        except CancelledError:  # pragma: no cover
+            envelope = await self.in_queue.get()
+            return envelope
+        except (CancelledError, asyncio.TimeoutError):  # pragma: no cover
             self.logger.debug("Receive cancelled.")
-            return None
+            raise
         except Exception:  # pylint: disable=broad-except
             self.logger.exception("Stub connection receive error:")
             return None
