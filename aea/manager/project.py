@@ -28,7 +28,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.cli.fetch import do_fetch
 from aea.cli.issue_certificates import issue_certificates_
-from aea.cli.registry.settings import REGISTRY_HTTP, REGISTRY_IPFS, REGISTRY_LOCAL
+from aea.cli.registry.settings import REGISTRY_LOCAL, REGISTRY_REMOTE
 from aea.cli.utils.context import Context
 from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_NAME
@@ -96,7 +96,6 @@ class Project(_Base):
         public_id: PublicId,
         local: bool = False,
         remote: bool = False,
-        ipfs: bool = False,
         is_restore: bool = False,
         cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
@@ -112,6 +111,8 @@ class Project(_Base):
 
         :param working_dir: the working directory
         :param public_id: the public id
+        :param local: to use local repository
+        :param remote: to use remote repository
         :param is_restore: whether to restore or not
         :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
@@ -132,9 +133,7 @@ class Project(_Base):
             if local:
                 ctx.registry_type = REGISTRY_LOCAL
             elif remote:
-                ctx.registry_type = REGISTRY_HTTP
-            elif ipfs:
-                ctx.registry_type = REGISTRY_IPFS
+                ctx.registry_type = REGISTRY_REMOTE
             else:
                 raise RuntimeError("Please provide registry type.")
             do_fetch(ctx, public_id, target_dir=target_dir)
