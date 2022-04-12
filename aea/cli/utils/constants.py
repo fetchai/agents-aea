@@ -20,13 +20,13 @@
 """Module with constants of the aea cli."""
 import os
 from pathlib import Path
+
 from aea.cli.registry.settings import (
     REGISTRY_LOCAL,
     REGISTRY_REMOTE,
     REMOTE_HTTP,
     REMOTE_IPFS,
 )
-
 from aea.configurations.constants import (
     CONNECTION,
     CONNECTIONS,
