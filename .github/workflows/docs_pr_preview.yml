@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - master
-      - develop
     paths:
       - 'docs/**'
 
@@ -17,16 +16,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use python 3.6
-        uses: actions/setup-python@v3
+      - name: Use python 3.9
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.6'
+          python-version: '3.9'
 
       - name: Install Dependencies
-        run: pip3 install pipenv && pipenv install
+        run: cd docs && pip3 install pipenv && pipenv install
 
       - name: Build
-        run: pipenv run mkdocs build
+        run: cd docs && pipenv run mkdocs build -f ../mkdocs.yml
 
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
