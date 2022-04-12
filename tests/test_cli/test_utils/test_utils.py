@@ -29,15 +29,12 @@ from uuid import uuid4
 import click
 import pytest
 from aea_ledger_fetchai import FetchAICrypto
-from click import BadParameter, ClickException, UsageError
+from click import BadParameter, ClickException
 from click.testing import CliRunner
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import (
-    PublicIdParameter,
-    password_option,
-)
+from aea.cli.utils.click_utils import PublicIdParameter, password_option
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,

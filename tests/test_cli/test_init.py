@@ -88,7 +88,7 @@ class TestDoInit:
         author = "test_author" + random_string()
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--author", author, "--remote"],
+            [*CLI_LOG_OPTION, "init", "--author", author, "--remote", "--http"],
             input=f"n\n{email}\n{pwd}\n{pwd}\n\n",
         )
         assert result.exit_code == 0, result.output
