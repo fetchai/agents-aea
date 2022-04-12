@@ -131,7 +131,6 @@ all-checks:
 	&& make formatters \
 	&& make code-checks \
 	&& make common-checks \
-	&& make doc-checks \
 	&& make security \
 
 .PHONY: new_env
