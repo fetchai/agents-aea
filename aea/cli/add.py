@@ -27,9 +27,9 @@ from typing import Union, cast
 import click
 
 from aea.cli.registry.add import fetch_package
-from aea.cli.registry.settings import REGISTRY_HTTP, REGISTRY_LOCAL
+from aea.cli.registry.settings import REGISTRY_LOCAL, REMOTE_IPFS
 from aea.cli.utils.click_utils import component_flag, registry_flag
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import get_default_remote_registry, load_item_config
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after
@@ -58,6 +58,7 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 try:
+    from aea_cli_ipfs.exceptions import HashNotProvided  # type: ignore
     from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
 
     IS_IPFS_PLUGIN_INSTALLED = True
@@ -90,7 +91,6 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
-    :param is_dependency: whether it's dependency or not.
     """
 
     from_hash = item_public_id == DUMMY_PACKAGE_ID
@@ -121,12 +121,8 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
         package_path = find_item_locally_or_distributed(
             ctx, item_type, item_public_id, dest_path
         )
-    elif ctx.registry_type == REGISTRY_HTTP:
-        package_path = fetch_package(
-            item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path,
-        )
     else:
-        package_path = fetch_ipfs(item_type, item_public_id, dest_path)
+        package_path = fetch_item_remote(ctx, item_type, item_public_id, dest_path)
 
     if from_hash:
         (package_path_temp,) = list(package_path.parent.iterdir())
@@ -203,6 +199,23 @@ def _add_item_deps(
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:
                 add_item(ctx, CONTRACT, contract_public_id)
+
+
+def fetch_item_remote(
+    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str
+) -> Path:
+    """Fetch item remote."""
+
+    if get_default_remote_registry() == REMOTE_IPFS:
+        try:
+            return fetch_ipfs(item_type, item_public_id, dest_path)
+        except HashNotProvided:
+            click.echo(f"Hash was not provided for: {item_public_id}")
+            click.echo("Will try with http repository.")
+
+    return fetch_package(
+        item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path,
+    )
 
 
 def find_item_locally_or_distributed(

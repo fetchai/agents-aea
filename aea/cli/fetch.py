@@ -28,14 +28,13 @@ import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.fetch import fetch_agent
-from aea.cli.registry.settings import (
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
-    REGISTRY_IPFS,
-    REGISTRY_LOCAL,
-)
+from aea.cli.registry.settings import REGISTRY_LOCAL, REGISTRY_REMOTE, REMOTE_IPFS
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
+from aea.cli.utils.config import (
+    get_default_remote_registry,
+    get_ipfs_node_multiaddr,
+    try_to_load_agent_config,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
@@ -92,13 +91,14 @@ def do_fetch(
     :param target_dir: the target directory, in case fetching locally.
     """
 
-    if ctx.registry_type == REGISTRY_HTTP:
-        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
-    elif ctx.registry_type == REGISTRY_LOCAL:
+    if ctx.registry_type == REGISTRY_LOCAL:
         ctx.set_config("is_local", True)
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
-    elif ctx.registry_type == REGISTRY_IPFS:
-        fetch_agent_ipfs(ctx, public_id, alias, target_dir)
+    elif ctx.registry_type == REGISTRY_REMOTE:
+        if get_default_remote_registry() == REMOTE_IPFS:
+            fetch_agent_ipfs(ctx, public_id, alias, target_dir)
+        else:
+            fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
     else:
         fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
 
@@ -135,15 +135,7 @@ def fetch_agent_ipfs(
     if target_dir is None:
         target_dir = Path(ctx.cwd).absolute()
 
-    multiaddr = (
-        get_or_create_cli_config()
-        .get(REGISTRY_CONFIG_KEY, {})
-        .get("settings", {})
-        .get(REGISTRY_IPFS, {})
-        .get("ipfs_node")
-    )
-
-    ipfs_tool = IPFSTool(multiaddr)
+    ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
 
     try:
         agent_path = ipfs_tool.download(public_id.hash, str(target_dir))

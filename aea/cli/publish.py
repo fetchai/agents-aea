@@ -33,15 +33,14 @@ import click
 from aea.cli.push import _save_item_locally as _push_item_locally
 from aea.cli.registry.publish import publish_agent
 from aea.cli.registry.push import push_item as _push_item_remote
-from aea.cli.registry.settings import (
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
-    REGISTRY_IPFS,
-    REGISTRY_LOCAL,
-)
+from aea.cli.registry.settings import REGISTRY_REMOTE, REMOTE_IPFS
 from aea.cli.registry.utils import get_package_meta
 from aea.cli.utils.click_utils import registry_flag
-from aea.cli.utils.config import get_or_create_cli_config, validate_item_config
+from aea.cli.utils.config import (
+    get_default_remote_registry,
+    get_ipfs_node_multiaddr,
+    validate_item_config,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import AEAConfigException
@@ -88,12 +87,13 @@ def publish(
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
 
-    if registry == REGISTRY_HTTP:
-        _publish_agent_remote(ctx, push_missing=push_missing)
-    elif registry == REGISTRY_LOCAL:
-        _save_agent_locally(ctx, is_mixed=False, push_missing=push_missing)
+    if registry == REGISTRY_REMOTE:
+        if get_default_remote_registry() == REMOTE_IPFS:
+            _publish_agent_ipfs(ctx, push_missing)
+        else:
+            _publish_agent_remote(ctx, push_missing=push_missing)
     else:
-        _publish_agent_ipfs(ctx, push_missing)
+        _save_agent_locally(ctx, is_mixed=False, push_missing=push_missing)
 
 
 def _validate_config(ctx: Context) -> None:
@@ -182,14 +182,12 @@ class IPFSRegistry(BaseRegistry):
         super().__init__()
 
         self.ctx = ctx
-        multiaddr = (
-            get_or_create_cli_config()
-            .get(REGISTRY_CONFIG_KEY, {})
-            .get("settings", {})
-            .get(REGISTRY_IPFS, {})
-            .get("ipfs_node")
-        )
-        self.ipfs_tool = IPFSTool(multiaddr)
+        if not IS_IPFS_PLUGIN_INSTALLED:
+            raise click.ClickException(
+                "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
+            )
+
+        self.ipfs_tool = IPFSTool(addr=get_ipfs_node_multiaddr())
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """Check if item is pinned on the node."""
@@ -200,11 +198,6 @@ class IPFSRegistry(BaseRegistry):
 
     def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
         """Push item to an ipfs registry."""
-
-        if not IS_IPFS_PLUGIN_INSTALLED:
-            raise click.ClickException(
-                "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
-            )
 
         try:
             component_path = try_get_item_source_path(

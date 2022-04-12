@@ -25,25 +25,32 @@ from typing import Dict, Tuple
 
 REGISTRY_CONFIG_KEY: str = "registry_config"
 
-REGISTRY_HTTP = "http"
-REGISTRY_IPFS = "ipfs"
+
+REGISTRY_REMOTE = "remote"
 REGISTRY_LOCAL = "local"
-REGISTRY_TYPES: Tuple[str, ...] = (REGISTRY_HTTP, REGISTRY_IPFS, REGISTRY_LOCAL)
+
+REGISTRY_TYPES: Tuple[str, ...] = (REGISTRY_LOCAL, REGISTRY_REMOTE)
+
+REMOTE_HTTP = "http"
+REMOTE_IPFS = "ipfs"
 
 REGISTRY_API_URL_KEY = "registry_api_url"
 # we ignore issue B105 because this is not an hard-coded authentication token,
 # but the name of the field in the configuration file.
 AUTH_TOKEN_KEY = "auth_token"  # nosec
 
+DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
 DEFAULT_REGISTRY_CONFIG: Dict = {
     "default": None,
     "settings": {
-        REGISTRY_HTTP: {
-            "auth_token": None,  # auth token for registry
-            "registry_api_url": None,  # registry url
+        REGISTRY_REMOTE: {
+            "default": None,
+            REMOTE_HTTP: {
+                "auth_token": None,  # auth token for registry
+                "registry_api_url": None,  # registry url
+            },
+            REMOTE_IPFS: {"ipfs_node": None},  # IPFS url (in multiaddr format)
         },
-        REGISTRY_IPFS: {"ipfs_node": None},  # IPFS url (in multiaddr format)
         REGISTRY_LOCAL: {"default_packages_path": None},
     },
 }
-DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
