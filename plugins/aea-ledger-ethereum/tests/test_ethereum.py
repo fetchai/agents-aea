@@ -26,7 +26,7 @@ import random
 import tempfile
 import time
 from pathlib import Path
-from typing import Dict, Generator, Optional, Tuple, cast
+from typing import Dict, Generator, Optional, Tuple, Union, cast
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -46,6 +46,9 @@ from aea_ledger_ethereum import (
 from aea_ledger_ethereum.ethereum import (
     DEFAULT_EIP1559_STRATEGY,
     DEFAULT_GAS_STATION_STRATEGY,
+    EIP1559,
+    GAS_STATION,
+    TIP_INCREASE,
 )
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
@@ -752,3 +755,40 @@ def test_revert_reason(
             )
 
             assert transaction_receipt["revert_reason"] == "test revert reason"
+
+
+@pytest.mark.parametrize(
+    "strategy",
+    (
+        {"name": EIP1559, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
+        {"name": GAS_STATION, "params": ("gasPrice",)},
+    ),
+)
+def test_try_get_gas_pricing(
+    strategy: Dict[str, Union[str, Tuple[str, ...]]],
+    ethereum_testnet_config: dict,
+    ganache: Generator,
+) -> None:
+    """Test `try_get_gas_pricing`."""
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    # test gas pricing
+    gas_price = ethereum_api.try_get_gas_pricing(gas_price_strategy=strategy["name"])
+    assert set(strategy["params"]) == set(gas_price.keys())
+    assert all(
+        gas_price[param] > 0 and isinstance(gas_price[param], int)
+        for param in strategy["params"]
+    )
+
+    # test gas repricing
+    gas_reprice = ethereum_api.try_get_gas_pricing(
+        gas_price_strategy=strategy["name"], old_price=gas_price
+    )
+    assert all(
+        gas_reprice[param] > 0 and isinstance(gas_reprice[param], int)
+        for param in strategy["params"]
+    )
+    assert gas_reprice == {
+        gas_price_param: math.ceil(gas_price[gas_price_param] * TIP_INCREASE)
+        for gas_price_param in strategy["params"]
+    }, "The repricing was performed incorrectly!"
