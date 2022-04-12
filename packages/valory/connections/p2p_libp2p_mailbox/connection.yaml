@@ -41,10 +41,10 @@ cert_requests:
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies:
-  aea-ledger-cosmos: {}
-  aea-ledger-ethereum: {}
   aiohttp:
     version: <3.8,>=3.7.4
   asn1crypto:
     version: <1.5.0,>=1.4.0
+  open-aea-ledger-cosmos: {}
+  open-aea-ledger-ethereum: {}
 is_abstract: false
