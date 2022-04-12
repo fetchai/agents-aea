@@ -286,11 +286,14 @@ class IPFSTool:
         self.client.get(hash_id, target_dir)
         downloaded_path = str(Path(target_dir) / hash_id)
 
-        downloaded_files = os.listdir(downloaded_path)
-        if len(downloaded_files) > 0:
-            package_name, *_ = os.listdir(downloaded_path)
-            package_path = str(Path(target_dir) / package_name)
-        else:
+        package_path = None
+        if os.path.isdir(downloaded_path):
+            downloaded_files = os.listdir(downloaded_path)
+            if len(downloaded_files) > 0:
+                package_name, *_ = os.listdir(downloaded_path)
+                package_path = str(Path(target_dir) / package_name)
+
+        if package_path is None:
             package_path = target_dir
 
         if fix_path:
@@ -300,11 +303,10 @@ class IPFSTool:
                 for each_file in Path(downloaded_path).iterdir():  # grabs all files
                     shutil.move(str(each_file), target_dir)
             except shutil.Error as e:  # pragma: nocover
+                shutil.rmtree(downloaded_path)
                 raise DownloadError(f"error on move files {str(e)}") from e
 
-        # TODO: use shutil
-        os.rmdir(downloaded_path)
-
+        shutil.rmtree(downloaded_path)
         return package_path
 
     def publish(self, hash_id: str) -> Dict:
