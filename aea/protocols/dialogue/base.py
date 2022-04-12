@@ -1136,6 +1136,28 @@ class BasicDialoguesStorage:
         """
         dialogue = self._dialogues_by_dialogue_label.pop(dialogue_label, None)
 
+        # If label is a complete label, reconstruct incomplete label and also delete it
+        dialogue_reference = dialogue_label.dialogue_reference
+
+        is_complete_label = (
+            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            and dialogue_reference[1] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        )
+
+        if is_complete_label:
+            incomplete_dialogue_reference = (
+                dialogue_reference[0],
+                Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            )
+
+            incomplete_dialogue_label = DialogueLabel(
+                incomplete_dialogue_reference,
+                dialogue_label.dialogue_opponent_addr,
+                dialogue_label.dialogue_starter_addr,
+            )
+
+            self.remove(incomplete_dialogue_label)
+
         self._incomplete_to_complete_dialogue_labels.pop(dialogue_label, None)
 
         if dialogue_label in self._terminal_state_dialogues_labels:
