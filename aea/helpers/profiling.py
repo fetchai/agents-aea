@@ -168,7 +168,13 @@ class Profiling(Runnable):
                 [f" * {i} (present):  {c}" for i, c in data["objects_present"].items()]
             )
             + "\n"
-            + """Objects created:\n"""
+            + "\n".join(
+                [
+                    f" * {i} (present):  {c}"
+                    for i, c in data["dialogues_by_type"].items()
+                ]
+            )
+            + """\nObjects created:\n"""
             + "\n".join(
                 [
                     f" * {i.__name__} (created):  {c}"
@@ -176,14 +182,7 @@ class Profiling(Runnable):
                 ]
             )
             + "\n"
-            + "Dialogues present:\n"
-            + "\n".join(
-                [
-                    f" * {i} (present):  {c}"
-                    for i, c in data["dialogues_by_type"].items()
-                ]
-            )
-            + "\n"
+
         )
         self._output_function(text)
 
