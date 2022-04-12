@@ -23,10 +23,10 @@ jobs:
           python-version: '3.9'
 
       - name: Install Dependencies
-        run: cd docs && pip3 install pipenv && pipenv install
+        run: pip3 install pipenv && pipenv install
 
       - name: Build
-        run: cd docs && pipenv run mkdocs build
+        run: pipenv run mkdocs build
 
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
@@ -51,6 +51,6 @@ jobs:
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          expires: 5d
+          expires: 2d
           projectId: fetch-docs-preview
           # entryPoint: docs/
