@@ -244,7 +244,7 @@ class LogParser:
                 plt.figure(figure_name)
                 for var_name, var_data in tracker_data["var_data"].items():
 
-                    if tracker_data["type"] == "event":
+                    if tracker_data["type"] == "event" and var_data["times"]:
                         t0 = var_data["times"][0]
                         plt.plot(
                             [t0, t0],
