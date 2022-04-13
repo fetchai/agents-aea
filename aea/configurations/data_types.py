@@ -326,7 +326,7 @@ class PublicId(JSONSerializable):
 
         >>> str(PublicId.from_str("author/package_name:0.1.0"))
         'author/package_name:0.1.0'
-        
+
         >>> str(PublicId.from_str("author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"))
         'author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH'
 
@@ -340,7 +340,7 @@ class PublicId(JSONSerializable):
         Traceback (most recent call last):
         ...
         ValueError: Input 'bad/formatted:0.1.0:Qmbadhash' is not well formatted.
-        
+
         :param public_id_string: the public id in string format.
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
