@@ -324,6 +324,23 @@ class PublicId(JSONSerializable):
     def from_str(cls, public_id_string: str) -> "PublicId":
         """Initialize the public id from the string.
 
+        >>> str(PublicId.from_str("author/package_name:0.1.0"))
+        'author/package_name:0.1.0'
+        
+        >>> str(PublicId.from_str("author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"))
+        'author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH'
+
+        A bad formatted input raises value error:
+        >>> PublicId.from_str("bad/formatted:input")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'bad/formatted:input' is not well formatted.
+
+        >>> PublicId.from_str("bad/formatted:0.1.0:Qmbadhash")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'bad/formatted:0.1.0:Qmbadhash' is not well formatted.
+        
         :param public_id_string: the public id in string format.
         :return: the public id object.
         :raises ValueError: if the string in input is not well formatted.
@@ -401,12 +418,15 @@ class PublicId(JSONSerializable):
     @property
     def json(self) -> Dict:
         """Compute the JSON representation."""
-        return {
+        data = {
             "author": self.author,
             "name": self.name,
             "version": self.version,
-            "package_hash": self._package_hash,
         }
+        if self._package_hash is not None:
+            data["package_hash"] = self.hash
+
+        return data
 
     @classmethod
     def from_json(cls, obj: Dict) -> "PublicId":

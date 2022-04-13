@@ -67,7 +67,7 @@ DEFAULT_CLI_CONFIG = {
                     "auth_token": None,  # auth token for registry
                     "registry_api_url": None,  # registry url
                 },
-                REMOTE_IPFS: {"ipfs_node": None,},  # IPFS url (in multiaddr format)
+                REMOTE_IPFS: {"ipfs_node": None},  # IPFS url (in multiaddr format)
             },
             REGISTRY_LOCAL: {"default_packages_path": None},
         },
