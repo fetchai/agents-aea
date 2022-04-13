@@ -35,7 +35,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import ComponentId, PackageId, PublicId
+from aea.configurations.data_types import PackageId, PublicId
 from aea.helpers.yaml_utils import _AEAYamlDumper, _AEAYamlLoader
 
 
@@ -80,18 +80,12 @@ def to_plural(string: str) -> str:
     return string + "s"
 
 
-def reduce_sets(list_of_sets: List[Set]) -> Set[str]:
+def reduce_sets(list_of_sets: List[Set]) -> Set[PackageId]:
     """Reduce a list of sets to one dimentional set."""
-    reduced: Set[str] = set()
+    reduced: Set[PackageId] = set()
     for s in list_of_sets:
         reduced = reduced.union(s)
     return reduced
-
-
-def from_package_id(package_id: PackageId) -> str:
-    """Convert to public id."""
-
-    return str(package_id.public_id.without_hash())
 
 
 def to_package_id(public_id: str, package_type: str) -> PackageId:
@@ -103,7 +97,7 @@ class DependecyTree:
     """This class represents the dependency tree for a registry."""
 
     @staticmethod
-    def get_all_dependencies(item_config: Dict) -> List[str]:
+    def get_all_dependencies(item_config: Dict) -> List[PackageId]:
         """Returns a list of all available dependencies."""
         return list(
             reduce_sets(
@@ -121,21 +115,21 @@ class DependecyTree:
 
     @classmethod
     def resolve_tree(
-        cls, dependencies: Dict[PackageId, List[PackageId]], tree: Dict
+        cls, dependency_list: Dict[PackageId, List[PackageId]], tree: Dict
     ) -> None:
         """Resolve dependency tree"""
 
         for root_package in tree:
-            root_dependencies = dependencies.get(root_package)
+            root_dependencies: List[PackageId] = dependency_list.get(root_package, [])
             for package in root_dependencies:
                 tree[root_package][package] = {
-                    p: {} for p in cast(list, dependencies.get(package))
+                    p: {} for p in cast(list, dependency_list.get(package))
                 }
-                cls.resolve_tree(dependencies, tree[root_package][package])
+                cls.resolve_tree(dependency_list, tree[root_package][package])
 
     @classmethod
     def flatten_tree(
-        cls, dependency_tree: Dict, flat_tree: List[List[str]], level: int
+        cls, dependency_tree: Dict, flat_tree: List[List[PackageId]], level: int
     ) -> None:
         """Flatten tree."""
         try:

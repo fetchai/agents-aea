@@ -20,7 +20,6 @@
 
 """Script to update PublicIds to PublicIds for package dependencies."""
 
-import json
 from pathlib import Path
 from typing import Dict, cast
 
@@ -39,12 +38,7 @@ from aea.configurations.constants import (
     SKILL,
 )
 from aea.configurations.data_types import PublicId
-from aea.helpers.dependency_tree import (
-    DependecyTree,
-    dump_yaml,
-    load_yaml,
-    to_plural,
-)
+from aea.helpers.dependency_tree import DependecyTree, dump_yaml, load_yaml, to_plural
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
@@ -56,10 +50,6 @@ COMPONENT_TO_FILE = {
     CONNECTION: DEFAULT_CONNECTION_CONFIG_FILE,
     PROTOCOL: DEFAULT_PROTOCOL_CONFIG_FILE,
 }
-
-
-def pprint(x):
-    print(json.dumps(x, indent=2))
 
 
 def update_public_id_hash(
@@ -109,8 +99,6 @@ def main(packages_dir: Path) -> None:
 
     public_id_to_hash_mappings: Dict = {}
     dependency_tree = DependecyTree.generate(packages_dir)
-
-    # pprint([[str(p) for p in level] for level in dependency_tree])
 
     for tree_level in dependency_tree:
         for package in tree_level:
