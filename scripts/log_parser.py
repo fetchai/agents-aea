@@ -84,7 +84,9 @@ class LogParser:
         )
         self.agent_index = agent_index
         self.time_format = time_format
-        self.default_x_label = "Time [min]" if self.time_format == TimeFormat.RELATIVE else "Time"
+        self.default_x_label = (
+            "Time [min]" if self.time_format == TimeFormat.RELATIVE else "Time"
+        )
         self.time_origin: Optional[datetime.datetime] = None
         self.line_trackers: Dict[str, Dict] = {}
         self.figures: List = []
@@ -305,12 +307,8 @@ if __name__ == "__main__":
 
     # Add figures
     log_parser.add_figure(fig_name="Memory", y_label="Memory [MB]")
-    log_parser.add_figure(
-        fig_name="Object count (present)", y_label="Count"
-    )
-    log_parser.add_figure(
-        fig_name="Object count (created)", y_label="Count"
-    )
+    log_parser.add_figure(fig_name="Object count (present)", y_label="Count")
+    log_parser.add_figure(fig_name="Object count (created)", y_label="Count")
 
     # Memory
     log_parser.add_tracker(
