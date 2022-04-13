@@ -20,6 +20,7 @@
 
 """Script to update PublicIds to PublicIds for package dependencies."""
 
+import json
 from pathlib import Path
 from typing import Dict, cast
 
@@ -43,7 +44,6 @@ from aea.helpers.dependency_tree import (
     dump_yaml,
     load_yaml,
     to_plural,
-    without_hash,
 )
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -58,6 +58,27 @@ COMPONENT_TO_FILE = {
 }
 
 
+def pprint(x):
+    print(json.dumps(x, indent=2))
+
+
+def update_public_id_hash(
+    public_id_str: str, public_id_to_hash_mappings: Dict[str, str]
+) -> str:
+    """Update hash for given public from available mappings."""
+    public_id = PublicId.from_str(public_id_str).without_hash()
+    return str(
+        PublicId.from_json(
+            {
+                **public_id.json,
+                "package_hash": cast(
+                    str, public_id_to_hash_mappings.get(str(public_id))
+                ),
+            }
+        )
+    )
+
+
 def extend_public_ids(
     item_config: Dict, public_id_to_hash_mappings: Dict[str, str]
 ) -> None:
@@ -69,17 +90,8 @@ def extend_public_ids(
         components = to_plural(component_type)
         if components in item_config:
             item_config[components] = [
-                str(
-                    PublicId.from_json(
-                        dict(
-                            **dependency.json,
-                            package_hash=public_id_to_hash_mappings.get(str(dependency))
-                        )
-                    )
-                )
-                for dependency in map(
-                    lambda x: without_hash(str(x)), item_config.get(components, {})
-                )
+                update_public_id_hash(d, public_id_to_hash_mappings)
+                for d in item_config.get(components, [])
             ]
 
 
@@ -98,19 +110,20 @@ def main(packages_dir: Path) -> None:
     public_id_to_hash_mappings: Dict = {}
     dependency_tree = DependecyTree.generate(packages_dir)
 
+    # pprint([[str(p) for p in level] for level in dependency_tree])
+
     for tree_level in dependency_tree:
         for package in tree_level:
-            component_type, public_id_str = package.split("-")
-            public_id = PublicId.from_str(public_id_str)
+            public_id = package.public_id
             package_path = (
                 packages_dir
                 / public_id.author
-                / to_plural(component_type)
+                / to_plural(package.package_type.value)
                 / public_id.name
             )
 
             config_file = package_path / cast(
-                str, COMPONENT_TO_FILE.get(component_type)
+                str, COMPONENT_TO_FILE.get(package.package_type.value)
             )
             item_config, extra_config = load_yaml(config_file)
 

@@ -19,7 +19,7 @@
 """This module contains the code to generate dependency trees from registries."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, cast
 
 import yaml
 
@@ -35,7 +35,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import ComponentId, PackageId, PublicId
 from aea.helpers.yaml_utils import _AEAYamlDumper, _AEAYamlLoader
 
 
@@ -88,17 +88,15 @@ def reduce_sets(list_of_sets: List[Set]) -> Set[str]:
     return reduced
 
 
-def from_package_id(public_id: str, separator: str = "-") -> str:
+def from_package_id(package_id: PackageId) -> str:
     """Convert to public id."""
 
-    component_type, component_id = public_id.split(separator)
-    component_id = str(without_hash(component_id))
-    return component_type + separator + component_id
+    return str(package_id.public_id.without_hash())
 
 
-def to_package_id(public_id: str, package_type: str, separator: str = "-") -> str:
+def to_package_id(public_id: str, package_type: str) -> PackageId:
     """Convert to public id."""
-    return package_type + separator + public_id
+    return PackageId(package_type, PublicId.from_str(public_id)).without_hash()
 
 
 class DependecyTree:
@@ -111,7 +109,7 @@ class DependecyTree:
             reduce_sets(
                 [
                     {
-                        from_package_id(to_package_id(dependency, component_type))
+                        to_package_id(dependency, component_type)
                         for dependency in item_config.get(
                             to_plural(component_type), set()
                         )
@@ -122,14 +120,16 @@ class DependecyTree:
         )
 
     @classmethod
-    def resolve_tree(cls, dependencies: Dict[str, List[str]], tree: Dict) -> None:
+    def resolve_tree(
+        cls, dependencies: Dict[PackageId, List[PackageId]], tree: Dict
+    ) -> None:
         """Resolve dependency tree"""
+
         for root_package in tree:
-            root_dependencies = dependencies.get(root_package, [])
+            root_dependencies = dependencies.get(root_package)
             for package in root_dependencies:
-                package = from_package_id(package)
                 tree[root_package][package] = {
-                    p: {} for p in list(dependencies.get(package, []))
+                    p: {} for p in cast(list, dependencies.get(package))
                 }
                 cls.resolve_tree(dependencies, tree[root_package][package])
 
@@ -147,7 +147,7 @@ class DependecyTree:
             cls.flatten_tree(dependencies, flat_tree, level + 1)
 
     @classmethod
-    def generate(cls, packages_dir: Path) -> List[List[str]]:
+    def generate(cls, packages_dir: Path) -> List[List[PackageId]]:
         """Returns PublicId to hash mapping."""
         package_to_dependency_mappings = {}
         for component_type, component_file in COMPONENTS:
@@ -161,12 +161,12 @@ class DependecyTree:
                     to_package_id(str(public_id), component_type)
                 ] = cls.get_all_dependencies(item_config)
 
-        dep_tree: Dict[str, Dict] = {
-            package: {} for package in package_to_dependency_mappings
+        dep_tree: Dict[PackageId, Dict] = {
+            root_node: {} for root_node in package_to_dependency_mappings
         }
-        flat_tree: List[List[str]] = []
-        flat_tree_dirty: List[List[str]] = []
-        dirty_packages: List[str] = []
+        flat_tree: List[List[PackageId]] = []
+        flat_tree_dirty: List[List[PackageId]] = []
+        dirty_packages: List[PackageId] = []
 
         cls.resolve_tree(package_to_dependency_mappings, dep_tree)
         cls.flatten_tree(dep_tree, flat_tree_dirty, 0)
