@@ -34,6 +34,7 @@ from jsonschema import ValidationError
 
 import aea
 from aea.cli import cli
+from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
@@ -116,6 +117,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         assert self.result.exception.message == s
 
     @mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
+    @mock.patch("aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS)
     @mock.patch("aea.cli.add.fetch_ipfs")
     def test_add_skill_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""

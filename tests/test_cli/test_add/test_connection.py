@@ -31,6 +31,7 @@ from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
+from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
@@ -97,6 +98,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         )
 
     @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
+    @unittest.mock.patch(
+        "aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS
+    )
     @unittest.mock.patch("aea.cli.add.fetch_ipfs")
     def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
