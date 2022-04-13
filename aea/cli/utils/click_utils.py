@@ -22,16 +22,16 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Union
 
 import click
 from click import argument, option
 
 from aea.cli.registry.settings import (
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
-    REGISTRY_IPFS,
     REGISTRY_LOCAL,
+    REGISTRY_REMOTE,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
 )
 from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
@@ -208,9 +208,10 @@ class AgentDirectory(click.Path):
 def registry_flag(mark_default: bool = True) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
-    cli_config = get_or_create_cli_config()
-    default_registry = cast(
-        str, cli_config.get(REGISTRY_CONFIG_KEY, {}).get("default", REGISTRY_LOCAL)
+    default_registry = (
+        get_or_create_cli_config()
+        .get("registry_config", {})
+        .get("default", REGISTRY_LOCAL)
     )
 
     def wrapper(f: Callable) -> Callable:
@@ -218,22 +219,46 @@ def registry_flag(mark_default: bool = True) -> Callable:
             "--local",
             "registry",
             flag_value=REGISTRY_LOCAL,
-            help="For pushing items to local folder.",
+            help="To use a local registry.",
             default=(REGISTRY_LOCAL == default_registry) and mark_default,
-        )(f)
-        f = option(
-            "--ipfs",
-            "registry",
-            flag_value=REGISTRY_IPFS,
-            help="For pushing items to ipfs node.",
-            default=(REGISTRY_IPFS == default_registry) and mark_default,
         )(f)
         f = option(
             "--remote",
             "registry",
-            flag_value=REGISTRY_HTTP,
-            help="For pushing items to http registry.",
-            default=(REGISTRY_HTTP == default_registry) and mark_default,
+            flag_value=REGISTRY_REMOTE,
+            help="To use a remote registry.",
+            default=(REGISTRY_REMOTE == default_registry) and mark_default,
+        )(f)
+        return f
+
+    return wrapper
+
+
+def remote_registry_flag(mark_default: bool = True) -> Callable:
+    """Choice of one flag between: '--local/--remote'."""
+
+    default_registry = (
+        get_or_create_cli_config()
+        .get("registry_config", {})
+        .get("settings", {})
+        .get("remote", {})
+        .get("default", REMOTE_IPFS)
+    )
+
+    def wrapper(f: Callable) -> Callable:
+        f = option(
+            "--ipfs",
+            "remote_registry",
+            flag_value=REMOTE_IPFS,
+            help="To use a local registry.",
+            default=(REMOTE_IPFS == default_registry) and mark_default,
+        )(f)
+        f = option(
+            "--http",
+            "remote_registry",
+            flag_value=REMOTE_HTTP,
+            help="To use a remote registry.",
+            default=(REMOTE_HTTP == default_registry) and mark_default,
         )(f)
         return f
 

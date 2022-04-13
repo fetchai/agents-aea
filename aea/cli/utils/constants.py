@@ -21,6 +21,12 @@
 import os
 from pathlib import Path
 
+from aea.cli.registry.settings import (
+    REGISTRY_LOCAL,
+    REGISTRY_REMOTE,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
+)
 from aea.configurations.constants import (
     CONNECTION,
     CONNECTIONS,
@@ -56,19 +62,14 @@ DEFAULT_CLI_CONFIG = {
     "registry_config": {
         "default": None,
         "settings": {
-            "http": {
-                "auth_token": None,  # auth token for registry
-                "registry_api_url": None,  # registry url
-            },
-            "ipfs": {
-                "ipfs_node": None,  # IPFS url (in multiaddr format)
-                "hash_resolver": None,  # Url to hash resolver service,
-                "registries": {
-                    "component": {"contract_address": None},
-                    "agent": {"contract_address": None},
+            REGISTRY_REMOTE: {
+                REMOTE_HTTP: {
+                    "auth_token": None,  # auth token for registry
+                    "registry_api_url": None,  # registry url
                 },
+                REMOTE_IPFS: {"ipfs_node": None,},  # IPFS url (in multiaddr format)
             },
-            "local": {"default_packages": None},
+            REGISTRY_LOCAL: {"default_packages_path": None},
         },
     },
 }

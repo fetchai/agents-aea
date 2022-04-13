@@ -29,16 +29,20 @@ from click.exceptions import ClickException
 from aea.cli.registry.push import check_package_public_id, push_item
 from aea.cli.registry.settings import (
     REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
-    REGISTRY_IPFS,
     REGISTRY_LOCAL,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
 )
 from aea.cli.utils.click_utils import (
     PublicIdOrPathParameter,
     component_flag,
     registry_flag,
 )
-from aea.cli.utils.config import get_or_create_cli_config, load_item_config
+from aea.cli.utils.config import (
+    get_default_remote_registry,
+    get_or_create_cli_config,
+    load_item_config,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import (
@@ -87,12 +91,13 @@ def push_from_public_id(
     ctx = cast(Context, context.obj)
     if registry == REGISTRY_LOCAL:
         _save_item_locally(ctx, component_type, public_id)
-    elif registry == REGISTRY_HTTP:
-        push_item(ctx, component_type, public_id)
     else:
-        raise click.ClickException(
-            f"Registry type {registry} not supported while pushing an item using public id."
-        )
+        if get_default_remote_registry() == REMOTE_IPFS:
+            raise click.ClickException(
+                "IPFS registry not supported while pushing an item using public id."
+            )
+
+        push_item(ctx, component_type, public_id)
 
 
 def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
@@ -150,7 +155,7 @@ def push_item_from_path(
 
     if registry == REGISTRY_LOCAL:
         push_item_local(ctx, component_type, component_path, item_config.public_id)
-    elif registry == REGISTRY_HTTP:
+    elif registry == REMOTE_HTTP:
         push_item_http()
     else:
         push_item_ipfs(component_path, item_config.public_id)
@@ -173,7 +178,7 @@ def push_item_local(
             .get("default_packages_path")
         )
         if registry_path is None:
-            raise click.ClickException(f"Registry path was not provided.")
+            raise click.ClickException("Registry path was not provided.")
         registry_path = cast(str, registry_path)
 
     target_path = try_get_item_target_path(
@@ -201,7 +206,8 @@ def push_item_ipfs(component_path: Path, public_id: PublicId) -> None:
         get_or_create_cli_config()
         .get(REGISTRY_CONFIG_KEY, {})
         .get("settings", {})
-        .get(REGISTRY_IPFS, {})
+        .get("remote", {})
+        .get(REMOTE_IPFS, {})
         .get("ipfs_node")
     )
     ipfs_tool = IPFSTool(multiaddr)

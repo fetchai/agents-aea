@@ -27,13 +27,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import jsonschema
+from aea_cli_ipfs.exceptions import HashNotProvided
 from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool, NodeError
 
-from aea.cli.registry.settings import (
-    DEFAULT_IPFS_URL,
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_IPFS,
-)
+from aea.cli.registry.settings import DEFAULT_IPFS_URL, REGISTRY_CONFIG_KEY, REMOTE_IPFS
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.configurations.base import PublicId
 
@@ -161,12 +158,12 @@ def fetch_ipfs(
             get_or_create_cli_config()
             .get(REGISTRY_CONFIG_KEY, {})
             .get("settings", {})
-            .get(REGISTRY_IPFS, {})
+            .get("remote", {})
+            .get(REMOTE_IPFS, {})
             .get("ipfs_node")
         )
         ipfs_tool = IPFSTool(multiaddr)
     else:
-
         ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL)
 
     try:
@@ -177,7 +174,7 @@ def fetch_ipfs(
         )
 
     if package_hash is None:
-        raise Exception("Please provide hash.")
+        raise HashNotProvided(f"Please provide hash; Public id {public_id}.")
 
     try:
         ipfs_tool.check_ipfs_node_running()

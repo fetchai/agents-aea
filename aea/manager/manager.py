@@ -484,7 +484,7 @@ class MultiAgentManager:
         return self
 
     def start_manager(
-        self, local: bool = False, remote: bool = False, ipfs: bool = False
+        self, local: bool = False, remote: bool = False
     ) -> "MultiAgentManager":
         """
         Start manager.
@@ -493,6 +493,8 @@ class MultiAgentManager:
         are fetched in mixed mode (i.e. first try from local
         registry, and then from remote registry in case of failure).
 
+        :param local: to use local repository
+        :param remote: to use remote repository
         :return: the MultiAgentManager instance.
         """
 
@@ -500,7 +502,7 @@ class MultiAgentManager:
             return self
 
         self._ensure_working_dir()
-        self._last_start_status = self._load_state(local, remote, ipfs)
+        self._last_start_status = self._load_state(local, remote)
 
         self._started_event.clear()
         self._is_running = True
@@ -579,7 +581,6 @@ class MultiAgentManager:
         public_id: PublicId,
         local: bool = False,
         remote: bool = False,
-        ipfs: bool = False,
         restore: bool = False,
     ) -> "MultiAgentManager":
         """
@@ -590,6 +591,8 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
+        :param local: to use local repository
+        :param remote: to use remote repository
         :param restore: bool flag for restoring already fetched agent.
         :return: self
         """
@@ -603,7 +606,6 @@ class MultiAgentManager:
             public_id,
             local,
             remote,
-            ipfs,
             registry_path=self.registry_path,
             is_restore=restore,
             skip_aea_validation=False,
@@ -681,7 +683,6 @@ class MultiAgentManager:
         component_overrides: Optional[List[dict]] = None,
         local: bool = False,
         remote: bool = False,
-        ipfs: bool = False,
         restore: bool = False,
     ) -> "MultiAgentManager":
         """
@@ -693,6 +694,8 @@ class MultiAgentManager:
         :param agent_name: unique name for the agent
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
+        :param local: to use local repository
+        :param remote: to use remote repository
         :param restore: bool flag for restoring already fetched agent.
         :return: self
         """
@@ -704,7 +707,7 @@ class MultiAgentManager:
         project = self._projects.get(public_id, None)
 
         if project is None and self._auto_add_remove_project:
-            self.add_project(public_id, local, remote, ipfs, restore)
+            self.add_project(public_id, local, remote, restore)
             project = self._projects.get(public_id, None)
 
         if project is None:
@@ -1008,7 +1011,7 @@ class MultiAgentManager:
             os.makedirs(self.data_dir)
 
     def _load_state(
-        self, local: bool = False, remote: bool = False, ipfs: bool = False,
+        self, local: bool = False, remote: bool = False
     ) -> Tuple[
         bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
     ]:
@@ -1021,6 +1024,8 @@ class MultiAgentManager:
         are fetched in mixed mode (i.e. first try from local
         registry, and then from remote registry in case of failure).
 
+        :param local: to use local repository
+        :param remote: to use remote repository
         :return: Tuple of bool indicating load success, settings of loaded, list of failed
         :raises: ValueError if failed to load state.
         """
@@ -1046,7 +1051,7 @@ class MultiAgentManager:
         for project_public_id, agents_settings in projects_agents.items():
             try:
                 self.add_project(
-                    project_public_id, local, remote, ipfs, restore=True,
+                    project_public_id, local, remote, restore=True,
                 )
             except ProjectCheckError as e:
                 failed_to_load.append((project_public_id, agents_settings, e))

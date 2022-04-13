@@ -97,7 +97,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         )
 
     @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
-    @unittest.mock.patch("aea.cli.add.fetch_package")
+    @unittest.mock.patch("aea.cli.add.fetch_ipfs")
     def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
@@ -114,11 +114,9 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
             [*CLI_LOG_OPTION, "add", "--remote", obj_type, public_id],
             standalone_mode=False,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
         public_id_obj = PublicId.from_str(public_id)
-        fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
-        )
+        fetch_package_mock.assert_called_once_with(obj_type, public_id_obj, "dest/path")
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

@@ -44,7 +44,7 @@ import click
 import jsonschema
 import yaml
 
-from aea.cli.registry.settings import REGISTRY_CONFIG_KEY
+from aea.cli.registry.settings import DEFAULT_IPFS_URL, REGISTRY_CONFIG_KEY, REMOTE_IPFS
 from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH, DEFAULT_CLI_CONFIG
 from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
@@ -175,6 +175,29 @@ def get_default_author_from_cli_config() -> Optional[str]:
     """Get registry path from config."""
     config = get_or_create_cli_config()
     return config.get(AUTHOR_KEY, None)
+
+
+def get_default_remote_registry(default: str = REMOTE_IPFS) -> str:
+    """Return remote registry from cli config."""
+    return (
+        get_or_create_cli_config()
+        .get("registry_config", {})
+        .get("settings", {})
+        .get("remote", {})
+        .get("default", default)
+    )
+
+
+def get_ipfs_node_multiaddr(default: str = DEFAULT_IPFS_URL) -> str:
+    """Return remote registry from cli config."""
+    return (
+        get_or_create_cli_config()
+        .get("registry_config", {})
+        .get("settings", {})
+        .get("remote", {})
+        .get("ipfs", {})
+        .get("ipfs_node", default)
+    )
 
 
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:

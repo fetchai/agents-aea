@@ -27,6 +27,7 @@ from click import ClickException
 
 from aea.cli import cli
 from aea.cli.push import _save_item_locally, check_package_public_id
+from aea.cli.registry.settings import REMOTE_HTTP
 from aea.cli.utils.constants import ITEM_TYPES
 from aea.configurations.base import PublicId
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -253,6 +254,7 @@ class PushContractCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
     @mock.patch("aea.cli.push.push_item")
+    @mock.patch("aea.cli.push.get_default_remote_registry", return_value=REMOTE_HTTP)
     def test_push_contract_registry_positive(self, *mocks):
         """Test push contract to registry command positive result."""
         result = self.runner.invoke(
