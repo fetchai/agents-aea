@@ -303,10 +303,12 @@ class IPFSTool:
                 for each_file in Path(downloaded_path).iterdir():  # grabs all files
                     shutil.move(str(each_file), target_dir)
             except shutil.Error as e:  # pragma: nocover
-                shutil.rmtree(downloaded_path)
+                if os.path.isdir(downloaded_path):
+                    shutil.rmtree(downloaded_path)
                 raise DownloadError(f"error on move files {str(e)}") from e
 
-        shutil.rmtree(downloaded_path)
+        if os.path.isdir(downloaded_path):
+            shutil.rmtree(downloaded_path)
         return package_path
 
     def publish(self, hash_id: str) -> Dict:

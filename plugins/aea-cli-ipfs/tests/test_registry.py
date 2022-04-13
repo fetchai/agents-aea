@@ -151,7 +151,7 @@ def test_fetch_ipfs() -> None:
         ):
             package_path = fetch_ipfs(
                 "protocol",
-                PublicId.from_str("default_author/component:0.2.0"),
+                PublicId.from_str("default_author/component:0.2.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"),
                 "",
                 dest_path,
             )
