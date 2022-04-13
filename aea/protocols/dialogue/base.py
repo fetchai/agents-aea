@@ -1146,16 +1146,8 @@ class BasicDialoguesStorage:
 
         # Reconstruct and delete incomplete label
         if is_complete_label:
-            incomplete_dialogue_reference = (
-                dialogue_reference[0],
-                Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
-            )
 
-            incomplete_dialogue_label = DialogueLabel(
-                incomplete_dialogue_reference,
-                dialogue_label.dialogue_opponent_addr,
-                dialogue_label.dialogue_starter_addr,
-            )
+            incomplete_dialogue_label = complete_dialogue_label.get_incomplete_version()
 
             self._incomplete_to_complete_dialogue_labels.pop(
                 incomplete_dialogue_label, None
