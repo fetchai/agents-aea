@@ -84,6 +84,7 @@ class LogParser:
         )
         self.agent_index = agent_index
         self.time_format = time_format
+        self.default_x_label = "Time [min]" if self.time_format == TimeFormat.RELATIVE else "Time"
         self.time_origin: Optional[datetime.datetime] = None
         self.line_trackers: Dict[str, Dict] = {}
         self.figures: List = []
@@ -210,8 +211,10 @@ class LogParser:
             if fig_title
             else f"{fig_name} [{file_name}] [Agent {self.agent_index}]"
         )
-        if x_label:
-            plt.xlabel(x_label)
+
+        x_label = x_label if x_label else self.default_x_label
+        plt.xlabel(x_label)
+
         if y_label:
             plt.ylabel(y_label)
 
@@ -301,12 +304,12 @@ if __name__ == "__main__":
     )  # uses the most recent log by default
 
     # Add figures
-    log_parser.add_figure(fig_name="Memory", x_label="Time [s]", y_label="Memory [MB]")
+    log_parser.add_figure(fig_name="Memory", y_label="Memory [MB]")
     log_parser.add_figure(
-        fig_name="Object count (present)", x_label="Time [s]", y_label="Count"
+        fig_name="Object count (present)", y_label="Count"
     )
     log_parser.add_figure(
-        fig_name="Object count (created)", x_label="Time [s]", y_label="Count"
+        fig_name="Object count (created)", y_label="Count"
     )
 
     # Memory
