@@ -73,12 +73,13 @@ class Context:
     @registry_type.setter
     def registry_type(self, value: str) -> None:
         """Set registry value."""
-        if value not in REGISTRY_TYPES:
-            raise ValueError(
-                f"{value} not allowed as registry type; Allowed registry types: {REGISTRY_TYPES}"
-            )
+        if value is not None:
+            if value not in REGISTRY_TYPES:
+                raise ValueError(
+                    f"{value} not allowed as registry type; Allowed registry types: {REGISTRY_TYPES}"
+                )
 
-        self._registry_type = value
+            self._registry_type = value
 
     @property
     def registry_path(self) -> str:
