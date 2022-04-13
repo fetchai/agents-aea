@@ -78,8 +78,8 @@ class NetworkConfig:
             f"Net name: {self.net_name}\n"
             f"Chain id: {self.chain_id}\n"
             f"Denom: {self.denom}\n"
-            f"resp api address: {self.rest_api_address}\n"
-            f"rpc api address: {self.rpc_api_address}\n"
+            f"REST API address: {self.rest_api_address}\n"
+            f"RPC address: {self.rpc_api_address}\n"
         )
 
 
@@ -124,15 +124,15 @@ class NetworkUpdate:
 
         :return: NetworkConfig instance
         """
-        net_name = click.prompt("Enter new net name", default=self.cur_config.net_name)
+        net_name = click.prompt("Enter the new network name", default=self.cur_config.net_name)
         chain_id = f"{net_name}-1"
-        chain_id = click.prompt("Enter new chain_id", default=chain_id)
+        chain_id = click.prompt("Enter the new chain id", default=chain_id)
         denom = "atestfet"
-        denom = click.prompt("Enter new denom", default=denom)
+        denom = click.prompt("Enter the new denomination", default=denom)
         rpc_api_addr = f"https://rpc-{net_name}.fetch.ai:443"
-        rpc_api_addr = click.prompt("Enter new rpc_api_addr", default=rpc_api_addr)
+        rpc_api_addr = click.prompt("Enter the new rpc address", default=rpc_api_addr)
         rest_api_addr = f"https://rest-{net_name}.fetch.ai:443"
-        rest_api_addr = click.prompt("Enter new rest_api_addr", default=rest_api_addr)
+        rest_api_addr = click.prompt("Enter the new rest api address", default=rest_api_addr)
 
         return NetworkConfig(
             net_name=net_name,
