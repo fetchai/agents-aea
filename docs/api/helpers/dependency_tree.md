@@ -51,29 +51,17 @@ Convert component to plural
 #### reduce`_`sets
 
 ```python
-def reduce_sets(list_of_sets: List[Set]) -> Set[str]
+def reduce_sets(list_of_sets: List[Set]) -> Set[PackageId]
 ```
 
 Reduce a list of sets to one dimentional set.
-
-<a id="aea.helpers.dependency_tree.from_package_id"></a>
-
-#### from`_`package`_`id
-
-```python
-def from_package_id(public_id: str, separator: str = "-") -> str
-```
-
-Convert to public id.
 
 <a id="aea.helpers.dependency_tree.to_package_id"></a>
 
 #### to`_`package`_`id
 
 ```python
-def to_package_id(public_id: str,
-                  package_type: str,
-                  separator: str = "-") -> str
+def to_package_id(public_id: str, package_type: str) -> PackageId
 ```
 
 Convert to public id.
@@ -94,7 +82,7 @@ This class represents the dependency tree for a registry.
 
 ```python
 @staticmethod
-def get_all_dependencies(item_config: Dict) -> List[str]
+def get_all_dependencies(item_config: Dict) -> List[PackageId]
 ```
 
 Returns a list of all available dependencies.
@@ -105,7 +93,8 @@ Returns a list of all available dependencies.
 
 ```python
 @classmethod
-def resolve_tree(cls, dependencies: Dict[str, List[str]], tree: Dict) -> None
+def resolve_tree(cls, dependency_list: Dict[PackageId, List[PackageId]],
+                 tree: Dict) -> None
 ```
 
 Resolve dependency tree
@@ -116,7 +105,7 @@ Resolve dependency tree
 
 ```python
 @classmethod
-def flatten_tree(cls, dependency_tree: Dict, flat_tree: List[List[str]],
+def flatten_tree(cls, dependency_tree: Dict, flat_tree: List[List[PackageId]],
                  level: int) -> None
 ```
 
@@ -128,7 +117,7 @@ Flatten tree.
 
 ```python
 @classmethod
-def generate(cls, packages_dir: Path) -> List[List[str]]
+def generate(cls, packages_dir: Path) -> List[List[PackageId]]
 ```
 
 Returns PublicId to hash mapping.

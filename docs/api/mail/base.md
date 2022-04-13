@@ -510,7 +510,7 @@ Check if sender is a public id.
 
 <a id="aea.mail.base.Envelope.is_to_public_id"></a>
 
-#### is`_`without`_`hash
+#### is`_`to`_`public`_`id
 
 ```python
 @property

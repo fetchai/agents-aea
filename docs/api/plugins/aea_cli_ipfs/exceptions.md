@@ -64,3 +64,13 @@ class DownloadError(BaseIPFSToolException)
 
 Exception on download failed.
 
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.exceptions.HashNotProvided"></a>
+
+## HashNotProvided Objects
+
+```python
+class HashNotProvided(BaseIPFSToolException)
+```
+
+Exception when hash is not provided.
+
