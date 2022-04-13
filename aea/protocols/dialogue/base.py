@@ -1134,16 +1134,17 @@ class BasicDialoguesStorage:
 
         :param dialogue_label: label of the dialogue to remove
         """
-        dialogue = self._dialogues_by_dialogue_label.pop(dialogue_label, None)
-
-        # If label is a complete label, reconstruct incomplete label and also delete it
         dialogue_reference = dialogue_label.dialogue_reference
 
+        # Check if dialogue_label is a complete label
         is_complete_label = (
             dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and dialogue_reference[1] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
         )
 
+        complete_dialogue_label = dialogue_label
+
+        # Reconstruct and delete incomplete label
         if is_complete_label:
             incomplete_dialogue_reference = (
                 dialogue_reference[0],
@@ -1156,17 +1157,34 @@ class BasicDialoguesStorage:
                 dialogue_label.dialogue_starter_addr,
             )
 
-            self.remove(incomplete_dialogue_label)
+            self._incomplete_to_complete_dialogue_labels.pop(
+                incomplete_dialogue_label, None
+            )
 
-        self._incomplete_to_complete_dialogue_labels.pop(dialogue_label, None)
+            if incomplete_dialogue_label in self._terminal_state_dialogues_labels:
+                self._terminal_state_dialogues_labels.remove(incomplete_dialogue_label)
 
-        if dialogue_label in self._terminal_state_dialogues_labels:
-            self._terminal_state_dialogues_labels.remove(dialogue_label)
+            dialogue = self._dialogues_by_dialogue_label.pop(
+                incomplete_dialogue_label, None
+            )
+
+            if dialogue:
+                self._dialogue_by_address[
+                    incomplete_dialogue_label.dialogue_opponent_addr
+                ].remove(dialogue)
+
+        # Delete complete label
+        self._incomplete_to_complete_dialogue_labels.pop(complete_dialogue_label, None)
+
+        if complete_dialogue_label in self._terminal_state_dialogues_labels:
+            self._terminal_state_dialogues_labels.remove(complete_dialogue_label)
+
+        dialogue = self._dialogues_by_dialogue_label.pop(complete_dialogue_label, None)
 
         if dialogue:
-            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].remove(
-                dialogue
-            )
+            self._dialogue_by_address[
+                complete_dialogue_label.dialogue_opponent_addr
+            ].remove(dialogue)
 
     def get(self, dialogue_label: DialogueLabel) -> Optional[Dialogue]:
         """
