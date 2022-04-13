@@ -493,16 +493,16 @@ class MultiAgentManager:
         are fetched in mixed mode (i.e. first try from local
         registry, and then from remote registry in case of failure).
 
-        :param local: to use local repository
-        :param remote: to use remote repository
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
+
         :return: the MultiAgentManager instance.
         """
-
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        self._last_start_status = self._load_state(local, remote)
+        self._last_start_status = self._load_state(local=local, remote=remote)
 
         self._started_event.clear()
         self._is_running = True
@@ -591,8 +591,8 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
-        :param local: to use local repository
-        :param remote: to use remote repository
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
         :return: self
         """
@@ -694,12 +694,11 @@ class MultiAgentManager:
         :param agent_name: unique name for the agent
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
-        :param local: to use local repository
-        :param remote: to use remote repository
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
         :return: self
         """
-
         agent_name = agent_name or public_id.name
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
@@ -1011,7 +1010,7 @@ class MultiAgentManager:
             os.makedirs(self.data_dir)
 
     def _load_state(
-        self, local: bool = False, remote: bool = False
+        self, local: bool, remote: bool
     ) -> Tuple[
         bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
     ]:
@@ -1024,8 +1023,9 @@ class MultiAgentManager:
         are fetched in mixed mode (i.e. first try from local
         registry, and then from remote registry in case of failure).
 
-        :param local: to use local repository
-        :param remote: to use remote repository
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
+
         :return: Tuple of bool indicating load success, settings of loaded, list of failed
         :raises: ValueError if failed to load state.
         """
@@ -1051,7 +1051,7 @@ class MultiAgentManager:
         for project_public_id, agents_settings in projects_agents.items():
             try:
                 self.add_project(
-                    project_public_id, local, remote, restore=True,
+                    project_public_id, local=local, remote=remote, restore=True,
                 )
             except ProjectCheckError as e:
                 failed_to_load.append((project_public_id, agents_settings, e))
