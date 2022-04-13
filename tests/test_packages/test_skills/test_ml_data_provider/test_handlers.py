@@ -19,13 +19,10 @@
 """This module contains the tests of the handler classes of the ml_data_provider skill."""
 
 import logging
-import sys
 import uuid
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
-
-import pytest
 
 from aea.helpers.search.models import Attribute, DataModel, Description, Location
 from aea.helpers.transaction.base import TransactionDigest, TransactionReceipt
@@ -56,10 +53,6 @@ from packages.fetchai.skills.ml_data_provider.strategy import Strategy
 from tests.conftest import ROOT_DIR
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 9),
-    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-)
 class TestMlTradeHandler(BaseSkillTestCase):
     """Test ml handler of ml_data_provider."""
 
@@ -318,10 +311,6 @@ class TestMlTradeHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 9),
-    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-)
 class TestLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of ml_data_provider."""
 
@@ -477,10 +466,6 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 9),
-    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-)
 class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of ml_data_provider."""
 

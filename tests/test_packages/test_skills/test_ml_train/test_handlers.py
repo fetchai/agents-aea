@@ -19,7 +19,6 @@
 """This module contains the tests of the handler classes of the ml_train skill."""
 import json
 import logging
-import sys
 import uuid
 from pathlib import Path
 from typing import cast
@@ -307,10 +306,6 @@ class TestMlTradeHandler(BaseSkillTestCase):
         assert ml_dialogue.terms == mocked_terms_from_proposal
         assert ml_dialogue in self.tx_behaviour.waiting
 
-    @pytest.mark.skipif(
-        sys.version_info >= (3, 9),
-        reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-    )
     def test_handle_data_with_data(self):
         """Test the _handle_data method of the ml_trade handler where data is NOT None."""
         # setup

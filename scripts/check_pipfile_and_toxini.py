@@ -26,6 +26,8 @@ from typing import Dict
 
 # specified in setup.py
 WHITELIST = {"base58": ">=1.0.3"}
+# fix for python 3.6 and tox
+EXCLUSIONS_LIST = [("tensorflow", "2.6.0")]
 
 
 def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
@@ -81,6 +83,8 @@ def check_match(
     name_part: str, version_part: str, dependencies: Dict[str, str], match_type: str
 ) -> None:
     """Check for a match independencies."""
+    if (name_part, version_part) in EXCLUSIONS_LIST:
+        return
     result = False
     for package, version_and_match_type in dependencies.items():
         if package == name_part:
