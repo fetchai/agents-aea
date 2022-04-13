@@ -34,11 +34,12 @@ from aea.cli.publish import (
     _save_agent_locally,
     _validate_pkp,
 )
+from aea.cli.registry.settings import REMOTE_HTTP
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
-from aea.cli.registry.settings import REMOTE_HTTP
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import (
     ContextMock,

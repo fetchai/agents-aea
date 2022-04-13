@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -151,7 +151,9 @@ def test_fetch_ipfs() -> None:
         ):
             package_path = fetch_ipfs(
                 "protocol",
-                PublicId.from_str("default_author/component:0.2.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"),
+                PublicId.from_str(
+                    "default_author/component:0.2.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"
+                ),
                 "",
                 dest_path,
             )
