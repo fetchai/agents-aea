@@ -29,13 +29,11 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
 from aea.cli.utils.click_utils import ConnectionsOption, password_option
-from aea.cli.utils.config import load_item_config
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.package_utils import list_available_packages
 from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE
-from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
@@ -249,17 +247,11 @@ def _print_all_available_packages(ctx: Context) -> None:
     max_col_2_length = 48
 
     rows = []
-    for component_type, config_file_name in PACKAGE_TYPE_TO_CONFIG_FILE.items():
-        config_files = Path(ctx.cwd).glob(f"**/{config_file_name}")
-        for config_file in config_files:
-            if config_file.parent == Path(ctx.cwd):
-                continue
 
-            package_hash = ipfs_hash.hash_directory(str(config_file.parent), wrap=False)
-            item_config = load_item_config(component_type, config_file.parent)
-            package_id = ComponentId(component_type, item_config.public_id)
-            rows.append((str(package_id), package_hash))
-            max_col_1_length = max(max_col_1_length, len(str(package_id)))
+    for package_id, package_path in list_available_packages(ctx.cwd):
+        package_hash = ipfs_hash.hash_directory(str(package_path), wrap=False)
+        rows.append((str(package_id), package_hash))
+        max_col_1_length = max(max_col_1_length, len(str(package_id)))
 
     table_width = max_col_2_length + max_col_1_length + 9
     row_separator = "=" * table_width

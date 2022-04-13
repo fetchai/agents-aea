@@ -22,7 +22,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import click
 from jsonschema import ValidationError
@@ -49,7 +49,7 @@ from aea.configurations.base import (
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import AGENT, DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.constants import (
     DISTRIBUTED_PACKAGES as DISTRIBUTED_PACKAGES_STR,
 )
@@ -61,6 +61,7 @@ from aea.configurations.constants import (
     SKILL,
     VENDOR,
 )
+from aea.configurations.data_types import PackageId
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
@@ -836,3 +837,40 @@ def update_aea_version_range(package_configuration: PackageConfiguration) -> Non
             f"Updating AEA version specifier from {old_aea_version} to {new_aea_version}."
         )
         package_configuration.aea_version = new_aea_version
+
+
+def list_available_packages(
+    project_path: Union[Path, str]
+) -> List[Tuple[PackageId, Path]]:
+    """Returns a list of paths for all available packages in an AEA project."""
+
+    project_path = Path(project_path)
+    agent_config = load_item_config(AGENT, project_path)
+    packages = []
+
+    for component_type in (
+        ComponentType.PROTOCOL,
+        ComponentType.CONNECTION,
+        ComponentType.CONTRACT,
+        ComponentType.SKILL,
+    ):
+        components = getattr(agent_config, component_type.to_plural(), set())
+        for public_id in components:
+            package_path = Path(
+                get_package_path(
+                    str(project_path), component_type.value, public_id, is_vendor=True
+                )
+            )
+            if not package_path.is_dir():
+                package_path = Path(
+                    get_package_path(
+                        str(project_path),
+                        component_type.value,
+                        public_id,
+                        is_vendor=False,
+                    ),
+                )
+
+            packages.append((PackageId(component_type.value, public_id), package_path))
+
+    return packages
