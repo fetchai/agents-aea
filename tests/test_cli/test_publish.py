@@ -36,9 +36,9 @@ from aea.cli.publish import (
 )
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.cli.registry.settings import REMOTE_HTTP
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
-
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import (
     ContextMock,
@@ -103,6 +103,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators._check_aea_project")
+@mock.patch("aea.cli.publish.get_default_remote_registry", return_value=REMOTE_HTTP)
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
 @mock.patch("aea.cli.publish._validate_pkp")
