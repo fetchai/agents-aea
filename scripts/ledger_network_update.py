@@ -18,26 +18,20 @@
 #
 # ------------------------------------------------------------------------------
 """Setup script to update ledger network."""
-import importlib.util
 import re
-import sys
 from pathlib import Path
-from typing import Any, Union
+from typing import Optional
 
 import click  # type: ignore
 
 
-def load_module(file_name: Union[str, Path], module_name: str) -> Any:
-    """Load python module from file."""
-    spec = importlib.util.spec_from_file_location(module_name, file_name)
-    module = importlib.util.module_from_spec(spec)  # type: ignore
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)  # type: ignore
-    return module
-
-
 ROOT_DIR = Path(__file__).parent / "../"
-AEA_LEDGER_MODULE_FILE = Path(__file__).parent / "../aea/crypto/ledger_apis.py"
+
+AEA_LEDGER_MODULE_FILE = ROOT_DIR / "aea/crypto/ledger_apis.py"
+FETCHAI_LEDGER_FILE = (
+    ROOT_DIR / "plugins/aea-ledger-fetchai/aea_ledger_fetchai/fetchai.py"
+)
+LEDGER_INTEGRATION_MD = ROOT_DIR / "docs/ledger-integration.md"
 
 
 class NetworkConfig:
@@ -48,6 +42,8 @@ class NetworkConfig:
     denom: str
     rest_api_address: str
     rpc_api_address: str
+    faucet_url: Optional[str]
+    explorer_url: Optional[str]
 
     def __init__(
         self,
@@ -56,6 +52,8 @@ class NetworkConfig:
         denom: str,
         rest_api_address: str,
         rpc_api_address: str,
+        faucet_url: Optional[str] = None,
+        explorer_url: Optional[str] = None,
     ):
         """
         Set network config.
@@ -65,12 +63,26 @@ class NetworkConfig:
         :param denom: str
         :param rest_api_address: str
         :param rpc_api_address: str
+        :param faucet_url: optional str
+        :param explorer_url: optional str
         """
         self.net_name = net_name
         self.chain_id = chain_id
         self.denom = denom
         self.rest_api_address = rest_api_address
         self.rpc_api_address = rpc_api_address
+        self.faucet_url = faucet_url or self.make_faucet_url(net_name)
+        self.explorer_url = explorer_url or self.make_explorer_url(net_name)
+
+    @staticmethod
+    def make_faucet_url(net_name) -> str:
+        """Make default faucet url based on net name."""
+        return f"https://faucet-{net_name}.t-v2-london-c.fetch-ai.com"
+
+    @staticmethod
+    def make_explorer_url(net_name) -> str:
+        """Make default explorer url based on net name."""
+        return f"https://explore-{net_name}.fetch.ai"
 
     def __str__(self) -> str:
         """Return lines of network configration to be printed."""
@@ -80,7 +92,16 @@ class NetworkConfig:
             f"Denom: {self.denom}\n"
             f"REST API address: {self.rest_api_address}\n"
             f"RPC address: {self.rpc_api_address}\n"
+            f"Testnet faucet address: {self.faucet_url}\n"
+            f"Block explorer address: {self.explorer_url}\n"
         )
+
+
+def _get_value(variable_name: str, text: str) -> str:
+    m = re.search(rf'{variable_name} = "(.*)"', text, re.MULTILINE)
+    if m:
+        return m.groups()[0]
+    raise ValueError("Value not found")
 
 
 class NetworkUpdate:
@@ -97,10 +118,13 @@ class NetworkUpdate:
 
         :return: NetworkConfig instance
         """
-        aea_ledger = load_module(AEA_LEDGER_MODULE_FILE, "aea.crypto.ledger_apis")
-        rest_api_addr = aea_ledger.FETCHAI_DEFAULT_ADDRESS
-        chain_id = aea_ledger.FETCHAI_DEFAULT_CHAIN_ID
-        denom = aea_ledger.FETCHAI_DEFAULT_CURRENCY_DENOM
+        code_text = FETCHAI_LEDGER_FILE.read_text()
+
+        rest_api_addr = _get_value("DEFAULT_ADDRESS", code_text)
+        chain_id = _get_value("DEFAULT_CHAIN_ID", code_text)
+        denom = _get_value("DEFAULT_CURRENCY_DENOM", code_text)
+        faucet_url = _get_value("FETCHAI_TESTNET_FAUCET_URL", code_text)
+
         m = re.match(r"https://rest-(\w+).fetch.ai:443", rest_api_addr)
         if not m:
             raise ValueError(
@@ -110,12 +134,23 @@ class NetworkUpdate:
 
         rpc_api_addr = f"https://rpc-{net_name}.fetch.ai:443"
 
+        m = re.search(
+            r'\| Block Explorer \| <a href="(.*)" target=',
+            LEDGER_INTEGRATION_MD.read_text(),
+            re.MULTILINE,
+        )
+        if not m:
+            raise ValueError(f"REGEX search failed for {LEDGER_INTEGRATION_MD}")
+        explorer_url = m.groups()[0]
+
         return NetworkConfig(
             net_name=net_name,
             chain_id=chain_id,
             denom=denom,
             rest_api_address=rest_api_addr,
             rpc_api_address=rpc_api_addr,
+            faucet_url=faucet_url,
+            explorer_url=explorer_url,
         )
 
     def get_new_config(self) -> NetworkConfig:
@@ -124,7 +159,9 @@ class NetworkUpdate:
 
         :return: NetworkConfig instance
         """
-        net_name = click.prompt("Enter the new network name", default=self.cur_config.net_name)
+        net_name = click.prompt(
+            "Enter the new network name", default=self.cur_config.net_name
+        )
         chain_id = f"{net_name}-1"
         chain_id = click.prompt("Enter the new chain id", default=chain_id)
         denom = "atestfet"
@@ -132,7 +169,17 @@ class NetworkUpdate:
         rpc_api_addr = f"https://rpc-{net_name}.fetch.ai:443"
         rpc_api_addr = click.prompt("Enter the new rpc address", default=rpc_api_addr)
         rest_api_addr = f"https://rest-{net_name}.fetch.ai:443"
-        rest_api_addr = click.prompt("Enter the new rest api address", default=rest_api_addr)
+        rest_api_addr = click.prompt(
+            "Enter the new rest api address", default=rest_api_addr
+        )
+        explorer_url = NetworkConfig.make_explorer_url(net_name)
+        explorer_url = click.prompt(
+            "Enter the new explorer address", default=explorer_url
+        )
+        faucet_url = NetworkConfig.make_faucet_url(net_name)
+        faucet_url = click.prompt(
+            "Enter the new testnet faucet address", default=faucet_url
+        )
 
         return NetworkConfig(
             net_name=net_name,
@@ -140,6 +187,8 @@ class NetworkUpdate:
             denom=denom,
             rest_api_address=rest_api_addr,
             rpc_api_address=rpc_api_addr,
+            faucet_url=faucet_url,
+            explorer_url=explorer_url,
         )
 
     @staticmethod
@@ -277,8 +326,7 @@ class NetworkUpdate:
         for f in docs_files:
             content = f.read_text()
             content = content.replace(
-                f"https://explore-{self.cur_config.net_name}.fetch.ai",
-                f"https://explore-{self.new_config.net_name}.fetch.ai",
+                self.cur_config.explorer_url, self.new_config.explorer_url,
             )
             content = content.replace(
                 f"Fetch.ai `{self.cur_config.net_name.capitalize()}`",
@@ -376,8 +424,8 @@ class NetworkUpdate:
             )
 
             content = content.replace(
-                f'FETCHAI_TESTNET_FAUCET_URL = "https://faucet-{self.cur_config.net_name}.t-v2-london-c.fetch-ai.com"',
-                f'FETCHAI_TESTNET_FAUCET_URL = "https://faucet-{self.new_config.net_name}.t-v2-london-c.fetch-ai.com"',
+                f'FETCHAI_TESTNET_FAUCET_URL = "{self.cur_config.faucet_url}"',
+                f'FETCHAI_TESTNET_FAUCET_URL = "{self.new_config.faucet_url}"',
             )
 
             content = content.replace(
