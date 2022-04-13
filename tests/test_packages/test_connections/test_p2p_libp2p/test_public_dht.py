@@ -33,10 +33,11 @@ from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.open_aea.connections.p2p_libp2p.connection import (
+from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
+from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.open_aea.connections.p2p_libp2p_client.connection import (
+from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
 
@@ -80,6 +81,9 @@ PUBLIC_STAGING_DHT_PUBLIC_KEYS = [
 ]
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
+
+p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
+p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
 
 @pytest.fixture
@@ -522,7 +526,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
 
-        config_path = "vendor.open_aea.connections.p2p_libp2p.config"
+        config_path = f"{p2p_libp2p_path}.config"
         self.nested_set_config(
             config_path,
             {
@@ -590,14 +594,13 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
         self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
 
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
-        config_path = "vendor.open_aea.connections.p2p_libp2p_client.config"
+        config_path = f"{p2p_libp2p_client_path}.config"
         self.nested_set_config(
             config_path,
             {"nodes": [{"uri": "{}".format(uri)} for uri in delegate_uris]},
         )
-        conn_path = "vendor.open_aea.connections.p2p_libp2p_client"
         self.nested_set_config(
-            conn_path + ".config",
+            p2p_libp2p_client_path + ".config",
             {
                 "nodes": [
                     {"uri": uri, "public_key": public_keys[i]}
@@ -608,7 +611,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
 
         # generate certificates for connection
         self.nested_set_config(
-            conn_path + ".cert_requests",
+            p2p_libp2p_client_path + ".cert_requests",
             [
                 CertRequest(
                     identifier="acn",

@@ -905,11 +905,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         return transaction
 
-    def _get_gas_price_strategy_callable(
+    def _get_gas_price_strategy(
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
-    ) -> Callable:
+    ) -> Optional[Tuple[str, Callable]]:
         """
         Returns parameters for gas price callable.
 
@@ -918,7 +918,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         :param gas_price_strategy: name of the gas price strategy.
         :param extra_config: gas price strategy getter parameters.
-        :return: gas price callable.
+        :return: gas price strategy's name and callable.
         """
         gas_price_strategy = (
             gas_price_strategy
@@ -939,30 +939,35 @@ class EthereumApi(LedgerApi, EthereumHelper):
         parameters = DEFAULT_GAS_PRICE_STRATEGIES.get(gas_price_strategy)
         parameters.update(self._gas_price_strategies.get(gas_price_strategy, {}))
         parameters.update(extra_config or {})
-        return gas_price_strategy_getter(**parameters)
+        return gas_price_strategy, gas_price_strategy_getter(**parameters)
+
+    @staticmethod
+    def __reprice(old_price: Wei) -> Wei:
+        return Wei(math.ceil(old_price * TIP_INCREASE))
 
     @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
     def try_get_gas_pricing(
         self,
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
-        old_tip: Optional[int] = None,
-    ) -> Optional[Dict[str, int]]:
+        old_price: Optional[Dict[str, Wei]] = None,
+    ) -> Optional[Dict[str, Wei]]:
         """
         Try get the gas price based on the provided strategy.
 
         :param gas_price_strategy: the gas price strategy to use, e.g., the EIP-1559 strategy.
             Can be either `eip1559` or `gas_station`.
         :param extra_config: gas price strategy getter parameters.
-        :param old_tip: the old `maxPriorityFeePerGas` in case that we are trying to resubmit a transaction.
+        :param old_price: the old gas price params in case that we are trying to resubmit a transaction.
         :return: a dictionary with the gas data.
         """
 
-        gas_price_strategy_callable = self._get_gas_price_strategy_callable(
+        retrieved_strategy = self._get_gas_price_strategy(
             gas_price_strategy, extra_config,
         )
-        if gas_price_strategy_callable is None:  # pragma: nocover
+        if retrieved_strategy is None:  # pragma: nocover
             return None
+        gas_price_strategy, gas_price_strategy_callable = retrieved_strategy
 
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
@@ -971,21 +976,22 @@ class EthereumApi(LedgerApi, EthereumHelper):
         finally:
             self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
 
-        if old_tip is not None and gas_price_strategy is EIP1559:
-            base_fee_per_gas = (
-                gas_price["maxFeePerGas"] - gas_price["maxPriorityFeePerGas"]
-            )
-            updated_max_priority_fee_per_gas = old_tip * TIP_INCREASE
-            updated_max_fee_per_gas = (
-                updated_max_priority_fee_per_gas + base_fee_per_gas
+        if gas_price is None or old_price is None:
+            return gas_price
+
+        gas_price = cast(Dict[str, Wei], gas_price)
+        if gas_price_strategy == EIP1559:
+            updated_max_fee_per_gas = self.__reprice(old_price["maxFeePerGas"])
+            updated_max_priority_fee_per_gas = self.__reprice(
+                old_price["maxPriorityFeePerGas"]
             )
 
-            if gas_price["maxPriorityFeePerGas"] < updated_max_priority_fee_per_gas:
-                gas_price["maxPriorityFeePerGas"] = updated_max_priority_fee_per_gas
+            if gas_price["maxFeePerGas"] < updated_max_fee_per_gas:
                 gas_price["maxFeePerGas"] = updated_max_fee_per_gas
+                gas_price["maxPriorityFeePerGas"] = updated_max_priority_fee_per_gas
 
-        elif old_tip is not None and gas_price_strategy is GAS_STATION:
-            updated_gas_price = old_tip * TIP_INCREASE
+        elif gas_price_strategy == GAS_STATION:
+            updated_gas_price = self.__reprice(old_price["gasPrice"])
             gas_price["gasPrice"] = max(gas_price["gasPrice"], updated_gas_price)
 
         return gas_price
@@ -1309,11 +1315,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             and "maxFeePerGas" not in tx_params
             and "maxPriorityFeePerGas" not in tx_params
         ):
-            gas_data = (
-                self.try_get_gas_pricing(old_tip=tx_args["old_tip"])
-                if "old_tip" in tx_args
-                else self.try_get_gas_pricing()
-            )
+            gas_data = self.try_get_gas_pricing(old_price=tx_args.get("old_price"))
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)

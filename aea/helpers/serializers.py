@@ -22,7 +22,10 @@
 import copy
 from typing import Any, Dict, Tuple
 
-from google.protobuf.struct_pb2 import ListValue, Struct
+from google.protobuf.struct_pb2 import (  # pylint: disable=no-name-in-module
+    ListValue,
+    Struct,
+)
 
 
 class DictProtobufStructSerializer:
