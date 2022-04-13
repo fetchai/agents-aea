@@ -255,6 +255,7 @@ class LogParser:
                                 var_data["line_style"],
                                 linewidth=var_data["line_width"],
                             )
+                        plt.legend()
                         continue
 
                     if None in var_data["times"]:
@@ -338,6 +339,21 @@ if __name__ == "__main__":
             "event": {
                 "style": LineStyle.SOLID.value,
                 "color": LineColor.BLACK.value,
+                "width": 1.5,
+            },
+        },
+    )
+
+    # Tendermint reset events
+    log_parser.add_tracker(
+        tracker_name="Tendermint reset",
+        regex=r".*Resetting tendermint node successful!.*",
+        figure_names=["Memory", "Object count (present)", "Object count (created)"],
+        tracker_type="event",
+        line_styles={
+            "event": {
+                "style": LineStyle.DASHED.value,
+                "color": LineColor.RED.value,
                 "width": 1.5,
             },
         },
