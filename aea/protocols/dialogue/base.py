@@ -169,6 +169,12 @@ class DialogueLabel:
         )
         return dialogue_label
 
+    def is_complete(self) -> bool:
+        """Check if the dialogue label is complete."""
+        return (
+            self.dialogue_responder_reference != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        )
+
     def get_incomplete_version(self) -> "DialogueLabel":
         """Get the incomplete version of the label."""
         dialogue_label = DialogueLabel(
@@ -1052,7 +1058,9 @@ class BasicDialoguesStorage:
 
     def __init__(self, dialogues: "Dialogues") -> None:
         """Init dialogues storage."""
+        # used for both storing via complete and incomplete dialogue labels
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
+        # used for retrieving dialogue by opponent address
         self._dialogue_by_address = defaultdict(
             list
         )  # type: Dict[Address, List[Dialogue]]
@@ -1060,6 +1068,7 @@ class BasicDialoguesStorage:
             {}
         )  # type: Dict[DialogueLabel, DialogueLabel]
         self._dialogues = dialogues
+        # used for both storing complete and incomplete dialogue labels
         self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
 
     @property
@@ -1111,6 +1120,9 @@ class BasicDialoguesStorage:
         """
         Add dialogue to storage.
 
+        Label can be complete (if receiving a message, and `add` being called by `Dialogue.update`)
+        or incomplete (if sending a message, and `add` being called by `Dialogue.create`).
+
         :param dialogue: dialogue to add.
         """
         dialogue.add_terminal_state_callback(self.dialogue_terminal_state_callback)
@@ -1134,49 +1146,48 @@ class BasicDialoguesStorage:
 
         :param dialogue_label: label of the dialogue to remove
         """
-        dialogue_reference = dialogue_label.dialogue_reference
+        if dialogue_label.is_complete():
+            complete_dialogue_label: Optional[DialogueLabel] = dialogue_label
+            incomplete_dialogue_label = dialogue_label.get_incomplete_version()
+        else:
+            complete_dialogue_label = None
+            incomplete_dialogue_label = dialogue_label
 
-        # Check if dialogue_label is a complete label
-        is_complete_label = (
-            dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and dialogue_reference[1] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        # TODO: by design all incomplete dialogue labels must be present in this mapping  # pylint: disable=fixme
+        self._incomplete_to_complete_dialogue_labels.pop(
+            incomplete_dialogue_label, None
         )
 
-        complete_dialogue_label = dialogue_label
+        if incomplete_dialogue_label in self._terminal_state_dialogues_labels:
+            self._terminal_state_dialogues_labels.remove(incomplete_dialogue_label)
 
-        # Reconstruct and delete incomplete label
-        if is_complete_label:
-
-            incomplete_dialogue_label = complete_dialogue_label.get_incomplete_version()
-
-            self._incomplete_to_complete_dialogue_labels.pop(
-                incomplete_dialogue_label, None
-            )
-
-            if incomplete_dialogue_label in self._terminal_state_dialogues_labels:
-                self._terminal_state_dialogues_labels.remove(incomplete_dialogue_label)
-
-            dialogue = self._dialogues_by_dialogue_label.pop(
-                incomplete_dialogue_label, None
-            )
-
-            if dialogue:
-                self._dialogue_by_address[
-                    incomplete_dialogue_label.dialogue_opponent_addr
-                ].remove(dialogue)
-
-        # Delete complete label
-        self._incomplete_to_complete_dialogue_labels.pop(complete_dialogue_label, None)
-
-        if complete_dialogue_label in self._terminal_state_dialogues_labels:
+        if (
+            complete_dialogue_label is not None
+            and complete_dialogue_label in self._terminal_state_dialogues_labels
+        ):
             self._terminal_state_dialogues_labels.remove(complete_dialogue_label)
 
-        dialogue = self._dialogues_by_dialogue_label.pop(complete_dialogue_label, None)
+        dialogue = self._dialogues_by_dialogue_label.pop(
+            incomplete_dialogue_label, None
+        )
+        if complete_dialogue_label is not None:
+            dialogue_ = self._dialogues_by_dialogue_label.pop(
+                complete_dialogue_label, None
+            )
 
-        if dialogue:
-            self._dialogue_by_address[
-                complete_dialogue_label.dialogue_opponent_addr
-            ].remove(dialogue)
+        if (
+            dialogue is not None and dialogue_ is not None and dialogue != dialogue_
+        ):  # pragma: nocover
+            raise ValueError(
+                f"Incomplete dialogue label {incomplete_dialogue_label} and complete dialogue label {complete_dialogue_label} yield different dialogues: {dialogue} vs {dialogue_}"
+            )
+
+        dialogue = dialogue or dialogue_
+
+        # by design the dialogue must be present
+        self._dialogue_by_address[
+            incomplete_dialogue_label.dialogue_opponent_addr
+        ].remove(cast(Dialogue, dialogue))
 
     def get(self, dialogue_label: DialogueLabel) -> Optional[Dialogue]:
         """
