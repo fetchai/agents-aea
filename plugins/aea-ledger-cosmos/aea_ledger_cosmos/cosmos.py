@@ -615,7 +615,6 @@ class _CosmosApi(LedgerApi):
                 "RestClient",
                 "TxRestClient",
                 "AuthRestClient",
-                "AuthRestClient",
                 "CosmWasmRestClient",
                 "BankRestClient",
             )
