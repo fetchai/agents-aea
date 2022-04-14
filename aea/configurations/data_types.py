@@ -303,11 +303,11 @@ class PublicId(JSONSerializable):
 
     def to_any(self) -> "PublicId":
         """Return the same public id, but with any version."""
-        return PublicId(self.author, self.name, self.ANY_VERSION, self._package_hash)
+        return PublicId(self.author, self.name, self.ANY_VERSION)
 
     def to_latest(self) -> "PublicId":
         """Return the same public id, but with latest version."""
-        return PublicId(self.author, self.name, self.LATEST_VERSION, self._package_hash)
+        return PublicId(self.author, self.name, self.LATEST_VERSION)
 
     @classmethod
     def is_valid_str(cls, public_id_string: str) -> bool:
