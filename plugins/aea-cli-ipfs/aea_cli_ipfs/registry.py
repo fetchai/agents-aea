@@ -30,8 +30,8 @@ import jsonschema
 from aea_cli_ipfs.exceptions import HashNotProvided
 from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool, NodeError
 
-from aea.cli.registry.settings import DEFAULT_IPFS_URL, REGISTRY_CONFIG_KEY, REMOTE_IPFS
-from aea.cli.utils.config import get_or_create_cli_config
+from aea.cli.registry.settings import DEFAULT_IPFS_URL
+from aea.cli.utils.config import get_ipfs_node_multiaddr
 from aea.configurations.base import PublicId
 
 
@@ -154,15 +154,7 @@ def fetch_ipfs(
 ) -> Optional[Path]:
     """Fetch a package from IPFS node."""
     if remote:
-        multiaddr = (
-            get_or_create_cli_config()
-            .get(REGISTRY_CONFIG_KEY, {})
-            .get("settings", {})
-            .get("remote", {})
-            .get(REMOTE_IPFS, {})
-            .get("ipfs_node")
-        )
-        ipfs_tool = IPFSTool(multiaddr)
+        ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
     else:
         ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL)
 
