@@ -32,6 +32,7 @@ from aea.cli.registry.settings import (
     REGISTRY_CONFIG_KEY,
     REGISTRY_LOCAL,
     REGISTRY_REMOTE,
+    REMOTE_HTTP,
     REMOTE_IPFS,
 )
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
@@ -158,6 +159,12 @@ def _registry_init_http(username: str, no_subscribe: bool) -> None:
     :param username: the user name
     :param no_subscribe: bool flag for developers subscription skip on register.
     """
+    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
+    registry_config["default"] = REGISTRY_REMOTE
+    registry_config["settings"][REGISTRY_REMOTE]["default"] = REMOTE_HTTP
+
+    update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
+
     if username is not None and is_auth_token_present():
         check_is_author_logged_in(username)
     else:

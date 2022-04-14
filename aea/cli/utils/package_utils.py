@@ -481,7 +481,7 @@ def validate_remote_registry_type(remote_registry: Optional[str] = None) -> str:
             text="Please select the type of remote registry to use",
             type=click.Choice((REMOTE_HTTP, REMOTE_IPFS), case_sensitive=True),
             show_choices=True,
-            default=REMOTE_IPFS,
+            default=REMOTE_HTTP,
         )
     if remote_registry not in (REMOTE_HTTP, REMOTE_IPFS):
         raise ValueError(
