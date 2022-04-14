@@ -27,7 +27,7 @@ from typing import Dict
 # specified in setup.py
 WHITELIST = {"base58": ">=1.0.3"}
 # fix for python 3.6 and tox
-EXCLUSIONS_LIST = [("tensorflow", "2.6.0")]
+EXCLUSIONS_LIST = [("tensorflow", "2.4.0")]
 
 
 def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:

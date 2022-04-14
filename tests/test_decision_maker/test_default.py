@@ -88,12 +88,11 @@ class SigningDialogues(BaseSigningDialogues):
 class BaseTestDecisionMaker:
     """Test the decision maker."""
 
+    decision_maker_handler_cls = DecisionMakerHandler
+    decision_maker_cls = DecisionMaker
+
     @classmethod
-    def setup(
-        cls,
-        decision_maker_handler_cls=DecisionMakerHandler,
-        decision_maker_cls=DecisionMaker,
-    ):
+    def setup(cls):
         """Initialise the decision maker."""
         cls.wallet = Wallet(
             {
@@ -110,10 +109,10 @@ class BaseTestDecisionMaker:
             default_address_key=FetchAICrypto.identifier,
         )
         cls.config = {}
-        cls.decision_maker_handler = decision_maker_handler_cls(
+        cls.decision_maker_handler = cls.decision_maker_handler_cls(
             identity=cls.identity, wallet=cls.wallet, config=cls.config
         )
-        cls.decision_maker = decision_maker_cls(cls.decision_maker_handler)
+        cls.decision_maker = cls.decision_maker_cls(cls.decision_maker_handler)
 
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
