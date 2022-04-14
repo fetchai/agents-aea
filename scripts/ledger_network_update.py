@@ -98,7 +98,7 @@ class NetworkConfig:
 
 
 def _get_value(variable_name: str, text: str) -> str:
-    m = re.search(rf'{variable_name} = "(.*)"', text, re.MULTILINE)
+    m = re.search(fr'{variable_name} = "(.*)"', text, re.MULTILINE)
     if m:
         return m.groups()[0]
     raise ValueError("Value not found")
