@@ -286,7 +286,7 @@ def test_run_with_profiling():
             pass
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 def test_run_with_default_connection():
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
@@ -1512,7 +1512,9 @@ class RunAEATestCase(TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             ctx.cwd = str(temp_dir)
             with mock.patch("aea.cli.run._build_aea", return_value=aea):
-                with mock.patch("aea.cli.run._print_hash_table"):
+                with mock.patch(
+                    "aea.cli.run._print_instantiated_components"
+                ), mock.patch("aea.cli.run._print_all_available_packages"):
                     run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
 
     def test_run_aea_positive_install_deps_mock(self):
@@ -1525,7 +1527,9 @@ class RunAEATestCase(TestCase):
             ctx.cwd = str(temp_dir)
             with mock.patch("aea.cli.run.do_install"):
                 with mock.patch("aea.cli.run._build_aea", return_value=aea):
-                    with mock.patch("aea.cli.run._print_hash_table"):
+                    with mock.patch(
+                        "aea.cli.run._print_instantiated_components"
+                    ), mock.patch("aea.cli.run._print_all_available_packages"):
                         run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
 
     @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
