@@ -21,18 +21,13 @@
 import os
 from pathlib import Path
 from shutil import copytree
-from typing import Union, cast
+from typing import Optional, Union, cast
 
 import click
 from click.exceptions import ClickException
 
 from aea.cli.registry.push import check_package_public_id, push_item
-from aea.cli.registry.settings import (
-    REGISTRY_CONFIG_KEY,
-    REGISTRY_LOCAL,
-    REMOTE_HTTP,
-    REMOTE_IPFS,
-)
+from aea.cli.registry.settings import REGISTRY_LOCAL, REMOTE_HTTP, REMOTE_IPFS
 from aea.cli.utils.click_utils import (
     PublicIdOrPathParameter,
     component_flag,
@@ -40,7 +35,8 @@ from aea.cli.utils.click_utils import (
 )
 from aea.cli.utils.config import (
     get_default_remote_registry,
-    get_or_create_cli_config,
+    get_ipfs_node_multiaddr,
+    get_registry_path_from_cli_config,
     load_item_config,
 )
 from aea.cli.utils.context import Context
@@ -148,16 +144,14 @@ def push_item_from_path(
     component_path = Path(path)
     item_config = load_item_config(component_type, component_path)
 
-    if len(list(path.glob("**/__pycache__"))) > 0:
-        raise click.ClickException(
-            f"Please remove all cache files from {component_path}"
-        )
-
     if registry == REGISTRY_LOCAL:
         push_item_local(ctx, component_type, component_path, item_config.public_id)
-    elif registry == REMOTE_HTTP:
-        push_item_http()
     else:
+        if get_default_remote_registry() == REMOTE_HTTP:
+            raise click.ClickException(
+                "Pushing using HTTP is not supported using path parameter."
+            )
+
         push_item_ipfs(component_path, item_config.public_id)
 
 
@@ -165,18 +159,13 @@ def push_item_local(
     ctx: Context, item_type: str, component_path: Path, item_id: PublicId
 ) -> None:
     """Push items to the local registry."""
+    registry_path: Optional[str]
     item_type_plural = item_type + "s"
 
     try:
         registry_path = ctx.registry_path
     except ValueError:  # pragma: nocover
-        registry_path = (
-            get_or_create_cli_config()
-            .get(REGISTRY_CONFIG_KEY, {})
-            .get("settings", {})
-            .get(REGISTRY_LOCAL, {})
-            .get("default_packages_path")
-        )
+        registry_path = get_registry_path_from_cli_config()
         if registry_path is None:
             raise click.ClickException("Registry path was not provided.")
         registry_path = cast(str, registry_path)
@@ -190,10 +179,6 @@ def push_item_local(
     )
 
 
-def push_item_http() -> None:
-    """Push items to the http registry."""
-
-
 def push_item_ipfs(component_path: Path, public_id: PublicId) -> None:
     """Push items to the ipfs registry."""
 
@@ -202,15 +187,12 @@ def push_item_ipfs(component_path: Path, public_id: PublicId) -> None:
             "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
         )
 
-    multiaddr = (
-        get_or_create_cli_config()
-        .get(REGISTRY_CONFIG_KEY, {})
-        .get("settings", {})
-        .get("remote", {})
-        .get(REMOTE_IPFS, {})
-        .get("ipfs_node")
-    )
-    ipfs_tool = IPFSTool(multiaddr)
+    if len(list(component_path.glob("**/__pycache__"))) > 0:
+        raise click.ClickException(
+            f"Please remove all cache files from {component_path}"
+        )
+
+    ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
     _, package_hash, _ = ipfs_tool.add(component_path)
     click.echo("Pushed component with:")
     click.echo(f"\tPublicId: {public_id}")
