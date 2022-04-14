@@ -20,7 +20,6 @@
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
 # pylint: disable = import-outside-toplevel, possibly-unused-variable
 import base64
-import functools
 import gzip
 import hashlib
 import json
@@ -59,9 +58,8 @@ from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 
 
-@functools.lru_cache()
-def lazy_load():
-    """Temporary solution because of protos mismatch"""
+def lazy_load():  # Python caches all imported modules
+    """Temporary solution because of protos mismatch."""
     # pylint: disable=import-error
     from cosmpy.auth.rest_client import AuthRestClient
     from cosmpy.bank.rest_client import BankRestClient, QueryBalanceRequest

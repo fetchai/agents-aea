@@ -9,11 +9,10 @@ Cosmos module wrapping the public and private key cryptography and ledger api.
 #### lazy`_`load
 
 ```python
-@functools.lru_cache()
 def lazy_load()
 ```
 
-Temporary solution because of protos mismatch
+Temporary solution because of protos mismatch.
 
 <a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.DataEncrypt"></a>
 
