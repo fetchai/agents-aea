@@ -5,7 +5,8 @@
 
 AEA:
 - List all available packages at the AEA start up.
-- Updates profiler module to tracemalloc.
+- Updates profiler module to use tracemalloc.
+- Fixes dialogue cleanup.
 
 Plugins:
 - Fixes repricing bug on ethereum plugin.
