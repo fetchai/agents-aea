@@ -256,6 +256,16 @@ pypi
 hardhat
 open-aea's
 analyze
+valory-xyz
+multiaddrs
+tracemalloc
+tendermint
+aws
+kubectl
+nginx-ingress
+acn
+args
+open-aea
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
