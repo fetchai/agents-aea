@@ -1170,6 +1170,7 @@ class BasicDialoguesStorage:
         dialogue = self._dialogues_by_dialogue_label.pop(
             incomplete_dialogue_label, None
         )
+        dialogue_ = None
         if complete_dialogue_label is not None:
             dialogue_ = self._dialogues_by_dialogue_label.pop(
                 complete_dialogue_label, None
