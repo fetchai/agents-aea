@@ -79,6 +79,7 @@ nav:
       - Security: 'security.md'
     - Agent Communication:
       - Agent Communication Network: 'acn.md'
+      - ACN Connections: 'p2p-connection.md'
       - ACN Internals: 'acn-internals.md'
     - Developer Interfaces:
       - CLI:
