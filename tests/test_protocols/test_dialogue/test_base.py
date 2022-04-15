@@ -183,17 +183,29 @@ class TestDialogueLabel:
         """Initialise the environment to test DialogueLabel."""
         cls.agent_address = "agent 1"
         cls.opponent_address = "agent 2"
+        cls.dialogue_starter_ref = str(1)
         cls.dialogue_label = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(
+                cls.dialogue_starter_ref,
+                Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            ),
             dialogue_opponent_addr=cls.opponent_address,
             dialogue_starter_addr=cls.agent_address,
         )
 
     def test_all_methods(self):
         """Test the DialogueLabel."""
-        assert self.dialogue_label.dialogue_reference == (str(1), "")
-        assert self.dialogue_label.dialogue_starter_reference == str(1)
-        assert self.dialogue_label.dialogue_responder_reference == ""
+        assert self.dialogue_label.dialogue_reference == (
+            self.dialogue_starter_ref,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        assert (
+            self.dialogue_label.dialogue_starter_reference == self.dialogue_starter_ref
+        )
+        assert (
+            self.dialogue_label.dialogue_responder_reference
+            == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        )
         assert self.dialogue_label.dialogue_opponent_addr == self.opponent_address
         assert self.dialogue_label.dialogue_starter_addr == self.agent_address
         assert str(self.dialogue_label) == "{}_{}_{}_{}".format(
@@ -204,7 +216,10 @@ class TestDialogueLabel:
         )
 
         dialogue_label_eq = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(
+                self.dialogue_starter_ref,
+                Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            ),
             dialogue_opponent_addr=self.opponent_address,
             dialogue_starter_addr=self.agent_address,
         )
@@ -218,13 +233,14 @@ class TestDialogueLabel:
         assert hash(dialogue_label_eq) == hash(self.dialogue_label)
 
         assert self.dialogue_label.json == dict(
-            dialogue_starter_reference=str(1),
-            dialogue_responder_reference="",
+            dialogue_starter_reference=self.dialogue_starter_ref,
+            dialogue_responder_reference=Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
             dialogue_opponent_addr=self.opponent_address,
             dialogue_starter_addr=self.agent_address,
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
         assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
+        assert not self.dialogue_label.is_complete()
 
 
 class TestDialogueBase:
@@ -1985,6 +2001,30 @@ class TestBaseDialoguesStorage:
         self.storage.remove(self.dialogue.dialogue_label)
         assert not self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._incomplete_to_complete_dialogue_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.dialogue_opponent_addr
+            not in self.storage._dialogue_by_address
+        )
 
     def test_dialogues_in_terminal_state_removed(self):
         """Test dialogues in terminal state handled properly."""
@@ -2025,7 +2065,7 @@ class TestBaseDialoguesStorage:
             not in self.storage._dialogues_by_dialogue_label
         )
         assert (
-            self.dialogue.dialogue_label.get_incomplete_version()
+            self.dialogue.dialogue_label.dialogue_opponent_addr
             not in self.storage._dialogue_by_address
         )
 
