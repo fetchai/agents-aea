@@ -2022,8 +2022,12 @@ class TestBaseDialoguesStorage:
             not in self.storage._dialogues_by_dialogue_label
         )
         assert (
-            self.dialogue.dialogue_label.dialogue_opponent_addr
-            not in self.storage._dialogue_by_address
+            len(
+                self.storage._dialogue_by_address[
+                    self.dialogue.dialogue_label.dialogue_opponent_addr
+                ]
+            )
+            == 0
         )
 
     def test_dialogues_in_terminal_state_removed(self):
@@ -2065,8 +2069,12 @@ class TestBaseDialoguesStorage:
             not in self.storage._dialogues_by_dialogue_label
         )
         assert (
-            self.dialogue.dialogue_label.dialogue_opponent_addr
-            not in self.storage._dialogue_by_address
+            len(
+                self.storage._dialogue_by_address[
+                    self.dialogue.dialogue_label.dialogue_opponent_addr
+                ]
+            )
+            == 0
         )
 
     def teardown(self):
