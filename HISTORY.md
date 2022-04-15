@@ -1,6 +1,24 @@
 # Release History - open AEA
 
 
+## 1.7.0 (2022-04-15)
+
+AEA:
+- List all available packages at the AEA start up.
+- Updates profiler module to use tracemalloc.
+- Fixes dialogue cleanup.
+
+Plugins:
+- Fixes repricing bug on ethereum plugin.
+- Adds support for lazy imports on cosmos plugin.
+
+Packages:
+- Adds protocol package for tendermint. 
+
+Docs:
+- Adds docs for newly introduced ACN modules and packages.
+
+
 ## 1.6.0 (2022-03-17)
 
 AEA:
