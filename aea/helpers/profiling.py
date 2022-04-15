@@ -34,7 +34,10 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Type
 
 from aea.helpers.async_utils import Runnable
+from aea.protocols.dialogue.base import BasicDialoguesStorage, Dialogue
 
+
+BYTES_TO_MBYTES = 1024 ** -2
 
 lock = threading.Lock()
 
@@ -48,7 +51,12 @@ if platform.system() == "Windows":  # pragma: nocover
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
-        return 1.0 * d["WorkingSetSize"] / 1024 ** 2
+        return float(d["WorkingSetSize"]) * BYTES_TO_MBYTES
+
+    def get_peak_process_memory_usage() -> float:
+        """Get current process memory usage in MB."""
+        d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
+        return float(d["PeakWorkingSetSize"]) * BYTES_TO_MBYTES
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
@@ -58,18 +66,15 @@ if platform.system() == "Windows":  # pragma: nocover
 
 else:
     import resource
-
-    _MAC_MEM_STATS_MB = 1024 ** 2
-    _LINUX_MEM_STATS_MB = 1024
+    import tracemalloc
 
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
-        if platform.system() == "Darwin":  # pragma: nocover
-            divider = _MAC_MEM_STATS_MB
-        else:
-            divider = _LINUX_MEM_STATS_MB
+        return tracemalloc.get_traced_memory()[0] * BYTES_TO_MBYTES
 
-        return 1.0 * resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / divider
+    def get_peak_process_memory_usage() -> float:
+        """Get current process memory usage in MB."""
+        return tracemalloc.get_traced_memory()[1] * BYTES_TO_MBYTES
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
@@ -104,6 +109,9 @@ class Profiling(Runnable):
         self._output_function = output_function
         self._counter: Dict[Type, int] = Counter()
 
+        if platform.system() != "Windows":
+            tracemalloc.start()
+
     def set_counters(self) -> None:
         """Modify obj.__new__ to count objects created created."""
         for obj in self._objects_created_to_count:
@@ -136,6 +144,9 @@ class Profiling(Runnable):
         except Exception:  # pragma: nocover
             _default_logger.exception("Exception in Profiling")
             raise
+        finally:
+            if platform.system() != "Windows":
+                tracemalloc.stop()
 
     def output_profile_data(self) -> None:
         """Render profiling data and call output_function."""
@@ -148,16 +159,27 @@ class Profiling(Runnable):
         Run time: {data["run_time"]:.6f} seconds
         Cpu time: {data["cpu_time"]:.6f} seconds,
         Cpu/Run time: {100*data["cpu_time"]/data["run_time"]:.6f}%
-        Memory: {data["mem"]:.6f} MB
+        Memory: {data["mem"]:.6f} MB [Peak {data["mem_peak"]:.6f} MB]
         Threads: {data["threads"]['amount']}  {data["threads"]['names']}
         Objects present:
         """
             )
-            + "\n".join([f" * {i}:  {c}" for i, c in data["objects_present"].items()])
-            + "\n"
-            + """Objects created:\n"""
             + "\n".join(
-                [f" * {i.__name__}:  {c}" for i, c in data["objects_created"].items()]
+                [f" * {i} (present):  {c}" for i, c in data["objects_present"].items()]
+            )
+            + "\n"
+            + "\n".join(
+                [
+                    f" * {i} (present):  {c}"
+                    for i, c in data["dialogues_by_type"].items()
+                ]
+            )
+            + """\nObjects created:\n"""
+            + "\n".join(
+                [
+                    f" * {i.__name__} (created):  {c}"
+                    for i, c in data["objects_created"].items()
+                ]
             )
             + "\n"
         )
@@ -169,12 +191,14 @@ class Profiling(Runnable):
             "run_time": time.time() - self._start_ts,
             "cpu_time": get_current_process_cpu_time(),
             "mem": get_current_process_memory_usage(),
+            "mem_peak": get_peak_process_memory_usage(),
             "threads": {
                 "amount": threading.active_count(),
                 "names": [i.name for i in threading.enumerate()],
             },
             "objects_present": self.get_objects_instances(),
-            "objects_created": self.get_objecst_created(),
+            "objects_created": self.get_objects_created(),
+            "dialogues_by_type": get_dialogues_by_type(),
         }
 
     def get_objects_instances(self) -> Dict:
@@ -194,6 +218,45 @@ class Profiling(Runnable):
             lock.release()
         return result
 
-    def get_objecst_created(self) -> Dict:
+    def get_objects_created(self) -> Dict:
         """Return dict with counted object instances created."""
         return self._counter
+
+
+def get_dialogues_by_type() -> Dict:
+    """Return dict with the number of dialogues by type."""
+
+    seen_dialogue_ids: List[int] = []
+    seen_dialogue_storage_ids: List[int] = []
+    dialogues_by_type: Dict[str, int] = {"incomplete_to_complete_dialogue_labels": 0}
+
+    lock.acquire()
+    try:
+        for obj in gc.get_objects():
+            if isinstance(obj, Dialogue) and id(obj) not in seen_dialogue_ids:
+                # Remember this dialogue
+                seen_dialogue_ids.append(id(obj))
+
+                dialogue_type = str(type(obj).__name__)
+
+                if dialogue_type not in dialogues_by_type:
+                    dialogues_by_type[dialogue_type] = 1
+                else:
+                    dialogues_by_type[dialogue_type] += 1
+
+            elif (
+                isinstance(obj, BasicDialoguesStorage)
+                and id(obj) not in seen_dialogue_storage_ids
+            ):
+                # Remember this storage
+                seen_dialogue_storage_ids.append(id(obj))
+
+                # Count incomplete dialogues by type
+                dialogues_by_type["incomplete_to_complete_dialogue_labels"] += len(
+                    list(
+                        obj._incomplete_to_complete_dialogue_labels.values()  # pylint: disable=protected-access
+                    )
+                )
+    finally:
+        lock.release()
+    return dialogues_by_type
