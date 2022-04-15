@@ -8,8 +8,8 @@ AEA:
 - Updates profiler module to tracemalloc.
 
 Plugins:
-- Fix repricing bug on ethereum plugin.
-- Add support for lazy imports on cosmos plugin.
+- Fixes repricing bug on ethereum plugin.
+- Adds support for lazy imports on cosmos plugin.
 
 Packages:
 - Adds protocol package for tendermint. 
