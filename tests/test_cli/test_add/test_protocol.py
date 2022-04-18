@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
+from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
@@ -68,16 +69,7 @@ class TestAddProtocolFailsWhenProtocolAlreadyExists:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -142,16 +134,7 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -205,7 +188,10 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         assert self.result.exception.message == s
 
     @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
-    @unittest.mock.patch("aea.cli.add.fetch_package")
+    @unittest.mock.patch(
+        "aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS
+    )
+    @unittest.mock.patch("aea.cli.add.fetch_ipfs")
     def test_add_protocol_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
@@ -214,13 +200,13 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         public_id = "{}/{}:{}".format(AUTHOR, self.protocol_name, self.protocol_version)
         obj_type = "protocol"
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "add", "--remote", obj_type, public_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         public_id_obj = PublicId.from_str(public_id)
-        fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
-        )
+        fetch_package_mock.assert_called_once_with(obj_type, public_id_obj, "dest/path")
 
     @classmethod
     def teardown_class(cls):
@@ -249,16 +235,7 @@ class TestAddProtocolFailsWhenProtocolNotInRegistry:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -314,16 +291,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -376,16 +344,7 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -454,16 +413,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 

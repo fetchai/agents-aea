@@ -58,6 +58,7 @@ def fetch_agent(
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
     """
+
     author, name, version = public_id.author, public_id.name, public_id.version
 
     folder_name = target_dir or (name if alias is None else alias)

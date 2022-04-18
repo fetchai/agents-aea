@@ -19,16 +19,22 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea fetch' subcommand."""
 import os
+import shutil
 from distutils.dir_util import copy_tree
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional, Union, cast
 
 import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.fetch import fetch_agent
+from aea.cli.registry.settings import REGISTRY_LOCAL, REGISTRY_REMOTE, REMOTE_IPFS
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import try_to_load_agent_config
+from aea.cli.utils.config import (
+    get_default_remote_registry,
+    get_ipfs_node_multiaddr,
+    try_to_load_agent_config,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
@@ -46,33 +52,33 @@ from aea.exceptions import enforce
 from aea.helpers.io import open_file
 
 
+try:
+    from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool  # type: ignore
+
+    IS_IPFS_PLUGIN_INSTALLED = True
+except ImportError:
+    IS_IPFS_PLUGIN_INSTALLED = False
+
+
 @click.command(name="fetch")
-@registry_flag(
-    help_local="For fetching agent from local folder.",
-    help_remote="For fetching agent from remote registry.",
-)
+@registry_flag()
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
 def fetch(
-    click_context: click.Context,
-    public_id: PublicId,
-    alias: str,
-    local: bool,
-    remote: bool,
+    click_context: click.Context, public_id: PublicId, alias: str, registry: str
 ) -> None:
     """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
-    do_fetch(ctx, public_id, local, remote, alias)
+    ctx.registry_type = registry
+    do_fetch(ctx, public_id, alias)
 
 
 def do_fetch(
     ctx: Context,
     public_id: PublicId,
-    local: bool,
-    remote: bool,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
 ) -> None:
@@ -81,27 +87,18 @@ def do_fetch(
 
     :param ctx: the CLI context.
     :param public_id: the public id.
-    :param local: whether to fetch from local
-    :param remote: whether to fetch from remote
     :param alias: the agent alias.
     :param target_dir: the target directory, in case fetching locally.
     """
-    enforce(
-        not (local and remote), "'local' and 'remote' options are mutually exclusive."
-    )
-    if not local and not remote:
-        try:
-            ctx.registry_path
-        except ValueError as e:
-            click.echo(f"{e}\nTrying remote registry (`--remote`).")
-            remote = True
-    is_mixed = not local and not remote
-    ctx.set_config("is_local", local and not remote)
-    ctx.set_config("is_mixed", is_mixed)
-    if remote:
-        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
-    elif local:
+
+    if ctx.registry_type == REGISTRY_LOCAL:
+        ctx.set_config("is_local", True)
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
+    elif ctx.registry_type == REGISTRY_REMOTE:
+        if get_default_remote_registry() == REMOTE_IPFS:
+            fetch_agent_ipfs(ctx, public_id, alias, target_dir)
+        else:
+            fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
     else:
         fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
 
@@ -119,6 +116,55 @@ def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
         agent_public_id.package_version.is_latest
         or ctx.agent_config.version == agent_public_id.version
     )
+
+
+@clean_after
+def fetch_agent_ipfs(
+    ctx: Context,
+    public_id: PublicId,
+    alias: Optional[str] = None,
+    target_dir: Optional[Union[str, Path]] = None,
+) -> None:
+    """Fetch agent from ipfs."""
+
+    if not IS_IPFS_PLUGIN_INSTALLED:
+        raise click.ClickException(
+            "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
+        )
+
+    if target_dir is None:
+        target_dir = Path(ctx.cwd).absolute()
+
+    ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
+
+    try:
+        agent_path = ipfs_tool.download(public_id.hash, str(target_dir))
+        ctx.clean_paths.append(agent_path)
+        if alias is not None:
+            target_dir = cast(Path, target_dir) / alias
+            if target_dir.exists():
+                raise click.ClickException(f"{alias} already exists at {target_dir}")
+            shutil.move(agent_path, target_dir)
+        else:
+            target_dir = Path(agent_path)
+    except DownloadError as e:
+        raise click.ClickException(e.args[0])
+    except shutil.Error as e:
+        raise click.ClickException(e.args[0])
+
+    ctx.clean_paths.append(target_dir)
+    ctx.cwd = str(target_dir)
+    try_to_load_agent_config(ctx)
+
+    ctx.agent_config.agent_name = target_dir.name
+    ctx.agent_loader.dump(
+        ctx.agent_config,
+        open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
+    )
+
+    try_to_load_agent_config(ctx)
+    _fetch_agent_deps(ctx)
+    click.echo("Agent {} successfully fetched.".format(ctx.agent_config.agent_name))
 
 
 @clean_after

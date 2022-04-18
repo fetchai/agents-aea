@@ -7,11 +7,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0
+- fetchai/stub:0.21.0:QmZ5AZHR6Gh8LFS7Kgce2R9uV4HbSw9T523gHz33wvAs9c
 contracts: []
 protocols: []
 skills:
-- fetchai/error_test_skill:0.1.0
+- fetchai/error_test_skill:0.1.0:QmZhWDHmU1VTY6ghwFHvcaCUrFBGg7utTdDkckY4Xiy3fr
 default_connection: fetchai/stub:0.21.0
 default_ledger: fetchai
 required_ledgers:

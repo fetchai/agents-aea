@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,7 @@ def test_flag_help():
     """Test that the flag '--help' works correctly."""
     runner = CliRunner()
     result = runner.invoke(cli, ["--help"])
+    print(result.stdout)
     assert (
         result.stdout
         == """Usage: aea [OPTIONS] COMMAND [ARGS]...
