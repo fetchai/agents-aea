@@ -104,7 +104,7 @@ class TestDoInit:
         author = "test_author" + random_string()
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--author", author, "--remote"],
+            [*CLI_LOG_OPTION, "init", "--author", author, "--remote", "--http"],
             input="y\nsome fake password\n",
         )
 
