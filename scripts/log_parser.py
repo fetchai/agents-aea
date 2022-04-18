@@ -264,7 +264,9 @@ class LogParser:
                         continue
 
                     if not var_data["values"]:
-                        print(f"Data for {tracker_name}::{var_name} not found in the log!")
+                        print(
+                            f"Data for {tracker_name}::{var_name} not found in the log!"
+                        )
                         continue
 
                     if not var_data["times"] or None in var_data["times"]:
