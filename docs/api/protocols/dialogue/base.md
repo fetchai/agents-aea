@@ -143,6 +143,16 @@ def from_json(cls, obj: Dict[str, str]) -> "DialogueLabel"
 
 Get dialogue label from json.
 
+<a id="aea.protocols.dialogue.base.DialogueLabel.is_complete"></a>
+
+#### is`_`complete
+
+```python
+def is_complete() -> bool
+```
+
+Check if the dialogue label is complete.
+
 <a id="aea.protocols.dialogue.base.DialogueLabel.get_incomplete_version"></a>
 
 #### get`_`incomplete`_`version

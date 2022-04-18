@@ -2004,6 +2004,30 @@ class TestBaseDialoguesStorage:
 
         assert not self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._incomplete_to_complete_dialogue_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._dialogue_by_address
+        )
 
     def teardown(self):
         """Tear down the environment to test BaseDialogueStorage."""

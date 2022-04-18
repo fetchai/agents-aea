@@ -4,6 +4,16 @@
 
 Cosmos module wrapping the public and private key cryptography and ledger api.
 
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.lazy_load"></a>
+
+#### lazy`_`load
+
+```python
+def lazy_load()
+```
+
+Temporary solution because of protos mismatch.
+
 <a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt"></a>
 
 ## DataEncrypt Objects

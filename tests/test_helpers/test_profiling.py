@@ -41,6 +41,7 @@ def test_profiling():
         wait_for_condition(lambda: result, timeout=20)
 
         assert "Profiling details" in result
+        assert "incomplete_to_complete_dialogue_labels" in result
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=20)
