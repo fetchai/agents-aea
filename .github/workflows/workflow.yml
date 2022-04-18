@@ -410,6 +410,12 @@ jobs:
           choco install protoc --version 3.19.4
           choco install mingw -y
           choco install make -y
+          
+          curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
+          Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
+          $Env:PATH += ";~\Apps\go-ipfs\"
+          ipfs --version
+
           # to check make was installed
           make --version
           pip install tox
@@ -420,9 +426,6 @@ jobs:
           make protolint_install_win
           # just check protolint runs
           protolint version
-          curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
-          Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
-          ~\Apps\go-ipfs\ipfs --version
           
 
       - if: True
