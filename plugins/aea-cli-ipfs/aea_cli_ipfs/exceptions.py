@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,25 +17,32 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This test module contains tests for aea.cli.add generic methods."""
-
-from unittest import TestCase, mock
-
-from aea.cli.add import _add_item_deps
-
-from tests.test_cli.tools_for_testing import ContextMock
+"""Module to contain exceptions for ipfs plugin."""
 
 
-class AddItemDepsTestCase(TestCase):
-    """Test case for _add_item_deps method."""
+class BaseIPFSToolException(Exception):
+    """Base ipfs tool exception."""
 
-    @mock.patch("aea.cli.add.add_item")
-    def test__add_item_deps_missing_skills_positive(self, add_item_mock):
-        """Test _add_item_deps for positive result with missing skills."""
-        ctx = ContextMock(skills=[])
-        item_config = mock.Mock()
-        item_config.protocols = []
-        item_config.contracts = []
-        item_config.connections = []
-        item_config.skills = ["skill-1", "skill-2"]
-        _add_item_deps(ctx, "skill", item_config)
+
+class RemoveError(BaseIPFSToolException):
+    """Exception on remove."""
+
+
+class PinError(BaseIPFSToolException):
+    """Exception on pin."""
+
+
+class PublishError(BaseIPFSToolException):
+    """Exception on publish."""
+
+
+class NodeError(BaseIPFSToolException):
+    """Exception for node connection check."""
+
+
+class DownloadError(BaseIPFSToolException):
+    """Exception on download failed."""
+
+
+class HashNotProvided(BaseIPFSToolException):
+    """Exception when hash is not provided."""

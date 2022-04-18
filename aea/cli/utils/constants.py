@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,12 @@
 import os
 from pathlib import Path
 
+from aea.cli.registry.settings import (
+    REGISTRY_LOCAL,
+    REGISTRY_REMOTE,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
+)
 from aea.configurations.constants import (
     CONNECTION,
     CONNECTIONS,
@@ -33,6 +39,7 @@ from aea.configurations.constants import (
     SKILLS,
     VENDOR,
 )
+from aea.configurations.data_types import PublicId
 from aea.helpers.constants import FROM_STRING_TO_TYPE
 
 
@@ -50,7 +57,27 @@ NOT_PERMITTED_AUTHORS = [
     PACKAGES,
     "aea",
 ]
-
+DEFAULT_CLI_CONFIG = {
+    "author": None,
+    "registry_config": {
+        "default": None,
+        "settings": {
+            REGISTRY_REMOTE: {
+                REMOTE_HTTP: {
+                    "auth_token": None,  # auth token for registry
+                    "registry_api_url": None,  # registry url
+                },
+                REMOTE_IPFS: {"ipfs_node": None},  # IPFS url (in multiaddr format)
+            },
+            REGISTRY_LOCAL: {"default_packages_path": None},
+        },
+    },
+}
 
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
 REQUIREMENTS = "requirements.txt"
+DUMMY_AUTHOR = "__DUMMY__AUTHOR__"
+DUMMY_PACKAGE = "__DUMMY_PACKAGE__"
+DUMMY_PACKAGE_ID = PublicId.from_json(
+    {"author": DUMMY_AUTHOR, "name": DUMMY_PACKAGE, "version": "latest"}
+)

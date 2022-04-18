@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,10 +26,12 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-import click
 import jsonschema
+from aea_cli_ipfs.exceptions import HashNotProvided
 from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool, NodeError
 
+from aea.cli.registry.settings import DEFAULT_IPFS_URL
+from aea.cli.utils.config import get_ipfs_node_multiaddr
 from aea.configurations.base import PublicId
 
 
@@ -148,25 +150,33 @@ def register_item_to_local_registry(
 
 
 def fetch_ipfs(
-    item_type: str,
-    public_id: PublicId,
-    cwd: str,  # pylint: disable=unused-argument
-    dest: str,
+    item_type: str, public_id: PublicId, dest: str, remote: bool = True,
 ) -> Optional[Path]:
     """Fetch a package from IPFS node."""
-    package_hash = get_ipfs_hash_from_public_id(item_type, public_id)
-    if package_hash is None:
-        return None
+    if remote:
+        ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
+    else:
+        ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL)
 
-    ipfs_tool = IPFSTool()
+    try:
+        package_hash = public_id.hash
+    except ValueError:
+        package_hash = (
+            None if remote else get_ipfs_hash_from_public_id(item_type, public_id)
+        )
+
+    if package_hash is None:
+        raise HashNotProvided(f"Please provide hash; Public id {public_id}.")
+
     try:
         ipfs_tool.check_ipfs_node_running()
     except NodeError:  # pragma: nocover
-        click.echo("Can not connect to the local ipfs node. Starting own one.")
-        ipfs_tool.daemon.start()
+        if not remote:
+            ipfs_tool.daemon.start()
+        else:
+            raise Exception(f"Cannot connect to node with addr: {ipfs_tool.addr}")
 
     try:
-        click.echo(f"Downloading {public_id}.")
         *_download_dir, _ = os.path.split(dest)
         download_dir = os.path.sep.join(_download_dir)
         ipfs_tool.download(package_hash, download_dir)
@@ -176,4 +186,4 @@ def fetch_ipfs(
 
     except DownloadError as e:  # pragma: nocover
         ipfs_tool.daemon.stop()
-        raise click.ClickException(str(e)) from e
+        raise Exception(str(e)) from e

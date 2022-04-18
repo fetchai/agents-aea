@@ -1320,14 +1320,14 @@ class AgentConfig(PackageConfiguration):
     def component_configurations(self, d: Dict[ComponentId, Dict]) -> None:
         """Set the component configurations."""
         package_type_to_set = {
-            PackageType.PROTOCOL: self.protocols,
-            PackageType.CONNECTION: self.connections,
-            PackageType.CONTRACT: self.contracts,
-            PackageType.SKILL: self.skills,
+            PackageType.PROTOCOL: {epid.without_hash() for epid in self.protocols},
+            PackageType.CONNECTION: {epid.without_hash() for epid in self.connections},
+            PackageType.CONTRACT: {epid.without_hash() for epid in self.contracts},
+            PackageType.SKILL: {epid.without_hash() for epid in self.skills},
         }
         for component_id, component_configuration in d.items():
             enforce(
-                component_id.public_id
+                component_id.public_id.without_hash()
                 in package_type_to_set[component_id.package_type],
                 f"Component {component_id} not declared in the agent configuration.",
             )

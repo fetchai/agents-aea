@@ -144,18 +144,23 @@ def _calculate_connection_ids(
 ) -> List[PublicId]:
     """Calculate resulting list of connection ids to run."""
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
-    not_existing_connections = (
-        set(exclude_connections) - agent_config_manager.agent_config.connections
-    )
+
+    exclude_connections_set = {
+        connection.without_hash() for connection in exclude_connections
+    }
+
+    agent_connections = {
+        connection.without_hash()
+        for connection in agent_config_manager.agent_config.connections
+    }
+    not_existing_connections = exclude_connections_set - agent_connections
+
     if not_existing_connections:
         raise ValueError(
             f"Connections to exclude: {', '.join(map(str, not_existing_connections))} are not defined in agent configuration!"
         )
 
-    connection_ids = list(
-        agent_config_manager.agent_config.connections - set(exclude_connections)
-    )
-
+    connection_ids = list(agent_connections - exclude_connections_set)
     return connection_ids
 
 
@@ -230,7 +235,7 @@ def _print_instantiated_components(aea: AEA) -> None:
             + "|"
         )
 
-    click.echo("Intantiated packages.")
+    click.echo("Instantiated packages.")
     click.echo(row_separator)
     click.echo(format_row("ComponentId"))
     click.echo(row_separator)

@@ -1490,7 +1490,7 @@ def disable_logging_handlers_cleanup(request) -> Generator:
 @pytest.fixture(scope="class")
 def use_ipfs_daemon() -> Generator:
     """Use IPFS daemon."""
-    ipfs_daemon = IPFSDaemon(offline=True)
+    ipfs_daemon = IPFSDaemon()
     ipfs_daemon.start()
 
     yield

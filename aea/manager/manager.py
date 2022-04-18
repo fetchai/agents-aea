@@ -700,7 +700,6 @@ class MultiAgentManager:
         :return: self
         """
         agent_name = agent_name or public_id.name
-
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
 
