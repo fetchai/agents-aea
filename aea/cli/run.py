@@ -230,7 +230,7 @@ def _print_instantiated_components(aea: AEA) -> None:
             + "|"
         )
 
-    click.echo("Intantiated packages.")
+    click.echo("Instantiated packages.")
     click.echo(row_separator)
     click.echo(format_row("ComponentId"))
     click.echo(row_separator)
