@@ -263,7 +263,7 @@ class LogParser:
                         plt.legend()
                         continue
 
-                    if None in var_data["times"]:
+                    if not var_data["times"] or None in var_data["times"]:
                         plt.plot(
                             var_data["values"],
                             var_data["line"],
