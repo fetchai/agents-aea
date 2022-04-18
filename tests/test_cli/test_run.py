@@ -1658,7 +1658,9 @@ class RunAEATestCase(TestCase):
             with mock.patch("aea.cli.run._build_aea", return_value=aea):
                 with mock.patch(
                     "aea.cli.run._print_instantiated_components"
-                ), mock.patch("aea.cli.run._print_all_available_packages"):
+                ), mock.patch("aea.cli.run._print_all_available_packages"), mock.patch(
+                    "aea.cli.run._print_addresses"
+                ):
                     run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
 
     def test_run_aea_positive_install_deps_mock(self):
@@ -1673,7 +1675,11 @@ class RunAEATestCase(TestCase):
                 with mock.patch("aea.cli.run._build_aea", return_value=aea):
                     with mock.patch(
                         "aea.cli.run._print_instantiated_components"
-                    ), mock.patch("aea.cli.run._print_all_available_packages"):
+                    ), mock.patch(
+                        "aea.cli.run._print_all_available_packages"
+                    ), mock.patch(
+                        "aea.cli.run._print_addresses"
+                    ):
                         run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
 
     @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
