@@ -422,10 +422,11 @@ jobs:
           # # just check protolint runs
           # protolint version
 
-          Write-Output $Env:PATH
+          # Write-Output $Env:PATH
           curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
-          $Env:PATH += ";C:\Users\runneradmin\Apps\go-ipfs"
+          cp C:\Users\runneradmin\Apps\go-ipfs\ipfs C:\Users\runneradmin\go\bin\
+          # $Env:PATH += ";C:\Users\runneradmin\Apps\go-ipfs"
           ipfs init
 
       # - if: True
