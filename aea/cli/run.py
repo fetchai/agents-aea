@@ -268,7 +268,6 @@ def _print_addresses(aea: AEA) -> None:
     addresses = [
         ("Name", "Address"),
         *((k, v) for k, v in aea.context.addresses.items()),
-        ("decision_maker", aea.context.decision_maker_address),
     ]
 
     click.echo("All available addresses.")
