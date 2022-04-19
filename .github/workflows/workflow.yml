@@ -405,24 +405,27 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         run: |
-          python -m pip install -U pip
-          echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-          choco install protoc --version 3.19.4
-          choco install mingw -y
-          choco install make -y
-          # to check make was installed
-          make --version
-          pip install tox
-          # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
-          # unzip protoc-3.19.4-win64.zip -d protoc
-          # sudo mv protoc/bin/protoc /usr/local/bin/protoc
-          python scripts/update_symlinks_cross_platform.py
-          make protolint_install_win
-          # just check protolint runs
-          protolint version
+          # python -m pip install -U pip
+          # echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+          # choco install protoc --version 3.19.4
+          # choco install mingw -y
+          # choco install make -y
+          # # to check make was installed
+          # make --version
+          # pip install tox
+          # # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
+          # # unzip protoc-3.19.4-win64.zip -d protoc
+          # # sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          # python scripts/update_symlinks_cross_platform.py
+          # make protolint_install_win
+          # # just check protolint runs
+          # protolint version
+
           curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
+          ls ~\Apps\go-ipfs\
           $Env:PATH += ";~\Apps\go-ipfs\"
+          [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";~\Apps\go-ipfs\", [EnvironmentVariableTarget]::Machine)
           ipfs init
 
       # - if: True
