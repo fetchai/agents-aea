@@ -23,10 +23,17 @@ import shutil
 import signal
 import subprocess  # nosec
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Set, Tuple, cast
 
 import ipfshttpclient  # type: ignore
 import requests
+from aea_cli_ipfs.exceptions import (
+    DownloadError,
+    NodeError,
+    PinError,
+    PublishError,
+    RemoveError,
+)
 
 
 DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
@@ -35,6 +42,7 @@ ALLOWED_ADDR_TYPES = ("ip4", "dns")
 ALLOWED_PROTOCOL_TYPES = ("http", "https")
 MULTIADDR_FORMAT = "/{dns,dns4,dns6,ip4}/<host>/tcp/<port>/protocol"
 IPFS_NODE_CHECK_ENDPOINT = "/api/v0/id"
+IPFS_VERSION = "0.6.0"
 
 
 def _verify_attr(name: str, attr: str, allowed: Tuple[str, ...]) -> None:
@@ -87,15 +95,19 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self, offline: bool = False, api_url: str = "http://127.0.0.1:5001"):
+    api_url: str
+    node_url: str
+    process: Optional[subprocess.Popen]
+
+    def __init__(self, node_url: str = "http://127.0.0.1:5001"):
         """Initialise IPFS daemon."""
 
-        if api_url.endswith("/"):
-            api_url = api_url[:-1]
+        if node_url.endswith("/"):
+            node_url = node_url[:-1]
 
-        self.api_url = api_url + IPFS_NODE_CHECK_ENDPOINT
-        self.process = None  # type: Optional[subprocess.Popen]
-        self.offline = offline
+        self.node_url = node_url
+        self.api_url = node_url + IPFS_NODE_CHECK_ENDPOINT
+        self.process = None
         self._check_ipfs()
 
     @staticmethod
@@ -131,7 +143,7 @@ class IPFSDaemon:
 
     def start(self) -> None:
         """Run the ipfs daemon."""
-        cmd = ["ipfs", "daemon", "--offline"] if self.offline else ["ipfs", "daemon"]
+        cmd = ["ipfs", "daemon", "--offline"]
         self.process = subprocess.Popen(  # nosec
             cmd, stdout=subprocess.PIPE, env=os.environ.copy(),
         )
@@ -165,37 +177,16 @@ class IPFSDaemon:
         self.stop()
 
 
-class BaseIPFSToolException(Exception):
-    """Base ipfs tool exception."""
-
-
-class RemoveError(BaseIPFSToolException):
-    """Exception on remove."""
-
-
-class PublishError(BaseIPFSToolException):
-    """Exception on publish."""
-
-
-class NodeError(BaseIPFSToolException):
-    """Exception for node connection check."""
-
-
-class DownloadError(BaseIPFSToolException):
-    """Exception on download failed."""
-
-
 class IPFSTool:
     """IPFS tool to add, publish, remove, download directories."""
 
     _addr: Optional[str] = None
 
-    def __init__(self, addr: Optional[str] = None, offline: bool = True):
+    def __init__(self, addr: Optional[str] = None):
         """
         Init tool.
 
         :param addr: multiaddr string for IPFS client.
-        :param offline: ipfs mode.
         """
 
         if addr is not None:
@@ -203,14 +194,33 @@ class IPFSTool:
             self._addr = addr
 
         self.client = ipfshttpclient.Client(addr=self.addr)
-        self.daemon = IPFSDaemon(offline=offline, api_url=addr_to_url(self.addr))
+        self.daemon = IPFSDaemon(node_url=addr_to_url(self.addr))
 
     @property
     def addr(self,) -> str:
         """Node address"""
         if self._addr is None:
-            self._addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
+            addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
+            try:
+                _ = resolve_addr(addr)
+                self._addr = addr
+            except ValueError as e:
+                raise ValueError(
+                    f"Error picking IPFS Addr from env; Addr : {addr}"
+                ) from e
+
         return cast(str, self._addr)
+
+    def is_a_package(self, package_hash: str) -> bool:
+        """Checks if a package with `package_hash` is pinned or not"""
+        return package_hash in self.all_pins()
+
+    def all_pins(self, recursive_only: bool = True) -> Set[str]:
+        """Returns a list of all pins."""
+        pinned_hashes = self.client.pin.ls(
+            type="recursive" if recursive_only else "all"
+        )
+        return set(pinned_hashes["Keys"])
 
     def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
         """
@@ -224,9 +234,17 @@ class IPFSTool:
         :return: dir name published, hash, list of items processed
         """
         response = self.client.add(
-            dir_path, pin=pin, recursive=True, wrap_with_directory=True
+            dir_path, pin=pin, recursive=True, wrap_with_directory=True,
         )
         return response[-2]["Name"], response[-1]["Hash"], response[:-1]
+
+    def pin(self, hash_id: str) -> Dict:
+        """Pin content with hash_id"""
+
+        try:
+            return self.client.pin.add(hash_id, recursive=True)
+        except ipfshttpclient.exceptions.ErrorResponse as e:
+            raise PinError(f"Error on while pinning {hash_id}: {str(e)}") from e
 
     def remove(self, hash_id: str) -> Dict:
         """
@@ -241,13 +259,23 @@ class IPFSTool:
         except ipfshttpclient.exceptions.ErrorResponse as e:
             raise RemoveError(f"Error on {hash_id} remove: {str(e)}") from e
 
-    def download(self, hash_id: str, target_dir: str, fix_path: bool = True) -> None:
+    def remove_unpinned_files(self) -> None:
+        """Remove dir added by it's hash."""
+        try:
+            return self.client.repo.gc()
+        except ipfshttpclient.exceptions.ErrorResponse as e:
+            raise RemoveError(
+                f"Error while performing garbage collection: {str(e)}"
+            ) from e
+
+    def download(self, hash_id: str, target_dir: str, fix_path: bool = True) -> str:
         """
         Download dir by it's hash.
 
         :param hash_id: str. hash of file to download
         :param target_dir: str. directory to place downloaded
         :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
+        :return: downloaded path
         """
         if not os.path.exists(target_dir):  # pragma: nocover
             os.makedirs(target_dir, exist_ok=True)
@@ -256,8 +284,17 @@ class IPFSTool:
             raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
 
         self.client.get(hash_id, target_dir)
-
         downloaded_path = str(Path(target_dir) / hash_id)
+
+        package_path = None
+        if os.path.isdir(downloaded_path):
+            downloaded_files = os.listdir(downloaded_path)
+            if len(downloaded_files) > 0:
+                package_name, *_ = os.listdir(downloaded_path)
+                package_path = str(Path(target_dir) / package_name)
+
+        if package_path is None:
+            package_path = target_dir
 
         if fix_path:
             # self.client.get creates result with hash name
@@ -266,9 +303,13 @@ class IPFSTool:
                 for each_file in Path(downloaded_path).iterdir():  # grabs all files
                     shutil.move(str(each_file), target_dir)
             except shutil.Error as e:  # pragma: nocover
+                if os.path.isdir(downloaded_path):
+                    shutil.rmtree(downloaded_path)
                 raise DownloadError(f"error on move files {str(e)}") from e
 
-        os.rmdir(downloaded_path)
+        if os.path.isdir(downloaded_path):
+            shutil.rmtree(downloaded_path)
+        return package_path
 
     def publish(self, hash_id: str) -> Dict:
         """

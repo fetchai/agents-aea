@@ -63,7 +63,9 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+IPFS_HASH_LENGTH_LIMIT = 46
 SIMPLE_ID_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
+IPFS_HASH_REGEX = fr"[a-zA-Z_][a-zA-Z0-9]{{{IPFS_HASH_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
@@ -258,7 +260,42 @@ class SimpleId(RegexConstrainedString):
     REGEX = re.compile(SIMPLE_ID_REGEX)
 
 
+class IPFSHash(RegexConstrainedString):
+    """
+    A simple identifier.
+
+    The allowed strings are all the strings that:
+    - have at least length 1
+    - have at most length 128
+    - the first character must be between a-z,A-Z or underscore
+    - the other characters must be either the above or digits.
+
+    Examples of allowed strings:
+    >>> SimpleId("an_identifier")
+    'an_identifier'
+
+    Examples of not allowed strings:
+    >>> SimpleId("0an_identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+    >>> SimpleId("an identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+    >>> SimpleId("")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+    """
+
+    REGEX = re.compile(IPFS_HASH_REGEX)
+
+
 SimpleIdOrStr = Union[SimpleId, str]
+IPFSHashOrStr = Union[IPFSHash, str]
 
 
 @contextlib.contextmanager

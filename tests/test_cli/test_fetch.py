@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ from click import ClickException
 import aea
 from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
+from aea.cli.registry.settings import REMOTE_HTTP
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
 from aea.helpers.base import cd
@@ -258,6 +259,7 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
 
     @pytest.mark.integration
     @mock.patch("aea.cli.fetch.add_item", side_effect=_mock_raise_click_exception)
+    @mock.patch("aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_HTTP)
     @mock.patch("aea.cli.fetch.fetch_agent", side_effect=_mock_raise_click_exception)
     @mock.patch(
         "aea.cli.registry.fetch.add_item", side_effect=_mock_raise_click_exception

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ from jsonschema import ValidationError
 
 import aea.configurations.base
 from aea.cli import cli
+from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
@@ -71,15 +72,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -105,7 +98,10 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         )
 
     @unittest.mock.patch("aea.cli.add.get_package_path", return_value="dest/path")
-    @unittest.mock.patch("aea.cli.add.fetch_package")
+    @unittest.mock.patch(
+        "aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS
+    )
+    @unittest.mock.patch("aea.cli.add.fetch_ipfs")
     def test_add_connection_from_registry_positive(self, fetch_package_mock, *mocks):
         """Test add from registry positive result."""
         fetch_package_mock.return_value = Path(
@@ -118,13 +114,13 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         )
         obj_type = "connection"
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "add", "--remote", obj_type, public_id],
+            standalone_mode=False,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
         public_id_obj = PublicId.from_str(public_id)
-        fetch_package_mock.assert_called_once_with(
-            obj_type, public_id=public_id_obj, cwd=".", dest="dest/path"
-        )
+        fetch_package_mock.assert_called_once_with(obj_type, public_id_obj, "dest/path")
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -169,15 +165,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -260,15 +248,7 @@ class TestAddConnectionFailsWhenConnectionNotInRegistry:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -326,15 +306,7 @@ class TestAddConnectionFailsWhenDifferentPublicId:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -389,15 +361,7 @@ class TestAddConnectionFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -465,15 +429,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -578,15 +534,7 @@ class TestAddConnectionMixedWhenNoLocalRegistryExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
 
@@ -646,15 +594,7 @@ class TestAddConnectionLocalWhenNoLocalRegistryExists:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
         assert result.exit_code == 0, result.stdout

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ from aea.cli.registry.settings import (
     AUTH_TOKEN_KEY,
     REGISTRY_API_URL_KEY,
     REGISTRY_CONFIG_KEY,
-    REGISTRY_HTTP,
+    REMOTE_HTTP,
 )
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.context import Context
@@ -55,7 +55,7 @@ def get_auth_token() -> Optional[str]:
     return (
         config.get(REGISTRY_CONFIG_KEY, {})
         .get("settings", {})
-        .get(REGISTRY_HTTP, {})
+        .get(REMOTE_HTTP, {})
         .get(AUTH_TOKEN_KEY, None)
     )
 
@@ -153,7 +153,7 @@ def _perform_registry_request(
     registry_api_url = (
         config.get(REGISTRY_CONFIG_KEY, {})
         .get("settings", {})
-        .get(REGISTRY_HTTP, {})
+        .get(REMOTE_HTTP, {})
         .get(REGISTRY_API_URL_KEY, None)
     )
     if registry_api_url is None:

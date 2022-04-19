@@ -122,6 +122,9 @@ temp_private_key.pem
 
 input_file
 output_file
+joined-path
+
+packages/default_author/
 
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build
@@ -146,3 +149,4 @@ libs/go/libp2p_node/dht/dhtpeer/agent_records_store*
 coverage.txt
 
 temp/
+agent_name/

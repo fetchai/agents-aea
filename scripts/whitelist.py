@@ -290,3 +290,8 @@ find_item_in_distribution  # unused function in (aea/cli/utils/package_utils.py:
 is_distributed_item  # unused function in (aea/cli/utils/package_utils.py:618)
 PACKAGE_TYPE_TO_CONFIG_FILE  # unused variable in (aea/configurations/constants.py:90)
 raise_on_try  # unused variable (aea/crypto/base.py:383)
+fetch_item_mixed  # unused function (aea/cli/add.py:241)
+DEFAULT_IPFS_URL  # unused variable (aea/cli/registry/settings.py:49)
+get_registry_config  # unused function (aea/cli/utils/config.py:156)
+dump_yaml  # unused function (aea/helpers/dependency_tree.py:58)
+DependecyTree  # unused class (aea/helpers/dependency_tree.py:104)

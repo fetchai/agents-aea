@@ -29,7 +29,12 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR, get_current_aea_version
 from aea.cli.fingerprint import fingerprint_item
-from aea.cli.registry.settings import REGISTRY_HTTP, REGISTRY_TYPES
+from aea.cli.registry.settings import (
+    REGISTRY_LOCAL,
+    REGISTRY_TYPES,
+    REMOTE_HTTP,
+    REMOTE_IPFS,
+)
 from aea.cli.utils.config import (
     dump_item_config,
     get_non_vendor_package_path,
@@ -45,7 +50,6 @@ from aea.configurations.base import (
     ComponentType,
     PackageConfiguration,
     PackageType,
-    PublicId,
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
@@ -61,7 +65,7 @@ from aea.configurations.constants import (
     SKILL,
     VENDOR,
 )
-from aea.configurations.data_types import PackageId
+from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
@@ -70,7 +74,9 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import compute_specifier_from_version, recursive_update
+from aea.helpers.dependency_tree import COMPONENTS
 from aea.helpers.io import open_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.sym_link import create_symlink
 
 
@@ -456,11 +462,32 @@ def validate_registry_type(default_registry: Optional[str] = None) -> str:
             text="Please select default registry type",
             type=click.Choice(REGISTRY_TYPES, case_sensitive=True),
             show_choices=True,
-            default=REGISTRY_HTTP,
+            default=REGISTRY_LOCAL,
         )
     if default_registry not in REGISTRY_TYPES:
         raise ValueError(f"Default registry type should be one of {REGISTRY_TYPES}")
     return default_registry
+
+
+def validate_remote_registry_type(remote_registry: Optional[str] = None) -> str:
+    """
+    Validate registry type.
+
+    :param remote_registry: registry type (optional)
+    :return: validated registry name
+    """
+    if remote_registry is None:
+        remote_registry = click.prompt(
+            text="Please select the type of remote registry to use",
+            type=click.Choice((REMOTE_HTTP, REMOTE_IPFS), case_sensitive=True),
+            show_choices=True,
+            default=REMOTE_HTTP,
+        )
+    if remote_registry not in (REMOTE_HTTP, REMOTE_IPFS):
+        raise ValueError(
+            f"Default registry type should be one of {(REMOTE_HTTP, REMOTE_IPFS)}"
+        )
+    return remote_registry
 
 
 def is_fingerprint_correct(
@@ -556,9 +583,31 @@ def is_item_present(
         return is_item_registered_no_version and does_path_exist
 
     # the following makes sense because public id is not latest
-    component_id = ComponentId(ComponentType(item_type), item_public_id)
-    component_is_registered = component_id in agent_config.package_dependencies
+    component_id = ComponentId(ComponentType(item_type), item_public_id.without_hash())
+    component_is_registered = component_id in {
+        cid.without_hash() for cid in agent_config.package_dependencies
+    }
     return component_is_registered and does_path_exist
+
+
+def is_item_with_hash_present(
+    path: str, agent_config: AgentConfig, package_hash: str, is_vendor: bool = True
+) -> Optional[PublicId]:
+    """Returns a public id if item with provided hash is present."""
+
+    for component_id in agent_config.all_components_id:
+        if component_id.public_id.hash == package_hash:
+            return component_id.public_id
+
+    hash_tool = IPFSHashOnly()
+    package_path = Path(path) / ("vendor" if is_vendor else "packages")
+    for component_type, config_file_name in COMPONENTS:
+        for config_file_path in package_path.glob(f"**/{config_file_name}"):
+            component_path = config_file_path.parent
+            calculated_hash = hash_tool.hash_directory(str(component_path))
+            if package_hash == calculated_hash:
+                return load_item_config(component_type, component_path).public_id
+    return None
 
 
 def get_item_id_present(
@@ -820,6 +869,7 @@ def fingerprint_all(ctx: Context) -> None:
 
     :param ctx: the CLI context.
     """
+
     aea_project_path = Path(ctx.cwd)
     for package_path in get_non_vendor_package_path(aea_project_path):
         item_type = package_path.parent.name[:-1]

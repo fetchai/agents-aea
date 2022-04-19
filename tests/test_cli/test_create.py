@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,7 @@ from packaging.version import Version
 import aea
 from aea.cli import cli
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
 from packages.open_aea.protocols.signing.message import SigningMessage
@@ -80,16 +81,7 @@ class TestCreate:
         )
         cls.cli_config_patch.start()
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0, result.stdout
 
@@ -174,9 +166,10 @@ class TestCreate:
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        assert self.agent_config["protocols"] == [
-            str(SigningMessage.protocol_id),
-        ]
+        assert [
+            str(PublicId.from_str(p).without_hash())
+            for p in self.agent_config["protocols"]
+        ] == [str(SigningMessage.protocol_id)]
 
     def test_skills_field_is_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
@@ -260,16 +253,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -325,16 +309,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -384,16 +359,7 @@ class TestCreateFailsWhenExceptionOccurs:
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -439,16 +405,7 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -500,7 +457,7 @@ class CreateCommandTestCase(TestCase):
         """Test for CLI create no init result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "create", "agent_name", "--author=some"],
+            [*CLI_LOG_OPTION, "create", "--remote", "agent_name", "--author=some"],
             standalone_mode=False,
         )
         self.assertEqual(

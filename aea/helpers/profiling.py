@@ -226,16 +226,12 @@ class Profiling(Runnable):
 def get_dialogues_by_type() -> Dict:
     """Return dict with the number of dialogues by type."""
 
-    seen_dialogue_ids: List[int] = []
-    seen_dialogue_storage_ids: List[int] = []
     dialogues_by_type: Dict[str, int] = {"incomplete_to_complete_dialogue_labels": 0}
 
     lock.acquire()
     try:
         for obj in gc.get_objects():
-            if isinstance(obj, Dialogue) and id(obj) not in seen_dialogue_ids:
-                # Remember this dialogue
-                seen_dialogue_ids.append(id(obj))
+            if isinstance(obj, Dialogue):
 
                 dialogue_type = str(type(obj).__name__)
 
@@ -244,13 +240,7 @@ def get_dialogues_by_type() -> Dict:
                 else:
                     dialogues_by_type[dialogue_type] += 1
 
-            elif (
-                isinstance(obj, BasicDialoguesStorage)
-                and id(obj) not in seen_dialogue_storage_ids
-            ):
-                # Remember this storage
-                seen_dialogue_storage_ids.append(id(obj))
-
+            elif isinstance(obj, BasicDialoguesStorage):
                 # Count incomplete dialogues by type
                 dialogues_by_type["incomplete_to_complete_dialogue_labels"] += len(
                     list(

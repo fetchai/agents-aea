@@ -267,7 +267,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         if connection.connection_id in self._id_to_connection:  # pragma: nocover
             self.logger.warning(
-                f"A connection with id {connection.connection_id} was already added. Replacing it..."
+                f"A connection with id {connection.connection_id.without_hash()} was already added. Replacing it..."
             )
 
         self._connections.append(connection)
