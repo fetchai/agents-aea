@@ -422,6 +422,7 @@ jobs:
           # # just check protolint runs
           # protolint version
 
+          Write-Output $Env:PATH
           curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
           $Env:PATH += ";C:\Users\runneradmin\Apps\go-ipfs"
@@ -433,7 +434,6 @@ jobs:
       #     tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
       - name: Plugin tests
         run: |
-          $Env:PATH += ";C:\Users\runneradmin\Apps\go-ipfs"
           ipfs --version
           python3 scripts/temp.py
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
