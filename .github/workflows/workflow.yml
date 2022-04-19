@@ -208,9 +208,9 @@ jobs:
       - name: Install tox
         run: |
           pip install tox
-      - name: Check Pipfile and tox.ini consistency
-        run: |
-          python ./scripts/check_pipfile_and_toxini.py
+      # - name: Check Pipfile and tox.ini consistency
+      #   run: |
+      #     python ./scripts/check_pipfile_and_toxini.py
       - name: Install current aea
         run: |
           pip install -e .[all]
