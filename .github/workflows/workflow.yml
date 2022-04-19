@@ -343,7 +343,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [windows-latest,]
         python_version: [3.7, 3.8, 3.9]
     timeout-minutes: 90
     steps:
@@ -423,7 +424,7 @@ jobs:
 
           curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
-          [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";C:\Users\runneradmin\Apps\go-ipfs", [EnvironmentVariableTarget]::Machine)
+          $Env:PATH += "C:\Users\runneradmin\Apps\go-ipfs"
           ipfs init
 
       # - if: True
@@ -432,6 +433,7 @@ jobs:
       #     tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
       - name: Plugin tests
         run: |
+          $Env:PATH += "C:\Users\runneradmin\Apps\go-ipfs"
           ipfs --version
           python3 scripts/temp.py
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
