@@ -423,9 +423,7 @@ jobs:
 
           curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
-          ls ~\Apps\go-ipfs\
-          $Env:PATH += ";~\Apps\go-ipfs\"
-          [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";~\Apps\go-ipfs\", [EnvironmentVariableTarget]::Machine)
+          [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";C:\Users\runneradmin\Apps\go-ipfs", [EnvironmentVariableTarget]::Machine)
           ipfs init
 
       # - if: True
