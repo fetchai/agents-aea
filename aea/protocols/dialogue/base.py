@@ -1071,6 +1071,13 @@ class BasicDialoguesStorage:
         # used for both storing complete and incomplete dialogue labels
         self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
 
+    def cleanup(self) -> None:
+        """Clean up the dialogue storage"""
+        self._dialogues_by_dialogue_label = {}
+        self._dialogue_by_address = defaultdict(list)
+        self._incomplete_to_complete_dialogue_labels = {}
+        self._terminal_state_dialogues_labels = set()
+
     @property
     def dialogues_in_terminal_state(self) -> List["Dialogue"]:
         """Get all dialogues in terminal state."""
@@ -1595,6 +1602,10 @@ class Dialogues:
             ),
         )
         self._role_from_first_message = role_from_first_message
+
+    def cleanup(self) -> None:
+        """Clean up the dialogue storage"""
+        self._dialogues_storage.cleanup()
 
     @property
     def is_keep_dialogues_in_terminal_state(self) -> bool:
