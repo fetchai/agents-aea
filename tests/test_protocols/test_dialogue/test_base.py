@@ -1818,6 +1818,39 @@ class TestPersistDialoguesStorage:
             is None
         )
 
+    def test_cleanup(self):
+        """Test storage cleanup."""
+        dialogues_storage = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage._skill_component = self.skill_component
+        self.dialogues._dialogues_storage = dialogues_storage
+        dialogues_storage._incomplete_to_complete_dialogue_labels[
+            self.dialogue_label
+        ] = self.dialogue_label
+        self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        msg, dialogue = self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello2"
+        )
+        dialogue.reply(
+            target_message=msg,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+        assert dialogues_storage._dialogues_by_dialogue_label
+        assert dialogues_storage._dialogue_by_address
+        assert dialogues_storage._incomplete_to_complete_dialogue_labels
+        assert dialogues_storage._terminal_state_dialogues_labels
+
+        self.dialogues._dialogues_storage.cleanup()
+
+        assert not dialogues_storage._dialogues_by_dialogue_label
+        assert not dialogues_storage._dialogue_by_address
+        assert not dialogues_storage._incomplete_to_complete_dialogue_labels
+        assert not dialogues_storage._terminal_state_dialogues_labels
+
 
 class TestPersistDialoguesStorageOffloading:
     """Test PersistDialoguesStorage."""
