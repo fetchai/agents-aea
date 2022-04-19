@@ -21,7 +21,6 @@
 """This module contains the tests for the ipfs helper module."""
 
 from pathlib import Path
-from platform import system
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
