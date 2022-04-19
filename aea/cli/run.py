@@ -20,7 +20,7 @@
 """Implementation of the 'aea run' subcommand."""
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator, List, Optional, cast
+from typing import Generator, List, Optional, Sequence, Tuple, cast
 
 import click
 
@@ -201,10 +201,36 @@ def _profiling_context(period: int) -> Generator:
         sys.stderr = open(os.devnull, "w")
 
 
+def print_table(rows: Sequence) -> None:
+    """Print a formatted table."""
+    head, *rows = rows
+    col_lengths = list(map(len, head))
+
+    for row in rows:
+        col_lengths = list(map(max, zip(col_lengths, map(len, row))))  # type: ignore
+
+    def _format_row(row: Tuple) -> str:
+        """Format row."""
+        cols = [s + (" " * (max(0, l - len(s)))) for l, s in zip(col_lengths, row)]
+        return "| " + " | ".join(cols) + " |"
+
+    table_length = len(_format_row(head))
+    separator = "=" * table_length
+
+    click.echo(separator)
+    click.echo(_format_row(head))
+    click.echo(separator)
+    for row in rows:
+        click.echo(_format_row(row))
+    click.echo(separator)
+    click.echo()
+
+
 def _print_instantiated_components(aea: AEA) -> None:
     """Print table of only components."""
-    components: List[str] = []
-    max_col_1_length = 0
+    components: List[str] = [
+        "ComponentId",
+    ]
 
     for component_type in [
         ComponentType.PROTOCOL,
@@ -219,73 +245,33 @@ def _print_instantiated_components(aea: AEA) -> None:
             )
         ]
 
-    max_col_1_length = max(list(map(len, components)))
-    table_width = max_col_1_length + 6
-    row_separator = "=" * table_width
-    padding = " " * 2
-
-    def format_row(col_1: str) -> str:
-        """Format a row."""
-        return (
-            "|"
-            + padding
-            + col_1
-            + " " * (max_col_1_length - len(col_1))
-            + padding
-            + "|"
-        )
-
-    click.echo("Instantiated packages.")
-    click.echo(row_separator)
-    click.echo(format_row("ComponentId"))
-    click.echo(row_separator)
-    for component_id in components:
-        click.echo(format_row(component_id))
-    click.echo(row_separator)
-    click.echo()
-    click.echo()
+    click.echo("All instantiated components")
+    print_table([(c,) for c in components])
 
 
 def _print_all_available_packages(ctx: Context) -> None:
     """Print hashes for all available packages"""
     ipfs_hash = IPFSHashOnly()
-    max_col_1_length = 0
-    max_col_2_length = 48
-
-    rows = []
+    rows = [("Package", "IPFSHash")]
 
     for package_id, package_path in list_available_packages(ctx.cwd):
         package_hash = ipfs_hash.hash_directory(str(package_path), wrap=False)
         rows.append((str(package_id), package_hash))
-        max_col_1_length = max(max_col_1_length, len(str(package_id)))
 
-    table_width = max_col_2_length + max_col_1_length + 9
-    row_separator = "=" * table_width
-    padding = " " * 2
+    click.echo("All available packages.")
+    print_table(rows)
 
-    def format_row(col_1: str, col_2: str) -> str:
-        """Format a row."""
-        return (
-            "|"
-            + padding
-            + col_1
-            + " " * (max_col_1_length - len(col_1))
-            + "|"
-            + padding
-            + col_2
-            + " " * (max_col_2_length - len(col_2))
-            + padding
-            + "|"
-        )
 
-    click.echo("Available packages.")
-    click.echo(row_separator)
-    click.echo(format_row("Package", "IPFSHash"))
-    click.echo(row_separator)
-    for row in rows:
-        click.echo(format_row(*row))
-    click.echo(row_separator)
-    click.echo()
+def _print_addresses(aea: AEA) -> None:
+    """Print all the addresses used by agent."""
+
+    addresses = [
+        ("Name", "Address"),
+        *((k, v) for k, v in aea.context.addresses.items()),
+    ]
+
+    click.echo("All available addresses.")
+    print_table(addresses)
 
 
 def run_aea(
@@ -317,6 +303,7 @@ def run_aea(
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     _print_all_available_packages(ctx)
     _print_instantiated_components(aea)
+    _print_addresses(aea)
 
     click.echo(
         "Starting AEA '{}' in '{}' mode...".format(aea.name, aea.runtime.loop_mode)

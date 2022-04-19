@@ -1508,14 +1508,17 @@ class RunAEATestCase(TestCase):
         """Test run_aea method for positive result (mocked)."""
         ctx = mock.Mock()
         aea = mock.Mock()
+
+        aea.context.addresses = {}
+        aea.resources.component_registry.fetch_by_type = lambda _: []
+
         ctx.config = {"skip_consistency_check": True}
         with tempfile.TemporaryDirectory() as temp_dir:
             ctx.cwd = str(temp_dir)
-            with mock.patch("aea.cli.run._build_aea", return_value=aea):
-                with mock.patch(
-                    "aea.cli.run._print_instantiated_components"
-                ), mock.patch("aea.cli.run._print_all_available_packages"):
-                    run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
+            with mock.patch("aea.cli.run._build_aea", return_value=aea), mock.patch(
+                "aea.cli.run.list_available_packages", return_value=[]
+            ):
+                run_aea(ctx, ["author/name:0.1.0"], "env_file", False)
 
     def test_run_aea_positive_install_deps_mock(self):
         """Test run_aea method for positive result (mocked), install deps true."""
@@ -1523,14 +1526,16 @@ class RunAEATestCase(TestCase):
         aea = mock.Mock()
         ctx.config = {"skip_consistency_check": True}
 
+        aea.context.addresses = {}
+        aea.resources.component_registry.fetch_by_type = lambda _: []
+
         with tempfile.TemporaryDirectory() as temp_dir:
             ctx.cwd = str(temp_dir)
             with mock.patch("aea.cli.run.do_install"):
-                with mock.patch("aea.cli.run._build_aea", return_value=aea):
-                    with mock.patch(
-                        "aea.cli.run._print_instantiated_components"
-                    ), mock.patch("aea.cli.run._print_all_available_packages"):
-                        run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
+                with mock.patch("aea.cli.run._build_aea", return_value=aea), mock.patch(
+                    "aea.cli.run.list_available_packages", return_value=[]
+                ):
+                    run_aea(ctx, ["author/name:0.1.0"], "env_file", True)
 
     @mock.patch("aea.cli.run._prepare_environment", _raise_click_exception)
     def test_run_aea_negative(self, *mocks):
