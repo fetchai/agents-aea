@@ -1240,8 +1240,9 @@ class BasicDialoguesStorage:
 
     def get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
         """Get latest label for dialogue."""
-        return self._incomplete_to_complete_dialogue_labels.get(
-            dialogue_label, dialogue_label
+        return (
+            self._incomplete_to_complete_dialogue_labels.get(dialogue_label)
+            or dialogue_label
         )
 
 
@@ -1386,7 +1387,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
     def _incomplete_dialogues_labels_to_json(self) -> List:
         """Dump incomplete_to_complete_dialogue_labels to json friendly dict."""
         return [
-            [k.json, v.json]
+            [k.json, getattr(v, "json", None)]
             for k, v in self._incomplete_to_complete_dialogue_labels.items()
         ]
 
