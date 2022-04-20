@@ -242,6 +242,16 @@ class TestDialogueLabel:
         assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
         assert not self.dialogue_label.is_complete()
 
+        (
+            incomplete_dialogue_label,
+            complete_dialogue_label,
+        ) = self.dialogue_label.get_both_versions()
+        assert incomplete_dialogue_label.dialogue_reference == (
+            self.dialogue_label.dialogue_starter_reference,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        assert complete_dialogue_label is None
+
 
 class TestDialogueBase:
     """Test for Dialogue."""
