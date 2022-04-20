@@ -184,6 +184,16 @@ class DialogueLabel:
         )
         return dialogue_label
 
+    def get_both_versions(self) -> Tuple["DialogueLabel", Optional["DialogueLabel"]]:
+        """Get the incomplete and complete versions of the label."""
+        if self.is_complete():
+            complete_dialogue_label: Optional[DialogueLabel] = self
+            incomplete_dialogue_label = self.get_incomplete_version()
+        else:
+            complete_dialogue_label = None
+            incomplete_dialogue_label = self
+        return (incomplete_dialogue_label, complete_dialogue_label)
+
     def __str__(self) -> str:
         """Get the string representation."""
         return "{}_{}_{}_{}".format(
@@ -1131,12 +1141,10 @@ class BasicDialoguesStorage:
             dialogue.dialogue_label.dialogue_opponent_addr
         ].append(dialogue)
 
-        if dialogue.dialogue_label.is_complete():
-            complete_dialogue_label: Optional[DialogueLabel] = dialogue.dialogue_label
-            incomplete_dialogue_label = dialogue.dialogue_label.get_incomplete_version()
-        else:
-            complete_dialogue_label = None
-            incomplete_dialogue_label = dialogue.dialogue_label
+        (
+            incomplete_dialogue_label,
+            complete_dialogue_label,
+        ) = dialogue.dialogue_label.get_both_versions()
 
         self._incomplete_to_complete_dialogue_labels[
             incomplete_dialogue_label
@@ -1236,10 +1244,10 @@ class BasicDialoguesStorage:
 
     def get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
         """Get latest label for dialogue."""
-        complete_dialogue_label = self._incomplete_to_complete_dialogue_labels.get(
-            dialogue_label, dialogue_label
+        return (
+            self._incomplete_to_complete_dialogue_labels.get(dialogue_label)
+            or dialogue_label
         )
-        return complete_dialogue_label if complete_dialogue_label else dialogue_label
 
 
 class PersistDialoguesStorage(BasicDialoguesStorage):
@@ -1383,7 +1391,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
     def _incomplete_dialogues_labels_to_json(self) -> List:
         """Dump incomplete_to_complete_dialogue_labels to json friendly dict."""
         return [
-            [k.json, v.json if v else None]
+            [k.json, getattr(v, "json", None)]
             for k, v in self._incomplete_to_complete_dialogue_labels.items()
         ]
 
