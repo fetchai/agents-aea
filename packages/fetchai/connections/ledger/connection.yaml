@@ -24,9 +24,9 @@ config:
       address: http://127.0.0.1:8545
       gas_price_api_key: null
     fetchai:
-      address: https://rest-capricorn.fetch.ai:443
+      address: https://rest-dorado.fetch.ai:443
       denom: atestfet
-      chain_id: capricorn-1
+      chain_id: dorado-1
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:1.1.0

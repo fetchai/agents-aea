@@ -9,7 +9,7 @@ There are two types of AEAs:
 
 This demo shows how agents negotiate autonomously with each other while they pursue their goals by participating in the Trading Agents Competition (TAC). 
 The demo can be run against Fetchai or Ethereum ledger.
-Transactions are validated on an ERC1155 smart contract on the Fetchai Capricorn or a local Ganache Ethereum testnet.
+Transactions are validated on an ERC1155 smart contract on the Fetchai Dorado or a local Ganache Ethereum testnet.
 
 In the following video we discuss the framework and TAC in more detail:
 
@@ -99,7 +99,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ## Demo instructions (Fetchai):
 
-Follow this instruction to run TAC against the fetch.ai Capricorn testnet.
+Follow this instruction to run TAC against the fetch.ai Dorado testnet.
 
 ### Fetch TAC controller AEA
 
@@ -322,7 +322,7 @@ Retrieve the address of each agent (in each terminal):
 aea get-address fetchai
 ```
 
-Go to the <a href="https://explore-capricorn.fetch.ai" target="_blank">Capricorn block explorer</a> and request some test tokens via `Get Funds`.
+Go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
 To check the wealth of an AEA, use:
 

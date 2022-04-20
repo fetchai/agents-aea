@@ -91,8 +91,8 @@ config:
     ethereum:
       address: null
     fetchai:
-      address: https://rest-capricorn.fetch.ai:443
-      chain_id: capricorn-1
+      address: https://rest-dorado.fetch.ai:443
+      chain_id: dorado-1
 ---
 public_id: fetchai/simple_service_registration:0.23.0
 type: skill

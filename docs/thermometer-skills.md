@@ -59,7 +59,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `my_thermometer_client` with public id `fetchai/thermometer_client:0.31.0`.
 
-3. Copy the address from the `my_thermometer_client` into your clip board. Then go to the <a href="https://explore-capricorn.fetch.ai" target="_blank">Capricorn block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `my_thermometer_client` into your clip board. Then go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `my_thermometer_aea` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -163,7 +163,7 @@ aea config set --type dict agent.default_routing \
 
 #### Add keys for the thermometer AEA
 
-First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Capricorn` use:
+First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt

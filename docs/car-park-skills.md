@@ -61,7 +61,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.33.0`.
 
-3. Copy the address from the `car_data_buyer` into your clip board. Then go to the <a href="https://explore-capricorn.fetch.ai" target="_blank">Capricorn block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `car_data_buyer` into your clip board. Then go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `car_detector` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -172,7 +172,7 @@ aea build
 
 #### Add keys for the car data seller AEA
 
-First, create the private key for the car data seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Capricorn` use:
+First, create the private key for the car data seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -193,13 +193,13 @@ aea issue-certificates
 
 The buyer needs to have some wealth to purchase the service from the seller.
 
-First, create the private key for the car data buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Capricorn` use:
+First, create the private key for the car data buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for your car data buyer based on the network you want to transact with. On the Fetch.ai `Capricorn` network:
+Then, create some wealth for your car data buyer based on the network you want to transact with. On the Fetch.ai `Dorado` network:
 ``` bash
 aea generate-wealth fetchai
 ```

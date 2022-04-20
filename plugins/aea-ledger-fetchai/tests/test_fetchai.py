@@ -915,11 +915,11 @@ def test_fail_sign_multisig():
         "sign_data": {
             "fetch17yh6gwf48ac8m2rdmze0sy55l369x6t75972jf": {
                 "account_number": 16964,
-                "chain_id": "capricorn-1",
+                "chain_id": "dorado-1",
             },
             "fetch17yh6gwf48ac8m2rdmze0sy55l369x6t75972j1": {
                 "account_number": 16964,
-                "chain_id": "capricorn-1",
+                "chain_id": "dorado-1",
             },
         },
     }
@@ -979,7 +979,7 @@ def test_send_signed_tx_failed():
         "sign_data": {
             "fetch14a92pzm55djc80xhztkz5ccemnm2kem2g5dzvh": {
                 "account_number": 16991,
-                "chain_id": "capricorn-1",
+                "chain_id": "dorado-1",
             }
         },
     }
