@@ -67,6 +67,7 @@ vulture = "==2.3"
 isort = "==5.7.0"
 web3 = "==5.25.0"
 cosmpy = "==0.2.0"
+typed-ast = "==1.5.0"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy

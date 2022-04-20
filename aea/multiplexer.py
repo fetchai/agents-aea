@@ -87,6 +87,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
     CONNECT_TIMEOUT = 60
     SEND_TIMEOUT = 60
 
+    _lock: asyncio.Lock
+
     def __init__(
         self,
         connections: Optional[Sequence[Connection]] = None,
@@ -159,7 +161,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._send_loop_task = None  # type: Optional[asyncio.Task]
 
         self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
-        self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
         self.set_loop(self._loop)
 
     @property
@@ -240,7 +241,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param loop: asyncio event loop.
         """
         self._loop = loop
-        self._lock = asyncio.Lock(loop=self._loop)
+        self._lock = asyncio.Lock()
 
     def _handle_exception(self, fn: Callable, exc: Exception) -> None:
         """
