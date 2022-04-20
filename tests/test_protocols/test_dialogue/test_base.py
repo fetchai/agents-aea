@@ -1992,9 +1992,11 @@ class TestBaseDialoguesStorage:
 
     def test_dialogues_in_terminal_state_kept(self):
         """Test dialogues in terminal state handled properly."""
+        assert not self.storage._incomplete_to_complete_dialogue_labels
         self.storage.add(self.dialogue)
         assert self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert len(self.storage._incomplete_to_complete_dialogue_labels) == 1
 
         self.dialogue._update(self.valid_message_1_by_self)
         self.dialogue.reply(
