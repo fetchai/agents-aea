@@ -242,6 +242,16 @@ class TestDialogueLabel:
         assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
         assert not self.dialogue_label.is_complete()
 
+        (
+            incomplete_dialogue_label,
+            complete_dialogue_label,
+        ) = self.dialogue_label.get_both_versions()
+        assert incomplete_dialogue_label.dialogue_reference == (
+            self.dialogue_label.dialogue_starter_reference,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        assert complete_dialogue_label is None
+
 
 class TestDialogueBase:
     """Test for Dialogue."""
@@ -1982,9 +1992,11 @@ class TestBaseDialoguesStorage:
 
     def test_dialogues_in_terminal_state_kept(self):
         """Test dialogues in terminal state handled properly."""
+        assert not self.storage._incomplete_to_complete_dialogue_labels
         self.storage.add(self.dialogue)
         assert self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert len(self.storage._incomplete_to_complete_dialogue_labels) == 1
 
         self.dialogue._update(self.valid_message_1_by_self)
         self.dialogue.reply(
