@@ -114,22 +114,22 @@ class Profiling(Runnable):
 
     def set_counters(self) -> None:
         """Modify obj.__new__ to count objects created created."""
+
+        def make_fn(obj: Any) -> Callable:
+            orig_new = obj.__new__
+            # pylint: disable=protected-access  # type: ignore
+
+            @wraps(orig_new)
+            def new(*args: Any, **kwargs: Any) -> Callable:
+                self._counter[obj] += 1
+                if orig_new is object.__new__:
+                    return orig_new(args[0])  # pragma: nocover
+                return orig_new(*args, **kwargs)  # pragma: nocover
+
+            return new
+
         for obj in self._objects_created_to_count:
             self._counter[obj] = 0
-
-            def make_fn(obj: Any) -> Callable:
-                orig_new = obj.__new__
-                # pylint: disable=protected-access  # type: ignore
-
-                @wraps(orig_new)
-                def new(*args: Any, **kwargs: Any) -> Callable:
-                    self._counter[obj] += 1
-                    if orig_new is object.__new__:
-                        return orig_new(args[0])  # pragma: nocover
-                    return orig_new(*args, **kwargs)  # pragma: nocover
-
-                return new
-
             obj.__new__ = make_fn(obj)  # type: ignore
 
     async def run(self) -> None:
