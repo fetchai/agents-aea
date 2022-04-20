@@ -1066,8 +1066,13 @@ class BasicDialoguesStorage:
         )  # type: Dict[Address, List[Dialogue]]
         self._incomplete_to_complete_dialogue_labels = (
             {}
-        )  # type: Dict[DialogueLabel, DialogueLabel]
-        self._dialogues = dialogues
+        )  # type: Dict[DialogueLabel, Optional[DialogueLabel]]
+        self._dialogues_info = {
+            "is_keep_dialogues_in_terminal_state": dialogues.is_keep_dialogues_in_terminal_state,
+            "class_name": dialogues.__class__.__name__,
+            "dialogue_class": dialogues.dialogue_class,
+            "message_class": dialogues.message_class,
+        }
         # used for both storing complete and incomplete dialogue labels
         self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
 
@@ -1108,7 +1113,7 @@ class BasicDialoguesStorage:
     @property
     def is_terminal_dialogues_kept(self) -> bool:
         """Return True if dialogues should stay after terminal state."""
-        return self._dialogues.is_keep_dialogues_in_terminal_state
+        return cast(bool, self._dialogues_info["is_keep_dialogues_in_terminal_state"])
 
     def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
         """Method to be called on dialogue terminal state reached."""
@@ -1274,7 +1279,7 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
                 self._skill_component.skill_id.name,
                 self._skill_component.name,
                 self._skill_component.__class__.__name__,
-                self._dialogues.__class__.__name__,
+                cast(str, self._dialogues_info["class_name"]),
             ]
         )
 
@@ -1344,8 +1349,8 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
             yield self._dialogue_from_json(dialogue_data)
 
     def _dialogue_from_json(self, dialogue_data: dict) -> "Dialogue":
-        return self._dialogues.dialogue_class.from_json(
-            self._dialogues.message_class, dialogue_data
+        return cast(Type[Dialogue], self._dialogues_info["dialogue_class"]).from_json(
+            cast(Type[Message], self._dialogues_info["message_class"]), dialogue_data
         )
 
     @staticmethod
