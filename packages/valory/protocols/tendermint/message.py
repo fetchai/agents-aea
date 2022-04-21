@@ -21,7 +21,7 @@
 
 # pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
-from typing import Any, Dict, Set, Tuple, cast
+from typing import Any, Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -49,24 +49,21 @@ class TendermintMessage(Message):
         """Performatives for the tendermint protocol."""
 
         ERROR = "error"
-        TENDERMINT_CONFIG_REQUEST = "tendermint_config_request"
-        TENDERMINT_CONFIG_RESPONSE = "tendermint_config_response"
+        REQUEST = "request"
+        RESPONSE = "response"
 
         def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
-    _performatives = {
-        "error",
-        "tendermint_config_request",
-        "tendermint_config_response",
-    }
+    _performatives = {"error", "request", "response"}
     __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
             "dialogue_reference",
             "error_code",
+            "error_data",
             "error_msg",
             "info",
             "message_id",
@@ -136,22 +133,27 @@ class TendermintMessage(Message):
         return cast(CustomErrorCode, self.get("error_code"))
 
     @property
+    def error_data(self) -> Dict[str, str]:
+        """Get the 'error_data' content from the message."""
+        enforce(self.is_set("error_data"), "'error_data' content is not set.")
+        return cast(Dict[str, str], self.get("error_data"))
+
+    @property
     def error_msg(self) -> str:
         """Get the 'error_msg' content from the message."""
         enforce(self.is_set("error_msg"), "'error_msg' content is not set.")
         return cast(str, self.get("error_msg"))
 
     @property
-    def info(self) -> Dict[str, str]:
+    def info(self) -> str:
         """Get the 'info' content from the message."""
         enforce(self.is_set("info"), "'info' content is not set.")
-        return cast(Dict[str, str], self.get("info"))
+        return cast(str, self.get("info"))
 
     @property
-    def query(self) -> str:
+    def query(self) -> Optional[str]:
         """Get the 'query' content from the message."""
-        enforce(self.is_set("query"), "'query' content is not set.")
-        return cast(str, self.get("query"))
+        return cast(Optional[str], self.get("query"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the tendermint protocol."""
@@ -199,41 +201,25 @@ class TendermintMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if (
-                self.performative
-                == TendermintMessage.Performative.TENDERMINT_CONFIG_REQUEST
-            ):
+            if self.performative == TendermintMessage.Performative.REQUEST:
+                expected_nb_of_contents = 0
+                if self.is_set("query"):
+                    expected_nb_of_contents += 1
+                    query = cast(str, self.query)
+                    enforce(
+                        isinstance(query, str),
+                        "Invalid type for content 'query'. Expected 'str'. Found '{}'.".format(
+                            type(query)
+                        ),
+                    )
+            elif self.performative == TendermintMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 1
                 enforce(
-                    isinstance(self.query, str),
-                    "Invalid type for content 'query'. Expected 'str'. Found '{}'.".format(
-                        type(self.query)
-                    ),
-                )
-            elif (
-                self.performative
-                == TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE
-            ):
-                expected_nb_of_contents = 1
-                enforce(
-                    isinstance(self.info, dict),
-                    "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
+                    isinstance(self.info, str),
+                    "Invalid type for content 'info'. Expected 'str'. Found '{}'.".format(
                         type(self.info)
                     ),
                 )
-                for key_of_info, value_of_info in self.info.items():
-                    enforce(
-                        isinstance(key_of_info, str),
-                        "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_info)
-                        ),
-                    )
-                    enforce(
-                        isinstance(value_of_info, str),
-                        "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_info)
-                        ),
-                    )
             elif self.performative == TendermintMessage.Performative.ERROR:
                 expected_nb_of_contents = 3
                 enforce(
@@ -249,22 +235,22 @@ class TendermintMessage(Message):
                     ),
                 )
                 enforce(
-                    isinstance(self.info, dict),
-                    "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
-                        type(self.info)
+                    isinstance(self.error_data, dict),
+                    "Invalid type for content 'error_data'. Expected 'dict'. Found '{}'.".format(
+                        type(self.error_data)
                     ),
                 )
-                for key_of_info, value_of_info in self.info.items():
+                for key_of_error_data, value_of_error_data in self.error_data.items():
                     enforce(
-                        isinstance(key_of_info, str),
-                        "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
-                            type(key_of_info)
+                        isinstance(key_of_error_data, str),
+                        "Invalid type for dictionary keys in content 'error_data'. Expected 'str'. Found '{}'.".format(
+                            type(key_of_error_data)
                         ),
                     )
                     enforce(
-                        isinstance(value_of_info, str),
-                        "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
-                            type(value_of_info)
+                        isinstance(value_of_error_data, str),
+                        "Invalid type for dictionary values in content 'error_data'. Expected 'str'. Found '{}'.".format(
+                            type(value_of_error_data)
                         ),
                     )
 
