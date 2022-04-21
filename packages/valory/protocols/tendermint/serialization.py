@@ -54,26 +54,26 @@ class TendermintSerializer(Serializer):
         dialogue_message_pb.target = msg.target
 
         performative_id = msg.performative
-        if performative_id == TendermintMessage.Performative.TENDERMINT_CONFIG_REQUEST:
-            performative = tendermint_pb2.TendermintMessage.Tendermint_Config_Request_Performative()  # type: ignore
-            query = msg.query
-            performative.query = query
-            tendermint_msg.tendermint_config_request.CopyFrom(performative)
-        elif (
-            performative_id == TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE
-        ):
-            performative = tendermint_pb2.TendermintMessage.Tendermint_Config_Response_Performative()  # type: ignore
+        if performative_id == TendermintMessage.Performative.REQUEST:
+            performative = tendermint_pb2.TendermintMessage.Request_Performative()  # type: ignore
+            if msg.is_set("query"):
+                performative.query_is_set = True
+                query = msg.query
+                performative.query = query
+            tendermint_msg.request.CopyFrom(performative)
+        elif performative_id == TendermintMessage.Performative.RESPONSE:
+            performative = tendermint_pb2.TendermintMessage.Response_Performative()  # type: ignore
             info = msg.info
-            performative.info.update(info)
-            tendermint_msg.tendermint_config_response.CopyFrom(performative)
+            performative.info = info
+            tendermint_msg.response.CopyFrom(performative)
         elif performative_id == TendermintMessage.Performative.ERROR:
             performative = tendermint_pb2.TendermintMessage.Error_Performative()  # type: ignore
             error_code = msg.error_code
             ErrorCode.encode(performative.error_code, error_code)
             error_msg = msg.error_msg
             performative.error_msg = error_msg
-            info = msg.info
-            performative.info.update(info)
+            error_data = msg.error_data
+            performative.error_data.update(error_data)
             tendermint_msg.error.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
@@ -106,24 +106,22 @@ class TendermintSerializer(Serializer):
         performative = tendermint_pb.WhichOneof("performative")
         performative_id = TendermintMessage.Performative(str(performative))
         performative_content = dict()  # type: Dict[str, Any]
-        if performative_id == TendermintMessage.Performative.TENDERMINT_CONFIG_REQUEST:
-            query = tendermint_pb.tendermint_config_request.query
-            performative_content["query"] = query
-        elif (
-            performative_id == TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE
-        ):
-            info = tendermint_pb.tendermint_config_response.info
-            info_dict = dict(info)
-            performative_content["info"] = info_dict
+        if performative_id == TendermintMessage.Performative.REQUEST:
+            if tendermint_pb.request.query_is_set:
+                query = tendermint_pb.request.query
+                performative_content["query"] = query
+        elif performative_id == TendermintMessage.Performative.RESPONSE:
+            info = tendermint_pb.response.info
+            performative_content["info"] = info
         elif performative_id == TendermintMessage.Performative.ERROR:
             pb2_error_code = tendermint_pb.error.error_code
             error_code = ErrorCode.decode(pb2_error_code)
             performative_content["error_code"] = error_code
             error_msg = tendermint_pb.error.error_msg
             performative_content["error_msg"] = error_msg
-            info = tendermint_pb.error.info
-            info_dict = dict(info)
-            performative_content["info"] = info_dict
+            error_data = tendermint_pb.error.error_data
+            error_data_dict = dict(error_data)
+            performative_content["error_data"] = error_data_dict
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 
