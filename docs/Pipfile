@@ -12,4 +12,4 @@ mkdocs-material-extensions = "*"
 mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 
 [requires]
-python_version = "3.9"
+python_version = "3.7"
