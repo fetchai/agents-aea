@@ -21,6 +21,8 @@
 import re
 from typing import Dict, List, Optional
 
+import pytest
+
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message
 
@@ -73,6 +75,7 @@ def test_basic_profiling():
     del m
 
 
+@pytest.mark.profiling
 def test_profiling_instance_number():
     """Test profiling tool."""
     result = ""
@@ -138,6 +141,7 @@ def test_profiling_instance_number():
     del messages
 
 
+@pytest.mark.profiling
 def test_profiling_cross_reference():
     """Test profiling tool."""
     result = ""
