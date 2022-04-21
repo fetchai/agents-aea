@@ -18,12 +18,35 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers/profiling module."""
-from typing import List, Optional
+import re
+from typing import Dict, List, Optional
 
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message
 
 from tests.common.utils import wait_for_condition
+
+
+def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
+    """Extract object counts from the profiling log."""
+    result: Dict[str, Dict[str, int]] = {"created": {}, "present": {}}
+
+    for line in log.split("\n"):
+
+        match = re.match(r".*\* (?P<field>.*) \(present\):  (?P<count>\d+).*", line)
+        if match:
+            result["present"][match.groupdict()["field"]] = int(
+                match.groupdict()["count"]
+            )
+            continue
+
+        match = re.match(r".*\* (?P<field>.*) \(created\):  (?P<count>\d+).*", line)
+        if match:
+            result["created"][match.groupdict()["field"]] = int(
+                match.groupdict()["count"]
+            )
+
+    return result
 
 
 def test_basic_profiling():
@@ -71,36 +94,43 @@ def test_profiling_instance_number():
         # Check the number of created and present messages
         wait_for_condition(lambda: result, timeout=20)
 
-        assert "Profiling details" in result
-        assert "incomplete_to_complete_dialogue_labels" in result
-        assert f"Message (present):  {MESSAGE_NUMBER}" in result
-        assert f"Message (created):  {MESSAGE_NUMBER}" in result
+        assert extract_object_counts(result) == {
+            "created": {"Message": MESSAGE_NUMBER},
+            "present": {
+                "Message": MESSAGE_NUMBER,
+                "incomplete_to_complete_dialogue_labels": 0,
+            },
+        }
 
         # Modify the number of messages
         messages = messages[: int(MESSAGE_NUMBER / 2)]
         result = ""
 
-        # Check the number of created and present messages
+        # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
 
-        assert "Profiling details" in result
-        assert "incomplete_to_complete_dialogue_labels" in result
-        assert f"Message (present):  {int(MESSAGE_NUMBER / 2)}" in result
-        assert f"Message (created):  {MESSAGE_NUMBER}" in result
+        assert extract_object_counts(result) == {
+            "created": {"Message": MESSAGE_NUMBER},
+            "present": {
+                "Message": int(MESSAGE_NUMBER / 2),
+                "incomplete_to_complete_dialogue_labels": 0,
+            },
+        }
 
         # Modify the number of messages
         messages += [Message() for _ in range(len(messages))]
         result = ""
 
-        # Check the number of created and present messages
+        # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
 
-        assert "Profiling details" in result
-        assert "incomplete_to_complete_dialogue_labels" in result
-        assert f"Message (present):  {MESSAGE_NUMBER}" in result
-        assert (
-            f"Message (created):  {MESSAGE_NUMBER + int(MESSAGE_NUMBER / 2)}" in result
-        )
+        assert extract_object_counts(result) == {
+            "created": {"Message": MESSAGE_NUMBER + int(MESSAGE_NUMBER / 2)},
+            "present": {
+                "Message": MESSAGE_NUMBER,
+                "incomplete_to_complete_dialogue_labels": 0,
+            },
+        }
 
     finally:
         p.stop()
@@ -137,15 +167,17 @@ def test_profiling_cross_reference():
     MessageContainer(container_a)  # shares the same messages with a
 
     try:
-        # Check the number of created and present messages
+        # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
 
-        assert "Profiling details" in result
-        assert "incomplete_to_complete_dialogue_labels" in result
-        assert f"Message (present):  {MESSAGE_NUMBER}" in result
-        assert f"Message (created):  {MESSAGE_NUMBER}" in result
-        assert f"MessageContainer (present):  1" in result
-        assert f"MessageContainer (created):  2" in result
+        assert extract_object_counts(result) == {
+            "created": {"Message": MESSAGE_NUMBER, "MessageContainer": 2},
+            "present": {
+                "Message": MESSAGE_NUMBER,
+                "MessageContainer": 1,
+                "incomplete_to_complete_dialogue_labels": 0,
+            },
+        }
 
     finally:
         p.stop()
