@@ -590,14 +590,6 @@ def pytest_addoption(parser) -> None:
         help="check non closed threads i started during test",
     )
 
-    # Run profiler tests only
-    parser.addoption(
-        "--profiling",
-        action="store_true",
-        default=False,
-        help="run profiling tests only.",
-    )
-
 
 @pytest.fixture(scope="session", autouse=True)
 def inet_disable(request) -> None:
@@ -1503,11 +1495,3 @@ def use_ipfs_daemon() -> Generator:
 
     yield
     ipfs_daemon.stop()
-
-
-def pytest_collection_modifyitems(config, items):
-    """Run profiler or non-profiler tests separately."""
-    if config.getoption("--profiling"):
-        items[:] = filter(lambda item: item.get_closest_marker("profiling"), items)
-    else:
-        items[:] = filter(lambda item: not item.get_closest_marker("profiling"), items)
