@@ -304,7 +304,7 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
       - name: Async integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+        run: tox -e py3.8 -- -m 'integration and not unstable and not ledger and not profiling'
 
   profiling_checks:
     continue-on-error: True
@@ -361,7 +361,7 @@ jobs:
           sudo apt-get autoclean
           pip install tox
       - name: Integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
+        run: tox -e py3.8 -- -m 'integration and not unstable and ledger and not profiling'
 
   platform_checks:
     continue-on-error: True
@@ -461,10 +461,10 @@ jobs:
       - if: True
         name: Unit tests
         run: |
-          tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
+          tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
       - name: Plugin tests
         run: |
-          tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
+          tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
 
   golang_checks:
     continue-on-error: True
