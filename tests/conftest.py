@@ -1505,11 +1505,6 @@ def use_ipfs_daemon() -> Generator:
     ipfs_daemon.stop()
 
 
-def pytest_configure(config):
-    """Register the profiling marker to avoid warnings."""
-    config.addinivalue_line("markers", "profiling: filter profiler tests")
-
-
 def pytest_collection_modifyitems(config, items):
     """Run profiler or non-profiler tests separately."""
     if config.getoption("--profiling"):
