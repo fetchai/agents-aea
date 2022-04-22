@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.6
+          python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing

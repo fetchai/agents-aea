@@ -43,7 +43,7 @@ def _rand_seed():
 
 README = """
 To start with test:
-`pip install aries-cloudagent` acaPY is required
+`pip install aries-cloudagent[indy]` acaPY is required
 
 ## VON Network
 
