@@ -127,6 +127,9 @@ class Profiling(Runnable):
 
         for t in self._types_to_track:
             t.__new__ = call_count(t.__new__, 0, t)
+            # For some reason, if we don't init the destructor with an empty function, the next
+            # line will raise the exception: AttributeError: type object 'Message' has no attribute '__del__'
+            t.__del__ = lambda: None
             t.__del__ = call_count(t.__del__, 1, t)
 
     async def run(self) -> None:
