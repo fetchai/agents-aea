@@ -207,8 +207,7 @@ def get_most_common_objects_in_gc(number: int = 10) -> List[Tuple[str, int]]:
     lock.acquire()
     try:
         for obj in gc.get_objects():
-            # not all objects have the __class__ attribute
-            object_type = type(obj).__name__
+            object_type = str(getattr(obj, "__class__", type(obj).__name__))
             if object_type not in PROFILER_TYPE_BLACK_LIST:
                 object_count[object_type] = object_count.get(object_type, 0) + 1
     finally:
