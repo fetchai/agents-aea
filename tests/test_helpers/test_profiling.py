@@ -32,7 +32,7 @@ def test_profiling():
         nonlocal result
         result = report
 
-    p = Profiling(1, [Message], [Message], output_function=output_function)
+    p = Profiling([Message], 1, output_function=output_function)
     p.start()
 
     wait_for_condition(lambda: p.is_running, timeout=20)
@@ -41,7 +41,6 @@ def test_profiling():
         wait_for_condition(lambda: result, timeout=20)
 
         assert "Profiling details" in result
-        assert "incomplete_to_complete_dialogue_labels" in result
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=20)
