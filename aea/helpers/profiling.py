@@ -104,11 +104,11 @@ class Profiling(Runnable):
         super().__init__(threaded=True)
         self._period = period
         self._start_ts = time.time()
-        self._types_to_track = types_to_track
+        self._types_to_track: List[Type] = types_to_track
         self._output_function = output_function
         self.object_counts: Dict[Type, List[int]] = dict(
             zip(types_to_track, [[0, 0]] * len(types_to_track))
-        )  # {object: [instances_created, instamces_deleted]}
+        )  # {object: [instances_created, instances_deleted]}
         self.set_counters()
 
         if platform.system() != "Windows":
