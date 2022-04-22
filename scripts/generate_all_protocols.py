@@ -259,6 +259,8 @@ def _set_copyright_header(package_path: Path) -> None:
     """Set copyright header for every python file in the package path."""
 
     for filename in package_path.absolute().glob("**/*.py"):
+        if str(filename).endswith("_pb2.py"):
+            continue
         filepath: Path = package_path.absolute() / filename
         content = filepath.read_text()
         if re.search(r"\#\s+Copyright", content):

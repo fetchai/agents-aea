@@ -13,7 +13,7 @@ fingerprint:
   message.py: QmaPVDsoC7sdGE2x7u7KuVqeimHvPEsvJNcZzKb78kBqwS
   serialization.py: Qmd4bz59ZHqrCtKnnmqBwLe4jCsmGJJnKifaQcmLyW7o1z
   t_protocol.proto: QmedX13Z6cNgbTJ8L9LyYG3HtSKhkY8ntq6uVdtepmt2cg
-  t_protocol_pb2.py: QmPcuH3pERHd1nZv3Bp2kPKGVrFtpKs16tPPTm6kQxpQi1
+  t_protocol_pb2.py: QmU7uEunhccVLgth5rT4C7WWimbnRmpdrtoCmJyNZuTJR4
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

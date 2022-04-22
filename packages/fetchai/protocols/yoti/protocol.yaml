@@ -13,7 +13,7 @@ fingerprint:
   message.py: QmPkDXnQE3tEVRv3yv69LMeKS68bUAEgevJDRfFCe74BmA
   serialization.py: QmSu7FYEc5qcKSnBkTSviGenh4a2HbEq2QyqTxqwqyKo67
   yoti.proto: Qmasuw6KKGB95zygCfMjJwjWMad2Q1XY7KBnf3yA8h4JCB
-  yoti_pb2.py: QmXSZFsyxV1fgYuQHNHJHtq46UVqrGGCtxgmoRcNufz1AK
+  yoti_pb2.py: Qme5UkcqgTNE34km1jVWRutTVWoj5B1NvSXVoRgMD4D5G8
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

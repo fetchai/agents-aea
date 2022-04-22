@@ -12,7 +12,7 @@ fingerprint:
   dialogues.py: QmVNNWsEzorKdYWxGSW1yUKd8PNXYjcRprtJijuuFSepkQ
   message.py: QmWoPxzoxiXdw9qSodSKr8qsXHospVpSvqUvBJbsk27bHr
   prometheus.proto: QmXMxMXbDH1LoFcV9QB7TvewUPu62poka43aKuujL73UN1
-  prometheus_pb2.py: QmS8kojcwVzQts1G2CqgRwrvskE75eMz1my4MTxhDWN2C7
+  prometheus_pb2.py: QmYqPhhZFgZfcAsXyD6Eef9tTqkXcgtcyUwVee4fFRoBvk
   serialization.py: QmYXXhfSkq4Xo93Yah4QhtriFpGZjr97sW8nozA6LpxzaQ
 fingerprint_ignore_patterns: []
 dependencies:
