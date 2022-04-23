@@ -37,7 +37,7 @@ svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 pip install open-aea[all]
 ```
 ```
-svn checkout https://github.com/valory-xyz/open-aea/trunk/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.7.0/packages packages
 ```
 
 

@@ -152,7 +152,7 @@ AEAs are composed of components. AEAs and AEA components can be developed by any
 
 To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">SVN</a> to checkout the specific folders;
 ```bash
-svn checkout https://github.com/valory-xyz/open-aea/trunk/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.7.0/packages packages
 ```
 
 
