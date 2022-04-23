@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,14 +105,19 @@ JSON_DEPENDENCY_SPECIFIER_SET_PATTERN = (
 _AEA_ALL_PATTERN = r"(?<={package_name}\[all\]==){version}"
 AEA_PATHS: PatternByPath = {
     Path("deploy-image", "Dockerfile"): _AEA_ALL_PATTERN,
+    Path("deploy-image", "README.md"): "(?<=open-aea/tags/v){version}",
     Path("develop-image", "docker-env.sh"): "(?<=aea-develop:){version}",
     Path("docs", "quickstart.md"): "(?<=v){version}",
+    Path("docs", "quickstart.md"): "(?<=open-aea/tags/v){version}",
     Path("examples", "tac_deploy", "Dockerfile"): _AEA_ALL_PATTERN,
     Path("scripts", "install.ps1"): _AEA_ALL_PATTERN,
     Path("scripts", "install.sh"): _AEA_ALL_PATTERN,
     Path(
         "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
     ): "(?<=v){version}",
+    Path(
+        "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
+    ): "(?<=open-aea/tags/v){version}",
     Path("user-image", "docker-env.sh"): "(?<=aea-user:){version}",
 }
 
