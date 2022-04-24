@@ -141,6 +141,7 @@ nav:
         - Async Utils: 'api/helpers/async_utils.md'
         - Base: 'api/helpers/base.md'
         - Constants: 'api/helpers/constants.md'
+        - Dependency Tree: 'api/helpers/dependency_tree.md'
         - Env Vars: 'api/helpers/env_vars.md'
         - Exception Policy: 'api/helpers/exception_policy.md'
         - Exec Timeout: 'api/helpers/exec_timeout.md'
@@ -213,6 +214,7 @@ nav:
         - CLI:
           - IPFS:
             - API: 'api/plugins/aea_cli_ipfs/core.md'
+            - Exceptions: 'api/plugins/aea_cli_ipfs/exceptions.md'
             - Registry: 'api/plugins/aea_cli_ipfs/registry.md'
             - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
         - Ledger:
@@ -228,6 +230,7 @@ nav:
 
 plugins:
     - markdownmermaid
+    - search
 
 markdown_extensions:
   - pymdownx.superfences
