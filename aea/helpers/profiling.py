@@ -117,10 +117,15 @@ class Profiling(Runnable):
     def set_counters(self) -> None:
         """Modify __new__ and __del__ to count objects created created and destroyed."""
 
-        def call_count(wrapped: Callable, index: int, tag: Any) -> Callable:
+        def call_count(wrapped: Callable, index: int, obj: Any) -> Callable:
+            orig_new = obj.__new__
+
             @wraps(wrapped)
             def wrapper(*args: Any, **kwargs: Any) -> Callable:
-                self.object_counts[tag][index] += 1
+                self.object_counts[obj][index] += 1
+                # Avoid TypeError: object.__new__() takes exactly one argument
+                if orig_new is object.__new__:
+                    return orig_new(args[0])  # pragma: nocover
                 return wrapped(*args, **kwargs)
 
             return wrapper
