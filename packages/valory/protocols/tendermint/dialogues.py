@@ -38,23 +38,20 @@ class TendermintDialogue(Dialogue):
     """The tendermint dialogue class maintains state of a dialogue and manages it."""
 
     INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
-        {TendermintMessage.Performative.TENDERMINT_CONFIG_REQUEST}
+        {TendermintMessage.Performative.REQUEST}
     )
     TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
-        {
-            TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE,
-            TendermintMessage.Performative.ERROR,
-        }
+        {TendermintMessage.Performative.RESPONSE, TendermintMessage.Performative.ERROR}
     )
     VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         TendermintMessage.Performative.ERROR: frozenset(),
-        TendermintMessage.Performative.TENDERMINT_CONFIG_REQUEST: frozenset(
+        TendermintMessage.Performative.REQUEST: frozenset(
             {
-                TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE,
+                TendermintMessage.Performative.RESPONSE,
                 TendermintMessage.Performative.ERROR,
             }
         ),
-        TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE: frozenset(),
+        TendermintMessage.Performative.RESPONSE: frozenset(),
     }
 
     class Role(Dialogue.Role):

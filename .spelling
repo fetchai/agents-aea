@@ -266,9 +266,11 @@ nginx-ingress
 acn
 args
 open-aea
+cleanup
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
+a-zA-Z0-9
  - docs/simple-oef.md
 _do_
 CosmWasm
