@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import os
 import shutil
 
 # pylint: skip-file
-from datetime import date
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -105,6 +104,9 @@ def _type_check(variable_name: str, variable_type: str) -> str:
         return f"type({variable_name}) is {variable_type}"
 
 
+copy_right_str = "# -*- coding: utf-8 -*-\n"
+
+
 def _copyright_header_str(author: str) -> str:
     """
     Produce the copyright header text for a protocol.
@@ -112,28 +114,6 @@ def _copyright_header_str(author: str) -> str:
     :param author: the author of the protocol.
     :return: The copyright header text.
     """
-    copy_right_str = (
-        "# -*- coding: utf-8 -*-\n"
-        "# ------------------------------------------------------------------------------\n"
-        "#\n"
-    )
-    copy_right_str += "#   Copyright {} {}\n".format(date.today().year, author)
-    copy_right_str += (
-        "#\n"
-        '#   Licensed under the Apache License, Version 2.0 (the "License");\n'
-        "#   you may not use this file except in compliance with the License.\n"
-        "#   You may obtain a copy of the License at\n"
-        "#\n"
-        "#       http://www.apache.org/licenses/LICENSE-2.0\n"
-        "#\n"
-        "#   Unless required by applicable law or agreed to in writing, software\n"
-        '#   distributed under the License is distributed on an "AS IS" BASIS,\n'
-        "#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n"
-        "#   See the License for the specific language governing permissions and\n"
-        "#   limitations under the License.\n"
-        "#\n"
-        "# ------------------------------------------------------------------------------\n"
-    )
     return copy_right_str
 
 

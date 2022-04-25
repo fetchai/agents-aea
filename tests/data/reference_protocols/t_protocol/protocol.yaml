@@ -1,0 +1,12 @@
+name: t_protocol
+author: fetchai
+version: 0.1.0
+protocol_specification_id: some_author/some_protocol_name:1.0.0
+type: protocol
+description: A protocol for testing purposes.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+dependencies:
+    protobuf: {}

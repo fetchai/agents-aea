@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRqzw2aTE6rsUnoB8XvvWoF4sg4ZUpvgQwStZpAVG5sUj
-  __init__.py: QmQCpSWKT8vCEXB7oe2ofkFB1J6U2x27yFg1PBizEYtE6f
-  behaviours.py: QmTdPHSdkMQA7BXWE9zrEnVbJMSYm6zWwXcHthNHHjH1FU
-  dialogues.py: QmU4ADzsxFd9ekTTJ7LiF1wtjvNcYhtUaGsDTeXVbWjLFC
-  handlers.py: QmeT7y15FpKrGBJm9JX75DazjJamc7jZ7knMkdtdQ2SirK
-  strategy.py: QmP2uM4gQqZvr9mYtjKHoByMyB55Yt3YCNtdaRcHxgGSSF
+  __init__.py: QmPbguPjZDz9vcPVBegygxduLzWbP2ED3z7DJ8dS4DTSiX
+  behaviours.py: QmVSDm9NsnG1owj4eDh7Pvp2rrJ4AEppuii9W7Q9orZ81J
+  dialogues.py: QmbbaQXAXr8cUc9YB927pnZYdx6SqFfxc4LQV1iWyFUvGX
+  handlers.py: QmZfap8Lyb33VscFi9hrcAUhABii9XNLbenr3YYzD1tvTT
+  strategy.py: QmTw5G7JKRg5DWf2ueF8FTogjAaXS91hcD1VskqSuuVdVe
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/fet_erc20:0.9.0
