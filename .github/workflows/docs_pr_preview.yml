@@ -23,7 +23,7 @@ jobs:
           python-version: '3.7'
 
       - name: Install Dependencies
-        run: cd docs && pip3 install pipenv && pipenv install
+        run: cd docs && pip3 install pipenv && pipenv install -d --skip-lock --python python3
 
       - name: Build
         run: cd docs && pipenv run mkdocs build -f ../mkdocs.yml
