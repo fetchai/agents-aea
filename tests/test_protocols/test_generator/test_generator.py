@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         path_to_generated_protocol = self.t
         dotted_path_to_package_for_imports = "tests.data.generator."
         path_to_protocol = os.path.join(
-            ROOT_DIR, "tests", "data", "generator", protocol_name
+            ROOT_DIR, "tests", "data", "reference_protocols", protocol_name
         )
 
         # Generate the protocol
