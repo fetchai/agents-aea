@@ -206,7 +206,7 @@ class Profiling(Runnable):
         }
 
 
-def get_most_common_objects_in_gc(number: int = 10) -> List[Tuple[str, int]]:
+def get_most_common_objects_in_gc(number: int = 15) -> List[Tuple[str, int]]:
     """Get the highest-count objects in the garbage collector."""
 
     object_count: CounterType = Counter()
