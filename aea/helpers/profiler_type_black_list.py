@@ -20,7 +20,7 @@
 
 """Profiler blacklisted types."""
 
-PROFILER_TYPE_BLACK_LIST = [
+PROFILER_TYPE_BLACK_LIST = {
     "ABCMeta",
     "Add",
     "AddressFamily",
@@ -171,4 +171,4 @@ PROFILER_TYPE_BLACK_LIST = [
     "vectorize",
     "weakref",
     "wrapper_descriptor",
-]
+}
