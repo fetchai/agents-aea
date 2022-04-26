@@ -7,11 +7,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmY2q7knhZcLFja5oswD7rauVtN1pDVVnkjHuUj1JWrVv7
-  __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmVT4JenW2GhnyKxneQFPCXhVYnZE81bb4DRjHERYmA4dp
-  connection.py: QmRJ5szyjB7PJsWLHG7pAY7NwEabYyBMVJzr7myKB2eGwz
-  contract_dispatcher.py: QmVcSfTsYsg8MtXKx9pFa9hsZwFdTsc6RdAjDcLoZkM1qE
-  ledger_dispatcher.py: QmXdsDXWCHd9cqBDsQRc1npBwuSTbz6bqTSQk5ETxioqJk
+  __init__.py: QmY7cPhXj7suon5jahiWCZgsCtQr5zfwYtR7yu5CJ6y5nD
+  base.py: QmT7A1QqcUcgjBhLWpjY1nEsMK6g6eocScM868g5GHFHPh
+  connection.py: QmbzG7jcRAashSNcso3reesk3E7jHZanBKm8QTjGT1iijq
+  contract_dispatcher.py: QmWKkFTskC2ThnLFG3hEXSCksHBeJJa6mkcR2eedeRSk3M
+  ledger_dispatcher.py: QmfZ9cG99sknPZMB9Dmd7inM1UABdjDi9EUavpqL8aGSvE
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

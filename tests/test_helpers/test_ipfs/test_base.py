@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ FILE_PATH = "__init__.py"
 def test_get_hash():
     """Test get hash IPFSHashOnly."""
     ipfs_hash = IPFSHashOnly().get(file_path=os.path.join(CUR_PATH, FILE_PATH))
-    assert ipfs_hash == "QmWeMu9JFPUcYdz4rwnWiJuQ6QForNFRsjBiN5PtmkEg4A"
+    assert ipfs_hash == "QmbfrfW8V4u1gtQZ4ZjsJubrwkahYjAGVY1RSBVbvM9UXw"
 
 
 def test_is_text_negative():
