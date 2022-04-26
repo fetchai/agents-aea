@@ -18,11 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea run' subcommand."""
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from typing import Generator, List, Optional, Sequence, Tuple, cast
 
 import click
+import memray  # type: ignore
 
 from aea import __version__
 from aea.aea import AEA
@@ -118,25 +119,22 @@ def run(
     if exclude_connection_ids:
         connection_ids = _calculate_connection_ids(ctx, exclude_connection_ids)
 
-    if profiling > 0:
-        with _profiling_context(period=profiling):
-            run_aea(
-                ctx,
-                connection_ids,
-                env_file,
-                is_install_deps,
-                apply_environment_variables,
-                password,
-            )
-            return
-    run_aea(
-        ctx,
-        connection_ids,
-        env_file,
-        is_install_deps,
-        apply_environment_variables,
-        password,
+    profiling_context = (
+        _profiling_context(period=profiling) if profiling > 0 else nullcontext()
     )
+    memray_context = (
+        memray.Tracker("memray_profiling.bin") if profiling > 0 else nullcontext()
+    )
+
+    with profiling_context, memray_context:
+        run_aea(
+            ctx,
+            connection_ids,
+            env_file,
+            is_install_deps,
+            apply_environment_variables,
+            password,
+        )
 
 
 def _calculate_connection_ids(
