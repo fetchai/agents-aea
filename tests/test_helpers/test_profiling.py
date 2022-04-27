@@ -29,12 +29,20 @@ from aea.protocols.base import Message
 from tests.common.utils import wait_for_condition
 
 
+class DummyClass:
+    """Dummy class for counting purposes"""
+
+    def __init__(self) -> None:
+        """Dummy init"""
+        pass
+
+
 def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
     """Extract object counts from the profiling log."""
-    result: Dict[str, Dict[str, int]] = {"created": {}, "present": {}}
+    result: Dict[str, Dict[str, int]] = {"created": {}, "present": {}, "gc": {}}
 
     for line in log.split("\n"):
-
+        # Created (tracked objects)
         match = re.match(r".*\* (?P<field>.*) \(present\):  (?P<count>\d+).*", line)
         if match:
             result["present"][match.groupdict()["field"]] = int(
@@ -42,11 +50,18 @@ def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
             )
             continue
 
+        # Present (tracked objects)
         match = re.match(r".*\* (?P<field>.*) \(created\):  (?P<count>\d+).*", line)
         if match:
             result["created"][match.groupdict()["field"]] = int(
                 match.groupdict()["count"]
             )
+            continue
+
+        # Present (garbage collector)
+        match = re.match(r".*\* (?P<field>.*) \(gc\):  (?P<count>\d+).*", line)
+        if match:
+            result["gc"][match.groupdict()["field"]] = int(match.groupdict()["count"])
 
     return result
 
@@ -83,6 +98,9 @@ def test_profiling_instance_number():
         nonlocal result
         result = report
 
+    # Generate some dummy classes to check that they appear in the gc counter
+    dummy_classes_to_count = [DummyClass() for _ in range(1000)]
+
     p = Profiling([Message], 1, output_function=output_function)
     p.start()
 
@@ -96,12 +114,11 @@ def test_profiling_instance_number():
         # Check the number of created and present messages
         wait_for_condition(lambda: result, timeout=20)
 
-        assert extract_object_counts(result) == {
-            "created": {"Message": MESSAGE_NUMBER},
-            "present": {
-                "Message": MESSAGE_NUMBER,
-            },
-        }
+        count_dict = extract_object_counts(result)
+
+        assert count_dict["created"] == {"Message": MESSAGE_NUMBER}
+        assert count_dict["present"] == {"Message": MESSAGE_NUMBER}
+        assert count_dict["gc"]["DummyClass"] == len(dummy_classes_to_count)
 
         # Modify the number of messages
         messages = messages[: int(MESSAGE_NUMBER / 2)]
@@ -110,12 +127,10 @@ def test_profiling_instance_number():
         # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
 
-        assert extract_object_counts(result) == {
-            "created": {"Message": MESSAGE_NUMBER},
-            "present": {
-                "Message": int(MESSAGE_NUMBER / 2),
-            },
-        }
+        count_dict = extract_object_counts(result)
+
+        assert count_dict["created"] == {"Message": MESSAGE_NUMBER}
+        assert count_dict["present"] == {"Message": int(MESSAGE_NUMBER / 2)}
 
         # Modify the number of messages
         messages += [Message() for _ in range(len(messages))]
@@ -124,12 +139,12 @@ def test_profiling_instance_number():
         # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
 
-        assert extract_object_counts(result) == {
-            "created": {"Message": MESSAGE_NUMBER + int(MESSAGE_NUMBER / 2)},
-            "present": {
-                "Message": MESSAGE_NUMBER,
-            },
+        count_dict = extract_object_counts(result)
+
+        assert count_dict["created"] == {
+            "Message": MESSAGE_NUMBER + int(MESSAGE_NUMBER / 2)
         }
+        assert count_dict["present"] == {"Message": MESSAGE_NUMBER}
 
     finally:
         p.stop()
@@ -153,11 +168,7 @@ def test_profiling_cross_reference():
                 other.messages if other else [Message() for _ in range(MESSAGE_NUMBER)]
             )
 
-    p = Profiling(
-        [Message, MessageContainer],
-        1,
-        output_function=output_function,
-    )
+    p = Profiling([Message, MessageContainer], 1, output_function=output_function,)
     p.start()
 
     wait_for_condition(lambda: p.is_running, timeout=20)
@@ -169,13 +180,64 @@ def test_profiling_cross_reference():
         # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
 
-        assert extract_object_counts(result) == {
-            "created": {"Message": MESSAGE_NUMBER, "MessageContainer": 2},
-            "present": {
-                "Message": MESSAGE_NUMBER,
-                "MessageContainer": 1,
-            },
+        count_dict = extract_object_counts(result)
+
+        assert count_dict["created"] == {
+            "Message": MESSAGE_NUMBER,
+            "MessageContainer": 2,
         }
+        assert count_dict["present"] == {
+            "Message": MESSAGE_NUMBER,
+            "MessageContainer": 1,
+        }
+
+    finally:
+        p.stop()
+        p.wait_completed(sync=True, timeout=20)
+
+
+def test_profiling_counts_not_equal():
+    """Test profiling tool."""
+    result = ""
+    MESSAGE_NUMBER = 10
+
+    def output_function(report):
+        nonlocal result
+        result = report
+
+    class MessageContainer:
+        def __init__(self, other: Optional["MessageContainer"] = None) -> None:
+            self.messages: List[Message] = (
+                other.messages if other else [Message() for _ in range(MESSAGE_NUMBER)]
+            )
+
+    p = Profiling(
+        [Message, MessageContainer, DummyClass], 1, output_function=output_function,
+    )
+    p.start()
+
+    wait_for_condition(lambda: p.is_running, timeout=20)
+
+    # Generate some dummy classes to check that they appear in the gc counter
+    dummy_classes_to_count = [  # noqa: F841 we need to store the objects so they appear in the gc
+        DummyClass() for _ in range(1000)
+    ]
+
+    container_a = MessageContainer()  # contains new messages
+    MessageContainer(container_a)  # shares the same messages with a
+
+    try:
+        # Check the number of created and present objects
+        wait_for_condition(lambda: result, timeout=20)
+
+        count_dict = extract_object_counts(result)
+        assert (
+            len(set(count_dict["present"].values())) == 3
+        ), "All element counts are equal"
+        assert (
+            len(set(count_dict["created"].values())) == 3
+        ), "All element counts are equal"
+        assert len(set(count_dict["gc"].values())) > 1, "All element counts are equal"
 
     finally:
         p.stop()
