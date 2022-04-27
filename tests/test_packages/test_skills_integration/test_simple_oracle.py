@@ -156,7 +156,9 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
 
             # use alternate port for prometheus connection
             setting_path = "vendor.fetchai.connections.prometheus.config.port"
-            self.set_config(setting_path, 9091, type_="int")
+            self.set_config(
+                setting_path, 19091, type_="int"
+            )  # 9091 used by fetchd docker image
 
             setting_path = "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address_file"
             self.set_config(setting_path, ORACLE_CONTRACT_ADDRESS_FILE)
