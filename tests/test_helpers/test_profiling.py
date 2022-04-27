@@ -83,7 +83,7 @@ def test_profiling_instance_number():
         nonlocal result
         result = report
 
-    p = Profiling(1, [Message], [Message], output_function=output_function)
+    p = Profiling([Message], 1, output_function=output_function)
     p.start()
 
     wait_for_condition(lambda: p.is_running, timeout=20)
@@ -100,7 +100,6 @@ def test_profiling_instance_number():
             "created": {"Message": MESSAGE_NUMBER},
             "present": {
                 "Message": MESSAGE_NUMBER,
-                "incomplete_to_complete_dialogue_labels": 0,
             },
         }
 
@@ -115,7 +114,6 @@ def test_profiling_instance_number():
             "created": {"Message": MESSAGE_NUMBER},
             "present": {
                 "Message": int(MESSAGE_NUMBER / 2),
-                "incomplete_to_complete_dialogue_labels": 0,
             },
         }
 
@@ -130,7 +128,6 @@ def test_profiling_instance_number():
             "created": {"Message": MESSAGE_NUMBER + int(MESSAGE_NUMBER / 2)},
             "present": {
                 "Message": MESSAGE_NUMBER,
-                "incomplete_to_complete_dialogue_labels": 0,
             },
         }
 
@@ -157,9 +154,8 @@ def test_profiling_cross_reference():
             )
 
     p = Profiling(
+        [Message, MessageContainer],
         1,
-        [Message, MessageContainer],
-        [Message, MessageContainer],
         output_function=output_function,
     )
     p.start()
@@ -178,7 +174,6 @@ def test_profiling_cross_reference():
             "present": {
                 "Message": MESSAGE_NUMBER,
                 "MessageContainer": 1,
-                "incomplete_to_complete_dialogue_labels": 0,
             },
         }
 

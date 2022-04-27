@@ -186,7 +186,7 @@ class Profiling(Runnable):
             + """Most common objects in garbage collector (excluding blacklisted):\n"""
             + "\n".join(
                 [
-                    f" * {i[0]} (present):  {i[1]}"
+                    f" * {i[0]} (gc):  {i[1]}"
                     for i in data["most_common_objects_in_gc"]
                 ]
             )
