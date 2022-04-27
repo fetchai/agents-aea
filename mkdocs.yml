@@ -6,7 +6,7 @@ site_author: developer@fetch.ai
 
 theme:
   name: 'material'
-  logo: assests/logo.png
+  logo: assets/logo.png
   feature:
     tabs: true
 
