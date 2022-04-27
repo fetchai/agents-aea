@@ -62,7 +62,7 @@ base_deps = [
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
-    base_deps.append("pywin32==300")
+    base_deps.append("pywin32==303")
 
 here = os.path.abspath(os.path.dirname(__file__))
 about: Dict[str, str] = {}

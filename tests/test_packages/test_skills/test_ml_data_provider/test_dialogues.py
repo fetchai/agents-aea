@@ -18,11 +18,8 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the ml_data_provider skill."""
 
-import sys
 from pathlib import Path
 from typing import cast
-
-import pytest
 
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
@@ -44,10 +41,6 @@ from packages.fetchai.skills.ml_data_provider.dialogues import (
 from tests.conftest import ROOT_DIR
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 9),
-    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-)
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue classes of ml_data_provider."""
 
