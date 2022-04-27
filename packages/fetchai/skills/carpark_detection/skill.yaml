@@ -8,12 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmd5Xe9jY8AjJjFR5QY7L9QQ3AeCEKx837UgiGuf3BSRVN
-  __init__.py: QmSbE1yc5GQ8UVPRBxw4cfYFStjGzf7uZ2XSx2PhTGtUcq
-  behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
-  database.py: QmWiNScq4WBokCoXQi4vqqN4Q9GNkV4YtDwsV7XyQqgKi4
-  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
-  handlers.py: QmbkmEP9K4Qu2MsRtnkdx3PGNbSW46qi48bCHVCUJHpcQF
-  strategy.py: QmebfJ69ZfKBSdCXeMY5Pu7AjMqere8BnGTKg3mLimc8jA
+  __init__.py: QmaSarzXSbgENajnT6hgbdXAqbBmdDjXDFXsLFuCz7bSL5
+  behaviours.py: QmZjzKKQp6SiNzkx4Vvzz5S3yoc6hy2S879uEfyFrEhedN
+  database.py: QmXp1j6RRjspqKeN9RSevRgsSA4cyzW6kcn35863Rc7vQS
+  dialogues.py: QmXxgcYDTbUb68kZdftmQgpQLL4EqnJK6uUpjhbxEfLvks
+  handlers.py: QmUxxFrbjYiE72rDcXymb9yF1WP7rnJ3jj6ysF8HYoDdzA
+  strategy.py: Qma3PfdFiTg2JY6Mkir4t96X1hpnzVASQ34SBkfRoUkZa6
 fingerprint_ignore_patterns:
 - temp_files_placeholder/*
 connections: []

@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUQB9uBtWGWY5zETSyJnbPZixRj1c4suedVwGPegrTQWs
-  __init__.py: QmYqLCeNJjMCDb718nMFh7o8r16wgz8yCN23wa3gcViJi8
-  behaviours.py: QmfXTbHZWYCh5xWB5QZEXyym2imbE2NoojzxPaaCgG2C9X
-  dialogues.py: QmV6h1wva5YQfL59rnXuFpr2voMYWPcYW3PhDtnrvSRM8m
-  handlers.py: QmaMYCvA9RrSsbiH3T2pJBaNWtWUCLsefik7QHj3E4LtDi
-  strategy.py: QmW8xGF5NxgurmYH4vWarwvqt3NL3NM7u1AMMGR1nvfbT7
+  __init__.py: QmNVeCXgrUsrUpvSbrYzMkWBNkdVqFAe7pGnY5LGYNVPTQ
+  behaviours.py: QmZs34mLXAxJfwHa68k4cUMBudrbgHtVnt5o9dXyWbK1P2
+  dialogues.py: QmS2ERq7Vb3v3VZTkcM8CupbkAoT74Cn4YQH3RbiW6qDoi
+  handlers.py: QmWENcBW5NjN1bD7B4h28MjrtUhMLwfzHDQNRfTa9SLCp3
+  strategy.py: QmUBgu4gYqgw9hXkHNEAy3AyHifpDub5AwFmLkp8feaDWh
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.0
