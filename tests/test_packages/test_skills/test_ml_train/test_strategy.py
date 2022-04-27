@@ -19,7 +19,6 @@
 """This module contains the tests of the strategy class of the ml_train skill."""
 
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -247,10 +246,6 @@ class TestStrategy(BaseSkillTestCase):
         )
         assert self.strategy.terms_from_proposal(description) == terms
 
-    @pytest.mark.skipif(
-        sys.version_info >= (3, 9),
-        reason="This test uses tensorflow which, at the time of writing, does not yet support python version 3.9.",
-    )
     def test_decode_sample_data_i(self):
         """Test the decode_sample_data method of the Strategy class where data is NOT None."""
         # setup
