@@ -29,12 +29,32 @@ from aea.protocols.base import Message
 from tests.common.utils import wait_for_condition
 
 
+MESSAGE_NUMBER = 10
+
+
 class DummyClass:
     """Dummy class for counting purposes"""
 
-    def __init__(self) -> None:
-        """Dummy init"""
-        pass
+
+class MessageContainer:
+    """Dummy class for counting purposes"""
+
+    def __init__(
+        self, other: Optional["MessageContainer"] = None, message_number=MESSAGE_NUMBER
+    ) -> None:
+        """Initializer"""
+        self.messages: List[Message] = (
+            other.messages if other else [Message() for _ in range(message_number)]
+        )
+
+
+result = ""
+
+
+def output_function(report):
+    """Test output function"""
+    global result
+    result = report
 
 
 def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
@@ -68,11 +88,8 @@ def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
 
 def test_basic_profiling():
     """Test profiling tool."""
+    global result
     result = ""
-
-    def output_function(report):
-        nonlocal result
-        result = report
 
     p = Profiling([Message], 1, output_function=output_function)
     p.start()
@@ -92,11 +109,8 @@ def test_basic_profiling():
 @pytest.mark.profiling
 def test_profiling_instance_number():
     """Test profiling tool."""
+    global result
     result = ""
-
-    def output_function(report):
-        nonlocal result
-        result = report
 
     # Generate some dummy classes to check that they appear in the gc counter
     dummy_classes_to_count = [DummyClass() for _ in range(1000)]
@@ -107,7 +121,6 @@ def test_profiling_instance_number():
     wait_for_condition(lambda: p.is_running, timeout=20)
 
     # Create some messages
-    MESSAGE_NUMBER = 10
     messages = [Message() for _ in range(MESSAGE_NUMBER)]
 
     try:
@@ -155,18 +168,8 @@ def test_profiling_instance_number():
 @pytest.mark.profiling
 def test_profiling_cross_reference():
     """Test profiling tool."""
+    global result
     result = ""
-    MESSAGE_NUMBER = 10
-
-    def output_function(report):
-        nonlocal result
-        result = report
-
-    class MessageContainer:
-        def __init__(self, other: Optional["MessageContainer"] = None) -> None:
-            self.messages: List[Message] = (
-                other.messages if other else [Message() for _ in range(MESSAGE_NUMBER)]
-            )
 
     p = Profiling([Message, MessageContainer], 1, output_function=output_function,)
     p.start()
@@ -198,18 +201,8 @@ def test_profiling_cross_reference():
 
 def test_profiling_counts_not_equal():
     """Test profiling tool."""
+    global result
     result = ""
-    MESSAGE_NUMBER = 10
-
-    def output_function(report):
-        nonlocal result
-        result = report
-
-    class MessageContainer:
-        def __init__(self, other: Optional["MessageContainer"] = None) -> None:
-            self.messages: List[Message] = (
-                other.messages if other else [Message() for _ in range(MESSAGE_NUMBER)]
-            )
 
     p = Profiling(
         [Message, MessageContainer, DummyClass], 1, output_function=output_function,
