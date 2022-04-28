@@ -35,7 +35,7 @@ setup(
         "ecdsa>=0.15,<0.17.0",
         "bech32==1.2.0",
         "pycryptodome>=3.10.1,<4.0.0",
-        "cosmpy@git+https://github.com/fetchai/cosmpy.git@c923b9dff763812548c08d63ff49a66a0295f5db",
+        "cosmpy@git+https://github.com/fetchai/cosmpy.git@65603dc9bbfca44136e98566e1ede68fa6042256",
     ],
     tests_require=["pytest"],
     entry_points={
