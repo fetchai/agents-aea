@@ -265,7 +265,7 @@ class LogParser:
 
                     if not var_data["values"]:
                         print(
-                            f"Data for {tracker_name}::{var_name} not found in the log!"
+                            f"[Figure {figure_name}] Data for {tracker_name}::{var_name} not found in the log!"
                         )
                         continue
 
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     )
 
     # Counters
-    present_counters = [
+    tracked_objects = [
         "Message",
         "Dialogue",
         "DialogueLabel",
@@ -378,20 +378,18 @@ if __name__ == "__main__":
         "Connection",
         "Contract",
         "Protocol",
-        "AbciDialogue",
-        "HttpDialogue",
-        "LedgerApiDialogue",
-        "ContractApiDialogue",
-        "SigningDialogue",
-        "incomplete_to_complete_dialogue_labels",
     ]
     add_count_trackers(
-        log_parser, present_counters, ["Object count (present)"], " (present)"
+        parser=log_parser,
+        tracker_names=tracked_objects,
+        figure_names=["Object count (present)"],
+        tracker_name_appendix=" (present)",
     )
-
-    created_counters = ["Message", "Dialogue", "DialogueLabel"]
     add_count_trackers(
-        log_parser, created_counters, ["Object count (created)"], " (created)"
+        parser=log_parser,
+        tracker_names=tracked_objects,
+        figure_names=["Object count (created)"],
+        tracker_name_appendix=" (created)",
     )
 
     # Process and plot

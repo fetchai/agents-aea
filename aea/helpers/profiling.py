@@ -31,10 +31,12 @@ import time
 from collections import Counter
 from concurrent.futures._base import CancelledError
 from functools import wraps
-from typing import Any, Callable, Dict, List, Type
+from typing import Any, Callable
+from typing import Counter as CounterType
+from typing import Dict, List, Tuple, Type
 
 from aea.helpers.async_utils import Runnable
-from aea.protocols.dialogue.base import BasicDialoguesStorage, Dialogue
+from aea.helpers.profiler_type_black_list import PROFILER_TYPE_BLACK_LIST
 
 
 BYTES_TO_MBYTES = 1024 ** -2
@@ -86,56 +88,58 @@ class Profiling(Runnable):
 
     def __init__(
         self,
+        types_to_track: List[Type],
         period: int = 0,
-        objects_instances_to_count: List[Type] = None,
-        objects_created_to_count: List[Type] = None,
         output_function: Callable[[str], None] = lambda x: print(x, flush=True),
     ) -> None:
         """
         Init profiler.
 
         :param period: delay between profiling output in seconds.
-        :param objects_instances_to_count: object to count
-        :param objects_created_to_count: object created to count
+        :param types_to_track: object types to count
         :param output_function: function to display output, one str argument.
         """
         if period < 1:  # pragma: nocover
-            raise ValueError("Period should be at least 1 second!")
+            raise ValueError("Profiling frequency should be at least 1 second!")
         super().__init__(threaded=True)
         self._period = period
         self._start_ts = time.time()
-        self._objects_instances_to_count = objects_instances_to_count or []
-        self._objects_created_to_count = objects_created_to_count or []
+        self._types_to_track: List[Type] = types_to_track
         self._output_function = output_function
-        self._counter: Dict[Type, int] = Counter()
+        self.object_counts: Dict[Type, List[int]] = {
+            obj: [0, 0] for obj in types_to_track
+        }  # {object: [instances_created, instances_deleted]}
+        self.set_counters()
 
         if platform.system() != "Windows":
             tracemalloc.start()
 
     def set_counters(self) -> None:
-        """Modify obj.__new__ to count objects created created."""
+        """Modify __new__ and __del__ to count objects created created and destroyed."""
 
-        def make_fn(obj: Any) -> Callable:
+        def call_count(wrapped: Callable, index: int, obj: Any) -> Callable:
             orig_new = obj.__new__
-            # pylint: disable=protected-access  # type: ignore
 
-            @wraps(orig_new)
-            def new(*args: Any, **kwargs: Any) -> Callable:
-                self._counter[obj] += 1
+            @wraps(wrapped)
+            def wrapper(*args: Any, **kwargs: Any) -> Callable:
+                self.object_counts[obj][index] += 1
+                # Avoid TypeError: object.__new__() takes exactly one argument
                 if orig_new is object.__new__:
                     return orig_new(args[0])  # pragma: nocover
-                return orig_new(*args, **kwargs)  # pragma: nocover
+                return wrapped(*args, **kwargs)
 
-            return new
+            return wrapper
 
-        for obj in self._objects_created_to_count:
-            self._counter[obj] = 0
-            obj.__new__ = make_fn(obj)  # type: ignore
+        for t in self._types_to_track:
+            t.__new__ = call_count(t.__new__, 0, t)
+            # For some reason, if we don't init the __del__ method with an empty function, the next
+            # line will raise the exception: AttributeError: type object 'Message' has no attribute '__del__'
+            t.__del__ = lambda _: None
+            t.__del__ = call_count(t.__del__, 1, t)
 
     async def run(self) -> None:
         """Run profiling."""
         try:
-            self.set_counters()
             while True:
                 await asyncio.sleep(self._period)
                 self.output_profile_data()
@@ -165,21 +169,23 @@ class Profiling(Runnable):
         """
             )
             + "\n".join(
-                [f" * {i} (present):  {c}" for i, c in data["objects_present"].items()]
-            )
-            + "\n"
-            + "\n".join(
                 [
-                    f" * {i} (present):  {c}"
-                    for i, c in data["dialogues_by_type"].items()
+                    f" * {i.__name__} (present):  {c}"
+                    for i, c in data["objects_present"].items()
                 ]
             )
-            + """\nObjects created:\n"""
+            + "\n"
+            + """Objects created:\n"""
             + "\n".join(
                 [
                     f" * {i.__name__} (created):  {c}"
                     for i, c in data["objects_created"].items()
                 ]
+            )
+            + "\n"
+            + """Most common objects in garbage collector (excluding blacklisted):\n"""
+            + "\n".join(
+                [f" * {i[0]} (gc):  {i[1]}" for i in data["most_common_objects_in_gc"]]
             )
             + "\n"
         )
@@ -196,57 +202,24 @@ class Profiling(Runnable):
                 "amount": threading.active_count(),
                 "names": [i.name for i in threading.enumerate()],
             },
-            "objects_present": self.get_objects_instances(),
-            "objects_created": self.get_objects_created(),
-            "dialogues_by_type": get_dialogues_by_type(),
+            "objects_present": {k: v[0] - v[1] for k, v in self.object_counts.items()},
+            "objects_created": {k: v[0] for k, v in self.object_counts.items()},
+            "most_common_objects_in_gc": get_most_common_objects_in_gc(),
         }
 
-    def get_objects_instances(self) -> Dict:
-        """Return dict with counted object instances present now."""
-        result: Dict = Counter()
 
-        lock.acquire()
-        try:
-            for obj_type in self._objects_instances_to_count:
-                result[obj_type.__name__] += 0
+def get_most_common_objects_in_gc(number: int = 15) -> List[Tuple[str, int]]:
+    """Get the highest-count objects in the garbage collector."""
 
-            for obj in gc.get_objects():
-                for obj_type in self._objects_instances_to_count:
-                    if isinstance(obj, obj_type):
-                        result[obj_type.__name__] += 1
-        finally:
-            lock.release()
-        return result
-
-    def get_objects_created(self) -> Dict:
-        """Return dict with counted object instances created."""
-        return self._counter
-
-
-def get_dialogues_by_type() -> Dict:
-    """Return dict with the number of dialogues by type."""
-
-    dialogues_by_type: Dict[str, int] = {"incomplete_to_complete_dialogue_labels": 0}
-
+    object_count: CounterType = Counter()
     lock.acquire()
     try:
         for obj in gc.get_objects():
-            if isinstance(obj, Dialogue):
-
-                dialogue_type = str(type(obj).__name__)
-
-                if dialogue_type not in dialogues_by_type:
-                    dialogues_by_type[dialogue_type] = 1
-                else:
-                    dialogues_by_type[dialogue_type] += 1
-
-            elif isinstance(obj, BasicDialoguesStorage):
-                # Count incomplete dialogues by type
-                dialogues_by_type["incomplete_to_complete_dialogue_labels"] += len(
-                    list(
-                        obj._incomplete_to_complete_dialogue_labels.values()  # pylint: disable=protected-access
-                    )
-                )
+            object_type = str(
+                getattr(obj, "__class__", type(obj)).__name__
+            )  # not all objects have the __class__ attribute
+            if object_type not in PROFILER_TYPE_BLACK_LIST:
+                object_count[object_type] += 1
     finally:
         lock.release()
-    return dialogues_by_type
+    return object_count.most_common(number)
