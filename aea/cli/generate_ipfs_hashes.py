@@ -128,7 +128,9 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
 def sort_configuration_file(config: PackageConfiguration) -> None:
     """Sort the order of the fields in the configuration files."""
     # load config file to get ignore patterns, dump again immediately to impose ordering
-    assert config.directory is not None
+    if config.directory is None:
+        raise ValueError("config.directory cannot be None.")
+
     configuration_filepath = config.directory / config.default_configuration_filename
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json
@@ -158,7 +160,9 @@ def ipfs_hashing(
     # we still need to ignore some files
     #      use ignore patterns somehow
     # ignore_patterns = configuration.fingerprint_ignore_patterns # noqa: E800
-    assert configuration.directory is not None
+    if configuration.directory is None:
+        raise ValueError("configuration.directory cannot be None.")
+
     result_list = client.add(
         configuration.directory,
         recursive=True,
@@ -169,7 +173,9 @@ def ipfs_hashing(
         configuration.author, package_type.to_plural(), configuration.directory.name,
     )
     # check that the last result of the list is for the whole package directory
-    assert result_list[-1]["Name"] == configuration.directory.name
+    if result_list[-1]["Name"] != configuration.directory.name:
+        raise ValueError("Directory name does not match.")
+
     directory_hash = result_list[-1]["Hash"]
     return key, directory_hash, result_list
 
@@ -191,7 +197,9 @@ def from_csv(path: str) -> Dict[str, str]:
     with open(path, "r") as csv_file:
         reader = csv.reader(csv_file)
         for row in reader:
-            assert len(row) == 2
+            if len(row) != 2:
+                raise ValueError("Length of the row should be 2.")
+
             key, value = row
             result[key] = value
     return result
@@ -296,9 +304,9 @@ def assert_hash_consistency(
     for file_name, ipfs_hash in fingerprint.items():
         path = path_prefix / file_name
         expected_ipfs_hash = client.add(path)["Hash"]
-        assert (
-            expected_ipfs_hash == ipfs_hash
-        ), "WARNING, hashes don't match for: {}".format(path)
+
+        if expected_ipfs_hash != ipfs_hash:
+            raise ValueError("WARNING, hashes don't match for: {}".format(path))
 
 
 def _replace_fingerprint_non_invasive(
@@ -358,7 +366,10 @@ def update_fingerprint(
     # we don't process agent configurations
     if isinstance(configuration, AgentConfig):
         return
-    assert configuration.directory is not None
+
+    if configuration.directory is None:
+        raise ValueError("configuration.directory cannot be None.")
+
     fingerprint = compute_fingerprint(
         configuration.directory, configuration.fingerprint_ignore_patterns, client
     )
@@ -383,7 +394,10 @@ def check_fingerprint(
     # we don't process agent configurations
     if isinstance(configuration, AgentConfig):
         return True
-    assert configuration.directory is not None
+
+    if configuration.directory is None:
+        raise ValueError("configuration.directory cannot be None.")
+
     expected_fingerprint = compute_fingerprint(
         configuration.directory, configuration.fingerprint_ignore_patterns, client
     )
