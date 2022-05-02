@@ -12,7 +12,7 @@ name = "test-pypi"
 # we fix exact versions as it's sufficient to have at least one set of compatible dependencies for development
 aiohttp = "==3.7.4"
 asn1crypto = "==1.4.0"
-aioprometheus = "==20.0.1"
+aioprometheus = "==22.3.0"
 bandit = "==1.7.0"
 bech32 = "==1.2.0"
 black = "==19.10b0"
