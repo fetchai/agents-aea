@@ -36,7 +36,11 @@ from aea.cli.fetch import fetch
 from aea.cli.fingerprint import fingerprint
 from aea.cli.freeze import freeze
 from aea.cli.generate import generate
+<<<<<<< HEAD
 from aea.cli.generate_ipfs_hashes import generate_all_ipfs_hashes
+=======
+from aea.cli.generate_all_protocols import generate_all_protocols
+>>>>>>> feat/port-generate-all-protocols
 from aea.cli.generate_key import generate_key
 from aea.cli.generate_wealth import generate_wealth
 from aea.cli.get_address import get_address
@@ -140,3 +144,4 @@ cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)
 cli.add_command(generate_all_ipfs_hashes)
+cli.add_command(generate_all_protocols)
