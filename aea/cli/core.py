@@ -37,7 +37,6 @@ from aea.cli.fingerprint import fingerprint
 from aea.cli.freeze import freeze
 from aea.cli.generate import generate
 from aea.cli.generate_all_protocols import generate_all_protocols
-from aea.cli.generate_ipfs_hashes import generate_all_ipfs_hashes
 from aea.cli.generate_key import generate_key
 from aea.cli.generate_wealth import generate_wealth
 from aea.cli.get_address import get_address
@@ -46,6 +45,7 @@ from aea.cli.get_public_key import get_public_key
 from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
+from aea.cli.ipfs_hash import hash_group
 from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
@@ -140,5 +140,5 @@ cli.add_command(search)
 cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)
-cli.add_command(generate_all_ipfs_hashes)
+cli.add_command(hash_group)
 cli.add_command(generate_all_protocols)
