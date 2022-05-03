@@ -67,6 +67,10 @@ CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PROTOCOLS_PLURALS = "protocols"
 PROTOCOL_GENERATOR_DOCSTRING_REGEX = "It was created with protocol buffer compiler version `libprotoc .*` and aea version `.*`."
+DEFAULT_TEST_SAMPLES = [
+    ("sample_specification.yaml", "t_protocol",),
+    ("sample_specification_no_custom_types.yaml", "t_protocol_no_ct",),
+]
 
 
 logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s")
@@ -518,12 +522,6 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     log(
         "Protocol specification id not bumped - content is not different, or version is not newer."
     )
-
-
-DEFAULT_TEST_SAMPLES = [
-    ("sample_specification.yaml", "t_protocol",),
-    ("sample_specification_no_custom_types.yaml", "t_protocol_no_ct",),
-]
 
 
 @click.command(name="generate-all-protocols")
