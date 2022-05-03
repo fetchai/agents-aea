@@ -20,7 +20,7 @@
 import json
 import logging
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from aea.protocols.dialogue.base import Dialogues
 
@@ -49,9 +49,8 @@ class TestDefaultHandler(AriesAliceTestCase):
     def test_handle_i(self):
         """Test the handle method of the default handler where @type is in content."""
         # setup
-        content = "@type=something"
+        content = {"@type": "some", "@id": "conn_id"}
         content_bytes = json.dumps(content).encode("utf-8")
-        details = "some_details"
         incoming_message = cast(
             DefaultMessage,
             self.build_incoming_message(
@@ -64,29 +63,26 @@ class TestDefaultHandler(AriesAliceTestCase):
 
         # operation
         with patch.object(
-            self.default_handler, "_handle_received_invite", return_value=details
-        ) as mock_invite:
-            with patch.object(
-                self.alice_behaviour, "send_http_request_message"
-            ) as mock_send:
-                with patch.object(self.logger, "log") as mock_logger:
-                    self.default_handler.handle(incoming_message)
+            self.alice_behaviour, "send_http_request_message"
+        ) as mock_send:
+            with patch.object(self.logger, "log") as mock_logger:
+                self.default_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.INFO, f"Received message content:{content}",
         )
-        mock_invite.assert_called_once()
         mock_send.assert_any_call(
             method="POST",
-            url=self.strategy.admin_url + ADMIN_COMMAND_RECEIVE_INVITE,
-            content=details,
+            url=self.strategy.admin_url
+            + ADMIN_COMMAND_RECEIVE_INVITE
+            + "?auto_accept=true",
+            content=content,
         )
 
     def test_handle_ii(self):
         """Test the handle method of the default handler where http_dialogue is None."""
         # setup
-        details = "some_details"
         incoming_message = cast(
             DefaultMessage,
             self.build_incoming_message(
@@ -101,20 +97,16 @@ class TestDefaultHandler(AriesAliceTestCase):
 
         # operation
         with patch.object(
-            self.default_handler, "_handle_received_invite", return_value=details
-        ) as mock_invite:
-            with patch.object(
-                self.alice_behaviour, "send_http_request_message"
-            ) as mock_send:
-                with patch.object(self.logger, "log") as mock_logger:
-                    self.default_handler.handle(incoming_message)
+            self.alice_behaviour, "send_http_request_message"
+        ) as mock_send:
+            with patch.object(self.logger, "log") as mock_logger:
+                self.default_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.ERROR,
             "alice -> default_handler -> handle(): something went wrong when adding the incoming default message to the dialogue.",
         )
-        mock_invite.assert_not_called()
         mock_send.assert_not_called()
 
     def test_teardown(self):
@@ -161,13 +153,110 @@ class TestHttpHandler(AriesAliceTestCase):
             "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue.",
         )
 
-    def test_handle_request(self):
+    def test_handle_request_connection_invitation(self):
         """Test the handle method of the http handler where performative is REQUEST."""
         # setup
-        self.http_handler.connection_id = 123
-        self.http_handler.is_connected_to_Faber = False
+        invitation_msg_id = "some"
+        connection_id = "someconid"
+        addr = "some addr"
+        self.http_handler.connected = {}
+        self.strategy.aea_addresses = [addr]
+        self.strategy.invitations = {invitation_msg_id: addr}
+        name = "bob"
+        body = {
+            "invitation_msg_id": invitation_msg_id,
+            "connection_id": connection_id,
+            "state": "active",
+            "their_label": name,
+        }
+        mocked_body_bytes = json.dumps(body).encode("utf-8")
+        incoming_message = cast(
+            HttpMessage,
+            self.build_incoming_message(
+                message_type=HttpMessage,
+                performative=HttpMessage.Performative.REQUEST,
+                method=self.mocked_method,
+                url=self.mocked_url,
+                headers=self.mocked_headers,
+                version=self.mocked_version,
+                body=mocked_body_bytes,
+            ),
+        )
 
-        body = {"connection_id": 123, "state": "active"}
+        # operation
+        with patch.object(self.logger, "log") as mock_logger, patch.object(
+            self.alice_behaviour, "send_http_request_message"
+        ) as send_http_request_message_mock:
+            self.http_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(logging.INFO, f"Connected to {name}")
+        assert connection_id in self.http_handler.connected
+
+        send_http_request_message_mock.assert_any_call(
+            method="POST",
+            url=self.strategy.admin_url + "/present-proof/send-request",
+            content=ANY,
+        )
+
+    def test_handle_request_credentials_proof_request(self):
+        """Test the handle method of the http handler where performative is REQUEST."""
+        # setup
+        self.http_handler.presentation_requests = []
+        presentation_exchange_id = "some"
+        body = {
+            "role": "prover",
+            "presentation_request_dict": {},
+            "state": "request_received",
+            "presentation_exchange_id": presentation_exchange_id,
+        }
+        mocked_body_bytes = json.dumps(body).encode("utf-8")
+        incoming_message = cast(
+            HttpMessage,
+            self.build_incoming_message(
+                message_type=HttpMessage,
+                performative=HttpMessage.Performative.REQUEST,
+                method=self.mocked_method,
+                url=self.mocked_url,
+                headers=self.mocked_headers,
+                version=self.mocked_version,
+                body=mocked_body_bytes,
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger, patch.object(
+            self.alice_behaviour, "send_http_request_message"
+        ) as send_http_request_message_mock:
+            self.http_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(logging.INFO, "Got credentials proof request")
+
+        send_http_request_message_mock.assert_any_call(
+            method="GET",
+            url=self.strategy.admin_url
+            + f"/present-proof/records/{presentation_exchange_id}/credentials",
+        )
+
+    def test_handle_request_get_credentials_proof(self):
+        """Test the handle method of the http handler where performative is REQUEST."""
+        # setup
+        self.http_handler.presentation_requests = []
+        connection_id = "some"
+        addr = "some_addr"
+        name = "bob"
+        self.http_handler.addr_names = {addr: name}
+        self.http_handler.connected = {connection_id: addr}
+        self.strategy.aea_addresses = [addr]
+        presentation_exchange_id = "some"
+        body = {
+            "role": "verifier",
+            "presentation_request_dict": {},
+            "state": "presentation_received",
+            "presentation_exchange_id": presentation_exchange_id,
+            "connection_id": connection_id,
+        }
         mocked_body_bytes = json.dumps(body).encode("utf-8")
         incoming_message = cast(
             HttpMessage,
@@ -187,8 +276,48 @@ class TestHttpHandler(AriesAliceTestCase):
             self.http_handler.handle(incoming_message)
 
         # after
-        mock_logger.assert_any_call(logging.INFO, "Connected to Faber")
-        assert self.http_handler.is_connected_to_Faber is True
+        mock_logger.assert_any_call(logging.INFO, f"Got credentials proof from {name}")
+
+    def test_handle_request_get_credentials_issued(self):
+        """Test the handle method of the http handler where performative is REQUEST."""
+        # setup
+        connection_id = "some"
+        self.strategy.is_searching = False
+        cred_def_id = "some_cred_def_id"
+        body = {
+            "credential_proposal_dict": {"credential_proposal": ""},
+            "state": "credential_acked",
+            "raw_credential": {"cred_def_id": cred_def_id},
+            "connection_id": connection_id,
+        }
+        mocked_body_bytes = json.dumps(body).encode("utf-8")
+        incoming_message = cast(
+            HttpMessage,
+            self.build_incoming_message(
+                message_type=HttpMessage,
+                performative=HttpMessage.Performative.REQUEST,
+                method=self.mocked_method,
+                url=self.mocked_url,
+                headers=self.mocked_headers,
+                version=self.mocked_version,
+                body=mocked_body_bytes,
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger, patch.object(
+            self.alice_behaviour, "perform_agents_search"
+        ) as mock_perform_agents_search:
+            self.http_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Got crendetials from faber: schema:{cred_def_id} {body['credential_proposal_dict']['credential_proposal']}",
+        )
+        assert self.strategy.is_searching is True
+        assert self.http_handler.cred_def_id == cred_def_id
+        mock_perform_agents_search.assert_called_once()
 
     def test_handle_response_i(self):
         """Test the handle method of the http handler where performative is RESPONSE and content has Error."""
@@ -228,6 +357,8 @@ class TestHttpHandler(AriesAliceTestCase):
     def test_handle_response_ii(self):
         """Test the handle method of the http handler where performative is RESPONSE and content does NOT have Error."""
         # setup
+        addr = "some addr"
+        self.strategy.aea_addresses = [addr]
         connection_id = 2342
         invitation = {"some_key": "some_value"}
         http_dialogue = cast(
@@ -260,10 +391,11 @@ class TestHttpHandler(AriesAliceTestCase):
         mock_logger.assert_any_call(
             logging.INFO, f"Received http response message content:{body}"
         )
-        assert self.http_handler.connection_id == connection_id
-        mock_logger.assert_any_call(logging.INFO, f"invitation response: {str(body)}")
-        mock_logger.assert_any_call(logging.INFO, f"connection id: {connection_id}")
-        mock_logger.assert_any_call(logging.INFO, f"invitation: {str(invitation)}")
+        assert connection_id in self.http_handler.connections_sent
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Sent invitation to {addr}. Waiting for the invitation from agent some addr to finalise the connection...",
+        )
 
     def test_teardown(self):
         """Test the teardown method of the http handler."""

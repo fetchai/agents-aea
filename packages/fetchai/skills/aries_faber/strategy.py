@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the strategy class."""
-
-from typing import Any
+import random
+from typing import Any, List
 
 from aea.common import Address
 from aea.exceptions import enforce
@@ -37,6 +36,7 @@ ADMIN_COMMAND_CREATE_INVITATION = "/connections/create-invitation"
 ADMIN_COMMAND_STATUS = "/status"
 ADMIN_COMMAND_SCEHMAS = "/schemas"
 ADMIN_COMMAND_CREDDEF = "/credential-definitions"
+ADMIN_COMMAND_REGISTGER_PUBLIC_DID = "/wallet/did/public"
 LEDGER_COMMAND_REGISTER_DID = "/register"
 
 # Convenience
@@ -66,9 +66,17 @@ class Strategy(Model):
         self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
         self._ledger_url = kwargs.pop("ledger_url", DEFAULT_LEDGER_URL)
 
+        self._seed = (
+            kwargs.pop("seed", None,)
+            or (
+                "my_seed_000000000000000000000000"
+                + str(random.randint(100_000, 999_999))  # nosec
+            )[-32:]
+        )
+
         # derived config
         self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
-        self._alice_aea_address = ""
+        self._aea_addresses: List[Address] = []
 
         # Search
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
@@ -97,18 +105,23 @@ class Strategy(Model):
         return self._ledger_url
 
     @property
+    def seed(self) -> str:
+        """Get the wallet seed."""
+        return self._seed
+
+    @property
     def admin_url(self) -> str:
         """Get the admin URL."""
         return self._admin_url
 
     @property
-    def alice_aea_address(self) -> Address:
+    def aea_addresses(self) -> List[Address]:
         """Get Alice's address."""
-        return self._alice_aea_address
+        return self._aea_addresses
 
-    @alice_aea_address.setter
-    def alice_aea_address(self, address: Address) -> None:
-        self._alice_aea_address = address
+    @aea_addresses.setter
+    def aea_addresses(self, addresses: List[Address]) -> None:
+        self._aea_addresses = addresses
 
     @property
     def is_searching(self) -> bool:
