@@ -40,10 +40,11 @@ from typing import Dict, List, Tuple
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
+from aea.cli.ipfs_hash import update_hashes
 from aea.helpers.base import compute_specifier_from_version
-from scripts.generate_ipfs_hashes import update_hashes
 
 
+ROOT_DIR = Path(__file__).parent
 PLUGINS_DIR = Path("plugins")
 SETUP_PY_NAME_REGEX = re.compile(r"\Wname=\"(.*)\",")
 SETUP_PY_VERSION_REGEX = re.compile(r"\Wversion=\"(.*)\",")
@@ -278,7 +279,11 @@ def main() -> None:
         print("Not updating fingerprints, since no specifier set has been updated.")
     else:
         print("Updating hashes and fingerprints.")
-        return_code = update_hashes()
+        return_code = update_hashes(
+            packages_dir=ROOT_DIR / "packages",
+            test_data=ROOT_DIR / "tests" / "data",
+            root_dir=ROOT_DIR,
+        )
     exit_with_message("Done!", exit_code=return_code)
 
 

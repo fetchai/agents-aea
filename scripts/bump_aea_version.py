@@ -58,8 +58,8 @@ from git import Repo
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
+from aea.cli.ipfs_hash import update_hashes
 from aea.helpers.base import compute_specifier_from_version
-from scripts.generate_ipfs_hashes import update_hashes
 
 
 logging.basicConfig(
@@ -72,7 +72,7 @@ PatternByPath = Dict[Path, str]
 
 AEA_DIR = Path("aea")
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-ROOT_DIR = Path(os.path.join(CUR_PATH, ".."))
+ROOT_DIR = Path(__file__).parent
 
 PLUGINS_DIR = Path("plugins")
 ALL_PLUGINS = tuple(PLUGINS_DIR.iterdir())
@@ -543,7 +543,11 @@ def bump(arguments: argparse.Namespace) -> int:
         )
     else:
         logging.info("Updating hashes and fingerprints.")
-        return_code = update_hashes()
+        return_code = update_hashes(
+            packages_dir=ROOT_DIR / "packages",
+            test_data=ROOT_DIR / "tests" / "data",
+            root_dir=ROOT_DIR,
+        )
     return return_code
 
 
