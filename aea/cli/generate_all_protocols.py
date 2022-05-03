@@ -81,7 +81,7 @@ logger.setLevel(logging.INFO)
 def check_working_tree_is_dirty() -> None:
     """Check if the current Git working tree is dirty."""
     click.echo("Checking whether the Git working tree is dirty...")
-    result = subprocess.check_output(
+    result = subprocess.check_output(  # nosec
         [str(shutil.which("git")), "diff", "--stat"]
     )  # nosec
     if len(result) > 0:
