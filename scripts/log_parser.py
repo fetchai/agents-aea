@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Parser and plotter for profiling logs."""
+"""Parser and plotter for profiling logs. Pyqt5 might be required in some systems in order for the script to work: pip install PyQt5"""
 import datetime
 import json
 import os
