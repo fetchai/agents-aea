@@ -58,34 +58,34 @@ from aea.configurations.loader import (
     ConfigLoaders,
     load_component_configuration,
 )
+from aea.exceptions import enforce
 
 
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
 LIBPROTOC_VERSION = "libprotoc 3.19.4"
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
-TEST_DATA = Path("tests", "data").absolute()
 PROTOCOLS_PLURALS = "protocols"
-ROOT_DIR = Path(".").absolute()
 PROTOCOL_GENERATOR_DOCSTRING_REGEX = "It was created with protocol buffer compiler version `libprotoc .*` and aea version `.*`."
 
 
-def setup_logger(name: str) -> logging.Logger:
-    """Set up the logger."""
-    FORMAT = "[%(asctime)s][%(levelname)s] %(message)s"
-    logging.basicConfig(format=FORMAT)
-    logger_ = logging.getLogger(name)
-    logger_.setLevel(logging.INFO)
-    return logger_
+logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s")
+logger = logging.getLogger("generate_all_protocols")
+logger.setLevel(logging.INFO)
 
 
-logger = setup_logger("generate_all_protocols")
-
-
-def enforce(condition: bool, message: str = "") -> None:
-    """Custom assertion."""
-    if not condition:
-        raise AssertionError(message)
+def check_working_tree_is_dirty() -> None:
+    """Check if the current Git working tree is dirty."""
+    click.echo("Checking whether the Git working tree is dirty...")
+    result = subprocess.check_output(
+        [str(shutil.which("git")), "diff", "--stat"]
+    )  # nosec
+    if len(result) > 0:
+        click.echo("Git working tree is dirty:")
+        click.echo(result.decode("utf-8"))
+        sys.exit(1)
+    else:
+        click.echo("All good!")
 
 
 def load_protocol_specification_from_string(
@@ -138,6 +138,11 @@ def find_protocols_in_local_registry(packages_dir: Path) -> Iterator[Path]:
 def log(message: str, level: int = logging.INFO) -> None:
     """Produce a logging message."""
     logger.log(level, message)
+
+
+def log_separator(length: int = 100) -> None:
+    """Log separator."""
+    click.echo("=" * length)
 
 
 def run_cli(*args: Any, **kwargs: Any) -> None:
@@ -220,8 +225,9 @@ def _generate_protocol(package_path: Path) -> None:
 
 def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
     """Run black and isort against a directory."""
+    kwargs["stdout"] = subprocess.PIPE
     run_cli(
-        sys.executable, "-m", "black", "--verbose", str(directory.absolute()), **kwargs,
+        sys.executable, "-m", "black", "-q", str(directory.absolute()), **kwargs,
     )
     run_cli(
         sys.executable,
@@ -229,7 +235,6 @@ def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
         "isort",
         "--settings-path",
         "setup.cfg",
-        "--verbose",
         str(directory.absolute()),
         **kwargs,
     )
@@ -340,7 +345,10 @@ def _replace_generator_docstring(package_path: Path, replacement: str) -> None:
 
 
 def _process_packages_protocol(
-    package_path: Path, preserve_generator_docstring: bool = False
+    package_path: Path,
+    preserve_generator_docstring: bool,
+    no_format: bool,
+    root_dir: Path,
 ) -> None:
     """
     Process protocol package from local registry.
@@ -362,6 +370,8 @@ def _process_packages_protocol(
 
     :param package_path: path to the package.
     :param preserve_generator_docstring: if True, the protocol generator docstring is preserved (see above).
+    :param no_format: If True, won't run the formatters
+    :param root_dir: Path to open-aea repository
     """
     if preserve_generator_docstring:
         # save the old protocol generator docstring
@@ -372,7 +382,12 @@ def _process_packages_protocol(
     _fix_generated_protocol(package_path)
     if preserve_generator_docstring:
         _replace_generator_docstring(package_path, old_protocol_generator_docstring)
-    run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
+
+    if not no_format:
+        run_isort_and_black(
+            Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(root_dir)
+        )
+
     _fingerprint_protocol(package_path.name)
     _update_original_protocol(package_path)
 
@@ -396,12 +411,16 @@ def _check_preliminaries() -> None:
     )
 
 
-def _process_test_protocol(specification: Path, package_path: Path) -> None:
+def _process_test_protocol(
+    specification: Path, package_path: Path, no_format: bool, root_dir: Path
+) -> None:
     """
     Process a test protocol.
 
     :param specification: path to specification.
     :param package_path: the output directory.
+    :param no_format: If True, won't run the formatters
+    :param root_dir: Path to open-aea repository
     """
     specification_content = specification.read_text()
     _save_specification_in_temporary_file(package_path.name, specification_content)
@@ -414,7 +433,10 @@ def _process_test_protocol(specification: Path, package_path: Path) -> None:
         )
     ]
     replace_in_directory(package_path.name, replacements)
-    run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
+    if not no_format:
+        run_isort_and_black(
+            Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(root_dir)
+        )
     _fingerprint_protocol(package_path.name)
     _update_original_protocol(package_path)
 
@@ -498,36 +520,10 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     )
 
 
-def _generate_all_protocols(packages_dir: Path, no_bump: bool = False) -> None:
-    """
-    Run the script.
-
-    :param packages_dir: Path to package dir
-    :param no_bump: if True, the (default: False)
-    """
-    _check_preliminaries()
-
-    all_protocols = list(find_protocols_in_local_registry(packages_dir))
-
-    with AEAProject():
-        log("=" * 100)
-        _process_test_protocol(
-            TEST_DATA / "sample_specification.yaml",
-            TEST_DATA / "generator" / "t_protocol",
-        )
-        log("=" * 100)
-        _process_test_protocol(
-            TEST_DATA / "sample_specification_no_custom_types.yaml",
-            TEST_DATA / "generator" / "t_protocol_no_ct",
-        )
-        for package_path in all_protocols:
-            log("=" * 100)
-            log(f"Processing protocol at path {package_path}")
-            if not no_bump:
-                _bump_protocol_specification_id_if_needed(package_path)
-            # no_bump implies to ignore the docstring:
-            #  'It was created with protocol buffer compiler ... and aea version ...'
-            _process_packages_protocol(package_path, no_bump)
+DEFAULT_TEST_SAMPLES = [
+    ("sample_specification.yaml", "t_protocol",),
+    ("sample_specification_no_custom_types.yaml", "t_protocol_no_ct",),
+]
 
 
 @click.command(name="generate-all-protocols")
@@ -536,7 +532,65 @@ def _generate_all_protocols(packages_dir: Path, no_bump: bool = False) -> None:
     type=click.Path(dir_okay=True, file_okay=False),
     default=Path("packages/"),
 )
-@click.option("--no-bump", is_flag=True, default=False)
-def generate_all_protocols(packages_dir: Path, no_bump: bool) -> None:
+@click.option(
+    "--no-bump",
+    is_flag=True,
+    default=False,
+    help="no_bump implies to ignore the docstring",
+)
+@click.option(
+    "--test-data",
+    type=click.Path(dir_okay=True, file_okay=False),
+    help="Path to test data.",
+)
+@click.option(
+    "--no-format",
+    is_flag=True,
+    default=False,
+    help="If set to True, formatters won't run.",
+)
+@click.option(
+    "--root-dir",
+    type=click.Path(dir_okay=True, file_okay=False),
+    help="Path to root dir.",
+    default=Path(".").resolve(),
+)
+@click.option(
+    "--check-clean", is_flag=True, help="Check if git tree is clean..",
+)
+def generate_all_protocols(
+    packages_dir: Path,
+    no_bump: bool,
+    test_data: Optional[Path],
+    no_format: bool,
+    root_dir: Path,
+    check_clean: bool,
+) -> None:
     """Generate all protocols."""
-    _generate_all_protocols(packages_dir, no_bump)
+
+    _check_preliminaries()
+
+    all_protocols = list(find_protocols_in_local_registry(packages_dir))
+    if test_data is not None:
+        test_data = Path(test_data).absolute()
+
+    with AEAProject():
+        if test_data is not None:
+            for file, output_dir in DEFAULT_TEST_SAMPLES:
+                log_separator()
+                _process_test_protocol(
+                    test_data / file,
+                    test_data / "generator" / output_dir,
+                    no_format,
+                    root_dir,
+                )
+
+        for package_path in all_protocols:
+            log_separator()
+            log(f"Processing protocol at path {package_path}")
+            if not no_bump:
+                _bump_protocol_specification_id_if_needed(package_path)
+            _process_packages_protocol(package_path, no_bump, no_format, root_dir)
+
+    if check_clean:
+        check_working_tree_is_dirty()
