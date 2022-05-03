@@ -111,5 +111,5 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-capricorn.fetch.ai:443
-      chain_id: capricorn-1
+      address: https://rest-dorado.fetch.ai:443
+      chain_id: dorado-1

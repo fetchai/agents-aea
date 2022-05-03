@@ -35,6 +35,6 @@ type: connection
 config:
   ledger_apis:
     fetchai:
-      address: https://rest-capricorn.fetch.ai:443
+      address: https://rest-dorado.fetch.ai:443
       denom: atestfet
-      chain_id: capricorn-1
+      chain_id: dorado-1
