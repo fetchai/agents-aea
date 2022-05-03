@@ -9,7 +9,7 @@
 
 3. Bump plugin versions if necessary by running `python scripts/update_plugin_versions.py --update "PLUGIN_NAME,NEW_VERSION"`. Commit if satisfied.
 
-4. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`. Commit if changes occurred.
+4. Check the protocols are up-to-date by running `aea generate-all-protocols --test-data=tests/data/ --check-clean`. Commit if changes occurred.
 
 5. [CURRENTLY SKIPPED] Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
