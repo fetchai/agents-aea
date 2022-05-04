@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Parser and plotter for profiling logs."""
+"""Parser and plotter for profiling logs. Pyqt5 might be required in some systems in order for the script to work: pip install PyQt5"""
 import datetime
 import json
 import os
@@ -265,7 +265,7 @@ class LogParser:
 
                     if not var_data["values"]:
                         print(
-                            f"Data for {tracker_name}::{var_name} not found in the log!"
+                            f"[Figure {figure_name}] Data for {tracker_name}::{var_name} not found in the log!"
                         )
                         continue
 
@@ -288,6 +288,17 @@ class LogParser:
         plt.show()
 
 
+def extract_gc_objects_set(log_file_path):
+    """Extract a set of all objects that appeared in the garbage collector count section"""
+    objs = set()
+    with open(log_file_path, "r") as log:
+        for line in log.readlines():
+            match = re.match(r".*\* (?P<name>.*) \(gc\):  (?P<value>\d+).*", line)
+            if match:
+                objs.add(match.groupdict()["name"])
+    return sorted(objs)
+
+
 def add_count_trackers(
     parser: LogParser,
     tracker_names: List[str],
@@ -305,8 +316,8 @@ def add_count_trackers(
         )
 
 
-if __name__ == "__main__":
-
+def main():
+    """Main function"""
     log_parser = LogParser(
         agent_index=0, time_format=TimeFormat.RELATIVE
     )  # uses the most recent log by default
@@ -315,6 +326,7 @@ if __name__ == "__main__":
     log_parser.add_figure(fig_name="Memory", y_label="Memory [MB]")
     log_parser.add_figure(fig_name="Object count (present)", y_label="Count")
     log_parser.add_figure(fig_name="Object count (created)", y_label="Count")
+    log_parser.add_figure(fig_name="Object count (gc)", y_label="Count")
 
     # Memory
     log_parser.add_tracker(
@@ -326,12 +338,12 @@ if __name__ == "__main__":
             "current_memory": {
                 "style": LineStyle.SOLID.value,
                 "color": LineColor.GREEN.value,
-                "width": 1,
+                "width": 2,
             },
             "peak_memory": {
                 "style": LineStyle.SOLID.value,
                 "color": LineColor.RED.value,
-                "width": 1,
+                "width": 2,
             },
         },
     )
@@ -340,7 +352,12 @@ if __name__ == "__main__":
     log_parser.add_tracker(
         tracker_name="Settlement",
         regex=r".*Finalized with transaction hash: .*",  # validation message
-        figure_names=["Memory", "Object count (present)", "Object count (created)"],
+        figure_names=[
+            "Memory",
+            "Object count (present)",
+            "Object count (created)",
+            "Object count (gc)",
+        ],
         tracker_type="event",
         line_styles={
             "event": {
@@ -355,7 +372,12 @@ if __name__ == "__main__":
     log_parser.add_tracker(
         tracker_name="Tendermint reset",
         regex=r".*Resetting tendermint node successful!.*",
-        figure_names=["Memory", "Object count (present)", "Object count (created)"],
+        figure_names=[
+            "Memory",
+            "Object count (present)",
+            "Object count (created)",
+            "Object count (gc)",
+        ],
         tracker_type="event",
         line_styles={
             "event": {
@@ -366,8 +388,8 @@ if __name__ == "__main__":
         },
     )
 
-    # Counters
-    present_counters = [
+    # Tracked objects
+    tracked_objects = [
         "Message",
         "Dialogue",
         "DialogueLabel",
@@ -378,22 +400,36 @@ if __name__ == "__main__":
         "Connection",
         "Contract",
         "Protocol",
-        "AbciDialogue",
-        "HttpDialogue",
-        "LedgerApiDialogue",
-        "ContractApiDialogue",
-        "SigningDialogue",
-        "incomplete_to_complete_dialogue_labels",
     ]
-    add_count_trackers(
-        log_parser, present_counters, ["Object count (present)"], " (present)"
-    )
 
-    created_counters = ["Message", "Dialogue", "DialogueLabel"]
+    # Present tracked objects
     add_count_trackers(
-        log_parser, created_counters, ["Object count (created)"], " (created)"
+        parser=log_parser,
+        tracker_names=tracked_objects,
+        figure_names=["Object count (present)"],
+        tracker_name_appendix=" (present)",
+    )
+    # Created tracked objects
+    add_count_trackers(
+        parser=log_parser,
+        tracker_names=tracked_objects,
+        figure_names=["Object count (created)"],
+        tracker_name_appendix=" (created)",
+    )
+    # Present common objects in the garbage collector
+    tracked_objects_in_gc = extract_gc_objects_set(log_parser.log_file_path)
+
+    add_count_trackers(
+        parser=log_parser,
+        tracker_names=tracked_objects_in_gc,
+        figure_names=["Object count (gc)"],
+        tracker_name_appendix=" (gc)",
     )
 
     # Process and plot
     log_parser.process()
     log_parser.plot()
+
+
+if __name__ == "__main__":
+    main()

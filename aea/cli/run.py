@@ -165,7 +165,7 @@ def _calculate_connection_ids(
 @contextmanager
 def _profiling_context(period: int) -> Generator:
     """Start profiling context."""
-    OBJECTS_INSTANCES = [
+    TYPES_TO_TRACK = [
         Message,
         Dialogue,
         DialogueLabel,
@@ -177,13 +177,8 @@ def _profiling_context(period: int) -> Generator:
         Contract,
         Protocol,
     ]
-    OBJECTS_CREATED = [Message, Dialogue, DialogueLabel]
 
-    profiler = Profiling(
-        period=period,
-        objects_instances_to_count=OBJECTS_INSTANCES,
-        objects_created_to_count=OBJECTS_CREATED,
-    )
+    profiler = Profiling(period=period, types_to_track=TYPES_TO_TRACK,)
     profiler.start()
     try:
         yield None
