@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Generator, List, Optional, Sequence, Tuple, cast
 
 import click
-import memray  # type: ignore
 
 from aea import __version__
 from aea.aea import AEA
@@ -81,6 +80,14 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     help="Enable profiling, print profiling every amount of seconds",
 )
 @click.option(
+    "--memray",
+    "memray_flag",
+    is_flag=True,
+    required=False,
+    default=False,
+    help="Enable memray tracing, create a bin file with the memory dump",
+)
+@click.option(
     "--exclude-connections",
     "exclude_connection_ids",
     cls=ConnectionsOption,
@@ -106,6 +113,7 @@ def run(
     is_install_deps: bool,
     apply_environment_variables: bool,
     profiling: int,
+    memray_flag: bool,
     password: str,
 ) -> None:
     """Run the agent."""
@@ -122,9 +130,17 @@ def run(
     profiling_context = (
         _profiling_context(period=profiling) if profiling > 0 else nullcontext()
     )
-    memray_context = (
-        memray.Tracker("memray_profiling.bin") if profiling > 0 else nullcontext()
-    )
+
+    memray_context = nullcontext()
+    if memray_flag:
+        try:
+            import memray  # type: ignore # pylint: disable=import-error,import-outside-toplevel
+
+            memray_context = memray.Tracker("memray_profiling.bin")
+        except ModuleNotFoundError:
+            click.echo(
+                "WARNING: memray module is not installed. Memray tracing will be disabled."
+            )
 
     with profiling_context, memray_context:
         run_aea(
