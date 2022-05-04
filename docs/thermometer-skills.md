@@ -11,7 +11,7 @@ This demo aims to demonstrate how to create a very simple AEA with the usage of 
 
 This diagram shows the communication between the various entities as data is successfully sold by the thermometer AEA to the client AEA. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Client_AEA
@@ -39,9 +39,7 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Search
         deactivate Thermometer_AEA
         deactivate Blockchain
-       
-</div>
-<br>
+```
 
 ## Option 1: AEA Manager approach
 

@@ -19,7 +19,7 @@ There are two types of interactions:
 
 This diagram shows the communication between the various entities during the registration phase. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent_2
         participant Agent_1
@@ -46,13 +46,13 @@ This diagram shows the communication between the various entities during the reg
         deactivate Agent_2
         deactivate Search
         deactivate Controller
-</div>
+```
 
 ### Transaction communication
 
 This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as `Seller_Agent`. We also have an AEA in the role of the buyer, referred to as `Buyer_Agent`. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Buyer_Agent
         participant Seller_Agent
@@ -80,8 +80,7 @@ This diagram shows the communication between two AEAs and the controller. In thi
         deactivate Seller_Agent
         deactivate Search
         deactivate Controller
-
-</div>
+```
 
 In the above case, the proposal received contains a set of good which the seller wishes to sell and a cost of them. The buyer AEA needs to determine if this is a good deal for them and if so, it accepts.
 

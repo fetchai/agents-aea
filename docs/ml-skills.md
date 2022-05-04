@@ -18,7 +18,7 @@ The `aea install` command installs all dependencies an AEA needs that is listed 
 
 This diagram shows the communication between the two AEAs.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant ml_model_trainer
         participant ml_data_provider
@@ -47,9 +47,7 @@ This diagram shows the communication between the two AEAs.
         deactivate ml_data_provider
         deactivate Search
         deactivate Ledger
-
-</div>
-<br>
+```
 
 ## Option 1: AEA Manager approach
 

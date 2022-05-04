@@ -14,7 +14,7 @@ It demonstrates how the AEAs trade car park information.
 ## Communication
 This diagram shows the communication between the various entities as data is successfully sold by the car park AEA to the client. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Car_Data_Buyer_AEA
@@ -42,8 +42,7 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Car_Data_Buyer_AEA
         deactivate Car_Park_AEA
         deactivate Blockchain
-</div>
-<br>
+```
 
 ## Option 1: AEA Manager approach
 

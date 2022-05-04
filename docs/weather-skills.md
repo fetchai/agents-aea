@@ -15,7 +15,7 @@ You can use this AEA as an example of how to read data from a database and adver
 
 This diagram shows the communication between the various entities as data is successfully sold by the weather station AEA to the client. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Client_AEA
@@ -42,10 +42,8 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Client_AEA
         deactivate Search
         deactivate Weather_AEA
-        deactivate Blockchain
-       
-</div>
-<br>
+        deactivate Blockchain  
+```
 
 ## Option 1: AEA Manager approach
 

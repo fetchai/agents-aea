@@ -256,7 +256,7 @@ aea delete erc1155_client
 
 This diagram shows the communication between the various entities in this interaction:
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Erc1155_contract
@@ -287,5 +287,4 @@ This diagram shows the communication between the various entities in this intera
         deactivate Client_AEA
         deactivate Deployer_AEA
         deactivate Blockchain
-       
-</div>
+```

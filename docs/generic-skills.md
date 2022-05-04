@@ -15,7 +15,7 @@ The corresponding packages can be customised to allow for a database or sensor t
 
 The following diagram shows the communication between various entities in this interaction.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Buyer_AEA
@@ -42,9 +42,8 @@ The following diagram shows the communication between various entities in this i
         deactivate Buyer_AEA
         deactivate Search
         deactivate Seller_AEA
-        deactivate Blockchain
-       
-</div>
+        deactivate Blockchain 
+```
 
 ## Preparation instructions
  

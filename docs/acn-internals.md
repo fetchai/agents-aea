@@ -159,7 +159,7 @@ The ACN protocol specifies three different possible interactions:
 The registration interaction is used by delegate agents or relayed peers
 to register themselves to another peer.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent/RelayedPeer
         participant Peer
@@ -176,14 +176,14 @@ to register themselves to another peer.
         else unsupported ledger
             Peer->>Agent/RelayedPeer: Status(ERROR_UNSUPPORTED_LEDGER)
         end
-</div>
+```
 
 ### "Look-up" Interaction
 
 The look-up interaction is used by a peer
 to request information to another peer about an agent address.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Peer1
         participant Peer2
@@ -193,7 +193,7 @@ to request information to another peer about an agent address.
         else unknown agent address
             Peer2->>Peer1: Status(ERROR_UNKNOWN_AGENT_ADDRESS)
         end
-</div>
+```
 
 
 ### "Routing" Interaction
@@ -201,7 +201,7 @@ to request information to another peer about an agent address.
 The routing interaction is used by agents
 and peers to route the envelope through the ACN.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Peer1
         participant Peer2
@@ -214,8 +214,7 @@ and peers to route the envelope through the ACN.
         else PoR errors
             note over Peer1,Peer2: see above 
         end
-
-</div>
+```
 
 
 ## Joining the ACN network
@@ -248,7 +247,7 @@ and delegate connections.
 
 Then, it sets up the notification stream and notifies the bootstrap peers (if any).
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Peer1
         participant Peer2
@@ -269,7 +268,7 @@ Then, it sets up the notification stream and notifies the bootstrap peers (if an
             Peer1->>Peer3: register address
         end
         note over Peer1: set up:<br/>- address stream<br/>- envelope stream<br/>- register relay stream
-</div>
+```
 
 ### Relay connections
 
@@ -280,7 +279,7 @@ requests.
 The following diagram shows an example of the message exchanged
 during a registration request:
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent
         participant Peer
@@ -303,7 +302,7 @@ during a registration request:
             Peer->>Agent: Status(SUCCESS)
             note over Peer: announce agent address<br/>to other peers
         end
-</div>
+```
 
 ### Delegate connections
 
@@ -354,7 +353,7 @@ The logic of the `Agent` client connected with a delegate connection
 is implemented in 
 the <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/connections/p2p_libp2p_client" target="_blank">AEA connection `fetchai/p2p_libp2p_client`</a> 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent
         participant Peer
@@ -378,7 +377,7 @@ the <a href="https://github.com/fetchai/agents-aea/tree/main/packages/fetchai/co
             end
         end
         note over Peer: route envelope<br/>to next peer
-</div>
+```
 
 
 ### ACN Envelope Routing
@@ -401,7 +400,7 @@ we may have different scenario:
    is not the local agent address: 
    the message is considered invalid, and it is dropped. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent
         participant Peer1
@@ -410,13 +409,13 @@ we may have different scenario:
         alt envelope sender not registered locally
             note over Peer1: stop, log error
         end
-</div>
+```
 
 2) the `target` of the envelope is 
    the local agent connected to the peer:
    the envelope is routed to the local agent.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent
         participant Peer1
@@ -430,12 +429,12 @@ we may have different scenario:
             Peer1->>Agent: AeaEnvelope
             Agent->>Peer1: Status(Success)
         end
-</div>
+```
 
 3) the `target` is a delegate client.
    Send the envelope via TCP.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Delegate
         participant Peer1
@@ -446,14 +445,14 @@ we may have different scenario:
             Peer1->>Delegate: AeaEnvelope
             Delegate->>Peer1: Status(Success)
         end
-</div>
+```
 
 4) Otherwise, look up the local DHT.
   If an entry is found, use it;
    otherwise, send a look-up request
    to connected peers.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent
         participant Peer1
@@ -474,13 +473,13 @@ we may have different scenario:
             end
         end
         note over Peer1,Peer2: Now Peer1 knows the contact peer<br/>is PeerX
-</div>
+```
 
 In particular, when a peer receives a LookupRequest message,
 it does the following:
 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Peer1
         participant Peer2
@@ -500,13 +499,13 @@ it does the following:
                 Peer2->>Peer1:Status(UNKNOWN_AGENT_ADDRESS)
             end
         end
-</div>
+```
 
 Let `Peer3` the contact peer of the recipient of the envelope. 
 The following diagram shows how the contact peer of the 
 envelope recipient handles the incoming envelope:
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Peer1
         participant Peer3
@@ -542,7 +541,7 @@ envelope recipient handles the incoming envelope:
                 Peer3->>Peer1: Status(ERROR_UNKNOWN_AGENT_ADDRESS)
             end
         end
-</div>
+```
 
 ### ACN Envelope Exit: Peer -> Agent
 
@@ -555,7 +554,7 @@ delegate connection,
 similarly for what has been described for the envelope entrance
 <a href="../acn-internals#acn-envelope-entrance-agent-peer">(see above)</a>.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent
         participant Peer
@@ -571,7 +570,7 @@ similarly for what has been described for the envelope entrance
         else wrong payload
             Agent->>Peer: Status(GENERIC_ERROR)
         end
-</div>
+```
 
 ## Connect your AEA to the ACN
 
@@ -607,7 +606,7 @@ Then, it sets up the _message receiving loop_,
 The loops are run concurrently in the Multiplexer thread, 
   using the Python asynchronous programming library `asyncio`.  
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Libp2p Connection
         participant sending loop
@@ -624,13 +623,13 @@ The loops are run concurrently in the Multiplexer thread,
         deactivate Libp2p Node
         deactivate sending loop
         deactivate receiving loop
-</div>
+```
 
 - The `send` method enqueues a message in the output queue.
 The message is then dequeued by the sending loop,
 and then sent to the Libp2p node. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Libp2p Connection
         participant sending loop
@@ -656,13 +655,13 @@ and then sent to the Libp2p node.
         else envelope decoding error 
             Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
         end
-</div>
+```
 
 - The `receive` method dequeues a message from the input queue.
 The queue is populated by the receiving loop,
 which receives messages from the Libp2p node. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Libp2p Connection
         participant receiving loop
@@ -688,7 +687,7 @@ which receives messages from the Libp2p node.
         end
         Libp2p Connection->>receiving loop: read message from output queue
         note over Libp2p Connection: return message<br/>to Multiplexer
-</div>
+```
 
 - the `disconnect` method stops both the receiving loop and the sending loop,
   and stops the Libp2p node.
@@ -715,7 +714,7 @@ therefore can be used by the Multiplexer as any other connection.
   The loops are run concurrently in the Multiplexer thread, 
   using the Python asynchronous programming library `asyncio`.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Libp2p Client Connection
         participant Libp2p Node
@@ -744,7 +743,7 @@ therefore can be used by the Multiplexer as any other connection.
             activate Libp2p Node
             deactivate Libp2p Node
         end
-</div>
+```
 
 - The `send` method and the `receive` methods behave similarly to
   the `send` and `receive` methods of the

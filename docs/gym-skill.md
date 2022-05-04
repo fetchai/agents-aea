@@ -98,7 +98,7 @@ aea delete my_gym_aea
 ## Communication
 This diagram shows the communication between the AEA and the gym environment
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant AEA
         participant Environment
@@ -114,7 +114,7 @@ This diagram shows the communication between the AEA and the gym environment
 
         deactivate AEA
         deactivate Environment
-</div>
+```
 
 ## Skill Architecture
 

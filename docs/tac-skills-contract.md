@@ -24,7 +24,7 @@ There are two types of interactions:
 ### Registration communication
 This diagram shows the communication between the various entities during the registration phase. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Agent_2
         participant Agent_1
@@ -50,12 +50,12 @@ This diagram shows the communication between the various entities during the reg
         deactivate Agent_2
         deactivate Search
         deactivate Controller
-</div>
+```
 
 ### Transaction communication
 This diagram shows the communication between two AEAs and a controller. In this case, we have a `Seller_Agent` which is set up as a seller (and registers itself as such with the controller during the registration phase). We also have the `Searching_Agent` which is set up to search for sellers. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Buyer_Agent
         participant Seller_Agent
@@ -83,8 +83,7 @@ This diagram shows the communication between two AEAs and a controller. In this 
         deactivate Seller_Agent
         deactivate Search
         deactivate Controller
-
-</div>
+```
 
 In the above case, the proposal received contains a set of goods to sell and an associated price. The buyer AEA needs to determine if this is a good deal for them, and if so, it accepts.
 

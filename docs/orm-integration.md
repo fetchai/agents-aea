@@ -14,7 +14,7 @@ Since the AEA framework enables us to use third-party libraries hosted on PyPI w
 
 This diagram shows the communication between the various entities in the case where the thermometer data is successfully sold by the seller AEA to the buyer. 
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Buyer_AEA
@@ -41,9 +41,8 @@ This diagram shows the communication between the various entities in the case wh
         deactivate Buyer_AEA
         deactivate Search
         deactivate Seller_AEA
-        deactivate Blockchain
-       
-</div>
+        deactivate Blockchain    
+```
 
 ## Preparation instructions
 

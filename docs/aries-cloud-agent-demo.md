@@ -12,7 +12,7 @@ This demo corresponds with the one <a href="https://github.com/hyperledger/aries
 
 The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining all of their capabilities, such as issuing and requesting verifiable credentials, selective disclosure and zero knowledge proofs.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant faea as Faber_AEA
         participant faca as Faber_ACA
@@ -41,7 +41,7 @@ The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining
         deactivate faca
         deactivate aaca
         deactivate aaea
-</div>
+```
 
 There are two AEAs:
 

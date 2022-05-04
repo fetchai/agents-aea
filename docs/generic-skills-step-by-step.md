@@ -235,7 +235,7 @@ So far, we have tasked the AEA with sending register/unregister requests to the 
 
 We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow that we want this AEA to use, as well as interactions with a search node and the blockchain between a `seller_AEA` and a `buyer_AEA`.
 
-<div class="mermaid">
+``` mermaid
     sequenceDiagram
         participant Search
         participant Buyer_AEA
@@ -272,8 +272,7 @@ We have to specify the logic to negotiate with another AEA based on the strategy
         deactivate Search
         deactivate Seller_AEA
         deactivate Blockchain
-
-</div>
+```
 
 In our case, `my_generic_seller` is the `Seller_AEA` in the above figure.
 
