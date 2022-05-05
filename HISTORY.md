@@ -1,5 +1,34 @@
 # Release History
 
+
+## 1.2.0 (2022-05-05)
+
+AEA:
+- Adds support for Python 3.10
+- Updates protobuf dependency 
+- Updates asyncio dependency
+- Updates golang modules
+- Updates many dependencies to their latest versions
+- Fixes dependency issues
+
+Plugins:
+- Upgrades fetchai plugin to be compatible with Dorado networks
+- Upgrades cosmos plugin to be compatible with Dorado networks
+
+Packages:
+- Adds more logging to the p2p_libp2p packages (vanilla, client, mailbox)
+- Aries demo updated to cover the full base scenario
+- Protocols were regenerated with newer protobuf
+
+Chores:
+- Fixed various tests
+- Fixed docker container issue in tests
+- Added automated script to add support for new versions of the Fetchai network
+- Added automated script to update copyright headers and check their validity
+- Apply the above script on all packages
+- Adds tests for BaseContractTestTool
+- Improves the script that automatically updates package versions
+
 ## 1.1.1 (2021-12-15)
 
 AEA:

@@ -4,6 +4,14 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v1.1.1` to `v1.2.0`
+
+Ensure you update the plugins to their latest version (fetchai and cosmos plugins are changed in this release)
+
+Update the packages to the latest versions (especially p2p_libp2p related packages are updated)
+
+Check packages’ and agents’ configurations are correct (e.g. the fetchai test-net name is changed for the Dorado network)
+
 ## `v1.1.0` to `v1.1.1`
 
 No backwards incompatible changes.
