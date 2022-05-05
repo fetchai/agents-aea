@@ -1,6 +1,6 @@
 name: http_server
 author: fetchai
-version: 0.23.0
+version: 0.23.1
 type: connection
 description: The HTTP server connection that wraps http server implementing a RESTful
   API specification.
@@ -13,7 +13,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.1.0
+- fetchai/http:1.1.1
 class_name: HTTPServerConnection
 config:
   api_spec_path: null
@@ -24,7 +24,7 @@ config:
   target_skill_id: null
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:1.1.0
+- fetchai/http:1.1.1
 dependencies:
   aiohttp:
     version: <3.8,>=3.7.4

@@ -1,6 +1,6 @@
 name: error_test_skill
 author: fetchai
-version: 0.1.0
+version: 0.1.1
 type: skill
 description: The error test skil for testing.
 license: Apache-2.0

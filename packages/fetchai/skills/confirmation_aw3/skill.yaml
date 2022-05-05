@@ -1,6 +1,6 @@
 name: confirmation_aw3
 author: fetchai
-version: 0.12.0
+version: 0.12.1
 type: skill
 description: This skill purchases information from other agents as specified in its
   configuration. It is the confirmation buyer for Agent World 3.
@@ -16,17 +16,17 @@ fingerprint:
   strategy.py: QmYtFuuv1SevjmsdcvZTGszTS92wuA4RP5StJJaieEtWmi
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.0
-- fetchai/ledger:0.20.0
+- fetchai/http_client:0.24.1
+- fetchai/ledger:0.21.0
 contracts: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/fipa:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/oef_search:1.1.0
-- fetchai/signing:1.1.0
+- fetchai/default:1.1.1
+- fetchai/fipa:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/oef_search:1.1.1
+- fetchai/signing:1.1.1
 skills:
-- fetchai/generic_buyer:0.27.0
+- fetchai/generic_buyer:0.27.1
 behaviours:
   search:
     args:

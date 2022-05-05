@@ -1,7 +1,7 @@
 name: aggregation
 author: fetchai
-version: 0.2.0
-protocol_specification_id: fetchai/aggregation:0.2.0
+version: 0.2.1
+protocol_specification_id: fetchai/aggregation:0.2.1
 type: protocol
 description: A protocol for agents to aggregate individual observations
 license: Apache-2.0

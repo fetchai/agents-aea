@@ -1,6 +1,6 @@
 name: signing
 author: fetchai
-version: 1.1.0
+version: 1.1.1
 protocol_specification_id: fetchai/signing:1.0.0
 type: protocol
 description: A protocol for communication between skills and decision maker.

@@ -7,25 +7,25 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.0
-- fetchai/http_server:0.23.0
-- fetchai/prometheus:0.9.0
+- fetchai/http_client:0.24.1
+- fetchai/http_server:0.23.1
+- fetchai/prometheus:0.9.1
 contracts: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/http:1.1.0
-- fetchai/prometheus:1.1.0
-- fetchai/signing:1.1.0
-- fetchai/state_update:1.1.0
+- fetchai/default:1.1.1
+- fetchai/http:1.1.1
+- fetchai/prometheus:1.1.1
+- fetchai/signing:1.1.1
+- fetchai/state_update:1.1.1
 skills:
-- fetchai/advanced_data_request:0.7.0
-default_connection: fetchai/http_server:0.23.0
+- fetchai/advanced_data_request:0.7.1
+default_connection: fetchai/http_server:0.23.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai
 default_routing:
-  fetchai/http:1.1.0: fetchai/http_client:0.24.0
-  fetchai/prometheus:1.1.0: fetchai/prometheus:0.9.0
+  fetchai/http:1.1.1: fetchai/http_client:0.24.1
+  fetchai/prometheus:1.1.1: fetchai/prometheus:0.9.1
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -35,13 +35,13 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/http_server:0.23.0
+public_id: fetchai/http_server:0.23.1
 type: connection
 config:
   api_spec_path: vendor/fetchai/skills/advanced_data_request/api_spec.yaml
-  target_skill_id: fetchai/advanced_data_request:0.7.0
+  target_skill_id: fetchai/advanced_data_request:0.7.1
 ---
-public_id: fetchai/advanced_data_request:0.7.0
+public_id: fetchai/advanced_data_request:0.7.1
 type: skill
 models:
   advanced_data_request_model:

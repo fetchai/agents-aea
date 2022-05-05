@@ -1,6 +1,6 @@
 name: simple_oracle_client
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 type: skill
 description: This skill deploys a Fetch oracle client contract and calls this contract
   to request an oracle value
@@ -15,13 +15,13 @@ fingerprint:
   strategy.py: QmTw5G7JKRg5DWf2ueF8FTogjAaXS91hcD1VskqSuuVdVe
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/fet_erc20:0.9.0
-- fetchai/oracle_client:0.10.0
+- fetchai/fet_erc20:0.9.1
+- fetchai/oracle_client:0.11.0
 protocols:
-- fetchai/contract_api:1.1.0
-- fetchai/default:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/signing:1.1.0
+- fetchai/contract_api:1.1.1
+- fetchai/default:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/signing:1.1.1
 skills: []
 behaviours:
   simple_oracle_client_behaviour:

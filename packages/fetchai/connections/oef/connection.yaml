@@ -1,6 +1,6 @@
 name: oef
 author: fetchai
-version: 0.22.0
+version: 0.22.1
 type: connection
 description: The oef connection provides a wrapper around the OEF SDK for connection
   with the OEF search and communication node.
@@ -14,8 +14,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/oef_search:1.1.0
+- fetchai/default:1.1.1
+- fetchai/oef_search:1.1.1
 class_name: OEFConnection
 config:
   addr: 127.0.0.1

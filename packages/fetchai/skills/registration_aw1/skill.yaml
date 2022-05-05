@@ -1,6 +1,6 @@
 name: registration_aw1
 author: fetchai
-version: 0.13.0
+version: 0.13.1
 type: skill
 description: The registration_aw1 skill is a skill for registration in Agent World
   1.
@@ -17,10 +17,10 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/register:1.1.0
-- fetchai/signing:1.1.0
+- fetchai/register:1.1.1
+- fetchai/signing:1.1.1
 skills:
-- fetchai/simple_service_search:0.11.0
+- fetchai/simple_service_search:0.11.1
 behaviours:
   registration:
     args:

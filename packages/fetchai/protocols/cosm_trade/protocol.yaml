@@ -1,6 +1,6 @@
 name: cosm_trade
 author: fetchai
-version: 0.2.0
+version: 0.2.1
 protocol_specification_id: fetchai/cosm_trade:1.0.0
 type: protocol
 description: A protocol for preparing an atomic swap bilateral transaction for cosmos-based

@@ -1,6 +1,6 @@
 name: erc1155_deploy
 author: fetchai
-version: 0.31.0
+version: 0.31.1
 type: skill
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
@@ -15,16 +15,16 @@ fingerprint:
   strategy.py: QmVQTC9D2M6h3dirfPT1dC2dgwGTs8XNj82AqjRDh8Mzq6
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.20.0
+- fetchai/ledger:0.21.0
 contracts:
-- fetchai/erc1155:0.22.0
+- fetchai/erc1155:0.23.1
 protocols:
-- fetchai/contract_api:1.1.0
-- fetchai/default:1.1.0
-- fetchai/fipa:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/oef_search:1.1.0
-- fetchai/signing:1.1.0
+- fetchai/contract_api:1.1.1
+- fetchai/default:1.1.1
+- fetchai/fipa:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/oef_search:1.1.1
+- fetchai/signing:1.1.1
 skills: []
 behaviours:
   service_registration:

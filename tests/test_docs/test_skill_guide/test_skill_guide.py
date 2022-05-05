@@ -99,7 +99,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         self.set_config(setting_path, FetchAICrypto.identifier)
 
         default_routing = {
-            "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0",
+            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
         # replace location
@@ -112,9 +112,9 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 

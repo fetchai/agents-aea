@@ -1,6 +1,6 @@
 name: stub
 author: fetchai
-version: 0.21.0
+version: 0.21.1
 type: connection
 description: The stub connection implements a connection stub which reads/writes messages
   from/to file.

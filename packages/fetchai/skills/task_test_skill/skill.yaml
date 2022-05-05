@@ -1,6 +1,6 @@
 name: task_test_skill
 author: fetchai
-version: 0.1.0
+version: 0.1.1
 type: skill
 description: Skill with simple task to run.
 license: Apache-2.0

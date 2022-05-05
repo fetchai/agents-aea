@@ -1,6 +1,6 @@
 name: yoti
 author: fetchai
-version: 1.1.0
+version: 1.1.1
 protocol_specification_id: fetchai/yoti:1.0.0
 type: protocol
 description: A protocol for communication between yoti skills and yoti connection.
