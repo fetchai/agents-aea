@@ -9,8 +9,8 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWiyaUmc3ZSSc7ndBQ5FHRq1fAEgAmsuZ9VrxUp17N1Ee
   __init__.py: QmRWNcSMXvsPbckLHSe5UiLantJfGEM1a9aiPhZNN82bS4
-  aggregation.proto: QmZinDiSCtFDvcZghHBQUsr6RYhy9qAiTUAEaS3CARMEzL
-  aggregation_pb2.py: QmaxcUfGkUifDEBqMimP3xhJWHEVV5WUGWwCZtEZVcayX6
+  aggregation.proto: QmaknWkwTR1QfoLqSVL3sJzrTN9VHpKdEdw1d9f8Vuca6t
+  aggregation_pb2.py: QmSJnd6kMuBfbBie7cx88tWV4ho9rq3yhGvoX93dpuQHmU
   dialogues.py: QmZhvgjNtjwiSy6bHKaw4PG8jgY6pLfCFivbcr5xQ8JJN8
   message.py: QmbTCxmGtVeSqtvxJNMBtHpbwEY81DxknLsMxNmEFqFikD
   serialization.py: QmSK6nnPMcDSuQZo2cxabo8xESxbQxKvRncTkSEtK6WhZD
