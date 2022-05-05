@@ -7,9 +7,9 @@ description: The stub p2p connection implements a local p2p connection allowing 
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVXqobCqUqr2Pn1YuAF2tobjCsdqPfjCJSEqiyCRt8jkN
+  README.md: QmWuptcm7mTLvxemgzMWddMxYy9XPXtA92Yc1r6oRN1Ri9
   __init__.py: QmPh1wWMrDNzz83WKAYVJzDMMWpb6QVjV6x9LsvmjueKWn
-  connection.py: QmQhjk1dqzWMpK7CJMJpfcVcsVZoFwCkb1Kt37SduzhciY
+  connection.py: Qmdcq8MBhZdDZWHHs34vbegECnv2xN1bv3E1UfUCe5TNLx
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/stub:0.21.1

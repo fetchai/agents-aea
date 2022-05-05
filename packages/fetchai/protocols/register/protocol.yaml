@@ -7,10 +7,10 @@ description: A protocol for communication between two AEAs for registration.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmR65UiRtvYkPok6SJVNATFkQaXiroTSYKCiHFYJyFPzEb
+  README.md: QmbHQXfAFEkcbtek3jDueakkEjc3MfU95r5HudRk3a7oVz
   __init__.py: QmSeQBigjFHfTwEaJdYTYXhMh7wjjguoHbuPcoo3PQDi4o
   dialogues.py: QmPBn3aiw9oc1QhkehdghEoBkhjreMmLnw6rZCr84cimJH
-  message.py: QmYJXE5t8zVreAModkogUge56R3ATrrKWwqhzvU6qBPibY
+  message.py: QmRr8jt5TtAyQqWjCgkmU2uv6HwSTaECumP9a5Qx6geakA
   register.proto: QmTHG7MpXFwd6hhf9Wawi8k1rGGo6um1i15Rr89eN1nP1Z
   register_pb2.py: QmckwvSTvakGddthhjX45nTfxgRHUeK6KzEHht6npwirXe
   serialization.py: QmVbsLQJRgaErNxyEtED6GFVQgubzkgNmxu4MpSczTHX3k

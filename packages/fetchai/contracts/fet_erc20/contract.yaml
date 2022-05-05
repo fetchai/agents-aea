@@ -9,7 +9,7 @@ fingerprint:
   README.md: QmdksAfBj3gVPH8zmzpHjjpXsf1gtAY6z6gjrfYfiicLrr
   __init__.py: Qmd8rqKQoZBKaFHCPB9xT2KMZa4nW8pSJUKjTrXvEnoTLG
   build/FetERC20Mock.json: QmPKt6BUTUotWS7mtdHLxfg7dEw3cATzNojNBiJ1nifwF9
-  contract.py: QmVuXEtW8okhUNvyeJP2bZGuy28N8ysQHa6x7b2aDFsnrJ
+  contract.py: QmSqtsaLgakC1V9ZAJy3iTtWLheXgyJ6FAPNaSBX7JjRFF
 fingerprint_ignore_patterns: []
 class_name: FetERC20
 contract_interface_paths:

@@ -6,9 +6,9 @@ description: The gym connection wraps an OpenAI gym.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmTKojYfAMT3Vun5sFcerHQwTBPA6qaWKUq4GT8kTUVjR8
+  README.md: QmRwzdeswv2wfH2JpJ2TNeBx42rqrYmypGApjpoXr7kC4x
   __init__.py: QmZJEjVyTn5auLw9VJESKjCVHrz5w5qY2qLyZQXdzxeMkw
-  connection.py: Qme2VckpDieVhS8DUSAcD5PF1NDj9e4pXBFYDERKxTNsLE
+  connection.py: QmXy24bCnjnawbrDiKKgNM2mnvdogrjCPnNwHmpxHThRGb
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

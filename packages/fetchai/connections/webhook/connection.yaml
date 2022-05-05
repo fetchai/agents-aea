@@ -6,9 +6,9 @@ description: The webhook connection that wraps a webhook functionality.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: Qme1G8f3MPhbhUcr6S5PTREQ8AcCtBB2WKNEsqMDbc7Ytd
+  README.md: QmUp26gCWiARLb74kTy4zDiXZSdN7Nh99M6gyyuCAJVweY
   __init__.py: QmYVwjb5jTf46hMNVajEPVjDCBfDFHi6uJYob9xfkXdTmW
-  connection.py: QmRyZJgaKzrTURkxVoq9uYcc6uDYyVZBkRPQWJTdJ9ASCQ
+  connection.py: QmPPQUMChahupCYSVkNmp1yiiKdJ5KoBCyrFJwQywe3xpe
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

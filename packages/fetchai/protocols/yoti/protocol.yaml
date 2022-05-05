@@ -7,10 +7,10 @@ description: A protocol for communication between yoti skills and yoti connectio
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmNfbPjKkBae7rn9pLVaDcFTMSi2ZdZcRLHBfjhnfBZY1r
+  README.md: QmQzeUjMJ1QSaMBgnCFRD3Nx2Uj7Ac6aQKbXRsTWE1hP4x
   __init__.py: QmbRaqux8nPKULixg7JQLPfm6GYMAdi7FWNRsB8CnEXKJ5
   dialogues.py: QmNy36Xc6b9ZcextPkH9M2Ej7CSZJAVHJ13RtfiHU7iiyu
-  message.py: QmPkDXnQE3tEVRv3yv69LMeKS68bUAEgevJDRfFCe74BmA
+  message.py: QmWxTkPthsnzCpJirdfopVzmaAocenxgZbTBLh3E5ntaqJ
   serialization.py: QmSu7FYEc5qcKSnBkTSviGenh4a2HbEq2QyqTxqwqyKo67
   yoti.proto: Qmasuw6KKGB95zygCfMjJwjWMad2Q1XY7KBnf3yA8h4JCB
   yoti_pb2.py: Qme5UkcqgTNE34km1jVWRutTVWoj5B1NvSXVoRgMD4D5G8
