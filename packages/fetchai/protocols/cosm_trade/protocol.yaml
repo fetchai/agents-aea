@@ -9,7 +9,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmZnnrELDnJY6tJLBg12orufw1KqahRcTNdJJHN16Qo425
-  __init__.py: QmSdpB1kofny7NomxU898xULPngZshVShGWhBoTpJiofqD
+  __init__.py: QmVKF1brp8wTMJBe4CX2fPTjvjY535JD1TY4eTZNLZM3p2
   cosm_trade.proto: QmX1hcA9m6QM2bni9g6SG11ieWaYGvCrFi2qfT7TCG1s3j
   cosm_trade_pb2.py: QmREDApx2Fq7GGeyrTGDxkDbB2ux4wZCW4XZQ2eoJ3JKtx
   custom_types.py: QmS4h6s3ZnbzrDrud9ZPfaUesN3CczZHC4LPqFX8VGFPcj
