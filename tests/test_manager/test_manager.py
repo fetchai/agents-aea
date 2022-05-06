@@ -702,16 +702,16 @@ class TestMultiAgentManagerPackageConsistencyError:
 
     EXPECTED_ERROR_MESSAGE = dedent(
         """    cannot add project 'fetchai/weather_client:0.27.0': the following AEA dependencies have conflicts with previously added projects:
-    - 'fetchai/ledger' of type connection: the new version '0.17.0' conflicts with existing version '0.18.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/p2p_libp2p' of type connection: the new version '0.20.0' conflicts with existing version '0.21.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/soef' of type connection: the new version '0.21.0' conflicts with existing version '0.22.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/contract_api' of type protocol: the new version '0.14.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/default' of type protocol: the new version '0.15.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/fipa' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/ledger_api' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/oef_search' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
-    - 'fetchai/state_update' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.1>]
+    - 'fetchai/ledger' of type connection: the new version '0.17.0' conflicts with existing version '0.18.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/p2p_libp2p' of type connection: the new version '0.20.0' conflicts with existing version '0.21.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/soef' of type connection: the new version '0.21.0' conflicts with existing version '0.22.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/contract_api' of type protocol: the new version '0.14.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/default' of type protocol: the new version '0.15.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/fipa' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/ledger_api' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/oef_search' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
+    - 'fetchai/state_update' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
     """
     )
 
@@ -730,13 +730,13 @@ class TestMultiAgentManagerPackageConsistencyError:
         """
         Run the test.
 
-        First add agent project "fetchai/weather_station:0.27.1",
+        First add agent project "fetchai/weather_station:0.27.0",
         and then add "fetchai/weather_client:0.27.0".
         The second addition will fail because the projects
         contain conflicting AEA package versions.
         """
         self.manager.start_manager()
-        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.1")
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
         self.manager.add_project(weather_station_id)
         weather_client_id = PublicId.from_str("fetchai/weather_client:0.27.0")
         with pytest.raises(
@@ -784,13 +784,13 @@ class TestMultiAgentManagerWithPotentiallyConflictingPackages:
         """
         Run the test.
 
-        First add agent project "fetchai/weather_station:0.27.1",
+        First add agent project "fetchai/weather_station:0.27.0",
         and then add "fetchai/weather_client:0.27.0".
         The second addition will fail because the projects
         contain conflicting AEA package versions.
         """
         self.manager.start_manager()
-        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.1")
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
         self.manager.add_project(weather_station_id)
         weather_client_id = PublicId.from_str("fetchai/weather_client:0.28.0")
         self.manager.add_project(weather_client_id)
