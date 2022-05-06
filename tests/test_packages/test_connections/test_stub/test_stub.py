@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import os
 import shutil
 import tempfile
 import time
+from asyncio.tasks import ensure_future
 from pathlib import Path
 from unittest import mock
 
@@ -364,7 +365,8 @@ async def test_bad_envelope():
         f.flush()
 
     with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(connection.receive(), timeout=0.1)
+        f = ensure_future(connection.receive())
+        await asyncio.wait_for(f, timeout=0.1)
 
     await connection.disconnect()
 

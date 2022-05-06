@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:1.1.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:1.1.1")
     protocol_specification_id = PublicId.from_str("fetchai/state_update:1.0.0")
 
     class Performative(Message.Performative):

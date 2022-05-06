@@ -59,7 +59,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `my_thermometer_client` with public id `fetchai/thermometer_client:0.31.0`.
 
-3. Copy the address from the `my_thermometer_client` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">StargateWorld block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `my_thermometer_client` into your clip board. Then go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `my_thermometer_aea` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -110,17 +110,17 @@ The following steps create the thermometer AEA from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/thermometer:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/thermometer:0.27.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 ```
 
@@ -144,17 +144,17 @@ The following steps create the thermometer client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/thermometer_client:0.26.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/thermometer_client:0.26.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 ```
 
@@ -163,7 +163,7 @@ aea config set --type dict agent.default_routing \
 
 #### Add keys for the thermometer AEA
 
-First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
+First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -216,7 +216,7 @@ First, run the thermometer AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
 
 Then, in the thermometer client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash

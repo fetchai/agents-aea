@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class DummyConnection(Connection):
 
     async def connect(self, *args, **kwargs):
         """Connect."""
-        self._queue = asyncio.Queue(loop=self.loop)
+        self._queue = asyncio.Queue()
         self.state = ConnectionStates.connected
 
     async def disconnect(self, *args, **kwargs):

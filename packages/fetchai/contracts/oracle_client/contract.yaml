@@ -1,16 +1,16 @@
 name: oracle_client
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: contract
 description: Fetch oracle client contract
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUBEziYn29b61higYFNsSxtnKcSNq7CRFpsQ68WjmTCcN
-  __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
+  __init__.py: QmZ3tqWJFLxkJapkC8T2Wd2Jos1CPd5LnrycCs2bGPyLKb
   build/FetchOracleTestClient.json: QmbqwQiYs8Tb2DKB1BDiigqmXxVt1BmfM5RVXHwkvysdqf
-  build/oracle_client.wasm: QmcUYbcSYcdPUMy2pVCKuCdigLAbZ8NFuNigzhiXfoxmJs
-  contract.py: QmQ8Jje7mZ1ub7YQhP7y5FM8TVSWNHgKHcPpMwqdTBK5rY
+  build/oracle_client.wasm: QmUeGnaLBZgfCQUydU3xqfvyxCvaFzDizCeyAX8wcagaVV
+  contract.py: QmZYQiTrLfnUkpayzhYFPjhMjXZT6qUmDgcPue3WdUvs7n
   contracts/FetchOracleTestClient.sol: QmWpUJ4aBrNreiyuXe6EgfSfE7T7hWz3xHDdT7fFye3WCG
 fingerprint_ignore_patterns: []
 class_name: FetchOracleClientContract

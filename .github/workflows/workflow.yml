@@ -14,9 +14,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
-          python-version: 3.6
+          python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -52,12 +52,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.6
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
-          go-version: '^1.14.0'
+          go-version: '^1.17.0'
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -80,18 +80,18 @@ jobs:
       - name: Static type check
         run: tox -e mypy
       - name: Golang code style check (libp2p_node)
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.28
+          version: v1.45.2
           working-directory: libs/go/libp2p_node
       - name: Golang code style check (aealite)
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.28
+          version: v1.45.2
           working-directory: libs/go/aealite
 
   common_checks_3:
@@ -100,7 +100,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.6
       - name: Install dependencies (ubuntu-latest)
@@ -119,9 +119,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.6
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.17.0'
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -130,8 +133,8 @@ jobs:
           pip install tox
           pip install --user --upgrade setuptools
           # install Protobuf compiler
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-          unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           # install IPFS
           sudo apt-get install -y wget
@@ -154,6 +157,11 @@ jobs:
         run: tox -e check_generate_all_protocols
       - name: Generate Documentation
         run: tox -e docs
+      - name: Check copyright year is up to date
+        run: |
+          ./scripts/bump_year.sh $(date +%Y)
+          git diff --quiet||(echo "Some files have the incorrect year in their copyright header. Run ./scripts/bump_year.sh!"; exit 1)
+          echo "all good"
 
   common_checks_5:
     continue-on-error: False
@@ -162,7 +170,7 @@ jobs:
     if: github.base_ref == 'main'
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - uses: actions/setup-node@v1
@@ -193,7 +201,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
@@ -224,7 +232,7 @@ jobs:
       - uses: actions/checkout@master
       - if: matrix.sys.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
@@ -249,10 +257,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.6
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
           go-version: '^1.14.0'
       - name: Install protolint (ubuntu-latest)
@@ -275,17 +283,17 @@ jobs:
     - dependencies_checks
     - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-python@master
+    - uses: actions/setup-python@v3
       with:
         python-version: 3.8
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - name: Setup GCloud - production
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0
       with:
           project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
           service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
@@ -296,8 +304,8 @@ jobs:
         sudo apt-get autoclean
         pip install tox
         # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
     - name: Configure Docker
       run: |
@@ -321,14 +329,14 @@ jobs:
       - dependencies_checks
       - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.8
       - name: Setup GCloud - production
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
             project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
             service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
@@ -360,14 +368,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.6, 3.7, 3.8, 3.9]
+        python_version: [3.6, 3.7, 3.8, 3.9, '3.10']
     timeout-minutes: 90
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-python@master
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python_version }}
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - if: matrix.os == 'ubuntu-latest'
@@ -378,8 +386,8 @@ jobs:
         sudo apt-get autoclean
         pip install tox
         # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     # sudo apt-get install -y protobuf-compiler
@@ -392,8 +400,8 @@ jobs:
         brew install gcc
         # brew install protobuf
         # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-osx-x86_64.zip
-        unzip protoc-3.11.4-osx-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip
+        unzip protoc-3.19.4-osx-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         brew tap yoheimuta/protolint
         brew install protolint
@@ -404,14 +412,14 @@ jobs:
       run: |
         python -m pip install -U pip
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
-        choco install protoc --version 3.11.4
+        choco install protoc --version 3.19.4
         choco install mingw -y
         choco install make -y
         # to check make was installed
         make --version
         pip install tox
-        # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-win64.zip
-        # unzip protoc-3.11.4-win64.zip -d protoc
+        # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
+        # unzip protoc-3.19.4-win64.zip -d protoc
         # sudo mv protoc/bin/protoc /usr/local/bin/protoc
         python scripts/update_symlinks_cross_platform.py
         make protolint_install_win
@@ -435,13 +443,13 @@ jobs:
     - dependencies_checks
     - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-python@master
+    - uses: actions/setup-python@v3
       with:
         python-version: 3.8
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - name: Install dependencies (ubuntu-latest)
@@ -450,8 +458,8 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     - name: Unit tests with sync agent loop
@@ -475,16 +483,16 @@ jobs:
     timeout-minutes: 45
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-python@master
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - if: matrix.os == 'macos-latest'
       working-directory: ./libs/go/libp2p_node
       run: |
-         export LINKPATH=$GOROOT/pkg/tool/darwin_amd64/link
+         export LINKPATH=`go env GOTOOLDIR`/link
          echo $LINKPATH
          sudo cp $LINKPATH ${LINKPATH}_orig
          sudo cp link $LINKPATH
@@ -537,10 +545,10 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-python@master
+    - uses: actions/setup-python@v3
       with:
         python-version: 3.7
-    - uses: actions/setup-go@master
+    - uses: actions/setup-go@v3
       with:
         go-version: '^1.14.0'
     - name: Install dependencies (ubuntu-latest)
@@ -551,8 +559,8 @@ jobs:
         pip install tox
         pip install coverage
         # install Protobuf compiler
-        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
-        unzip protoc-3.11.4-linux-x86_64.zip -d protoc
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+        unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
         make protolint_install
     # sudo apt-get install -y protobuf-compiler

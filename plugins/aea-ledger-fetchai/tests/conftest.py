@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ MAX_FLAKY_RERUNS = 3
 FETCHAI = FetchAICrypto.identifier
 
 
-FETCHAI_DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
+FETCHAI_DEFAULT_ADDRESS = "https://rest-dorado.fetch.ai:443"
 FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
-FETCHAI_DEFAULT_CHAIN_ID = "stargateworld-1"
+FETCHAI_DEFAULT_CHAIN_ID = "dorado-1"
 FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}

@@ -41,8 +41,8 @@ agent_overrides = {
     "connection_private_key_paths": {"fetchai": "fetchai_connection_private_key.txt"}
 }
 
-p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.26.0")
-soef_public_id = PublicId.from_str("fetchai/soef:0.27.0")
+p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.27.0")
+soef_public_id = PublicId.from_str("fetchai/soef:0.27.1")
 
 component_overrides = [{
     **p2p_public_id.json,

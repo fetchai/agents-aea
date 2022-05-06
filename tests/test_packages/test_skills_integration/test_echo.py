@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ class TestEchoSkill(AEATestCaseEmpty):
         """Run the echo skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/stub:0.21.0")
-        self.add_item("skill", "fetchai/echo:0.20.0")
+        self.add_item("connection", "fetchai/stub:0.21.1")
+        self.add_item("skill", "fetchai/echo:0.20.1")
 
         process = self.run_agent()
         is_running = self.is_running(process)

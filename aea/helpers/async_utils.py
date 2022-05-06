@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import datetime
 import logging
 import time
 from abc import ABC, abstractmethod
+from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from collections.abc import Iterable
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from threading import Thread
 from typing import (
     Any,
@@ -387,7 +388,6 @@ class Runnable(ABC):
         self._threaded = threaded
         self._task: Optional[asyncio.Task] = None
         self._thread: Optional[Thread] = None
-        self._completed_event: Optional[asyncio.Event] = None
         self._got_result = False
         self._was_cancelled = False
         self._is_running: bool = False
@@ -406,7 +406,6 @@ class Runnable(ABC):
         self._is_running = False
         self._got_result = False
         self._set_loop()
-        self._completed_event = asyncio.Event(loop=self._loop)
         self._was_cancelled = False
 
         if self._stop_called > 0:
@@ -459,14 +458,15 @@ class Runnable(ABC):
 
     async def _run_wrapper(self) -> None:
         """Wrap run() method."""
-        if not self._completed_event or not self._loop:  # pragma: nocover
+        if not self._loop:  # pragma: nocover
             raise ValueError("Start was not called!")
         self._is_running = True
         try:
-            with suppress(asyncio.CancelledError):
-                return await self.run()
+            return await self.run()
+        except CancelledError:
+            if not self._was_cancelled:
+                raise
         finally:
-            self._loop.call_soon_threadsafe(self._completed_event.set)
             self._is_running = False
 
     @property
@@ -500,8 +500,7 @@ class Runnable(ABC):
         if sync:
             self._wait_sync(timeout)
             return ready_future
-
-        return self._wait_async(timeout)
+        return asyncio.wait_for(self._wait_async(timeout), timeout=timeout)
 
     def _wait_sync(self, timeout: Optional[float] = None) -> None:
         """Wait task completed in sync manner."""
@@ -560,13 +559,14 @@ class Runnable(ABC):
 
     async def _wait(self) -> None:
         """Wait internal method."""
-        if not self._task or not self._completed_event:  # pragma: nocover
+        if not self._task:  # pragma: nocover
             raise ValueError("Not started")
-
-        await self._completed_event.wait()
 
         try:
             await self._task
+        except CancelledError:
+            if not self._was_cancelled:
+                raise
         finally:
             self._got_result = True
 

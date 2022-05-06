@@ -63,7 +63,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 2. Add another new AEA called `my_weather_client` with public id `fetchai/weather_client:0.33.0`.
 
-3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-stargateworld.fetch.ai" target="_blank">StargateWorld block explorer</a> and request some test tokens via `Get Funds`.
+3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
 4. Run the `my_weather_station` AEA. Navigate to its logs and copy the multiaddress displayed.
 
@@ -115,19 +115,19 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/weather_station:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/weather_station:0.27.1
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
 aea build
@@ -154,19 +154,19 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/weather_client:0.26.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/weather_client:0.26.1
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
 aea build
@@ -178,7 +178,7 @@ aea build
 
 #### Add keys for the weather station AEA
 
-First, create the private key for the weather station AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
+First, create the private key for the weather station AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -199,13 +199,13 @@ aea issue-certificates
 
 The weather client needs to have some wealth to purchase the service from the weather station.
 
-First, create the private key for the weather client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `StargateWorld` use:
+First, create the private key for the weather client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `Dorado` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for your weather client based on the network you want to transact with. On the Fetch.ai `StargateWorld` network:
+Then, create some wealth for your weather client based on the network you want to transact with. On the Fetch.ai `Dorado` network:
 ``` bash
 aea generate-wealth fetchai
 ```
@@ -231,7 +231,7 @@ First, run the weather station AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.26.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
 
 Then, in the weather client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash

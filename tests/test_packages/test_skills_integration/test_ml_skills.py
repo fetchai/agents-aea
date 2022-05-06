@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -63,8 +63,8 @@ class TestMLSkills(AEATestCaseManyFlaky):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-            "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0",
+            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
         # generate random location
@@ -75,11 +75,11 @@ class TestMLSkills(AEATestCaseManyFlaky):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.27.1")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -114,11 +114,11 @@ class TestMLSkills(AEATestCaseManyFlaky):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/ml_train:0.29.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/ml_train:0.29.1")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -247,8 +247,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-            "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0",
+            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
         # generate random location
@@ -259,11 +259,11 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.27.1")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
@@ -301,11 +301,11 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/ml_train:0.29.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/ml_train:0.29.1")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()

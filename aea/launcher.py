@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -98,6 +98,10 @@ def _run_agent(
         selector = selectors.SelectSelector()
         loop = asyncio.SelectorEventLoop(selector)  # type: ignore
         asyncio.set_event_loop(loop)
+    try:
+        asyncio.get_event_loop()
+    except Exception:  # pylint: disable=broad-except
+        asyncio.set_event_loop(asyncio.new_event_loop())
 
     _set_logger(log_level=log_level)
 

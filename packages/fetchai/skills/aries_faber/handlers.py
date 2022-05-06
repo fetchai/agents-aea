@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This package contains the handlers for the faber_alice skill."""
-
 import json
 import random
 from typing import Any, Dict, List, Optional, cast
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -40,6 +39,7 @@ from packages.fetchai.skills.aries_faber.dialogues import (
 from packages.fetchai.skills.aries_faber.strategy import (
     ADMIN_COMMAND_CREATE_INVITATION,
     ADMIN_COMMAND_CREDDEF,
+    ADMIN_COMMAND_REGISTGER_PUBLIC_DID,
     ADMIN_COMMAND_SCEHMAS,
     ADMIN_COMMAND_STATUS,
     FABER_ACA_IDENTITY,
@@ -63,17 +63,15 @@ class HttpHandler(Handler):
 
         # ACA stuff
         self.faber_identity = FABER_ACA_IDENTITY
-        rand_name = str(random.randint(100_000, 999_999))  # nosec
-        # use my_name to manually use the same seed in this demo and when starting up the accompanying ACA
-        # use rand_name to not use any seed when starting up the accompanying ACA
-        self.seed = ("my_seed_000000000000000000000000" + rand_name)[-32:]
+
         self.did = None  # type: Optional[str]
         self._schema_id = None  # type: Optional[str]
         self.credential_definition_id = None  # type: Optional[str]
 
-        # Helpers
-        self.connection_id = None  # type: Optional[str]
-        self.is_connected_to_Alice = False
+        # connections
+        self.connections_sent: Dict[str, Address] = {}
+        self.connections_set: Dict[str, Address] = {}
+        self.counterparts_names: Dict[Address, str] = {}
 
     @property
     def schema_id(self) -> str:
@@ -82,30 +80,65 @@ class HttpHandler(Handler):
             raise ValueError("schema_id not set")
         return self._schema_id
 
-    def _send_default_message(self, content: Dict) -> None:
+    def _send_invitation_message(self, connection: Dict) -> None:
         """
         Send a default message to Alice.
 
-        :param content: the content of the message.
+        :param connection: the content of the connection message.
         """
-        # context
         strategy = cast(Strategy, self.context.strategy)
-        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+        # context
+        connections_unsent = list(
+            set(strategy.aea_addresses) - set(self.connections_sent.values())
+        )
+        if not connections_unsent:
+            self.context.logger.info(
+                "Every invitation pushed, skip this new connection"
+            )
+            return
+        target = connections_unsent[0]
+        invitation = connection["invitation"]
 
-        # default message
+        self.connections_sent[connection["connection_id"]] = target
+
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         message, _ = default_dialogues.create(
-            counterparty=strategy.alice_aea_address,
+            counterparty=target,
             performative=DefaultMessage.Performative.BYTES,
-            content=json.dumps(content).encode("utf-8"),
+            content=json.dumps(invitation).encode("utf-8"),
         )
         # send
         self.context.outbox.put_message(message=message)
 
+        self.context.logger.info(f"connection: {str(connection)}")
+        self.context.logger.info(f"connection id: {connection['connection_id']}")  # type: ignore
+        self.context.logger.info(f"invitation: {str(invitation)}")
+        self.context.logger.info(
+            f"Sent invitation to {target}. Waiting for the invitation from agent {target} to finalise the connection..."
+        )
+
+    def _register_public_did_on_acapy(self) -> None:
+        """Register DID on the ACA PY."""
+        strategy = cast(Strategy, self.context.strategy)
+        self.context.behaviours.faber.send_http_request_message(
+            method="POST",
+            url=strategy.admin_url
+            + ADMIN_COMMAND_REGISTGER_PUBLIC_DID
+            + f"?did={self.did}",
+            content="",
+        )
+
     def _register_did(self) -> None:
         """Register DID on the ledger."""
         strategy = cast(Strategy, self.context.strategy)
-        self.context.logger.info(f"Registering Faber_ACA with seed {str(self.seed)}")
-        data = {"alias": self.faber_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
+        self.context.logger.info(
+            f"Registering Faber_ACA with seed {str(strategy.seed)}"
+        )
+        data = {
+            "alias": self.faber_identity,
+            "seed": strategy.seed,
+            "role": "TRUST_ANCHOR",
+        }
         self.context.behaviours.faber.send_http_request_message(
             method="POST",
             url=strategy.ledger_url + LEDGER_COMMAND_REGISTER_DID,
@@ -186,33 +219,40 @@ class HttpHandler(Handler):
             if "version" in content:  # response to /status
                 self._register_did()
             elif "did" in content:
-                self.context.logger.info(f"Received DID: {self.did}")
                 self.did = content["did"]
+                self.context.logger.info(f"Received DID: {self.did}")
+                self._register_public_did_on_acapy()
+            elif "result" in content and "posture" in content["result"]:
+                self.context.logger.info(f"Registered public DID: {content}")
                 self._register_schema(
                     schema_name="degree schema",
                     version="0.0.1",
-                    schema_attrs=["name", "date", "degree", "age", "timestamp"],
+                    schema_attrs=["average", "date", "degree", "name"],
                 )
             elif "schema_id" in content:
                 self._schema_id = content["schema_id"]
                 self._register_creddef(self.schema_id)
             elif "credential_definition_id" in content:
                 self.credential_definition_id = content["credential_definition_id"]
-                self.context.behaviours.faber.send_http_request_message(
-                    method="POST",
-                    url=strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION,
-                )
-            elif "connection_id" in content:
+                for _ in strategy.aea_addresses:
+                    # issue invitation for every agent
+                    self.context.behaviours.faber.send_http_request_message(
+                        method="POST",
+                        url=strategy.admin_url + ADMIN_COMMAND_CREATE_INVITATION,
+                    )
+            elif "invitation" in content:
                 connection = content
-                self.connection_id = content["connection_id"]
-                invitation = connection["invitation"]
-                self.context.logger.info(f"connection: {str(connection)}")
-                self.context.logger.info(f"connection id: {self.connection_id}")  # type: ignore
-                self.context.logger.info(f"invitation: {str(invitation)}")
+                self._send_invitation_message(connection)
+
+            elif "credential_proposal_dict" in content:
+                connection_id = content["connection_id"]
+                addr = self.connections_set[connection_id]
+                name = self.counterparts_names[addr]
                 self.context.logger.info(
-                    "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."
+                    f"Credential issued for {name}({addr}): {content['credential_offer_dict']['credential_preview']}"
                 )
-                self._send_default_message(invitation)
+            else:
+                self.context.logger.warning("UNKNOWN HTTP MESSAGE RESPONSE", message)
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request
@@ -220,10 +260,56 @@ class HttpHandler(Handler):
             content = json.loads(content_bytes)
             self.context.logger.info(f"Received webhook message content:{str(content)}")
             if "connection_id" in content:
-                if content["connection_id"] == self.connection_id:
-                    if content["state"] == "active" and not self.is_connected_to_Alice:
-                        self.context.logger.info("Connected to Alice")
-                        self.is_connected_to_Alice = True
+                connection_id = content["connection_id"]
+                if connection_id not in self.connections_sent:
+                    return
+                if not (
+                    content["state"] == "active"
+                    and connection_id not in self.connections_set
+                ):
+                    return
+                addr = self.connections_sent[connection_id]
+                name = content["their_label"]
+                self.counterparts_names[addr] = name
+                self.connections_set[connection_id] = addr
+                self.context.logger.info(f"Connected to {name}({addr})")
+                self.issue_crendetials_for(name, addr, connection_id)
+
+    def issue_crendetials_for(
+        self, name: str, address: Address, connection_id: str
+    ) -> None:
+        """Issue credentials for the agent."""
+        cred = {
+            "connection_id": connection_id,
+            "cred_def_id": self.credential_definition_id,
+            "credential_proposal": {
+                "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+                "attributes": [
+                    {"name": "name", "value": name},
+                    {"name": "date", "value": "2022-01-01"},
+                    {
+                        "name": "degree",
+                        "value": random.choice(  # nosec
+                            ["Physics", "Chemistry", "Mathematics", "History"]
+                        ),
+                    },
+                    {
+                        "name": "average",
+                        "value": str(random.choice([3, 4, 5])),  # nosec
+                    },
+                ],
+            },
+        }
+        strategy = cast(Strategy, self.context.strategy)
+        self.context.behaviours.faber.send_http_request_message(
+            method="POST",
+            url=strategy.admin_url + "/issue-credential/send",
+            content=cred,
+        )
+
+        self.context.logger.info(
+            f"Credentials issue requested for {name}({address}) {cred}"
+        )
 
     def teardown(self) -> None:
         """Implement the handler teardown."""
@@ -301,20 +387,20 @@ class OefSearchHandler(Handler):
 
         :param oef_search_msg: the oef search message to be handled
         """
-        if len(oef_search_msg.agents) != 1:
-            self.context.logger.info(
-                f"did not find Alice. found {len(oef_search_msg.agents)} agents. continue searching."
-            )
+
+        if len(oef_search_msg.agents) <= 1:
+            self.context.logger.info("Waiting for more agents.")
             return
 
         self.context.logger.info(
-            f"found Alice with address {oef_search_msg.agents[0]}, stopping search."
+            f"found agents {', '.join(oef_search_msg.agents)}, stopping search."
         )
+
         strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = False  # stopping search
 
         # set alice address
-        strategy.alice_aea_address = oef_search_msg.agents[0]
+        strategy.aea_addresses = list(oef_search_msg.agents)
 
         # check ACA is running
         self.context.behaviours.faber.send_http_request_message(

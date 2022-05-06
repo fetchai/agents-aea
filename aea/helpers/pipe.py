@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -571,7 +571,7 @@ class TCPSocketChannelClient(IPCChannelClient):
 
     async def _open_connection(self) -> TCPSocketProtocol:
         reader, writer = await asyncio.open_connection(
-            self._host, self._port, loop=self._loop,  # pylint: disable=protected-access
+            self._host, self._port,  # pylint: disable=protected-access
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 

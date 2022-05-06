@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ class TestFetchBlockSkill(AEATestCaseEmpty):
         """Run the fetch block skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/fetch_block:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/ledger:0.20.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/fetch_block:0.12.1")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
 
         self.run_install()
 

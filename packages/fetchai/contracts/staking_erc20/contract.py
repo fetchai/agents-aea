@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.staking_erc20.contract"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/staking_erc20:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/staking_erc20:0.10.1")
 
 
 class StakingERC20(Contract):

@@ -215,7 +215,7 @@ utc-0
 docstring
 utils
 kademlia
-StargateWorld
+Capricorn
 stargateworld-3
 v0.8.x
 fetch.ai
@@ -279,3 +279,10 @@ oef_search
 handlers.py
 skill.yaml
 packages.fetchai.skills.my_search.dialogues
+capricorn-1
+dorado
+dorado-1
+ - acapy-alice-bob/AdminAPI.md
+ACA-Py
+ACA-Py-based
+prover

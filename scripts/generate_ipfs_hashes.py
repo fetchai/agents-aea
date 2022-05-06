@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """
 This script generates the IPFS hashes for all packages.
 
@@ -33,6 +32,7 @@ import pprint
 import re
 import shutil
 import signal
+import socket
 import subprocess  # nosec
 import sys
 import time
@@ -195,6 +195,16 @@ def from_csv(path: str) -> Dict[str, str]:
     return result
 
 
+def is_port_open(host: str, port: int) -> bool:
+    """Check is port open or not."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex((host, port))
+    finally:
+        sock.close()
+    return result == 0
+
+
 class IPFSDaemon:
     """
     Set up the IPFS daemon.
@@ -202,10 +212,11 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self, timeout: float = 15.0):
+    def __init__(self, timeout: float = 15.0, port: int = 5001):
         """Initialise IPFS daemon."""
         # check we have ipfs
         self.timeout = timeout
+        self.port = port
         res = shutil.which("ipfs")
         if res is None:
             raise Exception("Please install IPFS first!")
@@ -225,7 +236,13 @@ class IPFSDaemon:
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
         print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
-        time.sleep(self.timeout)
+
+        t = time.time()
+        while time.time() - t < self.timeout:
+            if is_port_open(host="localhost", port=self.port):
+                return
+            time.sleep(1)
+        raise ValueError("failed to connect")
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         """Terminate the ipfs daemon."""

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_mailbox:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_mailbox:0.2.1")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -219,7 +219,7 @@ class TestClientServer:
 
         parsed_query = dict(
             urllib.parse.parse_qsl(
-                urllib.parse.splitquery(cast(HttpMessage, request.message).url)[1]
+                urllib.parse.urlparse(cast(HttpMessage, request.message).url).query
             )
         )
         assert parsed_query == query

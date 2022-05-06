@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the task class of the ml_train skill."""
 
-import sys
 from pathlib import Path
 from typing import Tuple
 from unittest.mock import patch
 
 import numpy as np
-import pytest
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -33,10 +31,6 @@ from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 from tests.conftest import ROOT_DIR
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 9),
-    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-)
 class TestTask(BaseSkillTestCase):
     """Test Task of ml_train."""
 

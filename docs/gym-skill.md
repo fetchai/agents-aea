@@ -36,12 +36,12 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.21.0
+aea add skill fetchai/gym:0.21.1
 ```
 
 ### Set gym connection as default
 ``` bash
-aea config set agent.default_connection fetchai/gym:0.20.0
+aea config set agent.default_connection fetchai/gym:0.20.1
 ```
 
 ### Install the skill dependencies

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ def _load_contract_interfaces(
         full_path = Path(configuration.directory, path)
         if identifier not in ledger_apis_registry.supported_ids:
             raise ValueError(  # pragma: nocover
-                "No ledger api registered for identifier {}."
+                f"No ledger api registered for identifier {identifier}."
             )
         ledger_api = make_ledger_api_cls(identifier)
         contract_interface = ledger_api.load_contract_interface(full_path)

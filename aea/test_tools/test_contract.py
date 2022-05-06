@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -116,8 +116,9 @@ class BaseContractTestCase(ABC):
 
         # deploy contract
         cls.deployment_tx_receipt = cls._deploy_contract(
-            cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas
+            cls._contract, cls.ledger_api, cls.deployer_crypto, gas=cls._deployment_gas,
         )
+
         cls.contract_address = cls.finish_contract_deployment()
 
     @classmethod

@@ -7,8 +7,8 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 protocol_specification_id: fetchai/scaffold:0.1.0
 fingerprint:
-  __init__.py: Qmc9Ln8THrWmwou4nr3Acag7vcZ1fv8v5oRSkCWtv1aH6t
-  message.py: QmSTvkiRCT9SEvKkNsMHABM1L2i88tFeKBdVaQDV8ntxBz
-  serialization.py: QmZbSDKy54EuhX8QN5BFP8pgZyUYMZWwPKRkdiqHudRcVL
+  __init__.py: QmYkkue6aaMZGWWTScCtpnP2M1bB9VnBe7qfc6AFxFdjhR
+  message.py: QmfNTLAPpPczf9Vvz9Q9Pbu92fi7YbV4Rfcmc3VanhxWvX
+  serialization.py: QmbczbN3YRTF9hY2VnWy2PdPsyirwPM9Spkk65NAtWL45Q
 fingerprint_ignore_patterns: []
 dependencies: {}

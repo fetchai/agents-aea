@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ FETCHAI_DEPLOY_RECEIPT = {
                 {
                     "attributes": [
                         {"key": "code_id", "value": "8888"},
-                        {"key": "contract_address", "value": "some_contract_address"},
+                        {"key": "_contract_address", "value": "some_contract_address"},
                     ]
                 }
             ]

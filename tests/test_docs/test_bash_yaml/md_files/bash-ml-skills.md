@@ -16,19 +16,19 @@ aea build
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/ml_data_provider:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/ml_data_provider:0.27.1
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
 aea build
@@ -42,19 +42,19 @@ aea build
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/ml_train:0.29.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/ml_train:0.29.1
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
 aea build
@@ -108,7 +108,7 @@ aea delete ml_model_trainer
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.26.0
+public_id: fetchai/p2p_libp2p:0.27.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

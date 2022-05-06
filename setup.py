@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ def get_all_extras() -> Dict:
         "click>=7.0.0,<8.0.0",
         "pyyaml>=4.2b1,<6.0",
         "jsonschema>=3.0.0,<4.0.0",
-        "packaging>=20.3,<21.0",
+        "packaging>=20.4,<=21.5",
     ]
 
     extras = {
@@ -53,7 +53,7 @@ base_deps = [
     "jsonschema>=3.0.0,<4.0.0",
     "packaging>=20.3,<21.0",
     "semver>=2.9.1,<3.0.0",
-    "protobuf==3.13.0",
+    "protobuf>=3.19.0,<4.0.0",
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1,<6.0",
     "requests>=2.22.0,<3.0.0",
@@ -62,7 +62,7 @@ base_deps = [
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
-    base_deps.append("pywin32==300")
+    base_deps.append("pywin32==303")
 
 here = os.path.abspath(os.path.dirname(__file__))
 about: Dict[str, str] = {}

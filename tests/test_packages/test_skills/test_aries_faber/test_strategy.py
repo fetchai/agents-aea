@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ class TestStrategy(AriesFaberTestCase):
         assert self.strategy.admin_port == self.admin_port
         assert self.strategy.ledger_url == self.ledger_url
         assert self.strategy.admin_url == f"http://{self.admin_host}:{self.admin_port}"
-        assert self.strategy.alice_aea_address == ""
-        self.strategy.alice_aea_address = "some_address"
-        assert self.strategy.alice_aea_address == "some_address"
         assert self.strategy.is_searching is False
+        assert self.strategy.aea_addresses == []
+        self.strategy.aea_addresses = ["some"]
+        assert self.strategy.aea_addresses == ["some"]
         with pytest.raises(AEAEnforceError, match="Can only set bool on is_searching!"):
             self.strategy.is_searching = "some_value"
         self.strategy.is_searching = True

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -240,6 +240,9 @@ class TestDecisionMaker:
 class TestDecisionMaker2(BaseTestDecisionMakerDefault):
     """Test the decision maker."""
 
+    decision_maker_handler_cls = DecisionMakerHandler  # type: ignore
+    decision_maker_cls = DecisionMaker  # type: ignore
+
     @classmethod
     def _patch_logger(cls):
         cls.patch_logger_warning = mock.patch.object(
@@ -254,10 +257,7 @@ class TestDecisionMaker2(BaseTestDecisionMakerDefault):
     @classmethod
     def setup(cls):
         """Initialise the decision maker."""
-        super().setup(
-            decision_maker_handler_cls=DecisionMakerHandler,
-            decision_maker_cls=DecisionMaker,
-        )
+        super().setup()
         cls._patch_logger()
 
     @classmethod

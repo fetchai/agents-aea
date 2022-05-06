@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ from aea.mail.base import Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
-PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.17.0")
+PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.17.1")
 
 
 class TCPConnection(Connection, ABC):

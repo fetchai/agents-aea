@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.21.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.21.1")
 
 
 class StubConnection(Connection):
@@ -188,10 +188,11 @@ class StubConnection(Connection):
             return None
 
         try:
-            return await self.in_queue.get()
-        except CancelledError:  # pragma: no cover
+            envelope = await self.in_queue.get()
+            return envelope
+        except (CancelledError, asyncio.TimeoutError):  # pragma: no cover
             self.logger.debug("Receive cancelled.")
-            return None
+            raise
         except Exception:  # pylint: disable=broad-except
             self.logger.exception("Stub connection receive error:")
             return None

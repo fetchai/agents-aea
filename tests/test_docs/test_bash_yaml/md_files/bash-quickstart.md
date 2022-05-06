@@ -69,10 +69,10 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
-aea add connection fetchai/stub:0.21.0
+aea add connection fetchai/stub:0.21.1
 ```
 ``` bash
-aea add skill fetchai/echo:0.20.0
+aea add skill fetchai/echo:0.20.1
 ```
 ``` bash
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,

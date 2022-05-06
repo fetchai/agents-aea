@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ from packages.fetchai.protocols.yoti.dialogues import YotiDialogues as BaseYotiD
 from packages.fetchai.protocols.yoti.message import YotiMessage
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.7.1")
 
 
 def rgetattr(obj: Any, attr: str, *args: Any) -> Any:

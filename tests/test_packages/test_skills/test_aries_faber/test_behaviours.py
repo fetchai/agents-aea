@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class TestFaberBehaviour(AriesFaberTestCase):
             sender=str(self.skill.skill_context.skill_id),
             method=self.mocked_method,
             url=self.mocked_url,
-            headers="",
+            headers="Content-Type: application/json",
             version="",
             body=json.dumps(self.body_dict).encode("utf-8"),
         )

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """
 Generate all the protocols from their specifications.
 
@@ -31,6 +30,7 @@ the desired outcomes.
 It requires the `aea` package, `black` and `isort` tools.
 """
 import argparse
+import datetime
 import logging
 import os
 import pprint
@@ -53,6 +53,7 @@ from aea.configurations.base import ComponentType, ProtocolConfig
 from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
+from aea.protocols.generator.base import copy_right_str
 from scripts.common import (
     check_working_tree_is_dirty,
     enforce,
@@ -61,7 +62,7 @@ from scripts.common import (
 )
 
 
-LIBPROTOC_VERSION = "libprotoc 3.11.4"
+LIBPROTOC_VERSION = "libprotoc 3.19.4"
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PACKAGES_DIR = Path("packages")
@@ -233,6 +234,44 @@ def _fix_generated_protocol(package_path: Path) -> None:
         )
 
 
+COPYRIGHT_STR = f"""# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-{datetime.datetime.now().year} Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""
+
+
+def _set_copyright_header(package_path: Path) -> None:
+    """Set copyright header for every python file in the package path."""
+
+    for filename in package_path.absolute().glob("**/*.py"):
+        if str(filename).endswith("_pb2.py"):
+            continue
+        filepath: Path = package_path.absolute() / filename
+        content = filepath.read_text()
+        if re.search(r"\#\s+Copyright", content):
+            # header already here
+            continue
+        new_content = content.replace(copy_right_str, COPYRIGHT_STR)
+        assert "Copyright 2018-" in new_content
+        filepath.write_text(new_content)
+        print(filepath, "copyright set")
+
+
 def _update_original_protocol(package_path: Path) -> None:
     """
     Update the original protocol.
@@ -325,6 +364,7 @@ def _process_packages_protocol(
     _fix_generated_protocol(package_path)
     if preserve_generator_docstring:
         _replace_generator_docstring(package_path, old_protocol_generator_docstring)
+    _set_copyright_header(Path(PROTOCOLS_PLURALS, package_path.name))
     run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
     _fingerprint_protocol(package_path.name)
     _update_original_protocol(package_path)
@@ -367,6 +407,7 @@ def _process_test_protocol(specification: Path, package_path: Path) -> None:
         )
     ]
     replace_in_directory(package_path.name, replacements)
+    _set_copyright_header(Path(PROTOCOLS_PLURALS, package_path.name))
     run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
     _fingerprint_protocol(package_path.name)
     _update_original_protocol(package_path)

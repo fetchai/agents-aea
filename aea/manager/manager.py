@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -130,8 +130,8 @@ class AgentRunAsyncTask(BaseAgentRunTask):
     def start(self) -> None:
         """Start task."""
         self.create_run_loop()
+        self._done_future = asyncio.Future()
         self.task = self.run_loop.create_task(self._run_wrapper())
-        self._done_future = asyncio.Future(loop=self.caller_loop)
 
     def wait(self) -> asyncio.Future:
         """Return future to wait task completed."""
@@ -436,13 +436,11 @@ class MultiAgentManager:
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
         self._loop = asyncio.new_event_loop()
-        self._event = asyncio.Event(loop=self._loop)
         self._loop.run_until_complete(self._manager_loop())
 
     async def _manager_loop(self) -> None:
         """Await and control running manager."""
-        if not self._event:  # pragma: nocover
-            raise ValueError("Do not use this method directly, use start_manager.")
+        self._event = asyncio.Event()
 
         self._started_event.set()
 
@@ -451,7 +449,10 @@ class MultiAgentManager:
                 task.wait(): agent_name
                 for agent_name, task in self._agents_tasks.items()
             }
-            wait_tasks = list(agents_run_tasks_futures.keys()) + [self._event.wait()]  # type: ignore
+            wait_tasks = [
+                asyncio.ensure_future(i)
+                for i in [*agents_run_tasks_futures.keys(), self._event.wait()]
+            ]
             done, _ = await asyncio.wait(wait_tasks, return_when=FIRST_COMPLETED)
 
             if self._event.is_set():
@@ -467,7 +468,7 @@ class MultiAgentManager:
                 self._agents_tasks.pop(agent_name)
                 if task.exception():
                     for callback in self._error_callbacks:
-                        callback(agent_name, task.exception())
+                        callback(agent_name, task.exception())  # type: ignore
                 else:
                     await task
 
@@ -871,6 +872,20 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
+        event = threading.Event()
+        self._loop.call_soon_threadsafe(
+            self._make_agent_task, agent_name, agent_alias, event
+        )
+        event.wait(30)  # if something goes wrong
+        del event
+
+        self._loop.call_soon_threadsafe(self._event.set)
+        return self
+
+    def _make_agent_task(
+        self, agent_name: str, agent_alias: AgentAlias, event: threading.Event
+    ) -> None:
+        """Create and start agent task."""
         task_cls = self._MODE_TASK_CLASS[self._mode]
         if self._mode == MULTIPROCESS_MODE:
             task = task_cls(agent_alias, self._loop)
@@ -878,12 +893,9 @@ class MultiAgentManager:
             agent = agent_alias.get_aea_instance()
             task = task_cls(agent, self._loop)
 
-        task.start()
-
         self._agents_tasks[agent_name] = task
-
-        self._loop.call_soon_threadsafe(self._event.set)
-        return self
+        task.start()
+        event.set()
 
     def _is_agent_running(self, agent_name: str) -> bool:
         """Return is agent task in running state."""

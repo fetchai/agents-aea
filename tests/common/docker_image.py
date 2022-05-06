@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -91,6 +91,15 @@ class DockerImage(ABC):
     def tag(self) -> str:
         """Return the tag of the image."""
 
+    def pull_image(self, retries=3) -> None:
+        """Pull image from remote repo."""
+        for _ in range(retries):
+            try:
+                self._client.images.pull(self.tag)
+                return
+            except Exception as e:  # nosec
+                print("failed to pull image", e)
+
     def stop_if_already_running(self):
         """Stop the running images with the same tag, if any."""
         client = docker.from_env()
@@ -98,6 +107,7 @@ class DockerImage(ABC):
             if self.tag in container.image.tags:
                 logger.info(f"Stopping image {self.tag}...")
                 container.stop()
+                container.wait()
 
     @abstractmethod
     def create(self) -> Container:
@@ -224,6 +234,8 @@ class OEFSearchDockerImage(DockerImage):
     def create(self) -> Container:
         """Create an instance of the OEF Search image."""
         from tests.conftest import ROOT_DIR  # pylint: disable
+
+        self.pull_image()
 
         logger.info(ROOT_DIR + "/tests/common/oef_search_pluto_scripts")
         ports = {
@@ -373,7 +385,7 @@ class SOEFDockerImage(DockerImage):
             "# (Author Toby Simpson)",
             "#",
             "# Port we're listening on",
-            f"port {self._port}",
+            "port 9000",
             "#",
             "# Our declared location",
             "latitude 52.205278",
@@ -396,10 +408,11 @@ class SOEFDockerImage(DockerImage):
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
-        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
+        return {"9000/tcp": ("0.0.0.0", self._port)}  # nosec
 
     def create(self) -> Container:
         """Create the container."""
+        self.pull_image()
         with tempfile.TemporaryDirectory() as tmpdirname:
             self._make_soef_config_file(tmpdirname)
             volumes = {tmpdirname: {"bind": self.SOEF_MOUNT_PATH, "mode": "ro"}}
@@ -415,8 +428,10 @@ class SOEFDockerImage(DockerImage):
                 response = requests.get(f"{self._addr}:{self._port}")
                 enforce(response.status_code == 200, "")
                 return True
-            except Exception:
-                logger.info(f"Attempt {i} failed. Retrying in {sleep_rate} seconds...")
+            except Exception as e:
+                logger.info(
+                    f"Attempt {i} failed. Retrying in {sleep_rate} seconds... exception {e}"
+                )
                 time.sleep(sleep_rate)
         return False
 
@@ -485,6 +500,7 @@ class FetchLedgerDockerImage(DockerImage):
 
     def create(self) -> Container:
         """Create the container."""
+        self.pull_image()
         with tempfile.TemporaryDirectory() as tmpdirname:
             self._make_entrypoint_file(tmpdirname)
             mount_path = "/mnt"

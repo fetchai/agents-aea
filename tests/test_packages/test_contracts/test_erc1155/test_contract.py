@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
-
 import re
 import time
 from pathlib import Path
@@ -29,12 +27,14 @@ import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
 
+from aea.common import JSONLike
 from aea.configurations.loader import (
     ComponentType,
     ContractConfig,
     load_component_configuration,
 )
 from aea.contracts.base import Contract, contract_registry
+from aea.crypto.base import Crypto, LedgerApi
 from aea.test_tools.test_contract import BaseContractTestCase
 
 from tests.conftest import (
@@ -641,12 +641,47 @@ class TestCosmWasmContract(BaseContractTestCase):
     ledger_identifier = FetchAICrypto.identifier
     path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
     fund_from_faucet = True
+    deploy_tx_fee = 10000000000000000
+
+    @classmethod
+    def _deploy_contract(
+        cls,
+        contract: Contract,
+        ledger_api: LedgerApi,
+        deployer_crypto: Crypto,
+        gas: int,
+    ) -> JSONLike:
+        """
+        Deploy contract on network.
+
+        :param contract: the contract
+        :param ledger_api: the ledger api
+        :param deployer_crypto: the contract deployer crypto
+        :param gas: the gas amount
+
+        :return: the transaction receipt for initial transaction deployment
+        """
+        tx = contract.get_deploy_transaction(
+            ledger_api=ledger_api,
+            deployer_address=deployer_crypto.address,
+            gas=gas,
+            tx_fee=cls.deploy_tx_fee,
+        )
+
+        if tx is None:
+            raise ValueError("Deploy transaction not found!")  # pragma: nocover
+
+        tx_receipt = cls.sign_send_confirm_receipt_multisig_transaction(
+            tx, ledger_api, [deployer_crypto]
+        )
+
+        return tx_receipt
 
     @classmethod
     def setup(cls):
         """Setup."""
         # Test tokens IDs
-        super().setup(ledger_config=FETCHAI_TESTNET_CONFIG)
+        super().setup(ledger_config=FETCHAI_TESTNET_CONFIG, tx_fee=10000000000000000)
         cls.token_ids_a = [
             340282366920938463463374607431768211456,
             340282366920938463463374607431768211457,
@@ -681,10 +716,10 @@ class TestCosmWasmContract(BaseContractTestCase):
             deployer_address=cls.deployer_crypto.address,
             code_id=code_id,
             init_msg={},
-            tx_fee=0,
             amount=0,
             label="ERC1155",
             gas=1000000,
+            tx_fee=5000000000000000,
         )
 
         if tx is None:
@@ -712,6 +747,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             token_id=self.token_id_b,
+            tx_fee=1500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -724,6 +760,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             token_ids=self.token_ids_a,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -738,6 +775,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             recipient_address=self.item_owner_crypto.address,
             token_id=self.token_id_b,
             mint_quantity=1,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -762,6 +800,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             recipient_address=self.item_owner_crypto.address,
             token_ids=self.token_ids_a,
             mint_quantities=[1] * len(self.token_ids_a),
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -789,6 +828,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             token_ids=self.token_ids_a,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -803,6 +843,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             recipient_address=self.deployer_crypto.address,
             token_id=self.token_ids_a[0],
             mint_quantity=1,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -817,6 +858,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         # Atomic swap
         # Send 1 ERC1155 token a[0] from Deployer to Item owner
         # Send 1 native token from Item owner to Deployer
+        tx_fee = 7500000000000000
         tx = self.contract.get_atomic_swap_single_transaction(
             self.ledger_api,
             contract_address=self.contract_address,
@@ -829,6 +871,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             trade_nonce=0,
             from_pubkey=self.deployer_crypto.public_key,
             to_pubkey=self.item_owner_crypto.public_key,
+            tx_fee=tx_fee,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -848,7 +891,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
         # Check deployer's native token balance
         deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
-        assert deployer_balance == original_deployer_balance + 1
+        assert deployer_balance == original_deployer_balance + 1 - tx_fee
 
         # Other direction of atomic swap
         # Send 1 ERC1155 token a[0] from Item owner to Deployer
@@ -865,6 +908,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             trade_nonce=0,
             from_pubkey=self.deployer_crypto.public_key,
             to_pubkey=self.item_owner_crypto.public_key,
+            tx_fee=tx_fee,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -884,7 +928,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
         # Check deployer's native token balance
         deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
-        assert deployer_balance == original_deployer_balance + 2
+        assert deployer_balance == original_deployer_balance + 2 - tx_fee
 
         # Check invalid case with from_supply > 0 and to_supply > 0
         with pytest.raises(RuntimeError):
@@ -914,6 +958,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             token_ids=self.token_ids_a,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -928,6 +973,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             recipient_address=self.deployer_crypto.address,
             token_id=self.token_ids_a[0],
             mint_quantity=1,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -942,6 +988,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             recipient_address=self.item_owner_crypto.address,
             token_id=self.token_ids_a[1],
             mint_quantity=1,
+            tx_fee=2500000000000000,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -957,7 +1004,7 @@ class TestCosmWasmContract(BaseContractTestCase):
         # Send 1 ERC1155 token a[0] from Deployer to Item owner
         # Send 1 ERC1155 token a[1] from Item owner to Deployer
         # Send 1 native token from Item owner to Deployer
-
+        tx_fee = 7500000000000000
         tx = self.contract.get_atomic_swap_batch_transaction(
             self.ledger_api,
             contract_address=self.contract_address,
@@ -970,6 +1017,7 @@ class TestCosmWasmContract(BaseContractTestCase):
             trade_nonce=0,
             from_pubkey=self.deployer_crypto.public_key,
             to_pubkey=self.item_owner_crypto.public_key,
+            tx_fee=tx_fee,
         )
         assert len(tx) == 2
         self.sign_send_confirm_receipt_multisig_transaction(
@@ -1000,7 +1048,7 @@ class TestCosmWasmContract(BaseContractTestCase):
 
         # Check deployer's native token balance
         deployer_balance = self.ledger_api.get_balance(self.deployer_crypto.address)
-        assert deployer_balance == original_deployer_balance + 1
+        assert deployer_balance == original_deployer_balance + 1 - tx_fee
 
 
 class TestContractCommon:

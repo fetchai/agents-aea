@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@
 """This module contains the tests of the strategy class of the ml_data_provider skill."""
 
 import json
-import sys
 from pathlib import Path
 from unittest.mock import PropertyMock, patch
 
 import numpy as np
-import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.models import (
@@ -57,10 +55,6 @@ from packages.fetchai.skills.ml_data_provider.strategy import (
 from tests.conftest import ROOT_DIR
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 9),
-    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
-)
 class TestGenericStrategy(BaseSkillTestCase):
     """Test Strategy of ml_data_provider."""
 

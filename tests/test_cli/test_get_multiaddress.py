@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -291,7 +291,7 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
         password_options = _get_password_option_args(password_or_none)
         with pytest.raises(
             Exception,
-            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.21.0",
+            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.21.1",
         ):
             self.run_cli_command(
                 "get-multiaddress",
@@ -328,7 +328,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         password_options = _get_password_option_args(password_or_none)
         with pytest.raises(
             Exception,
-            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.21.0",
+            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.21.1",
         ):
             self.run_cli_command(
                 "get-multiaddress",
@@ -463,7 +463,7 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
         password_options = _get_password_option_args(password_or_none)
         with pytest.raises(
             Exception,
-            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.21.0",
+            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.21.1",
         ):
             self.run_cli_command(
                 "get-multiaddress",

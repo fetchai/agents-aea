@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.20.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.21.0")
 
 
 class RequestDispatcher(ABC):

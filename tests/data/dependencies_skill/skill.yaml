@@ -6,11 +6,11 @@ description: a skill for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmejjdhqVfgR3ABQbUFT5xwjAwTt9MvPTpGd9oC2xHKzY4
+  __init__.py: QmZfYLD7aHkPLxHPLwcx7LNNuEdVPZCRqmNZdby1nEbrcN
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:1.1.0
+- fetchai/default:1.1.1
 skills: []
 behaviours: {}
 handlers: {}

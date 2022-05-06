@@ -1,6 +1,6 @@
 name: weather_station
 author: fetchai
-version: 0.27.0
+version: 0.27.1
 type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
@@ -8,24 +8,24 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmV56JmGf2DsJw3m2zu8fjL7Jvgdtsg7pXsgN7J35suZk4
-  __init__.py: QmU4Hf8N75EV2D2xBH7gZkgQW9qRGRJ1P3vaMjHtKvbNC6
-  behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
-  db_communication.py: Qmchv7pxizFmf11KFEEPZhJwZSWtfDdMuzpcNM1ZY8HiTc
-  dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
-  dummy_weather_station_data.py: QmUnGWqNzRKpqtHQTBVGHvGBTdBRp9rCmdTBrjXE4ZhfAK
-  handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
-  strategy.py: QmQgjfo7AdTk3r1mp35UkC2ZGhqwYQZpDGYbbwsRjPgWMw
+  __init__.py: QmZS59651YBYvdxBXX8xPLzyp9L7c5A3tLBsZcBrRB7Sgp
+  behaviours.py: QmWSZHCVxHv59bt72xutyBK7j81jCe92rYeWZ8ZQcYA52G
+  db_communication.py: QmaJ4m3e2ndNhCsJJJ6rFGdWv4uWKc718X1zGFGGoRNPAq
+  dialogues.py: QmXxgcYDTbUb68kZdftmQgpQLL4EqnJK6uUpjhbxEfLvks
+  dummy_weather_station_data.py: Qmb5o8HssrGqBgZJLGzbhtdacEjPZj1C9tsFvye9XUtGkg
+  handlers.py: QmQnyVVwm19b4zZ7gMySETogX9c8Khn3WSHJ5SwU3RNseU
+  strategy.py: QmYpmkD22Nj1zrD4cUxCow3yAsUqYDjRm6NCMeUdiG9t9F
 fingerprint_ignore_patterns:
 - '*.db'
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/fipa:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/oef_search:1.1.0
+- fetchai/default:1.1.1
+- fetchai/fipa:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/oef_search:1.1.1
 skills:
-- fetchai/generic_seller:0.28.0
+- fetchai/generic_seller:0.28.1
 behaviours:
   service_registration:
     args:

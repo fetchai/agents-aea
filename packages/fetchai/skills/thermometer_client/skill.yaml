@@ -1,6 +1,6 @@
 name: thermometer_client
 author: fetchai
-version: 0.26.0
+version: 0.26.1
 type: skill
 description: The thermometer client skill implements the skill to purchase temperature
   data.
@@ -8,22 +8,22 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmT1Nm7vfaUs3oxt5awfQLkezXkqkkabYaKc2q5bDgdq1K
-  __init__.py: QmPHpnnkgQhzqqPVpiGHZnNfvyP7dheAAu5r3t2wWJ7pLg
-  behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
-  dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
-  handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
-  strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
+  __init__.py: QmVWc8wcq4qTeEbp3BuLeXxViPZW1WP8ef5SfTZG5CU15K
+  behaviours.py: QmNxVQanY9hn7Cp9tfTvJhF7ghLpUBDd8XUVjhfQ5xCsnj
+  dialogues.py: QmXsn6zXQoqTMQaq86CAEyMJcyN9TQtKH7a5531t3y4x8J
+  handlers.py: QmbjJFi15fTmvpvZMwkz83vPhw42Kv3E5eXX6yordGsMoc
+  strategy.py: QmeBdS7qfMfFjty7jCRnuWezsvZSDXwmHZ4NzmEgr6jDm2
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.0
-- fetchai/fipa:1.1.0
-- fetchai/ledger_api:1.1.0
-- fetchai/oef_search:1.1.0
-- fetchai/signing:1.1.0
+- fetchai/default:1.1.1
+- fetchai/fipa:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/oef_search:1.1.1
+- fetchai/signing:1.1.1
 skills:
-- fetchai/generic_buyer:0.27.0
+- fetchai/generic_buyer:0.27.1
 behaviours:
   search:
     args:

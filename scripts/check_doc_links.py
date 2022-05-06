@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ WHITELIST_URL_TO_CODE = {
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
     "https://colab.research.google.com": 403,
-    "https://github.com/fetchai/networks-stargateworld": 404,
+    "https://github.com/fetchai/networks-capricorn": 404,
 }
 
 IGNORE: Set[str] = {"https://faucet.metamask.io/"}

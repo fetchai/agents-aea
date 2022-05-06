@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-            "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0",
+            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
         # generate random location
@@ -63,8 +63,8 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -72,9 +72,9 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/weather_station:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/weather_station:0.27.1")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
@@ -108,8 +108,8 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -117,10 +117,10 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/weather_client:0.26.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/weather_client:0.26.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -244,8 +244,8 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-            "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0",
+            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
         # generate random location
@@ -256,8 +256,8 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -265,9 +265,9 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/weather_station:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/weather_station:0.27.1")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
@@ -304,8 +304,8 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/soef:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -313,9 +313,9 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.26.0")
-        self.add_item("connection", "fetchai/ledger:0.20.0")
-        self.add_item("skill", "fetchai/weather_client:0.26.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/ledger:0.21.0")
+        self.add_item("skill", "fetchai/weather_client:0.26.1")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()

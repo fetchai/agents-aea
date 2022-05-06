@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -49,15 +49,15 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/http_client:0.24.0")
-        self.add_item("connection", "fetchai/http_server:0.23.0")
-        self.add_item("connection", "fetchai/prometheus:0.9.0")
-        self.add_item("skill", "fetchai/advanced_data_request:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.23.0")
+        self.add_item("connection", "fetchai/http_client:0.24.1")
+        self.add_item("connection", "fetchai/http_server:0.23.1")
+        self.add_item("connection", "fetchai/prometheus:0.9.1")
+        self.add_item("skill", "fetchai/advanced_data_request:0.7.1")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.23.1")
 
         default_routing = {
-            "fetchai/http:1.1.0": "fetchai/http_client:0.24.0",
-            "fetchai/prometheus:1.1.0": "fetchai/prometheus:0.9.0",
+            "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
+            "fetchai/prometheus:1.1.1": "fetchai/prometheus:0.9.1",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -69,7 +69,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
-            "fetchai/advanced_data_request:0.7.0",
+            "fetchai/advanced_data_request:0.7.1",
         )
         self.set_config(
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",

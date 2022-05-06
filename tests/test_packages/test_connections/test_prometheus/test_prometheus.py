@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2022 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class TestPrometheusConnection:
         self.some_skill = "some/skill:0.1.0"
         self.agent_address = "my_address"
         self.agent_public_key = "my_public_key"
-        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.1.0")
+        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.1.1")
         identity = Identity(
             "name", address=self.agent_address, public_key=self.agent_public_key
         )
