@@ -1,16 +1,16 @@
 name: prometheus
 author: fetchai
-version: 1.1.0
+version: 1.1.1
 protocol_specification_id: fetchai/prometheus:1.0.0
 type: protocol
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmTJiHJz5CACiYNZDUX56uBezVuNnPgCHNhczwnVKmNXnK
-  __init__.py: QmU1BtMDc2fKqQvwHJ1HCyfsfVm4ngwLzQLrVL4AKmjq9T
+  README.md: QmfEhyvVLVFFNbezUmDfNZajjdMoqVQRhxtAtgZzRpUr4y
+  __init__.py: QmYijk3sMpZdj8fwsrEPfQvApP2Y1aVPEPkonyMnvrvqwb
   dialogues.py: QmVNNWsEzorKdYWxGSW1yUKd8PNXYjcRprtJijuuFSepkQ
-  message.py: QmWoPxzoxiXdw9qSodSKr8qsXHospVpSvqUvBJbsk27bHr
+  message.py: QmaDAqm5SqW9cFuBKB1CJiy9bHZGBTahTcudpWS7gwwMtb
   prometheus.proto: QmXMxMXbDH1LoFcV9QB7TvewUPu62poka43aKuujL73UN1
   prometheus_pb2.py: QmYqPhhZFgZfcAsXyD6Eef9tTqkXcgtcyUwVee4fFRoBvk
   serialization.py: QmYXXhfSkq4Xo93Yah4QhtriFpGZjr97sW8nozA6LpxzaQ

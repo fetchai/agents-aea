@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the acn protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.1.1`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.0`.
 """
 
 from packages.fetchai.protocols.acn.message import AcnMessage

@@ -934,7 +934,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.21.0\n"
+        assert result.stdout == "fetchai/stub:0.21.1\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
@@ -1037,7 +1037,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
     IS_EMPTY = True
 
     GENERIC_SELLER = ComponentId(
-        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.28.0")
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.28.1")
     )
     unmocked = get_latest_version_available_in_registry
 
@@ -1143,7 +1143,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.27.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.27.1")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 

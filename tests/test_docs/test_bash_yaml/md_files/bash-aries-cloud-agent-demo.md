@@ -21,11 +21,11 @@ cd aries_alice
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/http_client:0.24.0
-aea add connection fetchai/webhook:0.20.0
-aea add skill fetchai/aries_alice:0.25.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/http_client:0.24.1
+aea add connection fetchai/webhook:0.20.1
+aea add skill fetchai/aries_alice:0.26.1
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_alice.models.strategy.args.admin_host 127.0.0.1
@@ -63,11 +63,11 @@ cd aries_faber
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/http_client:0.24.0
-aea add connection fetchai/webhook:0.20.0
-aea add skill fetchai/aries_faber:0.23.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/http_client:0.24.1
+aea add connection fetchai/webhook:0.20.1
+aea add skill fetchai/aries_faber:0.24.0
 ```
 ``` bash
 aea config set vendor.fetchai.skills.aries_faber.models.strategy.args.admin_host 127.0.0.1

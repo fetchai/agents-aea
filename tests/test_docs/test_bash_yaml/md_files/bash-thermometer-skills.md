@@ -16,17 +16,17 @@ aea build
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/thermometer:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/thermometer:0.27.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 ```
 ``` bash
@@ -38,17 +38,17 @@ aea build
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.26.0
-aea add connection fetchai/soef:0.27.0
-aea add connection fetchai/ledger:0.20.0
-aea add skill fetchai/thermometer_client:0.26.0
+aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/ledger:0.21.0
+aea add skill fetchai/thermometer_client:0.26.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.26.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.0": "fetchai/ledger:0.20.0",
-  "fetchai/oef_search:1.1.0": "fetchai/soef:0.27.0"
+  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 ```
 ``` bash
@@ -100,7 +100,7 @@ aea delete my_thermometer_client
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.26.0
+public_id: fetchai/p2p_libp2p:0.27.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

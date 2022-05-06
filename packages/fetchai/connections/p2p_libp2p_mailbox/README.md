@@ -7,7 +7,7 @@ It allows for using the DHT without having to deploy a node by delegating its co
 
 ## Usage 
 
-First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p_client:0.20.0`.
+First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p_client:0.20.1`.
 
 Next, ensure that the connection is properly configured by setting:
 
