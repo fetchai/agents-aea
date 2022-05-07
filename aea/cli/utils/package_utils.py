@@ -194,7 +194,11 @@ def try_get_item_target_path(
 
 
 def get_package_path(
-    project_directory: str, item_type: str, public_id: PublicId, is_vendor: bool = True
+    project_directory: str,
+    item_type: str,
+    public_id: PublicId,
+    is_vendor: bool = True,
+    vendor_dirname: str = VENDOR,
 ) -> str:
     """
     Get a vendorized path for a package.
@@ -203,6 +207,7 @@ def get_package_path(
     :param item_type: item type.
     :param public_id: item public ID.
     :param is_vendor: flag for vendorized path (True by default).
+    :param vendor_dirname: name of the vendor directory: default "vendor"
 
     :return: vendorized destination path for package.
     """
@@ -210,7 +215,7 @@ def get_package_path(
     if is_vendor:
         return os.path.join(
             project_directory,
-            VENDOR,
+            vendor_dirname,
             public_id.author,
             item_type_plural,
             public_id.name,

@@ -1323,10 +1323,18 @@ class _CosmosApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
+        err = None
+        for i in range(5):
+            try:
+                tx_request = GetTxRequest(hash=tx_digest)
+                tx_response = self.tx_client.GetTx(tx_request)
+                return MessageToDict(tx_response)
+            except Exception as e:  # pylint: disable=broad-except
+                err = e
+                time.sleep(i)
 
-        tx_request = GetTxRequest(hash=tx_digest)
-        tx_response = self.tx_client.GetTx(tx_request)
-        return MessageToDict(tx_response)
+        if err:
+            raise err from err
 
     def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """

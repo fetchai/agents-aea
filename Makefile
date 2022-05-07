@@ -137,13 +137,14 @@ new_env: clean
 	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
-		pipenv --python 3.7;\
+		pipenv --python 3.9;\
 		pipenv install --dev --skip-lock --clear;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
 		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\
+		pipenv run pip install --no-deps file:plugins/aea-cli-benchmark;\
 		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 	else\
 		echo "In a virtual environment! Exit first: 'exit'.";\
