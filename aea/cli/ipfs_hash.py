@@ -27,7 +27,6 @@ This script requires that you have IPFS installed:
 """
 import collections
 import csv
-import operator
 import os
 import re
 import sys
@@ -37,6 +36,7 @@ from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import click
 
+from aea.cli.utils.constants import HASHES_FILE
 from aea.configurations.base import (
     AgentConfig,
     ConnectionConfig,
@@ -47,21 +47,19 @@ from aea.configurations.base import (
     SkillConfig,
     _compute_fingerprint,
 )
+from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE, SCAFFOLD_PACKAGES
 from aea.configurations.loader import ConfigLoaders
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 
 
-HASHES_FILE = "hashes.csv"
-HASH_TOOL = IPFSHashOnly()
-
-type_to_class_config = {
+type_to_class_config: Dict[PackageType, Type[PackageConfiguration]] = {
     PackageType.AGENT: AgentConfig,
     PackageType.PROTOCOL: ProtocolConfig,
     PackageType.CONNECTION: ConnectionConfig,
     PackageType.SKILL: SkillConfig,
     PackageType.CONTRACT: ContractConfig,
-}  # type: Dict[PackageType, Type[PackageConfiguration]]
+}
 
 
 def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
@@ -71,43 +69,15 @@ def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
     return PackageType(item_type_singular), package_path
 
 
-def _get_core_packages(root_dir: Path) -> List[Tuple[PackageType, Path]]:
-    return list(
-        map(
-            package_type_and_path,
-            [
-                root_dir / "aea" / "protocols" / "scaffold",
-                root_dir / "aea" / "connections" / "scaffold",
-                root_dir / "aea" / "contracts" / "scaffold",
-                root_dir / "aea" / "skills" / "scaffold",
-            ],
-        )
-    )
-
-
-def _get_test_packages(test_data: Path) -> List[Tuple[PackageType, Path]]:
-    """Returns a list containing path for test packages."""
-    return [
-        (PackageType.AGENT, test_data / "dummy_aea"),
-        (PackageType.CONNECTION, test_data / "dummy_connection"),
-        (PackageType.CONTRACT, test_data / "dummy_contract"),
-        (PackageType.PROTOCOL, test_data / "generator" / "t_protocol"),
-        (PackageType.PROTOCOL, test_data / "generator" / "t_protocol_no_ct"),
-        (PackageType.SKILL, test_data / "dependencies_skill"),
-        (PackageType.SKILL, test_data / "exception_skill"),
-        (PackageType.SKILL, test_data / "dummy_skill"),
-    ]
-
-
 def _get_all_packages(packages_dir: Path) -> List[Tuple[PackageType, Path]]:
     """Get all the hashable package of the repository."""
 
-    return list(
-        map(
-            package_type_and_path,
-            filter(operator.methodcaller("is_dir"), packages_dir.glob("*/*/*/")),
-        )
-    )
+    all_packages = []
+    for package_type, config_file in PACKAGE_TYPE_TO_CONFIG_FILE.items():
+        for package_dir in packages_dir.glob(f"**/{config_file}"):
+            all_packages.append((PackageType(package_type), package_dir.parent))
+
+    return all_packages
 
 
 def sort_configuration_file(config: PackageConfiguration) -> None:
@@ -128,14 +98,16 @@ def sort_configuration_file(config: PackageConfiguration) -> None:
 
 
 def hash_package(
-    configuration: PackageConfiguration, package_type: PackageType, wrap: bool = True
+    configuration: PackageConfiguration,
+    package_type: PackageType,
+    no_wrap: bool = False,
 ) -> Tuple[str, str]:
     """
     Hashes a package and its components.
 
     :param configuration: the package configuration.
     :param package_type: the package type.
-    :param wrap: Whether to use the wrapper node or not.
+    :param no_wrap: Whether to use the wrapper node or not.
     :return: the identifier of the hash (e.g. 'fetchai/protocols/default')
            | and the hash of the whole package.
     """
@@ -149,7 +121,9 @@ def hash_package(
     key = os.path.join(
         configuration.author, package_type.to_plural(), configuration.directory.name,
     )
-    package_hash = HASH_TOOL.hash_directory(str(configuration.directory), wrap=wrap)
+    package_hash = IPFSHashOnly.hash_directory(
+        str(configuration.directory), wrap=(not no_wrap)
+    )
     return key, package_hash
 
 
@@ -210,7 +184,7 @@ def assert_hash_consistency(fingerprint: Dict[str, str], path_prefix: Path) -> N
     # confirm ipfs only generates same hash:
     for file_name, ipfs_hash in fingerprint.items():
         path = path_prefix / file_name
-        expected_ipfs_hash = HASH_TOOL.hash_file(str(path), wrap=False)
+        expected_ipfs_hash = IPFSHashOnly.hash_file(str(path), wrap=False)
 
         if expected_ipfs_hash != ipfs_hash:
             raise ValueError("WARNING, hashes don't match for: {}".format(path))
@@ -234,9 +208,13 @@ def _replace_fingerprint_non_invasive(
     def to_row(x: Tuple[str, str]) -> str:
         return x[0] + ": " + x[1]
 
-    replacement = "\nfingerprint:\n  {}\n".format(
-        "\n  ".join(map(to_row, sorted(fingerprint_dict.items())))
-    )
+    if len(fingerprint_dict) == 0:
+        replacement = "\nfingerprint: {}\n"
+    else:
+        replacement = "\nfingerprint:\n  {}\n".format(
+            "\n  ".join(map(to_row, sorted(fingerprint_dict.items())))
+        )
+
     return re.sub(r"\nfingerprint:\W*\n(?:\W+.*\n)*", replacement, text)
 
 
@@ -310,21 +288,14 @@ def check_fingerprint(configuration: PackageConfiguration) -> bool:
     return result
 
 
-def update_hashes(
-    packages_dir: Path,
-    test_data: Optional[Path] = None,
-    root_dir: Optional[Path] = None,
-    no_wrap: bool = False,
-) -> int:
+def update_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
     """Process all AEA packages, update fingerprint, and update hashes.csv files."""
     return_code = 0
-    package_hashes = {}  # type: Dict[str, str]
-    test_package_hashes = {}  # type: Dict[str, str]
+    package_hashes: Dict[str, str] = {}
 
     try:
         packages = _get_all_packages(packages_dir)
-        if root_dir is not None:
-            packages += _get_core_packages(Path(root_dir))
+        packages += list(map(package_type_and_path, SCAFFOLD_PACKAGES))
 
         for package_type, package_path in packages:
             click.echo(
@@ -336,30 +307,11 @@ def update_hashes(
             sort_configuration_file(configuration_obj)
             update_fingerprint(configuration_obj)
             key, package_hash = hash_package(
-                configuration_obj, package_type, wrap=not no_wrap
+                configuration_obj, package_type, no_wrap=no_wrap
             )
             package_hashes[key] = package_hash
 
         to_csv(package_hashes, packages_dir / HASHES_FILE)
-
-        if test_data is not None:
-            test_data = Path(test_data)
-            for package_type, package_path in _get_test_packages(test_data):
-                click.echo(
-                    "Processing test package {} of type {}".format(
-                        package_path.name, package_type
-                    )
-                )
-                configuration_obj = load_configuration(package_type, package_path)
-                sort_configuration_file(configuration_obj)
-                update_fingerprint(configuration_obj)
-                key, package_hash = hash_package(
-                    configuration_obj, package_type, wrap=not no_wrap
-                )
-                test_package_hashes[key] = package_hash
-
-            to_csv(test_package_hashes, test_data / HASHES_FILE)
-
         click.echo("Done!")
 
     except Exception:  # pylint: disable=broad-except
@@ -385,7 +337,7 @@ def check_same_ipfs_hash(
     :return: True if the IPFS hash match, False otherwise.
     """
 
-    key, actual_hash = hash_package(configuration, package_type, not no_wrap)
+    key, actual_hash = hash_package(configuration, package_type, no_wrap=no_wrap)
     expected_hash = all_expected_hashes[key]
     result = actual_hash == expected_hash
     if not result:
@@ -398,12 +350,7 @@ def check_same_ipfs_hash(
     return result
 
 
-def check_hashes(
-    packages_dir: Path,
-    test_data: Optional[Path],
-    root_dir: Optional[Path],
-    no_wrap: bool = False,
-) -> int:
+def check_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
     """Check fingerprints and outer hash of all AEA packages."""
 
     return_code = 0
@@ -412,8 +359,7 @@ def check_hashes(
     try:
         packages = _get_all_packages(packages_dir)
         expected_package_hashes = from_csv(packages_dir / HASHES_FILE)
-        if root_dir is not None:
-            packages += _get_core_packages(Path(root_dir))
+        packages += list(map(package_type_and_path, SCAFFOLD_PACKAGES))
 
         for package_type, package_path in packages:
             configuration_obj = load_configuration(package_type, package_path)
@@ -421,19 +367,6 @@ def check_hashes(
             failed = failed or not check_same_ipfs_hash(
                 configuration_obj, package_type, expected_package_hashes, no_wrap
             )
-
-        if test_data is not None:
-            test_data = Path(test_data)
-            expected_test_package_hashes = from_csv(test_data / HASHES_FILE)
-            for package_type, package_path in _get_test_packages(test_data):
-                configuration_obj = load_configuration(package_type, package_path)
-                failed = failed or not check_fingerprint(configuration_obj)
-                failed = failed or not check_same_ipfs_hash(
-                    configuration_obj,
-                    package_type,
-                    expected_test_package_hashes,
-                    no_wrap,
-                )
 
     except Exception:  # pylint: disable=broad-except
         traceback.print_exc()
@@ -458,26 +391,15 @@ def hash_group() -> None:
     type=click.Path(exists=True, dir_okay=True, file_okay=False),
     default=Path("packages/"),
 )
-@click.option(
-    "--test-data", type=click.Path(exists=True, dir_okay=True, file_okay=False),
-)
-@click.option(
-    "--root-dir", type=click.Path(exists=True, dir_okay=True, file_okay=False),
-)
 @click.option("--no-wrap", is_flag=True)
 @click.option("--check", is_flag=True)
-def generate_all(
-    packages_dir: Path,
-    test_data: Optional[Path],
-    root_dir: Optional[Path],
-    no_wrap: bool,
-    check: bool,
-) -> None:
+def generate_all(packages_dir: Path, no_wrap: bool, check: bool,) -> None:
     """Generate IPFS hashes."""
+    packages_dir = Path(packages_dir).absolute()
     if check:
-        return_code = check_hashes(packages_dir, test_data, root_dir, no_wrap)
+        return_code = check_hashes(packages_dir, no_wrap)
     else:
-        return_code = update_hashes(packages_dir, test_data, root_dir, no_wrap)
+        return_code = update_hashes(packages_dir, no_wrap)
     sys.exit(return_code)
 
 
@@ -488,4 +410,4 @@ def hash_file(path: str, no_wrap: bool) -> None:
     """Hash a single file/directory."""
 
     click.echo(f"Path : {path}")
-    click.echo(f"Hash : {HASH_TOOL.get(path, wrap=not no_wrap)}")
+    click.echo(f"Hash : {IPFSHashOnly.get(path, wrap=not no_wrap)}")
