@@ -19,6 +19,11 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of AEA agents project configuration."""
 import os
+import pprint
+import shutil
+import subprocess
+import sys
+import tempfile
 from copy import deepcopy
 from pathlib import Path
 from shutil import rmtree
@@ -363,3 +368,54 @@ class AgentAlias(_Base):
             self.agent_config, password=self._password
         )
         return wallet.connection_cryptos.addresses
+
+
+class AEAProject:
+    """A context manager class to create and delete an AEA project."""
+
+    old_cwd: str
+    temp_dir: str
+
+    def __init__(self, name: str = "my_aea", parent_dir: Optional[str] = None):
+        """
+        Initialize an AEA project.
+
+        :param name: the name of the AEA project.
+        :param parent_dir: the parent directory.
+        """
+        self.name = name
+        self.parent_dir = parent_dir
+
+    def __enter__(self) -> None:
+        """Create and enter into the project."""
+        self.old_cwd = os.getcwd()
+        self.temp_dir = tempfile.mkdtemp(dir=self.parent_dir)
+        os.chdir(self.temp_dir)
+
+        self.run_aea("create", "--local", "--empty", self.name, "--author", "fetchai")
+        os.chdir(self.name)
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
+        """Exit the context manager."""
+        os.chdir(self.old_cwd)
+        shutil.rmtree(self.temp_dir)
+
+    @staticmethod
+    def run_cli(*args: Any, **kwargs: Any) -> None:
+        """Run a CLI command."""
+        print(f"Calling command {args} with kwargs {kwargs}")
+        return_code = subprocess.check_call(args, **kwargs)  # nosec
+        enforce(
+            return_code == 0,
+            f"Return code of {pprint.pformat(args)} is {return_code} != 0.",
+        )
+
+    @classmethod
+    def run_aea(cls, *args: Any, **kwargs: Any) -> None:
+        """
+        Run an AEA command.
+
+        :param args: the AEA command
+        :param kwargs: keyword arguments to subprocess function
+        """
+        cls.run_cli(sys.executable, "-m", "aea.cli", *args, **kwargs)
