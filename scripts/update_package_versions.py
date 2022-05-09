@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -137,11 +137,7 @@ def check_if_running_allowed() -> None:
 
 def run_hashing() -> None:
     """Run the hashing script."""
-    hashing_call = update_hashes(
-        packages_dir=ROOT_DIR / "packages",
-        test_data=ROOT_DIR / "tests" / "data",
-        root_dir=ROOT_DIR,
-    )
+    hashing_call = update_hashes(packages_dir=ROOT_DIR / "packages")
     if hashing_call == 1:
         print("Problem when running IPFS script!")
         sys.exit(1)
@@ -615,11 +611,7 @@ class Updater:
     @staticmethod
     def run_hashing():
         """Run hashes update."""
-        hashing_call = update_hashes(
-            packages_dir=ROOT_DIR / "packages",
-            test_data=ROOT_DIR / "tests" / "data",
-            root_dir=ROOT_DIR,
-        )
+        hashing_call = update_hashes(packages_dir=ROOT_DIR / "packages")
         if hashing_call == 1:
             raise Exception("Problem when running IPFS script!")
 

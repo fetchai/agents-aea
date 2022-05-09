@@ -543,11 +543,7 @@ def bump(arguments: argparse.Namespace) -> int:
         )
     else:
         logging.info("Updating hashes and fingerprints.")
-        return_code = update_hashes(
-            packages_dir=ROOT_DIR / "packages",
-            test_data=ROOT_DIR / "tests" / "data",
-            root_dir=ROOT_DIR,
-        )
+        return_code = update_hashes(packages_dir=ROOT_DIR / "packages",)
     return return_code
 
 

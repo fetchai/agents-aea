@@ -279,11 +279,7 @@ def main() -> None:
         print("Not updating fingerprints, since no specifier set has been updated.")
     else:
         print("Updating hashes and fingerprints.")
-        return_code = update_hashes(
-            packages_dir=ROOT_DIR / "packages",
-            test_data=ROOT_DIR / "tests" / "data",
-            root_dir=ROOT_DIR,
-        )
+        return_code = update_hashes(packages_dir=ROOT_DIR / "packages",)
     exit_with_message("Done!", exit_code=return_code)
 
 

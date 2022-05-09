@@ -59,7 +59,8 @@ static:
 
 .PHONY: package_checks
 package_checks:
-	python -m aea.cli hash all --root-dir=./ --test-data=./tests/data/ --check
+	python -m aea.cli hash all --check
+	python -m aea.cli hash all --packages-dir=./tests/data/ --check
 	python scripts/check_package_versions_in_docs.py
 	python scripts/check_packages.py
 
@@ -91,7 +92,8 @@ test-sub-p:
 
 .PHONY: hashes
 hashes:
-	python -m aea.cli hash all --root-dir=./ --test-data=./tests/data/ 
+	python -m aea.cli hash all 
+	python -m aea.cli hash all --packages-dir=./tests/data/ 
 
 .PHONY: test-all
 test-all:
@@ -188,7 +190,8 @@ security:
 .PHONY: generators
 generators:
 	python -m aea.cli generate-all-protocols --test-data=tests/data/
-	python -m aea.cli hash all --root-dir=./ --test-data=./tests/data/ 
+	python -m aea.cli hash all 
+	python -m aea.cli hash all --packages-dir=./tests/data/ 
 	python scripts/generate_api_docs.py
 	python scripts/check_copyright_notice.py
 
