@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,21 +16,5 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains utility code for the test_generator modules."""
-import os
 
-from tests.conftest import ROOT_DIR
-
-
-T_PROTOCOL_NAME = "t_protocol"
-PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
-    ROOT_DIR, "tests", "data", "sample_specification.yaml"
-)
-PATH_TO_T_PROTOCOL = os.path.join(
-    ROOT_DIR, "tests", "data", "packages", "fetchai", "protocols", T_PROTOCOL_NAME
-)
-
-
-def black_is_not_installed(*args, **kwargs):
-    """Check black is not installed."""
-    return not args[0] == "black"
+"""This test module contains the test packages."""

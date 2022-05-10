@@ -40,7 +40,7 @@ import subprocess  # nosec
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, List, Match, cast
+from typing import Any, List, Match, Tuple, cast
 
 import click
 import semver
@@ -347,6 +347,23 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     )
 
 
+def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]) -> None:
+    """
+    Replace text in directory.
+
+    :param name: the protocol name.
+    :param replacement_pairs: a list of pairs of strings (to_replace, replacement).
+    """
+    log(f"Replace prefix of import statements in directory '{name}'")
+    package_dir = Path(PROTOCOLS, name)
+    for submodule in package_dir.rglob("*.py"):
+        log(f"Process submodule {submodule.relative_to(package_dir)}")
+        for to_replace, replacement in replacement_pairs:
+            if to_replace not in submodule.read_text():
+                continue
+            submodule.write_text(submodule.read_text().replace(to_replace, replacement))
+
+
 def _process_packages_protocol(
     package_path: Path,
     preserve_generator_docstring: bool,
@@ -383,6 +400,24 @@ def _process_packages_protocol(
     _save_specification_in_temporary_file(package_path.name, specification_content)
     _generate_protocol(package_path)
     _fix_generated_protocol(package_path)
+
+    packages_dir_parent = package_path.parent.parent.parent.parent
+    if root_dir != packages_dir_parent:
+        if root_dir not in packages_dir_parent.parents:
+            raise ValueError(
+                "Packages dir should be a sub directory of the root directory."
+            )
+
+        relative_import_path = ".".join(
+            packages_dir_parent.parts[len(root_dir.parts) :]
+        )
+        replacements = [
+            (
+                f"from packages.fetchai.protocols.{package_path.name}",
+                f"from {relative_import_path}.packages.fetchai.protocols.{package_path.name}",
+            )
+        ]
+        replace_in_directory(package_path.name, replacements)
 
     if preserve_generator_docstring:
         _replace_generator_docstring(package_path, old_protocol_generator_docstring)
@@ -432,7 +467,8 @@ def generate_all_protocols(
 
     _check_preliminaries()
 
-    packages_dir = Path(packages_dir)
+    packages_dir = Path(packages_dir).absolute()
+    root_dir = Path(root_dir).absolute()
     all_protocols = find_protocols_in_local_registry(packages_dir)
 
     with AEAProject():

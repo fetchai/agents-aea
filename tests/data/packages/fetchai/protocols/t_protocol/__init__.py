@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2022 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,21 +16,17 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains utility code for the test_generator modules."""
-import os
 
-from tests.conftest import ROOT_DIR
+"""
+This module contains the support resources for the t_protocol protocol.
 
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.7.0`.
+"""
 
-T_PROTOCOL_NAME = "t_protocol"
-PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
-    ROOT_DIR, "tests", "data", "sample_specification.yaml"
-)
-PATH_TO_T_PROTOCOL = os.path.join(
-    ROOT_DIR, "tests", "data", "packages", "fetchai", "protocols", T_PROTOCOL_NAME
+from tests.data.packages.fetchai.protocols.t_protocol.message import TProtocolMessage
+from tests.data.packages.fetchai.protocols.t_protocol.serialization import (
+    TProtocolSerializer,
 )
 
 
-def black_is_not_installed(*args, **kwargs):
-    """Check black is not installed."""
-    return not args[0] == "black"
+TProtocolMessage.serializer = TProtocolSerializer
