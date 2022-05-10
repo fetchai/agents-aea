@@ -250,7 +250,7 @@ def _print_all_available_packages(ctx: Context) -> None:
     rows = [("Package", "IPFSHash")]
 
     for package_id, package_path in list_available_packages(ctx.cwd):
-        package_hash = ipfs_hash.hash_directory(str(package_path), wrap=False)
+        package_hash = ipfs_hash.hash_directory(str(package_path))
         rows.append((str(package_id), package_hash))
 
     click.echo("All available packages.")
