@@ -21,7 +21,7 @@
 import os
 import pprint
 import shutil
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 from copy import deepcopy

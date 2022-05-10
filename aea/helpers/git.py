@@ -19,7 +19,7 @@
 """Useful git tools."""
 
 import shutil
-import subprocess
+import subprocess  # nosec
 import sys
 
 
