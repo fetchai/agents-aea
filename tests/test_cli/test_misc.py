@@ -44,7 +44,6 @@ def test_flag_help():
     """Test that the flag '--help' works correctly."""
     runner = CliRunner()
     result = runner.invoke(cli, ["--help"])
-    print(result.stdout)
     assert (
         result.stdout
         == """Usage: aea [OPTIONS] COMMAND [ARGS]...
@@ -63,44 +62,47 @@ Options:
   --help                        Show this message and exit.
 
 Commands:
-  add                  Add a package to the agent.
-  add-key              Add a private key to the wallet of the agent.
-  build                Build the agent and its components.
-  config               Read or modify a configuration of the agent.
-  create               Create a new agent.
-  delete               Delete an agent.
-  eject                Eject a vendor package of the agent.
-  fetch                Fetch an agent from the registry.
-  fingerprint          Fingerprint a non-vendor package of the agent.
-  freeze               Get the dependencies of the agent.
-  generate             Generate a package for the agent.
-  generate-key         Generate a private key and place it in a file.
-  generate-wealth      Generate wealth for the agent on a test network.
-  get-address          Get the address associated with a private key of the...
-  get-multiaddress     Get the multiaddress associated with a private key or...
-  get-public-key       Get the public key associated with a private key of
-                       the...
+  add                     Add a package to the agent.
+  add-key                 Add a private key to the wallet of the agent.
+  build                   Build the agent and its components.
+  config                  Read or modify a configuration of the agent.
+  create                  Create a new agent.
+  delete                  Delete an agent.
+  eject                   Eject a vendor package of the agent.
+  fetch                   Fetch an agent from the registry.
+  fingerprint             Fingerprint a non-vendor package of the agent.
+  freeze                  Get the dependencies of the agent.
+  generate                Generate a package for the agent.
+  generate-all-protocols  Generate all protocols.
+  generate-key            Generate a private key and place it in a file.
+  generate-wealth         Generate wealth for the agent on a test network.
+  get-address             Get the address associated with a private key of
+                          the...
 
-  get-wealth           Get the wealth associated with the private key of the...
-  init                 Initialize your AEA configurations.
-  install              Install the dependencies of the agent.
-  ipfs                 IPFS Commands
-  issue-certificates   Issue certificates for connections that require them.
-  launch               Launch many agents at the same time.
-  list                 List the installed packages of the agent.
-  local-registry-sync  Upgrade the local package registry.
-  login                Login to the registry account.
-  logout               Logout from the registry account.
-  publish              Publish the agent to the registry.
-  push                 Push a non-vendor package of the agent to the registry.
-  register             Create a new registry account.
-  remove               Remove a package from the agent.
-  remove-key           Remove a private key from the wallet of the agent.
-  reset_password       Reset the password of the registry account.
-  run                  Run the agent.
-  scaffold             Scaffold a package for the agent.
-  search               Search for packages in the registry.
-  transfer             Transfer wealth associated with a private key of the...
-  upgrade              Upgrade the packages of the agent.
+  get-multiaddress        Get the multiaddress associated with a private key...
+  get-public-key          Get the public key associated with a private key of...
+  get-wealth              Get the wealth associated with the private key of...
+  init                    Initialize your AEA configurations.
+  install                 Install the dependencies of the agent.
+  ipfs                    IPFS Commands
+  issue-certificates      Issue certificates for connections that require...
+  launch                  Launch many agents at the same time.
+  list                    List the installed packages of the agent.
+  local-registry-sync     Upgrade the local package registry.
+  login                   Login to the registry account.
+  logout                  Logout from the registry account.
+  publish                 Publish the agent to the registry.
+  push                    Push a non-vendor package of the agent to the...
+  register                Create a new registry account.
+  remove                  Remove a package from the agent.
+  remove-key              Remove a private key from the wallet of the agent.
+  reset_password          Reset the password of the registry account.
+  run                     Run the agent.
+  scaffold                Scaffold a package for the agent.
+  search                  Search for packages in the registry.
+  transfer                Transfer wealth associated with a private key of
+                          the...
+
+  upgrade                 Upgrade the packages of the agent.
 """
     )

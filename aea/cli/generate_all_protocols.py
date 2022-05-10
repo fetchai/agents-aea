@@ -61,7 +61,7 @@ from aea.configurations.loader import (
 )
 from aea.exceptions import enforce
 from aea.helpers.git import check_working_tree_is_dirty
-from aea.manager.project import AEAProject
+from aea.manager.helpers import AEAProject
 
 
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
