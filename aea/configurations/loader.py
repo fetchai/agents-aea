@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the parser for configuration file."""
+from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 
@@ -428,3 +429,15 @@ def load_configuration_object(
             )
         )
     return configuration_object
+
+
+def load_protocol_specification_from_string(
+    specification_content: str,
+) -> ProtocolSpecification:
+    """Load a protocol specification from string."""
+    file = StringIO(initial_value=specification_content)
+    config_loader = ConfigLoader(
+        "protocol-specification_schema.json", ProtocolSpecification
+    )
+    protocol_spec = config_loader.load_protocol_specification(file)
+    return protocol_spec

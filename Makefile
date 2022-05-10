@@ -189,9 +189,10 @@ security:
 # update copyright headers
 .PHONY: generators
 generators:
-	python -m aea.cli generate-all-protocols --test-data=tests/data/
+	python -m aea.cli generate-all-protocols
 	python -m aea.cli hash all 
 	python -m aea.cli hash all --packages-dir=./tests/data/ 
+	python scripts/generate_ipfs_hashes.py
 	python scripts/generate_api_docs.py
 	python scripts/check_copyright_notice.py
 
