@@ -14,6 +14,7 @@
 | `fingerprint [package_type] [public_id]`    | Fingerprint connection, contract, protocol, or skill, with `public_id`.    |
 | `freeze`                                    | Get all the dependencies needed for the AEA project and its components.      |
 | `generate protocol [protocol_spec_path]`    | Generate a protocol from the specification.                                  |
+| `generate-all-protocols`                    | Generate all protocols. |
 | `generate-key [ledger_id]`                  | Generate private keys. The AEA uses a private key to derive the associated public key and address. |
 | `generate-wealth [ledger_id]`               | Generate wealth for address on test network.                                 |
 | `get-address [ledger_id]`                   | Get the address associated with the private key.                             |
