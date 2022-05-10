@@ -32,34 +32,21 @@ import re
 import sys
 import traceback
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, Tuple, Type, cast
+from typing import Collection, Dict, List, Optional, Tuple, cast
 
 import click
 
 from aea.cli.utils.constants import HASHES_FILE
 from aea.configurations.base import (
     AgentConfig,
-    ConnectionConfig,
-    ContractConfig,
     PackageConfiguration,
     PackageType,
-    ProtocolConfig,
-    SkillConfig,
     _compute_fingerprint,
 )
 from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE, SCAFFOLD_PACKAGES
-from aea.configurations.loader import ConfigLoaders
+from aea.configurations.loader import load_configuration_object
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
-
-
-type_to_class_config: Dict[PackageType, Type[PackageConfiguration]] = {
-    PackageType.AGENT: AgentConfig,
-    PackageType.PROTOCOL: ProtocolConfig,
-    PackageType.CONNECTION: ConnectionConfig,
-    PackageType.SKILL: SkillConfig,
-    PackageType.CONTRACT: ContractConfig,
-}
 
 
 def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
@@ -162,32 +149,9 @@ def load_configuration(
     :param package_path: the path to the package root.
     :return: the configuration object.
     """
-    configuration_class = type_to_class_config[package_type]
-    configuration_filepath = (
-        package_path / configuration_class.default_configuration_filename
-    )
-
-    loader = ConfigLoaders.from_package_type(package_type)
-    with configuration_filepath.open() as fp:
-        configuration_obj = loader.load(fp)
+    configuration_obj = load_configuration_object(package_type, package_path)
     configuration_obj._directory = package_path  # pylint: disable=protected-access
     return cast(PackageConfiguration, configuration_obj)
-
-
-def assert_hash_consistency(fingerprint: Dict[str, str], path_prefix: Path) -> None:
-    """
-    Check that our implementation of IPFS hashing for a package is correct against the true IPFS.
-
-    :param fingerprint: the fingerprint dictionary.
-    :param path_prefix: the path prefix to prepend.
-    """
-    # confirm ipfs only generates same hash:
-    for file_name, ipfs_hash in fingerprint.items():
-        path = path_prefix / file_name
-        expected_ipfs_hash = IPFSHashOnly.hash_file(str(path), wrap=False)
-
-        if expected_ipfs_hash != ipfs_hash:
-            raise ValueError("WARNING, hashes don't match for: {}".format(path))
 
 
 def _replace_fingerprint_non_invasive(
@@ -231,7 +195,6 @@ def compute_fingerprint(  # pylint: disable=unsubscriptable-object
     fingerprint = _compute_fingerprint(
         package_path, ignore_patterns=fingerprint_ignore_patterns,
     )
-    assert_hash_consistency(fingerprint, package_path)
     return fingerprint
 
 

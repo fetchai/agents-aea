@@ -387,7 +387,7 @@ def load_package_configuration(
     :param skip_aea_validation: if True, the validation of the AEA version is skipped.
     :return: the configuration object.
     """
-    configuration_object = _load_configuration_object(
+    configuration_object = load_configuration_object(
         package_type, directory, skip_aea_validation
     )
     if not skip_consistency_check and isinstance(
@@ -399,7 +399,7 @@ def load_package_configuration(
     return configuration_object
 
 
-def _load_configuration_object(
+def load_configuration_object(
     package_type: PackageType, directory: Path, skip_aea_validation: bool = True
 ) -> PackageConfiguration:
     """
