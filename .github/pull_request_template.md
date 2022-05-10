@@ -50,7 +50,7 @@ _Put an `x` in the boxes that apply._
 - [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) doc
 - [ ] I am making a pull request against the `main` branch (left side), from `develop`
 - [ ] Lint and unit tests pass locally and in CI
-- [ ] I have checked the fingerprint hashes are correct by running (`scripts/generate_ipfs_hashes.py`)
+- [ ] I have checked the fingerprint hashes are correct by running (`aea hash all --check`)
 - [ ] I have regenerated the latest API docs
 - [ ] I built the documentation and updated it with the latest changes
 - [ ] I have added an item in `HISTORY.md` for this release
