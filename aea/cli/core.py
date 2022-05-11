@@ -45,6 +45,7 @@ from aea.cli.get_public_key import get_public_key
 from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
+from aea.cli.ipfs_hash import hash_group
 from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
@@ -139,4 +140,5 @@ cli.add_command(search)
 cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)
+cli.add_command(hash_group)
 cli.add_command(generate_all_protocols)

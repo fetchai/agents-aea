@@ -19,9 +19,11 @@
 # ------------------------------------------------------------------------------
 
 """Module to declare constants."""
+from pathlib import Path
 from typing import Dict, List
 
 
+AEA_DIR = Path(__file__).parent.parent
 _FETCHAI_IDENTIFIER = "fetchai"
 _ETHEREUM_IDENTIFIER = "ethereum"
 _COSMOS_IDENTIFIER = "cosmos"
@@ -142,3 +144,9 @@ ITEM_TYPE_TO_PLURAL = {
 }
 
 ITEM_TYPE_PLURAL_TO_TYPE = {v: k for k, v in ITEM_TYPE_TO_PLURAL.items()}
+SCAFFOLD_PACKAGES = [
+    AEA_DIR / "protocols" / "scaffold",
+    AEA_DIR / "connections" / "scaffold",
+    AEA_DIR / "contracts" / "scaffold",
+    AEA_DIR / "skills" / "scaffold",
+]

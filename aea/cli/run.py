@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea run' subcommand."""
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from typing import Generator, List, Optional, Sequence, Tuple, cast
 
@@ -80,6 +80,14 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     help="Enable profiling, print profiling every amount of seconds",
 )
 @click.option(
+    "--memray",
+    "memray_flag",
+    is_flag=True,
+    required=False,
+    default=False,
+    help="Enable memray tracing, create a bin file with the memory dump",
+)
+@click.option(
     "--exclude-connections",
     "exclude_connection_ids",
     cls=ConnectionsOption,
@@ -105,6 +113,7 @@ def run(
     is_install_deps: bool,
     apply_environment_variables: bool,
     profiling: int,
+    memray_flag: bool,
     password: str,
 ) -> None:
     """Run the agent."""
@@ -118,25 +127,30 @@ def run(
     if exclude_connection_ids:
         connection_ids = _calculate_connection_ids(ctx, exclude_connection_ids)
 
-    if profiling > 0:
-        with _profiling_context(period=profiling):
-            run_aea(
-                ctx,
-                connection_ids,
-                env_file,
-                is_install_deps,
-                apply_environment_variables,
-                password,
-            )
-            return
-    run_aea(
-        ctx,
-        connection_ids,
-        env_file,
-        is_install_deps,
-        apply_environment_variables,
-        password,
+    profiling_context = (
+        _profiling_context(period=profiling) if profiling > 0 else nullcontext()
     )
+
+    memray_context = nullcontext()
+    if memray_flag:
+        try:
+            import memray  # type: ignore # pylint: disable=import-error,import-outside-toplevel
+
+            memray_context = memray.Tracker("memray_profiling.bin")
+        except ModuleNotFoundError:
+            click.echo(
+                "WARNING: memray module is not installed. Memray tracing will be disabled."
+            )
+
+    with profiling_context, memray_context:
+        run_aea(
+            ctx,
+            connection_ids,
+            env_file,
+            is_install_deps,
+            apply_environment_variables,
+            password,
+        )
 
 
 def _calculate_connection_ids(
@@ -250,7 +264,7 @@ def _print_all_available_packages(ctx: Context) -> None:
     rows = [("Package", "IPFSHash")]
 
     for package_id, package_path in list_available_packages(ctx.cwd):
-        package_hash = ipfs_hash.hash_directory(str(package_path), wrap=False)
+        package_hash = ipfs_hash.hash_directory(str(package_path))
         rows.append((str(package_id), package_hash))
 
     click.echo("All available packages.")

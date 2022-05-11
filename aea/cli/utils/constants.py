@@ -81,3 +81,4 @@ DUMMY_PACKAGE = "__DUMMY_PACKAGE__"
 DUMMY_PACKAGE_ID = PublicId.from_json(
     {"author": DUMMY_AUTHOR, "name": DUMMY_PACKAGE, "version": "latest"}
 )
+HASHES_FILE = "hashes.csv"
