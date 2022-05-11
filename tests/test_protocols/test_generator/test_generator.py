@@ -75,7 +75,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
               custom_types.py files makes their IPFS hashes different.
         """
         path_to_generated_protocol = self.t
-        dotted_path_to_package_for_imports = "tests.data.generator."
+        dotted_path_to_package_for_imports = "tests.data.packages.fetchai.protocols."
 
         # Generate the protocol
         try:
@@ -94,6 +94,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # compare __init__.py
         init_file_generated = Path(self.t, T_PROTOCOL_NAME, "__init__.py")
         init_file_original = Path(PATH_TO_T_PROTOCOL, "__init__.py",)
+
         is_matched, diff = match_files(init_file_generated, init_file_original)
         assert (
             is_matched or len(diff) == 194
@@ -175,7 +176,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
             ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"
         )
         path_to_generated_protocol = self.t
-        dotted_path_to_package_for_imports = "tests.data.generator."
+        dotted_path_to_package_for_imports = "tests.data.packages.fetchai.protocols."
         path_to_protocol = os.path.join(
             ROOT_DIR, "tests", "data", "packages", "fetchai", "protocols", protocol_name
         )
