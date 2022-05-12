@@ -26,9 +26,9 @@ from aea.mail.base_pb2 import DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
-from tests.data.generator.t_protocol import t_protocol_pb2
-from tests.data.generator.t_protocol.custom_types import DataModel
-from tests.data.generator.t_protocol.message import TProtocolMessage
+from tests.data.packages.fetchai.protocols.t_protocol import t_protocol_pb2
+from tests.data.packages.fetchai.protocols.t_protocol.custom_types import DataModel
+from tests.data.packages.fetchai.protocols.t_protocol.message import TProtocolMessage
 
 
 class TProtocolSerializer(Serializer):
