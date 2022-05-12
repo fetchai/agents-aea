@@ -147,6 +147,7 @@ nav:
         - Exec Timeout: 'api/helpers/exec_timeout.md'
         - File IO: 'api/helpers/file_io.md'
         - File Lock: 'api/helpers/file_lock.md'
+        - Git: api/helpers/git.md
         - HttpRequests: 'api/helpers/http_requests.md'
         - Install Dependency: 'api/helpers/install_dependency.md'
         - IO: 'api/helpers/io.md'
@@ -160,6 +161,7 @@ nav:
         - Pipe: 'api/helpers/pipe.md'
         - Preferences:
           - Base: 'api/helpers/preference_representations/base.md'
+        - Profiler Type Blacklist: api/helpers/profiler_type_black_list.md
         - Profiling: 'api/helpers/profiling.md'
         - Search:
           - Generic: 'api/helpers/search/generic.md'
@@ -180,6 +182,7 @@ nav:
       - Manager:
         - Manager: 'api/manager/manager.md'
         - Project: 'api/manager/project.md'
+        - Helpers:  api/manager/helpers.md
         - Utils: 'api/manager/utils.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
