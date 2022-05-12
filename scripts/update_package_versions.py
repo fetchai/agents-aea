@@ -53,7 +53,7 @@ from scripts.common import (
 )
 
 
-ROOT_DIR = Path(__file__).parent
+ROOT_DIR = Path(__file__).parent.parent
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
 CLI_LOG_OPTION = ["-v", "OFF"]
 TYPES = set(map(lambda x: x.to_plural(), PackageType))

@@ -71,8 +71,7 @@ logging.basicConfig(
 PatternByPath = Dict[Path, str]
 
 AEA_DIR = Path("aea")
-CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-ROOT_DIR = Path(__file__).parent
+ROOT_DIR = Path(__file__).parent.parent
 
 PLUGINS_DIR = Path("plugins")
 ALL_PLUGINS = tuple(PLUGINS_DIR.iterdir())
