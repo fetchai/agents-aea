@@ -44,10 +44,8 @@ python scripts/bump_aea_version.py --only-check
 """
 
 import argparse
-import inspect
 import logging
 import operator
-import os
 import re
 import sys
 from functools import wraps
