@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the t_protocol_no_ct protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.7.0`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.8.0`.
 """
 
 from tests.data.packages.fetchai.protocols.t_protocol_no_ct.message import (

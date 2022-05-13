@@ -267,6 +267,13 @@ acn
 args
 open-aea
 cleanup
+gc
+memray
+pluging
+cli
+mkdocs
+ipfs
+command_line
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
