@@ -4,7 +4,7 @@
 ## 1.8.0 (2022-05-12)
 
 AEA:
-- Extends the run command to print all available addresses at the AEA start up.
+- Extends the `run` command to print all available addresses at the AEA start up.
 - Introduces support for usage of hashes as a part of the `PublicId`
 - Adds support for IPFS based registry
 - Introduces dialogue cleanup
@@ -23,7 +23,7 @@ Pluging:
 -  Updates IPFS cli plugin tool to support remote registry and extended `PublicId`
 
 Packages:
-- Updated tendermint protocol for config sharing
+- Updated `tendermint/protocol` for config sharing
 
 Chores:
 - Adds support for IPFS in CI for windows based environments
