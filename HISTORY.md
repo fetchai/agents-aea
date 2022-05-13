@@ -1,6 +1,37 @@
 # Release History - open AEA
 
 
+## 1.8.0 (2022-05-12)
+
+AEA:
+- Extends the `run` command to print all available addresses at the AEA start up.
+- Introduces support for usage of hashes as a part of the `PublicId`
+- Adds support for IPFS based registry
+- Introduces dialogue cleanup
+- Adds support for removing the temporal `None` values in the dialogue label 
+- Updated the profiler to
+  - Removing the unwanted variables in profiling
+  - Set counters also in the destructor
+  - Only iterate the gc one
+  - Use types blacklist
+  - Get info from all objects
+- Adds support for memray in the profiler
+- Ports the `generate_all_protocols.py` and `generate_ipfs_hashes.py` to `aea.cli` as a command line tools.
+- Adds support for the usage of environment variables in `issue-certificates` command.
+
+Pluging:
+-  Updates IPFS cli plugin tool to support remote registry and extended `PublicId`
+
+Packages:
+- Updated `tendermint/protocol` for config sharing
+
+Chores:
+- Adds support for IPFS in CI for windows based environments
+- Profile parser checks for non empty data before plotting
+- The paths to download the packages folder with svn are now pointing to the version tag rather than main.
+- Adds the missing search plugin for mkdocs.
+- Adds new functionality to the log parser to add an extra plot with common objects in the garbage collector.
+
 ## 1.7.0 (2022-04-15)
 
 AEA:

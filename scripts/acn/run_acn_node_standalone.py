@@ -248,7 +248,7 @@ class AcnNodeStandalone:
             self._proc.wait()
 
 
-def parse_commandline():
+def parse_command_line():
     """Parse script cl arguments."""
 
     parser = argparse.ArgumentParser()
@@ -338,7 +338,7 @@ def parse_commandline():
 
 if __name__ == "__main__":
 
-    run_args = parse_commandline()
+    run_args = parse_command_line()
 
     node_config: Optional[AcnNodeConfig] = None
 
