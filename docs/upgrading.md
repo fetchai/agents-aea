@@ -11,6 +11,8 @@ Below we describe the additional manual steps required to upgrade between differ
 
 This release introduces a new format for `PublicId` parameter which allows users to use IPFS hashes as a part of the `PublicId` which may lead to some unexpected behaviours or bugs.
 
+Previous implementation of `PublicId` used `author/package:version` format, The new implementation uses `author/package:version:hash`
+
 This release also fixes the hash inconsistency by using wrapper hashes to represent packages.
 
 Plugins from previous versions are not compatible anymore.
