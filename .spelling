@@ -273,7 +273,7 @@ pluging
 cli
 mkdocs
 ipfs
-commandline
+command_line
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
