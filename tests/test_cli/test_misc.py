@@ -44,6 +44,7 @@ def test_flag_help():
     """Test that the flag '--help' works correctly."""
     runner = CliRunner()
     result = runner.invoke(cli, ["--help"])
+    print(result.stdout)
     assert (
         result.stdout
         == """Usage: aea [OPTIONS] COMMAND [ARGS]...
@@ -65,6 +66,7 @@ Commands:
   add                     Add a package to the agent.
   add-key                 Add a private key to the wallet of the agent.
   build                   Build the agent and its components.
+  check-packages          Run different checks on AEA packages.
   config                  Read or modify a configuration of the agent.
   create                  Create a new agent.
   delete                  Delete an agent.
