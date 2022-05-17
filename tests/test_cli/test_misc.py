@@ -44,7 +44,6 @@ def test_flag_help():
     """Test that the flag '--help' works correctly."""
     runner = CliRunner()
     result = runner.invoke(cli, ["--help"])
-    print(result.stdout)
     assert (
         result.stdout
         == """Usage: aea [OPTIONS] COMMAND [ARGS]...
