@@ -65,6 +65,7 @@ Commands:
   add                     Add a package to the agent.
   add-key                 Add a private key to the wallet of the agent.
   build                   Build the agent and its components.
+  check-packages          Run different checks on AEA packages.
   config                  Read or modify a configuration of the agent.
   create                  Create a new agent.
   delete                  Delete an agent.

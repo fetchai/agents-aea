@@ -28,6 +28,7 @@ import aea
 from aea.cli.add import add
 from aea.cli.add_key import add_key
 from aea.cli.build import build
+from aea.cli.check_packages import check_packages
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.delete import delete
@@ -142,3 +143,4 @@ cli.add_command(transfer)
 cli.add_command(upgrade)
 cli.add_command(hash_group)
 cli.add_command(generate_all_protocols)
+cli.add_command(check_packages)
