@@ -25,6 +25,19 @@ from typing import Any, MutableMapping, Optional, Tuple, cast
 from aea.helpers.base import _get_aea_logger_name_prefix
 
 
+DEFAULT_FORMAT = "[%(asctime)s][%(levelname)s] %(message)s"
+
+
+def setup_logger(
+    name: str, level: int = logging.INFO, log_format: str = DEFAULT_FORMAT
+) -> Logger:
+    """Set up the logger."""
+    logging.basicConfig(format=log_format)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    return logger
+
+
 def get_logger(module_path: str, agent_name: str) -> Logger:
     """Get the logger based on a module path and agent name."""
     logger = logging.getLogger(_get_aea_logger_name_prefix(module_path, agent_name))

@@ -29,7 +29,7 @@ from pathlib import Path
 
 from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.constants import PACKAGES, SIGNING_PROTOCOL, _FETCHAI_IDENTIFIER
-from scripts.common import check_working_tree_is_dirty
+from aea.helpers.git import check_working_tree_is_dirty
 
 
 DOCS_DIR = Path("docs/")

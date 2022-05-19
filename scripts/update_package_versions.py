@@ -46,14 +46,14 @@ from aea.cli import cli
 from aea.cli.ipfs_hash import update_hashes
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
-from scripts.common import (
-    PACKAGES_DIR,
+from aea.helpers.protocols import (
     get_protocol_specification_from_readme,
     get_protocol_specification_id_from_specification,
 )
 
 
 ROOT_DIR = Path(__file__).parent.parent
+PACKAGES_DIR = ROOT_DIR / "packages"
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
 CLI_LOG_OPTION = ["-v", "OFF"]
 TYPES = set(map(lambda x: x.to_plural(), PackageType))
