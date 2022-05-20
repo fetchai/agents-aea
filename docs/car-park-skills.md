@@ -59,7 +59,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 1. Add a new AEA called `car_detector` with public id `fetchai/car_detector:0.32.0`.
 
-2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.33.0`.
+2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.33.1`.
 
 3. Copy the address from the `car_data_buyer` into your clip board. Then go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
@@ -135,7 +135,7 @@ aea build
 
 Then, fetch the car data client AEA:
 ``` bash
-aea fetch fetchai/car_data_buyer:0.33.0
+aea fetch fetchai/car_data_buyer:0.33.1
 cd car_data_buyer
 aea install
 aea build
@@ -151,7 +151,7 @@ cd car_data_buyer
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/carpark_client:0.27.1
+aea add skill fetchai/carpark_client:0.27.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}

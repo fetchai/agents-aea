@@ -25,7 +25,7 @@ aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.30.1 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 aea build
@@ -36,7 +36,7 @@ cd my_buyer_aea
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/generic_buyer:0.27.1
+aea add skill fetchai/generic_buyer:0.27.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
@@ -138,7 +138,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       search_query:
         constraint_type: ==

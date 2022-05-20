@@ -61,7 +61,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 1. Add a new AEA called `my_weather_station` with public id `fetchai/weather_station:0.32.0`.
 
-2. Add another new AEA called `my_weather_client` with public id `fetchai/weather_client:0.33.0`.
+2. Add another new AEA called `my_weather_client` with public id `fetchai/weather_client:0.33.1`.
 
 3. Copy the address from the `my_weather_client` into your clip board. Then go to the <a href="https://explore-dorado.fetch.ai" target="_blank">Dorado block explorer</a> and request some test tokens via `Get Funds`.
 
@@ -141,7 +141,7 @@ aea build
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.33.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.33.1 --alias my_weather_client
 cd my_weather_client
 aea install
 aea build
@@ -157,7 +157,7 @@ cd my_weather_client
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/weather_client:0.26.1
+aea add skill fetchai/weather_client:0.26.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}

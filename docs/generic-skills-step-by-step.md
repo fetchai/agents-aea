@@ -18,9 +18,9 @@ cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.0
+aea fetch fetchai/generic_buyer:0.30.1
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.27.1
+aea eject skill fetchai/generic_buyer:0.27.2
 cd ..
 ```
 
@@ -3116,7 +3116,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       min_quantity: 1
       search_query:

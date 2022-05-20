@@ -34,7 +34,7 @@ aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/weather_client:0.33.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.33.1 --alias my_weather_client
 cd my_weather_client
 aea install
 aea build
@@ -45,7 +45,7 @@ cd my_weather_client
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/weather_client:0.26.1
+aea add skill fetchai/weather_client:0.26.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}

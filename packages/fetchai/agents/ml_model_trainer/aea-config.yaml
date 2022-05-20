@@ -1,6 +1,6 @@
 agent_name: ml_model_trainer
 author: fetchai
-version: 0.33.0
+version: 0.33.1
 description: An agent buying data and training a model from it.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -19,7 +19,7 @@ protocols:
 - fetchai/signing:1.1.1
 - fetchai/state_update:1.1.1
 skills:
-- fetchai/generic_buyer:0.27.1
+- fetchai/generic_buyer:0.27.2
 - fetchai/ml_train:0.29.1
 default_connection: fetchai/p2p_libp2p:0.27.0
 default_ledger: fetchai

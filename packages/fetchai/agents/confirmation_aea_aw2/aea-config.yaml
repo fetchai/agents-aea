@@ -1,6 +1,6 @@
 agent_name: confirmation_aea_aw2
 author: fetchai
-version: 0.18.1
+version: 0.18.2
 description: This agent purchases information from other agents as specified in its
   configuration. It acts as the confirmation AEA in Agent World 2.
 license: Apache-2.0
@@ -19,8 +19,8 @@ protocols:
 - fetchai/signing:1.1.1
 - fetchai/state_update:1.1.1
 skills:
-- fetchai/confirmation_aw2:0.13.1
-- fetchai/generic_buyer:0.27.1
+- fetchai/confirmation_aw2:0.13.2
+- fetchai/generic_buyer:0.27.2
 default_connection: fetchai/p2p_libp2p:0.27.0
 default_ledger: fetchai
 required_ledgers:
@@ -91,7 +91,7 @@ config:
       address: https://rest-dorado.fetch.ai:443
       chain_id: dorado-1
 ---
-public_id: fetchai/confirmation_aw2:0.13.1
+public_id: fetchai/confirmation_aw2:0.13.2
 type: skill
 behaviours:
   search:
@@ -107,7 +107,7 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       mininum_hours_between_txs: 4
       search_query:

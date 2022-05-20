@@ -118,7 +118,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         )
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
         self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.26.1")
+        self.add_item("skill", "fetchai/thermometer_client:0.26.2")
         setting_path = (
             "vendor.fetchai.skills.thermometer_client.models.strategy.args.is_ledger_tx"
         )
@@ -319,7 +319,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         )
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
         self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.26.1")
+        self.add_item("skill", "fetchai/thermometer_client:0.26.2")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()

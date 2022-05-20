@@ -142,7 +142,7 @@ aea build
 
 Then, fetch the model trainer AEA:
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.33.0
+aea fetch fetchai/ml_model_trainer:0.33.1
 cd ml_model_trainer
 aea install
 aea build

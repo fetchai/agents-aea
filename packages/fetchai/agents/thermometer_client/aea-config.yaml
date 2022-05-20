@@ -19,8 +19,8 @@ protocols:
 - fetchai/signing:1.1.1
 - fetchai/state_update:1.1.1
 skills:
-- fetchai/generic_buyer:0.27.1
-- fetchai/thermometer_client:0.26.1
+- fetchai/generic_buyer:0.27.2
+- fetchai/thermometer_client:0.26.2
 default_connection: fetchai/p2p_libp2p:0.27.0
 default_ledger: fetchai
 required_ledgers:

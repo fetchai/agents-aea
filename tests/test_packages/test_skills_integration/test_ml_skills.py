@@ -311,7 +311,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.33.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.33.1", model_trainer_aea_name
         )
         assert (
             diff == []

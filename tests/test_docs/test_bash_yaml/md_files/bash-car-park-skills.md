@@ -34,7 +34,7 @@ aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/car_data_buyer:0.33.0
+aea fetch fetchai/car_data_buyer:0.33.1
 cd car_data_buyer
 aea install
 aea build
@@ -45,7 +45,7 @@ cd car_data_buyer
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/carpark_client:0.27.1
+aea add skill fetchai/carpark_client:0.27.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}

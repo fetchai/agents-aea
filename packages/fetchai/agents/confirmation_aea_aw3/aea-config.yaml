@@ -23,8 +23,8 @@ protocols:
 - fetchai/signing:1.1.1
 - fetchai/state_update:1.1.1
 skills:
-- fetchai/confirmation_aw3:0.12.1
-- fetchai/generic_buyer:0.27.1
+- fetchai/confirmation_aw3:0.12.2
+- fetchai/generic_buyer:0.27.2
 default_connection: fetchai/p2p_libp2p:0.27.0
 default_ledger: fetchai
 required_ledgers:
@@ -96,7 +96,7 @@ config:
       address: https://rest-dorado.fetch.ai:443
       chain_id: dorado-1
 ---
-public_id: fetchai/confirmation_aw3:0.12.1
+public_id: fetchai/confirmation_aw3:0.12.2
 type: skill
 behaviours:
   search:

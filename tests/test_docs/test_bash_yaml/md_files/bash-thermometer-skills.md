@@ -41,7 +41,7 @@ cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/thermometer_client:0.26.1
+aea add skill fetchai/thermometer_client:0.26.2
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0

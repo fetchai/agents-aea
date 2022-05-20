@@ -106,7 +106,7 @@ class TestCarPark(AEATestCaseManyFlaky):
         self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
         self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/carpark_client:0.27.1")
+        self.add_item("skill", "fetchai/carpark_client:0.27.2")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
@@ -289,13 +289,13 @@ class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
         self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
         self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/carpark_client:0.27.1")
+        self.add_item("skill", "fetchai/carpark_client:0.27.2")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_data_buyer:0.33.0", carpark_client_aea_name
+            "fetchai/car_data_buyer:0.33.1", carpark_client_aea_name
         )
         assert (
             diff == []

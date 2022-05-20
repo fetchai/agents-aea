@@ -114,7 +114,7 @@ cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.27.0
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/thermometer_client:0.26.1
+aea add skill fetchai/thermometer_client:0.26.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
@@ -221,7 +221,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       search_query:
         constraint_type: ==

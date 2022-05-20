@@ -24,7 +24,7 @@ We first add a couple of finished AEA project:
 from aea.configurations.base import PublicId
 
 weather_station_id = PublicId.from_str("fetchai/weather_station:0.32.0")
-weather_client_id = PublicId.from_str("fetchai/weather_client:0.33.0")
+weather_client_id = PublicId.from_str("fetchai/weather_client:0.33.1")
 manager.add_project(weather_station_id)
 manager.add_project(weather_client_id)
 weather_station_name = weather_station_id.name
