@@ -40,7 +40,7 @@ import subprocess  # nosec
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, List, Match, Tuple, cast
+from typing import Any, List, Tuple, cast
 
 import click
 import semver
@@ -54,13 +54,10 @@ from aea.configurations.constants import (
     PROTOCOLS,
 )
 from aea.configurations.data_types import PackageId, PublicId
-from aea.configurations.loader import (
-    ConfigLoaders,
-    load_component_configuration,
-    load_protocol_specification_from_string,
-)
+from aea.configurations.loader import ConfigLoaders, load_component_configuration
 from aea.exceptions import enforce
 from aea.helpers.git import check_working_tree_is_dirty
+from aea.helpers.protocols import get_protocol_specification_from_readme
 from aea.manager.helpers import AEAProject
 
 
@@ -73,27 +70,6 @@ PROTOCOL_GENERATOR_DOCSTRING_REGEX = "It was created with protocol buffer compil
 logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s")
 logger = logging.getLogger("generate_all_protocols")
 logger.setLevel(logging.INFO)
-
-
-def get_protocol_specification_from_readme(package_path: Path) -> str:
-    """Get the protocol specification from the package README."""
-    logger.info(f"Get protocol specification from README {package_path}")
-    readme = package_path / "README.md"
-    readme_content = readme.read_text()
-    enforce(
-        "## Specification" in readme_content,
-        f"Cannot find specification section in {package_path}",
-    )
-
-    search_result = SPECIFICATION_REGEX.search(readme_content)
-    enforce(
-        search_result is not None,
-        f"Cannot find specification section in README of {package_path}",
-    )
-    specification_content = cast(Match, search_result).group(0)
-    # just for validation of the parsed string
-    load_protocol_specification_from_string(specification_content)
-    return specification_content
 
 
 def find_protocols_in_local_registry(packages_dir: Path) -> List[Path]:

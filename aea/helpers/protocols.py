@@ -2,7 +2,6 @@
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2022 Valory AG
-#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,71 +17,28 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Common utils for scripts."""
-import logging
+"""Protocol helpers."""
+
 import re
-import subprocess  # nosec
-import sys
-from io import StringIO
 from pathlib import Path
 from typing import Match, cast
 
-from aea.configurations.base import ProtocolSpecification
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import load_protocol_specification_from_string
+from aea.exceptions import enforce
+from aea.helpers.logging import setup_logger
 
 
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
 PROTOCOL_SPECIFICATION_ID_IN_SPECIFICATION_REGEX = re.compile(
     "^protocol_specification_id: (.*)$", re.MULTILINE
 )
-PACKAGES_DIR = Path("packages")
 
-
-def setup_logger(name: str) -> logging.Logger:
-    """Set up the logger."""
-    FORMAT = "[%(asctime)s][%(levelname)s] %(message)s"
-    logging.basicConfig(format=FORMAT)
-    logger_ = logging.getLogger(name)
-    logger_.setLevel(logging.INFO)
-    return logger_
-
-
-logger = setup_logger(__name__)
-
-
-def enforce(condition: bool, message: str = "") -> None:
-    """Custom assertion."""
-    if not condition:
-        raise AssertionError(message)
-
-
-def check_working_tree_is_dirty() -> None:
-    """Check if the current Git working tree is dirty."""
-    print("Checking whether the Git working tree is dirty...")
-    result = subprocess.check_output(["git", "diff", "--stat"])  # nosec
-    if len(result) > 0:
-        print("Git working tree is dirty:")
-        print(result.decode("utf-8"))
-        sys.exit(1)
-    else:
-        print("All good!")
-
-
-def load_protocol_specification_from_string(
-    specification_content: str,
-) -> ProtocolSpecification:
-    """Load a protocol specification from string."""
-    file = StringIO(initial_value=specification_content)
-    config_loader = ConfigLoader(
-        "protocol-specification_schema.json", ProtocolSpecification
-    )
-    protocol_spec = config_loader.load_protocol_specification(file)
-    return protocol_spec
+_logger = setup_logger(__name__)
 
 
 def get_protocol_specification_from_readme(package_path: Path) -> str:
     """Get the protocol specification from the package README."""
-    logger.info(f"Get protocol specification from README {package_path}")
+    _logger.info(f"Get protocol specification from README {package_path}")
     readme = package_path / "README.md"
     readme_content = readme.read_text()
     enforce(

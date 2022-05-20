@@ -4,6 +4,18 @@
 
 Logging helpers.
 
+<a id="aea.helpers.logging.setup_logger"></a>
+
+#### setup`_`logger
+
+```python
+def setup_logger(name: str,
+                 level: int = logging.INFO,
+                 log_format: str = DEFAULT_FORMAT) -> Logger
+```
+
+Set up the logger.
+
 <a id="aea.helpers.logging.get_logger"></a>
 
 #### get`_`logger
