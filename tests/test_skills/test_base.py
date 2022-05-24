@@ -573,6 +573,13 @@ class TestSkillProgrammatic:
         """Test the handlers getter on skill context."""
         assert getattr(self.skill.skill_context, self.model_name, None) == self.model
 
+    def test_protocol_dialogues(self):
+        """Test the retrieving protocol dialogues via handler"""
+        with pytest.raises(ValueError):
+            self.handler.protocol_dialogues
+        self.handler.SUPPORTED_PROTOCOL = PublicId.from_str("open_aea/simple_skill:0.1.0")
+        assert self.handler.protocol_dialogues is None
+
 
 class TestHandlerHandleExceptions:
     """Test exceptions in the handle wrapper."""
