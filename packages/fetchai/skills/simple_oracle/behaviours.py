@@ -147,7 +147,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "oracle_address": self.context.agent_address,
-                    "gas": strategy.default_gas_grant_role,
+                    "gas": strategy.gas_limit_grant_role,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_grant_role,
                 }
             ),
         )
@@ -175,7 +176,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
                     "oracle_address": self.context.agent_address,
                     "update_function": strategy.update_function,
                     "update_kwargs": update_kwargs,
-                    "gas": strategy.default_gas_update,
+                    "gas": strategy.gas_limit_update,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_update,
                 }
             ),
         )

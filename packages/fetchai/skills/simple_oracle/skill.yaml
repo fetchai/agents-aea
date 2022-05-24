@@ -8,10 +8,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
   __init__.py: QmReQqp5iycqRhiSuHpdzVPWbfajqhmSyxoig8u71Rcy9c
-  behaviours.py: QmbyTxeyYTqq5ZouvoAYF4qFSKm98PVg1HecLL5tqoFqQA
+  behaviours.py: QmP2LgWLRFzQH3SgwEBaFsJki1a2MFw6VRrC3jeGnCxM6d
   dialogues.py: Qme9GGuPFfGMNPiwtnXDK8rUuGEN7PHgKnhoZU2ehfipq2
-  handlers.py: QmY2UzGhykdQoJS32JgyFZGkdawe6qsrrh2Ey7PnXmzGHA
-  strategy.py: QmeTVA5VYSwZyMrKM9uZDqadtcXmFpfSrQcTvPU5NL3yc6
+  handlers.py: QmbYdqiinrmBnoMeWFufGWrhTCREDoU6eopweeoj75Z1DW
+  strategy.py: QmcwQnL8uEAFYtDVDf9utYWkVXizTEfaFUfm1kdTecRSup
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.12.0
@@ -67,10 +67,11 @@ models:
     args:
       contract_address: null
       contract_address_file: null
-      default_gas_deploy: 1500000
-      default_gas_grant_role: 1500000
-      default_gas_update: 1500000
       erc20_address: '0x0000000000000000000000000000000000000000'
+      gas_limit_deploy: 1500000
+      gas_limit_grant_role: 1500000
+      gas_limit_update: 1500000
+      gas_price: 1000000000
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
       ledger_id: null
