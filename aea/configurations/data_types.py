@@ -45,6 +45,7 @@ from aea.configurations.constants import (
     CONTRACT,
     DEFAULT_GIT_REF,
     PROTOCOL,
+    SERVICE,
     SKILL,
 )
 from aea.exceptions import enforce
@@ -135,6 +136,7 @@ class PackageType(Enum):
     CONNECTION = CONNECTION
     CONTRACT = CONTRACT
     SKILL = SKILL
+    SERVICE = SERVICE
 
     def to_plural(self) -> str:
         """
@@ -510,12 +512,13 @@ class PublicId(JSONSerializable):
 class PackageId:
     """A package identifier."""
 
-    PACKAGE_TYPE_REGEX = r"({}|{}|{}|{}|{})".format(
+    PACKAGE_TYPE_REGEX = r"({}|{}|{}|{}|{}|{})".format(
         PackageType.AGENT,
         PackageType.PROTOCOL,
         PackageType.SKILL,
         PackageType.CONNECTION,
         PackageType.CONTRACT,
+        PackageType.SERVICE,
     )
     PACKAGE_ID_URI_REGEX = r"{}/{}".format(
         PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
