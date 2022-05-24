@@ -46,7 +46,7 @@ body:
       label: Context
       description: Any relevant information about your setup (this is important in case the issue is not reproducible except for under certain conditions)
       placeholder: |
-        Operating system [e.g. iOS], Python version [e.g. 3.8.5], AEA version [e.g. 1.0.0], ...
+        Operating system [e.g. MacOS], Python version [e.g. 3.8.5], AEA version [e.g. 1.2.0], ...
     validations:
       required: true
   - type: textarea
