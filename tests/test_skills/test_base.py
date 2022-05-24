@@ -575,9 +575,12 @@ class TestSkillProgrammatic:
 
     def test_protocol_dialogues(self):
         """Test the retrieving protocol dialogues via handler"""
-        with pytest.raises(ValueError):
+        error_message = f"SUPPORTED_PROTOCOL not set on {self.handler}"
+        with pytest.raises(ValueError, match=error_message):
             self.handler.protocol_dialogues
-        self.handler.SUPPORTED_PROTOCOL = PublicId.from_str("open_aea/simple_skill:0.1.0")
+
+        protocol = PublicId.from_str("open_aea/simple_skill:0.1.0")
+        self.handler.SUPPORTED_PROTOCOL = protocol
         assert self.handler.protocol_dialogues is None
 
 
