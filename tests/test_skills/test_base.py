@@ -581,7 +581,9 @@ class TestSkillProgrammatic:
 
         protocol = PublicId.from_str("open_aea/simple_skill:0.1.0")
         self.handler.SUPPORTED_PROTOCOL = protocol
-        assert self.handler.protocol_dialogues is None
+        error_message = "'SkillContext' object has no attribute "
+        with pytest.raises(AttributeError, match=error_message):
+            self.handler.protocol_dialogues
 
 
 class TestHandlerHandleExceptions:

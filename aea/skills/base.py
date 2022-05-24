@@ -511,12 +511,12 @@ class Handler(SkillComponent, ABC):
         return _parse_module(path, handler_configs, skill_context, Handler)
 
     @property
-    def protocol_dialogues(self) -> Optional["Dialogues"]:  # type: ignore
+    def protocol_dialogues(self) -> "Dialogues":  # type: ignore
         """Protocol dialogues"""
         if self.SUPPORTED_PROTOCOL is None:
             raise ValueError(f"SUPPORTED_PROTOCOL not set on {self}")
         attribute = cast(PublicId, self.SUPPORTED_PROTOCOL).name + "_dialogues"
-        return getattr(self.context, attribute, None)
+        return getattr(self.context, attribute)
 
 
 class Model(SkillComponent, ABC):
