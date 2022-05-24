@@ -19,6 +19,8 @@ body:
           required: true
         - label: I checked the [existing issues](https://github.com/fetchai/agents-aea/issues) to make sure my problem has not already been reported.
           required: true
+        - label: I have read the [code of conduct](../../CODE_OF_CONDUCT.md) before creating this issue.
+          required: true
   - type: textarea
     id: expected
     attributes:
