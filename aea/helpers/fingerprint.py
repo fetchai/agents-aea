@@ -23,8 +23,6 @@ import re
 from pathlib import Path
 from typing import Collection, Dict, Optional, Tuple
 
-import click
-
 from aea.configurations.base import (
     AgentConfig,
     PackageConfiguration,
@@ -121,7 +119,7 @@ def check_fingerprint(configuration: PackageConfiguration) -> bool:
     actual_fingerprint = configuration.fingerprint
     result = expected_fingerprint == actual_fingerprint
     if not result:
-        click.echo(
+        print(
             "Fingerprints do not match for {} in {}".format(
                 configuration.name, configuration.directory
             )
