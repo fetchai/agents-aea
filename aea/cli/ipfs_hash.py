@@ -38,19 +38,8 @@ from aea.cli.utils.constants import HASHES_FILE
 from aea.configurations.base import PackageConfiguration, PackageType
 from aea.configurations.constants import (
     AGENT,
-    CONNECTION,
-    CONTRACT,
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SERVICE_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
     PACKAGE_TYPE_TO_CONFIG_FILE,
-    PROTOCOL,
     SCAFFOLD_PACKAGES,
-    SERVICE,
-    SKILL,
 )
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import load_configuration_object
@@ -59,16 +48,6 @@ from aea.helpers.fingerprint import check_fingerprint, update_fingerprint
 from aea.helpers.io import from_csv, to_csv
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
-
-
-COMPONENT_TO_FILE = {
-    AGENT: DEFAULT_AEA_CONFIG_FILE,
-    SKILL: DEFAULT_SKILL_CONFIG_FILE,
-    CONTRACT: DEFAULT_CONTRACT_CONFIG_FILE,
-    CONNECTION: DEFAULT_CONNECTION_CONFIG_FILE,
-    PROTOCOL: DEFAULT_PROTOCOL_CONFIG_FILE,
-    SERVICE: DEFAULT_SERVICE_CONFIG_FILE,
-}
 
 
 def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
@@ -199,7 +178,7 @@ def extend_public_ids(
     item_config: Dict, public_id_to_hash_mappings: Dict[PackageId, str]
 ) -> None:
     """Extend public id with hashes for given item config."""
-    for component_type in COMPONENT_TO_FILE:
+    for component_type in PACKAGE_TYPE_TO_CONFIG_FILE:
         if component_type == AGENT:
             continue
 
@@ -233,7 +212,7 @@ def update_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
                 )
 
                 config_file = package_path / cast(
-                    str, COMPONENT_TO_FILE.get(package_id.package_type.value)
+                    str, PACKAGE_TYPE_TO_CONFIG_FILE.get(package_id.package_type.value)
                 )
                 item_config, extra_config = load_yaml(config_file)
                 extend_public_ids(item_config, public_id_to_hash_mappings)
