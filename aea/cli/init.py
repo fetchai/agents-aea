@@ -20,7 +20,7 @@
 
 """Implementation of the 'aea init' subcommand."""
 
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
@@ -185,7 +185,7 @@ def _registry_init_http(username: str, no_subscribe: bool) -> None:
 
 def _set_registries(
     default_registry: str = REGISTRY_LOCAL, default_remote_registry: str = REMOTE_IPFS
-) -> None:
+) -> Dict:
     """Set registry values."""
     registry_config = DEFAULT_REGISTRY_CONFIG.copy()
     registry_config["default"] = default_registry

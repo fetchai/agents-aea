@@ -252,6 +252,8 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
             ClickException, match=r"Package not found in remote registry"
         ) as e, mock.patch(
             "aea.cli.publish.get_package_meta", side_effect=ClickException("expected"),
+        ), mock.patch(
+            "aea.cli.publish.get_default_remote_registry", new=lambda: REMOTE_HTTP
         ):
             self.invoke("publish", "--remote")
         assert "--push-missing" in str(e)
@@ -260,6 +262,8 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
         with mock.patch(
             "aea.cli.publish.get_package_meta",
             side_effect=[ClickException("expected")] + [mock.DEFAULT] * 100,
+        ), mock.patch(
+            "aea.cli.publish.get_default_remote_registry", new=lambda: REMOTE_HTTP
         ):
             self.invoke("publish", "--remote", "--push-missing")
 
