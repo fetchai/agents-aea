@@ -34,6 +34,7 @@
 | `logout`                                    | Logout from registry account.                                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --local` to publish to local `packages` directory. |
 | `push [package_type] [public_id]`           | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
+| `push-all`                                  | Push all available packages to a registry. |
 | `register`                                  | Create a new registry account.
 | `remove [package_type] [name]`              | Remove connection, protocol, or skill, called `name`, from AEA.            |
 | `remove-key [ledger_id] [name]`             | Remove a private key registered with id `ledger_id`.	                             |
