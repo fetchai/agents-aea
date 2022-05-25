@@ -45,9 +45,11 @@ class Strategy(Model):
         self._erc20_address = kwargs.pop("erc20_address", None)
         self._query_function = kwargs.pop("query_function", None)
         self._query_oracle_fee = kwargs.pop("query_oracle_fee", 0)
-        self._default_gas_deploy = kwargs.pop("default_gas_deploy", 0)
-        self._default_gas_query = kwargs.pop("default_gas_query", 0)
-        self._default_gas_approve = kwargs.pop("default_gas_approve", 0)
+        self._gas_limit_deploy = kwargs.pop("gas_limit_deploy", 0)
+        self._gas_limit_instantiate = kwargs.pop("gas_limit_instantiate", 0)
+        self._gas_limit_query = kwargs.pop("gas_limit_query", 0)
+        self._gas_limit_approve = kwargs.pop("gas_limit_approve", 0)
+        self._gas_price = kwargs.pop("gas_price", 0)
         self._approve_amount = kwargs.pop("approve_amount", 0)
 
         super().__init__(**kwargs)
@@ -73,19 +75,29 @@ class Strategy(Model):
         return self._query_oracle_fee
 
     @property
-    def default_gas_deploy(self) -> str:
+    def gas_limit_instantiate(self) -> str:
+        """Get the default gas for instantiating a contract."""
+        return self._gas_limit_instantiate
+
+    @property
+    def gas_limit_deploy(self) -> str:
         """Get the default gas for deploying a contract."""
-        return self._default_gas_deploy
+        return self._gas_limit_deploy
 
     @property
-    def default_gas_query(self) -> str:
+    def gas_limit_query(self) -> str:
         """Get the default gas for querying oracle value."""
-        return self._default_gas_query
+        return self._gas_limit_query
 
     @property
-    def default_gas_approve(self) -> str:
+    def gas_limit_approve(self) -> str:
         """Get the default gas for querying oracle value."""
-        return self._default_gas_query
+        return self._gas_limit_query
+
+    @property
+    def gas_price(self) -> str:
+        """Get the gas price."""
+        return self._gas_price
 
     @property
     def approve_amount(self) -> str:
@@ -252,14 +264,15 @@ class Strategy(Model):
                 {
                     "deployer_address": self.context.agent_address,
                     "fetchOracleContractAddress": self.oracle_contract_address,
-                    "gas": self.default_gas_deploy,
+                    "gas": self.gas_limit_deploy,
                 }
             )
         else:
             kwargs = Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "gas": self.default_gas_deploy,
+                    "gas": self.gas_limit_deploy,
+                    "tx_fee": self.gas_price * self.gas_limit_deploy,
                 }
             )
         return kwargs
