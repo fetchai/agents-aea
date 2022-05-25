@@ -17,7 +17,7 @@ body:
           required: true
         - label: I checked the [existing issues](https://github.com/fetchai/agents-aea/issues) to make sure this feature has not already been requested.
           required: true
-        - label: I have read the [code of conduct](../../CODE_OF_CONDUCT.md) before creating this issue.
+        - label: I have read the [code of conduct](https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md) before creating this issue.
           required: true
   - type: textarea
     id: problem
