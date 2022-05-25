@@ -7,7 +7,7 @@
 #### to`_`csv
 
 ```python
-def to_csv(package_hashes: Dict[str, str], path: Path) -> None
+def to_csv(data: Dict[str, str], path: Path) -> None
 ```
 
 Outputs a dictionary to CSV.
