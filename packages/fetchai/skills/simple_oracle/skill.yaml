@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: QmReQqp5iycqRhiSuHpdzVPWbfajqhmSyxoig8u71Rcy9c
   behaviours.py: QmP2LgWLRFzQH3SgwEBaFsJki1a2MFw6VRrC3jeGnCxM6d
   dialogues.py: Qme9GGuPFfGMNPiwtnXDK8rUuGEN7PHgKnhoZU2ehfipq2
-  handlers.py: QmbYdqiinrmBnoMeWFufGWrhTCREDoU6eopweeoj75Z1DW
-  strategy.py: QmcwQnL8uEAFYtDVDf9utYWkVXizTEfaFUfm1kdTecRSup
+  handlers.py: QmYBdKPjBj4K7UUhsQr4fcEzkFukmWR3vC2Cy9rnRkFp1o
+  strategy.py: QmZowy8ZdqEjrXPz4FpQraec8aeqtwCpBpeB16YWfvsTG6
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.12.0
@@ -70,6 +70,7 @@ models:
       erc20_address: '0x0000000000000000000000000000000000000000'
       gas_limit_deploy: 1500000
       gas_limit_grant_role: 1500000
+      gas_limit_instantiate: 500000
       gas_limit_update: 1500000
       gas_price: 1000000000
       initial_fee_deploy: 1000000000000

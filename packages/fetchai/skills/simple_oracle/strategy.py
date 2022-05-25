@@ -48,6 +48,7 @@ class Strategy(Model):
         self._is_oracle_role_granted = kwargs.pop("is_oracle_role_granted", False)
         self._initial_fee_deploy = kwargs.pop("initial_fee_deploy", 0)
         self._gas_limit_deploy = kwargs.pop("gas_limit_deploy", 0)
+        self._gas_limit_instantiate = kwargs.pop("gas_limit_instantiate", 0)
         self._gas_limit_grant_role = kwargs.pop("gas_limit_grant_role", 0)
         self._gas_limit_update = kwargs.pop("gas_limit_update", 0)
         self._gas_price = kwargs.pop("gas_price", 0)
@@ -80,6 +81,11 @@ class Strategy(Model):
     def gas_limit_deploy(self) -> str:
         """Get the gas limit for deploying a contract."""
         return self._gas_limit_deploy
+
+    @property
+    def gas_limit_instantiate(self) -> str:
+        """Get the default gas for instantiating a contract."""
+        return self._gas_limit_instantiate
 
     @property
     def gas_limit_grant_role(self) -> str:
