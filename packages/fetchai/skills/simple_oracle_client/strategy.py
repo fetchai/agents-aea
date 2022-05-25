@@ -75,27 +75,27 @@ class Strategy(Model):
         return self._query_oracle_fee
 
     @property
-    def gas_limit_instantiate(self) -> str:
+    def gas_limit_instantiate(self) -> int:
         """Get the default gas for instantiating a contract."""
         return self._gas_limit_instantiate
 
     @property
-    def gas_limit_deploy(self) -> str:
+    def gas_limit_deploy(self) -> int:
         """Get the default gas for deploying a contract."""
         return self._gas_limit_deploy
 
     @property
-    def gas_limit_query(self) -> str:
+    def gas_limit_query(self) -> int:
         """Get the default gas for querying oracle value."""
         return self._gas_limit_query
 
     @property
-    def gas_limit_approve(self) -> str:
+    def gas_limit_approve(self) -> int:
         """Get the default gas for querying oracle value."""
         return self._gas_limit_query
 
     @property
-    def gas_price(self) -> str:
+    def gas_price(self) -> int:
         """Get the gas price."""
         return self._gas_price
 

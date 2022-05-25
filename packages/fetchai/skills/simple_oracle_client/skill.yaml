@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmX4RdaY9pETMdTntiHtM97KKEzZLQaGZebNiE4eoWiguK
   dialogues.py: QmbbaQXAXr8cUc9YB927pnZYdx6SqFfxc4LQV1iWyFUvGX
   handlers.py: QmU4dvTXLW4csxXvhDYkaborf65ax5XD1RTXdf5vjoHq3a
-  strategy.py: Qmbk38n76AbGPrxmZqcS3GVnWY6prXyGhxGbpENSSNAQxV
+  strategy.py: QmdcSExPito4H3eRR6j9D2hP75eKxTfg2kX4qWNk83ctHT
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/fet_erc20:0.9.1

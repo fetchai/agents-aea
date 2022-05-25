@@ -73,32 +73,32 @@ class Strategy(Model):
         return self._update_function
 
     @property
-    def initial_fee_deploy(self) -> str:
+    def initial_fee_deploy(self) -> int:
         """Get the initial for contract deployment."""
         return self._initial_fee_deploy
 
     @property
-    def gas_limit_deploy(self) -> str:
+    def gas_limit_deploy(self) -> int:
         """Get the gas limit for deploying a contract."""
         return self._gas_limit_deploy
 
     @property
-    def gas_limit_instantiate(self) -> str:
+    def gas_limit_instantiate(self) -> int:
         """Get the default gas for instantiating a contract."""
         return self._gas_limit_instantiate
 
     @property
-    def gas_limit_grant_role(self) -> str:
+    def gas_limit_grant_role(self) -> int:
         """Get the gas limit for role granting."""
         return self._gas_limit_grant_role
 
     @property
-    def gas_limit_update(self) -> str:
+    def gas_limit_update(self) -> int:
         """Get the gas limit for updating a value."""
         return self._gas_limit_update
 
     @property
-    def gas_price(self) -> str:
+    def gas_price(self) -> int:
         """Get the gas price."""
         return self._gas_price
 

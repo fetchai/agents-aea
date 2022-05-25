@@ -11,7 +11,7 @@ fingerprint:
   behaviours.py: QmP2LgWLRFzQH3SgwEBaFsJki1a2MFw6VRrC3jeGnCxM6d
   dialogues.py: Qme9GGuPFfGMNPiwtnXDK8rUuGEN7PHgKnhoZU2ehfipq2
   handlers.py: QmYBdKPjBj4K7UUhsQr4fcEzkFukmWR3vC2Cy9rnRkFp1o
-  strategy.py: QmZowy8ZdqEjrXPz4FpQraec8aeqtwCpBpeB16YWfvsTG6
+  strategy.py: QmbgMqaB3nqy3RQS5acEVi6iJTeMaCSyYLZfvTQ2qPP3cZ
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.12.0
