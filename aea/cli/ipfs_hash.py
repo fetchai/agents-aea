@@ -25,28 +25,50 @@ This script generates the IPFS hashes for all packages.
 This script requires that you have IPFS installed:
 - https://docs.ipfs.io/guides/guides/install/
 """
-import collections
-import csv
+
 import os
-import re
 import sys
 import traceback
 from pathlib import Path
-from typing import Collection, Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Tuple, cast
 
 import click
 
 from aea.cli.utils.constants import HASHES_FILE
-from aea.configurations.base import (
-    AgentConfig,
-    PackageConfiguration,
-    PackageType,
-    _compute_fingerprint,
+from aea.configurations.base import PackageConfiguration, PackageType
+from aea.configurations.constants import (
+    AGENT,
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SERVICE_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    PACKAGE_TYPE_TO_CONFIG_FILE,
+    PROTOCOL,
+    SCAFFOLD_PACKAGES,
+    SERVICE,
+    SKILL,
 )
-from aea.configurations.constants import PACKAGE_TYPE_TO_CONFIG_FILE, SCAFFOLD_PACKAGES
+from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import load_configuration_object
+from aea.helpers.dependency_tree import DependecyTree, dump_yaml, load_yaml, to_plural
+from aea.helpers.fingerprint import check_fingerprint, update_fingerprint
+from aea.helpers.io import from_csv, to_csv
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
+
+
+COMPONENT_TO_FILE = {
+    AGENT: DEFAULT_AEA_CONFIG_FILE,
+    SKILL: DEFAULT_SKILL_CONFIG_FILE,
+    CONTRACT: DEFAULT_CONTRACT_CONFIG_FILE,
+    CONNECTION: DEFAULT_CONNECTION_CONFIG_FILE,
+    PROTOCOL: DEFAULT_PROTOCOL_CONFIG_FILE,
+    SERVICE: DEFAULT_SERVICE_CONFIG_FILE,
+}
 
 
 def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
@@ -56,7 +78,33 @@ def package_type_and_path(package_path: Path) -> Tuple[PackageType, Path]:
     return PackageType(item_type_singular), package_path
 
 
-def _get_all_packages(packages_dir: Path) -> List[Tuple[PackageType, Path]]:
+def to_package_id(package_path: Path) -> Tuple[PackageId, Path]:
+    """Extract the package type from the path."""
+    item_type_plural = package_path.parent.name
+    item_type_singular = item_type_plural[:-1]
+    return (
+        PackageId(
+            PackageType(item_type_singular), PublicId("open_aea", "scaffold", "0.1.0")
+        ),
+        package_path,
+    )
+
+
+def package_id_and_path(
+    package_id: PackageId, packages_dir: Path
+) -> Tuple[PackageId, Path]:
+    """Extract the package type from the path."""
+    package_path = (
+        packages_dir
+        / package_id.author
+        / package_id.package_type.to_plural()
+        / package_id.name
+    )
+
+    return package_id, package_path
+
+
+def get_all_packages(packages_dir: Path) -> List[Tuple[PackageType, Path]]:
     """Get all the hashable package of the repository."""
 
     all_packages = []
@@ -114,31 +162,6 @@ def hash_package(
     return key, package_hash
 
 
-def to_csv(package_hashes: Dict[str, str], path: Path) -> None:
-    """Outputs a dictionary to CSV."""
-    try:
-        ordered = collections.OrderedDict(sorted(package_hashes.items()))
-        with open(path, "w") as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerows(ordered.items())
-    except IOError:
-        click.echo("I/O error")
-
-
-def from_csv(path: Path) -> Dict[str, str]:
-    """Load a CSV into a dictionary."""
-    result = collections.OrderedDict({})  # type: Dict[str, str]
-    with open(path, "r") as csv_file:
-        reader = csv.reader(csv_file)
-        for row in reader:
-            if len(row) != 2:
-                raise ValueError("Length of the row should be 2.")
-
-            key, value = row
-            result[key] = value
-    return result
-
-
 def load_configuration(
     package_type: PackageType, package_path: Path
 ) -> PackageConfiguration:
@@ -154,101 +177,38 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-def _replace_fingerprint_non_invasive(
-    fingerprint_dict: Dict[str, str], text: str
+def update_public_id_hash(
+    public_id_str: str,
+    package_type: str,
+    public_id_to_hash_mappings: Dict[PackageId, str],
 ) -> str:
-    """
-    Replace the fingerprint in a configuration file (not invasive).
-
-    We need this function because libraries like `yaml` may modify the
-    content of the .yaml file when loading/dumping. Instead,
-    working with the content of the file gives us finer granularity.
-
-    :param fingerprint_dict: the fingerprint dictionary.
-    :param text: the content of a configuration file.
-    :return: the updated content of the configuration file.
-    """
-
-    def to_row(x: Tuple[str, str]) -> str:
-        return x[0] + ": " + x[1]
-
-    if len(fingerprint_dict) == 0:
-        replacement = "\nfingerprint: {}\n"
-    else:
-        replacement = "\nfingerprint:\n  {}\n".format(
-            "\n  ".join(map(to_row, sorted(fingerprint_dict.items())))
+    """Update hash for given public from available mappings."""
+    public_id = PublicId.from_str(public_id_str).without_hash()
+    package_id = PackageId(PackageType(package_type), public_id)
+    return str(
+        PublicId.from_json(
+            {
+                **public_id.json,
+                "package_hash": cast(str, public_id_to_hash_mappings.get(package_id)),
+            }
         )
-
-    return re.sub(r"\nfingerprint:\W*\n(?:\W+.*\n)*", replacement, text)
-
-
-def compute_fingerprint(  # pylint: disable=unsubscriptable-object
-    package_path: Path, fingerprint_ignore_patterns: Optional[Collection[str]],
-) -> Dict[str, str]:
-    """
-    Compute the fingerprint of a package.
-
-    :param package_path: path to the package.
-    :param fingerprint_ignore_patterns: filename patterns whose matches will be ignored.
-    :return: the fingerprint
-    """
-    fingerprint = _compute_fingerprint(
-        package_path, ignore_patterns=fingerprint_ignore_patterns,
     )
-    return fingerprint
 
 
-def update_fingerprint(configuration: PackageConfiguration) -> None:
-    """
-    Update the fingerprint of a package.
+def extend_public_ids(
+    item_config: Dict, public_id_to_hash_mappings: Dict[PackageId, str]
+) -> None:
+    """Extend public id with hashes for given item config."""
+    for component_type in COMPONENT_TO_FILE:
+        if component_type == AGENT:
+            continue
 
-    :param configuration: the configuration object.
-    :return: None
-    """
-    # we don't process agent configurations
-    if isinstance(configuration, AgentConfig):
-        return
-
-    if configuration.directory is None:
-        raise ValueError("configuration.directory cannot be None.")
-
-    fingerprint = compute_fingerprint(
-        configuration.directory, configuration.fingerprint_ignore_patterns
-    )
-    config_filepath = (
-        configuration.directory / configuration.default_configuration_filename
-    )
-    old_content = config_filepath.read_text()
-    new_content = _replace_fingerprint_non_invasive(fingerprint, old_content)
-    config_filepath.write_text(new_content)
-
-
-def check_fingerprint(configuration: PackageConfiguration) -> bool:
-    """
-    Check the fingerprint of a package, given the loaded configuration file.
-
-    :param configuration: the configuration object.
-    :return: True if the fingerprint match, False otherwise.
-    """
-    # we don't process agent configurations
-    if isinstance(configuration, AgentConfig):
-        return True
-
-    if configuration.directory is None:
-        raise ValueError("configuration.directory cannot be None.")
-
-    expected_fingerprint = compute_fingerprint(
-        configuration.directory, configuration.fingerprint_ignore_patterns
-    )
-    actual_fingerprint = configuration.fingerprint
-    result = expected_fingerprint == actual_fingerprint
-    if not result:
-        click.echo(
-            "Fingerprints do not match for {} in {}".format(
-                configuration.name, configuration.directory
-            )
-        )
-    return result
+        components = to_plural(component_type)
+        if components in item_config:
+            item_config[components] = [
+                update_public_id_hash(d, component_type, public_id_to_hash_mappings)
+                for d in item_config.get(components, [])
+            ]
 
 
 def update_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
@@ -257,22 +217,38 @@ def update_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
     package_hashes: Dict[str, str] = {}
 
     try:
-        packages = _get_all_packages(packages_dir)
-        packages += list(map(package_type_and_path, SCAFFOLD_PACKAGES))
-
-        for package_type, package_path in packages:
-            click.echo(
-                "Processing package {} of type {}".format(
-                    package_path.name, package_type
+        public_id_to_hash_mappings: Dict = {}
+        dependency_tree = DependecyTree.generate(packages_dir)
+        packages = [
+            [package_id_and_path(package_id, packages_dir) for package_id in tree_level]
+            for tree_level in dependency_tree
+        ]
+        packages[0] = packages[0] + list(map(to_package_id, SCAFFOLD_PACKAGES))
+        for tree_level in packages:
+            for package_id, package_path in tree_level:
+                click.echo(
+                    "Processing package {} of type {}".format(
+                        package_path.name, package_id.package_type
+                    )
                 )
-            )
-            configuration_obj = load_configuration(package_type, package_path)
-            sort_configuration_file(configuration_obj)
-            update_fingerprint(configuration_obj)
-            key, package_hash = hash_package(
-                configuration_obj, package_type, no_wrap=no_wrap
-            )
-            package_hashes[key] = package_hash
+
+                config_file = package_path / cast(
+                    str, COMPONENT_TO_FILE.get(package_id.package_type.value)
+                )
+                item_config, extra_config = load_yaml(config_file)
+                extend_public_ids(item_config, public_id_to_hash_mappings)
+                dump_yaml(config_file, item_config, extra_config)
+
+                configuration_obj = load_configuration(
+                    package_id.package_type.value, package_path
+                )
+                sort_configuration_file(configuration_obj)
+                update_fingerprint(configuration_obj)
+                key, package_hash = hash_package(
+                    configuration_obj, package_id.package_type, no_wrap=no_wrap
+                )
+                package_hashes[key] = package_hash
+                public_id_to_hash_mappings[package_id] = package_hash
 
         to_csv(package_hashes, packages_dir / HASHES_FILE)
         click.echo("Done!")
@@ -320,7 +296,7 @@ def check_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
     failed = False
 
     try:
-        packages = _get_all_packages(packages_dir)
+        packages = get_all_packages(packages_dir)
         expected_package_hashes = from_csv(packages_dir / HASHES_FILE)
         packages += list(map(package_type_and_path, SCAFFOLD_PACKAGES))
 
