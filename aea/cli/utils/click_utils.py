@@ -235,7 +235,7 @@ def registry_flag(mark_default: bool = True) -> Callable:
 
 
 def remote_registry_flag(mark_default: bool = True) -> Callable:
-    """Choice of one flag between: '--local/--remote'."""
+    """Choice of one flag between: '--ipfs/--http'."""
 
     default_registry = (
         get_or_create_cli_config()
@@ -250,14 +250,14 @@ def remote_registry_flag(mark_default: bool = True) -> Callable:
             "--ipfs",
             "remote_registry",
             flag_value=REMOTE_IPFS,
-            help="To use a local registry.",
+            help="To use an IPFS registry.",
             default=(REMOTE_IPFS == default_registry) and mark_default,
         )(f)
         f = option(
             "--http",
             "remote_registry",
             flag_value=REMOTE_HTTP,
-            help="To use a remote registry.",
+            help="To use an HTTP registry.",
             default=(REMOTE_HTTP == default_registry) and mark_default,
         )(f)
         return f

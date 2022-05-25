@@ -400,7 +400,7 @@ def test_fetch_twice_remote():
                         "--registry-path",
                         PACKAGES_DIR,
                         "fetch",
-                        "--remote",
+                        "--local",
                         "fetchai/my_first_aea",
                     ],
                     standalone_mode=False,

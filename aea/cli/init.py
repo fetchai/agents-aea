@@ -20,7 +20,7 @@
 
 """Implementation of the 'aea init' subcommand."""
 
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
@@ -101,7 +101,9 @@ def do_init(
         update_cli_config({AUTHOR_KEY: author})
 
         if registry_type == REGISTRY_LOCAL:
-            _registry_init_local()
+            if default_remote_registry is None:
+                default_remote_registry = REMOTE_IPFS
+            _registry_init_local(default_remote_registry)
         else:
             default_remote_registry = validate_remote_registry_type(
                 default_remote_registry
@@ -122,10 +124,9 @@ def do_init(
     click.echo(success_msg)
 
 
-def _registry_init_local() -> None:
+def _registry_init_local(default_remote_registry: str = REMOTE_IPFS) -> None:
     """Initialize ipfs local"""
-    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
-    registry_config["default"] = REGISTRY_LOCAL
+    registry_config = _set_registries(REGISTRY_LOCAL, default_remote_registry)
     update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
 
 
@@ -144,11 +145,9 @@ def _registry_init_remote(
 
 def _registry_init_ipfs(ipfs_node: Optional[str]) -> None:
     """Initialize ipfs registry"""
-    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
-    registry_config["default"] = REGISTRY_REMOTE
-    registry_config["settings"][REGISTRY_REMOTE]["default"] = REMOTE_IPFS
-    registry_config["settings"][REGISTRY_REMOTE][REMOTE_IPFS]["ipfs_node"] = ipfs_node
 
+    registry_config = _set_registries(REGISTRY_REMOTE, REMOTE_IPFS)
+    registry_config["settings"][REGISTRY_REMOTE][REMOTE_IPFS]["ipfs_node"] = ipfs_node
     update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
 
 
@@ -159,10 +158,7 @@ def _registry_init_http(username: str, no_subscribe: bool) -> None:
     :param username: the user name
     :param no_subscribe: bool flag for developers subscription skip on register.
     """
-    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
-    registry_config["default"] = REGISTRY_REMOTE
-    registry_config["settings"][REGISTRY_REMOTE]["default"] = REMOTE_HTTP
-
+    registry_config = _set_registries(REGISTRY_REMOTE, REMOTE_HTTP)
     update_cli_config({REGISTRY_CONFIG_KEY: registry_config})
 
     if username is not None and is_auth_token_present():
@@ -185,3 +181,14 @@ def _registry_init_http(username: str, no_subscribe: bool) -> None:
                 )
 
             do_register(username, email, password, password_confirmation, no_subscribe)
+
+
+def _set_registries(
+    default_registry: str = REGISTRY_LOCAL, default_remote_registry: str = REMOTE_IPFS
+) -> Dict:
+    """Set registry values."""
+    registry_config = DEFAULT_REGISTRY_CONFIG.copy()
+    registry_config["default"] = default_registry
+    registry_config["settings"][REGISTRY_REMOTE]["default"] = default_remote_registry
+
+    return registry_config
