@@ -22,7 +22,7 @@ Or
 
 ## Publish packages
 
-To publish a package on the IPFS registry, first run `scripts/extend_public_ids.py` to update the dependencies with the latest IPFS hashes. Then push the relevent packages using
+To publish a package on the IPFS registry, first run `aea hash all` to update the dependencies with the latest IPFS hashes. Then push the relevent packages using
 
 `aea push COMPONENT_TYPE COMPONENT_PATH`
 
