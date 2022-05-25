@@ -7,14 +7,14 @@ aea_version: '>=1.3.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.22.0:QmUC4uYsXorHGdgTRmAgWB11VbdK84wLfwzXV4KM4z8Sm4
+- fetchai/http_server:0.22.0:Qmapykx4Cb6AbZBpSi83zqo1CzHAJuDdfJCEjDnJZ1ssZV
 contracts: []
 protocols:
-- fetchai/default:1.0.0:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe
-- fetchai/http:1.0.0:QmWcYPwfDoWhxNdMHrnGDEMevGAZuCYT2bA7vADcS4qKjM
-- open_aea/signing:1.0.0:QmTCQKD2iSjBUC3QCQRc7ZyNbnnrvoyw7EcQdJa7mQYLUW
+- fetchai/default:1.0.0:QmYvdtdJLQhB8wH7PZUUASoPbCG7jXTPZRG9PKZ59wB9XV
+- fetchai/http:1.0.0:QmbEw8GuKc28kcz5tatLkmGxoUCxjNXbaoqcJUMP3acCzh
+- open_aea/signing:1.0.0:QmdrqznAYpnTWtLvLtLXiyMVr8PRfmj251puWbMZMNBw41
 skills:
-- fetchai/http_echo:0.20.0:QmS52VjxtSuGy4G3VKcckWYFReZFs6AkzhtUgBY3ZPfGL3
+- fetchai/http_echo:0.20.0:QmVLzeQdJyoncCfARRTzLerPztF75MwrHcLn19Lhji8h4d
 default_ledger: ethereum
 required_ledgers:
 - ethereum

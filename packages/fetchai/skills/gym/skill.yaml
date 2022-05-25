@@ -15,10 +15,10 @@ fingerprint:
   tasks.py: QmaZe6dwZU9G9FLsuzrVDE1oRCbxzi2GKSu6np1tAkJxre
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:QmXyeF5CGT5gM2u9aRAeAmsYF8gySjzhsvbaHmRQ3VKuUS
+- fetchai/gym:0.19.0:QmecTP4XNr1PQ1ALatVfVHppRYWNp6mfWkGutXZcZ4pbq5
 contracts: []
 protocols:
-- fetchai/gym:1.0.0:QmQipkePBnsrAPMSSv5URUAnGwLDBDvtBZ7joGKPRcbQS7
+- fetchai/gym:1.0.0:QmRVQSNkWbQTf5KkW3JTBZocrHooeNEwUPH9uMa9Afh9Kr
 skills: []
 behaviours: {}
 handlers:
