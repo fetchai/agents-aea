@@ -29,7 +29,7 @@ from aea.cli.push import push_item_ipfs
 from aea.cli.registry.settings import REGISTRY_REMOTE, REMOTE_IPFS
 from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_default_remote_registry, load_item_config
-from aea.configurations.constants import PACKAGES
+from aea.configurations.constants import PACKAGES, PYCACHE
 
 
 @click.command("push-all")
@@ -54,7 +54,7 @@ def push_all(packages_dir: Optional[Path], registry: str) -> None:
         packages_dir = Path.cwd() / PACKAGES
 
     for package_path in packages_dir.glob("*/*/*"):
-        if not package_path.is_dir() or package_path.name == "__pycache__":
+        if not package_path.is_dir() or package_path.name == PYCACHE:
             continue
 
         click.echo(f"Pushing: {package_path}")
