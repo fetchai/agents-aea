@@ -86,7 +86,6 @@ Commands:
   hash                    Hashing utils.
   init                    Initialize your AEA configurations.
   install                 Install the dependencies of the agent.
-  ipfs                    IPFS Commands
   issue-certificates      Issue certificates for connections that require...
   launch                  Launch many agents at the same time.
   list                    List the installed packages of the agent.
@@ -95,6 +94,7 @@ Commands:
   logout                  Logout from the registry account.
   publish                 Publish the agent to the registry.
   push                    Push a non-vendor package of the agent to the...
+  push-all                Push all available packages to a registry.
   register                Create a new registry account.
   remove                  Remove a package from the agent.
   remove-key              Remove a private key from the wallet of the agent.

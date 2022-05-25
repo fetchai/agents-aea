@@ -91,10 +91,10 @@ def open_file(
     )
 
 
-def to_csv(package_hashes: Dict[str, str], path: Path) -> None:
+def to_csv(data: Dict[str, str], path: Path) -> None:
     """Outputs a dictionary to CSV."""
     try:
-        ordered = collections.OrderedDict(sorted(package_hashes.items()))
+        ordered = collections.OrderedDict(sorted(data.items()))
         with open(path, "w") as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(ordered.items())
