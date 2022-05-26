@@ -34,7 +34,7 @@ from aea.common import JSONLike
 _FETCHAI = "fetchai"
 _FETCH = "fetch"
 TESTNET_NAME = "testnet"
-FETCHAI_TESTNET_FAUCET_URL = "https://faucet-dorado.t-v2-london-c.fetch-ai.com"
+FETCHAI_TESTNET_FAUCET_URL = "https://faucet-dorado.fetch.ai"
 DEFAULT_ADDRESS = "https://rest-dorado.fetch.ai:443"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "dorado-1"
