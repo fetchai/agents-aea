@@ -510,12 +510,15 @@ class Handler(SkillComponent, ABC):
         """
         return _parse_module(path, handler_configs, skill_context, Handler)
 
-    @property
-    def protocol_dialogues(self) -> "Dialogues":  # type: ignore # noqa: F821
+    def protocol_dialogues(self, attribute: Optional[str] = None):  # type: ignore
         """Protocol dialogues"""
         if self.SUPPORTED_PROTOCOL is None:
             raise ValueError(f"SUPPORTED_PROTOCOL not set on {self}")
-        attribute = cast(PublicId, self.SUPPORTED_PROTOCOL).name + "_dialogues"
+        attribute = (
+            (cast(PublicId, self.SUPPORTED_PROTOCOL).name + "_dialogues")
+            if attribute is None
+            else attribute
+        )
         return getattr(self.context, attribute)
 
 
