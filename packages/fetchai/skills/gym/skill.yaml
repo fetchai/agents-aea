@@ -6,7 +6,7 @@ description: The gym skill wraps an RL agent.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmPwx59WZfJjauEiEXhcfQeUH1zFeEbkr1G8i2KVPWYao6
+  README.md: QmTvuKGZHdk5cRZkWFVSM8nBdEeXeJ8xAW4vpumBnuxzdA
   __init__.py: QmdbXPv9mGP9jhyjL8odSUrFxWESaMJD27Scze7RF9LwM4
   dialogues.py: QmTXi5973ww57PSh1aEpZfy4Gt6CWsjQHui9amsiVNUryM
   handlers.py: Qmenjg4jCoL6R7Qsbf26LZ5kp3nrVZzazFfvHHAdMakVyr
@@ -15,10 +15,10 @@ fingerprint:
   tasks.py: QmaZe6dwZU9G9FLsuzrVDE1oRCbxzi2GKSu6np1tAkJxre
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:QmY772aA83uaFYS8ic5jyeM8RFa8nzxEiz966a8DMcdHc3
+- fetchai/gym:0.19.0:QmRQtBH1mxYvKovuHCVCD5FRPxdwtBykWFX2rhQNssE1uF
 contracts: []
 protocols:
-- fetchai/gym:1.0.0:QmdetA27XZ9ebXK1fRR8VXPPCTc12YRrosMyPxuqiWbmpm
+- fetchai/gym:1.0.0:QmRTJHxbo9qWupgtGtqDphjmivT5ko6vEyLvh9gWvXYgJ6
 skills: []
 behaviours: {}
 handlers:
