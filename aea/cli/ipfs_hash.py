@@ -40,6 +40,7 @@ from aea.configurations.constants import (
     AGENT,
     PACKAGE_TYPE_TO_CONFIG_FILE,
     SCAFFOLD_PACKAGES,
+    SCAFFOLD_PUBLIC_ID,
 )
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import load_configuration_object
@@ -63,7 +64,7 @@ def to_package_id(package_path: Path) -> Tuple[PackageId, Path]:
     item_type_singular = item_type_plural[:-1]
     return (
         PackageId(
-            PackageType(item_type_singular), PublicId("open_aea", "scaffold", "0.1.0")
+            PackageType(item_type_singular), PublicId.from_str(SCAFFOLD_PUBLIC_ID)
         ),
         package_path,
     )
