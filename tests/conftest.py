@@ -60,11 +60,10 @@ from aea_ledger_ethereum.ethereum import (
     DEFAULT_GAS_STATION_STRATEGY,
 )
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
-from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
-from cosmpy.common.rest_client import RestClient
+from cosmpy.aerial.client import LedgerClient, NetworkConfig
+from cosmpy.aerial.wallet import LocalWallet
 from cosmpy.crypto.address import Address as CosmpyAddress
 from cosmpy.crypto.keypairs import PrivateKey
-from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -163,14 +162,14 @@ DEFAULT_MAX_PRIORITY_FEE_PER_GAS = 1_000_000_000
 DEFAULT_MAX_FEE_PER_GAS = 1_000_000_000
 
 # URL to local Fetch ledger instance
-DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.10.2"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
-DEFAULT_FETCH_ADDR_REMOTE = "https://rest-capricorn.fetch.ai:443"
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-dorado.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "capricorn-1"
+DEFAULT_FETCH_CHAIN_ID = "dorado-1"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -1329,25 +1328,37 @@ def fund_accounts_from_local_validator(
     addresses: List[str], amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
-    rest_client = RestClient(
-        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}"
-    )
-    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
 
-    time.sleep(FETCHD_INITIAL_TX_SLEEP)
-    client = SigningCosmWasmClient(pk, rest_client, DEFAULT_FETCH_CHAIN_ID)
-    coins = [Coin(amount=str(amount), denom=denom)]
+    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
+    wallet = LocalWallet(pk)
+    ledger = LedgerClient(
+        NetworkConfig(
+            chain_id=DEFAULT_FETCH_CHAIN_ID,
+            url=f"rest+{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+            fee_minimum_gas_price=5000000000,
+            fee_denomination=DEFAULT_DENOMINATION,
+            staking_denomination=DEFAULT_DENOMINATION,
+        )
+    )
 
     for address in addresses:
-        client.send_tokens(CosmpyAddress(address), coins)
+        tx = ledger.send_tokens(CosmpyAddress(address), amount, denom, wallet)
+        tx.wait_to_complete()
 
 
 @pytest.fixture()
 def fund_fetchai_accounts(fetchd):
     """Fund test accounts from local validator."""
-    fund_accounts_from_local_validator(
-        [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
-    )
+    for _ in range(5):
+        try:
+            # retry, cause possible race condition with fetchd docker image init
+            fund_accounts_from_local_validator(
+                [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO],
+                10000000000000000000,
+            )
+            return
+        except Exception:  # pylint: disable=broad-except
+            time.sleep(3)
 
 
 def env_path_separator() -> str:
