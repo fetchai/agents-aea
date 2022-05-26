@@ -15,16 +15,16 @@ fingerprint:
   strategy.py: QmXPNZ8u59GNAu4uhY8CZwuVoaffpf3dadtuXyFLeFvAoM
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:QmbeWYjrjpGogmm6b1ehfxupAjDJ3vNEeUoyrRiFnWVKcg
+- fetchai/ledger:0.19.0:QmcbAYZgw9487Nptb3CYyuitYz2iPHTwWqqzXRAubjrXR1
 contracts:
 - fetchai/erc1155:0.22.0:QmcWju76BLXDzeH6po8nHhkZL7BgSEq4KqgvTgP1Y1ZUQ2
 protocols:
-- fetchai/contract_api:1.0.0:QmebupHda1FRUf3aH2GZyGv4F3YA5LntiHymxRiexeXn85
-- fetchai/default:1.0.0:QmeK2UDVRYQdKrvZj8Zamnc9fDzZpkbAuouJJe8kMmXsBe
-- fetchai/fipa:1.0.0:QmbdA48eNWfAAHqPh8WTJoUamxeEo62LFkZs6sxRgmhFHf
-- fetchai/ledger_api:1.0.0:QmX2meqUx217qGo717EkrgZEUq8dCr2cMxxaYxZSkfrVij
-- fetchai/oef_search:1.0.0:QmY53toaNJzZ1fBBzEYNzeS4TgZJWNJ8PNakhx2crNyof3
-- open_aea/signing:1.0.0:QmTCQKD2iSjBUC3QCQRc7ZyNbnnrvoyw7EcQdJa7mQYLUW
+- fetchai/contract_api:1.0.0:QmcaSjvkpcV8wHjCjkorkYizwq6zP2K9rNLy5uUbHQk6Nv
+- fetchai/default:1.0.0:QmYvdtdJLQhB8wH7PZUUASoPbCG7jXTPZRG9PKZ59wB9XV
+- fetchai/fipa:1.0.0:QmcD4Mis4HQFxLBjdbJcAktQ4vrjnHb7zw4DLHvbEqkRM2
+- fetchai/ledger_api:1.0.0:QmUCpcjuaukLwrBQ5iEnzitpQzKLeQoJV6h7uQZT9fjmJU
+- fetchai/oef_search:1.0.0:QmeAn55EjBbGhgFmRDoSFxkd5SZnCqarPNykWVwFmYBzcC
+- open_aea/signing:1.0.0:QmdrqznAYpnTWtLvLtLXiyMVr8PRfmj251puWbMZMNBw41
 skills: []
 behaviours:
   service_registration:

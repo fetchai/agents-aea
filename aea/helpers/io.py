@@ -40,9 +40,11 @@ Hence, any usage of file system functionalities
 should either use 'open_file', or set 'newline="\n"' when
 calling the 'open' or the 'pathlib.Path.open' functions.
 """
+import collections
+import csv
 from functools import partial
 from pathlib import Path
-from typing import Callable, Optional, TextIO, Union
+from typing import Callable, Dict, Optional, TextIO, Union
 
 
 UNIX_LINESEP = "\n"
@@ -87,3 +89,28 @@ def open_file(
     return actual_wrapped_function(
         file, mode=mode, buffering=buffering, encoding=encoding, errors=errors
     )
+
+
+def to_csv(data: Dict[str, str], path: Path) -> None:
+    """Outputs a dictionary to CSV."""
+    try:
+        ordered = collections.OrderedDict(sorted(data.items()))
+        with open(path, "w") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(ordered.items())
+    except IOError:
+        print("I/O error")
+
+
+def from_csv(path: Path) -> Dict[str, str]:
+    """Load a CSV into a dictionary."""
+    result = collections.OrderedDict({})  # type: Dict[str, str]
+    with open(path, "r") as csv_file:
+        reader = csv.reader(csv_file)
+        for row in reader:
+            if len(row) != 2:
+                raise ValueError("Length of the row should be 2.")
+
+            key, value = row
+            result[key] = value
+    return result

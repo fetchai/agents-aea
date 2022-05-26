@@ -93,7 +93,7 @@ We have various commands which are helpful during development.
 
       make dir=cli tdir=cli test-sub
 
-- When making changes to one of the `packages`, then use `aea hash all` and `aea hash all --packages-dir=./tests/data/ ` to generate the latest hashes.
+- When making changes to one of the `packages`, then use `aea hash all` and `aea hash all --packages-dir=./tests/data/packages ` to generate the latest hashes.
 
 ### Go Development
 
