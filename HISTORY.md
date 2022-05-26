@@ -1,6 +1,23 @@
 # Release History - open AEA
 
 
+## 1.9.0 (2022-05-25)
+
+AEA:
+- Introduces `check-packages` command to check package integrity
+- Introduces a new component type `service`
+- Makes dialogues accessible via their respective handlers
+- Fixes default remote registry setting bug
+- Introduces `push-all` command to publish all available packages to a specific registry
+- Updates `aea hash all` command to extend public ids when hashing
+
+Docs:
+- Adds docs on IPFS registry usage
+
+Chores:
+- Updates `check_package_versions_in_docs.py` to use new PublicId format
+
+
 ## 1.8.0 (2022-05-12)
 
 AEA:
