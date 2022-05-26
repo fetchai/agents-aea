@@ -274,6 +274,8 @@ cli
 mkdocs
 ipfs
 command_line
+PublicId
+multiaddr
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
