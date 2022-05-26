@@ -56,7 +56,7 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- valory/acn:1.1.0:QmQBwxeumMyuQSsm35WZG5Xoco7jCygk8DTz2bLM9uBQjF
+- valory/acn:1.1.0:QmbUv2WwG6o2q8F17esBweFuFiogRWbU4wBLrAkCFRUkUm
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
