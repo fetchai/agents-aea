@@ -176,7 +176,7 @@ def _checks(
     matches = regex.finditer(file.read_text())
     for match in matches:
         package_id = extract_package_id_from_match(match)
-        if package_id not in ALL_PACKAGE_IDS:
+        if package_id.without_hash() not in ALL_PACKAGE_IDS:
             raise PackageIdNotFound(
                 file, package_id, match, "Package {} not found.".format(package_id)
             )
@@ -238,9 +238,6 @@ if __name__ == "__main__":
 
     try:
         for file_ in docs_files:
-            # TOFIX: Update check_file method to support extended public id
-            if file_.name == "ipfs_registry.md":
-                continue
             print("Processing " + str(file_))
             check_file(file_)
     except PackageIdNotFound as e_:
