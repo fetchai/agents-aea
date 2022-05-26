@@ -95,6 +95,7 @@ Commands:
   logout                  Logout from the registry account.
   publish                 Publish the agent to the registry.
   push                    Push a non-vendor package of the agent to the...
+  push-all                Push all available packages to a registry.
   register                Create a new registry account.
   remove                  Remove a package from the agent.
   remove-key              Remove a private key from the wallet of the agent.

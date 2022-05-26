@@ -56,6 +56,7 @@ from aea.cli.logout import logout
 from aea.cli.plugin import with_plugins
 from aea.cli.publish import publish
 from aea.cli.push import push
+from aea.cli.push_all import push_all
 from aea.cli.register import register
 from aea.cli.remove import remove
 from aea.cli.remove_key import remove_key
@@ -144,3 +145,4 @@ cli.add_command(upgrade)
 cli.add_command(hash_group)
 cli.add_command(generate_all_protocols)
 cli.add_command(check_packages)
+cli.add_command(push_all)

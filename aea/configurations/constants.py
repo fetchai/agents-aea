@@ -154,3 +154,4 @@ SCAFFOLD_PACKAGES = [
     AEA_DIR / "contracts" / "scaffold",
     AEA_DIR / "skills" / "scaffold",
 ]
+PYCACHE = "__pycache__"
