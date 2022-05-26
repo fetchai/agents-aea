@@ -128,20 +128,20 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
-## Capricorn - Fetch.ai testnet for agents
+## Dorado - Fetch.ai testnet for agents
 
-Capricorn is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
+Dorado is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
 
 | Parameter      | Value                                                                      |
 | -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | capricorn-1                                                            |
+| Chain ID       | dorado-1                                                            |
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
 | Version        | v0.8.x                                                                     |
-| RPC Endpoint   | https://rpc-capricorn.fetch.ai:443                                     |
-| REST Endpoint  | https://rest-capricorn.fetch.ai:443                                    |
-| Block Explorer | <a href="https://explore-capricorn.fetch.ai" target="_blank">https://explore-capricorn.fetch.ai</a> |
+| RPC Endpoint   | https://rpc-dorado.fetch.ai:443                                     |
+| REST Endpoint  | https://rest-dorado.fetch.ai:443                                    |
+| Block Explorer | <a href="https://explore-dorado.fetch.ai" target="_blank">https://explore-dorado.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
 

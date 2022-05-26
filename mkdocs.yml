@@ -154,6 +154,7 @@ nav:
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'
           - Utils: 'api/helpers/ipfs/utils.md'
+          - Fingerprinting: api/helpers/fingerprint.md
         - Logging: 'api/helpers/logging.md'
         - MultiAddress:
           - Base: 'api/helpers/multiaddr/base.md'
@@ -162,6 +163,7 @@ nav:
         - Preferences:
           - Base: 'api/helpers/preference_representations/base.md'
         - Profiler Type Blacklist: api/helpers/profiler_type_black_list.md
+        - Protocol Helpers: api/helpers/protocols.md
         - Profiling: 'api/helpers/profiling.md'
         - Search:
           - Generic: 'api/helpers/search/generic.md'
@@ -228,6 +230,8 @@ nav:
           - Fetchai:
             - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
             - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
+  - Registries:
+    - IPFS: ipfs_registry.md
   - Glossary: 'glossary.md'
   - Q&A: 'questions-and-answers.md'
 

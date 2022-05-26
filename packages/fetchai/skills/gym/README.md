@@ -15,4 +15,4 @@ This skill is part of the Fetch.ai Gym demo. It trains a reinforcement learning 
 
 * <a href="https://docs.fetch.ai/aea/gym-skill/" target="_blank">Gym Demo</a>
 * <a href="https://docs.fetch.ai/aea/gym-example/" target="_blank">Gym Example</a>
-* <a href="https://gym.openai.com" target="_blank">OpenAI Gym</a>
+* <a href="https://www.gymlibrary.ml" target="_blank">OpenAI Gym</a>
