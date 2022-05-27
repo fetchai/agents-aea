@@ -82,7 +82,7 @@ class FetchOracleContract(Contract):
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier == FetchAIApi.identifier:
-            msg = {"grant_role": {"role": ORACLE_ROLE, "address": oracle_address}}
+            msg = {"grant_oracle_role": {"address": oracle_address}}
             fetchai_api = cast(FetchAIApi, ledger_api)
             tx = fetchai_api.get_handle_transaction(
                 oracle_address, contract_address, msg, amount=0, tx_fee=tx_fee, gas=gas

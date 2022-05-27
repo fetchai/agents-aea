@@ -9,8 +9,8 @@ fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmZ3tqWJFLxkJapkC8T2Wd2Jos1CPd5LnrycCs2bGPyLKb
   build/FetchOracle.json: QmfEMai1yxPtWoshFahBk2EyVHd9Mo8pSp1SAE83rRvQgH
-  build/oracle.wasm: QmQGaJTZPbtnBTTzM8K4Td9DxSVVWucD6n4B2DXKs8V2jx
-  contract.py: QmSYVnrkUyS5htrP8Paxdgt3Ww3pED6HDzyPszCwDN1eTA
+  build/oracle.wasm: QmZaZJcpbkGuX9JXXHnjMVVCnzc5VnoFKrCbPJbbRmi9YD
+  contract.py: QmQgxtBvELLsYpKAiKQR2w4riMsUfR1ofCqgdfwHDDLnUw
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
 fingerprint_ignore_patterns: []
 class_name: FetchOracleContract
