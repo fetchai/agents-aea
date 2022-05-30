@@ -90,7 +90,7 @@ Update the default ledger and cert requests using the chosen ledger.
 ``` bash
 aea config set agent.default_ledger $LEDGER_ID
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
 ```
 
 Set the following configuration for the oracle skill:
