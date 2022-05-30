@@ -20,7 +20,18 @@
 """Implementation of the parser for configuration file."""
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TextIO,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
 
@@ -57,6 +68,7 @@ T = TypeVar(
     ContractConfig,
     ProtocolConfig,
     ProtocolSpecification,
+    PackageConfiguration,
 )
 
 
@@ -189,6 +201,10 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             return cast(T, self._load_agent_config(file_pointer))
+
+        if self.configuration_class.package_type == PackageType.SERVICE:
+            return cast(T, self._load_service_config(file_pointer))
+
         return self._load_component_config(file_pointer)
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
@@ -199,22 +215,34 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             self._dump_agent_config(cast(AgentConfig, configuration), file_pointer)
+        elif self.configuration_class.package_type == PackageType.SERVICE:
+            self._dump_service_config(
+                cast(PackageConfiguration, configuration), file_pointer
+            )
         else:
             self._dump_component_config(configuration, file_pointer)
 
     @classmethod
     def from_configuration_type(
-        cls, configuration_type: Union[PackageType, str], **kwargs: Any
+        cls,
+        configuration_type: Union[PackageType, str],
+        package_type_config_class: Optional[Dict] = None,
+        **kwargs: Any,
     ) -> "ConfigLoader":
         """
         Get the configuration loader from the type.
 
         :param configuration_type: the type of configuration
+        :param package_type_config_class: PackageType to config file mappings
         :param kwargs: keyword arguments to the configuration loader constructor.
         :return: the configuration loader
         """
+        if package_type_config_class is None:
+            package_type_config_class = PACKAGE_TYPE_TO_CONFIG_CLASS
         configuration_type = PackageType(configuration_type)
-        return ConfigLoaders.from_package_type(configuration_type, **kwargs)
+        return ConfigLoaders.from_package_type(
+            configuration_type, package_type_config_class, **kwargs
+        )
 
     def _load_component_config(self, file_pointer: TextIO) -> T:
         """Load a component configuration."""
@@ -290,15 +318,41 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         configuration_file_jsons = yaml_load_all(file_pointer)
         return self.load_agent_config_from_json(configuration_file_jsons)
 
+    def _load_service_config(self, file_pointer: TextIO) -> PackageConfiguration:
+        """Load an agent configuration."""
+        configuration_data = yaml_load_all(file_pointer)
+        if len(configuration_data) == 0:
+            raise ValueError("Agent configuration file was empty.")
+
+        service_config, *overrides = configuration_data
+        self.validate(service_config)
+        key_order = list(service_config.keys())
+        service = self.configuration_class.from_json(service_config)
+        service.overrides = overrides  # type: ignore
+
+        service._key_order = key_order  # pylint: disable=protected-access
+        return service
+
     def _dump_agent_config(
         self, configuration: AgentConfig, file_pointer: TextIO
     ) -> None:
         """Dump agent configuration."""
         agent_config_part = configuration.ordered_json
         self.validate(agent_config_part)
+
         agent_config_part.pop("component_configurations")
         result = [agent_config_part] + configuration.component_configurations_json()
         yaml_dump_all(result, file_pointer)
+
+    def _dump_service_config(
+        self, configuration: PackageConfiguration, file_pointer: TextIO
+    ) -> None:
+        """Dump agent configuration."""
+
+        service_config_data = configuration.ordered_json
+        overrides: List = service_config_data.pop("overrides")
+        self.validate(service_config_data)
+        yaml_dump_all([service_config_data, *overrides], file_pointer)
 
     def _dump_component_config(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump component configuration."""
@@ -335,16 +389,22 @@ class ConfigLoaders:
 
     @classmethod
     def from_package_type(
-        cls, configuration_type: Union[PackageType, str], **kwargs: Any
+        cls,
+        configuration_type: Union[PackageType, str],
+        package_type_config_class: Optional[Dict] = None,
+        **kwargs: Any,
     ) -> "ConfigLoader":
         """
         Get a config loader from the configuration type.
 
         :param configuration_type: the configuration type.
+        :param package_type_config_class: PackageType to config file mappings
         :param kwargs: keyword arguments to the configuration loader constructor.
         :return: configuration loader
         """
-        config_class: Type[PackageConfiguration] = PACKAGE_TYPE_TO_CONFIG_CLASS[
+        if package_type_config_class is None:
+            package_type_config_class = PACKAGE_TYPE_TO_CONFIG_CLASS
+        config_class: Type[PackageConfiguration] = package_type_config_class[
             PackageType(configuration_type)
         ]
         return ConfigLoader(config_class.schema, config_class, **kwargs)
@@ -389,7 +449,7 @@ def load_package_configuration(
     :return: the configuration object.
     """
     configuration_object = load_configuration_object(
-        package_type, directory, skip_aea_validation
+        package_type, directory, skip_aea_validation=skip_aea_validation
     )
     if not skip_consistency_check and isinstance(
         configuration_object, ComponentConfiguration
@@ -401,19 +461,25 @@ def load_package_configuration(
 
 
 def load_configuration_object(
-    package_type: PackageType, directory: Path, skip_aea_validation: bool = True
+    package_type: PackageType,
+    directory: Path,
+    package_type_config_class: Optional[Dict] = None,
+    skip_aea_validation: bool = True,
 ) -> PackageConfiguration:
     """
     Load the configuration object, without consistency checks.
 
     :param package_type: the package type.
     :param directory: the directory of the configuration.
+    :param package_type_config_class: PackageType to config file mappings
     :param skip_aea_validation: if True, the validation of the AEA version is skipped.
     :return: the configuration object.
     :raises FileNotFoundError: if the configuration file is not found.
     """
+    if package_type_config_class is None:
+        package_type_config_class = PACKAGE_TYPE_TO_CONFIG_CLASS
     configuration_loader = ConfigLoader.from_configuration_type(
-        package_type, skip_aea_validation=skip_aea_validation
+        package_type, package_type_config_class, skip_aea_validation=skip_aea_validation
     )
     configuration_filename = (
         configuration_loader.configuration_class.default_configuration_filename

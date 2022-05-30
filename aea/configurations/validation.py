@@ -134,7 +134,11 @@ class ConfigValidator:
         :param env_vars_friendly: whether or not it is env var friendly.
         """
         base_uri = Path(_SCHEMAS_DIR)
-        with open_file(base_uri / schema_filename) as fp:
+        if Path(schema_filename).is_absolute():
+            schema_file = Path(schema_filename)
+        else:
+            schema_file = base_uri / schema_filename
+        with open_file(schema_file) as fp:
             self._schema = json.load(fp)
         root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)

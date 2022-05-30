@@ -30,7 +30,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Dict, List, Tuple, cast
+from typing import Callable, Dict, List, Tuple, cast
 
 import click
 
@@ -108,6 +108,10 @@ def sort_configuration_file(config: PackageConfiguration) -> None:
         yaml_dump_all(
             [json_data] + component_configurations, configuration_filepath.open("w")
         )
+    elif config.package_type == PackageType.SERVICE:
+        json_data = config.ordered_json
+        overrides = json_data.pop("overrides")
+        yaml_dump_all([json_data, *overrides], configuration_filepath.open("w"))
     else:
         yaml_dump(config.ordered_json, configuration_filepath.open("w"))
 
@@ -191,7 +195,13 @@ def extend_public_ids(
             ]
 
 
-def update_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
+def update_hashes(
+    packages_dir: Path,
+    no_wrap: bool = False,
+    config_loader: Callable[
+        [PackageType, Path], PackageConfiguration
+    ] = load_configuration,
+) -> int:
     """Process all AEA packages, update fingerprint, and update hashes.csv files."""
     return_code = 0
     package_hashes: Dict[str, str] = {}
@@ -219,7 +229,7 @@ def update_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
                 extend_public_ids(item_config, public_id_to_hash_mappings)
                 dump_yaml(config_file, item_config, extra_config)
 
-                configuration_obj = load_configuration(
+                configuration_obj = config_loader(
                     package_id.package_type.value, package_path
                 )
                 sort_configuration_file(configuration_obj)
@@ -269,7 +279,13 @@ def check_same_ipfs_hash(
     return result
 
 
-def check_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
+def check_hashes(
+    packages_dir: Path,
+    no_wrap: bool = False,
+    config_loader: Callable[
+        [PackageType, Path], PackageConfiguration
+    ] = load_configuration,
+) -> int:
     """Check fingerprints and outer hash of all AEA packages."""
 
     return_code = 0
@@ -281,7 +297,7 @@ def check_hashes(packages_dir: Path, no_wrap: bool = False,) -> int:
         packages += list(map(package_type_and_path, SCAFFOLD_PACKAGES))
 
         for package_type, package_path in packages:
-            configuration_obj = load_configuration(package_type, package_path)
+            configuration_obj = config_loader(package_type, package_path)
             failed = failed or not check_fingerprint(configuration_obj)
             failed = failed or not check_same_ipfs_hash(
                 configuration_obj, package_type, expected_package_hashes, no_wrap
