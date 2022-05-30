@@ -104,9 +104,6 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self.context.logger.info("No oracle value to publish")
         else:
             self.context.logger.info("Publishing oracle value")
-
-            # add expiration block
-            oracle_data["expiration_block"] = EXPIRATION_BLOCK
             self.context.logger.info(f"Update kwargs: {oracle_data}")
             self._request_update_transaction(oracle_data)
 
