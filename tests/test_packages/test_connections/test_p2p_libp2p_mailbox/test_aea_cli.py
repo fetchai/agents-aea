@@ -38,7 +38,6 @@ from tests.conftest import (
 
 
 p2p_libp2p_mailbox_path = f"vendor.{p2p_libp2p_mailbox.__name__.split('.', 1)[-1]}"
-DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_MAILBOX_PORT = 8888

@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains tests for Libp2p tcp client connection."""
 import asyncio
+import itertools
 import os
 import shutil
 import tempfile
@@ -47,8 +48,8 @@ from tests.conftest import (
 )
 
 
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
+ports = itertools.count(10234)
+delegate_ports = itertools.count(11234)
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 1
 
@@ -121,7 +122,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, port=DEFAULT_PORT + 1, delegate=True
+            data_dir=temp_dir, port=next(ports), delegate=True
         )
         cls.multiplexer_node = Multiplexer(
             [cls.connection_node], protocols=[MockDefaultMessageProtocol]
@@ -301,12 +302,15 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.log_files = []
         cls.mutliplexers = []
 
+        delegate_port1 = next(delegate_ports)
+        delegate_port2 = next(delegate_ports)
+
         temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
         os.mkdir(temp_dir_node_1)
         cls.connection_node_1 = _make_libp2p_connection(
             data_dir=temp_dir_node_1,
-            port=DEFAULT_PORT + 1,
-            delegate_port=DEFAULT_DELEGATE_PORT + 1,
+            port=next(ports),
+            delegate_port=delegate_port1,
             delegate=True,
         )
         cls.multiplexer_node_1 = Multiplexer(
@@ -323,8 +327,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         try:
             cls.connection_node_2 = _make_libp2p_connection(
                 data_dir=temp_dir_node_2,
-                port=DEFAULT_PORT + 2,
-                delegate_port=DEFAULT_DELEGATE_PORT + 2,
+                port=next(ports),
+                delegate_port=delegate_port2,
                 entry_peers=[genesis_peer],
                 delegate=True,
             )
@@ -340,7 +344,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.connection_client_1 = _make_libp2p_client_connection(
                 data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node_1.node.pub,
-                node_port=DEFAULT_DELEGATE_PORT + 1,
+                node_port=delegate_port1,
             )
             cls.multiplexer_client_1 = Multiplexer(
                 [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
@@ -353,7 +357,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.connection_client_2 = _make_libp2p_client_connection(
                 data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node_2.node.pub,
-                node_port=DEFAULT_DELEGATE_PORT + 2,
+                node_port=delegate_port2,
             )
             cls.multiplexer_client_2 = Multiplexer(
                 [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
@@ -511,13 +515,16 @@ class TestLibp2pClientConnectionRouting:
         cls.log_files = []
         cls.multiplexers = []
 
+        delegate_port1 = next(delegate_ports)
+        delegate_port2 = next(delegate_ports)
+
         try:
             temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
             os.mkdir(temp_dir_node_1)
             cls.connection_node_1 = _make_libp2p_connection(
                 data_dir=temp_dir_node_1,
-                port=DEFAULT_PORT + 1,
-                delegate_port=DEFAULT_DELEGATE_PORT + 1,
+                port=next(ports),
+                delegate_port=delegate_port1,
                 delegate=True,
             )
             cls.multiplexer_node_1 = Multiplexer(
@@ -533,8 +540,8 @@ class TestLibp2pClientConnectionRouting:
             os.mkdir(temp_dir_node_2)
             cls.connection_node_2 = _make_libp2p_connection(
                 data_dir=temp_dir_node_2,
-                port=DEFAULT_PORT + 2,
-                delegate_port=DEFAULT_DELEGATE_PORT + 2,
+                port=next(ports),
+                delegate_port=delegate_port2,
                 entry_peers=[entry_peer],
                 delegate=True,
             )
@@ -557,20 +564,19 @@ class TestLibp2pClientConnectionRouting:
             ]
 
             for j in range(DEFAULT_CLIENTS_PER_NODE):
-                ports = [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]
+                default_ports = [delegate_port1, delegate_port2]
                 peers_public_keys = [
                     cls.connection_node_1.node.pub,
                     cls.connection_node_2.node.pub,
                 ]
-                for i in range(len(ports)):
-                    port = ports[i]
+                for i, default_port in enumerate(default_ports):
                     peer_public_key = peers_public_keys[i]
                     temp_dir_client = os.path.join(cls.t, f"temp_dir_client__{j}_{i}")
                     os.mkdir(temp_dir_client)
                     conn = _make_libp2p_client_connection(
                         data_dir=temp_dir_client,
                         peer_public_key=peer_public_key,
-                        node_port=port,
+                        node_port=default_port,
                     )
                     mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
 
@@ -666,7 +672,7 @@ class BaseTestLibp2pClientSamePeer:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, port=DEFAULT_PORT + 1, delegate=True
+            data_dir=temp_dir, port=next(ports), delegate=True
         )
         cls.multiplexer_node = Multiplexer(
             [cls.connection_node], protocols=[MockDefaultMessageProtocol]

@@ -52,9 +52,6 @@ check_node_built = (
     f"{P2PLibp2pConnection.__module__}.{P2PLibp2pConnection.__name__}._check_node_built"
 )
 
-DEFAULT_PORT = 10234
-DEFAULT_NET_SIZE = 4
-
 
 class TestP2PLibp2pConnectionFailureGolangRun:
     """Test that golang run fails if wrong path or timeout"""

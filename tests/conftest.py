@@ -589,6 +589,17 @@ def pytest_addoption(parser) -> None:
         default=False,
         help="check non closed threads i started during test",
     )
+    parser.addoption(
+        "--repeat", action="store", help="Number of times to repeat each test"
+    )
+
+
+def pytest_generate_tests(metafunc):
+    """Helper function to allow `--repeat` as pytest cli argument"""
+    if metafunc.config.option.repeat is not None:
+        count = int(metafunc.config.option.repeat)
+        metafunc.fixturenames.append("tmp_ct")
+        metafunc.parametrize("tmp_ct", range(count))
 
 
 @pytest.fixture(scope="session", autouse=True)

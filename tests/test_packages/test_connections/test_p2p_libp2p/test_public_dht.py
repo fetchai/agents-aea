@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains integration tests for P2PLibp2p connection."""
-
+import itertools
 import json
 import os
 import shutil
@@ -63,7 +63,7 @@ from tests.conftest import (
 )
 
 
-DEFAULT_PORT = 10234
+ports = itertools.count(10234)
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
 PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
 PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY_2]
@@ -120,10 +120,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             temp_dir = os.path.join(self.t, f"dir_{i}")
             os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
-                port=DEFAULT_PORT + 1,
-                relay=False,
-                entry_peers=[maddr],
-                data_dir=temp_dir,
+                port=next(ports), relay=False, entry_peers=[maddr], data_dir=temp_dir,
             )
             multiplexer = Multiplexer([connection])
             self.log_files.append(connection.node.log_file)
@@ -150,7 +147,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    port=DEFAULT_PORT + 1,
+                    port=next(ports),
                     relay=False,
                     entry_peers=[maddr],
                     data_dir=temp_dir_1,
@@ -163,7 +160,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
                 os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_connection(
-                    port=DEFAULT_PORT + 2,
+                    port=next(ports),
                     relay=False,
                     entry_peers=[maddr],
                     data_dir=temp_dir_2,
@@ -220,7 +217,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    port=DEFAULT_PORT + 1,
+                    port=next(ports),
                     relay=False,
                     entry_peers=[maddrs[i]],
                     data_dir=temp_dir_1,
@@ -238,7 +235,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
-                        port=DEFAULT_PORT + 2,
+                        port=next(ports),
                         relay=False,
                         entry_peers=[maddrs[j]],
                         data_dir=temp_dir_2,
@@ -530,7 +527,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         self.nested_set_config(
             config_path,
             {
-                "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
+                "local_uri": f"127.0.0.1:{next(ports)}",
                 "entry_peers": maddrs,
                 "log_file": log_file,
                 "ledger_id": node_ledger_id,

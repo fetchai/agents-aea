@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for P2PLibp2p connection."""
+import itertools
 import os
 import shutil
 import tempfile
@@ -38,7 +39,7 @@ from tests.conftest import (
 )
 
 
-DEFAULT_PORT = 10234
+ports = itertools.count(10234)
 
 MockDefaultMessageProtocol = Mock()
 MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
@@ -63,7 +64,7 @@ class TestSlowQueue:
         cls.multiplexers = []
 
         try:
-            port_genesis = DEFAULT_PORT + 10
+            port_genesis = next(ports)
             temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
             os.mkdir(temp_dir_gen)
             cls.bad_address = _make_libp2p_connection(
@@ -87,16 +88,14 @@ class TestSlowQueue:
             os.mkdir(temp_dir)
 
             cls.conn = _make_libp2p_connection(
-                data_dir=temp_dir, port=port_genesis + 100, entry_peers=[genesis_peer]
+                data_dir=temp_dir, port=next(ports), entry_peers=[genesis_peer]
             )
 
-            port = port_genesis
             for i in range(2):
-                port += 1
                 temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
                 os.mkdir(temp_dir)
                 conn = _make_libp2p_connection(
-                    data_dir=temp_dir, port=port, entry_peers=[genesis_peer]
+                    data_dir=temp_dir, port=next(ports), entry_peers=[genesis_peer]
                 )
                 mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
 
