@@ -104,9 +104,6 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self.context.logger.info("No oracle value to publish")
         else:
             self.context.logger.info("Publishing oracle value")
-
-            # add expiration block
-            oracle_data["expiration_block"] = EXPIRATION_BLOCK
             self.context.logger.info(f"Update kwargs: {oracle_data}")
             self._request_update_transaction(oracle_data)
 
@@ -147,7 +144,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "oracle_address": self.context.agent_address,
-                    "gas": strategy.default_gas_grant_role,
+                    "gas": strategy.gas_limit_grant_role,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_grant_role,
                 }
             ),
         )
@@ -175,7 +173,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
                     "oracle_address": self.context.agent_address,
                     "update_function": strategy.update_function,
                     "update_kwargs": update_kwargs,
-                    "gas": strategy.default_gas_update,
+                    "gas": strategy.gas_limit_update,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_update,
                 }
             ),
         )

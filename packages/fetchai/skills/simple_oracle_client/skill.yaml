@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRqzw2aTE6rsUnoB8XvvWoF4sg4ZUpvgQwStZpAVG5sUj
   __init__.py: QmTMk4XcBiSpKGRBPovRakFEDzCgYymcscxwxyfCWEKPjW
-  behaviours.py: QmVSDm9NsnG1owj4eDh7Pvp2rrJ4AEppuii9W7Q9orZ81J
+  behaviours.py: QmX4RdaY9pETMdTntiHtM97KKEzZLQaGZebNiE4eoWiguK
   dialogues.py: QmbbaQXAXr8cUc9YB927pnZYdx6SqFfxc4LQV1iWyFUvGX
-  handlers.py: QmZfap8Lyb33VscFi9hrcAUhABii9XNLbenr3YYzD1tvTT
-  strategy.py: QmTw5G7JKRg5DWf2ueF8FTogjAaXS91hcD1VskqSuuVdVe
+  handlers.py: QmU4dvTXLW4csxXvhDYkaborf65ax5XD1RTXdf5vjoHq3a
+  strategy.py: QmdcSExPito4H3eRR6j9D2hP75eKxTfg2kX4qWNk83ctHT
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/fet_erc20:0.9.1
@@ -52,10 +52,12 @@ models:
     args:
       approve_amount: 1000000000000000000
       client_contract_address: null
-      default_gas_approve: 300000
-      default_gas_deploy: 1500000
-      default_gas_query: 500000
       erc20_address: null
+      gas_limit_approve: 300000
+      gas_limit_deploy: 1500000
+      gas_limit_instantiate: 500000
+      gas_limit_query: 500000
+      gas_price: 1000000000
       ledger_id: null
       oracle_contract_address: null
       query_function: null
