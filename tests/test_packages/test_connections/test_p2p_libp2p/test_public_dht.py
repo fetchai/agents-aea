@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains integration tests for P2PLibp2p connection."""
-import itertools
+
 import json
 import os
 import shutil
@@ -42,6 +42,7 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    default_ports as ports,
     DEFAULT_LEDGER,
     DEFAULT_LEDGER_LIBP2P_NODE,
     PUBLIC_DHT_DELEGATE_URI_1,
@@ -63,7 +64,6 @@ from tests.conftest import (
 )
 
 
-ports = itertools.count(10234)
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
 PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
 PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY_2]
@@ -120,7 +120,9 @@ class TestLibp2pConnectionPublicDHTRelay:
             temp_dir = os.path.join(self.t, f"dir_{i}")
             os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
-                port=next(ports), relay=False, entry_peers=[maddr], data_dir=temp_dir,
+                relay=False,
+                entry_peers=[maddr],
+                data_dir=temp_dir,
             )
             multiplexer = Multiplexer([connection])
             self.log_files.append(connection.node.log_file)
@@ -147,7 +149,6 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    port=next(ports),
                     relay=False,
                     entry_peers=[maddr],
                     data_dir=temp_dir_1,
@@ -160,7 +161,6 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
                 os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_connection(
-                    port=next(ports),
                     relay=False,
                     entry_peers=[maddr],
                     data_dir=temp_dir_2,
@@ -217,7 +217,6 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    port=next(ports),
                     relay=False,
                     entry_peers=[maddrs[i]],
                     data_dir=temp_dir_1,
@@ -235,7 +234,6 @@ class TestLibp2pConnectionPublicDHTRelay:
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
-                        port=next(ports),
                         relay=False,
                         entry_peers=[maddrs[j]],
                         data_dir=temp_dir_2,

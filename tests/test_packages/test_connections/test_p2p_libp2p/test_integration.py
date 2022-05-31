@@ -40,7 +40,7 @@ from tests.conftest import (
 )
 
 
-ports = itertools.count(start=10234)
+DEFAULT_NET_SIZE = 4
 
 MockDefaultMessageProtocol = Mock()
 MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
@@ -61,7 +61,7 @@ class TestP2PLibp2pConnectionIntegrationTest:
         temp_dir = os.path.join(cls.t, name)
         os.mkdir(temp_dir)
         conn_options = copy(kwargs)
-        conn_options["port"] = conn_options.get("port", next(ports))
+        
         conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
         conn = _make_libp2p_connection(**conn_options)
         multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
@@ -131,8 +131,6 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 entry_peers=[main_relay],
                 relay=True,
                 delegate=True,
-                delegate_port=next(ports),
-                mailbox_port=next(ports),
                 mailbox=True,
             )
 
@@ -141,8 +139,6 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 entry_peers=[relay_peer_2],
                 relay=True,
                 delegate=True,
-                delegate_port=next(ports),
-                mailbox_port=next(ports),
                 mailbox=True,
             )
 

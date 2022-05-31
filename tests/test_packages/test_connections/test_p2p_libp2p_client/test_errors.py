@@ -41,6 +41,7 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    default_ports,
     DEFAULT_LEDGER_LIBP2P_NODE,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
@@ -145,12 +146,13 @@ class TestLibp2pClientConnectionNodeDisconnected:
 
         cls.log_files = []
         cls.multiplexers = []
+        cls.delegate_port = next(default_ports)
 
         temp_node_dir = os.path.join(cls.t, "node_dir")
         os.mkdir(temp_node_dir)
         try:
             cls.connection_node = _make_libp2p_connection(
-                data_dir=temp_node_dir, delegate=True
+                data_dir=temp_node_dir, delegate=True, delegate_port=cls.delegate_port,
             )
             cls.multiplexer_node = Multiplexer([cls.connection_node])
             cls.log_files.append(cls.connection_node.node.log_file)
@@ -160,7 +162,9 @@ class TestLibp2pClientConnectionNodeDisconnected:
             temp_client_dir = os.path.join(cls.t, "client_dir")
             os.mkdir(temp_client_dir)
             cls.connection_client = _make_libp2p_client_connection(
-                data_dir=temp_client_dir, peer_public_key=cls.connection_node.node.pub
+                data_dir=temp_client_dir,
+                peer_public_key=cls.connection_node.node.pub,
+                node_port=cls.delegate_port,
             )
             cls.multiplexer_client = Multiplexer([cls.connection_client])
             cls.multiplexer_client.connect()
@@ -282,14 +286,21 @@ class TestLibp2pClientConnectionCheckSignature:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.delegate_port = next(default_ports)
 
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
-        cls.connection_node = _make_libp2p_connection(data_dir=temp_dir, delegate=True)
+        cls.connection_node = _make_libp2p_connection(
+            data_dir=temp_dir,
+            delegate_port=cls.delegate_port,
+            delegate=True,
+        )
         temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client)
         cls.connection = _make_libp2p_client_connection(
-            data_dir=temp_dir_client, peer_public_key=cls.connection_node.node.pub
+            data_dir=temp_dir_client,
+            peer_public_key=cls.connection_node.node.pub,
+            node_port=cls.delegate_port,
         )
 
     @pytest.mark.asyncio
