@@ -64,7 +64,7 @@ aea config set --type bool vendor.fetchai.skills.advanced_data_request.models.ad
 Set the cert requests for the peer-to-peer connection:
 ``` bash
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
 ```
 
 Match the agent index `i` to the `COIN_URL` and `JSON_PATH` below:

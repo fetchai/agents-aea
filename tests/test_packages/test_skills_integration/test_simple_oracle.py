@@ -134,8 +134,8 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                     {
                         "identifier": "acn",
                         "ledger_id": ledger_id,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -372,8 +372,8 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
                     {
                         "identifier": "acn",
                         "ledger_id": ledger_id,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",

@@ -138,7 +138,7 @@ aea config set --type dict agent.default_routing \
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 aea install
 aea build
 ```
@@ -200,7 +200,7 @@ aea config set --type dict agent.decision_maker_handler \
   "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'''[{"identifier": "acn", "ledger_id": "fetchai", "message_format": "'{public_key}'", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
+'''[{"identifier": "acn", "ledger_id": "fetchai", "message_format": "'{public_key}'", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
 aea install
 aea build
 ```
@@ -235,7 +235,7 @@ aea config set --type dict agent.decision_maker_handler \
   "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'''[{"identifier": "acn", "ledger_id": "fetchai", "message_format": "'{public_key}'", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
+'''[{"identifier": "acn", "ledger_id": "fetchai", "message_format": "'{public_key}'", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
 aea install
 aea build
 ```
@@ -398,7 +398,7 @@ aea config set --type dict agent.default_routing \
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 aea install
 aea build
 ```
@@ -460,7 +460,7 @@ aea config set --type dict agent.decision_maker_handler \
   "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'''[{"identifier": "acn", "ledger_id": "ethereum", "message_format": "'{public_key}'", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
+'''[{"identifier": "acn", "ledger_id": "ethereum", "message_format": "'{public_key}'", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
 aea install
 aea build
 ```
@@ -495,7 +495,7 @@ aea config set --type dict agent.decision_maker_handler \
   "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'''[{"identifier": "acn", "ledger_id": "ethereum", "message_format": "'{public_key}'", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
+'''[{"identifier": "acn", "ledger_id": "ethereum", "message_format": "'{public_key}'", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
 aea install
 aea build
 ```
@@ -509,7 +509,7 @@ Run the following in every AEA's terminal:
 
 ```bash
 aea config set agent.default_ledger ethereum
-json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
+json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
