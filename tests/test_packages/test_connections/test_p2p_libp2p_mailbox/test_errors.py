@@ -40,11 +40,11 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
 )
 
 from tests.conftest import (
-    default_ports,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     _process_cert,
+    default_ports,
     libp2p_log_on_failure,
 )
 

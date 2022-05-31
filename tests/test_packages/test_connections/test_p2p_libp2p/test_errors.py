@@ -205,9 +205,7 @@ def test_libp2pconnection_node_config_registration_delay():
     host = "localhost"
 
     with tempfile.TemporaryDirectory() as data_dir:
-        _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
+        _make_libp2p_connection(host=host, data_dir=data_dir, build_directory=data_dir)
     with tempfile.TemporaryDirectory() as data_dir:
         with pytest.raises(ValueError):
             _make_libp2p_connection(

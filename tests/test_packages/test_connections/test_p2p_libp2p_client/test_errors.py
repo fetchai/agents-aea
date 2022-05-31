@@ -41,11 +41,11 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
-    default_ports,
     DEFAULT_LEDGER_LIBP2P_NODE,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,
+    default_ports,
     libp2p_log_on_failure,
 )
 
@@ -291,9 +291,7 @@ class TestLibp2pClientConnectionCheckSignature:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir,
-            delegate_port=cls.delegate_port,
-            delegate=True,
+            data_dir=temp_dir, delegate_port=cls.delegate_port, delegate=True,
         )
         temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client)

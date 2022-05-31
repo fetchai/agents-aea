@@ -30,10 +30,10 @@ from packages.valory.connections import p2p_libp2p_mailbox
 from packages.valory.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
 
 from tests.conftest import (
-    default_ports,
     DEFAULT_HOST,
     DEFAULT_LEDGER,
     _make_libp2p_connection,
+    default_ports,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )

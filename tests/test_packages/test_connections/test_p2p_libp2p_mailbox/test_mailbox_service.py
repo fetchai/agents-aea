@@ -38,9 +38,9 @@ from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
-    default_ports,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    default_ports,
 )
 
 

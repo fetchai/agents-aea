@@ -33,12 +33,9 @@ from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 
-from tests.conftest import (
-    default_ports as ports,
-    DEFAULT_LEDGER,
-    DEFAULT_LEDGER_LIBP2P_NODE,
-    libp2p_log_on_failure,
-)
+from tests.conftest import DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+from tests.conftest import default_ports as ports
+from tests.conftest import libp2p_log_on_failure
 
 
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"

@@ -38,11 +38,11 @@ from packages.valory.connections.p2p_libp2p_client.connection import NodeClient,
 from tests.common.mocks import RegexComparator
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
-    default_ports,
     DEFAULT_LEDGER,
     DEFAULT_LEDGER_LIBP2P_NODE,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    default_ports,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
@@ -310,9 +310,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
         os.mkdir(temp_dir_node_1)
         cls.connection_node_1 = _make_libp2p_connection(
-            data_dir=temp_dir_node_1,
-            delegate_port=cls.ports[0],
-            delegate=True,
+            data_dir=temp_dir_node_1, delegate_port=cls.ports[0], delegate=True,
         )
         cls.multiplexer_node_1 = Multiplexer(
             [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
@@ -520,9 +518,7 @@ class TestLibp2pClientConnectionRouting:
             temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
             os.mkdir(temp_dir_node_1)
             cls.connection_node_1 = _make_libp2p_connection(
-                data_dir=temp_dir_node_1,
-                delegate_port=cls.ports[0],
-                delegate=True,
+                data_dir=temp_dir_node_1, delegate_port=cls.ports[0], delegate=True,
             )
             cls.multiplexer_node_1 = Multiplexer(
                 [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]

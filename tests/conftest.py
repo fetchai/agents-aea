@@ -20,6 +20,7 @@
 """Conftest module for Pytest."""
 import difflib
 import inspect
+import itertools
 import logging
 import os
 import platform
@@ -47,7 +48,6 @@ from typing import (
     cast,
 )
 from unittest.mock import MagicMock, patch
-import itertools
 
 import docker as docker
 import gym
@@ -375,7 +375,6 @@ protocol_specification_files = [
 # ports for testing, call next() on to avoid assignment overlap
 DEFAULT_HOST = "127.0.0.1"
 default_ports = itertools.count(10234)
-default_mailbox_ports = itertools.count(8888)
 
 
 @contextmanager

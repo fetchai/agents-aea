@@ -35,15 +35,14 @@ from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
-    default_ports,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
+    default_ports,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
 
-DEFAULT_MAILBOX_PORT = 8888
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 1
 
@@ -318,8 +317,6 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         os.mkdir(temp_dir_node_1)
         cls.connection_node_1 = _make_libp2p_connection(
             data_dir=temp_dir_node_1,
-            port=next(default_ports),
-            delegate_port=next(default_ports),
             mailbox_port=cls.mailbox_ports[0],
             delegate=True,
             mailbox=True,
@@ -338,8 +335,6 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         try:
             cls.connection_node_2 = _make_libp2p_connection(
                 data_dir=temp_dir_node_2,
-                port=next(default_ports),
-                delegate_port=next(default_ports),
                 mailbox_port=cls.mailbox_ports[1],
                 entry_peers=[genesis_peer],
                 delegate=True,

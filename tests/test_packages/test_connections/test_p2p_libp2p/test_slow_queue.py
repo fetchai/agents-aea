@@ -38,8 +38,6 @@ from tests.conftest import (
 )
 
 
-# DEFAULT_PORT = 10234
-
 MockDefaultMessageProtocol = Mock()
 MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
 MockDefaultMessageProtocol.protocol_specification_id = (
@@ -68,9 +66,7 @@ class TestSlowQueue:
             cls.bad_address = _make_libp2p_connection(
                 data_dir=temp_dir_gen
             ).node.address
-            cls.connection_genesis = _make_libp2p_connection(
-                data_dir=temp_dir_gen
-            )
+            cls.connection_genesis = _make_libp2p_connection(data_dir=temp_dir_gen)
             cls.multiplexer_genesis = Multiplexer(
                 [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
             )

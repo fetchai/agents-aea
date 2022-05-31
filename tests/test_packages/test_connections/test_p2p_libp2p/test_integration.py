@@ -61,7 +61,7 @@ class TestP2PLibp2pConnectionIntegrationTest:
         temp_dir = os.path.join(cls.t, name)
         os.mkdir(temp_dir)
         conn_options = copy(kwargs)
-        
+
         conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
         conn = _make_libp2p_connection(**conn_options)
         multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])

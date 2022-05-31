@@ -29,13 +29,9 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 from packages.valory.connections import p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
-from tests.conftest import (
-    default_ports as ports,
-    DEFAULT_LEDGER,
-    _make_libp2p_connection,
-    libp2p_log_on_failure,
-    libp2p_log_on_failure_all,
-)
+from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
+from tests.conftest import default_ports as ports
+from tests.conftest import libp2p_log_on_failure, libp2p_log_on_failure_all
 
 
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"

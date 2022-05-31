@@ -370,9 +370,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1,
-                relay=False,
-                entry_peers=[relay_peer],
+                data_dir=temp_dir_1, relay=False, entry_peers=[relay_peer],
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -496,9 +494,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         try:
             temp_dir_rel_1 = os.path.join(cls.t, "temp_dir_rel_1")
             os.mkdir(temp_dir_rel_1)
-            cls.connection_relay_1 = _make_libp2p_connection(
-                data_dir=temp_dir_rel_1
-            )
+            cls.connection_relay_1 = _make_libp2p_connection(data_dir=temp_dir_rel_1)
             cls.multiplexer_relay_1 = Multiplexer(
                 [cls.connection_relay_1], protocols=[MockDefaultMessageProtocol]
             )
@@ -528,9 +524,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_1")
                 os.mkdir(temp_dir)
                 conn = _make_libp2p_connection(
-                    data_dir=temp_dir,
-                    relay=False,
-                    entry_peers=[relay_peer_1],
+                    data_dir=temp_dir, relay=False, entry_peers=[relay_peer_1],
                 )
                 mux = Multiplexer([conn])
                 cls.connections.append(conn)
@@ -542,9 +536,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_2")
                 os.mkdir(temp_dir)
                 conn = _make_libp2p_connection(
-                    data_dir=temp_dir,
-                    relay=False,
-                    entry_peers=[relay_peer_2],
+                    data_dir=temp_dir, relay=False, entry_peers=[relay_peer_2],
                 )
                 mux = Multiplexer([conn])
                 cls.connections.append(conn)
