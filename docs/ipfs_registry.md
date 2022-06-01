@@ -8,7 +8,7 @@ So to utilize the newer PublicId format we have a script which extends all avail
 
 ## Setup the aea to use the IPFS registry
 
-Initialize AEA cli tool with default registry set to remote and default remote registr set to ipfs.
+Initialize AEA cli tool with default registry set to remote and default remote registry set to ipfs.
 
 `aea init --author author_name --remote --ipfs`
 
@@ -22,7 +22,7 @@ Or
 
 ## Publish packages
 
-To publish a package on the IPFS registry, first run `aea hash all` to update the dependencies with the latest IPFS hashes. Then push the relevent packages using
+To publish a package on the IPFS registry, first run `aea hash all` to update the dependencies with the latest IPFS hashes. Then push the relevant packages using
 
 `aea push COMPONENT_TYPE COMPONENT_PATH`
 
@@ -46,7 +46,7 @@ Or
 
 ## Publishing agents
 
-Nevigate to the agent directory and publish the agent using
+Navigate to the agent directory and publish the agent using
 
 `aea publish`
 
