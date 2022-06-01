@@ -20,6 +20,7 @@
 """Conftest module for Pytest."""
 import difflib
 import inspect
+import itertools
 import logging
 import os
 import platform
@@ -370,6 +371,10 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+# ports for testing, call next() on to avoid assignment overlap
+DEFAULT_HOST = "127.0.0.1"
+default_ports = itertools.count(10234)
 
 
 @contextmanager
@@ -834,38 +839,49 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     )
 
 
+def is_port_in_use(host: str, port: int) -> bool:
+    """Check if port is in use"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex((host, port)) == 0
+
+
 def _make_libp2p_connection(
     data_dir: str,
-    port: int = 10234,
-    host: str = "127.0.0.1",
+    port: Optional[int] = None,
+    host: str = DEFAULT_HOST,
     relay: bool = True,
     delegate: bool = False,
     mailbox: bool = False,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
-    delegate_port: int = 11234,
-    delegate_host: str = "127.0.0.1",
-    mailbox_port: int = 8888,
-    mailbox_host: str = "127.0.0.1",
+    delegate_port: Optional[int] = None,
+    delegate_host: str = DEFAULT_HOST,
+    mailbox_port: Optional[int] = None,
+    mailbox_host: str = DEFAULT_HOST,
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
     peer_registration_delay: str = "0.0",
 ) -> P2PLibp2pConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+    """Get a libp2p connection."""
+
+    if not os.path.isdir(data_dir):
         raise ValueError("Data dir must be directory and exist!")
+
+    port = port or next(default_ports)
+    delegate_port = delegate_port or next(default_ports)
+    mailbox_port = mailbox_port or next(default_ports)
+
     log_file = os.path.join(data_dir, "libp2p_node_{}.log".format(port))
     if os.path.exists(log_file):
         os.remove(log_file)
-    key = agent_key
-    if key is None:
-        key = make_crypto(DEFAULT_LEDGER)
+
+    agent_key = agent_key or make_crypto(DEFAULT_LEDGER)
     identity = Identity(
         "identity",
-        address=key.address,
-        public_key=key.public_key,
-        default_address_key=key.identifier,
+        address=agent_key.address,
+        public_key=agent_key.public_key,
+        default_address_key=agent_key.identifier,
     )
-    conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER_LIBP2P_NODE: node_key_file})
     else:
@@ -876,13 +892,13 @@ def _make_libp2p_connection(
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
-        key.identifier,
+        agent_key.identifier,
         "2021-01-01",
         "2021-01-02",
         "{public_key}",
-        f"./{key.address}_cert.txt",
+        f"./{agent_key.address}_cert.txt",
     )
-    _process_cert(key, cert_request, path_prefix=data_dir)
+    _process_cert(agent_key, cert_request, path_prefix=data_dir)
     if not build_directory:
         build_directory = os.getcwd()
     config = {"ledger_id": node_key.identifier}
@@ -945,13 +961,18 @@ def _make_libp2p_connection(
 def _make_libp2p_client_connection(
     peer_public_key: str,
     data_dir: str,
-    node_port: int = 11234,
-    node_host: str = "127.0.0.1",
+    node_port: int = None,
+    node_host: str = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+    """Get a libp2p client connection."""
+
+    if not os.path.isdir(data_dir):
         raise ValueError("Data dir must be directory and exist!")
+
+    node_port = node_port or next(default_ports)
+
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
         "identity",
@@ -992,14 +1013,18 @@ def _make_libp2p_client_connection(
 def _make_libp2p_mailbox_connection(
     peer_public_key: str,
     data_dir: str,
-    node_port: int = 8888,
-    node_host: str = "127.0.0.1",
+    node_port: Optional[int] = None,
+    node_host: str = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
     """Get a libp2p mailbox connection."""
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+
+    if not os.path.isdir(data_dir):
         raise ValueError("Data dir must be directory and exist!")
+
+    node_port = node_port or next(default_ports)
+
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
         "identity",

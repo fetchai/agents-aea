@@ -52,7 +52,6 @@ check_node_built = (
     f"{P2PLibp2pConnection.__module__}.{P2PLibp2pConnection.__name__}._check_node_built"
 )
 
-DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
 
@@ -204,16 +203,12 @@ def test_libp2pconnection_mixed_ip_address():
 def test_libp2pconnection_node_config_registration_delay():
     """Test node registration delay configuration"""
     host = "localhost"
-    port = "10000"
 
     with tempfile.TemporaryDirectory() as data_dir:
-        _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
-        )
+        _make_libp2p_connection(host=host, data_dir=data_dir, build_directory=data_dir)
     with tempfile.TemporaryDirectory() as data_dir:
         with pytest.raises(ValueError):
             _make_libp2p_connection(
-                port=port,
                 host=host,
                 data_dir=data_dir,
                 peer_registration_delay="must_be_float",
@@ -224,10 +219,9 @@ def test_libp2pconnection_node_config_registration_delay():
 def test_build_dir_not_set():
     """Test build dir not set."""
     host = "localhost"
-    port = "10000"
     with tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+            host=host, data_dir=data_dir, build_directory=data_dir
         )
         con.configuration.build_directory = None
         with pytest.raises(
@@ -245,12 +239,11 @@ def test_build_dir_not_set():
 async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
     host = "localhost"
-    port = "10000"
     with patch(check_node_built, return_value="./"), patch(
         "tests.conftest.build_node"
     ), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+            host=host, data_dir=data_dir, build_directory=data_dir
         )
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
@@ -278,12 +271,11 @@ async def test_reconnect_on_write_failed():
 async def test_reconnect_on_write_failed_reconnect_pipe():
     """Test node restart on write fail."""
     host = "localhost"
-    port = "10000"
     with patch(check_node_built, return_value="./"), patch(
         "tests.conftest.build_node"
     ), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+            host=host, data_dir=data_dir, build_directory=data_dir
         )
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
@@ -317,12 +309,11 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
 async def test_reconnect_on_read_failed():
     """Test node restart on read fail."""
     host = "localhost"
-    port = "10000"
     with patch(check_node_built, return_value="./"), patch(
         "tests.conftest.build_node"
     ), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+            host=host, data_dir=data_dir, build_directory=data_dir
         )
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
@@ -363,11 +354,10 @@ async def test_node_stopped_callback():
             "Not supported on this platform. Unix and python >= 3.8 supported only"
         )
     host = "127.0.0.1"
-    port = "10000"
 
     with tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+            host=host, data_dir=data_dir, build_directory=data_dir
         )
         con.node.logger.error = Mock()
         await con.node.start()
@@ -378,7 +368,7 @@ async def test_node_stopped_callback():
 
     with tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
-            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+            host=host, data_dir=data_dir, build_directory=data_dir
         )
         con.node.logger.error = Mock()
         await con.node.start()

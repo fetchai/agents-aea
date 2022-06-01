@@ -44,6 +44,7 @@ from tests.conftest import (
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     _process_cert,
+    default_ports,
     libp2p_log_on_failure,
 )
 
@@ -74,7 +75,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         os.chdir(cls.t)
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
-        cls.node_port = "11234"
+        cls.node_port = next(default_ports)
         cls.identity = Identity(
             "identity", address=crypto.address, public_key=crypto.public_key
         )
@@ -140,6 +141,7 @@ class TestLibp2pClientConnectionNodeDisconnected:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.delegate_port = next(default_ports)
         os.chdir(cls.t)
 
         cls.log_files = []
@@ -149,7 +151,7 @@ class TestLibp2pClientConnectionNodeDisconnected:
         os.mkdir(temp_node_dir)
         try:
             cls.connection_node = _make_libp2p_connection(
-                data_dir=temp_node_dir, delegate=True
+                data_dir=temp_node_dir, delegate=True, delegate_port=cls.delegate_port
             )
             cls.multiplexer_node = Multiplexer([cls.connection_node])
             cls.log_files.append(cls.connection_node.node.log_file)
@@ -159,7 +161,9 @@ class TestLibp2pClientConnectionNodeDisconnected:
             temp_client_dir = os.path.join(cls.t, "client_dir")
             os.mkdir(temp_client_dir)
             cls.connection_client = _make_libp2p_client_connection(
-                data_dir=temp_client_dir, peer_public_key=cls.connection_node.node.pub
+                data_dir=temp_client_dir,
+                peer_public_key=cls.connection_node.node.pub,
+                node_port=cls.delegate_port,
             )
             cls.multiplexer_client = Multiplexer([cls.connection_client])
             cls.multiplexer_client.connect()

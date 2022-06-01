@@ -121,7 +121,6 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         os.mkdir(temp_dir_rel)
         self.relay = _make_libp2p_connection(
             data_dir=temp_dir_rel,
-            port=DEFAULT_PORT + 2,
             entry_peers=[genesis_peer],
             node_key_file=self.relay_key_path,
             build_directory=self.t,
@@ -137,7 +136,6 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         os.mkdir(temp_dir_1)
         self.connection = _make_libp2p_connection(
             data_dir=temp_dir_1,
-            port=DEFAULT_PORT + 3,
             relay=False,
             entry_peers=[relay_peer],
             build_directory=self.t,
@@ -151,7 +149,6 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         os.mkdir(temp_dir_2)
         self.connection2 = _make_libp2p_connection(
             data_dir=temp_dir_2,
-            port=DEFAULT_PORT + 4,
             relay=False,
             entry_peers=[relay_peer],
             build_directory=self.t,
@@ -336,7 +333,6 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         os.mkdir(temp_dir_rel)
         self.relay = _make_libp2p_connection(
             data_dir=temp_dir_rel,
-            port=DEFAULT_PORT + 2,
             entry_peers=[genesis_peer],
             node_key_file=self.relay_key_path,
             build_directory=self.t,
@@ -352,7 +348,6 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         os.mkdir(temp_dir_1)
         self.connection = _make_libp2p_connection(
             data_dir=temp_dir_1,
-            port=DEFAULT_PORT + 3,
             relay=False,
             entry_peers=[relay_peer],
             build_directory=self.t,
@@ -461,7 +456,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         temp_dir_1 = os.path.join(self.t, "temp_dir_1")
         os.mkdir(temp_dir_1)
         self.connection1 = _make_libp2p_connection(
-            data_dir=temp_dir_1, port=DEFAULT_PORT + 1, entry_peers=[genesis_peer]
+            data_dir=temp_dir_1, entry_peers=[genesis_peer]
         )
         self.multiplexer1 = Multiplexer([self.connection1], protocols=[DefaultMessage])
         self.log_files.append(self.connection1.node.log_file)
@@ -473,7 +468,6 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         os.mkdir(temp_dir_2)
         self.connection2 = _make_libp2p_connection(
             data_dir=temp_dir_2,
-            port=DEFAULT_PORT + 2,
             entry_peers=[genesis_peer],
             agent_key=self.connection_key,
         )
