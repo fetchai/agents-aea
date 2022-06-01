@@ -319,7 +319,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         return self.load_agent_config_from_json(configuration_file_jsons)
 
     def _load_service_config(self, file_pointer: TextIO) -> PackageConfiguration:
-        """Load an agent configuration."""
+        """Load a service configuration."""
         configuration_data = yaml_load_all(file_pointer)
         if len(configuration_data) == 0:
             raise ValueError("Agent configuration file was empty.")
