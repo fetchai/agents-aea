@@ -37,11 +37,13 @@ from aea.skills.base import Handler, Skill, SkillContext
 
 from tests.common.utils import UseOef
 from tests.conftest import ROOT_DIR
-from tests.data.generator.t_protocol.dialogues import (
+from tests.data.packages.fetchai.protocols.t_protocol.dialogues import (
     TProtocolDialogue,
     TProtocolDialogues,
 )
-from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
+from tests.data.packages.fetchai.protocols.t_protocol.message import (
+    TProtocolMessage,  # type: ignore
+)
 from tests.test_protocols.test_generator.common import PATH_TO_T_PROTOCOL
 
 

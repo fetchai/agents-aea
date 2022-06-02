@@ -20,6 +20,7 @@
 """Conftest module for Pytest."""
 import difflib
 import inspect
+import itertools
 import logging
 import os
 import platform
@@ -60,11 +61,10 @@ from aea_ledger_ethereum.ethereum import (
     DEFAULT_GAS_STATION_STRATEGY,
 )
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
-from cosmpy.clients.signing_cosmwasm_client import SigningCosmWasmClient
-from cosmpy.common.rest_client import RestClient
+from cosmpy.aerial.client import LedgerClient, NetworkConfig
+from cosmpy.aerial.wallet import LocalWallet
 from cosmpy.crypto.address import Address as CosmpyAddress
 from cosmpy.crypto.keypairs import PrivateKey
-from cosmpy.protos.cosmos.base.v1beta1.coin_pb2 import Coin
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -163,14 +163,14 @@ DEFAULT_MAX_PRIORITY_FEE_PER_GAS = 1_000_000_000
 DEFAULT_MAX_FEE_PER_GAS = 1_000_000_000
 
 # URL to local Fetch ledger instance
-DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.8.4"
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.10.2"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
-DEFAULT_FETCH_ADDR_REMOTE = "https://rest-capricorn.fetch.ai:443"
+DEFAULT_FETCH_ADDR_REMOTE = "https://rest-dorado.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
-DEFAULT_FETCH_CHAIN_ID = "capricorn-1"
+DEFAULT_FETCH_CHAIN_ID = "dorado-1"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
@@ -370,6 +370,10 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+# ports for testing, call next() on to avoid assignment overlap
+DEFAULT_HOST = "127.0.0.1"
+default_ports = itertools.count(10234)
 
 
 @contextmanager
@@ -834,38 +838,49 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     )
 
 
+def is_port_in_use(host: str, port: int) -> bool:
+    """Check if port is in use"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex((host, port)) == 0
+
+
 def _make_libp2p_connection(
     data_dir: str,
-    port: int = 10234,
-    host: str = "127.0.0.1",
+    port: Optional[int] = None,
+    host: str = DEFAULT_HOST,
     relay: bool = True,
     delegate: bool = False,
     mailbox: bool = False,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
-    delegate_port: int = 11234,
-    delegate_host: str = "127.0.0.1",
-    mailbox_port: int = 8888,
-    mailbox_host: str = "127.0.0.1",
+    delegate_port: Optional[int] = None,
+    delegate_host: str = DEFAULT_HOST,
+    mailbox_port: Optional[int] = None,
+    mailbox_host: str = DEFAULT_HOST,
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
     peer_registration_delay: str = "0.0",
 ) -> P2PLibp2pConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+    """Get a libp2p connection."""
+
+    if not os.path.isdir(data_dir):
         raise ValueError("Data dir must be directory and exist!")
+
+    port = port or next(default_ports)
+    delegate_port = delegate_port or next(default_ports)
+    mailbox_port = mailbox_port or next(default_ports)
+
     log_file = os.path.join(data_dir, "libp2p_node_{}.log".format(port))
     if os.path.exists(log_file):
         os.remove(log_file)
-    key = agent_key
-    if key is None:
-        key = make_crypto(DEFAULT_LEDGER)
+
+    agent_key = agent_key or make_crypto(DEFAULT_LEDGER)
     identity = Identity(
         "identity",
-        address=key.address,
-        public_key=key.public_key,
-        default_address_key=key.identifier,
+        address=agent_key.address,
+        public_key=agent_key.public_key,
+        default_address_key=agent_key.identifier,
     )
-    conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER_LIBP2P_NODE: node_key_file})
     else:
@@ -876,13 +891,13 @@ def _make_libp2p_connection(
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
-        key.identifier,
+        agent_key.identifier,
         "2021-01-01",
         "2021-01-02",
         "{public_key}",
-        f"./{key.address}_cert.txt",
+        f"./{agent_key.address}_cert.txt",
     )
-    _process_cert(key, cert_request, path_prefix=data_dir)
+    _process_cert(agent_key, cert_request, path_prefix=data_dir)
     if not build_directory:
         build_directory = os.getcwd()
     config = {"ledger_id": node_key.identifier}
@@ -945,13 +960,18 @@ def _make_libp2p_connection(
 def _make_libp2p_client_connection(
     peer_public_key: str,
     data_dir: str,
-    node_port: int = 11234,
-    node_host: str = "127.0.0.1",
+    node_port: int = None,
+    node_host: str = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+    """Get a libp2p client connection."""
+
+    if not os.path.isdir(data_dir):
         raise ValueError("Data dir must be directory and exist!")
+
+    node_port = node_port or next(default_ports)
+
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
         "identity",
@@ -992,14 +1012,18 @@ def _make_libp2p_client_connection(
 def _make_libp2p_mailbox_connection(
     peer_public_key: str,
     data_dir: str,
-    node_port: int = 8888,
-    node_host: str = "127.0.0.1",
+    node_port: Optional[int] = None,
+    node_host: str = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
     """Get a libp2p mailbox connection."""
-    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+
+    if not os.path.isdir(data_dir):
         raise ValueError("Data dir must be directory and exist!")
+
+    node_port = node_port or next(default_ports)
+
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
         "identity",
@@ -1329,25 +1353,37 @@ def fund_accounts_from_local_validator(
     addresses: List[str], amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
-    rest_client = RestClient(
-        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}"
-    )
-    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
 
-    time.sleep(FETCHD_INITIAL_TX_SLEEP)
-    client = SigningCosmWasmClient(pk, rest_client, DEFAULT_FETCH_CHAIN_ID)
-    coins = [Coin(amount=str(amount), denom=denom)]
+    pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
+    wallet = LocalWallet(pk)
+    ledger = LedgerClient(
+        NetworkConfig(
+            chain_id=DEFAULT_FETCH_CHAIN_ID,
+            url=f"rest+{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+            fee_minimum_gas_price=5000000000,
+            fee_denomination=DEFAULT_DENOMINATION,
+            staking_denomination=DEFAULT_DENOMINATION,
+        )
+    )
 
     for address in addresses:
-        client.send_tokens(CosmpyAddress(address), coins)
+        tx = ledger.send_tokens(CosmpyAddress(address), amount, denom, wallet)
+        tx.wait_to_complete()
 
 
 @pytest.fixture()
 def fund_fetchai_accounts(fetchd):
     """Fund test accounts from local validator."""
-    fund_accounts_from_local_validator(
-        [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
-    )
+    for _ in range(5):
+        try:
+            # retry, cause possible race condition with fetchd docker image init
+            fund_accounts_from_local_validator(
+                [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO],
+                10000000000000000000,
+            )
+            return
+        except Exception:  # pylint: disable=broad-except
+            time.sleep(3)
 
 
 def env_path_separator() -> str:
@@ -1490,7 +1526,7 @@ def disable_logging_handlers_cleanup(request) -> Generator:
 @pytest.fixture(scope="class")
 def use_ipfs_daemon() -> Generator:
     """Use IPFS daemon."""
-    ipfs_daemon = IPFSDaemon(offline=True)
+    ipfs_daemon = IPFSDaemon()
     ipfs_daemon.start()
 
     yield

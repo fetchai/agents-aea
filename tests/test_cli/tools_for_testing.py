@@ -126,6 +126,10 @@ class PublicIdMock:
         """Get package version."""
         return PackageVersion(self.version)
 
+    def without_hash(self,) -> "PublicIdMock":
+        """Returns the mock object."""
+        return self
+
 
 class AEAConfMock:
     """A class to mock AgentConfig."""

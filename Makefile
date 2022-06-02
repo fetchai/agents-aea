@@ -59,9 +59,10 @@ static:
 
 .PHONY: package_checks
 package_checks:
-	python scripts/generate_ipfs_hashes.py --check
+	python -m aea.cli hash all --check
+	python -m aea.cli hash all --packages-dir=./tests/data/packages --check
 	python scripts/check_package_versions_in_docs.py
-	python scripts/check_packages.py
+	python -m aea.cli check-packages
 
 .PHONY: docs
 docs:
@@ -91,7 +92,8 @@ test-sub-p:
 
 .PHONY: hashes
 hashes:
-	python scripts/generate_ipfs_hashes.py
+	python -m aea.cli hash all 
+	python -m aea.cli hash all --packages-dir=./tests/data/packages 
 
 .PHONY: test-all
 test-all:
@@ -187,8 +189,9 @@ security:
 # update copyright headers
 .PHONY: generators
 generators:
-	python scripts/generate_all_protocols.py
-	python scripts/generate_ipfs_hashes.py
+	python -m aea.cli generate-all-protocols
+	python -m aea.cli hash all 
+	python -m aea.cli hash all --packages-dir=./tests/data/packages 
 	python scripts/generate_api_docs.py
 	python scripts/check_copyright_notice.py
 

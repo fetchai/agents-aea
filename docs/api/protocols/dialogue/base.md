@@ -163,6 +163,16 @@ def get_incomplete_version() -> "DialogueLabel"
 
 Get the incomplete version of the label.
 
+<a id="aea.protocols.dialogue.base.DialogueLabel.get_both_versions"></a>
+
+#### get`_`both`_`versions
+
+```python
+def get_both_versions() -> Tuple["DialogueLabel", Optional["DialogueLabel"]]
+```
+
+Get the incomplete and complete versions of the label.
+
 <a id="aea.protocols.dialogue.base.DialogueLabel.__str__"></a>
 
 #### `__`str`__`

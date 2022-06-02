@@ -242,6 +242,16 @@ class TestDialogueLabel:
         assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
         assert not self.dialogue_label.is_complete()
 
+        (
+            incomplete_dialogue_label,
+            complete_dialogue_label,
+        ) = self.dialogue_label.get_both_versions()
+        assert incomplete_dialogue_label.dialogue_reference == (
+            self.dialogue_label.dialogue_starter_reference,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        assert complete_dialogue_label is None
+
 
 class TestDialogueBase:
     """Test for Dialogue."""
@@ -1818,6 +1828,39 @@ class TestPersistDialoguesStorage:
             is None
         )
 
+    def test_cleanup(self):
+        """Test storage cleanup."""
+        dialogues_storage = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage._skill_component = self.skill_component
+        self.dialogues._dialogues_storage = dialogues_storage
+        dialogues_storage._incomplete_to_complete_dialogue_labels[
+            self.dialogue_label
+        ] = self.dialogue_label
+        self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        msg, dialogue = self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello2"
+        )
+        dialogue.reply(
+            target_message=msg,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+        assert dialogues_storage._dialogues_by_dialogue_label
+        assert dialogues_storage._dialogue_by_address
+        assert dialogues_storage._incomplete_to_complete_dialogue_labels
+        assert dialogues_storage._terminal_state_dialogues_labels
+
+        self.dialogues._dialogues_storage.cleanup()
+
+        assert not dialogues_storage._dialogues_by_dialogue_label
+        assert not dialogues_storage._dialogue_by_address
+        assert not dialogues_storage._incomplete_to_complete_dialogue_labels
+        assert not dialogues_storage._terminal_state_dialogues_labels
+
 
 class TestPersistDialoguesStorageOffloading:
     """Test PersistDialoguesStorage."""
@@ -1982,9 +2025,11 @@ class TestBaseDialoguesStorage:
 
     def test_dialogues_in_terminal_state_kept(self):
         """Test dialogues in terminal state handled properly."""
+        assert not self.storage._incomplete_to_complete_dialogue_labels
         self.storage.add(self.dialogue)
         assert self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert len(self.storage._incomplete_to_complete_dialogue_labels) == 1
 
         self.dialogue._update(self.valid_message_1_by_self)
         self.dialogue.reply(

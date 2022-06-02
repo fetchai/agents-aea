@@ -15,8 +15,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:1.0.0
-- fetchai/ledger_api:1.0.0
+- fetchai/contract_api:1.0.0:QmXfEAhomDMvdR9oDKzLmmegyS5Kf6Un2KxWPLgfbRF1kt
+- fetchai/ledger_api:1.0.0:QmZ6SPoXVUhjbgsL3qw1JM2UJxsCSr4G3Jm16nsT3MG7jA
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -29,9 +29,9 @@ config:
           gas_price_strategy: fast
         eip1559: {}
     fetchai:
-      address: https://rest-capricorn.fetch.ai:443
+      address: https://rest-dorado.fetch.ai:443
       denom: atestfet
-      chain_id: capricorn-1
+      chain_id: dorado-1
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/contract_api:1.0.0

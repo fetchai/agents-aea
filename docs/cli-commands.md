@@ -5,6 +5,7 @@
 | `add [package_type] [public_id]`            | Add a `package_type` connection, contract, protocol, or skill, with `[public_id]`, to the AEA. `add --local` to add from local `packages` directory. |
 | `add-key [ledger_id] file [--connection]`   | Add a private key from a file for `ledger_id`.	                             |
 | `build`                                     | Build the agent and its components.                      |
+| `check-packages`                            |   Run different checks on AEA packages.                     |
 | `config get [path]`                         | Reads the configuration specified in `path` and prints its target.                |
 | `config set [path] [--type TYPE]`           | Sets a new value for the target of the `path`. Optionally cast to type.    |
 | `create [name]`                             | Create a new AEA project called `name`.                                    |
@@ -14,12 +15,14 @@
 | `fingerprint [package_type] [public_id]`    | Fingerprint connection, contract, protocol, or skill, with `public_id`.    |
 | `freeze`                                    | Get all the dependencies needed for the AEA project and its components.      |
 | `generate protocol [protocol_spec_path]`    | Generate a protocol from the specification.                                  |
+| `generate-all-protocols`                    | Generate all protocols. |
 | `generate-key [ledger_id]`                  | Generate private keys. The AEA uses a private key to derive the associated public key and address. |
 | `generate-wealth [ledger_id]`               | Generate wealth for address on test network.                                 |
 | `get-address [ledger_id]`                   | Get the address associated with the private key.                             |
 | `get-multiaddress [ledger_id]...`           | Get the multiaddress associated with a private key or connection.            |
 | `get-public-key [ledger_id]...`             | Get the public key associated with a private key of the agent.               |
 | `get-wealth [ledger_id]`                    | Get the wealth associated with the private key.                              |
+| `hash [command] [options]`                  | Hashing utils                                                                |
 | `init`                                      | Initialize your AEA configurations. (With `--author` to define author.)      |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
 | `ipfs`                                      | IPFS Commands                                                                |
@@ -31,6 +34,7 @@
 | `logout`                                    | Logout from registry account.                                                |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --local` to publish to local `packages` directory. |
 | `push [package_type] [public_id]`           | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
+| `push-all`                                  | Push all available packages to a registry. |
 | `register`                                  | Create a new registry account.
 | `remove [package_type] [name]`              | Remove connection, protocol, or skill, called `name`, from AEA.            |
 | `remove-key [ledger_id] [name]`             | Remove a private key registered with id `ledger_id`.	                             |

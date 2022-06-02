@@ -45,10 +45,14 @@ from aea.configurations.constants import (
     CONTRACT,
     DEFAULT_GIT_REF,
     PROTOCOL,
+    SERVICE,
     SKILL,
 )
 from aea.exceptions import enforce
 from aea.helpers.base import (
+    IPFSHash,
+    IPFSHashOrStr,
+    IPFS_HASH_REGEX,
     RegexConstrainedString,
     SIMPLE_ID_REGEX,
     SimpleId,
@@ -132,6 +136,7 @@ class PackageType(Enum):
     CONNECTION = CONNECTION
     CONTRACT = CONTRACT
     SKILL = SKILL
+    SERVICE = SERVICE
 
     def to_plural(self) -> str:
         """
@@ -232,16 +237,18 @@ class PublicId(JSONSerializable):
     True
     """
 
-    __slots__ = ("_author", "_name", "_package_version")
+    __slots__ = ("_author", "_name", "_package_version", "_package_hash")
 
     AUTHOR_REGEX = SIMPLE_ID_REGEX
+    IPFS_HASH_REGEX = IPFS_HASH_REGEX
     PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
+
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
     VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
     PUBLIC_ID_URI_REGEX = (
         fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
+    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:{VERSION_REGEX})?(:{IPFS_HASH_REGEX})?$"
 
     ANY_VERSION = "any"
     LATEST_VERSION = "latest"
@@ -251,6 +258,7 @@ class PublicId(JSONSerializable):
         author: SimpleIdOrStr,
         name: SimpleIdOrStr,
         version: Optional[PackageVersionLike] = None,
+        package_hash: Optional[IPFSHashOrStr] = None,
     ) -> None:
         """Initialize the public identifier."""
         self._author = SimpleId(author)
@@ -259,6 +267,9 @@ class PublicId(JSONSerializable):
             PackageVersion(version)
             if version is not None
             else PackageVersion(self.LATEST_VERSION)
+        )
+        self._package_hash = (
+            IPFSHash(package_hash) if package_hash is not None else None
         )
 
     @property
@@ -281,13 +292,20 @@ class PublicId(JSONSerializable):
         """Get the package version object."""
         return self._package_version
 
-    def to_any(self) -> "PublicId":
-        """Return the same public id, but with any version."""
-        return PublicId(self.author, self.name, self.ANY_VERSION)
+    @property
+    def hash(self,) -> str:
+        """Returns the hash for the package."""
+        if self._package_hash is None:
+            raise ValueError("Package hash was not provided.")
+        return str(self._package_hash)
 
     def same_prefix(self, other: "PublicId") -> bool:
         """Check if the other public id has the same author and name of this."""
         return self.name == other.name and self.author == other.author
+
+    def to_any(self) -> "PublicId":
+        """Return the same public id, but with any version."""
+        return PublicId(self.author, self.name, self.ANY_VERSION)
 
     def to_latest(self) -> "PublicId":
         """Return the same public id, but with latest version."""
@@ -306,17 +324,24 @@ class PublicId(JSONSerializable):
 
     @classmethod
     def from_str(cls, public_id_string: str) -> "PublicId":
-        """
-        Initialize the public id from the string.
+        """Initialize the public id from the string.
 
         >>> str(PublicId.from_str("author/package_name:0.1.0"))
         'author/package_name:0.1.0'
+
+        >>> str(PublicId.from_str("author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"))
+        'author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH'
 
         A bad formatted input raises value error:
         >>> PublicId.from_str("bad/formatted:input")
         Traceback (most recent call last):
         ...
         ValueError: Input 'bad/formatted:input' is not well formatted.
+
+        >>> PublicId.from_str("bad/formatted:0.1.0:Qmbadhash")
+        Traceback (most recent call last):
+        ...
+        ValueError: Input 'bad/formatted:0.1.0:Qmbadhash' is not well formatted.
 
         :param public_id_string: the public id in string format.
         :return: the public id object.
@@ -327,10 +352,17 @@ class PublicId(JSONSerializable):
             raise ValueError(
                 "Input '{}' is not well formatted.".format(public_id_string)
             )
+
         username = match.group(1)
         package_name = match.group(2)
-        version = match.group(3)[1:] if ":" in public_id_string else None
-        return PublicId(username, package_name, version)
+        version = match.group(3)
+        if version is not None:
+            version = version.replace(":", "")
+        package_hash = match.group(13)
+        if package_hash is not None:
+            package_hash = package_hash.replace(":", "")
+
+        return PublicId(username, package_name, version, package_hash)
 
     @classmethod
     def try_from_str(cls, public_id_string: str) -> Optional["PublicId"]:
@@ -388,22 +420,29 @@ class PublicId(JSONSerializable):
     @property
     def json(self) -> Dict:
         """Compute the JSON representation."""
-        return {"author": self.author, "name": self.name, "version": self.version}
+        data = {
+            "author": self.author,
+            "name": self.name,
+            "version": self.version,
+        }
+        if self._package_hash is not None:
+            data["package_hash"] = self.hash
+
+        return data
 
     @classmethod
     def from_json(cls, obj: Dict) -> "PublicId":
         """Build from a JSON object."""
-        return PublicId(obj["author"], obj["name"], obj["version"],)
+        return PublicId(
+            obj["author"],
+            obj["name"],
+            obj.get("version", None),
+            obj.get("package_hash", None),
+        )
 
     def __hash__(self) -> int:
         """Get the hash."""
         return hash((self.author, self.name, self.version))
-
-    def __str__(self) -> str:
-        """Get the string representation."""
-        return "{author}/{name}:{version}".format(
-            author=self.author, name=self.name, version=self.version
-        )
 
     def __repr__(self) -> str:
         """Get the representation."""
@@ -451,16 +490,35 @@ class PublicId(JSONSerializable):
             )
         )
 
+    def without_hash(self,) -> "PublicId":
+        """Returns a `PublicId` object with same parameters."""
+        return PublicId(self.author, self.name, self.version)
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        if self._package_hash is None:
+            return "{author}/{name}:{version}".format(
+                author=self.author, name=self.name, version=self.version
+            )
+
+        return "{author}/{name}:{version}:{package_hash}".format(
+            author=self.author,
+            name=self.name,
+            version=self.version,
+            package_hash=self.hash,
+        )
+
 
 class PackageId:
     """A package identifier."""
 
-    PACKAGE_TYPE_REGEX = r"({}|{}|{}|{}|{})".format(
+    PACKAGE_TYPE_REGEX = r"({}|{}|{}|{}|{}|{})".format(
         PackageType.AGENT,
         PackageType.PROTOCOL,
         PackageType.SKILL,
         PackageType.CONNECTION,
         PackageType.CONTRACT,
+        PackageType.SERVICE,
     )
     PACKAGE_ID_URI_REGEX = r"{}/{}".format(
         PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
@@ -506,6 +564,11 @@ class PackageId:
         return self.public_id.version
 
     @property
+    def package_hash(self) -> str:
+        """Get the version of the package."""
+        return self.public_id.hash
+
+    @property
     def package_prefix(self) -> Tuple[PackageType, str, str]:
         """Get the package identifier without the version."""
         return self.package_type, self.author, self.name
@@ -547,6 +610,10 @@ class PackageId:
         :return: uri path string
         """
         return f"{str(self.package_type)}/{self.author}/{self.name}/{self.version}"
+
+    def without_hash(self,) -> "PackageId":
+        """Returns PackageId object without hash"""
+        return PackageId(self.package_type, self.public_id.without_hash())
 
     def __hash__(self) -> int:
         """Get the hash."""
@@ -637,8 +704,12 @@ class ComponentId(PackageId):
     def from_json(cls, json_data: Dict) -> "ComponentId":
         """Create  component id from json data."""
         return cls(
-            component_type=json_data["type"], public_id=PublicId.from_json(json_data)
+            component_type=json_data["type"], public_id=PublicId.from_json(json_data),
         )
+
+    def without_hash(self,) -> "ComponentId":
+        """Returns PackageId object without hash"""
+        return ComponentId(self.component_type, self.public_id.without_hash())
 
 
 class PyPIPackageName(RegexConstrainedString):

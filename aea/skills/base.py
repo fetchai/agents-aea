@@ -510,6 +510,17 @@ class Handler(SkillComponent, ABC):
         """
         return _parse_module(path, handler_configs, skill_context, Handler)
 
+    def protocol_dialogues(self, attribute: Optional[str] = None):  # type: ignore
+        """Protocol dialogues"""
+        if self.SUPPORTED_PROTOCOL is None:
+            raise ValueError(f"SUPPORTED_PROTOCOL not set on {self}")
+        attribute = (
+            (cast(PublicId, self.SUPPORTED_PROTOCOL).name + "_dialogues")
+            if attribute is None
+            else attribute
+        )
+        return getattr(self.context, attribute)
+
 
 class Model(SkillComponent, ABC):
     """This class implements an abstract model."""

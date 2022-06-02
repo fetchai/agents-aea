@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,15 +79,7 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
         os.chdir(self.t)
         result = self.runner.invoke(
             cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             standalone_mode=False,
         )
         assert result.exit_code == 0
@@ -175,7 +167,9 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
 
         Done with mocking _add_item_deps to avoid dependencies installation.
         """
-        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        assert self.DEPENDENCY_PUBLIC_ID in {
+            p.without_hash() for p in self.load_config().protocols
+        }
 
         self.runner.invoke(
             cli,
@@ -215,7 +209,9 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
 
     def test_not_removed_cause_required(self):
         """Test dependency is not removed after upgrade cause required by another item."""
-        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        assert self.DEPENDENCY_PUBLIC_ID in {
+            p.without_hash() for p in self.load_config().protocols
+        }
         # do not add dependencies for the package
         with pytest.raises(
             ClickException,
@@ -234,4 +230,6 @@ class TestRemoveAndDependencies:  # pylint: disable=attribute-defined-outside-in
                 standalone_mode=False,
                 catch_exceptions=False,
             )
-        assert self.DEPENDENCY_PUBLIC_ID in self.load_config().protocols
+        assert self.DEPENDENCY_PUBLIC_ID in {
+            p.without_hash() for p in self.load_config().protocols
+        }

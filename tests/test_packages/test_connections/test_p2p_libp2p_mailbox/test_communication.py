@@ -37,14 +37,12 @@ from tests.common.utils import wait_for_condition
 from tests.conftest import (
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
+    default_ports,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
 
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
-DEFAULT_MAILBOX_PORT = 8888
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 1
 
@@ -64,17 +62,25 @@ class TestLibp2pClientConnectionConnectDisconnect:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.delegate_port = next(default_ports)
+        cls.mailbox_port = next(default_ports)
         os.chdir(cls.t)
 
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, delegate=True, mailbox=True
+            data_dir=temp_dir,
+            delegate=True,
+            delegate_port=cls.delegate_port,
+            mailbox=True,
+            mailbox_port=cls.mailbox_port,
         )
         temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client)
         cls.connection = _make_libp2p_mailbox_connection(
-            data_dir=temp_dir_client, peer_public_key=cls.connection_node.node.pub,
+            data_dir=temp_dir_client,
+            peer_public_key=cls.connection_node.node.pub,
+            node_port=cls.mailbox_port,
         )
 
     @pytest.mark.asyncio
@@ -85,7 +91,6 @@ class TestLibp2pClientConnectionConnectDisconnect:
             await self.connection_node.connect()
             await self.connection.connect()
             assert self.connection.is_connected is True
-
             await self.connection.disconnect()
             assert self.connection.is_connected is False
         except Exception:
@@ -113,13 +118,19 @@ class TestLibp2pClientConnectionEchoEnvelope:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.delegate_port = next(default_ports)
+        cls.mailbox_port = next(default_ports)
         os.chdir(cls.t)
 
         cls.log_files = []
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, port=DEFAULT_PORT + 1, delegate=True, mailbox=True
+            data_dir=temp_dir,
+            delegate=True,
+            delegate_port=cls.delegate_port,
+            mailbox=True,
+            mailbox_port=cls.mailbox_port,
         )
         cls.multiplexer_node = Multiplexer(
             [cls.connection_node], protocols=[MockDefaultMessageProtocol]
@@ -134,6 +145,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
                 data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node.node.pub,
                 ledger_api_id=CosmosCrypto.identifier,
+                node_port=cls.mailbox_port,
             )
             cls.multiplexer_client_1 = Multiplexer(
                 [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
@@ -146,6 +158,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
                 data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node.node.pub,
                 ledger_api_id=EthereumCrypto.identifier,
+                node_port=cls.mailbox_port,
             )
             cls.multiplexer_client_2 = Multiplexer(
                 [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
@@ -294,6 +307,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.mailbox_ports = next(default_ports), next(default_ports)
         os.chdir(cls.t)
 
         cls.log_files = []
@@ -303,9 +317,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         os.mkdir(temp_dir_node_1)
         cls.connection_node_1 = _make_libp2p_connection(
             data_dir=temp_dir_node_1,
-            port=DEFAULT_PORT + 1,
-            delegate_port=DEFAULT_DELEGATE_PORT + 1,
-            mailbox_port=DEFAULT_MAILBOX_PORT + 1,
+            mailbox_port=cls.mailbox_ports[0],
             delegate=True,
             mailbox=True,
         )
@@ -323,9 +335,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         try:
             cls.connection_node_2 = _make_libp2p_connection(
                 data_dir=temp_dir_node_2,
-                port=DEFAULT_PORT + 2,
-                delegate_port=DEFAULT_DELEGATE_PORT + 2,
-                mailbox_port=DEFAULT_MAILBOX_PORT + 2,
+                mailbox_port=cls.mailbox_ports[1],
                 entry_peers=[genesis_peer],
                 delegate=True,
                 mailbox=True,
@@ -342,7 +352,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.connection_client_1 = _make_libp2p_mailbox_connection(
                 data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node_1.node.pub,
-                node_port=DEFAULT_MAILBOX_PORT + 1,
+                node_port=cls.mailbox_ports[0],
             )
             cls.multiplexer_client_1 = Multiplexer(
                 [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
@@ -355,7 +365,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.connection_client_2 = _make_libp2p_mailbox_connection(
                 data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node_2.node.pub,
-                node_port=DEFAULT_MAILBOX_PORT + 2,
+                node_port=cls.mailbox_ports[1],
             )
             cls.multiplexer_client_2 = Multiplexer(
                 [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
@@ -508,6 +518,7 @@ class TestLibp2pClientConnectionRouting:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.mailbox_ports = next(default_ports), next(default_ports)
         os.chdir(cls.t)
 
         cls.log_files = []
@@ -518,9 +529,9 @@ class TestLibp2pClientConnectionRouting:
             os.mkdir(temp_dir_node_1)
             cls.connection_node_1 = _make_libp2p_connection(
                 data_dir=temp_dir_node_1,
-                port=DEFAULT_PORT + 1,
-                delegate_port=DEFAULT_DELEGATE_PORT + 1,
-                mailbox_port=DEFAULT_MAILBOX_PORT + 1,
+                port=next(default_ports),
+                delegate_port=next(default_ports),
+                mailbox_port=cls.mailbox_ports[0],
                 delegate=True,
                 mailbox=True,
             )
@@ -537,9 +548,9 @@ class TestLibp2pClientConnectionRouting:
             os.mkdir(temp_dir_node_2)
             cls.connection_node_2 = _make_libp2p_connection(
                 data_dir=temp_dir_node_2,
-                port=DEFAULT_PORT + 2,
-                delegate_port=DEFAULT_DELEGATE_PORT + 2,
-                mailbox_port=DEFAULT_MAILBOX_PORT + 2,
+                port=next(default_ports),
+                delegate_port=next(default_ports),
+                mailbox_port=cls.mailbox_ports[1],
                 entry_peers=[entry_peer],
                 delegate=True,
                 mailbox=True,
@@ -563,13 +574,11 @@ class TestLibp2pClientConnectionRouting:
             ]
 
             for j in range(DEFAULT_CLIENTS_PER_NODE):
-                ports = [DEFAULT_MAILBOX_PORT + 1, DEFAULT_MAILBOX_PORT + 2]
                 peers_public_keys = [
                     cls.connection_node_1.node.pub,
                     cls.connection_node_2.node.pub,
                 ]
-                for i in range(len(ports)):
-                    port = ports[i]
+                for i, port in enumerate(cls.mailbox_ports):
                     peer_public_key = peers_public_keys[i]
                     temp_dir_client = os.path.join(cls.t, f"temp_dir_client__{j}_{i}")
                     os.mkdir(temp_dir_client)
@@ -653,6 +662,8 @@ class BaseTestLibp2pClientSamePeer:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.delegate_port = next(default_ports)
+        cls.mailbox_port = next(default_ports)
         os.chdir(cls.t)
 
         MockDefaultMessageProtocol = Mock()
@@ -665,7 +676,11 @@ class BaseTestLibp2pClientSamePeer:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, port=DEFAULT_PORT + 1, delegate=True, mailbox=True
+            data_dir=temp_dir,
+            delegate=True,
+            delegate_port=cls.delegate_port,
+            mailbox=True,
+            mailbox_port=cls.mailbox_port,
         )
         cls.multiplexer_node = Multiplexer(
             [cls.connection_node], protocols=[MockDefaultMessageProtocol]
@@ -680,6 +695,7 @@ class BaseTestLibp2pClientSamePeer:
                 data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node.node.pub,
                 ledger_api_id=CosmosCrypto.identifier,
+                node_port=cls.mailbox_port,
             )
             cls.multiplexer_client_1 = Multiplexer(
                 [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
@@ -692,6 +708,7 @@ class BaseTestLibp2pClientSamePeer:
                 data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node.node.pub,
                 ledger_api_id=EthereumCrypto.identifier,
+                node_port=cls.mailbox_port,
             )
             cls.multiplexer_client_2 = Multiplexer(
                 [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
@@ -714,7 +731,6 @@ class BaseTestLibp2pClientSamePeer:
         cls.multiplexer_node.disconnect()
 
         os.chdir(cls.cwd)
-        print(open(cls.connection_node.node.log_file, "r").read())
         try:
             shutil.rmtree(cls.t)
         except (OSError, IOError):

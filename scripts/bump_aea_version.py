@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,10 +44,8 @@ python scripts/bump_aea_version.py --only-check
 """
 
 import argparse
-import inspect
 import logging
 import operator
-import os
 import re
 import sys
 from functools import wraps
@@ -58,8 +56,8 @@ from git import Repo
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
+from aea.cli.ipfs_hash import update_hashes
 from aea.helpers.base import compute_specifier_from_version
-from scripts.generate_ipfs_hashes import update_hashes
 
 
 logging.basicConfig(
@@ -71,8 +69,7 @@ logging.basicConfig(
 PatternByPath = Dict[Path, str]
 
 AEA_DIR = Path("aea")
-CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-ROOT_DIR = Path(os.path.join(CUR_PATH, ".."))
+ROOT_DIR = Path(__file__).parent.parent
 
 PLUGINS_DIR = Path("plugins")
 ALL_PLUGINS = tuple(PLUGINS_DIR.iterdir())
@@ -105,14 +102,19 @@ JSON_DEPENDENCY_SPECIFIER_SET_PATTERN = (
 _AEA_ALL_PATTERN = r"(?<={package_name}\[all\]==){version}"
 AEA_PATHS: PatternByPath = {
     Path("deploy-image", "Dockerfile"): _AEA_ALL_PATTERN,
+    Path("deploy-image", "README.md"): "(?<=open-aea/tags/v){version}",
     Path("develop-image", "docker-env.sh"): "(?<=aea-develop:){version}",
     Path("docs", "quickstart.md"): "(?<=v){version}",
+    Path("docs", "quickstart.md"): "(?<=open-aea/tags/v){version}",
     Path("examples", "tac_deploy", "Dockerfile"): _AEA_ALL_PATTERN,
     Path("scripts", "install.ps1"): _AEA_ALL_PATTERN,
     Path("scripts", "install.sh"): _AEA_ALL_PATTERN,
     Path(
         "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
     ): "(?<=v){version}",
+    Path(
+        "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
+    ): "(?<=open-aea/tags/v){version}",
     Path("user-image", "docker-env.sh"): "(?<=aea-user:){version}",
 }
 
@@ -538,7 +540,7 @@ def bump(arguments: argparse.Namespace) -> int:
         )
     else:
         logging.info("Updating hashes and fingerprints.")
-        return_code = update_hashes()
+        return_code = update_hashes(packages_dir=ROOT_DIR / "packages",)
     return return_code
 
 

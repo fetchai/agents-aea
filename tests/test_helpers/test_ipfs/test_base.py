@@ -21,7 +21,6 @@
 """This module contains the tests for the ipfs helper module."""
 
 from pathlib import Path
-from platform import system
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
@@ -50,9 +49,6 @@ def test_hash_for_big_file():
 
 
 @pytest.mark.usefixtures("use_ipfs_daemon")
-@pytest.mark.skipif(
-    system() == "Windows", reason="Need to find a way to setup IPFS on windows workflow"
-)
 class TestDirectoryHashing:
     """Test recursive directory hashing."""
 

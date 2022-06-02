@@ -19,13 +19,18 @@
 # ------------------------------------------------------------------------------
 
 """Module to declare constants."""
+from pathlib import Path
 from typing import Dict, List
 
 
+AEA_DIR = Path(__file__).parent.parent
 _FETCHAI_IDENTIFIER = "fetchai"
 _ETHEREUM_IDENTIFIER = "ethereum"
 _COSMOS_IDENTIFIER = "cosmos"
 SIGNING_PROTOCOL = "open_aea/signing:latest"
+SIGNING_PROTOCOL_WITH_HASH = (
+    "open_aea/signing:1.0.0:QmTCQKD2iSjBUC3QCQRc7ZyNbnnrvoyw7EcQdJa7mQYLUW"
+)
 DEFAULT_LEDGER = _ETHEREUM_IDENTIFIER
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
@@ -36,7 +41,6 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SCAFFOLD_PUBLIC_ID = "open_aea/scaffold:0.1.0"
 PACKAGES = "packages"
-REGISTRY_PATH_KEY = "registry_path"
 DEFAULT_REGISTRY_NAME = PACKAGES
 VENDOR = "vendor"
 AGENT = "agent"
@@ -49,6 +53,8 @@ PROTOCOL = "protocol"
 PROTOCOLS = "protocols"
 SKILL = "skill"
 SKILLS = "skills"
+SERVICE = "service"
+SERVICES = "services"
 DEFAULT_README_FILE = "README.md"
 DEFAULT_VERSION = "0.1.0"
 DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
@@ -56,6 +62,7 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
+DEFAULT_SERVICE_CONFIG_FILE = "service.yaml"
 PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -63,6 +70,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     "*__pycache__",
     "*.pyc",
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_SERVICE_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
@@ -84,6 +92,7 @@ CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_PROTOCOL_CONFIG_FILE: PROTOCOL,
     DEFAULT_CONNECTION_CONFIG_FILE: CONNECTION,
     DEFAULT_CONTRACT_CONFIG_FILE: CONTRACT,
+    DEFAULT_SERVICE_CONFIG_FILE: SERVICE,
     DEFAULT_AEA_CONFIG_FILE: AGENT,
 }  # type: Dict[str, str]
 
@@ -140,3 +149,10 @@ ITEM_TYPE_TO_PLURAL = {
 }
 
 ITEM_TYPE_PLURAL_TO_TYPE = {v: k for k, v in ITEM_TYPE_TO_PLURAL.items()}
+SCAFFOLD_PACKAGES = [
+    AEA_DIR / "protocols" / "scaffold",
+    AEA_DIR / "connections" / "scaffold",
+    AEA_DIR / "contracts" / "scaffold",
+    AEA_DIR / "skills" / "scaffold",
+]
+PYCACHE = "__pycache__"

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -18,25 +17,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""
-Run different checks on AEA packages.
+"""Run different checks on AEA packages."""
 
-Namely:
-- Check that every package has existing dependencies
-- Check that every package has non-empty description
-
-Run this script from the root of the project directory:
-
-    python scripts/check_packages.py
-
-"""
 import pprint
 import sys
 from functools import partial
-from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Set
+from typing import Any, Dict, List, Set
 
+import click
 import yaml
 
 from aea.configurations.base import PackageId, PackageType, PublicId
@@ -49,8 +38,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL_CONFIG_FILE,
 )
 
-
-DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
 CONFIG_FILE_NAMES = [
     DEFAULT_AEA_CONFIG_FILE,
@@ -99,21 +86,14 @@ class EmptyPackageDescription(Exception):
         self.configuration_file = configuration_file
 
 
-def find_all_configuration_files() -> List:
+def find_all_configuration_files(packages_dir: Path) -> List:
     """Find all configuration files."""
-    packages_dir = Path("packages")
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
         if any([file in str(path) for file in CONFIG_FILE_NAMES])
     ]
-    return list(chain(config_files, default_config_file_paths()))
-
-
-def default_config_file_paths() -> Generator:
-    """Get (generator) the default config file paths."""
-    for item in DEFAULT_CONFIG_FILE_PATHS:
-        yield item
+    return config_files
 
 
 def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
@@ -131,7 +111,7 @@ def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     try:
         name = data["name"] if "name" in data else data["agent_name"]
     except KeyError:
-        print(f"No name or agent_name field in {str(configuration_file)}")
+        click.echo(f"No name or agent_name field in {str(configuration_file)}")
         raise
     version = data.get("version", None)
     if not version:
@@ -139,10 +119,10 @@ def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     return PublicId(author, name, version)
 
 
-def find_all_packages_ids() -> Set[PackageId]:
+def find_all_packages_ids(packages_dir: Path) -> Set[PackageId]:
     """Find all packages ids."""
     package_ids: Set[PackageId] = set()
-    for configuration_file in find_all_configuration_files():
+    for configuration_file in find_all_configuration_files(packages_dir):
         package_type = PackageType(configuration_file.parts[-3][:-1])
         package_public_id = get_public_id_from_yaml(configuration_file)
         package_id = PackageId(package_type, package_public_id)
@@ -155,18 +135,18 @@ def handle_dependency_not_found(e: DependencyNotFound) -> None:
     """Handle PackageIdNotFound errors."""
     sorted_expected = list(map(str, sorted(e.expected_dependencies)))
     sorted_missing = list(map(str, sorted(e.missing_dependencies)))
-    print("=" * 50)
-    print(f"Package {e.configuration_file}:")
-    print(f"Expected: {pprint.pformat(sorted_expected)}")
-    print(f"Missing: {pprint.pformat(sorted_missing)}")
-    print("=" * 50)
+    click.echo("=" * 50)
+    click.echo(f"Package {e.configuration_file}:")
+    click.echo(f"Expected: {pprint.pformat(sorted_expected)}")
+    click.echo(f"Missing: {pprint.pformat(sorted_missing)}")
+    click.echo("=" * 50)
 
 
 def handle_empty_package_description(e: EmptyPackageDescription) -> None:
     """Handle EmptyPackageDescription errors."""
-    print("=" * 50)
-    print(f"Package '{e.configuration_file}' has empty description field.")
-    print("=" * 50)
+    click.echo("=" * 50)
+    click.echo(f"Package '{e.configuration_file}' has empty description field.")
+    click.echo("=" * 50)
 
 
 def unified_yaml_load(configuration_file: Path) -> Dict:
@@ -226,12 +206,29 @@ def check_description(configuration_file: Path) -> None:
         raise EmptyPackageDescription(configuration_file)
 
 
-if __name__ == "__main__":
-    all_packages_ids_ = find_all_packages_ids()
+@click.command(name="check-packages")
+@click.argument(
+    "packages_dir",
+    type=click.Path(dir_okay=True, exists=True),
+    default=Path.cwd() / "packages",
+)
+def check_packages(packages_dir: Path) -> None:
+    """
+    Run different checks on AEA packages.
+
+    Namely:
+    - Check that every package has existing dependencies
+    - Check that every package has non-empty description
+
+    :param packages_dir: Path to packages dir.
+    """
+    packages_dir = Path(packages_dir).absolute()
+    all_packages_ids_ = find_all_packages_ids(packages_dir)
     failed: bool = False
-    for file in find_all_configuration_files():
+
+    for file in find_all_configuration_files(packages_dir):
         try:
-            print("Processing " + str(file))
+            click.echo("Processing " + str(file))
             check_dependencies(file, all_packages_ids_)
             check_description(file)
         except DependencyNotFound as e_:
@@ -242,8 +239,8 @@ if __name__ == "__main__":
             failed = True
 
     if failed:
-        print("Failed!")
+        click.echo("Failed!")
         sys.exit(1)
     else:
-        print("OK!")
+        click.echo("OK!")
         sys.exit(0)

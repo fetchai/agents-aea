@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,16 +43,17 @@ import yaml
 from click.testing import CliRunner
 
 from aea.cli import cli
+from aea.cli.ipfs_hash import update_hashes
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
-from scripts.common import (
-    PACKAGES_DIR,
+from aea.helpers.protocols import (
     get_protocol_specification_from_readme,
     get_protocol_specification_id_from_specification,
 )
-from scripts.generate_ipfs_hashes import update_hashes
 
 
+ROOT_DIR = Path(__file__).parent.parent
+PACKAGES_DIR = ROOT_DIR / "packages"
 DIRECTORIES = ["packages", "aea", "docs", "benchmark", "examples", "tests"]
 CLI_LOG_OPTION = ["-v", "OFF"]
 TYPES = set(map(lambda x: x.to_plural(), PackageType))
@@ -136,7 +137,7 @@ def check_if_running_allowed() -> None:
 
 def run_hashing() -> None:
     """Run the hashing script."""
-    hashing_call = update_hashes()
+    hashing_call = update_hashes(packages_dir=ROOT_DIR / "packages")
     if hashing_call == 1:
         print("Problem when running IPFS script!")
         sys.exit(1)
@@ -610,7 +611,7 @@ class Updater:
     @staticmethod
     def run_hashing():
         """Run hashes update."""
-        hashing_call = update_hashes()
+        hashing_call = update_hashes(packages_dir=ROOT_DIR / "packages")
         if hashing_call == 1:
             raise Exception("Problem when running IPFS script!")
 

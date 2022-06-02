@@ -29,17 +29,12 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 from packages.valory.connections import p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
-from tests.conftest import (
-    DEFAULT_LEDGER,
-    _make_libp2p_connection,
-    libp2p_log_on_failure,
-    libp2p_log_on_failure_all,
-)
+from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
+from tests.conftest import default_ports as ports
+from tests.conftest import libp2p_log_on_failure, libp2p_log_on_failure_all
 
 
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
 
@@ -54,14 +49,15 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def setup_class(cls):
         """Set up the test class."""
-        super(TestP2PLibp2pClientConnectionAEARunning, cls).setup_class()
+        super().setup_class()
 
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
+        cls.delegate_port = next(ports)
         cls.node_connection = _make_libp2p_connection(
             data_dir=temp_dir,
             delegate_host=DEFAULT_HOST,
-            delegate_port=DEFAULT_DELEGATE_PORT,
+            delegate_port=cls.delegate_port,
             delegate=True,
         )
         cls.node_multiplexer = Multiplexer([cls.node_connection])
@@ -87,7 +83,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
             {
                 "nodes": [
                     {
-                        "uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT),
+                        "uri": "{}:{}".format(DEFAULT_HOST, self.delegate_port),
                         "public_key": self.node_connection.node.pub,
                     }
                 ]
@@ -116,7 +112,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         assert is_running, "AEA not running within timeout!"
 
         check_strings = "Successfully connected to libp2p node {}:{}".format(
-            DEFAULT_HOST, DEFAULT_DELEGATE_PORT
+            DEFAULT_HOST, self.delegate_port
         )
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
@@ -132,7 +128,5 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     def teardown_class(cls):
         """Tear down the test"""
         cls.terminate_agents()
-
-        super(TestP2PLibp2pClientConnectionAEARunning, cls).teardown_class()
-
+        super().teardown_class()
         cls.node_multiplexer.disconnect()

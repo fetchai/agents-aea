@@ -28,7 +28,7 @@ PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
     ROOT_DIR, "tests", "data", "sample_specification.yaml"
 )
 PATH_TO_T_PROTOCOL = os.path.join(
-    ROOT_DIR, "tests", "data", "generator", T_PROTOCOL_NAME
+    ROOT_DIR, "tests", "data", "packages", "fetchai", "protocols", T_PROTOCOL_NAME
 )
 
 

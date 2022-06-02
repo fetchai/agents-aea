@@ -37,14 +37,14 @@ from packages.valory.protocols.tendermint.message import TendermintMessage
 
 PERFORMATIVE = TendermintMessage.Performative
 INITIAL_DIALOGUE_REFERENCE = ("0", "")
-ALICE_TENDERMINT_INFO = dict(ip="192.168.0.0", hostname="alice")
-BOB_TENDERMINT_INFO = dict(ip="192.168.255.255", hostname="bob")
+ALICE_TENDERMINT_INFO = "http://node2:26657"
+BOB_TENDERMINT_INFO = "tcp://0.0.0.0:26656"
 
 PERFORMATIVE_TEST_KWARGS = [
     dict(
         error_code=TendermintMessage.ErrorCode.INVALID_REQUEST,
         error_msg="Invalid request",
-        info={"error": "Agent address not registered for this service."},
+        error_data={"error": "Agent address not registered for this service."},
     ),
     dict(query=""),
     dict(info=ALICE_TENDERMINT_INFO),
@@ -89,7 +89,7 @@ def test_serialization(performative, kwargs):
 
 def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = TendermintMessage(performative=PERFORMATIVE.TENDERMINT_CONFIG_REQUEST)
+    msg = TendermintMessage(performative=PERFORMATIVE.REQUEST)
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(PERFORMATIVE, "__eq__", return_value=False):
             TendermintMessage.serializer.encode(msg)
@@ -97,13 +97,18 @@ def test_encoding_unknown_performative():
 
 def test_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
-    msg = TendermintMessage(
-        performative=PERFORMATIVE.TENDERMINT_CONFIG_REQUEST, query=""
-    )
+    msg = TendermintMessage(performative=PERFORMATIVE.REQUEST, query="")
     encoded_msg = TendermintMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(PERFORMATIVE, "__eq__", return_value=False):
             TendermintMessage.serializer.decode(encoded_msg)
+
+
+def test_inconsistent_type():
+    """Test that we raise an exception when the performative is unknown during decoding."""
+    msg = TendermintMessage(performative=PERFORMATIVE.REQUEST, query=123)
+    with pytest.raises(TypeError):
+        TendermintMessage.serializer.encode(msg)
 
 
 class TestDialogues:
@@ -139,8 +144,7 @@ class TestDialogues:
         # create message and initialize dialogue
         request_msg, dialogue = self.dialogues_alice.create(
             counterparty=self.dialogues_bob.self_address,
-            performative=TendermintMessage.Performative.TENDERMINT_CONFIG_REQUEST,
-            query="",
+            performative=TendermintMessage.Performative.REQUEST,
         )
         assert self.dialogues_alice.get_dialogue(request_msg)
         assert request_msg.dialogue_reference[0]
@@ -151,7 +155,7 @@ class TestDialogues:
         # share tendermint configuration details
         response_msg = bob_dialogue.reply(
             target_message=request_msg,
-            performative=TendermintMessage.Performative.TENDERMINT_CONFIG_RESPONSE,
+            performative=TendermintMessage.Performative.RESPONSE,
             info=ALICE_TENDERMINT_INFO,
         )
         alice_dialogue = self.dialogues_alice.update(response_msg)
