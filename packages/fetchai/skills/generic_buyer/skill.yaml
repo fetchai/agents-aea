@@ -14,14 +14,14 @@ fingerprint:
   strategy.py: QmRVeQXmkB1eN4JwqqETVUEgcvNUNQhVXhDm1HpRcGiYNt
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0
+- fetchai/ledger:0.19.0:QmPCbasPNL1wFno9pFCF8wTqR9CaCt8i1QagMF2HmdkP2s
 contracts: []
 protocols:
-- fetchai/default:1.0.0
-- fetchai/fipa:1.0.0
-- fetchai/ledger_api:1.0.0
-- fetchai/oef_search:1.0.0
-- open_aea/signing:1.0.0
+- fetchai/default:1.0.0:QmNuQp2z2bq2SsEGCUdYAyXLXyCRtB16RrsR2enGPaF3Nr
+- fetchai/fipa:1.0.0:QmQELeVL8MvqAW28Jbzzz3sRS4Ewdi3tviZt3zsCwHKD79
+- fetchai/ledger_api:1.0.0:QmZ6SPoXVUhjbgsL3qw1JM2UJxsCSr4G3Jm16nsT3MG7jA
+- fetchai/oef_search:1.0.0:QmPVwWnsvSRFxu89kRFcQSpbgeDuGrwscJYXXhtQAu7KqK
+- open_aea/signing:1.0.0:QmYvwPTb6HXrNcKYvQwCWiHsB6sYQGHPLxr5DXQFtAbMrf
 skills: []
 behaviours:
   search:

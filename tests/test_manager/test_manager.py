@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -560,7 +560,7 @@ class BaseTestMultiAgentManager(TestCase):
             ValueError, match=r"The project \(fetchai/my_first_aea\) was already added!"
         ):
             self.manager.add_project(
-                PublicId.from_str("fetchai/my_first_aea:0.15.0"), local=False
+                PublicId.from_str("fetchai/my_first_aea:0.15.0"), remote=True
             )
 
     def test_get_overridables(self, *args):

@@ -20,9 +20,8 @@ Profiling service.
 
 ```python
 def __init__(
+    types_to_track: List[Type],
     period: int = 0,
-    objects_instances_to_count: List[Type] = None,
-    objects_created_to_count: List[Type] = None,
     output_function: Callable[[str], None] = lambda x: print(x, flush=True)
 ) -> None
 ```
@@ -32,8 +31,7 @@ Init profiler.
 **Arguments**:
 
 - `period`: delay between profiling output in seconds.
-- `objects_instances_to_count`: object to count
-- `objects_created_to_count`: object created to count
+- `types_to_track`: object types to count
 - `output_function`: function to display output, one str argument.
 
 <a id="aea.helpers.profiling.Profiling.set_counters"></a>
@@ -44,7 +42,7 @@ Init profiler.
 def set_counters() -> None
 ```
 
-Modify obj.__new__ to count objects created created.
+Modify __new__ and __del__ to count objects created created and destroyed.
 
 <a id="aea.helpers.profiling.Profiling.run"></a>
 
@@ -76,33 +74,13 @@ def get_profile_data() -> Dict
 
 Get profiling data dict.
 
-<a id="aea.helpers.profiling.Profiling.get_objects_instances"></a>
+<a id="aea.helpers.profiling.get_most_common_objects_in_gc"></a>
 
-#### get`_`objects`_`instances
-
-```python
-def get_objects_instances() -> Dict
-```
-
-Return dict with counted object instances present now.
-
-<a id="aea.helpers.profiling.Profiling.get_objects_created"></a>
-
-#### get`_`objects`_`created
+#### get`_`most`_`common`_`objects`_`in`_`gc
 
 ```python
-def get_objects_created() -> Dict
+def get_most_common_objects_in_gc(number: int = 15) -> List[Tuple[str, int]]
 ```
 
-Return dict with counted object instances created.
-
-<a id="aea.helpers.profiling.get_dialogues_by_type"></a>
-
-#### get`_`dialogues`_`by`_`type
-
-```python
-def get_dialogues_by_type() -> Dict
-```
-
-Return dict with the number of dialogues by type.
+Get the highest-count objects in the garbage collector.
 

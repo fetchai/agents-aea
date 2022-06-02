@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -136,23 +136,14 @@ def test_fetch_ipfs() -> None:
         new=lambda *_, **__: DUMMY_REGISTRY_DATA,
     ), TemporaryDirectory() as dest_path:
 
-        package_path = fetch_ipfs(
-            "skill", PublicId.from_str("fetchai/dummy:latest"), "", dest_path
-        )
-        assert package_path is None
-
-        with mock.patch(
-            "aea_cli_ipfs.ipfs_utils.IPFSTool.download", new=lambda *_: None
-        ), mock.patch(
-            "aea_cli_ipfs.ipfs_utils.IPFSTool.check_ipfs_node_running",
-            new=lambda *_: None,
-        ), mock.patch(
-            "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
+        with mock.patch("aea_cli_ipfs.ipfs_utils.IPFSTool.download"), mock.patch(
+            "aea_cli_ipfs.ipfs_utils.IPFSTool.check_ipfs_node_running"
         ):
             package_path = fetch_ipfs(
                 "protocol",
-                PublicId.from_str("default_author/component:0.2.0"),
-                "",
+                PublicId.from_str(
+                    "default_author/component:0.2.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"
+                ),
                 dest_path,
             )
             assert package_path == Path(dest_path).absolute()

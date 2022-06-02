@@ -175,6 +175,10 @@ class TestEchoHandler(BaseSkillTestCase):
             f"received invalid message={incoming_message} in dialogue={self.default_dialogues.get_dialogue(incoming_message)}.",
         )
 
+    def test_retrieve_protocol_dialogues_from_handler(self):
+        """Test retrieve protocol dialogues from handler"""
+        assert self.echo_handler.protocol_dialogues() is self.default_dialogues
+
     def test_teardown(self):
         """Test the teardown method of the echo handler."""
         with patch.object(self.logger, "log") as mock_logger:

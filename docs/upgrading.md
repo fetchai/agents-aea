@@ -7,6 +7,34 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.8.0` to `v1.9.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.7.0` to `1.8.0`
+
+This release introduces a new format for `PublicId` parameter which allows users to use IPFS hashes as a part of the `PublicId` which may lead to some unexpected behaviours or bugs.
+
+Previous implementation of `PublicId` used `author/package:version` format, The new implementation uses `author/package:version:hash`
+
+This release also fixes the hash inconsistency by using wrapper hashes to represent packages.
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.6.0` to `v1.7.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.5.0` to `v1.6.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.4.0` to `v1.5.0`
 
 No backwards incompatible changes.

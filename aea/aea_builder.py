@@ -1599,7 +1599,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param configuration: the component configuration
         :raises AEAException: if there's a missing dependency.
         """
-        not_supported_packages = configuration.package_dependencies.difference(
+
+        not_supported_packages = {
+            dep.without_hash() for dep in configuration.package_dependencies
+        }.difference(
             self._package_dependency_manager.all_dependencies
         )  # type: Set[ComponentId]
         has_all_dependencies = len(not_supported_packages) == 0
@@ -1806,6 +1809,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             ComponentId, Set[ComponentId]
         ] = defaultdict(set)
         for component_id in component_ids:
+            component_id = component_id.without_hash()
             component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
@@ -1826,7 +1830,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
             for dependency in dependencies:
                 dependency_to_supported_dependencies[
-                    ComponentId(component_type[:-1], dependency)
+                    ComponentId(component_type[:-1], dependency).without_hash()
                 ].add(component_id)
 
         try:

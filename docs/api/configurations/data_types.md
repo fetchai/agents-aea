@@ -258,7 +258,8 @@ True
 ```python
 def __init__(author: SimpleIdOrStr,
              name: SimpleIdOrStr,
-             version: Optional[PackageVersionLike] = None) -> None
+             version: Optional[PackageVersionLike] = None,
+             package_hash: Optional[IPFSHashOrStr] = None) -> None
 ```
 
 Initialize the public identifier.
@@ -307,15 +308,16 @@ def package_version() -> PackageVersion
 
 Get the package version object.
 
-<a id="aea.configurations.data_types.PublicId.to_any"></a>
+<a id="aea.configurations.data_types.PublicId.hash"></a>
 
-#### to`_`any
+#### hash
 
 ```python
-def to_any() -> "PublicId"
+@property
+def hash() -> str
 ```
 
-Return the same public id, but with any version.
+Returns the hash for the package.
 
 <a id="aea.configurations.data_types.PublicId.same_prefix"></a>
 
@@ -326,6 +328,16 @@ def same_prefix(other: "PublicId") -> bool
 ```
 
 Check if the other public id has the same author and name of this.
+
+<a id="aea.configurations.data_types.PublicId.to_any"></a>
+
+#### to`_`any
+
+```python
+def to_any() -> "PublicId"
+```
+
+Return the same public id, but with any version.
 
 <a id="aea.configurations.data_types.PublicId.to_latest"></a>
 
@@ -370,11 +382,19 @@ Initialize the public id from the string.
 >>> str(PublicId.from_str("author/package_name:0.1.0"))
 'author/package_name:0.1.0'
 
+>>> str(PublicId.from_str("author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH"))
+'author/package_name:0.1.0:QmYAXgX8ARiriupMQsbGXtKdDyGzWry1YV3sycKw1qqmgH'
+
 A bad formatted input raises value error:
 >>> PublicId.from_str("bad/formatted:input")
 Traceback (most recent call last):
 ...
 ValueError: Input 'bad/formatted:input' is not well formatted.
+
+>>> PublicId.from_str("bad/formatted:0.1.0:Qmbadhash")
+Traceback (most recent call last):
+...
+ValueError: Input 'bad/formatted:0.1.0:Qmbadhash' is not well formatted.
 
 **Arguments**:
 
@@ -486,16 +506,6 @@ def __hash__() -> int
 
 Get the hash.
 
-<a id="aea.configurations.data_types.PublicId.__str__"></a>
-
-#### `__`str`__`
-
-```python
-def __str__() -> str
-```
-
-Get the string representation.
-
 <a id="aea.configurations.data_types.PublicId.__repr__"></a>
 
 #### `__`repr`__`
@@ -550,6 +560,26 @@ ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 canno
 **Returns**:
 
 whether or not the inequality is satisfied
+
+<a id="aea.configurations.data_types.PublicId.without_hash"></a>
+
+#### without`_`hash
+
+```python
+def without_hash() -> "PublicId"
+```
+
+Returns a `PublicId` object with same parameters.
+
+<a id="aea.configurations.data_types.PublicId.__str__"></a>
+
+#### `__`str`__`
+
+```python
+def __str__() -> str
+```
+
+Get the string representation.
 
 <a id="aea.configurations.data_types.PackageId"></a>
 
@@ -632,6 +662,17 @@ def version() -> str
 
 Get the version of the package.
 
+<a id="aea.configurations.data_types.PackageId.package_hash"></a>
+
+#### package`_`hash
+
+```python
+@property
+def package_hash() -> str
+```
+
+Get the version of the package.
+
 <a id="aea.configurations.data_types.PackageId.package_prefix"></a>
 
 #### package`_`prefix
@@ -689,6 +730,16 @@ Turn the package id into a uri path string.
 **Returns**:
 
 uri path string
+
+<a id="aea.configurations.data_types.PackageId.without_hash"></a>
+
+#### without`_`hash
+
+```python
+def without_hash() -> "PackageId"
+```
+
+Returns PackageId object without hash
 
 <a id="aea.configurations.data_types.PackageId.__hash__"></a>
 
@@ -840,6 +891,16 @@ def from_json(cls, json_data: Dict) -> "ComponentId"
 ```
 
 Create  component id from json data.
+
+<a id="aea.configurations.data_types.ComponentId.without_hash"></a>
+
+#### without`_`hash
+
+```python
+def without_hash() -> "ComponentId"
+```
+
+Returns PackageId object without hash
 
 <a id="aea.configurations.data_types.PyPIPackageName"></a>
 

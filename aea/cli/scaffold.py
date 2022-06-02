@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +53,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
     SKILL,
 )
 from aea.helpers.io import open_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 @click.group()
@@ -184,13 +185,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         logger.debug(f"Copying {item_type} modules. src={src} dst={dest}")
         shutil.copytree(src, dest)
 
-        # add the item to the configurations.
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
-        if not to_local_registry:
-            logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
-            existing_ids.add(new_public_id)
-            with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
-                ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
         if to_local_registry:
@@ -224,6 +219,16 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             fingerprint_item(ctx, item_type, new_public_id)
         else:
             fingerprint_item(ctx, item_type, new_public_id)
+
+        package_hash = IPFSHashOnly().hash_directory(str(dest))
+        new_public_id_with_hash = PublicId(
+            author_name, item_name, DEFAULT_VERSION, package_hash
+        )
+        if not to_local_registry:
+            logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
+            existing_ids.add(new_public_id_with_hash)
+            with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+                ctx.agent_loader.dump(ctx.agent_config, fp)
 
         if ctx.config.get("with_symlinks", False):
             click.echo(

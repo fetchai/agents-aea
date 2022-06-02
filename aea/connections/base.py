@@ -29,7 +29,8 @@ from pathlib import Path
 from typing import Any, Callable, Generator, Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
+from aea.configurations.base import ComponentType, ConnectionConfig
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import (

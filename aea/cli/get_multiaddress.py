@@ -232,7 +232,9 @@ def _try_get_connection_multiaddress(
     :return: the multiaddress.
     """
     ctx = cast(Context, click_context.obj)
-    if connection_id not in ctx.agent_config.connections:
+    if connection_id not in {
+        pid.without_hash() for pid in ctx.agent_config.connections
+    }:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
     agent_config_manager = AgentConfigManager.load(ctx.cwd)

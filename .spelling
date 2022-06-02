@@ -216,7 +216,7 @@ docstring
 utils
 kademlia
 StargateWorld
-capricorn-1
+dorado-1
 v0.8.x
 fetch.ai
 RaiseError
@@ -266,9 +266,20 @@ nginx-ingress
 acn
 args
 open-aea
+cleanup
+gc
+memray
+pluging
+cli
+mkdocs
+ipfs
+command_line
+PublicId
+multiaddr
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
+a-zA-Z0-9
  - docs/simple-oef.md
 _do_
 CosmWasm

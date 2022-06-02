@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -884,16 +884,7 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         self.conn_key_path = os.path.join(self.t, "conn_private_key.txt")
 
         result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "init",
-                "--local",
-                "--author",
-                AUTHOR,
-                "--default-registry",
-                "http",
-            ],
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 

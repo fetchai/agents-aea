@@ -16,14 +16,14 @@ description: A protocol for communication between two AEAs to share tendermint c
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 speech_acts:
-  tendermint_config_request:
-    query: pt:str
-  tendermint_config_response:
-    info: pt:dict[pt:str, pt:str]
+  request: 
+    query: pt:optional[pt:str]  # required field, optional provides default value, not used otherwise.
+  response:
+    info: pt:str
   error:
     error_code: ct:ErrorCode
     error_msg: pt:str
-    info: pt:dict[pt:str, pt:str]
+    error_data: pt:dict[pt:str, pt:str]
 ...
 ---
 ct:ErrorCode: |
@@ -33,13 +33,13 @@ ct:ErrorCode: |
   ErrorCodeEnum error_code = 1;
 ...
 ---
-initiation: [tendermint_config_request]
+initiation: [request]
 reply:
-  tendermint_config_request: [tendermint_config_response, error]
-  tendermint_config_response: []
+  request: [response, error]
+  response: []
   error: []
 roles: {agent}
-termination: [tendermint_config_response, error]
+termination: [response, error]
 end_states: [config_shared, config_not_shared]
 keep_terminal_state_dialogues: true
 ...

@@ -33,18 +33,13 @@ from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 
-from tests.conftest import (
-    DEFAULT_LEDGER,
-    DEFAULT_LEDGER_LIBP2P_NODE,
-    libp2p_log_on_failure,
-)
+from tests.conftest import DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+from tests.conftest import default_ports as ports
+from tests.conftest import libp2p_log_on_failure
 
 
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
-DEFAULT_PORT = 10234
-DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_NET_SIZE = 4
-
 LIBP2P_LAUNCH_TIMEOUT = 20  # may downloads up to ~66Mb
 
 
@@ -109,7 +104,6 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
     def teardown_class(cls):
         """Tear down the test"""
         cls.terminate_agents()
-
         super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
 
 
@@ -231,16 +225,9 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         self.run_cli_command("build", cwd=self._get_cwd())
         # setup a full node: with public uri, relay service, and delegate service
         config_path = f"{p2p_libp2p_path}.config"
-        self.set_config(
-            "{}.local_uri".format(config_path), "127.0.0.1:{}".format(DEFAULT_PORT)
-        )
-        self.set_config(
-            "{}.public_uri".format(config_path), "127.0.0.1:{}".format(DEFAULT_PORT)
-        )
-        self.set_config(
-            "{}.delegate_uri".format(config_path),
-            "127.0.0.1:{}".format(DEFAULT_DELEGATE_PORT),
-        )
+        self.set_config(f"{config_path}.local_uri", f"127.0.0.1:{next(ports)}")
+        self.set_config(f"{config_path}.public_uri", f"127.0.0.1:{next(ports)}")
+        self.set_config(f"{config_path}.delegate_uri", f"127.0.0.1:{next(ports)}")
 
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
