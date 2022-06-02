@@ -31,7 +31,7 @@ from aea_cli_benchmark.utils import (
 
 
 PACKAGES = [
-    ("protocol", "fetchai/signing"),
+    ("protocol", "open_aea/signing"),
     ("protocol", "fetchai/default"),
     ("protocol", "fetchai/fipa"),
     ("protocol", "fetchai/ledger_api"),

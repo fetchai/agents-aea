@@ -30,7 +30,7 @@ from aea_cli_benchmark.utils import (
 )
 
 
-PACKAGES = [("protocol", "fetchai/signing")]
+PACKAGES = [("protocol", "open_aea/signing")]
 
 
 @click.command(name="decision_maker")

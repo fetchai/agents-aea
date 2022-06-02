@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -34,14 +35,15 @@ import click
 import psutil  # type: ignore
 
 from aea.aea import AEA
-from aea.cli.registry.add import fetch_package
+from aea.cli.add import copy_package_directory
 from aea.cli.utils.package_utils import get_package_path
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
+    AEA_DIR,
     DEFAULT_LEDGER,
-    DEFAULT_PROTOCOL,
     PACKAGES,
     PROTOCOLS,
+    SIGNING_PROTOCOL,
     SKILLS,
     _FETCHAI_IDENTIFIER,
 )
@@ -127,9 +129,9 @@ def make_agent(
         Protocol.from_dir(
             str(
                 Path(packages_dir)
-                / _FETCHAI_IDENTIFIER
+                / "open_aea"
                 / PROTOCOLS
-                / PublicId.from_str(DEFAULT_PROTOCOL).name
+                / PublicId.from_str(SIGNING_PROTOCOL).name
             )
         )
     )
@@ -335,25 +337,33 @@ def make_identity_from_wallet(name, wallet, default_ledger):
 
 
 @contextmanager
-def with_packages(packages: List[Tuple[str, str]]):
+def with_packages(packages: List[Tuple[str, str]], packages_dir: Optional[Path] = None):
     """Download and install packages context manager."""
+
+    if packages_dir is None:
+        packages_dir = AEA_DIR.parent / PACKAGES
+
     with TemporaryDirectory() as dir_name:
-        packages_dir = Path(dir_name) / "packages"
-        os.mkdir(packages_dir)
+        temp_packages_dir = Path(dir_name) / PACKAGES
+        os.mkdir(temp_packages_dir)
         _make_init_py(dir_name)
-        _make_init_py(packages_dir)
+        _make_init_py(temp_packages_dir)
 
         for package_type, package in packages:
             public_id = PublicId.from_str(package)
-            pkg_dir = get_package_path(
-                str(dir_name), package_type, public_id, vendor_dirname="packages"
+            dest = get_package_path(
+                str(dir_name), package_type, public_id, vendor_dirname=PACKAGES
             )
-            fetch_package(package_type, public_id, str(dir_name), str(pkg_dir))
-            _make_init_py(packages_dir / public_id.author / f"{package_type}s")
-            _make_init_py(packages_dir / public_id.author)
+            source = (
+                packages_dir / public_id.author / f"{package_type}s" / public_id.name
+            )
+            copy_package_directory(source, dest)
+            _make_init_py(temp_packages_dir / public_id.author)
+            _make_init_py(temp_packages_dir / public_id.author / f"{package_type}s")
+
         sys.path.append(dir_name)
         yield
         sys.path.remove(dir_name)
         for k in list(sys.modules.keys()):
-            if k.startswith("packages"):
+            if k.startswith(PACKAGES):
                 sys.modules.pop(k)

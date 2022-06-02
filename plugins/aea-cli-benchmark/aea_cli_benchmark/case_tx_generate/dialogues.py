@@ -41,8 +41,8 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.protocols.signing.dialogues import SigningDialogue
-from packages.fetchai.protocols.signing.dialogues import (
+from packages.open_aea.protocols.signing.dialogues import SigningDialogue
+from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
 
