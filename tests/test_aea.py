@@ -517,42 +517,47 @@ def test_add_behaviour_dynamically():
         address=wallet.addresses[DEFAULT_LEDGER],
         public_key=wallet.public_keys[DEFAULT_LEDGER],
     )
-    connection = _make_local_connection(
-        identity.address, identity.public_key, LocalNode()
-    )
-    resources.add_connection(connection)
-
-    agent = AEA(
-        identity, wallet, resources, data_dir, default_connection=connection.public_id,
-    )
-    resources.add_component(
-        Skill.from_dir(
-            Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
+    with LocalNode() as local_node:
+        connection = _make_local_connection(
+            identity.address, identity.public_key, local_node
         )
-    )
-    for skill in resources.get_all_skills():
-        skill.skill_context.set_agent_context(agent.context)
+        resources.add_connection(connection)
 
-    dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
-    old_nb_behaviours = len(agent.resources.get_behaviours(dummy_skill_id))
-    with run_in_thread(agent.start, timeout=5, on_exit=agent.stop):
-        wait_for_condition(lambda: agent.is_running, timeout=10)
-
-        dummy_skill = agent.resources.get_skill(dummy_skill_id)
-
-        wait_for_condition(lambda: dummy_skill is not None, timeout=10)
-
-        new_behaviour = DummyBehaviour(
-            name="dummy2", skill_context=dummy_skill.skill_context
+        agent = AEA(
+            identity,
+            wallet,
+            resources,
+            data_dir,
+            default_connection=connection.public_id,
         )
-        dummy_skill.skill_context.new_behaviours.put(new_behaviour)
-
-        wait_for_condition(lambda: new_behaviour.nb_act_called > 0, timeout=10)
-        wait_for_condition(
-            lambda: len(agent.resources.get_behaviours(dummy_skill_id))
-            == old_nb_behaviours + 1,
-            timeout=10,
+        resources.add_component(
+            Skill.from_dir(
+                Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
+            )
         )
+        for skill in resources.get_all_skills():
+            skill.skill_context.set_agent_context(agent.context)
+
+        dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
+        old_nb_behaviours = len(agent.resources.get_behaviours(dummy_skill_id))
+        with run_in_thread(agent.start, timeout=5, on_exit=agent.stop):
+            wait_for_condition(lambda: agent.is_running, timeout=10)
+
+            dummy_skill = agent.resources.get_skill(dummy_skill_id)
+
+            wait_for_condition(lambda: dummy_skill is not None, timeout=10)
+
+            new_behaviour = DummyBehaviour(
+                name="dummy2", skill_context=dummy_skill.skill_context
+            )
+            dummy_skill.skill_context.new_behaviours.put(new_behaviour)
+
+            wait_for_condition(lambda: new_behaviour.nb_act_called > 0, timeout=10)
+            wait_for_condition(
+                lambda: len(agent.resources.get_behaviours(dummy_skill_id))
+                == old_nb_behaviours + 1,
+                timeout=10,
+            )
 
 
 def test_no_handlers_registered():
