@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,16 +29,12 @@ from uuid import uuid4
 import click
 import pytest
 from aea_ledger_fetchai import FetchAICrypto
-from click import BadParameter, ClickException, UsageError
+from click import BadParameter, ClickException
 from click.testing import CliRunner
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import (
-    MutuallyExclusiveOption,
-    PublicIdParameter,
-    password_option,
-)
+from aea.cli.utils.click_utils import PublicIdParameter, password_option
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -65,15 +62,13 @@ from aea.cli.utils.package_utils import (
     validate_package_name,
 )
 from aea.configurations.base import ComponentId, ComponentType, PublicId
-from aea.configurations.constants import (
-    DEFAULT_LEDGER,
-    DEFAULT_PROTOCOL,
-    LEDGER_CONNECTION,
-)
-from aea.crypto.ledger_apis import FETCHAI_DEFAULT_CHAIN_ID, LedgerApis
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.crypto.ledger_apis import ETHEREUM_DEFAULT_CHAIN_ID, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
@@ -167,7 +162,7 @@ class PublicIdParameterTestCase(TestCase):
     def test_get_metavar_positive(self):
         """Test for get_metavar positive result."""
         result = PublicIdParameter.get_metavar("obj", "param")
-        expected_result = "PUBLIC_ID"
+        expected_result = "PUBLIC_ID_OR_HASH"
         self.assertEqual(result, expected_result)
 
 
@@ -482,7 +477,7 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
         (PublicId.from_str("fetchai/stub:latest"), False),
-        (PublicId.from_str(DEFAULT_PROTOCOL), False),
+        (DefaultMessage.protocol_id, False),
     ],
 )
 def test_is_distributed_item(public_id, expected_outcome):
@@ -512,12 +507,12 @@ def test_override_ledger_configurations_negative():
 
 def test_override_ledger_configurations_positive():
     """Test override ledger configurations function util with fields to override."""
-    new_chain_id = "some_chain"
+    new_chain_id = 134
     agent_config = MagicMock()
     agent_config.component_configurations = {
-        ComponentId(ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)): {
-            "config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}
-        }
+        ComponentId(
+            ComponentType.CONNECTION, PublicId.from_str("fetchai/ledger:latest")
+        ): {"config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}}
     }
     old_configurations = deepcopy(LedgerApis.ledger_api_configs)
 
@@ -525,7 +520,7 @@ def test_override_ledger_configurations_positive():
     expected_configurations["chain_id"] = new_chain_id
     try:
         _override_ledger_configurations(agent_config)
-        actual_configurations = LedgerApis.ledger_api_configs.get("fetchai")
+        actual_configurations = LedgerApis.ledger_api_configs.get(DEFAULT_LEDGER)
         assert expected_configurations == actual_configurations
     finally:
         # this is important - _ovveride_ledger_configurations does
@@ -533,18 +528,8 @@ def test_override_ledger_configurations_positive():
         LedgerApis.ledger_api_configs = old_configurations
         assert (
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
-            == FETCHAI_DEFAULT_CHAIN_ID
+            == ETHEREUM_DEFAULT_CHAIN_ID
         )
-
-
-def test_mutually_exclusive_usage_error():
-    """Test MutuallyExclusiveOption.handle_parse_result."""
-    opt = MutuallyExclusiveOption(["--arg1"], mutually_exclusive=["arg2"])
-    with pytest.raises(
-        UsageError,
-        match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
-    ):
-        opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])
 
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config", return_value={})

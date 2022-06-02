@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,7 +25,7 @@ from shutil import rmtree
 
 import pytest
 
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import _FETCHAI_IDENTIFIER
 from aea.crypto.registries import make_crypto
 from aea.helpers.multiaddr.base import MultiAddr
 
@@ -38,14 +39,14 @@ PEER_ID = "16Uiu2HAkw1VyY3RkiuMy38XKjb6w9EhbtXfwHkRpbQzNvXYVkG1T"
 
 def test_multiaddr_consistency():
     """Test multiaddress consistency."""
-    key = make_crypto(DEFAULT_LEDGER)
+    key = make_crypto(_FETCHAI_IDENTIFIER)
     maddr1 = MultiAddr(HOST, PORT, key.public_key)
 
     tmpdir = tempfile.mkdtemp()
     key_file = tmpdir + "/key"
     key.dump(key_file)
 
-    key2 = make_crypto(DEFAULT_LEDGER, private_key_path=key_file)
+    key2 = make_crypto(_FETCHAI_IDENTIFIER, private_key_path=key_file)
     maddr2 = MultiAddr(HOST, PORT, key2.public_key)
 
     rmtree(tmpdir)
@@ -62,7 +63,7 @@ def test_multiaddr_correctness():
     with open(key_file, "w+") as k:
         k.write(PRIV_KEY)
 
-    key = make_crypto(DEFAULT_LEDGER, private_key_path=key_file)
+    key = make_crypto(_FETCHAI_IDENTIFIER, private_key_path=key_file)
     maddr = MultiAddr(HOST, PORT, key.public_key)
 
     rmtree(tmpdir)

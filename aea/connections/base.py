@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -28,7 +29,8 @@ from pathlib import Path
 from typing import Any, Callable, Generator, Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
+from aea.configurations.base import ComponentType, ConnectionConfig
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import (

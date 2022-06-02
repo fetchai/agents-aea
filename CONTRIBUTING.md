@@ -4,14 +4,14 @@ Contributions to the framework, its plugins, related tools and packages are welc
 
 There are various ways to contribute:
 
-- If you need support, want to report a bug or ask for features, you can check the [Issues page](https://github.com/fetchai/agents-aea/issues) and raise an issue, if applicable.
+- If you need support, want to report a bug or ask for features, you can check the [Issues page](https://github.com/valory-xyz/open-aea/issues) and raise an issue, if applicable.
 
-- If you would like to contribute a bug fix of feature then [submit a Pull request](https://github.com/fetchai/agents-aea/pulls).
+- If you would like to contribute a bug fix of feature then [submit a Pull request](https://github.com/valory-xyz/open-aea/pulls).
 
 For other kinds of feedback, you can contact one of the
-[authors](https://github.com/fetchai/agents-aea/blob/main/AUTHORS.md) by email.
+[authors](https://github.com/valory-xyz/open-aea/blob/main/AUTHORS.md) by email.
 
-Before reading on, please have a look at the [code of conduct](https://github.com/fetchai/agents-aea/blob/main/CODE_OF_CONDUCT.md).
+Before reading on, please have a look at the [code of conduct](https://github.com/valory-xyz/open-aea/blob/main/CODE_OF_CONDUCT.md).
 
 ## A few simple rules
 
@@ -52,11 +52,27 @@ First, setup your environment by either using the `develop-image` or by followin
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
+##  For a clean workflow run checks in the following order before pushing the code on a PR
+
+- make clean
+- make formatters
+- make code-checks
+- make security
+
+**Only run following if you have modified a file in `packages/`**
+- make generators
+- make common-checks
+
+**else run**
+- make check-copyright
+
+**run this after making a commit**
+- make doc-checks
 ## Further commands needed during development
 
 We have various commands which are helpful during development.
 
-- For linting and static analysis use:
+- For independent linting and static analysis use:
 
       make lint
       make static
@@ -77,11 +93,11 @@ We have various commands which are helpful during development.
 
       make dir=cli tdir=cli test-sub
 
-- When making changes to one of the `packages`, then use `python scripts/generate_ipfs_hashes.py` to generate the latest hashes.
+- When making changes to one of the `packages`, then use `aea hash all` and `aea hash all --packages-dir=./tests/data/packages ` to generate the latest hashes.
 
 ### Go Development
 
-- The `fetchai/p2p_libp2p` package is partially developed in Go.
+- The `valory/p2p_libp2p` package is partially developed in Go.
 
 - To install Go visit the [Golang site](https://golang.org/doc/install).
 

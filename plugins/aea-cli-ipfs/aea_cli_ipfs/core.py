@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +19,9 @@
 # ------------------------------------------------------------------------------
 """Core components for `ipfs cli command`."""
 import os
-import time
-from contextlib import suppress
-from typing import Any, Optional
+from glob import glob
+from pathlib import Path
+from typing import Any, Optional, Tuple
 
 import click
 from aea_cli_ipfs.ipfs_utils import (
@@ -30,6 +31,10 @@ from aea_cli_ipfs.ipfs_utils import (
     PublishError,
     RemoveError,
 )
+from aea_cli_ipfs.registry import register_item_to_local_registry
+
+from aea.cli.utils.config import load_item_config
+from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
 
 
 @click.group()
@@ -39,28 +44,18 @@ def ipfs(click_context: click.Context) -> None:
     ipfs_tool = IPFSTool()
     click_context.obj = ipfs_tool
     try:
-        ipfs_tool.chec_ipfs_node_running()
-    except NodeError as e:
+        ipfs_tool.check_ipfs_node_running()
+    except NodeError:
         click.echo("Can not connect to the local ipfs node. Starting own one.")
         ipfs_tool.daemon.start()
-        for _ in range(10):
-            with suppress(NodeError):  # pragma: nocover
-                ipfs_tool.chec_ipfs_node_running()
-                click.echo("ipfs node started.")
-                break
-            time.sleep(1)
-        else:
-            raise click.ClickException(
-                "Failed to connect or start ipfs node! Please check ipfs is installed or launched!"
-            ) from e
 
 
 @ipfs.resultcallback()
 @click.pass_context
-def process_result(click_context: click.Context, *_: Any) -> None:
+def process_result(click_context: click.Context, *_: Any, **__: Any) -> None:
     """Tear down command group."""
     ipfs_tool = click_context.obj
-    if ipfs_tool.daemon.is_started():  # pragma: nocover
+    if ipfs_tool.daemon.is_started_internally():  # pragma: nocover
         click.echo("Stopping ipfs node launched to execute the command.")
         ipfs_tool.daemon.stop()
         click.echo("Daemon stopped.")
@@ -86,13 +81,11 @@ def add(
     """Add directory to ipfs, if not directory specified the current one will be added."""
     dir_path = dir_path or os.getcwd()
     ipfs_tool = click_context.obj
-    click.echo(f"Starting processing: {dir_path}")
-    name, hash_, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
-    click.echo(f"Added: `{name}`, hash is {hash_}")
+    package_hash = register_package(ipfs_tool, dir_path, no_pin)
     if publish:
         click.echo("Publishing...")
         try:
-            response = ipfs_tool.publish(hash_)
+            response = ipfs_tool.publish(package_hash)
             click.echo(f"Published to {response['Name']}")
         except PublishError as e:
             raise click.ClickException(f"Publish failed: {str(e)}") from e
@@ -135,3 +128,49 @@ def download(
         click.echo("Download complete!")
     except DownloadError as e:  # pragma: nocover
         raise click.ClickException(str(e)) from e
+
+
+def _get_path_data(dir_path: str) -> Optional[Tuple[str, str]]:
+    """
+    Returns the file path for item config file.
+
+    :param dir_path: directory path.
+    :return: package path and item type.
+    """
+
+    yaml_files = glob(str(Path(dir_path) / "*.yaml"))
+    for config_file_path in yaml_files:
+        package_path, config_file = os.path.split(config_file_path)
+        if config_file in CONFIG_FILE_TO_PACKAGE_TYPE.keys():
+            return (package_path, CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
+    return None
+
+
+def register_package(ipfs_tool: IPFSTool, dir_path: str, no_pin: bool,) -> str:
+    """
+    Register package to IPFS registry.
+
+    :param ipfs_tool: instance of IPFSTool.
+    :param dir_path: package directory.
+    :param no_pin: pin object or not.
+    :return: package hash
+    """
+
+    click.echo(f"Processing package: {dir_path}")
+    name, package_hash, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
+    path_data = _get_path_data(dir_path)
+    if path_data is not None:
+        package_path, item_type = path_data
+        package_path_ = Path(package_path)
+        item_config = load_item_config(item_type=item_type, package_path=package_path_)
+        register_item_to_local_registry(
+            item_type=item_type,
+            public_id=item_config.public_id,
+            package_hash=package_hash,
+        )
+        click.echo(
+            f"Registered item with:\n\titem_type: {item_type}\n\tpublic id : {item_config.public_id}\n\thash : {package_hash}"
+        )
+    else:
+        click.echo(f"Added: `{name}`, hash is {package_hash}")
+    return package_hash

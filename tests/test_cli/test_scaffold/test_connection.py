@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,7 +68,7 @@ class TestScaffoldConnection:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -118,6 +119,89 @@ class TestScaffoldConnection:
             pass
 
 
+class TestScaffoldConnectionToRegistry:
+    """Test that the command 'aea scaffold connection' works correctly in correct preconditions."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.resource_name = "myresource"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
+
+        cls.schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
+        )
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        dir_path.mkdir(exist_ok=True)
+        # scaffold connection
+        cls.result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                f"--registry-path={str(dir_path)}",
+                "scaffold",
+                "--to-local-registry",
+                "connection",
+                cls.resource_name,
+            ],
+            standalone_mode=False,
+        )
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0."""
+        assert self.result.exit_code == 0
+
+    def test_resource_folder_contains_module_connection(self):
+        """Test that the resource folder contains scaffold connection.py module."""
+        p = Path(
+            self.t,
+            "packages",
+            AUTHOR,
+            "connections",
+            self.resource_name,
+            "connection.py",
+        )
+        assert p.exists()
+
+    def test_resource_folder_contains_configuration_file(self):
+        """Test that the resource folder contains a good configuration file."""
+        p = Path(
+            self.t,
+            "packages",
+            AUTHOR,
+            "connections",
+            self.resource_name,
+            DEFAULT_CONNECTION_CONFIG_FILE,
+        )
+        config_file = yaml.safe_load(open(p))
+        self.validator.validate(instance=config_file)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
 class TestScaffoldConnectionWithSymlinks:
     """Test that the command 'aea scaffold connection' works correctly in correct preconditions with the `--with-symlinks` flag."""
 
@@ -143,7 +227,7 @@ class TestScaffoldConnectionWithSymlinks:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -230,7 +314,7 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -298,7 +382,7 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -372,7 +456,7 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -446,7 +530,7 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 

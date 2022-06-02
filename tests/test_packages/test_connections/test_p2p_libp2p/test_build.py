@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,15 +27,15 @@ import pytest
 
 from aea.exceptions import AEAException
 
-from packages.fetchai.connections.p2p_libp2p import check_dependencies
-from packages.fetchai.connections.p2p_libp2p.check_dependencies import (
+from packages.valory.connections.p2p_libp2p import check_dependencies
+from packages.valory.connections.p2p_libp2p.check_dependencies import (
+    LIBP2P_NODE_MODULE_NAME,
     MINIMUM_GCC_VERSION,
     MINIMUM_GO_VERSION,
     build_node,
     check_versions,
     version_to_string,
 )
-from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_NODE_MODULE_NAME
 
 
 def test_check_versions():

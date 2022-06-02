@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,6 +103,11 @@ class SkillContext:
         if self._agent_context is None:  # pragma: nocover
             raise ValueError("Agent context not set yet.")
         return self._agent_context
+
+    @property
+    def data_dir(self) -> str:
+        """Get the agent's data directory"""
+        return self._get_agent_context().data_dir
 
     def set_agent_context(self, agent_context: AgentContext) -> None:
         """Set the agent context."""
@@ -503,6 +509,17 @@ class Handler(SkillComponent, ABC):
         :return: an handler, or None if the parsing fails.
         """
         return _parse_module(path, handler_configs, skill_context, Handler)
+
+    def protocol_dialogues(self, attribute: Optional[str] = None):  # type: ignore
+        """Protocol dialogues"""
+        if self.SUPPORTED_PROTOCOL is None:
+            raise ValueError(f"SUPPORTED_PROTOCOL not set on {self}")
+        attribute = (
+            (cast(PublicId, self.SUPPORTED_PROTOCOL).name + "_dialogues")
+            if attribute is None
+            else attribute
+        )
+        return getattr(self.context, attribute)
 
 
 class Model(SkillComponent, ABC):

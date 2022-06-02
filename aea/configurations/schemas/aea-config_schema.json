@@ -99,7 +99,10 @@
       }
     },
     "default_connection": {
-      "type": ["string", "null"]
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "protocols": {
       "type": "array",
@@ -115,7 +118,7 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
-    "logging_config" : {
+    "logging_config": {
       "$ref": "definitions.json#/definitions/logging_config"
     },
     "period": {

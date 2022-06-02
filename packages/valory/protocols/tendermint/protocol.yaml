@@ -1,0 +1,21 @@
+name: tendermint
+author: valory
+version: 0.1.0
+protocol_specification_id: valory/tendermint:0.1.0
+type: protocol
+description: A protocol for communication between two AEAs to share tendermint configuration
+  details.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmU7EMLyBUhLyGM5XYAC8UcFZLzT8Wy8PmUBtZREeRiuj1
+  __init__.py: QmXS58PYxescsRJhfqmdGpejRBSRLaCf1mUuKy54UuHbkL
+  custom_types.py: QmY3fU6xiCSQyzRmeQgAkgzLa1YNhCwcdoie8v6USEsU4F
+  dialogues.py: QmVo2K5ModwfF1J562M6ZiGkCdogdB16u33NBvwmBqx6vm
+  message.py: QmeHjyNVGkb6T6UwZBxdBajmGR4wQrUycZdSePAkA6Zibo
+  serialization.py: QmPR6pQociRaSbDqd4GgizfrNtpoLq7yKeesoWRWUQd5aJ
+  tendermint.proto: QmZup4Pkm26FqQvhXtH2JZsAzUQsrdgmUdhdCEM9774cxJ
+  tendermint_pb2.py: QmQyAhhVTpea4UJtzGNtJGf65Vuoa6fiT5WUYZpksp4TAC
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

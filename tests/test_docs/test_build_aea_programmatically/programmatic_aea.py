@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -57,6 +58,9 @@ def run():
     builder.set_name("my_aea")
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+
+    # Add the default protocol (assuming it is present in the local directory 'packages')
+    builder.add_protocol("./packages/fetchai/protocols/default")
 
     # Add the stub connection (assuming it is present in the local directory 'packages')
     builder.add_connection("./packages/fetchai/connections/stub")

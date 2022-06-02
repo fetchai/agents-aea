@@ -7,12 +7,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmbK7MtyAVqh2LmSh9TY6yBZqfWaAXURP4rQGATyP2hTKC
-  __init__.py: QmeeoX5E38Ecrb1rLdeFyyxReHLrcJoETnBcPbcNWVbiKG
-  connection.py: QmefhFjAcFQZSTmwRjQF8CS6gd3qKQ298x3BVMNn6cnZJM
+  __init__.py: QmRTQZuqfT5dYpZUMx9vDMmstWFJrYZ2V5HmX9fvrXZ31h
+  connection.py: QmPrNRo66bzjUMAXBf7fi8hFXa3FTPEyqHqUgvBrXf2SGm
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/oef_search:1.0.0
+- fetchai/oef_search:1.0.0:QmPVwWnsvSRFxu89kRFcQSpbgeDuGrwscJYXXhtQAu7KqK
 class_name: OEFLocalConnection
 config: {}
 excluded_protocols: []

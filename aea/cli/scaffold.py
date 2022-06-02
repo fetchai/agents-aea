@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,9 +53,16 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
     SKILL,
 )
 from aea.helpers.io import open_file
+from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 @click.group()
+@click.option(
+    "--to-local-registry",
+    "-tlr",
+    is_flag=True,
+    help="Scaffold skill inside a local registry.",
+)
 @click.option(
     "--with-symlinks",
     is_flag=True,
@@ -63,11 +71,12 @@ from aea.helpers.io import open_file
 @click.pass_context
 @check_aea_project
 def scaffold(
-    click_context: click.core.Context, with_symlinks: bool
+    click_context: click.core.Context, with_symlinks: bool, to_local_registry: bool,
 ) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
+    ctx.set_config("to_local_registry", to_local_registry)
 
 
 @scaffold.command()
@@ -138,6 +147,8 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
     loader = getattr(ctx, f"{item_type}_loader")
     default_config_filename = globals()[f"DEFAULT_{item_type.upper()}_CONFIG_FILE"]
 
+    to_local_registry = ctx.config.get("to_local_registry")
+
     item_type_plural = item_type + "s"
     existing_ids = getattr(ctx.agent_config, f"{item_type}s")
     existing_ids_only_author_and_name = map(lambda x: (x.author, x.name), existing_ids)
@@ -148,13 +159,20 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         )
 
     agent_name = ctx.agent_config.agent_name
-    click.echo(
-        f"Adding {item_type} scaffold '{item_name}' to the agent '{agent_name}'..."
-    )
 
     # create the item folder
-    Path(item_type_plural).mkdir(exist_ok=True)
-    dest = os.path.join(item_type_plural, item_name)
+    if to_local_registry:
+        click.echo(f"Adding {item_type} scaffold '{item_name}' to local registry...")
+        dest = Path(str(ctx.agent_config.directory)) / Path(item_type_plural)
+    else:
+        click.echo(
+            f"Adding {item_type} scaffold '{item_name}' to the agent '{agent_name}'..."
+        )
+        dest = Path(item_type_plural)
+
+    dest.mkdir(exist_ok=True)
+    dest = dest / item_name
+
     if os.path.exists(dest):
         raise click.ClickException(
             f"A {item_type} with this name already exists. Please choose a different name and try again."
@@ -167,17 +185,16 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         logger.debug(f"Copying {item_type} modules. src={src} dst={dest}")
         shutil.copytree(src, dest)
 
-        # add the item to the configurations.
-        logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
-        existing_ids.add(new_public_id)
-        with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
-            ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
-        config_filepath = Path(
-            ctx.cwd, item_type_plural, item_name, default_config_filename
-        )
+        if to_local_registry:
+            config_filepath = dest / default_config_filename
+        else:
+            config_filepath = Path(
+                ctx.cwd, item_type_plural, item_name, default_config_filename
+            )
+
         with open_file(config_filepath) as fp:
             config = loader.load(fp)
         config.name = item_name
@@ -197,7 +214,21 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
             )
 
         # fingerprint item.
-        fingerprint_item(ctx, item_type, new_public_id)
+        if to_local_registry:
+            ctx.cwd = str(ctx.agent_config.directory)
+            fingerprint_item(ctx, item_type, new_public_id)
+        else:
+            fingerprint_item(ctx, item_type, new_public_id)
+
+        package_hash = IPFSHashOnly().hash_directory(str(dest))
+        new_public_id_with_hash = PublicId(
+            author_name, item_name, DEFAULT_VERSION, package_hash
+        )
+        if not to_local_registry:
+            logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
+            existing_ids.add(new_public_id_with_hash)
+            with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+                ctx.agent_loader.dump(ctx.agent_config, fp)
 
         if ctx.config.get("with_symlinks", False):
             click.echo(

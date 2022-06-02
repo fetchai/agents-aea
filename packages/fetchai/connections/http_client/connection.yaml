@@ -9,11 +9,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmS6oZ4AKuTm2Gj5Xjz99s9b7BXgXyBifcFPo7ZNPrWsqx
   __init__.py: QmPdKAks8A6XKAgZiopJzPZYXJumTeUqChd8UorqmLQQPU
-  connection.py: QmPhg67mJPskRatZmSkiNREYagtRZb6uvgepnzcuP76noD
+  connection.py: QmTQzM6QAjVTXXMtebbkzPav8Sq6eLYQsojT5iZ9deS8j8
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0
+- fetchai/http:1.0.0:QmUKPQ41NMxTmzEmcv5y3U5rc4EJAvj2kdQoEJWvP34ceD
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1

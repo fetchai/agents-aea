@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +26,7 @@ Bump the versions of AEA plugins throughout the code base.
 
 Example of usage:
 
-    python scripts/update_plugin_versions.py --update "aea-ledger-fetchai,0.2.0" --update "aea-ledger-ethereum,0.3.0"
+    python scripts/update_plugin_versions.py --update "open-aea-ledger-fetchai,0.2.0" --update "open-aea-ledger-ethereum,0.3.0"
 
 """
 
@@ -39,10 +40,11 @@ from typing import Dict, List, Tuple
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
+from aea.cli.ipfs_hash import update_hashes
 from aea.helpers.base import compute_specifier_from_version
-from scripts.generate_ipfs_hashes import update_hashes
 
 
+ROOT_DIR = Path(__file__).parent.parent
 PLUGINS_DIR = Path("plugins")
 SETUP_PY_NAME_REGEX = re.compile(r"\Wname=\"(.*)\",")
 SETUP_PY_VERSION_REGEX = re.compile(r"\Wversion=\"(.*)\",")
@@ -61,7 +63,7 @@ def update_plugin_setup(
     :param new_version: the new version.
     :return: True if an update has been done, False otherwise.
     """
-    setup_file = PLUGINS_DIR / plugin_name / "setup.py"
+    setup_file = PLUGINS_DIR / plugin_name.strip("open-") / "setup.py"
     content = setup_file.read_text()
     new_content = re.sub(
         rf"version=['\"]{old_version}['\"],", f'version="{new_version}",', content
@@ -277,7 +279,7 @@ def main() -> None:
         print("Not updating fingerprints, since no specifier set has been updated.")
     else:
         print("Updating hashes and fingerprints.")
-        return_code = update_hashes()
+        return_code = update_hashes(packages_dir=ROOT_DIR / "packages",)
     exit_with_message("Done!", exit_code=return_code)
 
 

@@ -1,3 +1,7 @@
+# ide generated files
+.vscode
+.history
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -118,6 +122,9 @@ temp_private_key.pem
 
 input_file
 output_file
+joined-path
+
+packages/default_author/
 
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build
@@ -140,3 +147,6 @@ libs/go/libp2p_node/dht/dhtclient/agent_records_store*
 libs/go/libp2p_node/dht/dhtpeer/agent_records_store*
 !libs/go/aea_end2end/seller_agent
 coverage.txt
+
+temp/
+agent_name/

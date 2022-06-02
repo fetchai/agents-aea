@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,9 @@
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
+import shutil
 import sys
+import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
@@ -57,14 +60,14 @@ from aea.helpers.install_dependency import call_pip
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
-from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty, BaseAEATestCase
 
-from packages.fetchai.connections.oef.connection import (
-    PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
+from packages.fetchai.connections.http_server.connection import (
+    PUBLIC_ID as HTTP_SERVER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
 from tests.conftest import (
@@ -78,6 +81,29 @@ from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 dummy_skill_path = os.path.join(CUR_PATH, "data", "dummy_skill")
 contract_path = os.path.join(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+
+
+class CleanDirectoryClass(BaseAEATestCase):
+    """
+    Loads the default aea into a clean temp directory and cleans up after.
+
+    Used when testing code which leaves artifacts
+    """
+
+    working_dir = None
+    path_to_aea = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
+
+    def setup(self):
+        """Sets up the working directory for the test method."""
+        self.old_cwd = os.getcwd()
+        self.working_dir = Path(tempfile.TemporaryDirectory().name)
+        shutil.copytree(self.path_to_aea, self.working_dir)
+        os.chdir(self.working_dir)
+
+    def teardown(self):
+        """Removes the over-ride"""
+        shutil.rmtree(self.working_dir, ignore_errors=True)
+        os.chdir(self.old_cwd)
 
 
 def test_default_timeout_for_agent():
@@ -121,15 +147,15 @@ def test_when_package_has_missing_dependency():
     """Test the case when the builder tries to load the packages, but fails because of a missing dependency."""
     builder = AEABuilder()
     expected_message = re.escape(
-        f"Package '{str(OEF_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
-        f"Missing dependencies: ['(protocol, {str(OefSearchMessage.protocol_id)})']"
+        f"Package '{str(HTTP_SERVER_CONNECTION_PUBLIC_ID)}' of type 'connection' cannot be added. "
+        f"Missing dependencies: ['(protocol, {str(HttpMessage.protocol_id)})']"
     )
     with pytest.raises(AEAException, match=expected_message):
-        # connection "fetchai/oef" requires
-        # "fetchai/oef_search" and "fetchai/fipa" protocols.
+        # connection "fetchai/http_server" requires
+        # "fetchai/http" protocols.
         builder.add_component(
             ComponentType.CONNECTION,
-            Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "oef",
+            Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_server",
         )
 
 
@@ -157,13 +183,19 @@ class TestReentrancy:
             ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
         )
         connection_path = os.path.join(
-            ROOT_DIR, "packages", "fetchai", "connections", "soef"
+            ROOT_DIR, "packages", "fetchai", "connections", "local"
         )
 
         builder = AEABuilder()
         builder.set_name("aea1")
         builder.add_private_key(DEFAULT_LEDGER)
         builder.add_protocol(protocol_path)
+        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        builder.add_component(ComponentType.PROTOCOL, protocol)
+        protocol = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+        )
+        builder.add_component(ComponentType.PROTOCOL, protocol)
         builder.add_contract(contract_path)
         builder.add_connection(connection_path)
         builder.add_skill(dummy_skill_path)
@@ -428,6 +460,12 @@ def test_remove_skill():
     builder.add_private_key("fetchai")
 
     skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(skill)
     assert len(builder._package_dependency_manager.all_dependencies) == num_deps + 1
@@ -601,6 +639,12 @@ def test_load_abstract_component():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
+    protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+    builder.add_component(ComponentType.PROTOCOL, protocol)
+    protocol = os.path.join(
+        ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
+    )
+    builder.add_component(ComponentType.PROTOCOL, protocol)
     builder.add_component(ComponentType.SKILL, dummy_skill_path)
     with mock.patch("aea.aea_builder.load_aea_package"), mock.patch.object(
         builder,
@@ -889,12 +933,14 @@ class TestExtraDeps(AEATestCaseEmpty):
             pass
 
 
-class TestBuildEntrypoint(AEATestCaseEmpty):
+class TestBuildEntrypoint(AEATestCaseEmpty, CleanDirectoryClass):
     """Test build entrypoint."""
 
     def setup(self):
         """Set up the test."""
-        self.builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        super().setup()
+
+        self.builder = AEABuilder.from_aea_project(Path(self.working_dir))
         self.component_id = "component_id"
         # add project-wide build entrypoint
         self.script_path = Path("script.py")
@@ -902,7 +948,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
 
     def test_build_positive_aea(self):
         """Test build project-wide entrypoint, positive."""
-        with cd(self._get_cwd()):
+        with cd(self.working_dir):
             self.script_path.write_text("")
             with patch.object(self.builder.logger, "info") as info_mock:
                 self.builder.call_all_build_entrypoints()
@@ -912,7 +958,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
 
     def test_build_positive_package(self):
         """Test build package entrypoint, positive."""
-        with cd(self._get_cwd()):
+        with cd(self.working_dir):
             self.script_path.write_text("")
             # add mock configuration build entrypoint
             with patch.object(self.builder, "_package_dependency_manager") as _mock_mgr:
@@ -934,7 +980,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
     def test_build_negative_syntax_error(self):
         """Test build, negative due to a syntax error in the script."""
         match = r"The Python script at 'script.py' has a syntax error: invalid syntax \(<unknown>, line 1\): syntax\+\.error\n"
-        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+        with cd(self.working_dir), pytest.raises(AEAException, match=match):
             self.script_path.write_text("syntax+.error")
             self.builder.call_all_build_entrypoints()
 
@@ -945,7 +991,7 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
     def test_build_negative_subprocess(self, *_mocks):
         """Test build, negative due to script error at runtime."""
         match = "An error occurred while running command '.*script.py .+':\nsome error."
-        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+        with cd(self.working_dir), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()
 
@@ -995,7 +1041,93 @@ def test_builder_pypi_dependencies():
     dependencies = builder._package_dependency_manager.pypi_dependencies
     assert set(dependencies.keys()) == {
         "protobuf",
-        "aea-ledger-fetchai",
-        "aea-ledger-ethereum",
-        "aea-ledger-cosmos",
+        "open-aea-ledger-fetchai",
+        "open-aea-ledger-ethereum",
+        "open-aea-ledger-cosmos",
     }
+
+
+class TestApplyEnvironmentVariables(AEATestCaseEmpty, CleanDirectoryClass):
+    """Test builder set from project dir, to make a skill 'abstract'."""
+
+    path_to_aea = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
+    override = dedent(
+        """
+        ---
+        public_id: dummy_author/dummy:0.1.0
+        type: skill
+        models:
+          dummy:
+            args:
+                model_arg_1: ${HOST:int:8}
+        ...
+        """
+    )
+
+    def _add_skill_override_config(self):
+        """Add custom stub connection config."""
+        aea_config_file = self.working_dir / DEFAULT_AEA_CONFIG_FILE
+        configuration = aea_config_file.read_text()
+        # here we change all the dummy skill configurations
+        configuration += self.override
+        aea_config_file.write_text(configuration)
+
+    def test_builds_without_flag_without_env_var_override(self):
+        """Tests fails to build with override and without flag."""
+        with cd(self.working_dir):
+            builder = AEABuilder.from_aea_project(self.working_dir)
+            builder.call_all_build_entrypoints()
+            aea = builder.build()
+            assert "aea" in locals()
+
+    def test_fails_to_build_without_flag_with_env_var_override(self):
+        """Tests fails to build with override and without flag."""
+        with cd(self.working_dir):
+            self._add_skill_override_config()
+            try:
+                builder = AEABuilder.from_aea_project(self.working_dir)
+                builder.call_all_build_entrypoints()
+                aea = builder.build()
+            except ValueError:
+                assert "aea" not in locals()
+
+    def test_builds_with_flag_with_env_var_override(self):
+        """Tests builds with override and with flag."""
+        with cd(self.working_dir):
+            self._add_skill_override_config()
+            builder = AEABuilder.from_aea_project(
+                self.working_dir, apply_environment_variables=True
+            )
+            builder.call_all_build_entrypoints()
+            aea = builder.build()
+            assert "aea" in locals()
+
+    def test_builds_with_flag_without_env_var_override(self):
+        """Tests builds without override and with flag."""
+        with cd(self.working_dir):
+            builder = AEABuilder.from_aea_project(
+                self.working_dir, apply_environment_variables=True
+            )
+            builder.call_all_build_entrypoints()
+            aea = builder.build()
+            assert "aea" in locals()
+
+    def test_applies_override(self):
+        """Tests actually applies over-ride."""
+        with cd(self.working_dir):
+            builder = AEABuilder.from_aea_project(self.working_dir)
+            builder.call_all_build_entrypoints()
+            aea1 = builder.build()
+            self._add_skill_override_config()
+            builder = AEABuilder.from_aea_project(
+                self.working_dir, apply_environment_variables=True
+            )
+            builder.call_all_build_entrypoints()
+            aea2 = builder.build()
+            model_1 = aea1.resources.get_skill(
+                DUMMY_SKILL_PUBLIC_ID
+            ).configuration.models.read("dummy")
+            model_2 = aea2.resources.get_skill(
+                DUMMY_SKILL_PUBLIC_ID
+            ).configuration.models.read("dummy")
+            assert model_1.args["model_arg_1"] != model_2.args["model_arg_1"]

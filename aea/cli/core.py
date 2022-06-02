@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +28,7 @@ import aea
 from aea.cli.add import add
 from aea.cli.add_key import add_key
 from aea.cli.build import build
+from aea.cli.check_packages import check_packages
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.delete import delete
@@ -35,6 +37,7 @@ from aea.cli.fetch import fetch
 from aea.cli.fingerprint import fingerprint
 from aea.cli.freeze import freeze
 from aea.cli.generate import generate
+from aea.cli.generate_all_protocols import generate_all_protocols
 from aea.cli.generate_key import generate_key
 from aea.cli.generate_wealth import generate_wealth
 from aea.cli.get_address import get_address
@@ -43,7 +46,7 @@ from aea.cli.get_public_key import get_public_key
 from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
-from aea.cli.interact import interact
+from aea.cli.ipfs_hash import hash_group
 from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
@@ -53,6 +56,7 @@ from aea.cli.logout import logout
 from aea.cli.plugin import with_plugins
 from aea.cli.publish import publish
 from aea.cli.push import push
+from aea.cli.push_all import push_all
 from aea.cli.register import register
 from aea.cli.remove import remove
 from aea.cli.remove_key import remove_key
@@ -122,7 +126,6 @@ cli.add_command(get_multiaddress)
 cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
-cli.add_command(interact)
 cli.add_command(issue_certificates)
 cli.add_command(launch)
 cli.add_command(login)
@@ -139,3 +142,7 @@ cli.add_command(search)
 cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)
+cli.add_command(hash_group)
+cli.add_command(generate_all_protocols)
+cli.add_command(check_packages)
+cli.add_command(push_all)

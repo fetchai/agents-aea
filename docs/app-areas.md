@@ -8,11 +8,11 @@ The <a href="../index">introduction</a> and the <a href="../agent-oriented-devel
 
 In light of those discussions, on this page we identify a number of application areas for AEA-based solutions. This list is by no means comprehensive. In fact, we are most excited about applications which we have not thought of before.
 
-* **Inhabitants**: agents representing objects in the IoT (Internet of Things) space. For examples, AEAs paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example is a <a href="../thermometer-skills"> thermometer agent </a>.
+* **Inhabitants**: agents representing objects in the IoT (Internet of Things) space. For examples, AEAs paired with real world hardware devices such as drones, laptops, heat sensors, etc.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between existing (Web 2.0) and new (Web 3.0) economic models. An example is an AEA with <a href="../http-connection-and-skill"> HTTP connection and skill </a> who has the capability to communicate using HTTP.
 * **Pure software**: software agents _living_ in the digital space that interact with interface agents and others.
-* **Digital data sales agents**: software agents that attach to data sources and sell it via the open economic framework. An example can be found <a href="../ml-skills">here</a>.
-* **Representative**: an agent which represents an individual's activities on the Fetch.ai network. An example can be found <a href="../tac-skills">here</a>.
+* **Digital data sales agents**: software agents that attach to data sources and sell it to other agents. 
+* **Representative**: an agent which represents an individual's activities on the network. 
 
 ## Likely short-term applications
 
@@ -20,7 +20,7 @@ In the short-term we see AEAs primarily deployed in three areas:
 
 * Off-load repetitive tasks: AEAs can automate well-defined processes in different domains such as supply chain, mobility and finance, etc.
 
-* Micro transactions: AEAs make it economically viable to execute trades which involve small value transfers. This is particularly relevant in areas where there is a (data) supply side constituted of many small actors and a single demand side.
+* Microtransactions: AEAs make it economically viable to execute trades which involve small value transfers. This is particularly relevant in areas where there is a (data) supply side constituted of many small actors and a single demand side.
 
 * Wallet agents: AEAs can simplify interactions with blockchains for end users. For instance, they can act as "smart wallets" which optimize blockchain interactions on behalf of the user.
 

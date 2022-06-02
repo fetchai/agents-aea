@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +34,7 @@ from aea.cli.publish import (
     _save_agent_locally,
     _validate_pkp,
 )
+from aea.cli.registry.settings import REMOTE_HTTP
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -102,6 +104,7 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators._check_aea_project")
+@mock.patch("aea.cli.publish.get_default_remote_registry", return_value=REMOTE_HTTP)
 @mock.patch("aea.cli.publish._save_agent_locally")
 @mock.patch("aea.cli.publish.publish_agent")
 @mock.patch("aea.cli.publish._validate_pkp")
@@ -159,6 +162,7 @@ class TestPublishMixedMode(AEATestCaseEmpty):
         self.run_cli_command("publish", cwd=self._get_cwd())
 
 
+@pytest.mark.skip  # need remote registry
 def test_negative_check_is_item_in_remote_registry():
     """Test the utility function (negative) to check if an item is in the remote registry"""
     with pytest.raises(click.ClickException, match="Not found in Registry."):
@@ -182,6 +186,7 @@ def test_negative_check_is_item_in_registry_mixed():
         )
 
 
+@pytest.mark.skip  # need remote registry
 def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
     """Check if item in registry, mixed mode, when not in local registry but only in remote."""
     ctx = mock.Mock()
@@ -247,6 +252,8 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
             ClickException, match=r"Package not found in remote registry"
         ) as e, mock.patch(
             "aea.cli.publish.get_package_meta", side_effect=ClickException("expected"),
+        ), mock.patch(
+            "aea.cli.publish.get_default_remote_registry", new=lambda: REMOTE_HTTP
         ):
             self.invoke("publish", "--remote")
         assert "--push-missing" in str(e)
@@ -255,6 +262,8 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
         with mock.patch(
             "aea.cli.publish.get_package_meta",
             side_effect=[ClickException("expected")] + [mock.DEFAULT] * 100,
+        ), mock.patch(
+            "aea.cli.publish.get_default_remote_registry", new=lambda: REMOTE_HTTP
         ):
             self.invoke("publish", "--remote", "--push-missing")
 

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,18 +25,18 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="aea-ledger-cosmos",
-    version="1.1.0",
-    author="Fetch.AI Limited",
+    name="open-aea-ledger-cosmos",
+    version="1.9.0",
+    author="Valory AG",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
     packages=find_packages(include=["aea_ledger_cosmos*"]),
     install_requires=[
-        "aea>=1.0.0, <2.0.0",
+        "open-aea>=1.0.0, <2.0.0",
         "ecdsa>=0.15,<0.17.0",
         "bech32==1.2.0",
         "pycryptodome>=3.10.1,<4.0.0",
-        "cosmpy>=0.1.4",
+        "cosmpy>=0.2.0",
     ],
     tests_require=["pytest"],
     entry_points={

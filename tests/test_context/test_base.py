@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +34,12 @@ def test_agent_context():
     addresses = {FetchAICrypto.identifier: address}
     public_key = "public_key"
     public_keys = {FetchAICrypto.identifier: public_key}
-    identity = Identity(agent_name, addresses=addresses, public_keys=public_keys)
+    identity = Identity(
+        agent_name,
+        addresses=addresses,
+        public_keys=public_keys,
+        default_address_key=FetchAICrypto.identifier,
+    )
     connection_status = "connection_status_stub"
     outbox = "outbox_stub"
     decision_maker_message_queue = "decision_maker_message_queue_stub"

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -699,7 +700,6 @@ class MultiAgentManager:
         :return: self
         """
         agent_name = agent_name or public_id.name
-
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
 

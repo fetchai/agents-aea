@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,8 @@
 import os
 from pathlib import Path
 
+import pytest
+
 from aea.configurations.constants import DEFAULT_PRIVATE_KEY_FILE
 from aea.test_tools.test_cases import BaseAEATestCase
 
@@ -34,6 +37,7 @@ MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"
 
 
+@pytest.mark.skip  # wrong ledger_id
 class TestProgrammaticAEA(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 

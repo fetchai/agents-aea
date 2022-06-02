@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,11 +33,9 @@ from aea.cli.remove import remove_item
 from aea.configurations.base import (
     AgentConfig,
     DEFAULT_AEA_CONFIG_FILE,
-    PackageId,
     PackageType,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
@@ -45,7 +44,8 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
-from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
+from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -89,10 +89,11 @@ class RemoveItemBadConfigurationTestCase(TestCase):
 class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
     """Test case for remove package with latest version."""
 
+    @pytest.mark.skip  # need remote registry
     @pytest.mark.parametrize(
         ["type_", "public_id"],
         [
-            ("protocol", PublicId.from_str(DEFAULT_PROTOCOL)),
+            ("protocol", DefaultMessage.protocol_id),
             ("connection", PublicId("fetchai", "stub").to_latest()),
             ("contract", PublicId("fetchai", "erc1155").to_latest()),
         ],
@@ -129,7 +130,7 @@ class TestRemoveConfig(
     """Test component configuration also removed from agent config."""
 
     ITEM_TYPE = "connection"
-    ITEM_PUBLIC_ID = SOEF_PUBLIC_ID
+    ITEM_PUBLIC_ID = LOCAL_PUBLIC_ID
 
     @staticmethod
     def loader() -> ConfigLoader:
@@ -145,51 +146,51 @@ class TestRemoveConfig(
                 agent_config = agent_loader.load(fp)
             return agent_config
 
-    def test_component_configuration_removed_from_agent_config(self):
-        """Test component configuration removed from agent config."""
-        with cd(self._get_cwd()):
-            self.run_cli_command(
-                "add", "--local", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)
-            )
-            self.run_cli_command("add", "--local", "connection", "fetchai/http_server")
+    # def test_component_configuration_removed_from_agent_config(self):  # noqa: E800
+    #     """Test component configuration removed from agent config."""  # noqa: E800
+    #     with cd(self._get_cwd()):  # noqa: E800
+    #         self.run_cli_command(  # noqa: E800
+    #             "add", "--local", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID)  # noqa: E800
+    #         )  # noqa: E800
+    #         self.run_cli_command("add", "--local", "connection", "fetchai/http_server")  # noqa: E800
 
-            self.runner.invoke(
-                cli,
-                [
-                    "config",
-                    "set",
-                    "vendor.fetchai.connections.soef.config.api_key",
-                    "some_api_key",
-                ],
-                standalone_mode=False,
-                catch_exceptions=False,
-            )
-            self.runner.invoke(
-                cli,
-                [
-                    "config",
-                    "set",
-                    "vendor.fetchai.connections.http_server.config.port",
-                    "9000",
-                ],
-                standalone_mode=False,
-                catch_exceptions=False,
-            )
-            config = self.load_config()
-            assert config.component_configurations
-            assert (
-                PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
-                in config.component_configurations
-            )
+    #         self.runner.invoke(  # noqa: E800
+    #             cli,  # noqa: E800
+    #             [  # noqa: E800
+    #                 "config",  # noqa: E800
+    #                 "set",  # noqa: E800
+    #                 "vendor.fetchai.connections.local.config.api_key",  # noqa: E800
+    #                 "some_api_key",  # noqa: E800
+    #             ],  # noqa: E800
+    #             standalone_mode=False,  # noqa: E800
+    #             catch_exceptions=False,  # noqa: E800
+    #         )  # noqa: E800
+    #         self.runner.invoke(  # noqa: E800
+    #             cli,  # noqa: E800
+    #             [  # noqa: E800
+    #                 "config",  # noqa: E800
+    #                 "set",  # noqa: E800
+    #                 "vendor.fetchai.connections.http_server.config.port",  # noqa: E800
+    #                 "9000",  # noqa: E800
+    #             ],  # noqa: E800
+    #             standalone_mode=False,  # noqa: E800
+    #             catch_exceptions=False,  # noqa: E800
+    #         )  # noqa: E800
+    #         config = self.load_config()  # noqa: E800
+    #         assert config.component_configurations  # noqa: E800
+    #         assert (  # noqa: E800
+    #             PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)  # noqa: E800
+    #             in config.component_configurations  # noqa: E800
+    #         )  # noqa: E800
 
-            self.run_cli_command("remove", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID))
+    #         self.run_cli_command("remove", self.ITEM_TYPE, str(self.ITEM_PUBLIC_ID))  # noqa: E800
 
-            config = self.load_config()
-            assert (
-                PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)
-                not in config.component_configurations
-            )
-            assert config.component_configurations
+    #         config = self.load_config()  # noqa: E800
+    #         assert (  # noqa: E800
+    #             PackageId(self.ITEM_TYPE, self.ITEM_PUBLIC_ID)  # noqa: E800
+    #             not in config.component_configurations  # noqa: E800
+    #         )  # noqa: E800
+    #         assert config.component_configurations  # noqa: E800
 
 
 class TestRemoveWithIncompatibleAEAVersion:
@@ -209,7 +210,7 @@ class TestRemoveWithIncompatibleAEAVersion:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(

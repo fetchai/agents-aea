@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -38,12 +39,26 @@ from aea.helpers.base import CertRequest, prepend_if_not_absolute
 
 @click.command()
 @password_option()
+@click.option(
+    "--aev",
+    "apply_environment_variables",
+    required=False,
+    is_flag=True,
+    default=False,
+    help="Populate Agent configs from Environment variables.",
+)
 @click.pass_context
 @check_aea_project
-def issue_certificates(click_context: click.Context, password: Optional[str]) -> None:
+def issue_certificates(
+    click_context: click.Context,
+    apply_environment_variables: bool,
+    password: Optional[str],
+) -> None:
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
-    agent_config_manager = AgentConfigManager.load(ctx.cwd)
+    agent_config_manager = AgentConfigManager.load(
+        ctx.cwd, substitude_env_vars=apply_environment_variables,
+    )
     issue_certificates_(ctx.cwd, agent_config_manager, password=password)
 
 

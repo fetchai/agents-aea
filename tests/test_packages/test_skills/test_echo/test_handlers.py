@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -173,6 +174,10 @@ class TestEchoHandler(BaseSkillTestCase):
             logging.INFO,
             f"received invalid message={incoming_message} in dialogue={self.default_dialogues.get_dialogue(incoming_message)}.",
         )
+
+    def test_retrieve_protocol_dialogues_from_handler(self):
+        """Test retrieve protocol dialogues from handler"""
+        assert self.echo_handler.protocol_dialogues() is self.default_dialogues
 
     def test_teardown(self):
         """Test the teardown method of the echo handler."""

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +33,10 @@ from typing import Callable, Generator
 import docker
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.ethereum import (
+    DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_GAS_STATION_STRATEGY,
+)
 
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 
@@ -148,6 +153,18 @@ def ethereum_private_key_file():
         shutil.rmtree(temp_dir)
 
 
+"""
+default_gas_price_strategy: eip1559
+gas_price_strategies:
+    eip1559:
+        max_gas_fast: ...
+        ....
+    gas_station:
+        gas_price_api_key: ...
+        ....
+"""
+
+
 @pytest.fixture(scope="session")
 def ethereum_testnet_config(ganache_addr, ganache_port):
     """Get Ethereum ledger api configurations using Ganache."""
@@ -156,7 +173,11 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
-        "gas_price_api_key": GAS_PRICE_API_KEY,
+        "default_gas_price_strategy": "eip1559",
+        "gas_price_strategies": {
+            "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+        },
     }
     return new_config
 
@@ -223,6 +244,7 @@ def _launch_image(
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
     if not success:
+        logger.warning(f"Logs: {container.logs()}")
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")

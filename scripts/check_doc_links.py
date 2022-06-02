@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +45,7 @@ WHITELIST_URL_TO_CODE = {
     "https://github.com/fetchai/networks-stargateworld": 404,
 }
 
-IGNORE: Set[str] = {"https://faucet.metamask.io/"}
+IGNORE: Set[str] = {"https://faucet.metamask.io/", "https://ipfs.io/"}
 
 
 def is_url_reachable(url: str) -> bool:
@@ -59,7 +60,7 @@ def is_url_reachable(url: str) -> bool:
     if url in IGNORE:
         return True
     try:
-        response = requests.head(url, timeout=3)
+        response = requests.head(url, timeout=60)
         if response.status_code == 200:
             return True
         if response.status_code in [403, 405, 302, 404]:

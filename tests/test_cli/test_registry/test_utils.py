@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +30,7 @@ import pytest
 from click import ClickException
 from requests.exceptions import ConnectionError
 
-from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
+from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.registry.utils import (
     FILE_DOWNLOAD_TIMEOUT,
     _rm_tarfiles,
@@ -63,12 +64,14 @@ def _raise_json_decode_error(*args):
     raise JSONDecodeError(None, "None", 1)  # args requied for JSONDecodeError raising
 
 
+@pytest.mark.skip  # need remote registry
 @mock.patch("aea.cli.registry.utils.requests.request")
 class RequestAPITestCase(TestCase):
     """Test case for request_api method."""
 
     def test_request_api_positive(self, request_mock):
         """Test for request_api method positive result."""
+        REGISTRY_API_URL = "https://agents-registry.prod.fetch-ai.com/api/v1"
         expected_result = {"correct": "json"}
 
         resp_mock = mock.Mock()
@@ -373,6 +376,7 @@ def test_clean_tarfiles_error():
             assert not tarfile_path.exists()
 
 
+@pytest.mark.skip  # need remote registry
 @pytest.mark.integration
 def test_get_package_meta():
     """Test get package meta."""

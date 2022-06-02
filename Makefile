@@ -46,32 +46,23 @@ lint:
 	isort aea benchmark examples packages plugins scripts tests
 	flake8 aea benchmark examples packages plugins scripts tests
 	vulture aea scripts/whitelist.py --exclude "*_pb2.py"
-	darglint aea benchmark examples libs packages/fetchai/connections packages/fetchai/contracts packages/fetchai/skills plugins scripts
+	darglint aea benchmark examples libs packages plugins scripts
 
 .PHONY: pylint
 pylint:
 	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs examples/*
 
-.PHONY: security
-security:
-	bandit -r aea benchmark examples packages \
-        plugins/aea-ledger-fetchai/aea_ledger_fetchai \
-        plugins/aea-ledger-ethereum/aea_ledger_ethereum \
-        plugins/aea-ledger-cosmos/aea_ledger_cosmos \
-        plugins/aea-cli-ipfs/aea_cli_ipfs
-	bandit -s B101 -r tests scripts
-	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706
-
 .PHONY: static
 static:
-	mypy aea benchmark examples packages plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs scripts --disallow-untyped-defs
-	mypy tests
+	mypy aea benchmark examples --disallow-untyped-defs
+	mypy packages tests plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs
 
 .PHONY: package_checks
 package_checks:
-	python scripts/generate_ipfs_hashes.py --check
+	python -m aea.cli hash all --check
+	python -m aea.cli hash all --packages-dir=./tests/data/packages --check
 	python scripts/check_package_versions_in_docs.py
-	python scripts/check_packages.py
+	python -m aea.cli check-packages
 
 .PHONY: docs
 docs:
@@ -86,19 +77,23 @@ test:
 	pytest -rfE plugins/aea-ledger-ethereum/tests --cov=aea_ledger_ethereum --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE plugins/aea-ledger-cosmos/tests --cov=aea_ledger_cosmos --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE plugins/aea-cli-ipfs/tests --cov=aea_cli_ipfs --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
-	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills tests/ --cov=aea --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/valory/protocols packages/valory/connections packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills tests/ --cov=aea --cov=packages/valory/connections --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/valory/protocols --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-sub
 test-sub:
-	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/valory/connections packages/valory/protocols packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-sub-p
 test-sub-p:
-	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/valory/connections packages/valory/protocols packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
+.PHONY: hashes
+hashes:
+	python -m aea.cli hash all 
+	python -m aea.cli hash all --packages-dir=./tests/data/packages 
 
 .PHONY: test-all
 test-all:
@@ -132,13 +127,21 @@ release:
 
 v := $(shell pip -V | grep virtualenvs)
 
+.PHONY: all-checks
+all-checks:
+	make clean \
+	&& make formatters \
+	&& make code-checks \
+	&& make common-checks \
+	&& make security \
+
 .PHONY: new_env
 new_env: clean
 	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
-		pipenv install --dev --skip-lock --clear;\
+		pipenv install --dev --skip-lock;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
@@ -151,8 +154,59 @@ new_env: clean
 protolint_install:
 	GO111MODULE=on GOPATH=~/go go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0
 protolint:
-	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
+	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols ./packages/valory/protocols
 protolint_install_win:
 	powershell -command '$$env:GO111MODULE="on"; go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
 protolint_win:
-	protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
+	protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols ./packages/valory/protocols
+
+# isort: fix import orders
+# black: format files according to the pep standards
+.PHONY: formatters
+formatters:
+	tox -e isort
+	tox -e black
+
+# black-check: check code style
+# isort-check: check for import order
+# flake8: wrapper around various code checks, https://flake8.pycqa.org/en/latest/user/error-codes.html
+# mypy: static type checker
+# pylint: code analysis for code smells and refactoring suggestions
+# vulture: finds dead code
+# darglint: docstring linter
+.PHONY: code-checks
+code-checks:
+	tox -p -e black-check -e isort-check -e flake8 -e mypy -e pylint -e vulture -e darglint
+
+# safety: checks dependencies for known security vulnerabilities
+# bandit: security linter
+.PHONY: security
+security:
+	tox -p -e safety -e bandit
+
+# generate latest hashes for updated packages
+# generate docs for updated packages
+# update copyright headers
+.PHONY: generators
+generators:
+	python -m aea.cli generate-all-protocols
+	python -m aea.cli hash all 
+	python -m aea.cli hash all --packages-dir=./tests/data/packages 
+	python scripts/generate_api_docs.py
+	python scripts/check_copyright_notice.py
+
+.PHONY: common-checks
+common-checks:
+	tox -p -e check-copyright -e hash_check -e package_dependencies_checks
+
+.PHONY: doc-checks
+doc-checks:
+	tox -p -e check_doc_links -e check_api_docs
+
+.PHONY: copyright
+copyright:
+	python scripts/check_copyright_notice.py
+
+.PHONY: check-copyright
+check-copyright:
+	tox -e check-copyright

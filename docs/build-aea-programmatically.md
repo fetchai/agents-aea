@@ -3,15 +3,15 @@ These instructions detail the Python code you need for running an AEA outside th
 
 ## Preparation
 
-Get the packages directory from the AEA repository:
+Get the packages' directory from the AEA repository:
 
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 
-Also, install `aea-ledger-fetchai` plug-in:
+Also, install `open-aea-ledger-fetchai` plug-in:
 ```bash
-pip install aea-ledger-fetchai
+pip install open-aea-ledger-fetchai
 ```
 
 ## Imports
@@ -62,7 +62,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:1.0.0`, `fetchai/state_update:1.0.0` and `fetchai/signing:1.0.0` protocols.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:1.0.0`, `fetchai/state_update:1.0.0` and `open_aea/signing:1.0.0` protocols.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -78,6 +78,9 @@ We set the name, add the private key for the AEA to use and set the ledger confi
 
 Next, we add the `fetchai/stub:0.15.0` connection which will read/write messages from file:
 ``` python
+    # Add the default protocol (assuming it is present in the local directory 'packages')
+    builder.add_protocol("./packages/fetchai/protocols/default")
+
     # Add the stub connection (assuming it is present in the local directory 'packages')
     builder.add_connection("./packages/fetchai/connections/stub")
 ```
@@ -217,6 +220,9 @@ def run():
     builder.set_name("my_aea")
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+
+    # Add the default protocol (assuming it is present in the local directory 'packages')
+    builder.add_protocol("./packages/fetchai/protocols/default")
 
     # Add the stub connection (assuming it is present in the local directory 'packages')
     builder.add_connection("./packages/fetchai/connections/stub")

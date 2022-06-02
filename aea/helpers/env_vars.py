@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +24,16 @@ import re
 from collections.abc import Mapping as MappingType
 from typing import Any, Dict, List, Mapping, Union
 
-from aea.helpers.constants import FALSE_EQUIVALENTS, FROM_STRING_TO_TYPE, JSON_TYPES
+from aea.helpers.constants import (
+    FALSE_EQUIVALENTS,
+    FROM_STRING_TO_TYPE,
+    JSON_TYPES,
+    NULL_EQUIVALENTS,
+)
 
 
 ENV_VARIABLE_RE = re.compile(
-    r"^\$\{(?P<name>\w+)(:(?P<type>\w+)(:(?P<default>\w+))?)?\}$", re.I
+    r"^\$\{(?P<name>\w+)(:(?P<type>\w+)(:(?P<default>.+))?)?\}$", re.I
 )
 
 
@@ -101,7 +107,7 @@ def convert_value_str_to_type(value: str, type_str: str) -> JSON_TYPES:
         type_ = FROM_STRING_TO_TYPE[type_str]
         if type_ == bool:
             return value not in FALSE_EQUIVALENTS
-        if type_ is None:
+        if type_ is None or value in NULL_EQUIVALENTS:
             return None
         if type_ in (dict, list):
             return json.loads(value)

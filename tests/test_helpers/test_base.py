@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -60,7 +61,7 @@ from aea.helpers.base import (
     win_popen_kwargs,
 )
 
-from packages.fetchai.connections.oef.connection import OEFConnection
+from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
 
@@ -86,9 +87,9 @@ class TestHelpersBase:
         """Test the locate function to locate classes."""
         cwd = os.getcwd()
         os.chdir(os.path.join(CUR_PATH, ".."))
-        expected_class = OEFConnection
+        expected_class = HTTPServerConnection
         actual_class = locate(
-            "packages.fetchai.connections.oef.connection.OEFConnection"
+            "packages.fetchai.connections.http_server.connection.HTTPServerConnection"
         )
         os.chdir(cwd)
         # although they are the same class, they are different instances in memory
@@ -150,14 +151,20 @@ def test_reg_exp_not_match():
         MyReString("anystring")
 
 
-def test_try_decorator():
+@pytest.mark.parametrize("raise_on_try", (True, False))
+def test_try_decorator(raise_on_try: bool):
     """Test try and log decorator."""
     # for pydocstyle
-    @try_decorator("oops", default_return="failed")
-    def fn():
-        raise Exception("expected")
+    @try_decorator("oops", default_return=lambda _: "failed")
+    def fn(**_):
+        """Dummy function that raises an Exception."""
+        raise ValueError("expected")
 
-    assert fn() == "failed"
+    if raise_on_try:
+        with pytest.raises(ValueError, match="expected"):
+            fn(raise_on_try=raise_on_try)
+    else:
+        assert fn(raise_on_try=raise_on_try)("test_arg") == "failed"
 
 
 def test_retry_decorator():

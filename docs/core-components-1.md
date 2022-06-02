@@ -1,6 +1,6 @@
 The AEA framework consists of several core components, some required to run an AEA and others optional.
 
-The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
+The following sections discuss the inner workings of the AEA framework and how it calls the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). While it is in principle possible to use parts of the framework as a library, we do not recommend it.
 
 ## The elements each AEA uses
 
@@ -8,15 +8,13 @@ The following sections discuss the inner workings of the AEA framework and how i
 
 <img src="../assets/envelope.jpg" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-<a href="../api/aea#aea-objects">`AEA`</a> objects communicate asynchronously via <a href="../api/mail/base#envelope-objects">`Envelopes`</a>.
-
-An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object with which agents communicate. It is a vehicle for <a href="../api/protocols/base#message-objects">`Messages`</a> with five attributes:
+<a href="../api/aea#aea-objects">`AEAs`</a> communicate asynchronously via  exchange of  <a href="../api/protocols/base#message-objects">`Messages`</a> wrapped in <a href="../api/mail/base#envelope-objects">`Envelopes`</a> containing five attributes:
 
 * `to`: defines the destination address.
 
 * `sender`: defines the sender address.
 
-* `protocol_id`: defines the id of the `Protocol`.
+* `protocol_specification_id`: defines the id of the `Protocol`.
 
 * `message`: is a bytes field which holds the `Message` in serialized form.
 
@@ -34,7 +32,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 * `Dialogues`, which define rules over `Message` sequences.
 
-The framework provides one default `Protocol`, called `default` (current version `fetchai/default:1.0.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides one default `Protocol`, called `signing` (current version `open_aea/signing:1.0.0`). This `Protocol` provides an implementation for an AEA `Protocol` which includes a <a href="../api/protocols/signing/message#packages.open_aea.protocols.default.message">`SigningMessage`</a>  class and associated <a href="../api/protocols/signing/serialization#packages.open_aea.protocols.default.serialization">`SigningSerializer`</a> and <a href="../api/protocols/signing/dialogues#packages.open_aea.protocols.default.dialogues">`SigningDialogue`</a> classes.
 
 Additional `Protocols`, for new types of interactions, can be added as packages. For more details on `Protocols` you can read the <a href="../protocol">protocol guide</a>. To learn how you can easily automate protocol definition, head to the guide for the <a href="../protocol-generator">protocol generator</a>.
 
@@ -42,7 +40,7 @@ Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to o
 
 ### Connection
 
-A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to networks, ledgers or other services. Where necessary, a `Connection` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
+A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to networks, ledgers or other services. Where necessary, a `Connection` is responsible for translating between the framework-specific `Envelope` with its `Message` and the external service or third-party protocol (e.g. `HTTP`).
 
 The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.21.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -22,6 +23,8 @@
 import os
 from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import OrderedDict
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -73,6 +76,47 @@ def test_config_loader_dump_agent_config(*_mocks):
     config_loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
     configuration = MagicMock(ordered_json={"component_configurations": []})
     config_loader.dump(configuration, open("foo"))
+
+
+@mock.patch.object(aea.configurations.loader, "yaml_dump_all")
+@mock.patch.object(ConfigLoader, "validate")
+def test_config_loader_load_service_config(*_mocks):
+    """Test ConfigLoader.dump"""
+
+    config = OrderedDict(
+        {
+            "name": "Service",
+            "author": "valory",
+            "version": "0.1.0",
+            "description": "Description",
+            "aea_version": ">=1.0.0, <2.0.0",
+            "license": "Apache-2.0",
+            "agent": "agent",
+            "network": "hardhat",
+            "number_of_agents": "4",
+        }
+    )
+
+    with TemporaryDirectory() as temp_dir:
+        schema_file = Path(temp_dir, "schema.json").absolute()
+        config_file = Path(temp_dir, "service.yaml")
+        schema_file.write_text("{}")
+
+        config_loader_cls = MagicMock()
+        config_loader_cls.schema = str(schema_file)
+        config_loader_cls.from_json = lambda x: MagicMock(**x)
+
+        config_loader = ConfigLoader.from_configuration_type(
+            PackageType.SERVICE, {PackageType.SERVICE: config_loader_cls}
+        )
+
+        dummy_obj = MagicMock()
+        dummy_obj.package_type = PackageType.SERVICE
+        dummy_obj.ordered_json = config
+
+        config_loader.dump(dummy_obj, config_file.open("w+"))
+        service_config = config_loader.load(config_file.open("r"))
+        assert any([getattr(service_config, key) == val for key, val in config.items()])
 
 
 @pytest.mark.parametrize("spec_file_path", protocol_specification_files)

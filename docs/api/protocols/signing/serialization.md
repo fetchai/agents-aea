@@ -1,9 +1,11 @@
-<a name="packages.fetchai.protocols.signing.serialization"></a>
-# packages.fetchai.protocols.signing.serialization
+<a id="packages.open_aea.protocols.signing.serialization"></a>
+
+# packages.open`_`aea.protocols.signing.serialization
 
 Serialization module for signing protocol.
 
-<a name="packages.fetchai.protocols.signing.serialization.SigningSerializer"></a>
+<a id="packages.open_aea.protocols.signing.serialization.SigningSerializer"></a>
+
 ## SigningSerializer Objects
 
 ```python
@@ -12,12 +14,13 @@ class SigningSerializer(Serializer)
 
 Serialization for the 'signing' protocol.
 
-<a name="packages.fetchai.protocols.signing.serialization.SigningSerializer.encode"></a>
+<a id="packages.open_aea.protocols.signing.serialization.SigningSerializer.encode"></a>
+
 #### encode
 
 ```python
- | @staticmethod
- | encode(msg: Message) -> bytes
+@staticmethod
+def encode(msg: Message) -> bytes
 ```
 
 Encode a 'Signing' message into bytes.
@@ -30,12 +33,13 @@ Encode a 'Signing' message into bytes.
 
 the bytes.
 
-<a name="packages.fetchai.protocols.signing.serialization.SigningSerializer.decode"></a>
+<a id="packages.open_aea.protocols.signing.serialization.SigningSerializer.decode"></a>
+
 #### decode
 
 ```python
- | @staticmethod
- | decode(obj: bytes) -> Message
+@staticmethod
+def decode(obj: bytes) -> Message
 ```
 
 Decode bytes into a 'Signing' message.

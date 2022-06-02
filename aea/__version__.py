@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +20,10 @@
 
 """Specifies the version of the AEA package."""
 
-__title__ = "aea"
-__description__ = "Autonomous Economic Agent framework"
-__url__ = "https://github.com/fetchai/agents-aea.git"
-__version__ = "1.1.0"
-__author__ = "Fetch.AI Limited"
+__title__ = "open-aea"
+__description__ = "Open Autonomous Economic Agent framework (without vendor lock-in)"
+__url__ = "https://github.com/valory-xyz/open-aea.git"
+__version__ = "1.9.0"
+__author__ = "Valory AG"
 __license__ = "Apache-2.0"
-__copyright__ = "2019 Fetch.AI Limited"
+__copyright__ = "2021 Valory AG, 2019 Fetch.AI Limited"

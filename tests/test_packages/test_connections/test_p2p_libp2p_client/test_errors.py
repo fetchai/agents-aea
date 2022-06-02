@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,16 +34,18 @@ from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.valory.connections.p2p_libp2p_client.connection import (
     NodeClient,
     P2PLibp2pClientConnection,
     POR_DEFAULT_SERVICE_ID,
 )
 
 from tests.conftest import (
+    DEFAULT_LEDGER_LIBP2P_NODE,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,
+    default_ports,
     libp2p_log_on_failure,
 )
 
@@ -143,12 +146,13 @@ class TestLibp2pClientConnectionNodeDisconnected:
 
         cls.log_files = []
         cls.multiplexers = []
+        cls.delegate_port = next(default_ports)
 
         temp_node_dir = os.path.join(cls.t, "node_dir")
         os.mkdir(temp_node_dir)
         try:
             cls.connection_node = _make_libp2p_connection(
-                data_dir=temp_node_dir, delegate=True
+                data_dir=temp_node_dir, delegate=True, delegate_port=cls.delegate_port,
             )
             cls.multiplexer_node = Multiplexer([cls.connection_node])
             cls.log_files.append(cls.connection_node.node.log_file)
@@ -158,7 +162,9 @@ class TestLibp2pClientConnectionNodeDisconnected:
             temp_client_dir = os.path.join(cls.t, "client_dir")
             os.mkdir(temp_client_dir)
             cls.connection_client = _make_libp2p_client_connection(
-                data_dir=temp_client_dir, peer_public_key=cls.connection_node.node.pub
+                data_dir=temp_client_dir,
+                peer_public_key=cls.connection_node.node.pub,
+                node_port=cls.delegate_port,
             )
             cls.multiplexer_client = Multiplexer([cls.connection_client])
             cls.multiplexer_client.connect()
@@ -280,20 +286,25 @@ class TestLibp2pClientConnectionCheckSignature:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
+        cls.delegate_port = next(default_ports)
 
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
-        cls.connection_node = _make_libp2p_connection(data_dir=temp_dir, delegate=True)
+        cls.connection_node = _make_libp2p_connection(
+            data_dir=temp_dir, delegate_port=cls.delegate_port, delegate=True,
+        )
         temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client)
         cls.connection = _make_libp2p_client_connection(
-            data_dir=temp_dir_client, peer_public_key=cls.connection_node.node.pub
+            data_dir=temp_dir_client,
+            peer_public_key=cls.connection_node.node.pub,
+            node_port=cls.delegate_port,
         )
 
     @pytest.mark.asyncio
     async def test_signature_check_fail(self):
         """Test signature check failed."""
-        key = make_crypto(DEFAULT_LEDGER)
+        key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
 
         assert self.connection.is_connected is False
         await self.connection_node.connect()

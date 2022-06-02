@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,9 +31,9 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-from packages.fetchai.protocols.acn.dialogues import AcnDialogue as BaseAcnDialogue
-from packages.fetchai.protocols.acn.dialogues import AcnDialogues as BaseAcnDialogues
-from packages.fetchai.protocols.acn.message import AcnMessage
+from packages.valory.protocols.acn.dialogues import AcnDialogue as BaseAcnDialogue
+from packages.valory.protocols.acn.dialogues import AcnDialogues as BaseAcnDialogues
+from packages.valory.protocols.acn.message import AcnMessage
 
 
 def test_acn_aea_envelope_serialization():

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
+import decimal
 import json
 import logging
+import math
 import threading
-import time
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from uuid import uuid4
 
 import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
@@ -31,11 +34,15 @@ from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import _hash_eip191_message, encode_defunct
+from eth_account.signers.local import LocalAccount
 from eth_keys import keys
 from eth_typing import HexStr
+from eth_utils.currency import from_wei, to_wei  # pylint: disable=import-error
 from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
+from requests import HTTPError
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+from web3.exceptions import SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
@@ -58,44 +65,243 @@ DEFAULT_CURRENCY_DENOM = "wei"
 ETH_GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 _ABI = "abi"
 _BYTECODE = "bytecode"
+EIP1559 = "eip1559"
+GAS_STATION = "gas_station"
+AVAILABLE_STRATEGIES = (EIP1559, GAS_STATION)
+
+MAX_GAS_FAST = 1500
+
+# How many blocks to consider for priority fee estimation
+FEE_HISTORY_BLOCKS = 10
+
+# Which percentile of effective priority fees to include
+FEE_HISTORY_PERCENTILE = 5
+
+# Which base fee to trigger priority fee estimation at (GWEI)
+PRIORITY_FEE_ESTIMATION_TRIGGER = 100
+
+# Returned if above trigger is not met (GWEI)
+DEFAULT_PRIORITY_FEE = 3
+
+# In case something goes wrong fall back to this estimate
+FALLBACK_ESTIMATE = {
+    "maxFeePerGas": to_wei(20, "gwei"),
+    "maxPriorityFeePerGas": to_wei(DEFAULT_PRIORITY_FEE, "gwei"),
+    "baseFee": None,
+}
+
+PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
+
+
+DEFAULT_EIP1559_STRATEGY = {
+    "max_gas_fast": MAX_GAS_FAST,
+    "fee_history_blocks": FEE_HISTORY_BLOCKS,
+    "fee_history_percentile": FEE_HISTORY_PERCENTILE,
+    "priority_fee_estimation_trigger": PRIORITY_FEE_ESTIMATION_TRIGGER,
+    "default_priority_fee": DEFAULT_PRIORITY_FEE,
+    "fallback_estimate": FALLBACK_ESTIMATE,
+    "priority_fee_increase_boundary": PRIORITY_FEE_INCREASE_BOUNDARY,
+}
+
+
+DEFAULT_GAS_STATION_STRATEGY = {"gas_price_api_key": "", "gas_price_strategy": "fast"}
+
+DEFAULT_GAS_PRICE_STRATEGIES = {
+    EIP1559: DEFAULT_EIP1559_STRATEGY,
+    GAS_STATION: DEFAULT_GAS_STATION_STRATEGY,
+}
+
+# The tip increase is the minimum required of 10%.
+TIP_INCREASE = 1.1
+
+
+def wei_to_gwei(number: Type[int]) -> Union[int, decimal.Decimal]:
+    """Covert WEI to GWEI"""
+    return from_wei(cast(int, number), unit="gwei")
+
+
+def round_to_whole_gwei(number: Type[int]) -> Wei:
+    """Round WEI to equivalent GWEI"""
+    gwei = wei_to_gwei(number)
+    rounded = math.ceil(gwei)
+    return cast(Wei, to_wei(rounded, "gwei"))
+
+
+def get_base_fee_multiplier(base_fee_gwei: int) -> float:
+    """Returns multiplier value."""
+
+    if base_fee_gwei <= 40:  # pylint: disable=no-else-return
+        return 2.0
+    elif base_fee_gwei <= 100:  # pylint: disable=no-else-return
+        return 1.6
+    elif base_fee_gwei <= 200:  # pylint: disable=no-else-return
+        return 1.4
+    else:  # pylint: disable=no-else-return
+        return 1.2
+
+
+def estimate_priority_fee(
+    web3_object: Web3,
+    base_fee_gwei: int,
+    block_number: int,
+    priority_fee_estimation_trigger: int,
+    default_priority_fee: int,
+    fee_history_blocks: int,
+    fee_history_percentile: int,
+    priority_fee_increase_boundary: int,
+) -> int:
+    """Estimate priority fee from base fee."""
+
+    if base_fee_gwei < priority_fee_estimation_trigger:
+        return default_priority_fee
+
+    fee_history = web3_object.eth.fee_history(
+        fee_history_blocks, block_number, [fee_history_percentile]  # type: ignore
+    )
+
+    # This is going to break if more percentiles are introduced in the future,
+    # i.e., `fee_history_percentile` param becomes a `List[int]`.
+    rewards = sorted([reward[0] for reward in fee_history["reward"] if reward[0] > 0])
+    if len(rewards) == 0:
+        return None
+
+    # Calculate percentage increases from between ordered list of fees
+    percentage_increases = [
+        ((j - i) / i) * 100 for i, j in zip(rewards[:-1], rewards[1:])
+    ]
+    highest_increase = max(*percentage_increases)
+    highest_increase_index = percentage_increases.index(highest_increase)
+
+    values = rewards.copy()
+    # If we have big increase in value, we could be considering "outliers" in our estimate
+    # Skip the low elements and take a new median
+    if (
+        highest_increase > priority_fee_increase_boundary
+        and highest_increase_index >= len(values) // 2
+    ):
+        values = values[highest_increase_index:]
+
+    return values[len(values) // 2]
+
+
+def get_gas_price_strategy_eip1559(
+    max_gas_fast: int,
+    fee_history_blocks: int,
+    fee_history_percentile: int,
+    priority_fee_estimation_trigger: int,
+    default_priority_fee: int,
+    fallback_estimate: Dict[str, Optional[int]],
+    priority_fee_increase_boundary: int,
+) -> Callable[[Web3, TxParams], Dict[str, Wei]]:
+    """Get the gas price strategy."""
+
+    def eip1559_price_strategy(
+        web3: Web3,  # pylint: disable=redefined-outer-name
+        transaction_params: TxParams,  # pylint: disable=unused-argument
+    ) -> Dict[str, Wei]:
+        """
+        Get gas price using EIP1559.
+
+        Visit `https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md`
+        for more information.
+
+        :param web3: web3 instance
+        :param transaction_params: transaction parameters
+        :return: dictionary containing gas price strategy
+        """
+
+        latest_block = web3.eth.get_block("latest")
+        base_fee = latest_block.get("baseFeePerGas")
+        block_number = latest_block.get("number")
+        base_fee_gwei = wei_to_gwei(base_fee)
+
+        estimated_priority_fee = estimate_priority_fee(
+            web3,
+            base_fee_gwei,
+            block_number,
+            priority_fee_estimation_trigger=priority_fee_estimation_trigger,
+            default_priority_fee=default_priority_fee,
+            fee_history_blocks=fee_history_blocks,
+            fee_history_percentile=fee_history_percentile,
+            priority_fee_increase_boundary=priority_fee_increase_boundary,
+        )
+
+        if estimated_priority_fee is None:
+            _default_logger.warning(
+                "An error occurred while estimating priority fee, falling back"
+            )
+            return fallback_estimate
+
+        max_priority_fee_per_gas = max(
+            estimated_priority_fee, to_wei(default_priority_fee, "gwei")
+        )
+        multiplier = get_base_fee_multiplier(base_fee_gwei)
+
+        potential_max_fee = base_fee * multiplier
+        max_fee_per_gas = (
+            (potential_max_fee + max_priority_fee_per_gas)
+            if max_priority_fee_per_gas > potential_max_fee
+            else potential_max_fee
+        )
+
+        if (
+            wei_to_gwei(max_fee_per_gas) >= max_gas_fast
+            or wei_to_gwei(max_priority_fee_per_gas) >= max_gas_fast
+        ):
+            return fallback_estimate
+
+        return {
+            "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
+            "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
+        }
+
+    return eip1559_price_strategy
+
+
+def rpc_gas_price_strategy_wrapper(
+    web3: Web3, transaction_params: TxParams  # pylint: disable=redefined-outer-name
+) -> Dict[str, Wei]:
+    """RPC gas price strategy wrapper."""
+    return {"gasPrice": rpc_gas_price_strategy(web3, transaction_params)}
 
 
 def get_gas_price_strategy(
-    gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None
-) -> Callable[[Web3, TxParams], Wei]:
+    gas_price_strategy: Optional[str] = None, gas_price_api_key: Optional[str] = None
+) -> Callable[[Web3, TxParams], Dict[str, Wei]]:
     """Get the gas price strategy."""
     supported_gas_price_modes = ["safeLow", "average", "fast", "fastest"]
+
     if gas_price_strategy is None:
         _default_logger.debug(
             "Gas price strategy not provided. Falling back to `rpc_gas_price_strategy`."
         )
-        return rpc_gas_price_strategy
+        return rpc_gas_price_strategy_wrapper
 
     if gas_price_strategy not in supported_gas_price_modes:
         _default_logger.debug(
             f"Gas price strategy `{gas_price_strategy}` not in list of supported modes: {supported_gas_price_modes}. Falling back to `rpc_gas_price_strategy`."
         )
-        return rpc_gas_price_strategy
+        return rpc_gas_price_strategy_wrapper
 
-    if api_key is None:
+    if gas_price_api_key is None:
         _default_logger.debug(
             "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
         )
-        return rpc_gas_price_strategy
+        return rpc_gas_price_strategy_wrapper
 
-    def gas_station_gas_price_strategy(  # pylint: disable=redefined-outer-name,unused-argument
-        web3: Web3, transaction_params: TxParams
-    ) -> Wei:
+    def gas_station_gas_price_strategy(
+        web3: Web3,  # pylint: disable=redefined-outer-name
+        transaction_params: TxParams,  # pylint: disable=unused-argument
+    ) -> Dict[str, Wei]:
         """
         Get gas price from Eth Gas Station api.
 
         Visit `https://docs.ethgasstation.info/gas-price` for documentation.
-
         :param web3: web3 instance
         :param transaction_params: transaction parameters
         :return: wei
         """
-        response = requests.get(f"{ETH_GASSTATION_URL}?api-key={api_key}")
+        response = requests.get(f"{ETH_GASSTATION_URL}?api-key={gas_price_api_key}")
         if response.status_code != 200:
             raise ValueError(  # pragma: nocover
                 f"Gas station API response: {response.status_code}, {response.text}"
@@ -107,7 +313,7 @@ def get_gas_price_strategy(
             raise ValueError(f"Invalid return value for `{gas_price_strategy}`!")
         gwei_result = result / 10  # adjustment (see api documentation)
         wei_result = web3.toWei(gwei_result, "gwei")
-        return wei_result
+        return {"gasPrice": wei_result}
 
     return gas_station_gas_price_strategy
 
@@ -118,12 +324,12 @@ class SignedTransactionTranslator:
     @staticmethod
     def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]:
         """Write SignedTransaction to dict."""
-        signed_transaction_dict = {
-            "raw_transaction": signed_transaction.rawTransaction.hex(),
-            "hash": signed_transaction.hash.hex(),
-            "r": signed_transaction.r,
-            "s": signed_transaction.s,
-            "v": signed_transaction.v,
+        signed_transaction_dict: Dict[str, Union[str, int]] = {
+            "raw_transaction": cast(str, signed_transaction.rawTransaction.hex()),
+            "hash": cast(str, signed_transaction.hash.hex()),
+            "r": cast(int, signed_transaction.r),
+            "s": cast(int, signed_transaction.s),
+            "v": cast(int, signed_transaction.v),
         }
         return signed_transaction_dict
 
@@ -138,11 +344,13 @@ class SignedTransactionTranslator:
                 f"Invalid for conversion. Found object: {signed_transaction_dict}."
             )
         signed_transaction = SignedTransaction(
-            rawTransaction=HexBytes(signed_transaction_dict["raw_transaction"]),
-            hash=HexBytes(signed_transaction_dict["hash"]),
-            r=signed_transaction_dict["r"],
-            s=signed_transaction_dict["s"],
-            v=signed_transaction_dict["v"],
+            rawTransaction=HexBytes(
+                cast(str, signed_transaction_dict["raw_transaction"])
+            ),
+            hash=HexBytes(cast(str, signed_transaction_dict["hash"])),
+            r=cast(int, signed_transaction_dict["r"]),
+            s=cast(int, signed_transaction_dict["s"]),
+            v=cast(int, signed_transaction_dict["v"]),
         )
         return signed_transaction
 
@@ -222,31 +430,42 @@ class AttributeDictTranslator:
         return AttributeDict(processed_dict)
 
 
-class EthereumCrypto(Crypto[Account]):
+class EthereumCrypto(Crypto[LocalAccount]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
     identifier = _ETHEREUM
 
     def __init__(
-        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+        self,
+        private_key_path: Optional[str] = None,
+        password: Optional[str] = None,
+        extra_entropy: Union[str, bytes, int] = "",
     ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
         :param password: the password to encrypt/decrypt the private key.
+        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
         """
-        super().__init__(private_key_path=private_key_path, password=password)
+        super().__init__(
+            private_key_path=private_key_path,
+            password=password,
+            extra_entropy=extra_entropy,
+        )
+
         bytes_representation = Web3.toBytes(hexstr=self.entity.key.hex())
         self._public_key = str(keys.PrivateKey(bytes_representation).public_key)
-        self._address = str(self.entity.address)
+        self._address = self.entity.address
 
     @property
     def private_key(self) -> str:
         """
         Return a private key.
 
-        :return: a private key string
+        64 random hex characters (i.e. 32 bytes) + "0x" prefix.
+
+        :return: a private key string in hex format
         """
         return self.entity.key.hex()
 
@@ -254,6 +473,8 @@ class EthereumCrypto(Crypto[Account]):
     def public_key(self) -> str:
         """
         Return a public key in hex format.
+
+        128 hex characters (i.e. 64 bytes) + "0x" prefix.
 
         :return: a public key string in hex format
         """
@@ -264,14 +485,16 @@ class EthereumCrypto(Crypto[Account]):
         """
         Return the address for the key pair.
 
-        :return: a display_address str
+        40 hex characters (i.e. 20 bytes) + "0x" prefix.
+
+        :return: an address string in hex format
         """
         return self._address
 
     @classmethod
     def load_private_key_from_path(
         cls, file_name: str, password: Optional[str] = None
-    ) -> Account:
+    ) -> LocalAccount:
         """
         Load a private key in hex format from a file.
 
@@ -323,17 +546,27 @@ class EthereumCrypto(Crypto[Account]):
         :param transaction: the transaction to be signed
         :return: signed transaction
         """
-        signed_transaction = self.entity.sign_transaction(transaction_dict=transaction)
-        #  Note: self.entity.signTransaction(transaction_dict=transaction) == signed_transaction # noqa: E800
+        signed_transaction = cast(Account, self.entity).sign_transaction(
+            transaction_dict=transaction
+        )
         signed_transaction_dict = SignedTransactionTranslator.to_dict(
             signed_transaction
         )
         return cast(JSONLike, signed_transaction_dict)
 
     @classmethod
-    def generate_private_key(cls) -> Account:
-        """Generate a key pair for ethereum network."""
-        account = Account.create()  # pylint: disable=no-value-for-parameter
+    def generate_private_key(
+        cls, extra_entropy: Union[str, bytes, int] = ""
+    ) -> LocalAccount:
+        """
+        Generate a key pair for ethereum network.
+
+        :param extra_entropy: add extra randomness to whatever randomness your OS can provide
+        :return: account object
+        """
+        account = Account.create(
+            extra_entropy
+        )  # pylint: disable=no-value-for-parameter
         return account
 
     def encrypt(self, password: str) -> str:
@@ -353,7 +586,7 @@ class EthereumCrypto(Crypto[Account]):
 
         :param keyfile_json: json str containing encrypted private key.
         :param password: the password to decrypt.
-        :return: the raw private key.
+        :return: the raw private key (without leading "0x").
         """
         try:
             private_key = Account.decrypt(keyfile_json, password)
@@ -424,9 +657,8 @@ class EthereumHelper(Helper):
         :param client: the address of the client.
         :return: return the hash in hex.
         """
-        time_stamp = int(time.time())
         aggregate_hash = Web3.keccak(
-            b"".join([seller.encode(), client.encode(), time_stamp.to_bytes(32, "big")])
+            b"".join([seller.encode(), client.encode(), uuid4().bytes])
         )
         return aggregate_hash.hex()
 
@@ -439,7 +671,7 @@ class EthereumHelper(Helper):
         :return: str
         """
         keccak_hash = Web3.keccak(hexstr=public_key)
-        raw_address = keccak_hash[-20:].hex().upper()
+        raw_address = keccak_hash[-20:].hex()
         address = Web3.toChecksumAddress(raw_address)
         return address
 
@@ -500,7 +732,7 @@ class EthereumHelper(Helper):
         Get the hash of a message.
 
         :param message: the message to be hashed.
-        :return: the hash of the message.
+        :return: the hash of the message as a hex string.
         """
         digest = Web3.keccak(message).hex()
         return digest
@@ -526,6 +758,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     identifier = _ETHEREUM
 
+    _gas_price_strategy_callables: Dict[str, Callable] = {
+        GAS_STATION: get_gas_price_strategy,
+        EIP1559: get_gas_price_strategy_eip1559,
+    }
+
     def __init__(self, **kwargs: Any):
         """
         Initialize the Ethereum ledger APIs.
@@ -536,7 +773,19 @@ class EthereumApi(LedgerApi, EthereumHelper):
             HTTPProvider(endpoint_uri=kwargs.pop("address", DEFAULT_ADDRESS))
         )
         self._chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
-        self._gas_price_api_key = kwargs.pop("gas_price_api_key", None)
+        self._is_gas_estimation_enabled = kwargs.pop("is_gas_estimation_enabled", False)
+
+        self._default_gas_price_strategy: str = kwargs.pop(
+            "default_gas_price_strategy", EIP1559
+        )
+        if self._default_gas_price_strategy not in AVAILABLE_STRATEGIES:
+            raise ValueError(
+                f"Gas price strategy must be one of {AVAILABLE_STRATEGIES}, provided: {self._default_gas_price_strategy}"
+            )  # pragma: nocover
+
+        self._gas_price_strategies: Dict[str, Dict] = kwargs.pop(
+            "gas_price_strategies", DEFAULT_GAS_PRICE_STRATEGIES
+        )
 
     @property
     def api(self) -> Web3:
@@ -551,7 +800,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
         check_address = self._api.toChecksumAddress(address)
-        return self._api.eth.getBalance(check_address)  # pylint: disable=no-member
+        return self._api.eth.get_balance(check_address)  # pylint: disable=no-member
 
     def get_state(
         self, callable_name: str, *args: Any, **kwargs: Any
@@ -588,8 +837,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_fee: int,
         tx_nonce: str,
         chain_id: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[str] = None,
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
+        gas_price_strategy_extra_config: Optional[Dict] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -601,20 +853,18 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_fee: the transaction fee (gas) to be used (in Wei).
         :param tx_nonce: verifies the authenticity of the tx.
         :param chain_id: the Chain ID of the Ethereum transaction.
+        :param max_fee_per_gas: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
+        :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
+        :param gas_price_strategy_extra_config: extra config for gas price strategy.
         :param kwargs: keyword arguments
         :return: the transfer transaction
         """
         transaction: Optional[JSONLike] = None
         chain_id = chain_id if chain_id is not None else self._chain_id
-        gas_price = (
-            self._try_get_gas_price(gas_price_strategy)
-            if gas_price is None
-            else gas_price
-        )
-        if gas_price is None:
-            return transaction  # pragma: nocover
+        destination_address = self._api.toChecksumAddress(destination_address)
+        sender_address = self._api.toChecksumAddress(sender_address)
         nonce = self._try_get_transaction_count(sender_address)
         if nonce is None:
             return transaction
@@ -624,33 +874,132 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "to": destination_address,
             "value": amount,
             "gas": tx_fee,
-            "gasPrice": gas_price,
             "data": tx_nonce,
         }
-        transaction = self.update_with_gas_estimate(transaction)
+        if self._is_gas_estimation_enabled:
+            transaction = self.update_with_gas_estimate(transaction)
+
+        if max_fee_per_gas is not None:
+            max_priority_fee_per_gas = (
+                self._try_get_max_priority_fee()
+                if max_priority_fee_per_gas is None
+                else max_priority_fee_per_gas
+            )
+            transaction.update(
+                {
+                    "maxFeePerGas": max_fee_per_gas,
+                    "maxPriorityFeePerGas": max_priority_fee_per_gas,
+                }
+            )
+
+        if gas_price is not None:
+            transaction.update({"gasPrice": gas_price})
+
+        if gas_price is None and max_fee_per_gas is None:
+            gas_pricing = self.try_get_gas_pricing(
+                gas_price_strategy, gas_price_strategy_extra_config
+            )
+            if gas_pricing is None:
+                return transaction  # pragma: nocover
+            transaction.update(gas_pricing)
+
         return transaction
 
-    @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
-    def _try_get_gas_price(
-        self, gas_price_strategy: Optional[str] = None
-    ) -> Optional[int]:
-        """Try get the gas price based on the provided strategy."""
-        gas_price_strategy_callable = get_gas_price_strategy(
-            gas_price_strategy, self._gas_price_api_key
+    def _get_gas_price_strategy(
+        self,
+        gas_price_strategy: Optional[str] = None,
+        extra_config: Optional[Dict] = None,
+    ) -> Optional[Tuple[str, Callable]]:
+        """
+        Returns parameters for gas price callable.
+
+        Note: The priority of gas price callable will be
+        `extra_config(Runtime params) > self._gas_price_strategies (Set using config file.) > DEFAULT_GAS_PRICE_STRATEGIES (Default values.)`
+
+        :param gas_price_strategy: name of the gas price strategy.
+        :param extra_config: gas price strategy getter parameters.
+        :return: gas price strategy's name and callable.
+        """
+        gas_price_strategy = (
+            gas_price_strategy
+            if gas_price_strategy is not None
+            else self._default_gas_price_strategy
         )
+        if gas_price_strategy not in AVAILABLE_STRATEGIES:  # pragma: nocover
+            _default_logger.debug(
+                f"Gas price strategy must be one of {AVAILABLE_STRATEGIES}, provided: {self._default_gas_price_strategy}"
+            )
+            return None
+
+        _default_logger.debug(f"Using strategy: {gas_price_strategy}")
+        gas_price_strategy_getter = self._gas_price_strategy_callables.get(
+            gas_price_strategy, None
+        )
+
+        parameters = DEFAULT_GAS_PRICE_STRATEGIES.get(gas_price_strategy)
+        parameters.update(self._gas_price_strategies.get(gas_price_strategy, {}))
+        parameters.update(extra_config or {})
+        return gas_price_strategy, gas_price_strategy_getter(**parameters)
+
+    @staticmethod
+    def __reprice(old_price: Wei) -> Wei:
+        return Wei(math.ceil(old_price * TIP_INCREASE))
+
+    @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
+    def try_get_gas_pricing(
+        self,
+        gas_price_strategy: Optional[str] = None,
+        extra_config: Optional[Dict] = None,
+        old_price: Optional[Dict[str, Wei]] = None,
+    ) -> Optional[Dict[str, Wei]]:
+        """
+        Try get the gas price based on the provided strategy.
+
+        :param gas_price_strategy: the gas price strategy to use, e.g., the EIP-1559 strategy.
+            Can be either `eip1559` or `gas_station`.
+        :param extra_config: gas price strategy getter parameters.
+        :param old_price: the old gas price params in case that we are trying to resubmit a transaction.
+        :return: a dictionary with the gas data.
+        """
+
+        retrieved_strategy = self._get_gas_price_strategy(
+            gas_price_strategy, extra_config,
+        )
+        if retrieved_strategy is None:  # pragma: nocover
+            return None
+        gas_price_strategy, gas_price_strategy_callable = retrieved_strategy
+
         prior_strategy = self._api.eth.gasPriceStrategy
         try:
-            self._api.eth.setGasPriceStrategy(gas_price_strategy_callable)
-            gas_price = self._api.eth.generateGasPrice()
+            self._api.eth.set_gas_price_strategy(gas_price_strategy_callable)
+            gas_price = self._api.eth.generate_gas_price()
         finally:
-            if prior_strategy is not None:
-                self._api.eth.setGasPriceStrategy(prior_strategy)  # pragma: nocover
+            self._api.eth.set_gas_price_strategy(prior_strategy)  # pragma: nocover
+
+        if gas_price is None or old_price is None:
+            return gas_price
+
+        gas_price = cast(Dict[str, Wei], gas_price)
+        if gas_price_strategy == EIP1559:
+            updated_max_fee_per_gas = self.__reprice(old_price["maxFeePerGas"])
+            updated_max_priority_fee_per_gas = self.__reprice(
+                old_price["maxPriorityFeePerGas"]
+            )
+
+            if gas_price["maxFeePerGas"] < updated_max_fee_per_gas:
+                gas_price["maxFeePerGas"] = updated_max_fee_per_gas
+                gas_price["maxPriorityFeePerGas"] = updated_max_priority_fee_per_gas
+
+        elif gas_price_strategy == GAS_STATION:
+            updated_gas_price = self.__reprice(old_price["gasPrice"])
+            gas_price["gasPrice"] = max(gas_price["gasPrice"], updated_gas_price)
+
         return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
     def _try_get_transaction_count(self, address: Address) -> Optional[int]:
         """Try get the transaction count."""
-        nonce = self._api.eth.getTransactionCount(  # pylint: disable=no-member
+        nonce = self._api.eth.get_transaction_count(  # pylint: disable=no-member
             self._api.toChecksumAddress(address)
         )
         return nonce
@@ -664,43 +1013,46 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         gas_estimate = self._try_get_gas_estimate(transaction)
         if gas_estimate is not None:
-            specified_gas = transaction["gas"]
-            if specified_gas < gas_estimate:
-                # eventually; there should be some specifiable strategy
-                _default_logger.warning(  # pragma: nocover
-                    f"Needed to increase gas to cover the gas consumption of the transaction. Estimated gas consumption is: {gas_estimate}. Specified gas was: {specified_gas}."
-                )
             transaction["gas"] = gas_estimate
         return transaction
 
     @try_decorator("Unable to retrieve gas estimate: {}", logger_method="warning")
     def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
         """Try get the gas estimate."""
-        gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
+        gas_estimate = self._api.eth.estimate_gas(  # pylint: disable=no-member
             transaction=cast(TxParams, AttributeDictTranslator.from_dict(transaction))
         )
         return gas_estimate
 
-    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def send_signed_transaction(
+        self, tx_signed: JSONLike, raise_on_try: bool = False
+    ) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
         :param tx_signed: the signed transaction
+        :param raise_on_try: whether the method will raise or log on error
         :return: tx_digest, if present
         """
-        tx_digest = self._try_send_signed_transaction(tx_signed)
+        tx_digest = self._try_send_signed_transaction(
+            tx_signed, raise_on_try=raise_on_try
+        )
         return tx_digest
 
     @try_decorator("Unable to send transaction: {}", logger_method="warning")
-    def _try_send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
+    def _try_send_signed_transaction(
+        self, tx_signed: JSONLike, **_kwargs: Any
+    ) -> Optional[str]:
         """
         Try send a signed transaction.
 
         :param tx_signed: the signed transaction
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: tx_digest, if present
         """
         signed_transaction = SignedTransactionTranslator.from_dict(tx_signed)
-        hex_value = self._api.eth.sendRawTransaction(  # pylint: disable=no-member
+        hex_value = self._api.eth.send_raw_transaction(  # pylint: disable=no-member
             signed_transaction.rawTransaction
         )
         tx_digest = hex_value.hex()
@@ -717,6 +1069,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx receipt, if present
         """
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
+
+        if tx_receipt is not None and not bool(tx_receipt["status"]):
+            tx = self.get_transaction(tx_digest)
+            tx_receipt["revert_reason"] = self._try_get_revert_reason(tx)
+
         return tx_receipt
 
     @try_decorator(
@@ -729,7 +1086,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx receipt, if present
         """
-        tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
+        tx_receipt = self._api.eth.get_transaction_receipt(  # pylint: disable=no-member
             cast(HexStr, tx_digest)
         )
         return AttributeDictTranslator.to_dict(tx_receipt)
@@ -752,10 +1109,41 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the transaction digest.
         :return: the tx, if found
         """
-        tx = self._api.eth.getTransaction(
+        tx = self._api.eth.get_transaction(
             cast(HexStr, tx_digest)
         )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
+
+    @try_decorator(
+        "Error when attempting getting tx revert reason: {}", logger_method="debug"
+    )
+    def _try_get_revert_reason(self, tx: TxData) -> str:
+        """Try to check the revert reason of a transaction.
+
+        :param tx: the transaction for which we want to get the revert reason.
+
+        :return: the revert reason message.
+        """
+        # build a new transaction to replay:
+        replay_tx = {
+            "to": tx["to"],
+            "from": tx["from"],
+            "value": tx["value"],
+            "data": tx["input"],
+        }
+
+        try:
+            # replay the transaction on the provider
+            self.api.eth.call(replay_tx, tx["blockNumber"] - 1)
+        except SolidityError as e:
+            # execution reverted exception
+            return str(e)
+        except HTTPError as e:
+            # http exception
+            raise e
+        else:
+            # given tx not reverted
+            raise ValueError(f"The given transaction has not been reverted!\ntx: {tx}")
 
     def get_contract_instance(
         self, contract_interface: Dict[str, str], contract_address: Optional[str] = None
@@ -785,9 +1173,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         contract_interface: Dict[str, str],
         deployer_address: Address,
         value: int = 0,
-        gas: int = 0,
+        gas: Optional[int] = None,
+        max_fee_per_gas: Optional[int] = None,
+        max_priority_fee_per_gas: Optional[str] = None,
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
+        gas_price_strategy_extra_config: Optional[Dict] = None,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -797,35 +1188,68 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param deployer_address: The address that will deploy the contract.
         :param value: value to send to contract (in Wei)
         :param gas: the gas to be used (in Wei)
+        :param max_fee_per_gas: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
+        :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
+        :param gas_price_strategy_extra_config: extra config for gas price strategy..
         :param kwargs: keyword arguments
         :return: the transaction dictionary.
         """
         transaction: Optional[JSONLike] = None
         _deployer_address = self.api.toChecksumAddress(deployer_address)
-        nonce = self.api.eth.getTransactionCount(_deployer_address)
+        nonce = self._try_get_transaction_count(_deployer_address)
         if nonce is None:
             return transaction
-        gas_price = (
-            self._try_get_gas_price(gas_price_strategy)
-            if gas_price is None
-            else gas_price
-        )
-        if gas_price is None:
-            return transaction  # pragma: nocover
         instance = self.get_contract_instance(contract_interface)
-        data = instance.constructor(**kwargs).buildTransaction().get("data", "0x")
         transaction = {
-            "from": _deployer_address,  # only 'from' address, don't insert 'to' address!
             "value": value,
-            "gas": gas,
-            "gasPrice": gas_price,
             "nonce": nonce,
-            "data": data,
         }
-        transaction = self.update_with_gas_estimate(transaction)
+        if max_fee_per_gas is not None:
+            max_priority_fee_per_gas = (
+                self._try_get_max_priority_fee()
+                if max_priority_fee_per_gas is None
+                else max_priority_fee_per_gas
+            )
+            if max_priority_fee_per_gas is None:
+                return None  # pragma: nocover
+            transaction.update(
+                {
+                    "maxFeePerGas": max_fee_per_gas,
+                    "maxPriorityFeePerGas": max_priority_fee_per_gas,
+                }
+            )
+
+        if gas_price is not None:
+            transaction.update({"gasPrice": gas_price})
+
+        if gas_price is None and max_fee_per_gas is None:
+            gas_pricing = self.try_get_gas_pricing(
+                gas_price_strategy, gas_price_strategy_extra_config
+            )
+
+            if gas_pricing is None:
+                return None  # pragma: nocover
+
+            transaction.update(gas_pricing)
+
+        transaction = instance.constructor(**kwargs).buildTransaction(transaction)
+
+        if transaction is None:
+            return None  # pragma: nocover
+        transaction.pop("to", None)  # only 'from' address, don't insert 'to' address!
+        transaction.update({"from": _deployer_address})
+        if gas is not None:
+            transaction.update({"gas": gas})
+        if self._is_gas_estimation_enabled:
+            transaction = self.update_with_gas_estimate(transaction)
         return transaction
+
+    @try_decorator("Unable to retrieve max_priority_fee: {}", logger_method="warning")
+    def _try_get_max_priority_fee(self) -> str:
+        """Try get the gas estimate."""
+        return cast(str, self.api.eth.max_priority_fee)
 
     @classmethod
     def is_valid_address(cls, address: Address) -> bool:
@@ -836,6 +1260,92 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: whether the address is valid
         """
         return Web3.isAddress(address)
+
+    @classmethod
+    def contract_method_call(
+        cls, contract_instance: Any, method_name: str, **method_args: Any,
+    ) -> Optional[JSONLike]:
+        """Call a contract's method
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract call parameters
+        :return: the call result
+        """
+        method = getattr(contract_instance.functions, method_name)
+        result = method(**method_args).call()
+        return result
+
+    def build_transaction(  # pylint: disable=too-many-arguments
+        self,
+        contract_instance: Any,
+        method_name: str,
+        method_args: Dict,
+        tx_args: Dict,
+    ) -> Optional[JSONLike]:
+        """Prepare a transaction
+
+        :param contract_instance: the contract to use
+        :param method_name: the contract methof to call
+        :param method_args: the contract parameters
+        :param tx_args: the transaction parameters
+        :return: the transaction
+        """
+        method = getattr(contract_instance.functions, method_name)
+        tx = method(**method_args)
+
+        nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
+        tx_params = {
+            "nonce": nonce,
+            "value": tx_args["value"] if "value" in tx_args else 0,
+        }
+
+        # Parameter camel-casing due to contract api requirements
+        for field in [
+            "gas",
+            "gasPrice",
+            "maxFeePerGas",
+            "maxPriorityFeePerGas",
+        ]:
+            if field in tx_args and tx_args[field] is not None:
+                tx_params[field] = tx_args[field]
+
+        if (
+            "gasPrice" not in tx_params
+            and "maxFeePerGas" not in tx_params
+            and "maxPriorityFeePerGas" not in tx_params
+        ):
+            gas_data = self.try_get_gas_pricing(old_price=tx_args.get("old_price"))
+            if gas_data:
+                tx_params.update(gas_data)  # pragma: nocover
+        tx = tx.buildTransaction(tx_params)
+        return tx
+
+    def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
+        self,
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None,
+    ) -> Optional[JSONLike]:
+        """
+        Get all transfer events derived from a transaction.
+
+        :param contract_instance: the contract
+        :param tx_hash: the transaction hash
+        :param target_address: optional address to filter tranfer events to just those that affect it
+        :return: the transfer logs
+        """
+        try:
+            tx_receipt = self.api.eth.get_transaction_receipt(tx_hash)
+            if tx_receipt is None:
+                raise ValueError  # pragma: nocover
+
+        except (TransactionNotFound, ValueError):  # pragma: nocover
+            return dict(logs=[])
+
+        transfer_logs = contract_instance.events.Transfer().processReceipt(tx_receipt)
+
+        return dict(logs=transfer_logs)
 
 
 class EthereumFaucetApi(FaucetApi):

@@ -1,0 +1,16 @@
+name: stub_1
+author: default_author
+version: 0.1.0
+type: contract
+description: The scaffold contract scaffolds a contract to be implemented by the developer.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: QmNyrstbfwi2i9ma4Ln4oR5KyrdAQacUK3t5mU3yHGmDjS
+  contract.py: QmSJXyS4bQgdrh2Dff7JDfohE3QitwA9Qnwe2H8YqXyE7b
+fingerprint_ignore_patterns: []
+class_name: MyScaffoldContract
+contract_interface_paths: {}
+dependencies: {}
+contracts:
+- default_author/stub_0:0.1.0:QmeLYjfy6VxvkErTxTc5Gm1MRHH4rkP1E715aQ693PnS6y

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -182,17 +183,29 @@ class TestDialogueLabel:
         """Initialise the environment to test DialogueLabel."""
         cls.agent_address = "agent 1"
         cls.opponent_address = "agent 2"
+        cls.dialogue_starter_ref = str(1)
         cls.dialogue_label = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(
+                cls.dialogue_starter_ref,
+                Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            ),
             dialogue_opponent_addr=cls.opponent_address,
             dialogue_starter_addr=cls.agent_address,
         )
 
     def test_all_methods(self):
         """Test the DialogueLabel."""
-        assert self.dialogue_label.dialogue_reference == (str(1), "")
-        assert self.dialogue_label.dialogue_starter_reference == str(1)
-        assert self.dialogue_label.dialogue_responder_reference == ""
+        assert self.dialogue_label.dialogue_reference == (
+            self.dialogue_starter_ref,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        assert (
+            self.dialogue_label.dialogue_starter_reference == self.dialogue_starter_ref
+        )
+        assert (
+            self.dialogue_label.dialogue_responder_reference
+            == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        )
         assert self.dialogue_label.dialogue_opponent_addr == self.opponent_address
         assert self.dialogue_label.dialogue_starter_addr == self.agent_address
         assert str(self.dialogue_label) == "{}_{}_{}_{}".format(
@@ -203,7 +216,10 @@ class TestDialogueLabel:
         )
 
         dialogue_label_eq = DialogueLabel(
-            dialogue_reference=(str(1), ""),
+            dialogue_reference=(
+                self.dialogue_starter_ref,
+                Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            ),
             dialogue_opponent_addr=self.opponent_address,
             dialogue_starter_addr=self.agent_address,
         )
@@ -217,13 +233,24 @@ class TestDialogueLabel:
         assert hash(dialogue_label_eq) == hash(self.dialogue_label)
 
         assert self.dialogue_label.json == dict(
-            dialogue_starter_reference=str(1),
-            dialogue_responder_reference="",
+            dialogue_starter_reference=self.dialogue_starter_ref,
+            dialogue_responder_reference=Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
             dialogue_opponent_addr=self.opponent_address,
             dialogue_starter_addr=self.agent_address,
         )
         assert DialogueLabel.from_json(self.dialogue_label.json) == self.dialogue_label
         assert DialogueLabel.from_str(str(self.dialogue_label)) == self.dialogue_label
+        assert not self.dialogue_label.is_complete()
+
+        (
+            incomplete_dialogue_label,
+            complete_dialogue_label,
+        ) = self.dialogue_label.get_both_versions()
+        assert incomplete_dialogue_label.dialogue_reference == (
+            self.dialogue_label.dialogue_starter_reference,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+        )
+        assert complete_dialogue_label is None
 
 
 class TestDialogueBase:
@@ -1801,6 +1828,39 @@ class TestPersistDialoguesStorage:
             is None
         )
 
+    def test_cleanup(self):
+        """Test storage cleanup."""
+        dialogues_storage = PersistDialoguesStorage(self.dialogues)
+        dialogues_storage._skill_component = self.skill_component
+        self.dialogues._dialogues_storage = dialogues_storage
+        dialogues_storage._incomplete_to_complete_dialogue_labels[
+            self.dialogue_label
+        ] = self.dialogue_label
+        self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
+        )
+        msg, dialogue = self.dialogues.create(
+            self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello2"
+        )
+        dialogue.reply(
+            target_message=msg,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=ErrorCode.UNSUPPORTED_PROTOCOL,
+            error_msg="oops",
+            error_data={},
+        )
+        assert dialogues_storage._dialogues_by_dialogue_label
+        assert dialogues_storage._dialogue_by_address
+        assert dialogues_storage._incomplete_to_complete_dialogue_labels
+        assert dialogues_storage._terminal_state_dialogues_labels
+
+        self.dialogues._dialogues_storage.cleanup()
+
+        assert not dialogues_storage._dialogues_by_dialogue_label
+        assert not dialogues_storage._dialogue_by_address
+        assert not dialogues_storage._incomplete_to_complete_dialogue_labels
+        assert not dialogues_storage._terminal_state_dialogues_labels
+
 
 class TestPersistDialoguesStorageOffloading:
     """Test PersistDialoguesStorage."""
@@ -1965,9 +2025,11 @@ class TestBaseDialoguesStorage:
 
     def test_dialogues_in_terminal_state_kept(self):
         """Test dialogues in terminal state handled properly."""
+        assert not self.storage._incomplete_to_complete_dialogue_labels
         self.storage.add(self.dialogue)
         assert self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert len(self.storage._incomplete_to_complete_dialogue_labels) == 1
 
         self.dialogue._update(self.valid_message_1_by_self)
         self.dialogue.reply(
@@ -1984,6 +2046,34 @@ class TestBaseDialoguesStorage:
         self.storage.remove(self.dialogue.dialogue_label)
         assert not self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._incomplete_to_complete_dialogue_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            len(
+                self.storage._dialogue_by_address[
+                    self.dialogue.dialogue_label.dialogue_opponent_addr
+                ]
+            )
+            == 0
+        )
 
     def test_dialogues_in_terminal_state_removed(self):
         """Test dialogues in terminal state handled properly."""
@@ -2003,6 +2093,34 @@ class TestBaseDialoguesStorage:
 
         assert not self.storage.dialogues_in_active_state
         assert not self.storage.dialogues_in_terminal_state
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._incomplete_to_complete_dialogue_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._terminal_state_dialogues_labels
+        )
+        assert (
+            self.dialogue.dialogue_label
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            self.dialogue.dialogue_label.get_incomplete_version()
+            not in self.storage._dialogues_by_dialogue_label
+        )
+        assert (
+            len(
+                self.storage._dialogue_by_address[
+                    self.dialogue.dialogue_label.dialogue_opponent_addr
+                ]
+            )
+            == 0
+        )
 
     def teardown(self):
         """Tear down the environment to test BaseDialogueStorage."""

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,11 +53,11 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import (
     CONNECTIONS,
+    CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
     DEFAULT_LOGGING_CONFIG,
-    DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_NAME,
 )
 from aea.configurations.constants import (
@@ -67,8 +68,6 @@ from aea.configurations.constants import (
     PROTOCOLS,
     SIGNING_PROTOCOL,
     SKILLS,
-    STATE_UPDATE_PROTOCOL,
-    _FETCHAI_IDENTIFIER,
 )
 from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
@@ -99,6 +98,7 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
 )
+from aea.helpers.env_vars import apply_env_variables
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.io import open_file
@@ -726,28 +726,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def _add_default_packages(self) -> None:
         """Add default packages."""
-        # add default protocol
-        default_protocol = PublicId.from_str(DEFAULT_PROTOCOL)
-        self.add_protocol(
-            Path(
-                self.registry_dir, _FETCHAI_IDENTIFIER, PROTOCOLS, default_protocol.name
-            )
-        )
         # add signing protocol
         signing_protocol = PublicId.from_str(SIGNING_PROTOCOL)
         self.add_protocol(
             Path(
-                self.registry_dir, _FETCHAI_IDENTIFIER, PROTOCOLS, signing_protocol.name
-            )
-        )
-        # add state update protocol
-        state_update_protocol = PublicId.from_str(STATE_UPDATE_PROTOCOL)
-        self.add_protocol(
-            Path(
                 self.registry_dir,
-                _FETCHAI_IDENTIFIER,
+                signing_protocol.author,
                 PROTOCOLS,
-                state_update_protocol.name,
+                signing_protocol.name,
             )
         )
 
@@ -1613,7 +1599,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param configuration: the component configuration
         :raises AEAException: if there's a missing dependency.
         """
-        not_supported_packages = configuration.package_dependencies.difference(
+
+        not_supported_packages = {
+            dep.without_hash() for dep in configuration.package_dependencies
+        }.difference(
             self._package_dependency_manager.all_dependencies
         )  # type: Set[ComponentId]
         has_all_dependencies = len(not_supported_packages) == 0
@@ -1646,7 +1635,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def try_to_load_agent_configuration_file(
-        cls, aea_project_path: Union[str, Path]
+        cls,
+        aea_project_path: Union[str, Path],
+        apply_environment_variables: bool = True,
     ) -> AgentConfig:
         """Try to load the agent configuration file.."""
         try:
@@ -1655,6 +1646,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             with open_file(configuration_file_path, mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
+                if apply_environment_variables:
+                    agent_configuration = apply_env_variables(
+                        agent_configuration, os.environ
+                    )
                 return agent_configuration
         except FileNotFoundError:  # pragma: nocover
             raise ValueError(
@@ -1814,6 +1809,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             ComponentId, Set[ComponentId]
         ] = defaultdict(set)
         for component_id in component_ids:
+            component_id = component_id.without_hash()
             component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id
             )
@@ -1827,11 +1823,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 dependencies, component_type = configuration.skills, SKILLS
             elif isinstance(configuration, ConnectionConfig):
                 dependencies, component_type = configuration.connections, CONNECTIONS
+            elif isinstance(configuration, ContractConfig):
+                dependencies, component_type = configuration.contracts, CONTRACTS
             else:
                 raise AEAException("Not a valid configuration type.")  # pragma: nocover
+
             for dependency in dependencies:
                 dependency_to_supported_dependencies[
-                    ComponentId(ComponentType.SKILL, dependency)
+                    ComponentId(component_type[:-1], dependency).without_hash()
                 ].add(component_id)
 
         try:
@@ -1848,6 +1847,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         cls,
         aea_project_path: PathLike,
         skip_consistency_check: bool = False,
+        apply_environment_variables: bool = False,
         password: Optional[str] = None,
     ) -> "AEABuilder":
         """
@@ -1862,20 +1862,24 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
+        :param apply_environment_variables: if True, environment variables are loaded.
         :param password: the password to encrypt/decrypt private keys.
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
-        cls.try_to_load_agent_configuration_file(aea_project_path)
+        cls.try_to_load_agent_configuration_file(
+            aea_project_path, apply_environment_variables
+        )
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
-        # check and create missing, do not replace env variables. updates config
-        AgentConfigManager.verify_private_keys(
-            aea_project_path,
-            substitude_env_vars=False,
-            private_key_helper=private_key_verify,
-            password=password,
-        ).dump_config()
+        if not apply_environment_variables:
+            # check and create missing, do not replace env variables. updates config
+            AgentConfigManager.verify_private_keys(
+                aea_project_path,
+                substitude_env_vars=False,
+                private_key_helper=private_key_verify,
+                password=password,
+            ).dump_config()
 
         # just validate
         agent_configuration = AgentConfigManager.verify_private_keys(
@@ -1983,13 +1987,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         component_ids = [
             ComponentId(component_type, public_id) for public_id in public_ids
         ]
-        if component_type in {ComponentType.PROTOCOL, ComponentType.CONTRACT}:
+        if component_type in {ComponentType.PROTOCOL}:
             # if protocols or contracts, import order doesn't matter.
             import_order = component_ids
         else:
             import_order = self._find_import_order(
                 component_ids, aea_project_path, skip_consistency_check
             )
+
         for component_id in import_order:
             component_path = find_component_directory_from_component_id(
                 aea_project_path, component_id

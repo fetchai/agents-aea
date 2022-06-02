@@ -19,6 +19,7 @@ disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801
 # C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s) , # kept as no harm
 # W0105: pointless-string-statement, # kept as no harm
 # R0801: similar lines, # too granular
+# W0212: protected-access
 
 [IMPORTS]
 ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto,asn1crypto,cosmpy,google

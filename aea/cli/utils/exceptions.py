@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +25,3 @@ from aea.exceptions import AEAException
 
 class AEAConfigException(AEAException):
     """Exception about AEA configuration."""
-
-
-class InterruptInputException(Exception):
-    """An exception to mark an interruption event."""

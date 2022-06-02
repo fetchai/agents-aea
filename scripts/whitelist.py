@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,6 +74,18 @@ _.has_ledger  # unused method (aea/crypto/ledger_apis.py:55)
 _.get_api  # unused method (aea/crypto/ledger_apis.py:60)
 _.has_spec  # unused method (aea/crypto/registries/base.py:236)
 _.main_cryptos  # unused property (aea/crypto/wallet.py:130)
+apply_delta  # unused method (aea/decision_maker/base.py:60)
+is_initialized  # unused property (aea/decision_maker/base.py:70)
+is_affordable_transaction  # unused method (aea/decision_maker/base.py:75)
+apply_transactions  # unused method (aea/decision_maker/base.py:84)
+list_of_terms  # unused variable (aea/decision_maker/base.py:85)
+Preferences  # unused class (aea/decision_maker/base.py:98)
+marginal_utility  # unused method (aea/decision_maker/base.py:118)
+ownership_state  # unused variable (aea/decision_maker/base.py:119)
+utility_diff_from_transaction  # unused method (aea/decision_maker/base.py:128)
+ownership_state  # unused variable (aea/decision_maker/base.py:130)
+logarithmic_utility  # unused function (/aea/helpers/preference_representations/base.py:28)
+linear_utility  # unused function (/aea/helpers/preference_representations/base.py:55)
 locate  # unused function (aea/helpers/base.py:139)
 sigint_crossplatform  # unused function (aea/helpers/base.py:236)
 _.dwFlags  # unused attribute (aea/helpers/base.py:269)
@@ -272,3 +285,18 @@ _.Tsize  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/hel
 _.Name  # unused attribute (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:126)
 init_worker  # unused function (/home/solarw/MyData/work/fetchai/agents-aea/aea/skills/tasks.py:108)
 _._generate_hash  # unused method (/home/solarw/MyData/work/fetchai/agents-aea/aea/helpers/ipfs/base.py:161)
+register_item_to_local_registry  # unused function in (aea/cli/registry/ipfs.py:59)
+find_item_in_distribution  # unused function in (aea/cli/utils/package_utils.py:353)
+is_distributed_item  # unused function in (aea/cli/utils/package_utils.py:618)
+PACKAGE_TYPE_TO_CONFIG_FILE  # unused variable in (aea/configurations/constants.py:90)
+raise_on_try  # unused variable (aea/crypto/base.py:383)
+fetch_item_mixed  # unused function (aea/cli/add.py:241)
+DEFAULT_IPFS_URL  # unused variable (aea/cli/registry/settings.py:49)
+get_registry_config  # unused function (aea/cli/utils/config.py:156)
+dump_yaml  # unused function (aea/helpers/dependency_tree.py:58)
+DependecyTree  # unused class (aea/helpers/dependency_tree.py:104)
+generate_all  # unused function (aea/cli/ipfs_hash.py:470)
+get_protocol_specification_id_from_specification  # unused function  (aea/helpers/protocols.py:60)
+protocol_dialogues  # unused property (aea/skills/base.py:513)
+SERVICES  # unused variable (aea/configurations/constants.py:57)
+DEFAULT_SERVICE_CONFIG_FILE  # unused variable (aea/configurations/constants.py:65)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -367,7 +368,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         tx = self.contract.get_deploy_transaction(
             ledger_api=self.ledger_api, deployer_address=ETHEREUM_ADDRESS_ONE
         )
-        assert len(tx) == 6
+        assert len(tx) == 7
         data = tx.pop("data")
         assert len(data) > 0 and data.startswith("0x")
         assert all(
@@ -635,6 +636,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert self.ledger_api.is_transaction_settled(receipt)
 
 
+@pytest.mark.skip("Fetch.ai testnet not currently working.")
 class TestCosmWasmContract(BaseContractTestCase):
     """Test the cosmwasm contract."""
 

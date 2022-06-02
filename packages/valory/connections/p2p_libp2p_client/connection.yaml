@@ -1,0 +1,50 @@
+name: p2p_libp2p_client
+author: valory
+version: 0.1.0
+type: connection
+description: The libp2p client connection implements a tcp connection to a running
+  libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
+  DHT.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmRmDYNeEsKRgKjroGCJmLVJqjfnUm9FNXBXv3YYBBwsXq
+  __init__.py: QmWYz6a1UrsXsG55CQj6X2snQZWU7isUGBiWJWwDqEpYyS
+  connection.py: QmUFkxwiJp9d55Bjwke3eHhpHxpuHCKN8fRPPHoTKPhT3m
+fingerprint_ignore_patterns: []
+connections: []
+protocols:
+- valory/acn:1.1.0:QmbUv2WwG6o2q8F17esBweFuFiogRWbU4wBLrAkCFRUkUm
+class_name: P2PLibp2pClientConnection
+config:
+  connect_retries: 3
+  ledger_id: cosmos
+  nodes:
+  - uri: staging.acn.autonolas.tech:9005
+    public_key: 0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d
+  - uri: staging.acn.autonolas.tech:9006
+    public_key: 02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7
+  tls_connection_signature_timeout: 5.0
+cert_requests:
+- identifier: acn
+  ledger_id: ethereum
+  message_format: '{public_key}'
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: 0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d
+  save_path: .certs/acn_cosmos_9005.txt
+- identifier: acn
+  ledger_id: ethereum
+  message_format: '{public_key}'
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: 02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7
+  save_path: .certs/acn_cosmos_9006.txt
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  asn1crypto:
+    version: <1.5.0,>=1.4.0
+  open-aea-ledger-cosmos: {}
+  open-aea-ledger-ethereum: {}
+is_abstract: false

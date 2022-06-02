@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -26,6 +27,7 @@ import click
 from packaging.version import Version
 
 import aea
+from aea.cli.fingerprint import fingerprint_item
 from aea.cli.remove import ItemRemoveHelper
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import (
@@ -67,6 +69,7 @@ from aea.helpers.base import (
     find_topological_order,
     reachable_nodes,
 )
+from aea.helpers.ipfs.base import IPFSHashOnly
 
 
 @click.group()
@@ -155,6 +158,7 @@ def _eject_item(
     # we know cli_author is set because of the above checks.
     cli_author: str = cast(str, ctx.config.get("cli_author"))
     item_type_plural = item_type + "s"
+
     if not is_item_present(
         ctx.cwd,
         ctx.agent_config,
@@ -166,8 +170,10 @@ def _eject_item(
         raise click.ClickException(
             f"{item_type.title()} {public_id} not found in agent's vendor items."
         )
+
     src = get_package_path(ctx.cwd, item_type, public_id)
     dst = get_package_path(ctx.cwd, item_type, public_id, is_vendor=False)
+
     if is_item_present(
         ctx.cwd, ctx.agent_config, item_type, public_id, is_vendor=False
     ):  # pragma: no cover
@@ -176,14 +182,13 @@ def _eject_item(
         )
     configuration = load_item_config(item_type, Path(src))
 
-    if public_id.package_version.is_latest:
-        # get 'concrete' public id, in case it is 'latest'
-        component_prefix = ComponentType(item_type), public_id.author, public_id.name
-        component_id = get_latest_component_id_from_prefix(
-            ctx.agent_config, component_prefix
-        )
-        # component id is necessarily found, due to the checks above.
-        public_id = cast(ComponentId, component_id).public_id
+    # get 'concrete' public id, in case it is 'latest'
+    component_prefix = ComponentType(item_type), public_id.author, public_id.name
+    component_id = get_latest_component_id_from_prefix(
+        ctx.agent_config, component_prefix
+    )
+    # component id is necessarily found, due to the checks above.
+    public_id = cast(ComponentId, component_id).public_id
 
     package_id = PackageId(PackageType(item_type), public_id)
 
@@ -196,7 +201,9 @@ def _eject_item(
     reverse_dependencies = (
         item_remover.get_agent_dependencies_with_reverse_dependencies()
     )
-    reverse_reachable_dependencies = reachable_nodes(reverse_dependencies, {package_id})
+    reverse_reachable_dependencies = reachable_nodes(
+        reverse_dependencies, {package_id.without_hash()}
+    )
     # the reversed topological order of a graph
     # is the topological order of the reverse graph.
     eject_order = list(reversed(find_topological_order(reverse_reachable_dependencies)))
@@ -229,29 +236,36 @@ def _eject_item(
         if configuration.aea_version_specifiers.contains(current_version)
         else compute_specifier_from_version(current_version)
     )
-    update_item_config(
-        item_type,
-        Path(dst),
+
+    item_config_update = dict(
         author=new_public_id.author,
         version=new_public_id.version,
         aea_version=new_aea_range,
     )
+
+    update_item_config(item_type, Path(dst), **item_config_update)
     update_item_public_id_in_init(item_type, Path(dst), new_public_id)
     shutil.rmtree(src)
+
+    replace_all_import_statements(
+        Path(ctx.cwd), ComponentType(item_type), public_id, new_public_id
+    )
+    fingerprint_item(ctx, item_type, new_public_id)
+    package_hash = IPFSHashOnly.hash_directory(dst)
+    public_id_with_hash = PublicId(
+        new_public_id.author, new_public_id.name, new_public_id.version, package_hash
+    )
 
     # update references in all the other packages
     component_type = ComponentType(item_type_plural[:-1])
     old_component_id = ComponentId(component_type, public_id)
-    new_component_id = ComponentId(component_type, new_public_id)
+    new_component_id = ComponentId(component_type, public_id_with_hash)
     update_references(ctx, {old_component_id: new_component_id})
 
     # need to reload agent configuration with the updated references
     try_to_load_agent_config(ctx)
 
     # replace import statements in all the non-vendor packages
-    replace_all_import_statements(
-        Path(ctx.cwd), ComponentType(item_type), public_id, new_public_id
-    )
 
     # fingerprint all (non-vendor) packages
     fingerprint_all(ctx)
@@ -264,5 +278,5 @@ def _eject_item(
         create_symlink_packages_to_vendor(ctx)
 
     click.echo(
-        f"Successfully ejected {item_type} {public_id} to {dst} as {new_public_id}."
+        f"Successfully ejected {item_type} {public_id} to {dst} as {public_id_with_hash}."
     )

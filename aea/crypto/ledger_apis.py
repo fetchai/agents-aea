@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -42,9 +43,9 @@ COSMOS_DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
 ETHEREUM_DEFAULT_ADDRESS = "http://127.0.0.1:8545"
 ETHEREUM_DEFAULT_CHAIN_ID = 1337
 ETHEREUM_DEFAULT_CURRENCY_DENOM = "wei"
-FETCHAI_DEFAULT_ADDRESS = "https://rest-stargateworld.fetch.ai:443"
+FETCHAI_DEFAULT_ADDRESS = "https://rest-dorado.fetch.ai:443"
 FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
-FETCHAI_DEFAULT_CHAIN_ID = "stargateworld-3"
+FETCHAI_DEFAULT_CHAIN_ID = "dorado-1"
 
 
 DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {

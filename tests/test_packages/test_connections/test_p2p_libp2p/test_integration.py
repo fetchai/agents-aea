@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +40,6 @@ from tests.conftest import (
 )
 
 
-DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
 MockDefaultMessageProtocol = Mock()
@@ -53,14 +53,6 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 class TestP2PLibp2pConnectionIntegrationTest:
     """Test mix of relay/delegate agents and client connections work together"""
 
-    BASE_PORT_NUM: int = DEFAULT_PORT
-
-    @classmethod
-    def get_port(cls) -> int:
-        """Get next port to use for libp2p."""
-        cls.BASE_PORT_NUM += 1
-        return cls.BASE_PORT_NUM
-
     @classmethod
     def make_connection(cls, name, **kwargs):
         """Make a p2p connection."""
@@ -69,7 +61,7 @@ class TestP2PLibp2pConnectionIntegrationTest:
         temp_dir = os.path.join(cls.t, name)
         os.mkdir(temp_dir)
         conn_options = copy(kwargs)
-        conn_options["port"] = conn_options.get("port", cls.get_port())
+
         conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
         conn = _make_libp2p_connection(**conn_options)
         multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
@@ -139,8 +131,6 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 entry_peers=[main_relay],
                 relay=True,
                 delegate=True,
-                delegate_port=cls.get_port(),
-                mailbox_port=cls.get_port(),
                 mailbox=True,
             )
 
@@ -149,8 +139,6 @@ class TestP2PLibp2pConnectionIntegrationTest:
                 entry_peers=[relay_peer_2],
                 relay=True,
                 delegate=True,
-                delegate_port=cls.get_port(),
-                mailbox_port=cls.get_port(),
                 mailbox=True,
             )
 

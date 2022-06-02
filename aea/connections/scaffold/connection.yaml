@@ -1,5 +1,5 @@
 name: scaffold
-author: fetchai
+author: open_aea
 version: 0.1.0
 type: connection
 description: The scaffold connection provides a scaffold for a connection to be implemented
@@ -7,8 +7,8 @@ description: The scaffold connection provides a scaffold for a connection to be 
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmPSdUNVTdgcoS8VFXQPZyjX8DjywLiK4Gt5Z64ekVWcqh
+  __init__.py: QmVdEbfzEyGcS59ypmWaMNHGv9N3CDV7s2tdwnH7Xhmq4q
+  connection.py: QmcMDwByumudUqC8PRHgRvKLt8gRDr1VePcAa2P1567pc8
   readme.md: Qmdt71SaCCwAG1c24VktXDm4pxgUBiPMg4bWfUTiqorypf
 fingerprint_ignore_patterns: []
 connections: []

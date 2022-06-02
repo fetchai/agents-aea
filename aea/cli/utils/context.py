@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -21,6 +22,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 
+from aea.cli.registry.settings import REGISTRY_LOCAL, REGISTRY_TYPES
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
     AgentConfig,
@@ -48,6 +50,8 @@ class Context:
 
     agent_config: AgentConfig
 
+    _registry_type: Optional[str]
+
     def __init__(self, cwd: str, verbosity: str, registry_path: Optional[str]) -> None:
         """Init the context."""
         self.config = dict()  # type: Dict
@@ -55,6 +59,27 @@ class Context:
         self.verbosity = verbosity
         self.clean_paths: List = []
         self._registry_path = registry_path
+        self._registry_type = None
+
+    @property
+    def registry_type(self,) -> str:
+        """Returns registry type to be used for session"""
+        if self._registry_type is None:
+            logger.warning("Registry not set, returning local as registry type")
+            return REGISTRY_LOCAL
+
+        return self._registry_type
+
+    @registry_type.setter
+    def registry_type(self, value: str) -> None:
+        """Set registry value."""
+        if value is not None:
+            if value not in REGISTRY_TYPES:
+                raise ValueError(
+                    f"{value} not allowed as registry type; Allowed registry types: {REGISTRY_TYPES}"
+                )
+
+            self._registry_type = value
 
     @property
     def registry_path(self) -> str:

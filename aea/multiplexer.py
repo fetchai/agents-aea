@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -266,7 +267,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         if connection.connection_id in self._id_to_connection:  # pragma: nocover
             self.logger.warning(
-                f"A connection with id {connection.connection_id} was already added. Replacing it..."
+                f"A connection with id {connection.connection_id.without_hash()} was already added. Replacing it..."
             )
 
         self._connections.append(connection)

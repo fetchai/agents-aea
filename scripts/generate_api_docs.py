@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,14 +28,8 @@ import sys
 from pathlib import Path
 
 from aea.configurations.base import ComponentType, PublicId
-from aea.configurations.constants import (
-    DEFAULT_PROTOCOL,
-    PACKAGES,
-    SIGNING_PROTOCOL,
-    STATE_UPDATE_PROTOCOL,
-    _FETCHAI_IDENTIFIER,
-)
-from scripts.common import check_working_tree_is_dirty
+from aea.configurations.constants import PACKAGES, SIGNING_PROTOCOL, _FETCHAI_IDENTIFIER
+from aea.helpers.git import check_working_tree_is_dirty
 
 
 DOCS_DIR = Path("docs/")
@@ -44,9 +39,7 @@ PACKAGES_DIR = Path(PACKAGES)
 PLUGIN_DIR = Path("plugins")
 FETCHAI_PACKAGES = PACKAGES_DIR / _FETCHAI_IDENTIFIER
 DEFAULT_PACKAGES = {
-    (ComponentType.PROTOCOL, DEFAULT_PROTOCOL),
     (ComponentType.PROTOCOL, SIGNING_PROTOCOL),
-    (ComponentType.PROTOCOL, STATE_UPDATE_PROTOCOL),
 }
 
 IGNORE_NAMES = {r"^__init__\.py$", r"^__version__\.py$", r"^py\.typed$", r"^.*_pb2.py$"}

@@ -6,14 +6,10 @@ All the commands must be executed from the parent directory, if not stated other
 
 We recommend using the following command for building:
 
-    ./user-image/scripts/docker-build-img.sh -t fetchai/aea-user:latest --
+    docker build . \
+    -t valory/open-aea-user:latest \
+    --file user-image/Dockerfile 
+
 
 ## Publish
-
-First,
-
-    ./user-image/scripts/docker-publish-img.sh
-
-And then, in `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-user:latest` and comment the alternative line, then run the publish command again: 
-
-    ./user-image/scripts/docker-publish-img.sh
+     docker push valory/open-aea-user:latest

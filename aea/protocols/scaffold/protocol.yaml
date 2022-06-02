@@ -1,14 +1,14 @@
 name: scaffold
-author: fetchai
+author: open_aea
 version: 0.1.0
 type: protocol
 description: The scaffold protocol scaffolds a protocol to be implemented by the developer.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-protocol_specification_id: fetchai/scaffold:0.1.0
+protocol_specification_id: open_aea/scaffold:0.1.0
 fingerprint:
-  __init__.py: Qmc9Ln8THrWmwou4nr3Acag7vcZ1fv8v5oRSkCWtv1aH6t
-  message.py: QmSTvkiRCT9SEvKkNsMHABM1L2i88tFeKBdVaQDV8ntxBz
-  serialization.py: QmZbSDKy54EuhX8QN5BFP8pgZyUYMZWwPKRkdiqHudRcVL
+  __init__.py: QmW1D7VoPyXpBGFa8Wraey75QTAdxsmvUpvzkBjkXrXpE6
+  message.py: QmbJBbc4KQKneFhSmFMwwQPzWqMdp6gXkFautpKQmzuZSm
+  serialization.py: QmdhpcZwK6b1KSWBUjgJ8KL5xRh82UdYHHxWvQWGKhzCi1
 fingerprint_ignore_patterns: []
 dependencies: {}

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +35,7 @@ def get_all_extras() -> Dict:
         "pyyaml>=4.2b1,<6.0",
         "jsonschema>=3.0.0,<4.0.0",
         "packaging>=20.3,<21.0",
+        "semver>=2.9.1,<3.0.0",
     ]
 
     extras = {
@@ -49,16 +51,16 @@ def get_all_extras() -> Dict:
 all_extras = get_all_extras()
 
 base_deps = [
+    "semver>=2.9.1,<3.0.0",
     "base58>=1.0.3,<3.0.0",
     "jsonschema>=3.0.0,<4.0.0",
     "packaging>=20.3,<21.0",
-    "semver>=2.9.1,<3.0.0",
-    "protobuf==3.13.0",
+    "protobuf>=3.19.0,<4.0.0",
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1,<6.0",
     "requests>=2.22.0,<3.0.0",
     "python-dotenv>=0.14.0,<0.18.0",
-    "ecdsa>=0.15,<0.17.0"
+    "ecdsa>=0.15,<0.17.0",
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
@@ -75,7 +77,7 @@ def parse_readme():
         readme = f.read()
 
     # replace relative links of images
-    raw_url_root = "https://raw.githubusercontent.com/fetchai/agents-aea/main/"
+    raw_url_root = "https://raw.githubusercontent.com/valory-xyz/open-aea/main/"
     replacement = raw_url_root + r"\g<0>"
     readme = re.sub(r"(?<=<img src=\")(/.*)(?=\")", replacement, readme, re.DOTALL)
 
@@ -124,9 +126,9 @@ if __name__ == "__main__":
         include_package_data=True,
         license=about["__license__"],
         python_requires=">=3.6",
-        keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
+        keywords="aea open-aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network",
         project_urls={
-            "Bug Reports": "https://github.com/fetchai/agents-aea/issues",
-            "Source": "https://github.com/fetchai/agents-aea",
+            "Bug Reports": "https://github.com/valory-xyz/open-aea/issues",
+            "Source": "https://github.com/valory-xyz/open-aea",
         },
     )

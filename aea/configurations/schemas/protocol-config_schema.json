@@ -27,7 +27,9 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "enum": ["protocol"]
+      "enum": [
+        "protocol"
+      ]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"

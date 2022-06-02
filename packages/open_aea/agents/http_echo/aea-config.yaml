@@ -1,0 +1,36 @@
+agent_name: http_echo
+author: open_aea
+version: 0.1.0
+license: Apache-2.0
+description: Http echo agent configured with default variables.
+aea_version: '>=1.3.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_server:0.22.0:QmNZLaHND6cXCFCwGHV3kbsguYxBm89v9h7c1sGHDvmqax
+contracts: []
+protocols:
+- fetchai/default:1.0.0:QmNuQp2z2bq2SsEGCUdYAyXLXyCRtB16RrsR2enGPaF3Nr
+- fetchai/http:1.0.0:QmUKPQ41NMxTmzEmcv5y3U5rc4EJAvj2kdQoEJWvP34ceD
+- open_aea/signing:1.0.0:QmYvwPTb6HXrNcKYvQwCWiHsB6sYQGHPLxr5DXQFtAbMrf
+skills:
+- fetchai/http_echo:0.20.0:QmRf9mzpTpdWvP2LuAK9sGVQHPJuzWrVcJNU63aTHX9c7o
+default_ledger: ethereum
+required_ledgers:
+- ethereum
+default_routing: {}
+connection_private_key_paths: {}
+private_key_paths: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+dependencies:
+  open-aea-ledger-ethereum: {}
+default_connection: null
+---
+public_id: fetchai/http_server:0.22.0
+type: connection
+config:
+  host: ${HOST:str:localhost}
+  port: ${PORT:int:5000}
+  target_skill_id: ${TARGET_SKILL:str:fetchai/http_echo:0.20.0}

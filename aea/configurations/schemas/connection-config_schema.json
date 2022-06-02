@@ -33,7 +33,9 @@
       "$ref": "definitions.json#/definitions/package_version"
     },
     "type": {
-      "enum": ["connection"]
+      "enum": [
+        "connection"
+      ]
     },
     "license": {
       "$ref": "definitions.json#/definitions/license"

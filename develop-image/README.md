@@ -4,44 +4,45 @@ All the commands must be executed from the parent directory, if not stated other
 
 ## Build
 
-    ./develop-image/scripts/docker-build-img.sh -t fetchai/aea-deploy:latest --
-    
+    docker build . \
+    -t valory/open-aea-develop:latest \
+    --file develop-image/Dockerfile 
 
 To pass immediate parameters to the `docker build` command:
 
-    ./develop-image/scripts/docker-build-img.sh arg1 arg2 --    
+    docker build . \
+        -t valory/open-aea-develop:latest \
+        --file develop-image/Dockerfile \
+        arg1 arg2
 
 E.g.:
 
-    ./develop-image/scripts/docker-build-img.sh --squash --cpus 4 --compress --    
-
+    docker build . \
+        -t valory/open-aea-develop:latest \
+        --file develop-image/Dockerfile  \
+        --cpu-quota 4 --compress
 
 ## Run
-
-    ./develop-image/scripts/docker-run.sh -- /bin/bash
+    docker run -it valory/open-aea-develop:latest /bin/bash
  
-As before, to pass parameters to the `docker run` command:
+Pass parameters to the `docker run` command:
 
-    ./develop-image/scripts/docker-run.sh -p 8080:80 -- /bin/bash
+    docker run -it -p 8080:8080 valory/open-aea-develop:latest /bin/bash
 
 
 ## Publish
 
 First, be sure you tagged the image with the `latest` tag: 
 
-    docker tag fetchai/aea-develop:<latest-version-number> fetchai/aea-develop:latest
+    docker tag valory/open-aea-develop:<latest-version-number> valory/open-aea-develop:latest
 
-Then, publish the images. First, the `fetchai/aea-develop:<latest-version-number>`
+Then, publish the images. First, the `valory/open-aea-develop:<latest-version-number>`
 
-    ./develop-image/scripts/docker-publish-img.sh
+    docker push valory/open-aea-develop:<latest-version-number>
 
-And then, the `fetchai/aea-develop:latest` image:
+And then, the `valory/open-aea-develop:latest` image:
 
-- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-develop:latest`  
-
-- Run the publish command again: 
-
-      ./develop-image/scripts/docker-publish-img.sh
+    docker push valory/open-aea-develop:latest
 
 # Publish to k8s
 

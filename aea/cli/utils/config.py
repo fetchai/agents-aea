@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +44,13 @@ import click
 import jsonschema
 import yaml
 
-from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH
+from aea.cli.registry.settings import (
+    DEFAULT_IPFS_URL,
+    REGISTRY_CONFIG_KEY,
+    REGISTRY_LOCAL,
+    REMOTE_HTTP,
+)
+from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH, DEFAULT_CLI_CONFIG
 from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
@@ -53,7 +60,7 @@ from aea.configurations.base import (
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, REGISTRY_PATH_KEY
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.configurations.validation import ExtraPropertiesError
 from aea.exceptions import AEAEnforceError, AEAValidationError
@@ -106,7 +113,7 @@ def _init_cli_config() -> None:
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
     with open_file(CLI_CONFIG_PATH, "w+") as f:
-        yaml.dump({}, f, default_flow_style=False)
+        yaml.dump(DEFAULT_CLI_CONFIG, f, default_flow_style=False)
 
 
 def update_cli_config(dict_conf: Dict) -> None:
@@ -151,10 +158,56 @@ def set_cli_author(click_context: click.Context) -> None:
     click_context.obj.set_config("cli_author", cli_author)
 
 
+def get_registry_config() -> Dict:
+    """Returns registry config from CLI config."""
+
+    config = get_or_create_cli_config()
+    cli_registry_config = config.get(REGISTRY_CONFIG_KEY, None)
+    if cli_registry_config is None:
+        raise click.ClickException(
+            "The AEA configurations are not initialized. Use `aea init` before continuing."
+        )
+    return cli_registry_config
+
+
 def get_registry_path_from_cli_config() -> Optional[str]:
     """Get registry path from config."""
+    return (
+        get_or_create_cli_config()
+        .get(REGISTRY_CONFIG_KEY, {})
+        .get("settings", {})
+        .get(REGISTRY_LOCAL, {})
+        .get("default_packages_path")
+    )
+
+
+def get_default_author_from_cli_config() -> Optional[str]:
+    """Get registry path from config."""
     config = get_or_create_cli_config()
-    return config.get(REGISTRY_PATH_KEY, None)
+    return config.get(AUTHOR_KEY, None)
+
+
+def get_default_remote_registry(default: str = REMOTE_HTTP) -> str:
+    """Return remote registry from cli config."""
+    return (
+        get_or_create_cli_config()
+        .get("registry_config", {})
+        .get("settings", {})
+        .get("remote", {})
+        .get("default", default)
+    )
+
+
+def get_ipfs_node_multiaddr(default: str = DEFAULT_IPFS_URL) -> str:
+    """Return remote registry from cli config."""
+    return (
+        get_or_create_cli_config()
+        .get("registry_config", {})
+        .get("settings", {})
+        .get("remote", {})
+        .get("ipfs", {})
+        .get("ipfs_node", default)
+    )
 
 
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:

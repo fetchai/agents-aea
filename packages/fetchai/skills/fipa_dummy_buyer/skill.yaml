@@ -15,7 +15,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/fipa:1.0.0
+- fetchai/fipa:1.0.0:QmQELeVL8MvqAW28Jbzzz3sRS4Ewdi3tviZt3zsCwHKD79
 skills: []
 behaviours:
   initializer:
@@ -32,6 +32,6 @@ models:
     args: {}
     class_name: FipaDialogues
 dependencies:
-  aea-ledger-fetchai:
+  open-aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 is_abstract: false

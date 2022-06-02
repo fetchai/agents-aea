@@ -7,9 +7,9 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
-  behaviours.py: QmbvxUwe8dCoj87ozw6YDrPTC17fDLXjAi7ydhJdK3c1aY
+  behaviours.py: QmaA79S7q3FiySHbL8fg5S8xJvKe9UsJYqbMF2jazgyGgf
   handlers.py: Qmf8XuXNDzqHNdo7Q18y9wCFujrtk6Tx1zaADsQ5MuzNRg
-  tasks.py: QmfJznzp11PWpBzpEaftq3h2BYHfXbnoitdMcFQsLCqZnL
+  tasks.py: QmPhW9JNVyNzPi9KK4K2mQo4aavMDziXAWuVsZ3J3xAUso
 fingerprint_ignore_patterns: []
 build_entrypoint: path/to/script.py
 contracts: []

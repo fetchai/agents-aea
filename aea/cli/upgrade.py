@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -65,10 +66,7 @@ from aea.helpers.base import delete_directory_contents, find_topological_order
 
 @click.group(invoke_without_command=True)
 @click.option("-y", "--yes", is_flag=True)
-@registry_flag(
-    help_local="For fetching packages only from local folder.",
-    help_remote="For fetching packages only from remote registry.",
-)
+@registry_flag()
 @click.pass_context
 @check_aea_project(  # pylint: disable=unused-argument,no-value-for-parameter
     check_aea_version=False

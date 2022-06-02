@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -175,7 +176,7 @@ def _checks(
     matches = regex.finditer(file.read_text())
     for match in matches:
         package_id = extract_package_id_from_match(match)
-        if package_id not in ALL_PACKAGE_IDS:
+        if package_id.without_hash() not in ALL_PACKAGE_IDS:
             raise PackageIdNotFound(
                 file, package_id, match, "Package {} not found.".format(package_id)
             )

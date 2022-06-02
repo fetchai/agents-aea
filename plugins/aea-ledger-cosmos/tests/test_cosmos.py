@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -221,7 +222,7 @@ def test_helper_get_contract_address():
                                     },
                                     {"key": "code_id", "value": "631"},
                                     {
-                                        "key": "contract_address",
+                                        "key": "_contract_address",
                                         "value": "fetch1lhd5t8jdjn0n4q27hsah6c0907nxrswcp5l4nw",
                                     },
                                 ],

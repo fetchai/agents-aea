@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -40,7 +41,9 @@ from aea.protocols.generator.base import (
 from aea.protocols.generator.common import _to_camel_case
 
 from tests.conftest import ROOT_DIR, match_files
-from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
+from tests.data.packages.fetchai.protocols.t_protocol.message import (
+    TProtocolMessage,  # type: ignore
+)
 from tests.test_protocols.test_generator.common import (
     PATH_TO_T_PROTOCOL,
     PATH_TO_T_PROTOCOL_SPECIFICATION,
@@ -72,7 +75,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
               custom_types.py files makes their IPFS hashes different.
         """
         path_to_generated_protocol = self.t
-        dotted_path_to_package_for_imports = "tests.data.generator."
+        dotted_path_to_package_for_imports = "tests.data.packages.fetchai.protocols."
 
         # Generate the protocol
         try:
@@ -91,6 +94,7 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
         # compare __init__.py
         init_file_generated = Path(self.t, T_PROTOCOL_NAME, "__init__.py")
         init_file_original = Path(PATH_TO_T_PROTOCOL, "__init__.py",)
+
         is_matched, diff = match_files(init_file_generated, init_file_original)
         assert (
             is_matched or len(diff) == 194
@@ -172,9 +176,9 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
             ROOT_DIR, "tests", "data", "sample_specification_no_custom_types.yaml"
         )
         path_to_generated_protocol = self.t
-        dotted_path_to_package_for_imports = "tests.data.generator."
+        dotted_path_to_package_for_imports = "tests.data.packages.fetchai.protocols."
         path_to_protocol = os.path.join(
-            ROOT_DIR, "tests", "data", "generator", protocol_name
+            ROOT_DIR, "tests", "data", "packages", "fetchai", "protocols", protocol_name
         )
 
         # Generate the protocol

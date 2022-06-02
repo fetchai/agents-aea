@@ -1,4 +1,217 @@
-# Release History
+# Release History - open AEA
+
+
+## 1.9.0 (2022-05-25)
+
+AEA:
+- Introduces `check-packages` command to check package integrity
+- Introduces a new component type `service`
+- Makes dialogues accessible via their respective handlers
+- Fixes default remote registry setting bug
+- Introduces `push-all` command to publish all available packages to a specific registry
+- Updates `aea hash all` command to extend public ids when hashing
+
+Docs:
+- Adds docs on IPFS registry usage
+
+Chores:
+- Updates `check_package_versions_in_docs.py` to use new PublicId format
+
+
+## 1.8.0 (2022-05-12)
+
+AEA:
+- Extends the `run` command to print all available addresses at the AEA start up.
+- Introduces support for usage of hashes as a part of the `PublicId`
+- Adds support for IPFS based registry
+- Introduces dialogue cleanup
+- Adds support for removing the temporal `None` values in the dialogue label 
+- Updated the profiler to
+  - Removing the unwanted variables in profiling
+  - Set counters also in the destructor
+  - Only iterate the gc one
+  - Use types blacklist
+  - Get info from all objects
+- Adds support for memray in the profiler
+- Ports the `generate_all_protocols.py` and `generate_ipfs_hashes.py` to `aea.cli` as a command line tools.
+- Adds support for the usage of environment variables in `issue-certificates` command.
+
+Pluging:
+-  Updates IPFS cli plugin tool to support remote registry and extended `PublicId`
+
+Packages:
+- Updated `tendermint/protocol` for config sharing
+
+Chores:
+- Adds support for IPFS in CI for windows based environments
+- Profile parser checks for non empty data before plotting
+- The paths to download the packages folder with svn are now pointing to the version tag rather than main.
+- Adds the missing search plugin for mkdocs.
+- Adds new functionality to the log parser to add an extra plot with common objects in the garbage collector.
+
+## 1.7.0 (2022-04-15)
+
+AEA:
+- List all available packages at the AEA start up.
+- Updates profiler module to use tracemalloc.
+- Fixes dialogue cleanup.
+
+Plugins:
+- Fixes repricing bug on ethereum plugin.
+- Adds support for lazy imports on cosmos plugin.
+
+Packages:
+- Adds protocol package for tendermint. 
+
+Docs:
+- Adds docs for newly introduced ACN modules and packages.
+
+
+## 1.6.0 (2022-03-17)
+
+AEA:
+- Adds support for packages hashing with `IPFSHashOnly` from `aea.helpers.ipfs.base`
+- Updates the `aea run` command to print hash table for available packages in an agent project
+
+Plugins:
+- Makes error raising optional when sending transactions and adds error logging for the same
+
+Docs:
+- Adds documentation for the newly introduced profiling script
+- Removes reference to `docs.fetch.ai`
+
+Chores:
+- Adds a script to analyze and visualize profiling data from agent runs
+- Updates authors list
+
+
+## 1.5.0 (2022-02-26)
+
+AEA:
+- Adds in null equivalents so that environment variables can default to a none value
+- Adds support for remote IPFS registry usage in CLI tool
+- Adds support to show IPFS hashes of each component yaml at start of `aea run`
+
+Plugins:
+- Adds support for remote IPFS registry usage in IPFS plugin
+- Fixes gas price repricing strategy in ethereum ledger plugin
+
+Packages:
+- Ports `acn` packages from fetchai repo
+- Bumps protobuf compiler version and updates protocols
+
+Docs: 
+- Adds demo of http connections and skills
+- Adds demo of environment variable usage
+- Adds miscellaneous updates to documentation based on developer feedback
+
+Chores:
+- Updates copyright script to support all patterns
+- Simplifies Dockerfiles and removes unneeded dependencies
+
+
+## Plugins patch (2022-01-27)
+
+Plugins:
+- Bumps `open-aea-ethereum-ledger` to `1.4.1` after fixing a bug in the log retrieval logic.
+
+## 1.4.0 (2022-01-26)
+
+AEA:
+- Exposes agent data directory on skill context.
+- Adds support for environment variables loading from aea-config files.
+- Extends contract base class to support new plugin functionality.
+
+Plugins:
+- Adds support for transaction preparation and log retrieval into the ethereum plugin.
+- Adds support for retrieving the revert reason when transaction is not verified in ethereum plugin.
+
+Docs: 
+- Simplifies documentation further and updates with latest features
+
+## Plugins patch (2022-01-15)
+
+Plugins:
+- Bumps `open-aea-ethereum-ledger` to `1.3.2` after adding tip increase logic
+
+## Plugins patch (2022-01-05)
+
+Plugins:
+- Fixes dynamic gas pricing on open-aea-ethereum
+- Improves daemon availability check in `IPFSDaemon` on `open-aea-cli-ipfs`
+- Bumps `open-aea-cli-ipfs` and open-aea-ethereum-ledger to `1.3.1`
+
+Docs: 
+- Removes reference to fetch.ai.
+
+## 1.3.0 (2021-12-31)
+
+AEA:
+- Adds support to scaffold packages outside an AEA project
+- Adds support for IPFS package hashing and IPFS based registry.
+- Allows contracts to depend on other contracts.
+
+Plugins:
+- Adds support for EIP1559 based gas estimation strategy on aea-ledger-ethereum.
+- Adds support for package hashing and local IPFS registry on `aea-cli-ipfs`.
+- Bumps `aea-ledger-ethereum` and `aea-cli-ipfs` to `1.3.0`.
+
+Docs: 
+- Applies new styling
+- Simplifies documentation and updates with latest features
+
+
+## 1.2.0 (2021-11-21)
+
+AEA:
+- Adds type hint for dialogue valid replies in protocol generator
+- Adds generator fixes to pass darglint checks
+- Adds various test fixes and fixes on MAM
+- Allows additional entropy to be passed to key generation in plugins (including. via CLI)
+- Fixes an issue with message key-value setter
+- Fixes an issue with improper termination of subprocesses in the test tools
+- Fixes typing issues
+- Miscellaneous minor fixes
+
+Plugins:
+- Updates aea-ledger-ethereum for EIP1159 compatibility
+- Bumps aea-ledger-ethereum dependencies
+
+Packages:
+- Miscellaneous minor fixes
+
+Docs:
+- Updates API documentation
+
+Chores:
+- Enables darglint for protocols
+
+## 1.1.0 (2021-10-31)
+
+AEA:
+- Forks 1.1.0 of legacy AEA with the aim of maintaining backwards compatibility where possible
+- Removes GOP decision maker handler to reduce dependencies
+- Removes hard-coded registry API URL
+- Changes default ledger to ethereum
+- Removes dependency on fetchai packages
+- Removes interact command
+
+Plugins:
+- Forks plugins, unfortunately cannot maintain plugin support for legacy aea plugins due to their dependency on legacy aea
+- Fixes typing issues
+
+Packages:
+- Removes most fetchai packages apart from those currently used in tests
+- Adds `open_aea/signing:1.0.0` protocol
+
+Docs:
+- Removes most demos
+
+Chores:
+- Makes all necessary changes to move to `open-aea`
+
+
+# Release History - legacy AEA
 
 ## 1.1.0 (2021-10-13)
 

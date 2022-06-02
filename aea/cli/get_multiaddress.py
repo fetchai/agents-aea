@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -231,7 +232,9 @@ def _try_get_connection_multiaddress(
     :return: the multiaddress.
     """
     ctx = cast(Context, click_context.obj)
-    if connection_id not in ctx.agent_config.connections:
+    if connection_id not in {
+        pid.without_hash() for pid in ctx.agent_config.connections
+    }:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
     agent_config_manager = AgentConfigManager.load(ctx.cwd)

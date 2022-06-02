@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,14 +30,18 @@ import requests
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p_mailbox.connection import NodeClient
-from packages.fetchai.protocols.acn import acn_pb2
-from packages.fetchai.protocols.acn.message import AcnMessage
 from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.valory.connections.p2p_libp2p_mailbox.connection import NodeClient
+from packages.valory.protocols.acn import acn_pb2
+from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import _make_libp2p_client_connection, _make_libp2p_connection
+from tests.conftest import (
+    _make_libp2p_client_connection,
+    _make_libp2p_connection,
+    default_ports,
+)
 
 
 MockDefaultMessageProtocol = Mock()
@@ -55,23 +60,33 @@ class TestMailboxAPI:
         """Set the test up"""
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        cls.delegate_port = next(default_ports)
+        cls.mailbox_port = next(default_ports)
         os.chdir(cls.t)
 
         cls.temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(cls.temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=cls.temp_dir, delegate=True, mailbox=True
+            data_dir=cls.temp_dir,
+            delegate=True,
+            delegate_port=cls.delegate_port,
+            mailbox=True,
+            mailbox_port=cls.mailbox_port,
         )
         temp_dir_client1 = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client1)
         temp_dir_client2 = os.path.join(cls.t, "temp_dir_client2")
         os.mkdir(temp_dir_client2)
         cls.connection1 = _make_libp2p_client_connection(
-            data_dir=temp_dir_client1, peer_public_key=cls.connection_node.node.pub
+            data_dir=temp_dir_client1,
+            peer_public_key=cls.connection_node.node.pub,
+            node_port=cls.delegate_port,
         )
 
         cls.connection2 = _make_libp2p_client_connection(
-            data_dir=temp_dir_client2, peer_public_key=cls.connection_node.node.pub
+            data_dir=temp_dir_client2,
+            peer_public_key=cls.connection_node.node.pub,
+            node_port=cls.delegate_port,
         )
         cls.multiplexer1 = Multiplexer([cls.connection_node])
         cls.multiplexer1.connect()
@@ -80,8 +95,10 @@ class TestMailboxAPI:
 
     @pytest.mark.asyncio
     async def test_message_delivery(self):  # nosec
-        """Test connnect then disconnect."""
-        r = requests.get("https://localhost:8888/ssl_signature", verify=False)  # nosec
+        """Test connect then disconnect."""
+
+        url = f"https://localhost:{self.mailbox_port}"
+        r = requests.get(f"{url}/ssl_signature", verify=False)  # nosec
         assert r.status_code == 200, r.text
 
         node_client = NodeClient(Mock(), self.connection2.node_por)
@@ -93,9 +110,7 @@ class TestMailboxAPI:
         )
         data = performative.record.SerializeToString()  # pylint: disable=no-member
 
-        r = requests.post(
-            "https://localhost:8888/register", data=data, verify=False  # nosec
-        )
+        r = requests.post(f"{url}/register", data=data, verify=False)  # nosec
         assert r.status_code == 200, r.text
         assert re.match(
             "[0-9a-f]{32}", r.text, re.I
@@ -104,7 +119,7 @@ class TestMailboxAPI:
 
         envelope = self.make_envelope(addr, addr)
         r = requests.post(
-            "https://localhost:8888/send_envelope",
+            f"{url}/send_envelope",
             data=envelope.encode(),
             headers={"Session-Id": session_id},
             verify=False,  # nosec
@@ -112,7 +127,7 @@ class TestMailboxAPI:
         assert r.status_code == 200, r.text
 
         r = requests.get(
-            "https://localhost:8888/get_envelope",
+            f"{url}/get_envelope",
             headers={"Session-Id": session_id},
             verify=False,  # nosec
         )
@@ -131,7 +146,7 @@ class TestMailboxAPI:
 
         # no new envelopes
         r = requests.get(
-            "https://localhost:8888/get_envelope",
+            f"{url}/get_envelope",
             headers={"Session-Id": session_id},
             verify=False,  # nosec
         )
@@ -140,7 +155,7 @@ class TestMailboxAPI:
 
         # unregister
         r = requests.get(
-            "https://localhost:8888/unregister",
+            f"{url}/unregister",
             headers={"Session-Id": session_id},
             verify=False,  # nosec
         )
@@ -148,7 +163,7 @@ class TestMailboxAPI:
 
         # bad session!
         r = requests.get(
-            "https://localhost:8888/get_envelope",
+            f"{url}/get_envelope",
             headers={"Session-Id": session_id},
             verify=False,  # nosec
         )
@@ -177,9 +192,7 @@ class TestMailboxAPI:
         """Tear down the test"""
         cls.multiplexer1.disconnect()
         os.chdir(cls.cwd)
-        print(open(cls.connection_node.node.log_file, "r").read())
         try:
-
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass

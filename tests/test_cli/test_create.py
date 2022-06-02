@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +20,6 @@
 
 """This test module contains the tests for the `aea create` sub-command."""
 
-import filecmp
 import json
 import os
 import shutil
@@ -38,11 +38,10 @@ from packaging.version import Version
 import aea
 from aea.cli import cli
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
-from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.signing.message import SigningMessage
-from packages.fetchai.protocols.state_update.message import StateUpdateMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -82,7 +81,7 @@ class TestCreate:
         )
         cls.cli_config_patch.start()
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0, result.stdout
 
@@ -167,11 +166,10 @@ class TestCreate:
 
     def test_protocols_field_is_not_empty_list(self):
         """Check that the 'protocols' field is a list with the 'default' protocol."""
-        assert self.agent_config["protocols"] == [
-            str(DefaultMessage.protocol_id),
-            str(SigningMessage.protocol_id),
-            str(StateUpdateMessage.protocol_id),
-        ]
+        assert [
+            str(PublicId.from_str(p).without_hash())
+            for p in self.agent_config["protocols"]
+        ] == [str(SigningMessage.protocol_id)]
 
     def test_skills_field_is_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
@@ -186,33 +184,22 @@ class TestCreate:
         vendor_dir = Path(self.agent_name, "vendor")
         assert vendor_dir.exists()
         assert set(vendor_dir.iterdir()) == {
-            vendor_dir / "fetchai",
+            vendor_dir / "open_aea",
             vendor_dir / "__init__.py",
         }
 
         # assert that every subdirectory of vendor/fetchai is a Python package
         # (i.e. that contains __init__.py)
-        for package_dir in (vendor_dir / "fetchai").iterdir():
+        for package_dir in (vendor_dir / "open_aea").iterdir():
             assert (package_dir / "__init__.py").exists()
 
-    def test_vendor_protocols_contains_default_protocol(self):
-        """Check that the vendor protocols directory contains the default protocol."""
-        stub_connection_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "protocols", "default"
+    def test_vendor_protocols_contains_signing_protocol(self):
+        """Check that the vendor protocols directory contains the signing protocol."""
+        protocol_dirpath = Path(
+            self.agent_name, "vendor", "open_aea", "protocols", "signing"
         )
-        assert stub_connection_dirpath.exists()
-        assert stub_connection_dirpath.is_dir()
-
-    def test_default_protocol_is_equal_to_library_default_protocol(self):
-        """Check that the stub connection directory is equal to the package's one (packages.fetchai.protocols.default)."""
-        default_protocol_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "protocols", "default"
-        )
-        comparison = filecmp.dircmp(
-            str(default_protocol_dirpath),
-            str(Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")),
-        )
-        assert comparison.diff_files == []
+        assert protocol_dirpath.exists()
+        assert protocol_dirpath.is_dir()
 
     def test_protocols_directory_content(self):
         """Test the content of the 'protocols' directory."""
@@ -266,7 +253,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -322,7 +309,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -372,7 +359,7 @@ class TestCreateFailsWhenExceptionOccurs:
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -418,7 +405,7 @@ class TestCreateFailsWhenAlreadyInAEAProject:
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -470,7 +457,7 @@ class CreateCommandTestCase(TestCase):
         """Test for CLI create no init result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "create", "agent_name", "--author=some"],
+            [*CLI_LOG_OPTION, "create", "--remote", "agent_name", "--author=some"],
             standalone_mode=False,
         )
         self.assertEqual(

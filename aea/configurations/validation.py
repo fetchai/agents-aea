@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -133,7 +134,11 @@ class ConfigValidator:
         :param env_vars_friendly: whether or not it is env var friendly.
         """
         base_uri = Path(_SCHEMAS_DIR)
-        with open_file(base_uri / schema_filename) as fp:
+        if Path(schema_filename).is_absolute():
+            schema_file = Path(schema_filename)
+        else:
+            schema_file = base_uri / schema_filename
+        with open_file(schema_file) as fp:
             self._schema = json.load(fp)
         root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -168,6 +169,12 @@ class DialogueLabel:
         )
         return dialogue_label
 
+    def is_complete(self) -> bool:
+        """Check if the dialogue label is complete."""
+        return (
+            self.dialogue_responder_reference != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+        )
+
     def get_incomplete_version(self) -> "DialogueLabel":
         """Get the incomplete version of the label."""
         dialogue_label = DialogueLabel(
@@ -176,6 +183,16 @@ class DialogueLabel:
             self.dialogue_starter_addr,
         )
         return dialogue_label
+
+    def get_both_versions(self) -> Tuple["DialogueLabel", Optional["DialogueLabel"]]:
+        """Get the incomplete and complete versions of the label."""
+        if self.is_complete():
+            complete_dialogue_label: Optional[DialogueLabel] = self
+            incomplete_dialogue_label = self.get_incomplete_version()
+        else:
+            complete_dialogue_label = None
+            incomplete_dialogue_label = self
+        return (incomplete_dialogue_label, complete_dialogue_label)
 
     def __str__(self) -> str:
         """Get the string representation."""
@@ -1051,15 +1068,25 @@ class BasicDialoguesStorage:
 
     def __init__(self, dialogues: "Dialogues") -> None:
         """Init dialogues storage."""
+        # used for both storing via complete and incomplete dialogue labels
         self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
+        # used for retrieving dialogue by opponent address
         self._dialogue_by_address = defaultdict(
             list
         )  # type: Dict[Address, List[Dialogue]]
         self._incomplete_to_complete_dialogue_labels = (
             {}
-        )  # type: Dict[DialogueLabel, DialogueLabel]
+        )  # type: Dict[DialogueLabel, Optional[DialogueLabel]]
         self._dialogues = dialogues
+        # used for both storing complete and incomplete dialogue labels
         self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
+
+    def cleanup(self) -> None:
+        """Clean up the dialogue storage"""
+        self._dialogues_by_dialogue_label = {}
+        self._dialogue_by_address = defaultdict(list)
+        self._incomplete_to_complete_dialogue_labels = {}
+        self._terminal_state_dialogues_labels = set()
 
     @property
     def dialogues_in_terminal_state(self) -> List["Dialogue"]:
@@ -1110,6 +1137,9 @@ class BasicDialoguesStorage:
         """
         Add dialogue to storage.
 
+        Label can be complete (if receiving a message, and `add` being called by `Dialogue.update`)
+        or incomplete (if sending a message, and `add` being called by `Dialogue.create`).
+
         :param dialogue: dialogue to add.
         """
         dialogue.add_terminal_state_callback(self.dialogue_terminal_state_callback)
@@ -1117,6 +1147,15 @@ class BasicDialoguesStorage:
         self._dialogue_by_address[
             dialogue.dialogue_label.dialogue_opponent_addr
         ].append(dialogue)
+
+        (
+            incomplete_dialogue_label,
+            complete_dialogue_label,
+        ) = dialogue.dialogue_label.get_both_versions()
+
+        self._incomplete_to_complete_dialogue_labels[
+            incomplete_dialogue_label
+        ] = complete_dialogue_label
 
     def _add_terminal_state_dialogue(self, dialogue: Dialogue) -> None:
         """
@@ -1133,17 +1172,46 @@ class BasicDialoguesStorage:
 
         :param dialogue_label: label of the dialogue to remove
         """
-        dialogue = self._dialogues_by_dialogue_label.pop(dialogue_label, None)
+        if dialogue_label.is_complete():
+            complete_dialogue_label: Optional[DialogueLabel] = dialogue_label
+            incomplete_dialogue_label = dialogue_label.get_incomplete_version()
+        else:
+            complete_dialogue_label = None
+            incomplete_dialogue_label = dialogue_label
 
-        self._incomplete_to_complete_dialogue_labels.pop(dialogue_label, None)
+        self._incomplete_to_complete_dialogue_labels.pop(incomplete_dialogue_label)
 
-        if dialogue_label in self._terminal_state_dialogues_labels:
-            self._terminal_state_dialogues_labels.remove(dialogue_label)
+        if incomplete_dialogue_label in self._terminal_state_dialogues_labels:
+            self._terminal_state_dialogues_labels.remove(incomplete_dialogue_label)
 
-        if dialogue:
-            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].remove(
-                dialogue
+        if (
+            complete_dialogue_label is not None
+            and complete_dialogue_label in self._terminal_state_dialogues_labels
+        ):
+            self._terminal_state_dialogues_labels.remove(complete_dialogue_label)
+
+        dialogue = self._dialogues_by_dialogue_label.pop(
+            incomplete_dialogue_label, None
+        )
+        dialogue_ = None
+        if complete_dialogue_label is not None:
+            dialogue_ = self._dialogues_by_dialogue_label.pop(
+                complete_dialogue_label, None
             )
+
+        if (
+            dialogue is not None and dialogue_ is not None and dialogue != dialogue_
+        ):  # pragma: nocover
+            raise ValueError(
+                f"Incomplete dialogue label {incomplete_dialogue_label} and complete dialogue label {complete_dialogue_label} yield different dialogues: {dialogue} vs {dialogue_}"
+            )
+
+        dialogue = dialogue or dialogue_
+
+        # by design the dialogue must be present
+        self._dialogue_by_address[
+            incomplete_dialogue_label.dialogue_opponent_addr
+        ].remove(cast(Dialogue, dialogue))
 
     def get(self, dialogue_label: DialogueLabel) -> Optional[Dialogue]:
         """
@@ -1183,8 +1251,9 @@ class BasicDialoguesStorage:
 
     def get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
         """Get latest label for dialogue."""
-        return self._incomplete_to_complete_dialogue_labels.get(
-            dialogue_label, dialogue_label
+        return (
+            self._incomplete_to_complete_dialogue_labels.get(dialogue_label)
+            or dialogue_label
         )
 
 
@@ -1329,14 +1398,15 @@ class PersistDialoguesStorage(BasicDialoguesStorage):
     def _incomplete_dialogues_labels_to_json(self) -> List:
         """Dump incomplete_to_complete_dialogue_labels to json friendly dict."""
         return [
-            [k.json, v.json]
+            [k.json, getattr(v, "json", None)]
             for k, v in self._incomplete_to_complete_dialogue_labels.items()
         ]
 
     def _set_incomplete_dialogues_labels_from_json(self, data: List) -> None:
         """Set incomplete_to_complete_dialogue_labels from json friendly dict."""
         self._incomplete_to_complete_dialogue_labels = {
-            DialogueLabel.from_json(k): DialogueLabel.from_json(v) for k, v in data
+            DialogueLabel.from_json(k): DialogueLabel.from_json(v) if v else None
+            for k, v in data
         }
 
     def setup(self) -> None:
@@ -1550,6 +1620,10 @@ class Dialogues:
             ),
         )
         self._role_from_first_message = role_from_first_message
+
+    def cleanup(self) -> None:
+        """Clean up the dialogue storage"""
+        self._dialogues_storage.cleanup()
 
     @property
     def is_keep_dialogues_in_terminal_state(self) -> bool:
@@ -1810,9 +1884,7 @@ class Dialogues:
             incomplete_dialogue_reference, message.sender, self.self_address,
         )
 
-        if self._dialogues_storage.is_dialogue_present(
-            incomplete_dialogue_label
-        ) and not self._dialogues_storage.is_in_incomplete(incomplete_dialogue_label):
+        if self._dialogues_storage.is_dialogue_present(incomplete_dialogue_label):
             dialogue = self._dialogues_storage.get(incomplete_dialogue_label)
             if not dialogue:  # pragma: nocover
                 raise ValueError("no dialogue found")

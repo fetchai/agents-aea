@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,8 +38,6 @@ from aea.configurations.base import PublicId, SkillComponentConfiguration, Skill
 from aea.configurations.data_types import ComponentType
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
-from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
@@ -217,37 +216,16 @@ class TestSkillContextDefault(BaseTestSkillContext):
     """Test skill context with default dm."""
 
 
-class TestSkillContextGOP(BaseTestSkillContext):
-    """Test skill context with GOP dm."""
-
-    @classmethod
-    def setup_class(cls, decision_maker_handler_class=GOPDecisionMakerHandler):
-        """Setup test class."""
-        super().setup_class(decision_maker_handler_class)
-
-    def test_agent_ownership_state(self):
-        """Test the ownership state."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.ownership_state,
-            OwnershipState,
-        )
-
-    def test_agent_preferences(self):
-        """Test the agents_preferences."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.preferences, Preferences
-        )
-
-    def test_agent_is_ready_to_pursuit_goals(self):
-        """Test if the agent is ready to pursuit his goals."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
-            GoalPursuitReadiness,
-        )
-
-
 class SkillContextTestCase(TestCase):
     """Test case for SkillContext class."""
+
+    @staticmethod
+    def test_data_dir():
+        """Test data_dir property."""
+        agent_context = mock.Mock()
+        agent_context.data_dir = "path"
+        obj = SkillContext(agent_context)
+        assert obj.data_dir == "path"
 
     def test_shared_state_positive(self):
         """Test shared_state property positive result"""
@@ -594,6 +572,18 @@ class TestSkillProgrammatic:
     def test_models(self):
         """Test the handlers getter on skill context."""
         assert getattr(self.skill.skill_context, self.model_name, None) == self.model
+
+    def test_protocol_dialogues(self):
+        """Test the retrieving protocol dialogues via handler"""
+        error_message = f"SUPPORTED_PROTOCOL not set on {self.handler}"
+        with pytest.raises(ValueError, match=error_message):
+            self.handler.protocol_dialogues()
+
+        protocol = PublicId.from_str("open_aea/simple_skill:0.1.0")
+        self.handler.SUPPORTED_PROTOCOL = protocol
+        error_message = "'SkillContext' object has no attribute "
+        with pytest.raises(AttributeError, match=error_message):
+            self.handler.protocol_dialogues()
 
 
 class TestHandlerHandleExceptions:

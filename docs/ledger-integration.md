@@ -25,14 +25,14 @@ In particular, there are three types of entry points the framework looks up:
 - `aea.cryptos`, which points to instantiable classes implementing the `Crypto` interface;
 - `aea.faucet_apis`, which points to instantiable classes implementing the `FaucetApi` interface.
 
-This is an example of `setup.py` script for a ledger plug-in `aea-ledger-myledger`:
+This is an example of `setup.py` script for a ledger plug-in `open-aea-ledger-myledger`:
 
 ```python
 # sample ./setup.py file
 from setuptools import setup
 
 setup(
-    name="aea-ledger-myledger",
+    name="open-aea-ledger-myledger",
     packages=["aea_ledger_myledger"],
     # plugins must depend on 'aea'  
     install_requires=["aea"], # add other dependencies...
@@ -47,9 +47,9 @@ setup(
 )
 ```
 
-By convention, such plug-in packages should be named `aea-ledger-${LEDGER_ID}`,
+By convention, such plug-in packages should be named `open-aea-ledger-${LEDGER_ID}`,
 and the importable package name `aea_ledger_${LEDGER_ID}`.
-In the example above, the package name is `aea-ledger-myledger`,
+In the example above, the package name is `open-aea-ledger-myledger`,
 and the importable package name is `aea_ledger_myledger`.
 
 You can search for AEA ledger plug-ins on PyPI:
@@ -59,9 +59,9 @@ You can search for AEA ledger plug-ins on PyPI:
 
 At the moment, the framework natively supports the following three ledgers:
 
-- Fetch.ai: <a href="https://pypi.org/project/aea-ledger-fetchai/" target="_blank">PyPI package: `aea-ledger-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai" target="_blank">source code</a>.
-- Ethereum: <a href="https://pypi.org/project/aea-ledger-ethereum/" target="_blank">PyPI package: `aea-ledger-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum" target="_blank">source code</a>.
-- Cosmos: <a href="https://pypi.org/project/aea-ledger-cosmos/" target="_blank">PyPI package: `aea-ledger-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos" target="_blank">source code</a>.
+- Fetch.ai: <a href="https://pypi.org/project/open-aea-ledger-fetchai/" target="_blank">PyPI package: `open-aea-ledger-fetchai`</a>, and <a href="https://github.com/valory-xyz/open-aea/tree/main/plugins/aea-ledger-fetchai" target="_blank">source code</a>.
+- Ethereum: <a href="https://pypi.org/project/open-aea-ledger-ethereum/" target="_blank">PyPI package: `open-aea-ledger-ethereum`</a>, and <a href="https://github.com/valory-xyz/open-aea/tree/main/plugins/aea-ledger-ethereum" target="_blank">source code</a>.
+- Cosmos: <a href="https://pypi.org/project/open-aea-ledger-cosmos/" target="_blank">PyPI package: `open-aea-ledger-cosmos`</a>, and <a href="https://github.com/valory-xyz/open-aea/tree/main/plugins/aea-ledger-cosmos" target="_blank">source code</a>.
 
 However, support for additional ledgers can be added to the framework at runtime.
 
@@ -128,23 +128,22 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
-## Stargate World - Fetch.ai testnet for agents
+## Dorado - Fetch.ai testnet for agents
 
-Stargate World is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
+Dorado is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
 
 | Parameter      | Value                                                                      |
 | -------------- | -------------------------------------------------------------------------- |
-| Chain ID       | stargateworld-3                                                            |
+| Chain ID       | dorado-1                                                            |
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
 | Version        | v0.8.x                                                                     |
-| RPC Endpoint   | https://rpc-stargateworld.fetch.ai:443                                     |
-| REST Endpoint  | https://rest-stargateworld.fetch.ai:443                                    |
-| Block Explorer | <a href="https://explore-stargateworld.fetch.ai" target="_blank">https://explore-stargateworld.fetch.ai</a> |
+| RPC Endpoint   | https://rpc-dorado.fetch.ai:443                                     |
+| REST Endpoint  | https://rest-dorado.fetch.ai:443                                    |
+| Block Explorer | <a href="https://explore-dorado.fetch.ai" target="_blank">https://explore-dorado.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
-You can access more details on <a href="https://github.com/fetchai/networks-stargateworld" target="_blank">GitHub</a>.
 
 The configurations can be specified for the `fetchai/ledger:0.19.0` connection.
 

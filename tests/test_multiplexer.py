@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,9 +45,6 @@ from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.test_tools.click_testing import CliRunner
 
 from packages.fetchai.connections.local.connection import LocalNode
-from packages.fetchai.connections.p2p_libp2p.connection import (
-    PUBLIC_ID as P2P_PUBLIC_ID,
-)
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -886,7 +884,7 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         self.conn_key_path = os.path.join(self.t, "conn_private_key.txt")
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -907,55 +905,62 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
         assert result.exit_code == 0, result.stdout_bytes
 
-    def test_multiplexer_disconnected_on_early_interruption(self):
-        """Test multiplexer disconnected properly on termination before connected."""
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
-        )
-        assert result.exit_code == 0, result.stdout_bytes
+    # def test_multiplexer_disconnected_on_early_interruption(self):  # noqa: E800
+    #     """Test multiplexer disconnected properly on termination before connected."""  # noqa: E800
+    #     result = self.runner.invoke(  # noqa: E800
+    #         cli,  # noqa: E800
+    #         [  # noqa: E800
+    #             *CLI_LOG_OPTION,  # noqa: E800
+    #             "add",  # noqa: E800
+    #             "--local",  # noqa: E800
+    #             "connection",  # noqa: E800
+    #             str(HTTP_SERVER_PUBLIC_ID),  # noqa: E800
+    #         ],  # noqa: E800
+    #     )  # noqa: E800
+    #     assert result.exit_code == 0, result.stdout_bytes  # noqa: E800
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
-        assert result.exit_code == 0, result.stdout_bytes
+    #     result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])  # noqa: E800
+    #     assert result.exit_code == 0, result.stdout_bytes  # noqa: E800
 
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.conn_key_path]
-        )
-        assert result.exit_code == 0, result.stdout_bytes
+    #     result = self.runner.invoke(  # noqa: E800
+    #         cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.conn_key_path]  # noqa: E800
+    #     )  # noqa: E800
+    #     assert result.exit_code == 0, result.stdout_bytes  # noqa: E800
 
-        result = self.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "add-key",
-                DEFAULT_LEDGER,
-                self.conn_key_path,
-                "--connection",
-            ],
-        )
-        assert result.exit_code == 0, result.stdout_bytes
+    #     result = self.runner.invoke(  # noqa: E800
+    #         cli,  # noqa: E800
+    #         [  # noqa: E800
+    #             *CLI_LOG_OPTION,  # noqa: E800
+    #             "add-key",  # noqa: E800
+    #             DEFAULT_LEDGER,  # noqa: E800
+    #             self.conn_key_path,  # noqa: E800
+    #             "--connection",  # noqa: E800
+    #         ],  # noqa: E800
+    #     )  # noqa: E800
+    #     assert result.exit_code == 0, result.stdout_bytes  # noqa: E800
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "issue-certificates"])
-        assert result.exit_code == 0, result.stdout_bytes
+    #     result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "issue-certificates"])  # noqa: E800
+    #     assert result.exit_code == 0, result.stdout_bytes  # noqa: E800
 
-        self.proc = PexpectWrapper(  # nosec
-            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
-            env=os.environ,
-            maxread=10000,
-            encoding="utf-8",
-            logfile=sys.stdout,
-        )
+    #     self.proc = PexpectWrapper(  # nosec  # noqa: E800
+    #         [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],  # noqa: E800
+    #         env=os.environ,  # noqa: E800
+    #         maxread=10000,  # noqa: E800
+    #         encoding="utf-8",  # noqa: E800
+    #         logfile=sys.stdout,  # noqa: E800
+    #     )  # noqa: E800
 
-        self.proc.expect_all(
-            ["Starting libp2p node..."], timeout=50,
-        )
-        self.proc.control_c()
-        self.proc.expect_all(
-            ["Multiplexer .*disconnected."], timeout=20, strict=False,
-        )
+    #     self.proc.expect_all(  # noqa: E800
+    #         ["HTTP Server has connected to port"], timeout=50,  # noqa: E800
+    #     )  # noqa: E800
+    #     self.proc.control_c()  # noqa: E800
+    #     self.proc.expect_all(  # noqa: E800
+    #         ["Multiplexer .*disconnected."], timeout=20, strict=False,  # noqa: E800
+    #     )  # noqa: E800
 
-        self.proc.expect_all(
-            [EOF], timeout=20,
-        )
+    #     self.proc.expect_all(  # noqa: E800
+    #         [EOF], timeout=20,  # noqa: E800
+    #     )  # noqa: E800
 
     def test_multiplexer_disconnected_on_termination_after_connected_no_connection(
         self,

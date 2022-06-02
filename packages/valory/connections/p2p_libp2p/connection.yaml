@@ -1,0 +1,85 @@
+name: p2p_libp2p
+author: valory
+version: 0.1.0
+type: connection
+description: The p2p libp2p connection implements an interface to standalone golang
+  go-libp2p node that can exchange aea envelopes with other agents connected to the
+  same DHT.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmZP7GPu67Ag2Fw8zgZnzpQPqaYJvr7w8Zy5VhQ8Jpekkg
+  __init__.py: QmRo1DRePomRccoY2tB3GnKV2rUoNFaaE26WDRKp4ATs33
+  check_dependencies.py: QmS7PnP2G3vMrjqPHeuuTH74Nfowd33FUZkqYTUb3269Pi
+  connection.py: Qmagjyj3QrcmU3q7LGvSiHLzQFfLkzvux2mxaWFVCbij2D
+  consts.py: QmWAHrbN2fhqEe8o6cVLtwhWaEFp6h5cUJtJddYWbibPJj
+  libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
+  libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
+  libp2p_node/acn/utils.go: QmNiWQ87SvY6qdqExFiZWcG734SocG8bZtVVj9z8A2ECM4
+  libp2p_node/aea/api.go: QmSGxHYYdbz9KZtJWcyGTLb4iP1Zik27dmSwnYuuL1rTzj
+  libp2p_node/aea/envelope.pb.go: QmZq6PDh3CzXwgvedZeYAofmBNVRVMtzNDb9b5UXfqxdy2
+  libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
+  libp2p_node/aea/pipe.go: QmR7u17MK8w4ARHKGRF8GMZFtEojGh4tGqDPZ5DabGVK5X
+  libp2p_node/aea/utils.go: QmUoDfXZZ3WK44889nDJcKfsqatfNhUR9DoZkviTfV8zUz
+  libp2p_node/common/common.go: QmeGr6xMzqkBVJMnWzCTcXJVQj2A8RK64mhTSewZJKpiJa
+  libp2p_node/dht/common/handlers.go: QmccEaF9eHencHfpXg8xscojuyvqz911Uv9HwP2pYQSFbw
+  libp2p_node/dht/dhtclient/dhtclient.go: QmVHwwNacmKaWcrYdUw4iNKdZzVqPZUiEKwGyJwhigYFHq
+  libp2p_node/dht/dhtclient/dhtclient_test.go: QmQfUGR6DAUenK3CnBzCMYHgLQRPBxHU6Hr383ekrfTuxa
+  libp2p_node/dht/dhtclient/options.go: QmZkiNXskZqgqsgm32J5etjHXYFNN6oTuLD3q4yjLPfkWc
+  libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
+  libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
+  libp2p_node/dht/dhtnode/utils.go: QmUwnEBV96LNgNXs48miN4PfVUaP5M9uJw7ha1XutBQS5k
+  libp2p_node/dht/dhtpeer/benchmarks_test.go: QmeXZbWBxwGY33oRRogFPv61qJu28ufmoprGkmZVrQ9kEV
+  libp2p_node/dht/dhtpeer/dhtpeer.go: QmXPqaK2tUWRAgYBYzc2rf5Uw7MebzFjRd7gk2WhbE5ZiT
+  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmT9SyDFBgDQKPLxtNn2qw3kwLzctCh4MrQWJ1HnERMPu9
+  libp2p_node/dht/dhtpeer/mailbox.go: QmUd5NjuuRxBnwbWKLAh5vms9FT2N2Np2YBTcMHrezhGQd
+  libp2p_node/dht/dhtpeer/options.go: QmZCQLNyw5f422q6DgrDQVbRkE69siML36XSBtPET7dpW1
+  libp2p_node/dht/dhtpeer/utils.go: QmdQYjyCJq7PJVTQ8xrRLV1TD7ACb1dDo6mURtmSWiksHv
+  libp2p_node/dht/dhttests/dhttests.go: QmSe8XsEhMJAWuokeWtPLXP4m9G5rDEAXrrQWBcma8t71c
+  libp2p_node/dht/monitoring/file.go: QmZwH59RcraRfgYjugVafVojakv1oEcgBUKuMdFAoeZBhS
+  libp2p_node/dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
+  libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
+  libp2p_node/go.mod: QmREU96KzTa75gqHeTLtBzHnhHNPcEN6sW1zp59LgDLCBA
+  libp2p_node/go.sum: QmY81CXMuRFgtJMDs4371QHp6PMGgvZPoZJM1CttuN4cKN
+  libp2p_node/libp2p_node.go: QmNQJf1KK4EkdtSuokekxU8fgA4WMGE7FZhuJLRMv7dBUW
+  libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
+  libp2p_node/mocks/mock_host.go: QmfH83dhq7DV8Sy7y8AMRTdgCxYeRyanYYHxd1E97LCN5o
+  libp2p_node/mocks/mock_net.go: QmeDAYbKoV1dDz5Z2zvPtZ7BWf1p5xyr5ZnZJLwN6wgfPJ
+  libp2p_node/mocks/mock_network.go: Qmbm9SnYb2zF8xvqD2qs2Q6CGfSCbCL4kZcQpjpLdEgWTN
+  libp2p_node/mocks/mock_peerstore.go: QmeH1TucFNbbv9yrLFWHSMDMnsmUmZQbzJYfo25JLyFoYf
+  libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmWDoniHr3wa5freLHDESv7SgC9ggYenrLyibw4jFkTc4r
+  libp2p_node/protocols/acn/v1_0_0/acn.proto: QmcguMcKttJfsuPYrUVWFJ1Trr1VxrSSfan94Z3yNAxNEW
+  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUxjEyzwQP7TWad5RfCefS2qfpbhJgVFjaEN4LUoA3ys5
+  libp2p_node/utils/utils.go: QmdVRRhcoWZE5tt9aD1zYapAcbs5hfJh7z8p4AwgnkT4i2
+  libp2p_node/utils/utils_test.go: Qmd2tbXhEDQELjkyKHyCqmcBitECK9mrVENyPWaev5HF63
+fingerprint_ignore_patterns: []
+build_entrypoint: check_dependencies.py
+connections: []
+protocols:
+- valory/acn:1.1.0:QmbUv2WwG6o2q8F17esBweFuFiogRWbU4wBLrAkCFRUkUm
+class_name: P2PLibp2pConnection
+config:
+  delegate_uri: 127.0.0.1:11000
+  entry_peers: []
+  ledger_id: cosmos
+  local_uri: 127.0.0.1:9000
+  log_file: libp2p_node.log
+  max_node_restarts: 5
+  monitoring_uri: null
+  node_connection_timeout: 10
+  public_uri: 127.0.0.1:9000
+  storage_path: null
+cert_requests:
+- identifier: acn
+  ledger_id: ethereum
+  message_format: '{public_key}'
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: cosmos
+  save_path: .certs/conn_cert.txt
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies:
+  open-aea-ledger-cosmos: {}
+  open-aea-ledger-ethereum: {}
+is_abstract: false

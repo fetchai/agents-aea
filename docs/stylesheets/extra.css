@@ -1,0 +1,217 @@
+@font-face {
+    font-family: 'triakis__font_lightregular';
+    src: url('../fonts/Webfont/triakisfont-regular-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'triakis__font_medium';
+    src: url('../fonts/Webfont/triakisfont-medium-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-medium-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'triakis__font_bold';
+    src: url('../fonts/Webfont/triakisfont-bold-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'triakis__font_heavy';
+    src: url('../fonts/Webfont/triakisfont-heavy-webfont.woff2') format('woff2'),
+        url('../fonts/Webfont/triakisfont-heavy-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* can add more font from autonolas repo if more fonts are needed */
+
+:root {
+    --md-primary-fg-color: #00D948;
+    --md-primary-fg-color--light: rgb(0 217 72 / 10%);
+    --md-primary-fg-color--dark: #086228;
+    --md-typeset-a-color: var(--md-primary-fg-color--dark);
+
+    --md-extra-color-black: #000000;
+    --md-extra-color-gray-1: #585858;
+    --md-extra-color-gray-2: #f8f8f7;
+    --md-extra-color-gray-3: #000000;
+    --md-text-font-lightregular: "triakis__font_lightregular";
+    --md-text-font-medium: "triakis__font_medium";
+    --md-text-font-bold: "triakis__font_bold";
+    --md-text-font-heavy: "triakis__font_heavy";
+}
+
+/* font changes */
+.md-content__inner h1,
+.md-content__inner h2,
+.md-content__inner h3,
+.md-sidebar .md-nav .md-nav__title,
+.md-footer .md-footer-nav__title {
+    font-family: var(--md-text-font-lightregular);
+}
+
+/* header & tabs */
+.md-header {
+    color: var(--md-extra-color-black);
+}
+
+/* hiding icon at top */
+.md-header-nav .md-flex__cell.md-flex__cell--shrink {
+    display: none;
+}
+
+.md-header-nav .md-header-nav__title .md-header-nav__topic {
+    text-transform: uppercase;
+    letter-spacing: 20px;
+    font-size: 24px;
+    font-family: var(--md-text-font-medium);
+}
+
+.md-header-nav .md-header-nav__title .md-header-nav__topic:nth-child(2) {
+    letter-spacing: normal;
+}
+
+.md-header-nav .md-flex .md-flex__cell:last-child {
+    display: none;
+}
+
+.md-tabs .md-tabs__list>.md-tabs__item a {
+    color: var(--md-extra-color-black);
+}
+
+.md-tabs .md-tabs__list>.md-tabs__item {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.md-tabs__link--active,
+.md-tabs__link:hover {
+    text-decoration: underline;
+}
+
+/* left sidebar */
+.md-sidebar .md-nav .md-nav__title {
+    text-transform: uppercase;
+    color: var(--md-extra-color-black);
+    font-size: 18px;
+}
+
+
+.md-sidebar .md-nav__link.md-nav__link {
+    color: var(--md-extra-color-gray-1);
+}
+
+.md-sidebar .md-nav__link.md-nav__link--active,
+.md-sidebar .md-nav__link:active {
+    text-decoration: underline;
+    color: var(--md-extra-color-black);
+}
+
+.md-sidebar .md-nav__link:focus,
+.md-nav__link:hover {
+    color: var(--md-primary-fg-color--dark);
+}
+
+/* right sidebar */
+
+/* ------ content ------ */
+.md-content__inner h1 {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--md-extra-color-black);
+}
+
+.md-content__inner h2 {
+    color: var(--md-primary-fg-color--dark);
+}
+
+.md-content__inner h3 {
+    color: var(--md-primary-fg-color--dark);
+}
+
+.md-typeset a {
+    color: var(--md-typeset-a-color);
+    font-weight: bold;
+}
+
+/* TODO: ask for color from Camelia */
+.md-typeset a:active,
+.md-typeset a:hover {
+    color: var(--md-typeset-a-color);
+}
+
+.md-typeset .admonition,
+.md-typeset details {
+    border-color: var(--md-primary-fg-color);
+}
+
+.md-typeset .admonition>.admonition-title:before,
+.md-typeset .admonition>summary:before,
+.md-typeset details>.admonition-title:before,
+.md-typeset details>summary:before {
+    color: var(--md-primary-fg-color);
+}
+
+.md-typeset .admonition>.admonition-title,
+.md-typeset .admonition>summary,
+.md-typeset details>.admonition-title,
+.md-typeset details>summary {
+    background-color: var(--md-primary-fg-color--light);
+}
+
+/* ------ footer ------ */
+.md-footer .md-footer-nav,
+.md-footer .md-footer-nav__direction {
+    color: var(--md-extra-color-black);
+    font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.md-footer .md-footer-nav__title {
+    text-transform: uppercase;
+}
+
+.md-footer .md-footer-nav__direction {
+    text-transform: none;
+}
+
+.md-footer .md-footer-meta {
+    display: none;
+}
+
+/* ------ common ------ */
+pre {
+    background-color: #f8f8f7;
+    background-color: var(--md-extra-color-gray-2);
+}
+
+code {
+    background: var(--md-primary-fg-color);
+}
+
+.md-header,
+.md-tabs,
+.md-footer-meta,
+.md-footer-nav,
+.md-footer-nav__inner {
+    background-color: var(--md-primary-fg-color);
+}
+
+.md-nav__title {
+    color: var(--md-primary-fg-color--dark);
+}
+
+/* Needed so that Mermaid UML diagrams don't end up being massively tall */
+svg {
+    height: auto;
+}

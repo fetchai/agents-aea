@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,7 +73,7 @@ class TestScaffoldSkill:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -145,6 +146,115 @@ class TestScaffoldSkill:
             pass
 
 
+class TestScaffoldSkillToRegistry:
+    """Test that the command 'aea scaffold skill' works correctly in correct preconditions."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.resource_name = "myresource"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
+
+        cls.schema = json.load(open(SKILL_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
+        )
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        dir_path.mkdir(exist_ok=True)
+        # scaffold skill
+        cls.result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                f"--registry-path={str(dir_path)}",
+                "scaffold",
+                "--to-local-registry",
+                "skill",
+                cls.resource_name,
+            ],
+            standalone_mode=False,
+        )
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0."""
+        assert self.result.exit_code == 0
+
+    def test_resource_folder_contains_module_handlers(self):
+        """Test that the resource folder contains scaffold handlers.py module."""
+        p = Path(
+            self.t, "packages", AUTHOR, "skills", self.resource_name, "handlers.py"
+        )
+        original = Path(AEA_DIR, "skills", "scaffold", "handlers.py")
+        assert filecmp.cmp(p, original)
+
+    def test_resource_folder_contains_module_behaviours(self):
+        """Test that the resource folder contains scaffold behaviours.py module."""
+        p = Path(
+            self.t, "packages", AUTHOR, "skills", self.resource_name, "behaviours.py"
+        )
+        original = Path(AEA_DIR, "skills", "scaffold", "behaviours.py")
+        assert filecmp.cmp(p, original)
+
+    def test_resource_folder_contains_module_model(self):
+        """Test that the resource folder contains scaffold my_model.py module."""
+        p = Path(
+            self.t, "packages", AUTHOR, "skills", self.resource_name, "my_model.py"
+        )
+        original = Path(AEA_DIR, "skills", "scaffold", "my_model.py")
+        assert filecmp.cmp(p, original)
+
+    def test_resource_folder_contains_configuration_file(self):
+        """Test that the resource folder contains a good configuration file."""
+        p = Path(
+            self.t,
+            "packages",
+            AUTHOR,
+            "skills",
+            self.resource_name,
+            DEFAULT_SKILL_CONFIG_FILE,
+        )
+        config_file = yaml.safe_load(open(p))
+        self.validator.validate(instance=config_file)
+
+    def test_init_module_contains_new_public_id(self):
+        """Test that the PUBLIC ID variable in the init module is replaced correctly."""
+        p = Path(
+            self.t, "packages", AUTHOR, "skills", self.resource_name, "__init__.py"
+        )
+        init_module_content = p.read_text()
+        expected_public_id = f"{AUTHOR}/{self.resource_name}:{DEFAULT_VERSION}"
+        matches = re.findall(
+            fr'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
+            init_module_content,
+            re.MULTILINE,
+        )
+        assert len(matches) == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
 class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
     """Test that the command 'aea scaffold skill' fails when a folder with 'scaffold' name already."""
 
@@ -163,7 +273,7 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -230,7 +340,7 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -303,7 +413,7 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -374,7 +484,7 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,7 @@ from click import ClickException
 import aea
 from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
+from aea.cli.registry.settings import REMOTE_HTTP
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
 from aea.helpers.base import cd
@@ -177,6 +179,7 @@ class IsVersionCorrectTestCase(TestCase):
         self.assertFalse(result)
 
 
+@pytest.mark.skip  # need remote registry
 class TestFetchFromRemoteRegistry(AEATestCaseManyFlaky):
     """Test case for fetch agent command from Registry."""
 
@@ -220,6 +223,7 @@ class TestFetchLatestVersion(AEATestCaseMany):
 class TestFetchAgentMixed(BaseAEATestCase):
     """Test 'aea fetch' in mixed mode."""
 
+    @pytest.mark.skip  # need remote registry
     @pytest.mark.integration
     @mock.patch(
         "aea.cli.registry.add.fetch_package", wraps=aea.cli.registry.add.fetch_package
@@ -255,6 +259,7 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
 
     @pytest.mark.integration
     @mock.patch("aea.cli.fetch.add_item", side_effect=_mock_raise_click_exception)
+    @mock.patch("aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_HTTP)
     @mock.patch("aea.cli.fetch.fetch_agent", side_effect=_mock_raise_click_exception)
     @mock.patch(
         "aea.cli.registry.fetch.add_item", side_effect=_mock_raise_click_exception
@@ -295,6 +300,7 @@ class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
     MODE = "--remote"
 
 
+@pytest.mark.skip  # need remote registry
 def test_fetch_mixed_no_local_registry():
     """Test that mixed becomes remote when no local registry."""
     with TemporaryDirectory() as tmp_dir:
@@ -394,7 +400,7 @@ def test_fetch_twice_remote():
                         "--registry-path",
                         PACKAGES_DIR,
                         "fetch",
-                        "--remote",
+                        "--local",
                         "fetchai/my_first_aea",
                     ],
                     standalone_mode=False,

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -27,7 +28,7 @@ PATH_TO_T_PROTOCOL_SPECIFICATION = os.path.join(
     ROOT_DIR, "tests", "data", "sample_specification.yaml"
 )
 PATH_TO_T_PROTOCOL = os.path.join(
-    ROOT_DIR, "tests", "data", "generator", T_PROTOCOL_NAME
+    ROOT_DIR, "tests", "data", "packages", "fetchai", "protocols", T_PROTOCOL_NAME
 )
 
 

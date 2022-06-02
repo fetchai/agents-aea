@@ -1,14 +1,9 @@
-If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective, you can use the AEA framework.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+## Dependencies & System Requirements
 
-This example will take you through a simple AEA to familiarise you with the basics of the framework.
+The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`. There are a number of base requirements to be installed prior to usage.
 
-## System Requirements
-
-The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
-
-You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 ​GCC installation is required:
 * Ubuntu: `apt-get install gcc`
@@ -25,7 +20,7 @@ Install a compatible Python and Go version on your system (see <a href="https://
 The following hints can help:
 
 <ul>
-<li>To install Go, follow the official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a></li>
+<li>To install Go, follow the official guide, depending on your platform <a href="https://go.dev/doc/install" target="_blank">here</a></li>
 
 <li>Python is already included by default on 
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
@@ -39,9 +34,9 @@ python3 --version
 
 <li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
-  E.g. for Python 3.7: 
+  E.g. for Python 3.8: 
 ``` bash
-sudo apt-get install python3.7-dev
+sudo apt-get install python3.8-dev
 ```
 </li>
 
@@ -59,12 +54,12 @@ We provide a script to automatically install all framework dependencies and the 
 On MacOS or Ubuntu run the following commands to download and install:
 
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```
 
-On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
+On Windows: download <a href="https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/valory-xyz/open-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
 
 </details>
 
@@ -99,13 +94,11 @@ you can follow the rest of the guide the same way as if not using docker.
 ​
 </details>
 
-## Preliminaries
+## Getting Started
 
 Ensure, you are in a clean working directory:
 
-- either you create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
-
-- or you clone the template repo as described in `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
+- Create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
 
 At this point, when typing `ls` you should see a single folder called `packages` in your working environment. This will act as your local registry for AEA components.
 
@@ -119,63 +112,49 @@ which pipenv
 
 If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target="_blank">here</a>.
 
-Once installed, create a new environment and open it (here we use Python 3.7 but the AEA framework supports any Python >= 3.6).
+Once installed, create a new environment and open it (here we use Python 3.8 but the AEA framework supports any Python >= 3.6).
 
 ``` bash
-touch Pipfile && pipenv --python 3.7 && pipenv shell
+touch Pipfile && pipenv --python 3.8 && pipenv shell
 ```
 
 
-## Installation
+## Installation of Open-AEA
 
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
 ``` bash
-pip install aea[all]
+pip install open-aea[all]
 ```
 
 If you are using `zsh` rather than `bash` type
 ``` zsh
-pip install 'aea[all]'
+pip install 'open-aea[all]'
+pip install 'open-aea-ledger-ethereum'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
-## Setup author name
+## Setup Open-AEA Author
 
-AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
+To configure the aea with an author.
 
-You can set up your author name using the `init` command:
 ``` bash
-aea init
+aea init --local
 ```
 
-This is your unique author (or developer) name in the AEA ecosystem.
 
-You should see a similar output (with your input instead of the sample username and email):
-``` bash
-Do you have a Registry account? [y/N]: n
-Create a new account on the Registry now:
-Username: fetchai
-Email: hello@fetch.ai
-Password:
-Please make sure that passwords are equal.
-Confirm password:
-    _     _____     _
-   / \   | ____|   / \
-  / _ \  |  _|    / _ \
- / ___ \ | |___  / ___ \
-/_/   \_\|_____|/_/   \_\
 
-v1.1.0
+## Setup Open-AEA Components
 
-AEA configurations successfully initialized: {'author': 'fetchai'}
+AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
+
+
+To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">SVN</a> to checkout the specific folders;
+```bash
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.9.0/packages packages
 ```
 
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If you would rather not create an account on the registry at this point, then run <code>aea init --local</code> instead.</p>
-</div>
 
 ## Echo skill demo
 
@@ -184,8 +163,84 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0
+aea fetch open_aea/my_first_aea:0.1.0 --local
 cd my_first_aea
+```
+### Install AEA dependencies
+
+``` bash
+aea install
+```
+
+### Add and create a private key
+
+All AEAs need a private key to run. Add one now:
+
+``` bash
+aea generate-key ethereum
+aea add-key ethereum
+```
+
+### Run the AEA
+
+Run the AEA.
+
+``` bash
+aea run
+```
+
+You will see the echo skill running in the terminal window (an output similar to the one below).
+
+``` bash
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
+/_/   \_\|_____|/_/   \_\
+
+v1.7.0
+
+Starting AEA 'my_first_aea' in 'async' mode ...
+info: Echo Handler: setup method called.
+info: Echo Behaviour: setup method called.
+info: [my_first_aea]: Start processing messages...
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+...
+```
+### Interact with the AEA
+
+From a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
+
+``` bash
+echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
+```
+
+You will see the <code>Echo Handler</code> dealing with the envelope and responding with the same message to the <code>output_file</code>, and also decoding the Base64 encrypted message in this case.
+
+``` bash
+info: Echo Behaviour: act method called.
+Echo Handler: message=Message(sender=sender_aea,to=my_first_aea,content=b'hello',dialogue_reference=('1', ''),message_id=1,performative=bytes,target=0), sender=sender_aea
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+```
+
+Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the <code>aea interact</code> command.
+
+### Stop the AEA
+
+You can stop an AEA by pressing `CTRL C`.
+
+Once you do, you should see the AEA being interrupted and then calling the `teardown()` methods:
+
+``` bash
+info: Echo Behaviour: act method called.
+info: Echo Behaviour: act method called.
+^C my_first_aea interrupted!
+my_first_aea stopping ...
+info: Echo Handler: teardown method called.
+info: Echo Behaviour: teardown method called.
 ```
 
 To learn more about the folder structure of an AEA project read on <a href="../package-imports/">here</a>.
@@ -215,6 +270,9 @@ aea add skill fetchai/echo:0.19.0
 ```
 This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
+
+## How Does This AEA work?
+
 
 ### Echo skill
 
@@ -248,111 +306,11 @@ For example:
 recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
-### Install AEA dependencies
-
-``` bash
-aea install
-```
-
-### Add and create a private key
-
-All AEAs need a private key to run. Add one now:
-
-``` bash
-aea generate-key fetchai
-aea add-key fetchai
-```
-
-### Run the AEA
-
-Run the AEA.
-
-``` bash
-aea run
-```
-
-You will see the echo skill running in the terminal window (an output similar to the one below).
-
-``` bash
-    _     _____     _
-   / \   | ____|   / \
-  / _ \  |  _|    / _ \
- / ___ \ | |___  / ___ \
-/_/   \_\|_____|/_/   \_\
-
-v1.1.0
-
-Starting AEA 'my_first_aea' in 'async' mode ...
-info: Echo Handler: setup method called.
-info: Echo Behaviour: setup method called.
-info: [my_first_aea]: Start processing messages...
-info: Echo Behaviour: act method called.
-info: Echo Behaviour: act method called.
-info: Echo Behaviour: act method called.
-...
-```
 
 The framework first calls the `setup` methods in the skill's `Handler` and `Behaviour` classes in that order; after which it repeatedly calls the `act` method of `Behaviour` class. This is the main agent loop in action.
 
-#### Add a message to the input file
-
-You can send the AEA a message wrapped in an envelope using the CLI's `interact` command.
-
-From a different terminal and same directory (ensure you are in the same virtual environment: `pipenv shell`):
-
-``` bash
-cd my_first_aea
-aea interact
-```
-
-You can now send messages to this AEA via an interactive tool by typing anything into the prompt and hitting enter twice (once to send the message and once more to check for a response). 
-
-Let us send `hello` to this AEA (type `hello` and press enter twice). In the original terminal, you will see the `Echo Handler` dealing with this envelope and its contained message. You should see an output similar to the one below but with a different `dialogue_reference`.
-
-``` bash
-info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=my_first_aea_interact
-info: Echo Behaviour: act method called.
-info: Echo Behaviour: act method called.
-```
-
-<details><summary>Manual approach</summary>
-
-Optionally, from a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
-
-``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
-```
-
-You will see the <code>Echo Handler</code> dealing with the envelope and responding with the same message to the <code>output_file</code>, and also decoding the Base64 encrypted message in this case.
-
-``` bash
-info: Echo Behaviour: act method called.
-Echo Handler: message=Message(sender=sender_aea,to=my_first_aea,content=b'hello',dialogue_reference=('1', ''),message_id=1,performative=bytes,target=0), sender=sender_aea
-info: Echo Behaviour: act method called.
-info: Echo Behaviour: act method called.
-```
-
-Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the <code>aea interact</code> command.
-
-</details>
-
-### Stop the AEA
-
-You can stop an AEA by pressing `CTRL C`.
-
-Once you do, you should see the AEA being interrupted and then calling the `teardown()` methods:
-
-``` bash
-info: Echo Behaviour: act method called.
-info: Echo Behaviour: act method called.
-^C my_first_aea interrupted!
-my_first_aea stopping ...
-info: Echo Handler: teardown method called.
-info: Echo Behaviour: teardown method called.
-```
-
-### Write a test for the AEA
+## Test Quickstart
+### Write a simple test for the AEA
 
 We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
 
@@ -363,7 +321,7 @@ The following test class replicates the preceding demo and tests it's correct be
 First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
 ``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 
 Then write the test:
@@ -408,7 +366,7 @@ class TestEchoSkill(AEATestCase):
         sent_envelope = Envelope(
             to=self.agent_name,
             sender=sender_aea,
-            protocol_id=message.protocol_id,
+            protocol_specification_id=message.protocol_specification_id,
             message=DefaultSerializer().encode(message),
         )
 
@@ -419,7 +377,7 @@ class TestEchoSkill(AEATestCase):
 
         assert sent_envelope.to == received_envelope.sender
         assert sent_envelope.sender == received_envelope.to
-        assert sent_envelope.protocol_id == received_envelope.protocol_id
+        assert sent_envelope.protocol_specification_id == received_envelope.protocol_specification_id
         received_message = DefaultMessage.serializer.decode(received_envelope.message)
         assert message.content == received_message.content
 
@@ -445,7 +403,7 @@ Place the above code into a file <code>test.py</code> in your AEA project direct
 To run, execute the following:
 
 ``` bash
-pytest test.py
+pipenv run pytest test.py
 ```
 
 </details>
@@ -463,11 +421,5 @@ aea delete my_first_aea
 To gain an understanding of the core components of the framework, please continue to the next page:
 
 - <a href="../core-components-1/">Core components - Part 1</a>
-
-For more demos, use cases or step by step guides, please check the following:
-
-- <a href="../generic-skills">Generic skill use case</a>
-- <a href='../weather-skills/'>Weather skill demo</a>
-- <a href='../generic-skills-step-by-step/'> Generic step by step guide </a>
 
 <br />

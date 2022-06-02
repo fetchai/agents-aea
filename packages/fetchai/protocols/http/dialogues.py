@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2022 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ This module contains the classes required for http dialogue management.
 """
 
 from abc import ABC
-from typing import Callable, FrozenSet, Type, cast
+from typing import Callable, Dict, FrozenSet, Type, cast
 
 from aea.common import Address
 from aea.protocols.base import Message
@@ -37,9 +37,13 @@ from packages.fetchai.protocols.http.message import HttpMessage
 class HttpDialogue(Dialogue):
     """The http dialogue class maintains state of a dialogue and manages it."""
 
-    INITIAL_PERFORMATIVES = frozenset({HttpMessage.Performative.REQUEST})
-    TERMINAL_PERFORMATIVES = frozenset({HttpMessage.Performative.RESPONSE})
-    VALID_REPLIES = {
+    INITIAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {HttpMessage.Performative.REQUEST}
+    )
+    TERMINAL_PERFORMATIVES: FrozenSet[Message.Performative] = frozenset(
+        {HttpMessage.Performative.RESPONSE}
+    )
+    VALID_REPLIES: Dict[Message.Performative, FrozenSet[Message.Performative]] = {
         HttpMessage.Performative.REQUEST: frozenset(
             {HttpMessage.Performative.RESPONSE}
         ),
@@ -70,7 +74,7 @@ class HttpDialogue(Dialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :return: None
+        :param message_class: the message class used
         """
         Dialogue.__init__(
             self,
@@ -98,7 +102,8 @@ class HttpDialogues(Dialogues, ABC):
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
-        :return: None
+        :param dialogue_class: the dialogue class used
+        :param role_from_first_message: the callable determining role from first message
         """
         Dialogues.__init__(
             self,

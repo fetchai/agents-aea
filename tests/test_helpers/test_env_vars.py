@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,6 +60,12 @@ def test_replace_with_env_var():
         replace_with_env_var("${var}", {})
 
 
+def test_apply_none_with_env_var():
+    """Test replace_with_env_var."""
+    assert replace_with_env_var("${var:int:none}", {"var": "10"}) == 10
+    assert replace_with_env_var("${var:int:none}", {}) is None
+
+
 def test_convert_value_str_to_type():
     """Test convert_value_str_to_type."""
     assert convert_value_str_to_type("false", "bool") is False
@@ -67,3 +74,7 @@ def test_convert_value_str_to_type():
     assert convert_value_str_to_type("1.1", "float") == 1.1
     assert convert_value_str_to_type("1sdfsdf2", "none") is None
     assert convert_value_str_to_type('{"a": 12}', "dict") == {"a": 12}
+    assert convert_value_str_to_type("Null", "str") is None
+    assert convert_value_str_to_type("none", "str") is None
+    assert convert_value_str_to_type("null", "str") is None
+    assert convert_value_str_to_type("None", "str") is None

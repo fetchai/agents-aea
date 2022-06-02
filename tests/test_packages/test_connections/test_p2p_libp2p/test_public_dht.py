@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,7 @@
 
 """This test module contains integration tests for P2PLibp2p connection."""
 
+import json
 import os
 import shutil
 import tempfile
@@ -30,15 +32,18 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
+from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
+    DEFAULT_LEDGER,
+    DEFAULT_LEDGER_LIBP2P_NODE,
     PUBLIC_DHT_DELEGATE_URI_1,
     PUBLIC_DHT_DELEGATE_URI_2,
     PUBLIC_DHT_P2P_MADDR_1,
@@ -53,12 +58,11 @@ from tests.conftest import (
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
-    libp2p_log_on_failure,
-    libp2p_log_on_failure_all,
 )
+from tests.conftest import default_ports as ports
+from tests.conftest import libp2p_log_on_failure, libp2p_log_on_failure_all
 
 
-DEFAULT_PORT = 10234
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
 PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
 PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY_2]
@@ -74,8 +78,11 @@ PUBLIC_STAGING_DHT_PUBLIC_KEYS = [
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
     PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
 ]
-AEA_DEFAULT_LAUNCH_TIMEOUT = 20
-AEA_LIBP2P_LAUNCH_TIMEOUT = 20
+AEA_DEFAULT_LAUNCH_TIMEOUT = 30
+AEA_LIBP2P_LAUNCH_TIMEOUT = 30
+
+p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
+p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
 
 @pytest.fixture
@@ -112,10 +119,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             temp_dir = os.path.join(self.t, f"dir_{i}")
             os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
-                port=DEFAULT_PORT + 1,
-                relay=False,
-                entry_peers=[maddr],
-                data_dir=temp_dir,
+                relay=False, entry_peers=[maddr], data_dir=temp_dir,
             )
             multiplexer = Multiplexer([connection])
             self.log_files.append(connection.node.log_file)
@@ -130,6 +134,7 @@ class TestLibp2pConnectionPublicDHTRelay:
             finally:
                 multiplexer.disconnect()
 
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -141,10 +146,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    port=DEFAULT_PORT + 1,
-                    relay=False,
-                    entry_peers=[maddr],
-                    data_dir=temp_dir_1,
+                    relay=False, entry_peers=[maddr], data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 self.log_files.append(connection1.node.log_file)
@@ -154,10 +156,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
                 os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_connection(
-                    port=DEFAULT_PORT + 2,
-                    relay=False,
-                    entry_peers=[maddr],
-                    data_dir=temp_dir_2,
+                    relay=False, entry_peers=[maddr], data_dir=temp_dir_2,
                 )
                 multiplexer2 = Multiplexer([connection2])
                 self.log_files.append(connection2.node.log_file)
@@ -177,7 +176,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                 multiplexer1.put(envelope)
-                delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
@@ -197,6 +196,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
+    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -210,10 +210,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    port=DEFAULT_PORT + 1,
-                    relay=False,
-                    entry_peers=[maddrs[i]],
-                    data_dir=temp_dir_1,
+                    relay=False, entry_peers=[maddrs[i]], data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 self.log_files.append(connection1.node.log_file)
@@ -228,10 +225,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
-                        port=DEFAULT_PORT + 2,
-                        relay=False,
-                        entry_peers=[maddrs[j]],
-                        data_dir=temp_dir_2,
+                        relay=False, entry_peers=[maddrs[j]], data_dir=temp_dir_2,
                     )
                     multiplexer2 = Multiplexer([connection2])
                     self.log_files.append(connection2.node.log_file)
@@ -250,7 +244,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                     multiplexer1.put(envelope)
-                    delivered_envelope = multiplexer2.get(block=True, timeout=20)
+                    delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
@@ -492,26 +486,38 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
         self.conn_key_file = os.path.join(
             os.path.abspath(os.getcwd()), "./conn_key.txt"
         )
-        self.generate_private_key()
-        self.add_private_key()
-        self.generate_private_key(private_key_file=self.conn_key_file)
-        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        # set config
+        self.set_config("agent.default_ledger", agent_ledger_id)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
+        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
+        # agent keys
+        self.generate_private_key(agent_ledger_id)
+        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
+        # libp2p node keys
+        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
+        self.add_private_key(
+            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        )
+        # add connection and build
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
-
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-
         # for logging
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
 
-        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        config_path = f"{p2p_libp2p_path}.config"
         self.nested_set_config(
             config_path,
             {
-                "local_uri": "127.0.0.1:{}".format(DEFAULT_PORT),
+                "local_uri": f"127.0.0.1:{next(ports)}",
                 "entry_peers": maddrs,
                 "log_file": log_file,
+                "ledger_id": node_ledger_id,
             },
         )
 
@@ -554,21 +560,31 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     )
     def test_connectivity(self, delegate_uris_public_keys):
         """Test connectivity."""
+
         delegate_uris, public_keys = delegate_uris_public_keys
         self.agent_name = "some"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
-        self.generate_private_key()
-        self.add_private_key()
+
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        self.set_config("agent.default_ledger", agent_ledger_id)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([agent_ledger_id, node_ledger_id]),
+            "list",
+        )
+        # agent keys
+        self.generate_private_key(agent_ledger_id)
+        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
+
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
-        config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
+        config_path = f"{p2p_libp2p_client_path}.config"
         self.nested_set_config(
             config_path,
             {"nodes": [{"uri": "{}".format(uri)} for uri in delegate_uris]},
         )
-        conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
         self.nested_set_config(
-            conn_path + ".config",
+            p2p_libp2p_client_path + ".config",
             {
                 "nodes": [
                     {"uri": uri, "public_key": public_keys[i]}
@@ -579,11 +595,11 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
 
         # generate certificates for connection
         self.nested_set_config(
-            conn_path + ".cert_requests",
+            p2p_libp2p_client_path + ".cert_requests",
             [
                 CertRequest(
                     identifier="acn",
-                    ledger_id="fetchai",
+                    ledger_id=agent_ledger_id,
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=public_key,

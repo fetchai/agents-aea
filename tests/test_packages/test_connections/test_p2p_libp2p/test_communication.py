@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,9 +33,9 @@ from aea.crypto.registries import make_crypto
 from aea.mail.base import Empty, Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p.connection import NodeClient, Uri
 from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.conftest import (
     _make_libp2p_connection,
@@ -43,7 +44,6 @@ from tests.conftest import (
 )
 
 
-DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
 
 MockDefaultMessageProtocol = Mock()
@@ -131,7 +131,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai, port=DEFAULT_PORT + 1
+                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -146,7 +146,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
                 data_dir=temp_dir_2,
-                port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
                 agent_key=aea_ledger_ethereum,
             )
@@ -256,12 +255,9 @@ class TestP2PLibp2pConnectionRouting:
         cls.multiplexers = []
 
         try:
-            port_genesis = DEFAULT_PORT + 10
             temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
             os.mkdir(temp_dir_gen)
-            cls.connection_genesis = _make_libp2p_connection(
-                data_dir=temp_dir_gen, port=port_genesis
-            )
+            cls.connection_genesis = _make_libp2p_connection(data_dir=temp_dir_gen)
             cls.multiplexer_genesis = Multiplexer(
                 [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
             )
@@ -273,13 +269,11 @@ class TestP2PLibp2pConnectionRouting:
 
             cls.connections = [cls.connection_genesis]
 
-            port = port_genesis
             for i in range(DEFAULT_NET_SIZE):
-                port += 1
                 temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
                 os.mkdir(temp_dir)
                 conn = _make_libp2p_connection(
-                    data_dir=temp_dir, port=port, entry_peers=[genesis_peer]
+                    data_dir=temp_dir, entry_peers=[genesis_peer]
                 )
                 mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
 
@@ -365,9 +359,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         try:
             temp_dir_rel = os.path.join(cls.t, "temp_dir_rel")
             os.mkdir(temp_dir_rel)
-            cls.relay = _make_libp2p_connection(
-                data_dir=temp_dir_rel, port=DEFAULT_PORT + 1
-            )
+            cls.relay = _make_libp2p_connection(data_dir=temp_dir_rel)
             cls.multiplexer = Multiplexer([cls.relay])
             cls.log_files.append(cls.relay.node.log_file)
             cls.multiplexer.connect()
@@ -378,10 +370,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1,
-                port=DEFAULT_PORT + 2,
-                relay=False,
-                entry_peers=[relay_peer],
+                data_dir=temp_dir_1, relay=False, entry_peers=[relay_peer],
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -393,7 +382,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
             os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
-                data_dir=temp_dir_2, port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
+                data_dir=temp_dir_2, entry_peers=[relay_peer]
             )
             cls.multiplexer2 = Multiplexer(
                 [cls.connection2], protocols=[MockDefaultMessageProtocol]
@@ -505,10 +494,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         try:
             temp_dir_rel_1 = os.path.join(cls.t, "temp_dir_rel_1")
             os.mkdir(temp_dir_rel_1)
-            port_relay_1 = DEFAULT_PORT + 10
-            cls.connection_relay_1 = _make_libp2p_connection(
-                data_dir=temp_dir_rel_1, port=port_relay_1
-            )
+            cls.connection_relay_1 = _make_libp2p_connection(data_dir=temp_dir_rel_1)
             cls.multiplexer_relay_1 = Multiplexer(
                 [cls.connection_relay_1], protocols=[MockDefaultMessageProtocol]
             )
@@ -520,9 +506,8 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
 
             temp_dir_rel_2 = os.path.join(cls.t, "temp_dir_rel_2")
             os.mkdir(temp_dir_rel_2)
-            port_relay_2 = DEFAULT_PORT + 100
             cls.connection_relay_2 = _make_libp2p_connection(
-                data_dir=temp_dir_rel_2, port=port_relay_2, entry_peers=[relay_peer_1]
+                data_dir=temp_dir_rel_2, entry_peers=[relay_peer_1]
             )
             cls.multiplexer_relay_2 = Multiplexer(
                 [cls.connection_relay_2], protocols=[MockDefaultMessageProtocol]
@@ -535,16 +520,11 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
 
             cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
 
-            port = port_relay_1
             for i in range(int(DEFAULT_NET_SIZE / 2) + 1):
                 temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_1")
                 os.mkdir(temp_dir)
-                port += 1
                 conn = _make_libp2p_connection(
-                    data_dir=temp_dir,
-                    port=port,
-                    relay=False,
-                    entry_peers=[relay_peer_1],
+                    data_dir=temp_dir, relay=False, entry_peers=[relay_peer_1],
                 )
                 mux = Multiplexer([conn])
                 cls.connections.append(conn)
@@ -552,16 +532,11 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 mux.connect()
                 cls.multiplexers.append(mux)
 
-            port = port_relay_2
             for i in range(int(DEFAULT_NET_SIZE / 2) + 1):
                 temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_2")
                 os.mkdir(temp_dir)
-                port += 1
                 conn = _make_libp2p_connection(
-                    data_dir=temp_dir,
-                    port=port,
-                    relay=False,
-                    entry_peers=[relay_peer_2],
+                    data_dir=temp_dir, relay=False, entry_peers=[relay_peer_2],
                 )
                 mux = Multiplexer([conn])
                 cls.connections.append(conn)
@@ -716,7 +691,7 @@ class BaseTestP2PLibp2p:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai, port=DEFAULT_PORT + 1
+                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -731,7 +706,6 @@ class BaseTestP2PLibp2p:
             os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
                 data_dir=temp_dir_2,
-                port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
                 agent_key=aea_ledger_ethereum,
             )

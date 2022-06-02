@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,13 +29,14 @@ import click
 from aea import get_current_aea_version
 from aea.cli.add import add_item
 from aea.cli.init import do_init
+from aea.cli.registry.settings import REGISTRY_LOCAL
 from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import AgentConfig, PublicId, dependencies_from_json
+from aea.configurations.base import AgentConfig, dependencies_from_json
 from aea.configurations.constants import (
     CONNECTIONS,
     CONTRACTS,
@@ -42,16 +44,14 @@ from aea.configurations.constants import (
     DEFAULT_DEPENDENCIES,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
-    DEFAULT_PROTOCOL,
     DEFAULT_VERSION,
     PROTOCOL,
     PROTOCOLS,
-    SIGNING_PROTOCOL,
+    SIGNING_PROTOCOL_WITH_HASH,
     SKILLS,
-    STATE_UPDATE_PROTOCOL,
     VENDOR,
 )
-from aea.exceptions import enforce
+from aea.configurations.data_types import PublicId
 from aea.helpers.base import compute_specifier_from_version
 from aea.helpers.io import open_file
 
@@ -64,59 +64,36 @@ from aea.helpers.io import open_file
     required=False,
     help="Add the author to run `init` before `create` execution.",
 )
-@registry_flag(
-    help_local="For fetching agent from local folder.",
-    help_remote="For fetching agent from remote registry.",
-)
+@registry_flag()
 @click.option("--empty", is_flag=True, help="Not adding default dependencies.")
 @click.pass_context
 def create(
     click_context: click.core.Context,
     agent_name: str,
     author: str,
-    local: bool,
-    remote: bool,
     empty: bool,
+    registry: str,
 ) -> None:
     """Create a new agent."""
     ctx = cast(Context, click_context.obj)
-    create_aea(ctx, agent_name, local, remote, author=author, empty=empty)
+    ctx.registry_type = registry
+    create_aea(ctx, agent_name, author=author, empty=empty)
 
 
 @clean_after
 def create_aea(
-    ctx: Context,
-    agent_name: str,
-    local: bool,
-    remote: bool = False,  # for backwards compatibility
-    author: Optional[str] = None,
-    empty: bool = False,
+    ctx: Context, agent_name: str, author: Optional[str] = None, empty: bool = False,
 ) -> None:
     """
     Create AEA project.
 
     :param ctx: Context object.
     :param agent_name: agent name.
-    :param local: boolean flag for local registry usage.
-    :param remote: boolean flag for remote registry usage.
     :param author: optional author name (valid with local=True and remote=False only).
     :param empty: optional boolean flag for skip adding default dependencies.
 
     :raises ClickException: if an error occurred.
     """
-    enforce(
-        not (local and remote), "'local' and 'remote' options are mutually exclusive."
-    )
-    if not local and not remote:
-        try:
-            ctx.registry_path
-        except ValueError as e:
-            click.echo(f"{e}\nTrying remote registry (`--remote`).")
-            remote = True
-    is_mixed = not local and not remote
-    is_local = local and not remote
-    ctx.set_config("is_local", is_local)
-    ctx.set_config("is_mixed", is_mixed)
 
     try:
         _check_is_parent_folders_are_aea_projects_recursively()
@@ -126,8 +103,10 @@ def create_aea(
         )
 
     if author is not None:
-        if is_local:
-            do_init(author, False, False, False)  # pragma: nocover
+        if ctx.registry_type == REGISTRY_LOCAL:
+            do_init(  # pragma: nocover
+                author, False, False, REGISTRY_LOCAL  # type: ignore
+            )
         else:
             raise click.ClickException(
                 "Author is not set up. Please use 'aea init' to initialize."
@@ -172,9 +151,7 @@ def create_aea(
 
         if not empty:
             click.echo("Adding default packages ...")
-            add_item(ctx, PROTOCOL, PublicId.from_str(DEFAULT_PROTOCOL))
-            add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
-            add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
+            add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL_WITH_HASH))
 
     except Exception as e:
         raise click.ClickException(str(e))
