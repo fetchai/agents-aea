@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
 from collections.abc import Iterable
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from threading import Thread
 from typing import (
     Any,
@@ -462,8 +462,11 @@ class Runnable(ABC):
             raise ValueError("Start was not called!")
         self._is_running = True
         try:
-            with suppress(asyncio.CancelledError):
+            try:
                 return await self.run()
+            except asyncio.CancelledError:
+                if not self._was_cancelled:
+                    raise
         finally:
             self._is_running = False
 

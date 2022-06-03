@@ -34,6 +34,8 @@ from aea.helpers.async_utils import (
     ensure_list,
 )
 
+from tests.common.utils import wait_for_condition, wait_for_condition_async
+
 
 def test_enusre_list() -> None:
     """Test AsyncFriendlyQueue in one thread environment."""
@@ -300,13 +302,20 @@ class TestRunnable:
         """Test runnable async methods."""
         # for pydocstyle
         class TestRun(Runnable):
+            def __init__(
+                self, loop: asyncio.AbstractEventLoop = None, threaded: bool = False
+            ) -> None:
+                Runnable.__init__(self, loop=loop, threaded=threaded)
+                self.started = False
+
             async def run(self):
                 while True:
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(0.1)
+                    self.started = True
 
         run = TestRun(threaded=True)
         run.start()
-        await asyncio.sleep(0.5)
+        wait_for_condition(lambda: run.started, timeout=5)
         with pytest.raises(asyncio.TimeoutError):
             run.wait_completed(sync=True, timeout=1)
 
@@ -315,6 +324,7 @@ class TestRunnable:
 
         run = TestRun()
         run.start()
+        await wait_for_condition_async(lambda: run.started, timeout=5)
         with pytest.raises(asyncio.TimeoutError):
             await run.wait_completed(timeout=1)
         run.stop()
