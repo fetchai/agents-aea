@@ -437,7 +437,7 @@ class P2PLibp2pClientConnection(Connection):
                 if not await pipe.connect():
                     raise ValueError(
                         f"Pipe connection error: {pipe.last_exception or ''}"
-                    )
+                    ) from pipe.last_exception
 
                 self._node_client = NodeClient(pipe, self.node_por)
                 await self._setup_connection()
@@ -662,7 +662,7 @@ class TCPSocketChannelClientTLS(TCPSocketChannelClient):
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
         reader, writer = await asyncio.open_connection(
-            self._host, self._port, loop=self._loop, ssl=ssl_ctx,
+            self._host, self._port, ssl=ssl_ctx,
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 

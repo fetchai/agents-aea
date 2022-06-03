@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
-import asyncio
 import contextlib
 import logging
 import os
@@ -56,8 +55,8 @@ DEFAULT_TIMEOUT = 120
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
-class BaseTestMultiAgentManager(TestCase):
-    """Base test class for multi-agent manager"""
+class BaseCase(TestCase):
+    """Base case setup/teardown."""
 
     MODE = "async"
     PASSWORD: Optional[str] = None
@@ -108,6 +107,11 @@ class BaseTestMultiAgentManager(TestCase):
         finally:
             self.tmp_dir.cleanup()
 
+
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
+class TestMultiAgentManagerDependencies(BaseCase):
+    """Test plugin installed and loaded as a depencndecy."""
+
     @pytest.mark.skip  # issue with plugins
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
@@ -139,6 +143,11 @@ class BaseTestMultiAgentManager(TestCase):
         finally:
             call_pip("uninstall open-aea-ledger-fetchai -y".split(" "))
             call_pip(install_cmd)
+
+
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
+class BaseTestMultiAgentManager(BaseCase):
+    """Base test class for multi-agent manager"""
 
     def test_workdir_created_removed(self, *args):
         """Check work dit created removed on MultiAgentManager start and stop."""
@@ -486,14 +495,6 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager.stop_manager()
         assert not self.manager.is_running
 
-    def test_run_loop_direct_call(self, *args):
-        """Test do not allow to run MultiAgentManager_loop directly."""
-        loop = asyncio.new_event_loop()
-        with pytest.raises(
-            ValueError, match="Do not use this method directly, use start_manager"
-        ):
-            loop.run_until_complete(self.manager._manager_loop())
-
     def test_remove_running_agent(self, *args):
         """Test fail on remove running agent."""
         self.test_start_all()
@@ -660,6 +661,7 @@ class BaseTestMultiAgentManager(TestCase):
         assert len(agent_alias.get_connections_addresses()) == 1
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerAsyncMode(
     BaseTestMultiAgentManager
 ):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
@@ -675,12 +677,14 @@ class TestMultiAgentManagerAsyncModeWithPassword(
     PASSWORD = "password"  # nosec
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in multiprocess mode."""
 
@@ -706,6 +710,7 @@ class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
     PASSWORD = "password"  # nosec
 
 
+@patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerPackageConsistencyError:
     """
     Test that the MultiAgentManager (MAM) raises an error on package version inconsistency.
