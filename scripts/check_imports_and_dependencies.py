@@ -114,7 +114,7 @@ class ImportsTool:
     ) -> Generator:
         """List all python files in directory."""
         root_path = Path(root_path)
-        for path in root_path.rglob(pattern):
+        for path in root_path.glob(pattern):
             yield path.relative_to(root_path)
 
     @classmethod
