@@ -90,7 +90,20 @@ class ImportsTool:
         with open(pyfile, "r") as f:
             statements = f.read()
         instructions = dis.get_instructions(statements)  # type: ignore
-        imports = [i for i in instructions if "IMPORT" in i.opname]
+        imports = []
+        is_try_except_block = False
+        for im in instructions:
+            if "SETUP_FINALLY" in im.opname:
+                is_try_except_block = True
+
+            if "POP_EXCEPT" in im.opname:
+                is_try_except_block = False
+
+            if is_try_except_block:
+                continue
+
+            if "IMPORT" in im.opname:
+                imports.append(im)
 
         grouped: Dict[str, List[str]] = defaultdict(list)
         for instr in imports:
