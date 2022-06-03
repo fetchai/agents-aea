@@ -437,7 +437,7 @@ class P2PLibp2pClientConnection(Connection):
                 if not await pipe.connect():
                     raise ValueError(
                         f"Pipe connection error: {pipe.last_exception or ''}"
-                    )
+                    ) from pipe.last_exception
 
                 self._node_client = NodeClient(pipe, self.node_por)
                 await self._setup_connection()
