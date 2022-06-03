@@ -70,13 +70,13 @@ def check_versions_in_tox_correct(file: str = "tox.ini") -> None:
         for line in f:
             if line.strip().startswith("[testenv_multi]"):
                 skip_dependencies = True
-            
+
             if "commands =" in line:
                 skip_dependencies = False
 
             if skip_dependencies:
                 continue
-                    
+
             for match_type in ["==", ">="]:
                 if match_type in line:
                     name_part, version_part = line.split(match_type)

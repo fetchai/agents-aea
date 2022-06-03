@@ -34,7 +34,19 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import (
+    Any,
+    BinaryIO,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 import yaml
 
@@ -773,7 +785,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def _read_out(
         cls, process: subprocess.Popen
     ) -> None:  # pragma: nocover # runs in thread!
-        for line in TextIOWrapper(process.stdout, encoding="utf-8"):
+        for line in TextIOWrapper(cast(BinaryIO, process.stdout), encoding="utf-8"):
             cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line
 
@@ -782,7 +794,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls, process: subprocess.Popen
     ) -> None:  # pragma: nocover # runs in thread!
         if process.stderr is not None:
-            for line in TextIOWrapper(process.stderr, encoding="utf-8"):
+            for line in TextIOWrapper(cast(BinaryIO, process.stderr), encoding="utf-8"):
                 cls._log_capture("stderr", process.pid, line)
                 cls.stderr[process.pid] += line
 

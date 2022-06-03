@@ -40,6 +40,7 @@ from typing import (
     Set,
     Tuple,
     Union,
+    cast,
 )
 
 
@@ -519,7 +520,7 @@ class Runnable(ABC):
 
             self._got_result = True
             if self._task.exception():
-                raise self._task.exception()
+                raise cast(BaseException, self._task.exception())
         else:
             self._loop.run_until_complete(
                 asyncio.wait_for(self._wait(), timeout=timeout)
@@ -541,7 +542,7 @@ class Runnable(ABC):
                 if fut.done():  # pragma: nocover
                     return
                 if task.exception():
-                    fut.set_exception(task.exception())
+                    fut.set_exception(cast(BaseException, task.exception()))
                 else:  # pragma: nocover
                     fut.set_result(None)
             finally:

@@ -197,7 +197,7 @@ class CheckTool:
             files_and_modules, set(sections_dependencies.keys())
         )
         missed_deps_for_imports, deps_not_imported_directly = cls.check_imports(
-            sections_imports, sections_dependencies  # type: ignore
+            sections_imports, sections_dependencies
         )
 
         for section, unresolved_imports in missed_deps_for_imports.items():
@@ -236,8 +236,8 @@ class CheckTool:
 
     @staticmethod
     def check_imports(
-        sections_imports: Dict[str, Set[str]],
-        sections_dependencies: Dict[str, Dict[str, List[str]]],
+        sections_imports: Dict[str, Set[Tuple[str, Path]]],
+        sections_dependencies: Dict[str, Dict[str, List[Path]]],
     ) -> Tuple[Dict[str, List[str]], List[str]]:
         """Find missing dependencies for imports and not imported dependencies."""
 
@@ -255,7 +255,7 @@ class CheckTool:
         for section, modules in sections_imports.items():
             for module, pyfile in modules:
                 package = _find_dependency_for_module(
-                    sections_dependencies.get(section, {}), pyfile
+                    sections_dependencies.get(section, {}), pyfile  # type: ignore
                 )
                 if module not in IGNORE:
                     sections_imports_packages[section][module] = package
