@@ -52,7 +52,7 @@ class _MockRequest:
         """Init with mock response."""
         self.response = response
 
-    async def __aenter__(self) -> None:
+    async def __aenter__(self) -> Mock:
         """Enter async context."""
         return self.response
 

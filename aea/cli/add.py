@@ -135,7 +135,7 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
                 f"Package with id {item_public_id} already exists."
             )
         ctx.clean_paths.append(package_path)
-        shutil.move(package_path_temp, package_path)
+        shutil.move(str(package_path_temp), package_path)
 
     item_config = load_item_config(item_type, package_path)
     if not ctx.config.get("skip_consistency_check") and not is_fingerprint_correct(
