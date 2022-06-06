@@ -20,6 +20,7 @@
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 import logging
+import re
 import unittest.mock
 from typing import cast
 from unittest.mock import MagicMock, patch
@@ -409,8 +410,11 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
             assert (
-                "An error occurred while processing the contract api request: 'Contract.get_deploy_transaction() missing 1 required positional argument: 'deployer_address''."
-                in caplog.text
+                re.search(
+                    r"An error occurred while processing the contract api request: '(Contract\.)?get_deploy_transaction\(\) missing 1 required positional argument: 'deployer_address''.",
+                    caplog.text,
+                )
+                is not None
             )
 
 
