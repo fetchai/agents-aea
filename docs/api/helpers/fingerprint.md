@@ -40,10 +40,6 @@ Update the fingerprint of a package.
 
 - `configuration`: the configuration object.
 
-**Returns**:
-
-None
-
 <a id="aea.helpers.fingerprint.check_fingerprint"></a>
 
 #### check`_`fingerprint
