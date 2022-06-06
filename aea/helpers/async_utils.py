@@ -503,7 +503,7 @@ class Runnable(ABC):
             self._wait_sync(timeout)
             return ready_future
 
-        return self._wait_async(timeout)
+        return asyncio.wait_for(self._wait_async(timeout), timeout=timeout)
 
     def _wait_sync(self, timeout: Optional[float] = None) -> None:
         """Wait task completed in sync manner."""
@@ -567,6 +567,9 @@ class Runnable(ABC):
 
         try:
             await self._task
+        except asyncio.CancelledError:
+            if not self._was_cancelled:
+                raise
         finally:
             self._got_result = True
 

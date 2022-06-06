@@ -409,6 +409,9 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
         with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
+            # We use the regex pattern with "(Contract\.)?" because Python with versions
+            # before and after 3.10 print slightly different error messages.
+            # In particular, 3.10 includes the class of the method called with invalid arguments.
             assert (
                 re.search(
                     r"An error occurred while processing the contract api request: '(Contract\.)?get_deploy_transaction\(\) missing 1 required positional argument: 'deployer_address''.",
