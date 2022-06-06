@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 import logging
+import re
 import unittest.mock
 from typing import cast
 from unittest.mock import MagicMock, patch
@@ -408,9 +409,15 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
         with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
+            # We use the regex pattern with "(Contract\.)?" because Python with versions
+            # before and after 3.10 print slightly different error messages.
+            # In particular, 3.10 includes the class of the method called with invalid arguments.
             assert (
-                "An error occurred while processing the contract api request: 'get_deploy_transaction() missing 1 required positional argument: 'deployer_address''."
-                in caplog.text
+                re.search(
+                    r"An error occurred while processing the contract api request: '(Contract\.)?get_deploy_transaction\(\) missing 1 required positional argument: 'deployer_address''.",
+                    caplog.text,
+                )
+                is not None
             )
 
 
