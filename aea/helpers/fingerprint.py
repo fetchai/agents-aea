@@ -79,7 +79,6 @@ def update_fingerprint(configuration: PackageConfiguration) -> None:
     Update the fingerprint of a package.
 
     :param configuration: the configuration object.
-    :return: None
     """
 
     if configuration.directory is None:
