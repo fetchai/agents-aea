@@ -81,9 +81,6 @@ def update_fingerprint(configuration: PackageConfiguration) -> None:
     :param configuration: the configuration object.
     :return: None
     """
-    # we don't process agent configurations
-    if isinstance(configuration, AgentConfig):
-        return
 
     if configuration.directory is None:
         raise ValueError("configuration.directory cannot be None.")
