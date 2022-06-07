@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: Qme98nNXajpA42LcZY6r1QARtycYkovnJWvJdfUoV6dtgB
   handlers.py: Qmbhp5Kvwsz1r1tctv4m4iocmfosYyVJN6ZTbgUfVimR9C
   helpers.py: QmXPzdgo8yHsa8H4YT8cNjZ8gN2K8qQNyAynNp6VnaehGe
-  strategy.py: QmXpKEvsCCvPQ3kZZUBEyLCR3myRvLaYyDcBgUu4x36fAc
+  strategy.py: QmbyNaAv67SYp7PFEoNmxedJxnn6FxNZScwyghakt4LRsm
   transactions.py: QmXLunaZALbzA2jQJ2NFd7PHqM25Hu2GYmB8tcNGYQQDZW
 fingerprint_ignore_patterns: []
 connections:
@@ -97,6 +97,7 @@ models:
       search_for: both
       search_radius: 5.0
       service_key: tac_service
+      tx_fee_proposal: 1500000000000000
     class_name: Strategy
   transactions:
     args:

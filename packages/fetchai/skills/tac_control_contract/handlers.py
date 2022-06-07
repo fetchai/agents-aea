@@ -403,7 +403,7 @@ class LedgerApiHandler(Handler):
                         "amount": 0,
                         "code_id": code_id,
                         "deployer_address": self.context.agent_address,
-                        "tx_fee": 0,
+                        "tx_fee": parameters.contract_init_tx_fee,
                     }
                 ),
             )
