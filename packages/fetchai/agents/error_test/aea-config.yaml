@@ -4,7 +4,8 @@ version: 0.1.0
 description: A simple agent to test error raised in skill.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-fingerprint: {}
+fingerprint:
+  README.md: QmdQh43mUtMJSLa9ghvwoZjiAcgU98Rb7c98HCf2t2vBNA
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z

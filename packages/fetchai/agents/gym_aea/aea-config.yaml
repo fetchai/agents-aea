@@ -5,7 +5,8 @@ description: The gym aea demos the interaction between a skill containing a RL a
   and a gym connection.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-fingerprint: {}
+fingerprint:
+  README.md: QmNZkqQZByU5yn18ELka8TAyypiRxhHjAfMSdZfUy9mRwy
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/gym:0.19.0:QmRQtBH1mxYvKovuHCVCD5FRPxdwtBykWFX2rhQNssE1uF
