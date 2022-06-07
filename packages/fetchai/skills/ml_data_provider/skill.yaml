@@ -54,7 +54,7 @@ models:
   strategy:
     args:
       batch_size: 2
-      buyer_tx_fee: 10
+      buyer_tx_fee: 1550000000000000
       classification:
         piece: classification
         value: seller
@@ -75,5 +75,5 @@ models:
 dependencies:
   numpy: {}
   tensorflow:
-    version: ~=2.4.0
+    version: <3.0.0,>=2.4.0
 is_abstract: false

@@ -71,7 +71,7 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
-      max_buyer_tx_fee: 20
+      max_buyer_tx_fee: 1550000000000000
       max_negotiations: 2
       max_unit_price: 70
       search_query:
@@ -86,5 +86,5 @@ dependencies:
     version: <2.0.0,>=1.0.0
   numpy: {}
   tensorflow:
-    version: ~=2.4.0
+    version: <3.0.0,>=2.4.0
 is_abstract: false

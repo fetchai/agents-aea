@@ -28,6 +28,11 @@ from aea.helpers.transaction.base import Terms
 from packages.fetchai.skills.tac_control.parameters import Parameters as BaseParameters
 
 
+DEFAULT_CONTRACT_DEPLOY_FEE = 1
+DEFAULT_CONTRACT_INIT_FEE = 1
+DEFAULT_CONTRACT_EXECUTE_FEE = 1
+
+
 class Parameters(BaseParameters):
     """This class contains the parameters of the game."""
 
@@ -35,6 +40,15 @@ class Parameters(BaseParameters):
         """Instantiate the parameter class."""
         super().__init__(**kwargs)
         self.nb_completed_minting = 0
+        self._contract_init_tx_fee = kwargs.pop(
+            "contract_init_tx_fee", DEFAULT_CONTRACT_INIT_FEE
+        )  # type: int
+        self._contract_deploy_tx_fee = kwargs.pop(
+            "contract_deploy_tx_fee", DEFAULT_CONTRACT_DEPLOY_FEE
+        )  # type: int
+        self._contract_execute_tx_fee = kwargs.pop(
+            "contract_execute_tx_fee", DEFAULT_CONTRACT_EXECUTE_FEE
+        )  # type: int
 
     def get_deploy_terms(self, is_init_transaction: bool = False) -> Terms:
         """
@@ -96,3 +110,18 @@ class Parameters(BaseParameters):
             nonce="",
         )
         return terms
+
+    @property
+    def contract_deploy_tx_fee(self) -> int:
+        """Transaction fee for a TAC instance."""
+        return self._contract_deploy_tx_fee
+
+    @property
+    def contract_init_tx_fee(self) -> int:
+        """Transaction fee for a TAC instance."""
+        return self._contract_init_tx_fee
+
+    @property
+    def contract_execute_tx_fee(self) -> int:
+        """Transaction fee for a TAC instance."""
+        return self._contract_execute_tx_fee
