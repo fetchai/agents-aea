@@ -4,7 +4,8 @@ version: 0.1.0
 license: Apache-2.0
 description: Http echo agent configured with default variables.
 aea_version: '>=1.3.0, <2.0.0'
-fingerprint: {}
+fingerprint:
+  README.md: QmcUt99EhiM9CRqXNVZXhMrJRWUd28EA1FR6jnZq8PhTzu
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_server:0.22.0:QmNZLaHND6cXCFCwGHV3kbsguYxBm89v9h7c1sGHDvmqax

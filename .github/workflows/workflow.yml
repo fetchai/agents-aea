@@ -90,7 +90,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
@@ -109,7 +109,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
@@ -151,7 +151,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - name: Install dependencies (ubuntu-latest)
@@ -171,7 +171,7 @@ jobs:
     if: github.base_ref == 'main'
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - uses: actions/setup-node@v1
@@ -202,7 +202,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
@@ -233,7 +233,7 @@ jobs:
       - uses: actions/checkout@master
       - if: matrix.sys.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python_version }}
       - name: Install tox
@@ -261,9 +261,9 @@ jobs:
       - uses: actions/setup-python@v3
         with:
           python-version: 3.7
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
-          go-version: "1.17.1"
+          go-version: "1.17.7"
       - name: Install protolint (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -287,12 +287,12 @@ jobs:
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.8
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
-          go-version: "1.17.0"
+          go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -319,12 +319,12 @@ jobs:
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.8
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
-          go-version: "1.17.0"
+          go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -351,7 +351,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.8
       - name: Install dependencies (ubuntu-latest)
@@ -380,10 +380,10 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python_version }}
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
       - if: matrix.os == 'ubuntu-latest'
@@ -483,10 +483,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
     # - if: matrix.python-version == '3.7'
@@ -504,10 +504,10 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-python@master
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.7
-      - uses: actions/setup-go@master
+      - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
       - name: Install dependencies (ubuntu-latest)
