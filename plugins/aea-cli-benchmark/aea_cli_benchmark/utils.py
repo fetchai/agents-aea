@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -21,9 +22,12 @@ import asyncio
 import inspect
 import multiprocessing
 import os
+import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from statistics import mean, stdev, variance
+from tempfile import TemporaryDirectory
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from unittest.mock import MagicMock
 
@@ -31,11 +35,15 @@ import click
 import psutil  # type: ignore
 
 from aea.aea import AEA
+from aea.cli.add import copy_package_directory
+from aea.cli.utils.package_utils import get_package_path
 from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
+    AEA_DIR,
     DEFAULT_LEDGER,
     PACKAGES,
     PROTOCOLS,
+    SIGNING_PROTOCOL,
     SKILLS,
     _FETCHAI_IDENTIFIER,
 )
@@ -43,13 +51,9 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.protocols.base import Protocol
+from aea.protocols.base import Message, Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, Skill, SkillContext
-
-from packages.fetchai.protocols.default.message import (  # noqa: F402  # pylint: disable=import-outside-toplevel,unused-import
-    DefaultMessage,
-)
 
 
 ERROR_SKILL_NAME = "error"
@@ -65,7 +69,7 @@ output_format_deco = click.option(
     show_default=True,
 )
 number_of_runs_deco = click.option(
-    "--number_of_runs", default=10, help="How many times run test.", show_default=True
+    "--number_of_runs", default=2, help="How many times run test.", show_default=True
 )
 runtime_mode_deco = click.option(
     "--runtime_mode",
@@ -92,12 +96,22 @@ def make_agent(
     agent_name: str = "my_agent",
     runtime_mode: str = "threaded",
     resources: Optional[Resources] = None,
+    wallet: Optional[Wallet] = None,
     identity: Optional[Identity] = None,
+    packages_dir=PACKAGES_DIR,
+    default_ledger=None,
 ) -> AEA:
     """Make AEA instance."""
-    wallet = Wallet({DEFAULT_LEDGER: None})
+    if not wallet:
+        wallet = Wallet({DEFAULT_LEDGER: None})
+
+    if wallet and not identity:
+        identity = make_identity_from_wallet(
+            agent_name, wallet, default_ledger or list(wallet.addresses.keys())[0]
+        )
+
     identity = identity or Identity(
-        agent_name, address=agent_name, public_key=f"public_key_for_{agent_name}"
+        agent_name, address=agent_name, public_key="somekey"
     )
     resources = resources or Resources()
     datadir = os.getcwd()
@@ -107,27 +121,29 @@ def make_agent(
 
     resources.add_skill(
         Skill.from_dir(
-            str(PACKAGES_DIR / _FETCHAI_IDENTIFIER / SKILLS / ERROR_SKILL_NAME),
+            str(Path(packages_dir) / _FETCHAI_IDENTIFIER / SKILLS / ERROR_SKILL_NAME),
             agent_context=agent_context,
         )
     )
     resources.add_protocol(
         Protocol.from_dir(
             str(
-                PACKAGES_DIR
-                / _FETCHAI_IDENTIFIER
+                Path(packages_dir)
+                / "open_aea"
                 / PROTOCOLS
-                / DefaultMessage.protocol_id.name
+                / PublicId.from_str(SIGNING_PROTOCOL).name
             )
         )
     )
     return AEA(identity, wallet, resources, datadir, runtime_mode=runtime_mode)
 
 
-def make_envelope(
-    sender: str, to: str, message: Optional[DefaultMessage] = None
-) -> Envelope:
+def make_envelope(sender: str, to: str, message: Optional[Message] = None) -> Envelope:
     """Make an envelope."""
+    from packages.fetchai.protocols.default.message import (  # noqa: E402  # pylint: disable=import-outside-toplevel,unused-import
+        DefaultMessage,
+    )
+
     if message is None:
         message = DefaultMessage(
             dialogue_reference=("", ""),
@@ -189,7 +205,7 @@ class GeneratorConnection(Connection):
         configuration = ConnectionConfig(connection_id=cls.connection_id,)
         test_connection = cls(
             configuration=configuration,
-            identity=Identity("name", "address", "public_key"),
+            identity=Identity("name", "address", "pubkey"),
             data_dir=".tmp",
         )
         return test_connection
@@ -232,11 +248,15 @@ def make_skill(
     agent: AEA,
     handlers: Optional[Dict[str, Type[Handler]]] = None,
     behaviours: Optional[Dict[str, Type[Behaviour]]] = None,
+    skill_id: Optional[PublicId] = None,
 ) -> Skill:
     """Construct skill instance for agent from behaviours."""
+    skill_id = skill_id or PublicId.from_str("fetchai/benchmark:0.1.0")
     handlers = handlers or {}
     behaviours = behaviours or {}
-    config = SkillConfig(name="test_skill", author="fetchai")
+    config = SkillConfig(
+        name=skill_id.name, author=skill_id.author, version=skill_id.version
+    )
     skill_context = SkillContext(agent.context)
     skill = Skill(configuration=config, skill_context=skill_context)
     for name, handler_cls in handlers.items():
@@ -274,9 +294,10 @@ def multi_run(
         p.terminate()
         del p
 
-    mean_values = map(mean, zip(*(map(lambda x: x[1], i) for i in results)))
-    stdev_values = map(stdev, zip(*(map(lambda x: x[1], i) for i in results)))
-    variance_values = map(variance, zip(*(map(lambda x: x[1], i) for i in results)))
+    data = list(zip(*(map(lambda x: x[1], i) for i in results)))
+    mean_values = map(mean, data)
+    stdev_values = map(stdev, data)
+    variance_values = map(variance, data)
     return list(
         zip(map(lambda x: x[0], results[0]), mean_values, stdev_values, variance_values)
     )
@@ -299,3 +320,51 @@ def print_results(
         mean_, stdev_, variance_ = map(lambda x: round(x, 6), values_set)
         click.echo(f" * {msg}: mean: {mean_} stdev: {stdev_} variance: {variance_} ")
     click.echo("Test finished.")
+
+
+def _make_init_py(path: str) -> None:
+    """Make init.py file in a directory."""
+    (Path(path) / "__init__.py").write_text("")
+
+
+def make_identity_from_wallet(name, wallet, default_ledger):
+    """Make indentity for ledger id and wallet specified."""
+    return Identity(
+        name,
+        address=wallet.addresses[default_ledger],
+        public_key=wallet.public_keys[default_ledger],
+        default_address_key=default_ledger,
+    )
+
+
+@contextmanager
+def with_packages(packages: List[Tuple[str, str]], packages_dir: Optional[Path] = None):
+    """Download and install packages context manager."""
+
+    if packages_dir is None:
+        packages_dir = AEA_DIR.parent / PACKAGES
+
+    with TemporaryDirectory() as dir_name:
+        temp_packages_dir = Path(dir_name) / PACKAGES
+        os.mkdir(temp_packages_dir)
+        _make_init_py(dir_name)
+        _make_init_py(temp_packages_dir)
+
+        for package_type, package in packages:
+            public_id = PublicId.from_str(package)
+            dest = get_package_path(
+                str(dir_name), package_type, public_id, vendor_dirname=PACKAGES
+            )
+            source = (
+                packages_dir / public_id.author / f"{package_type}s" / public_id.name
+            )
+            copy_package_directory(source, dest)
+            _make_init_py(temp_packages_dir / public_id.author)
+            _make_init_py(temp_packages_dir / public_id.author / f"{package_type}s")
+
+        sys.path.append(dir_name)
+        yield
+        sys.path.remove(dir_name)
+        for k in list(sys.modules.keys()):
+            if k.startswith(PACKAGES):
+                sys.modules.pop(k)
