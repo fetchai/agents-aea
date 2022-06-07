@@ -113,7 +113,11 @@ def run(
     agent.stop()
     t.join(5)
 
-    latency = mean(map(lambda x: x[1] - x[0], zip(connection.sends, connection.recvs,)))
+    data = list(map(lambda x: x[1] - x[0], zip(connection.sends, connection.recvs,)))
+    if not data:
+        raise ValueError("Could not collect enough data.")
+
+    latency = mean(data)
     total_amount = len(connection.recvs)
     rate = total_amount / duration
     return [

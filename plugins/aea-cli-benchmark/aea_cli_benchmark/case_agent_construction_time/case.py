@@ -28,7 +28,12 @@ from typing import List, Tuple, Union
 from aea_cli_benchmark.utils import get_mem_usage_in_mb
 from click.testing import CliRunner
 
+from aea import AEA_DIR as _AEA_DIR
 from aea.aea_builder import AEABuilder
+
+
+AEA_DIR = Path(_AEA_DIR)
+PACKAGES_DIR = AEA_DIR.parent / "packages"
 
 
 def run(agents: int) -> List[Tuple[str, Union[int, float]]]:
@@ -43,7 +48,14 @@ def run(agents: int) -> List[Tuple[str, Union[int, float]]]:
             CliRunner()
             .invoke(
                 cli,
-                ["fetch", "fetchai/my_first_aea", "--alias", "agent"],
+                [
+                    f"--registry-path={PACKAGES_DIR}",
+                    "fetch",
+                    "--local",
+                    "fetchai/my_first_aea",
+                    "--alias",
+                    "agent",
+                ],
                 catch_exceptions=False,
             )
             .exit_code

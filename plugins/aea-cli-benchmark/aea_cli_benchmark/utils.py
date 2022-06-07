@@ -294,9 +294,10 @@ def multi_run(
         p.terminate()
         del p
 
-    mean_values = map(mean, zip(*(map(lambda x: x[1], i) for i in results)))
-    stdev_values = map(stdev, zip(*(map(lambda x: x[1], i) for i in results)))
-    variance_values = map(variance, zip(*(map(lambda x: x[1], i) for i in results)))
+    data = list(zip(*(map(lambda x: x[1], i) for i in results)))
+    mean_values = map(mean, data)
+    stdev_values = map(stdev, data)
+    variance_values = map(variance, data)
     return list(
         zip(map(lambda x: x[0], results[0]), mean_values, stdev_values, variance_values)
     )

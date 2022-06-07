@@ -32,16 +32,16 @@ from aea.helpers.base import CertRequest, SimpleId
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.identity.base import Identity
 
-from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
-from packages.fetchai.connections.p2p_libp2p.connection import (
+from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
+from packages.valory.connections.p2p_libp2p.connection import (
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
 )
-from packages.fetchai.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
-from packages.fetchai.connections.p2p_libp2p_client.connection import (
+from packages.valory.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
+from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
-from packages.fetchai.connections.p2p_libp2p_mailbox.connection import (
+from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 

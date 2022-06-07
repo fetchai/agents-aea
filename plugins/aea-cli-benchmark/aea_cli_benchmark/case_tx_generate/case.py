@@ -48,6 +48,7 @@ from aea_cli_benchmark.case_tx_generate.ledger_utils import (
 )
 from aea_cli_benchmark.utils import make_agent, make_skill, wait_for_condition
 
+from aea import AEA_DIR as _AEA_DIR
 from aea.cli.generate_key import _generate_private_key
 from aea.configurations.base import ConnectionConfig, ProtocolConfig
 from aea.configurations.data_types import PublicId
@@ -70,11 +71,13 @@ from packages.fetchai.connections.ledger.base import (
 )
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.protocols.signing.dialogues import SigningDialogue
-from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.dialogues import SigningDialogue
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
+AEA_DIR = Path(_AEA_DIR)
+PACKAGES_DIR = AEA_DIR.parent / "packages"
 
 
 class LedgerApiHandler(Handler):
@@ -385,7 +388,7 @@ class Case:
             agent_name=self.agent_name,
             resources=resources,
             wallet=wallet,
-            packages_dir="/home/solarw/fetchai/agents-aea/packages",
+            packages_dir=str(PACKAGES_DIR),
         )
 
         skill = make_skill(

@@ -71,4 +71,9 @@ def main(
                 int(number_of_runs), run, (duration, runtime_mode, connection_mode),
             )
 
-        return print_results(output_format, parameters, result_fn)
+        try:
+            return print_results(output_format, parameters, result_fn)
+        except ValueError as e:
+            raise click.ClickException(str(e)) from e
+        except OSError as e:
+            raise click.ClickException(str(e)) from e

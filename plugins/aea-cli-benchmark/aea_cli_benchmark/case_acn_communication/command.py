@@ -32,11 +32,11 @@ from aea_cli_benchmark.utils import (
 
 
 PACKAGES = [
-    ("protocol", "fetchai/acn"),
+    ("protocol", "valory/acn"),
     ("protocol", "fetchai/default"),
-    ("connection", "fetchai/p2p_libp2p"),
-    ("connection", "fetchai/p2p_libp2p_client"),
-    ("connection", "fetchai/p2p_libp2p_mailbox"),
+    ("connection", "valory/p2p_libp2p"),
+    ("connection", "valory/p2p_libp2p_client"),
+    ("connection", "valory/p2p_libp2p_mailbox"),
 ]
 
 

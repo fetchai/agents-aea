@@ -712,9 +712,9 @@ def ganache(
 
 @contextmanager
 def _ganache_context(
-    ganache_configuration,
-    ganache_addr=DEFAULT_GANACHE_ADDR,
-    ganache_port=DEFAULT_GANACHE_PORT,
+    ganache_configuration: Dict,
+    ganache_addr: str = DEFAULT_GANACHE_ADDR,
+    ganache_port: int = DEFAULT_GANACHE_PORT,
     timeout: float = 2.0,
     max_attempts: int = 10,
 ):
