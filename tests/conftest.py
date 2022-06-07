@@ -305,6 +305,25 @@ VALORY_REF = os.path.join(ROOT_DIR, "packages", "valory")
 PROTOCOL_SPECS_PREF_1 = os.path.join(ROOT_DIR, "examples", "protocol_specification_ex")
 PROTOCOL_SPECS_PREF_2 = os.path.join(ROOT_DIR, "tests", "data")
 
+
+GANACHE_CONFIGURATION = dict(
+    accounts_balances=[
+        (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
+        (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
+        (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
+        (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
+    ],
+)
+
+FETCHD_CONFIGURATION = dict(
+    mnemonic=DEFAULT_FETCH_MNEMONIC,
+    moniker=DEFAULT_MONIKER,
+    chain_id=DEFAULT_FETCH_CHAIN_ID,
+    genesis_account=DEFAULT_GENESIS_ACCOUNT,
+    denom=DEFAULT_DENOMINATION,
+)
+
+
 contract_config_files = [
     os.path.join(FETCHAI_PREF, "contracts", "erc1155", CONTRACT_YAML),
     os.path.join(ROOT_DIR, "tests", "data", "dummy_contract", CONTRACT_YAML),
@@ -635,26 +654,13 @@ def apply_aea_loop(request) -> None:
 @pytest.fixture(scope="session")
 def ganache_configuration():
     """Get the Ganache configuration for testing purposes."""
-    return dict(
-        accounts_balances=[
-            (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
-            (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
-            (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
-            (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
-        ],
-    )
+    return GANACHE_CONFIGURATION
 
 
 @pytest.fixture(scope="session")
 def fetchd_configuration():
     """Get the Fetch ledger configuration for testing purposes."""
-    return dict(
-        mnemonic=DEFAULT_FETCH_MNEMONIC,
-        moniker=DEFAULT_MONIKER,
-        chain_id=DEFAULT_FETCH_CHAIN_ID,
-        genesis_account=DEFAULT_GENESIS_ACCOUNT,
-        denom=DEFAULT_DENOMINATION,
-    )
+    return FETCHD_CONFIGURATION
 
 
 @pytest.fixture(scope="session")
@@ -692,15 +698,29 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
 @pytest.fixture(scope="class")
 def ganache(
     ganache_configuration,
-    ganache_addr,
-    ganache_port,
+    ganache_addr=DEFAULT_GANACHE_ADDR,
+    ganache_port=DEFAULT_GANACHE_PORT,
     timeout: float = 2.0,
     max_attempts: int = 10,
 ):
     """Launch the Ganache image."""
+    with _ganache_context(
+        ganache_configuration, ganache_addr, ganache_port, timeout, max_attempts
+    ) as image:
+        yield image
+
+
+@contextmanager
+def _ganache_context(
+    ganache_configuration: Dict,
+    ganache_addr: str = DEFAULT_GANACHE_ADDR,
+    ganache_port: int = DEFAULT_GANACHE_PORT,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
     client = docker.from_env()
     image = GanacheDockerImage(
-        client, "http://127.0.0.1", 8545, config=ganache_configuration
+        client, ganache_addr, ganache_port, config=ganache_configuration
     )
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
@@ -713,6 +733,12 @@ def fetchd(
     fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20,
 ):
     """Launch the Fetch ledger image."""
+    with _fetchd_context(fetchd_configuration, timeout, max_attempts) as fetchd:
+        yield fetchd
+
+
+@contextmanager
+def _fetchd_context(fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20):
     client = docker.from_env()
     image = FetchLedgerDockerImage(
         client,

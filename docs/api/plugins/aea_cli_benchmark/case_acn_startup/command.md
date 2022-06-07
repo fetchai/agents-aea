@@ -1,0 +1,33 @@
+<a id="plugins.aea-cli-benchmark.aea_cli_benchmark.case_acn_startup.command"></a>
+
+# plugins.aea-cli-benchmark.aea`_`cli`_`benchmark.case`_`acn`_`startup.command
+
+Check amount of time for acn connection start.
+
+<a id="plugins.aea-cli-benchmark.aea_cli_benchmark.case_acn_startup.command.main"></a>
+
+#### main
+
+```python
+@click.command(name="acn_startup")
+@click.option(
+    "--connection",
+    default="p2pnode",
+    help="Connection to use.",
+    show_default=True,
+    type=click.Choice(["p2pnode", "mailbox", "client"]),
+)
+@click.option(
+    "--connect-times",
+    default=10,
+    help="How many time perform connection.",
+    show_default=True,
+)
+@number_of_runs_deco
+@output_format_deco
+def main(connection: str, connect_times: int, number_of_runs: int,
+         output_format: str) -> Any
+```
+
+Check connection connect time.
+
