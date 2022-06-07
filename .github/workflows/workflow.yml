@@ -260,7 +260,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
@@ -479,7 +479,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.7]
+        python-version: ["3.10"]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@master
@@ -506,7 +506,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
