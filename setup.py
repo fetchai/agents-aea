@@ -18,6 +18,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+import sys
 import os
 import re
 from typing import Dict
@@ -64,7 +65,12 @@ base_deps = [
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
-    base_deps.append("pywin32>=300,<305")
+    if sys.version_info[1] > 9 and sys.version_info[0] == 3:
+        base_deps.append("pywin32==305")
+    elif sys.version_info[1] <= 9 and sys.version_info[0] == 3:
+        base_deps.append("pywin32==300")
+    else:
+        raise Exception("Must be using Python 3")
 
 here = os.path.abspath(os.path.dirname(__file__))
 about: Dict[str, str] = {}
