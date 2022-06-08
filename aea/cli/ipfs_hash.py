@@ -30,7 +30,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple, cast
+from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import click
 
@@ -198,6 +198,7 @@ def extend_public_ids(
 def update_hashes(
     packages_dir: Path,
     no_wrap: bool = False,
+    vendor: Optional[str] = None,
     config_loader: Callable[
         [PackageType, Path], PackageConfiguration
     ] = load_configuration,
@@ -237,8 +238,11 @@ def update_hashes(
                 key, package_hash = hash_package(
                     configuration_obj, package_id.package_type, no_wrap=no_wrap
                 )
-                package_hashes[key] = package_hash
                 public_id_to_hash_mappings[package_id] = package_hash
+
+                if vendor is not None and package_id.author != vendor:
+                    continue
+                package_hashes[key] = package_hash
 
         to_csv(package_hashes, packages_dir / HASHES_FILE)
         click.echo("Done!")
@@ -326,15 +330,18 @@ def hash_group() -> None:
     type=click.Path(exists=True, dir_okay=True, file_okay=False),
     default=Path("packages/"),
 )
+@click.option("--vendor", type=str)
 @click.option("--no-wrap", is_flag=True)
 @click.option("--check", is_flag=True)
-def generate_all(packages_dir: Path, no_wrap: bool, check: bool,) -> None:
+def generate_all(
+    packages_dir: Path, vendor: Optional[str], no_wrap: bool, check: bool,
+) -> None:
     """Generate IPFS hashes."""
     packages_dir = Path(packages_dir).absolute()
     if check:
         return_code = check_hashes(packages_dir, no_wrap)
     else:
-        return_code = update_hashes(packages_dir, no_wrap)
+        return_code = update_hashes(packages_dir, no_wrap, vendor=vendor)
     sys.exit(return_code)
 
 
