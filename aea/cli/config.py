@@ -43,11 +43,21 @@ def config(click_context: click.Context) -> None:  # pylint: disable=unused-argu
 
 @config.command()
 @click.argument("JSON_PATH", required=True)
+@click.option(
+    "--aev",
+    "apply_environment_variables",
+    required=False,
+    is_flag=True,
+    default=False,
+    help="Populate Agent configs from Environment variables.",
+)
 @pass_ctx
-def get(ctx: Context, json_path: str) -> None:
+def get(ctx: Context, apply_environment_variables: bool, json_path: str) -> None:
     """Get a field."""
     try:
-        agent_config_manager = AgentConfigManager.load(ctx.cwd)
+        agent_config_manager = AgentConfigManager.load(
+            ctx.cwd, apply_environment_variables
+        )
         value = agent_config_manager.get_variable(json_path)
     except (ValueError, AEAException) as e:
         raise ClickException(*e.args)
