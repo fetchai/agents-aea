@@ -45,7 +45,8 @@ Unset the current agent context.
 def set_config(cls,
                dotted_path: str,
                value: Any,
-               type_: Optional[str] = None) -> Result
+               type_: Optional[str] = None,
+               aev: bool = False) -> Result
 ```
 
 Set a config.
@@ -57,6 +58,7 @@ Run from agent's directory.
 - `dotted_path`: str dotted path to config param.
 - `value`: a new value to set.
 - `type_`: the type
+- `aev`: use the environment variables
 
 **Returns**:
 

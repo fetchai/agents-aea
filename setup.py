@@ -66,7 +66,7 @@ base_deps = [
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
     if sys.version_info[1] > 9 and sys.version_info[0] == 3:
-        base_deps.append("pywin32==305")
+        base_deps.append("pywin32==304")
     elif sys.version_info[1] <= 9 and sys.version_info[0] == 3:
         base_deps.append("pywin32==300")
     else:

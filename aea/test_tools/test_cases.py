@@ -123,7 +123,11 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def set_config(
-        cls, dotted_path: str, value: Any, type_: Optional[str] = None
+        cls,
+        dotted_path: str,
+        value: Any,
+        type_: Optional[str] = None,
+        aev: bool = False,
     ) -> Result:
         """
         Set a config.
@@ -133,21 +137,19 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param dotted_path: str dotted path to config param.
         :param value: a new value to set.
         :param type_: the type
+        :param aev: use the environment variables
 
         :return: Result
         """
         if type_ is None:
             type_ = type(value).__name__
 
-        return cls.run_cli_command(
-            "config",
-            "set",
-            dotted_path,
-            str(value),
-            "--type",
-            type_,
-            cwd=cls._get_cwd(),
-        )
+        cmd = ["config", "set", dotted_path, str(value), "--type", type_]
+
+        if aev:
+            cmd.append("--aev")
+
+        return cls.run_cli_command(*cmd, cwd=cls._get_cwd(),)
 
     @classmethod
     def nested_set_config(cls, dotted_path: str, value: Any) -> None:
