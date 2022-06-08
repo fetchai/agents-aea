@@ -24,6 +24,7 @@ import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import List
+from unittest import mock
 
 from click.testing import Result
 
@@ -96,16 +97,24 @@ class TestCreate:
                 for pid in ["stub_0", "stub_1"]
             ]
         )
-        result = self._run_command(["build"])
-        assert result.stdout == "Build completed!\n"
+
+        with mock.patch("click.echo") as echo_mock:
+            result = self._run_command(["build"])
+            echo_mock.assert_called_with("Build completed!")
 
         self._run_command(["generate-key", "ethereum"])
         self._run_command(["add-key", "ethereum"])
 
-        result = self._run_command(["run"], False)
+        outputs = []
 
-        assert "Contract stub_0 initialized." in result.stdout
-        assert "Contract stub_1 initialized." in result.stdout
+        def _print_patch(line: str, *args, **kwargs) -> None:
+            outputs.append(line)
+
+        with mock.patch("builtins.print", new=_print_patch):
+            result = self._run_command(["run"], False)
+
+            assert "Contract stub_0 initialized." in outputs
+            assert "Contract stub_1 initialized." in outputs
 
     def teardown(self,):
         """Test teardown."""

@@ -374,7 +374,8 @@ class TCPSocketChannel(IPCChannel):
 
         try:
             await asyncio.wait_for(self._connected.wait(), timeout)
-        except asyncio.TimeoutError:  # pragma: no cover
+        except asyncio.TimeoutError as e:  # pragma: no cover
+            self.logger.debug(f"Error while connecting {e}")
             return False
 
         self._server.close()
