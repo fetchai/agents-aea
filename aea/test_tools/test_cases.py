@@ -146,6 +146,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             str(value),
             "--type",
             type_,
+            "--aev",
             cwd=cls._get_cwd(),
         )
 

@@ -68,13 +68,27 @@ def get(ctx: Context, json_path: str) -> None:
 )
 @click.argument("JSON_PATH", required=True)
 @click.argument("VALUE", required=True, type=str)
+@click.option(
+    "--aev",
+    "apply_environment_variables",
+    required=False,
+    is_flag=True,
+    default=False,
+    help="Populate Agent configs from Environment variables.",
+)
 @pass_ctx
 def set_command(
-    ctx: Context, json_path: str, value: str, type_: Optional[str],
+    ctx: Context,
+    json_path: str,
+    value: str,
+    apply_environment_variables: bool,
+    type_: Optional[str],
 ) -> None:
     """Set a field."""
     try:
-        agent_config_manager = AgentConfigManager.load(ctx.cwd)
+        agent_config_manager = AgentConfigManager.load(
+            ctx.cwd, apply_environment_variables
+        )
 
         current_value = None
         with contextlib.suppress(VariableDoesNotExist):
