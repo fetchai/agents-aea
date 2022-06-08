@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: QmTQL6ccCPnYCwaFQiJGtuWQx5SbCXmukUaPainmreyFBZ
   message.py: QmRAqT4QhYP4b3o1HbU1NcU6hpzoxRbyzv4PEYwVZbnV9T
   oef_search.proto: QmaYkawAXEeeNuCcjmwcvdsttnE3owtuP9ouAYVyRu7M2J
-  oef_search_pb2.py: QmaSXn3irhKQH7cVT4A1F38dNTwB9XhF41y5gZqA52ANGd
+  oef_search_pb2.py: QmSCvcwkLmwWESqiAs2Vj2yioUwLmdzMGaCDRo3sHT1ByL
   serialization.py: QmPoGQ7xvQQWoByWMTLJEPnQL9J5EXxWCVCCo4HQn9PiCW
 fingerprint_ignore_patterns: []
 dependencies:

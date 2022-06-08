@@ -11,17 +11,17 @@ fingerprint:
   __init__.py: QmNgbxAZUeLtGGA1eAAQufEd4y7eGpjC97wytq7yuWfjZR
   behaviours.py: QmZMdMaxM6gShJVxo83HoZGPQ1CZH2UxHe85R2nydsU9GQ
   dialogues.py: QmV4CzjeTnss1M3cDa7xwv6hfRCkeoDwaTDR6mHGkm9hrE
-  handlers.py: QmbUM86PH5FNriAQ43Gvc7hRMv5T24ZxXANGhpf4R6HHMK
-  strategy.py: QmfJwo9KxzZvSYexT84wMa2Wzy2TU3Byy3e9FqTnonYsL3
+  handlers.py: Qmd1ZxjxJZgW4HFm3Ay8sAuo1AxGypgtThRMMmeg4Tweow
+  strategy.py: QmQKMb3YcmpewEq3mXabnk3rX6ZzipxCgdAPu8VDo2VEwL
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:QmPCbasPNL1wFno9pFCF8wTqR9CaCt8i1QagMF2HmdkP2s
+- fetchai/ledger:0.19.0:QmR2bvMWRzbcWMgqVP3xWpZ3GBnGyrtW9jQMXuFY51PWvt
 contracts: []
 protocols:
-- fetchai/default:1.0.0:QmNuQp2z2bq2SsEGCUdYAyXLXyCRtB16RrsR2enGPaF3Nr
-- fetchai/fipa:1.0.0:QmQELeVL8MvqAW28Jbzzz3sRS4Ewdi3tviZt3zsCwHKD79
-- fetchai/ledger_api:1.0.0:QmZ6SPoXVUhjbgsL3qw1JM2UJxsCSr4G3Jm16nsT3MG7jA
-- fetchai/oef_search:1.0.0:QmPVwWnsvSRFxu89kRFcQSpbgeDuGrwscJYXXhtQAu7KqK
+- fetchai/default:1.0.0:QmVxny6aqskQokYacKcEhxSSJrdA14eDQRX69N9xXKjLsT
+- fetchai/fipa:1.0.0:Qmbe2oDXWp8eJ5SQfrChiHWPVA1qmaUmcWYXpnQKuSVUDb
+- fetchai/ledger_api:1.0.0:QmNVqsvmEaZ21QTK25s4S6Cdfc2vyAA4ipxoLZKA3NPRes
+- fetchai/oef_search:1.0.0:QmVD8sxmqeca59CM7XkVA8XJV8HhhzaffGHudUKSA956uV
 skills: []
 behaviours:
   service_registration:

@@ -8,11 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmbK7MtyAVqh2LmSh9TY6yBZqfWaAXURP4rQGATyP2hTKC
   __init__.py: QmRTQZuqfT5dYpZUMx9vDMmstWFJrYZ2V5HmX9fvrXZ31h
-  connection.py: QmZ4FNxvudhaaBRNEYnqQ2dzhjGtFGSvVS3bm43cUygzE8
+  connection.py: QmXjzMdSv8vFoHR5qedABJqEKQPLj29vx1bq1vXRr2Mdpn
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/oef_search:1.0.0:QmPVwWnsvSRFxu89kRFcQSpbgeDuGrwscJYXXhtQAu7KqK
+- fetchai/oef_search:1.0.0:QmVD8sxmqeca59CM7XkVA8XJV8HhhzaffGHudUKSA956uV
 class_name: OEFLocalConnection
 config: {}
 excluded_protocols: []

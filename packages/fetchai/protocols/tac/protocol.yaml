@@ -15,7 +15,7 @@ fingerprint:
   message.py: QmSSGEPx2kR2Q1bdXFCKxQAkt9RDXxwhoWeozf76MY2Kce
   serialization.py: QmaaUfm1tKj77JBXfdhVWVzKyrFuNCdA9TGc7oonCZm9Uf
   tac.proto: QmTjxGkEoMdvdDvBMoKhjkBV4CNNgsn6JWt6rJEwXfnq7Z
-  tac_pb2.py: QmUBYXuuLfRJEYNbtjLM5UfwRacFf7EybBbrbE3nv78oy6
+  tac_pb2.py: QmWAQ22NBCVLsBDK7x5CNXcC9GQcZRxZkQyHteJmRYiAQX
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

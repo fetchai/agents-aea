@@ -8,14 +8,14 @@ fingerprint:
   README.md: QmcUt99EhiM9CRqXNVZXhMrJRWUd28EA1FR6jnZq8PhTzu
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.22.0:QmNZLaHND6cXCFCwGHV3kbsguYxBm89v9h7c1sGHDvmqax
+- fetchai/http_server:0.22.0:QmSjFKWEjBPUFyB6eNZ61Y2CJPrGYedu9p8VXFt49zZmiB
 contracts: []
 protocols:
-- fetchai/default:1.0.0:QmNuQp2z2bq2SsEGCUdYAyXLXyCRtB16RrsR2enGPaF3Nr
+- fetchai/default:1.0.0:QmVxny6aqskQokYacKcEhxSSJrdA14eDQRX69N9xXKjLsT
 - fetchai/http:1.0.0:QmUKPQ41NMxTmzEmcv5y3U5rc4EJAvj2kdQoEJWvP34ceD
 - open_aea/signing:1.0.0:QmYvwPTb6HXrNcKYvQwCWiHsB6sYQGHPLxr5DXQFtAbMrf
 skills:
-- fetchai/http_echo:0.20.0:QmRf9mzpTpdWvP2LuAK9sGVQHPJuzWrVcJNU63aTHX9c7o
+- fetchai/http_echo:0.20.0:Qmewu2F9NeGDxiYirYLda8McsWTuQ3HHih3n3CEGabDk4h
 default_ledger: ethereum
 required_ledgers:
 - ethereum

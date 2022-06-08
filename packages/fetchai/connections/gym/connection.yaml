@@ -8,11 +8,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUp6pFGZJ3KwqfG3owDEMTUyscn9J9Gzyh2VvgFw2o3RV
   __init__.py: QmNWJFw4cbRNvs5fwGJTFthNdT8g7SSr1ukcG4zrbfX2Bu
-  connection.py: QmaZ92Lu5e7b8FqVmKnuu2DBc53rJobnTvfJGHnMwtvszN
+  connection.py: QmNVBEYkr5drCWrCvVftiGmCnM4fDcLQv6qcowpA6XDGwg
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/gym:1.0.0:QmRTJHxbo9qWupgtGtqDphjmivT5ko6vEyLvh9gWvXYgJ6
+- fetchai/gym:1.0.0:QmRdTUcCzKWVhjqsqN6L9GqLftRnHPoVdGi45FNGsn5HnK
 class_name: GymConnection
 config:
   env: ''

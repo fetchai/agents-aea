@@ -15,7 +15,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.0.0:QmNuQp2z2bq2SsEGCUdYAyXLXyCRtB16RrsR2enGPaF3Nr
+- fetchai/default:1.0.0:QmVxny6aqskQokYacKcEhxSSJrdA14eDQRX69N9xXKjLsT
 skills: []
 behaviours:
   echo:
