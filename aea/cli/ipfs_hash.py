@@ -30,7 +30,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple, cast
+from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import click
 
@@ -198,6 +198,7 @@ def extend_public_ids(
 def update_hashes(
     packages_dir: Path,
     no_wrap: bool = False,
+    vendor: Optional[str] = None,
     config_loader: Callable[
         [PackageType, Path], PackageConfiguration
     ] = load_configuration,
@@ -237,8 +238,11 @@ def update_hashes(
                 key, package_hash = hash_package(
                     configuration_obj, package_id.package_type, no_wrap=no_wrap
                 )
-                package_hashes[key] = package_hash
                 public_id_to_hash_mappings[package_id] = package_hash
+
+                if vendor is not None and package_id.author != vendor:
+                    continue
+                package_hashes[key] = package_hash
 
         to_csv(package_hashes, packages_dir / HASHES_FILE)
         click.echo("Done!")
@@ -267,7 +271,11 @@ def check_same_ipfs_hash(
     """
 
     key, actual_hash = hash_package(configuration, package_type, no_wrap=no_wrap)
-    expected_hash = all_expected_hashes[key]
+    expected_hash = all_expected_hashes.get(key)
+    if expected_hash is None:
+        click.echo(f"Hash not found for {configuration.package_id}, skipping check.")
+        return True
+
     result = actual_hash == expected_hash
     if not result:
         click.echo(
@@ -282,6 +290,7 @@ def check_same_ipfs_hash(
 def check_hashes(
     packages_dir: Path,
     no_wrap: bool = False,
+    vendor: Optional[str] = None,
     config_loader: Callable[
         [PackageType, Path], PackageConfiguration
     ] = load_configuration,
@@ -298,6 +307,9 @@ def check_hashes(
 
         for package_type, package_path in packages:
             configuration_obj = config_loader(package_type, package_path)
+            if vendor is not None and configuration_obj.author != vendor:
+                continue
+
             failed = failed or not check_fingerprint(configuration_obj)
             failed = failed or not check_same_ipfs_hash(
                 configuration_obj, package_type, expected_package_hashes, no_wrap
@@ -326,15 +338,18 @@ def hash_group() -> None:
     type=click.Path(exists=True, dir_okay=True, file_okay=False),
     default=Path("packages/"),
 )
+@click.option("--vendor", type=str)
 @click.option("--no-wrap", is_flag=True)
 @click.option("--check", is_flag=True)
-def generate_all(packages_dir: Path, no_wrap: bool, check: bool,) -> None:
+def generate_all(
+    packages_dir: Path, vendor: Optional[str], no_wrap: bool, check: bool,
+) -> None:
     """Generate IPFS hashes."""
     packages_dir = Path(packages_dir).absolute()
     if check:
-        return_code = check_hashes(packages_dir, no_wrap)
+        return_code = check_hashes(packages_dir, no_wrap, vendor=vendor)
     else:
-        return_code = update_hashes(packages_dir, no_wrap)
+        return_code = update_hashes(packages_dir, no_wrap, vendor=vendor)
     sys.exit(return_code)
 
 
