@@ -185,7 +185,9 @@ _QUERY_ATTRIBUTE = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[_QUERY_ATTRIBUTE_TYPE,],
+    enum_types=[
+        _QUERY_ATTRIBUTE_TYPE,
+    ],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
@@ -981,7 +983,9 @@ _QUERY_RELATION = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[_QUERY_RELATION_OPERATOR,],
+    enum_types=[
+        _QUERY_RELATION_OPERATOR,
+    ],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",
@@ -1350,8 +1354,12 @@ _QUERY_SET = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_QUERY_SET_VALUES,],
-    enum_types=[_QUERY_SET_OPERATOR,],
+    nested_types=[
+        _QUERY_SET_VALUES,
+    ],
+    enum_types=[
+        _QUERY_SET_OPERATOR,
+    ],
     serialized_options=None,
     is_extendable=False,
     syntax="proto3",

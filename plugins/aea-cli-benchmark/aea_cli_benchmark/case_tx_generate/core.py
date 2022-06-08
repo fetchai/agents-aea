@@ -150,7 +150,8 @@ def make_config(file: Optional[str]):
             yaml_dump_all(configs, stream=f)
     else:
         yaml_dump_all(
-            configs, stream=sys.stdout,
+            configs,
+            stream=sys.stdout,
         )
 
 

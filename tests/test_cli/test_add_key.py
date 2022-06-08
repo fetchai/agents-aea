@@ -66,7 +66,8 @@ class TestAddFetchKey:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = cls.runner.invoke(
@@ -128,7 +129,8 @@ class TestAddEthereumhKey:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = cls.runner.invoke(
@@ -190,7 +192,8 @@ class TestAddManyKeys:
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = cls.runner.invoke(
@@ -212,7 +215,8 @@ class TestAddManyKeys:
         """Test that the keys are added correctly."""
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
+            cli,
+            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
@@ -266,7 +270,8 @@ def test_add_key_fails_bad_key():
         ) as mock_logger_error:
 
             result = runner.invoke(
-                cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+                cli,
+                [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
             )
 
             result = runner.invoke(
@@ -312,7 +317,8 @@ def test_add_key_fails_bad_ledger_id():
     os.chdir(tmpdir)
     try:
         result = runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
 
         result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])

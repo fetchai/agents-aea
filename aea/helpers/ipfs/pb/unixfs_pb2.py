@@ -177,7 +177,9 @@ _DATA = _descriptor.Descriptor(
     ],
     extensions=[],
     nested_types=[],
-    enum_types=[_DATA_DATATYPE,],
+    enum_types=[
+        _DATA_DATATYPE,
+    ],
     serialized_options=None,
     is_extendable=False,
     syntax="proto2",

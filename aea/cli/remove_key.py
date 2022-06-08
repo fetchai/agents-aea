@@ -50,7 +50,9 @@ def remove_key(click_context: click.Context, type_: str, connection: bool) -> No
 
 
 def _remove_private_key(
-    click_context: click.core.Context, type_: str, connection: bool = False,
+    click_context: click.core.Context,
+    type_: str,
+    connection: bool = False,
 ) -> None:
     """
     Remove private key to the wallet.

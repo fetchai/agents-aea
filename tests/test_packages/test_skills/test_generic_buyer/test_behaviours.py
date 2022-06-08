@@ -234,7 +234,8 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self_.prepare_skill_dialogue(
-                dialogues=self_.fipa_dialogues, messages=self_.list_of_messages,
+                dialogues=self_.fipa_dialogues,
+                messages=self_.list_of_messages,
             ),
         )
         fipa_dialogue.terms = "terms"  # type: ignore

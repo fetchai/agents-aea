@@ -71,7 +71,9 @@ from aea.helpers.ipfs.base import IPFSHashOnly
 @click.pass_context
 @check_aea_project
 def scaffold(
-    click_context: click.core.Context, with_symlinks: bool, to_local_registry: bool,
+    click_context: click.core.Context,
+    with_symlinks: bool,
+    to_local_registry: bool,
 ) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)

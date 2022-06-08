@@ -46,7 +46,8 @@ class Kwargs:
     __slots__ = ("_body",)
 
     def __init__(
-        self, body: JSONLike,
+        self,
+        body: JSONLike,
     ):
         """Initialise an instance of RawTransaction."""
         self._body = body

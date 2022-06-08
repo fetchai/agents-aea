@@ -132,7 +132,11 @@ class RequestDispatcher(ABC):
 
     @abstractmethod
     def get_error_message(
-        self, e: Exception, api: LedgerApi, message: Message, dialogue: Dialogue,
+        self,
+        e: Exception,
+        api: LedgerApi,
+        message: Message,
+        dialogue: Dialogue,
     ) -> Message:
         """
         Build an error message.

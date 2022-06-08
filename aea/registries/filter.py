@@ -148,7 +148,8 @@ class Filter(WithLogger):
             )
             return
         handler = self.resources.handler_registry.fetch_by_protocol_and_skill(
-            message.protocol_id, skill_id,
+            message.protocol_id,
+            skill_id,
         )
         if handler is not None:
             self.logger.debug(

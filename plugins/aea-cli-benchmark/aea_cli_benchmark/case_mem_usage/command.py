@@ -54,6 +54,10 @@ def main(
         from aea_cli_benchmark.case_mem_usage.case import run
 
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-            return multi_run(int(number_of_runs), run, (duration, runtime_mode),)
+            return multi_run(
+                int(number_of_runs),
+                run,
+                (duration, runtime_mode),
+            )
 
         return print_results(output_format, parameters, result_fn)

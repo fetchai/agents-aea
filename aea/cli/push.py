@@ -127,7 +127,10 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     except ValueError as e:  # pragma: nocover
         raise click.ClickException(str(e))
     target_path = try_get_item_target_path(
-        registry_path, item_id.author, item_type_plural, item_id.name,
+        registry_path,
+        item_id.author,
+        item_type_plural,
+        item_id.name,
     )
     copytree(source_path, target_path)
     click.echo(
@@ -136,7 +139,10 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
 
 def push_item_from_path(
-    context: click.Context, component_type: str, path: Path, registry: str,
+    context: click.Context,
+    component_type: str,
+    path: Path,
+    registry: str,
 ) -> None:
     """Push item from path."""
 
@@ -171,7 +177,10 @@ def push_item_local(
         registry_path = cast(str, registry_path)
 
     target_path = try_get_item_target_path(
-        registry_path, item_id.author, item_type_plural, item_id.name,
+        registry_path,
+        item_id.author,
+        item_type_plural,
+        item_id.name,
     )
     copytree(component_path, target_path)
     click.echo(

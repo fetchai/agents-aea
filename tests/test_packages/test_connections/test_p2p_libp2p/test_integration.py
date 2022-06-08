@@ -206,7 +206,11 @@ class TestP2PLibp2pConnectionIntegrationTest:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        envelope = Envelope(to=to_addr, sender=from_addr, message=msg,)
+        envelope = Envelope(
+            to=to_addr,
+            sender=from_addr,
+            message=msg,
+        )
 
         from_multiplexer.put(envelope)
 

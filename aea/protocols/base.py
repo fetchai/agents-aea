@@ -400,7 +400,10 @@ class Protocol(Component):
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
         serializer_classes = list(
-            filter(lambda x: re.match(f"{name_camel_case}Serializer", x[0]), classes,)
+            filter(
+                lambda x: re.match(f"{name_camel_case}Serializer", x[0]),
+                classes,
+            )
         )
         if len(serializer_classes) != 1:  # pragma: nocover
             raise AEAComponentLoadException(

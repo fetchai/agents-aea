@@ -117,7 +117,9 @@ class IPFSDaemon:
         if res is None:
             raise Exception("Please install IPFS first!")
         process = subprocess.Popen(  # nosec
-            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
+            ["ipfs", "--version"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
         )
         output, _ = process.communicate()
         if b"0.6.0" not in output:
@@ -145,7 +147,9 @@ class IPFSDaemon:
         """Run the ipfs daemon."""
         cmd = ["ipfs", "daemon", "--offline"]
         self.process = subprocess.Popen(  # nosec
-            cmd, stdout=subprocess.PIPE, env=os.environ.copy(),
+            cmd,
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
         )
         empty_outputs = 0
         for stdout_line in iter(self.process.stdout.readline, ""):
@@ -197,7 +201,9 @@ class IPFSTool:
         self.daemon = IPFSDaemon(node_url=addr_to_url(self.addr))
 
     @property
-    def addr(self,) -> str:
+    def addr(
+        self,
+    ) -> str:
         """Node address"""
         if self._addr is None:
             addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
@@ -234,7 +240,10 @@ class IPFSTool:
         :return: dir name published, hash, list of items processed
         """
         response = self.client.add(
-            dir_path, pin=pin, recursive=True, wrap_with_directory=True,
+            dir_path,
+            pin=pin,
+            recursive=True,
+            wrap_with_directory=True,
         )
         return response[-2]["Name"], response[-1]["Hash"], response[:-1]
 

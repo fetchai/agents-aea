@@ -129,7 +129,8 @@ class BaseTestSkillContext:
     def test_decision_maker_handler_context(self):
         """Test the decision_maker_handler_context."""
         assert isinstance(
-            self.skill_context.decision_maker_handler_context, SimpleNamespace,
+            self.skill_context.decision_maker_handler_context,
+            SimpleNamespace,
         )
 
     def test_storage(self):

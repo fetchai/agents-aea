@@ -124,7 +124,9 @@ class EnvelopeContext:
     __slots__ = ("_connection_id", "_uri")
 
     def __init__(
-        self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None,
+        self,
+        connection_id: Optional[PublicId] = None,
+        uri: Optional[URI] = None,
     ) -> None:
         """
         Initialize the envelope context.
@@ -432,7 +434,10 @@ class Envelope:
             and self.context == other.context
         )
 
-    def encode(self, serializer: Optional[EnvelopeSerializer] = None,) -> bytes:
+    def encode(
+        self,
+        serializer: Optional[EnvelopeSerializer] = None,
+    ) -> bytes:
         """
         Encode the envelope.
 

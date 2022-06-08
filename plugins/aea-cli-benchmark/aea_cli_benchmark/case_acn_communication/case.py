@@ -69,7 +69,11 @@ def make_envelope(from_addr: str, to_addr: str) -> Envelope:
         performative=DefaultMessage.Performative.BYTES,
         content=b"hello",
     )
-    envelope = Envelope(to=to_addr, sender=from_addr, message=msg,)
+    envelope = Envelope(
+        to=to_addr,
+        sender=from_addr,
+        message=msg,
+    )
     return envelope
 
 

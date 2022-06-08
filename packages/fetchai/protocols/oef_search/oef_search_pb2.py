@@ -25,12 +25,12 @@ _OEFSEARCHMESSAGE_OEFERROROPERATION = _OEFSEARCHMESSAGE.nested_types_by_name[
     "OefErrorOperation"
 ]
 _OEFSEARCHMESSAGE_QUERY = _OEFSEARCHMESSAGE.nested_types_by_name["Query"]
-_OEFSEARCHMESSAGE_REGISTER_SERVICE_PERFORMATIVE = _OEFSEARCHMESSAGE.nested_types_by_name[
-    "Register_Service_Performative"
-]
-_OEFSEARCHMESSAGE_UNREGISTER_SERVICE_PERFORMATIVE = _OEFSEARCHMESSAGE.nested_types_by_name[
-    "Unregister_Service_Performative"
-]
+_OEFSEARCHMESSAGE_REGISTER_SERVICE_PERFORMATIVE = (
+    _OEFSEARCHMESSAGE.nested_types_by_name["Register_Service_Performative"]
+)
+_OEFSEARCHMESSAGE_UNREGISTER_SERVICE_PERFORMATIVE = (
+    _OEFSEARCHMESSAGE.nested_types_by_name["Unregister_Service_Performative"]
+)
 _OEFSEARCHMESSAGE_SEARCH_SERVICES_PERFORMATIVE = _OEFSEARCHMESSAGE.nested_types_by_name[
     "Search_Services_Performative"
 ]
@@ -43,9 +43,9 @@ _OEFSEARCHMESSAGE_SUCCESS_PERFORMATIVE = _OEFSEARCHMESSAGE.nested_types_by_name[
 _OEFSEARCHMESSAGE_OEF_ERROR_PERFORMATIVE = _OEFSEARCHMESSAGE.nested_types_by_name[
     "Oef_Error_Performative"
 ]
-_OEFSEARCHMESSAGE_OEFERROROPERATION_OEFERRORENUM = _OEFSEARCHMESSAGE_OEFERROROPERATION.enum_types_by_name[
-    "OefErrorEnum"
-]
+_OEFSEARCHMESSAGE_OEFERROROPERATION_OEFERRORENUM = (
+    _OEFSEARCHMESSAGE_OEFERROROPERATION.enum_types_by_name["OefErrorEnum"]
+)
 OefSearchMessage = _reflection.GeneratedProtocolMessageType(
     "OefSearchMessage",
     (_message.Message,),

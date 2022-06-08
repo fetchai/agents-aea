@@ -108,7 +108,9 @@ def load_local_registry(registry_path: str = LOCAL_REGISTRY_PATH) -> LocalRegist
 
 
 def get_ipfs_hash_from_public_id(
-    item_type: str, public_id: PublicId, registry_path: str = LOCAL_REGISTRY_PATH,
+    item_type: str,
+    public_id: PublicId,
+    registry_path: str = LOCAL_REGISTRY_PATH,
 ) -> Optional[str]:
     """Get IPFS hash from local registry."""
 
@@ -150,7 +152,10 @@ def register_item_to_local_registry(
 
 
 def fetch_ipfs(
-    item_type: str, public_id: PublicId, dest: str, remote: bool = True,
+    item_type: str,
+    public_id: PublicId,
+    dest: str,
+    remote: bool = True,
 ) -> Optional[Path]:
     """Fetch a package from IPFS node."""
     if remote:

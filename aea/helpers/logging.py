@@ -69,7 +69,9 @@ class WithLogger:
     __slots__ = ("_logger", "_default_logger_name")
 
     def __init__(
-        self, logger: Optional[Logger] = None, default_logger_name: str = "aea",
+        self,
+        logger: Optional[Logger] = None,
+        default_logger_name: str = "aea",
     ) -> None:
         """
         Initialize the logger.

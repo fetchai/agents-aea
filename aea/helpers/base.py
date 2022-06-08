@@ -431,7 +431,9 @@ def _is_dict_like(obj: Any) -> bool:
 
 
 def recursive_update(
-    to_update: Dict, new_values: Dict, allow_new_values: bool = False,
+    to_update: Dict,
+    new_values: Dict,
+    allow_new_values: bool = False,
 ) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.

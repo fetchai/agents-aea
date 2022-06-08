@@ -175,7 +175,10 @@ class TestEjectCommandCliConfigNotAvailable(AEATestCaseEmpty):
             match="The AEA configurations are not initialized. Use `aea init` before continuing.",
         ):
             self.invoke(
-                "eject", "--quiet", "protocol", str(DefaultMessage.protocol_id),
+                "eject",
+                "--quiet",
+                "protocol",
+                str(DefaultMessage.protocol_id),
             )
 
 

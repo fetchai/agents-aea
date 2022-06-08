@@ -55,7 +55,11 @@ def test_act_serialization():
         step_id=1,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -89,7 +93,11 @@ def test_percept_serialization():
         info=GymMessage.AnyObject("some_info"),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -123,7 +131,11 @@ def test_status_serialization():
         content=content_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -152,7 +164,11 @@ def test_reset_serialization():
         performative=GymMessage.Performative.RESET,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -181,7 +197,11 @@ def test_close_serialization():
         performative=GymMessage.Performative.CLOSE,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)

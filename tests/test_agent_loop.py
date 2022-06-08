@@ -272,7 +272,8 @@ class TestAsyncAgentLoop:
         )
         agent.put_internal_message("msg")
         await wait_for_condition_async(
-            lambda: agent.filter.handle_internal_message.called is True, timeout=5,
+            lambda: agent.filter.handle_internal_message.called is True,
+            timeout=5,
         )
         agent_loop.stop()
         await agent_loop.wait_completed()

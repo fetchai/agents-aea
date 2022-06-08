@@ -626,7 +626,11 @@ class EthereumHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -963,7 +967,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
 
         retrieved_strategy = self._get_gas_price_strategy(
-            gas_price_strategy, extra_config,
+            gas_price_strategy,
+            extra_config,
         )
         if retrieved_strategy is None:  # pragma: nocover
             return None
@@ -1157,7 +1162,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface[_ABI],
+                bytecode=contract_interface[_BYTECODE],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
@@ -1263,7 +1269,10 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     @classmethod
     def contract_method_call(
-        cls, contract_instance: Any, method_name: str, **method_args: Any,
+        cls,
+        contract_instance: Any,
+        method_name: str,
+        **method_args: Any,
     ) -> Optional[JSONLike]:
         """Call a contract's method
 

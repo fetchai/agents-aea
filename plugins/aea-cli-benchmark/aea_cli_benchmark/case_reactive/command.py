@@ -36,7 +36,10 @@ PACKAGES = [("protocol", "open_aea/signing"), ("protocol", "fetchai/default")]
 
 @click.command(name="reactive")
 @click.option(
-    "--duration", default=1, help="Run time in seconds.", show_default=True,
+    "--duration",
+    default=1,
+    help="Run time in seconds.",
+    show_default=True,
 )
 @runtime_mode_deco
 @click.option(
@@ -68,7 +71,9 @@ def main(
 
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
             return multi_run(
-                int(number_of_runs), run, (duration, runtime_mode, connection_mode),
+                int(number_of_runs),
+                run,
+                (duration, runtime_mode, connection_mode),
             )
 
         try:

@@ -120,15 +120,21 @@ class PublishCommandTestCase(TestCase):
     def test_publish_positive(self, *mocks):
         """Test for CLI publish positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--local"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "publish", "--local"],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--remote"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "publish", "--remote"],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "publish"],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 
@@ -212,7 +218,9 @@ class TestPublishLocallyWithDeps(AEATestCaseEmpty):
         cls.add_item(cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID), local=True)
         cls.scaffold_item(cls.NEW_ITEM_TYPE, cls.NEW_ITEM_NAME)
 
-    def test_publish_ok_with_missing_push(self,):
+    def test_publish_ok_with_missing_push(
+        self,
+    ):
         """Test ok for missing push."""
         with pytest.raises(ClickException, match=r"Dependency is missing") as e:
             self.invoke("publish", "--local")
@@ -251,7 +259,8 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
         with pytest.raises(
             ClickException, match=r"Package not found in remote registry"
         ) as e, mock.patch(
-            "aea.cli.publish.get_package_meta", side_effect=ClickException("expected"),
+            "aea.cli.publish.get_package_meta",
+            side_effect=ClickException("expected"),
         ), mock.patch(
             "aea.cli.publish.get_default_remote_registry", new=lambda: REMOTE_HTTP
         ):

@@ -94,7 +94,8 @@ class TestLedgerApis:
             return_value="mock_transaction_digest",
         ):
             tx_digest = self.ledger_apis.send_signed_transaction(
-                identifier=CosmosCrypto.identifier, tx_signed="signed_transaction",
+                identifier=CosmosCrypto.identifier,
+                tx_signed="signed_transaction",
             )
             assert tx_digest == "mock_transaction_digest"
 
@@ -105,7 +106,8 @@ class TestLedgerApis:
             return_value="mock_transaction_receipt",
         ):
             tx_receipt = self.ledger_apis.get_transaction_receipt(
-                identifier=CosmosCrypto.identifier, tx_digest="tx_digest",
+                identifier=CosmosCrypto.identifier,
+                tx_digest="tx_digest",
             )
             assert tx_receipt == "mock_transaction_receipt"
 
@@ -116,24 +118,28 @@ class TestLedgerApis:
             return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transaction(
-                identifier=CosmosCrypto.identifier, tx_digest="tx_digest",
+                identifier=CosmosCrypto.identifier,
+                tx_digest="tx_digest",
             )
             assert tx == "mock_transaction"
 
     def test_is_transaction_settled(self):
         """Test the is_transaction_settled."""
         with mock.patch(
-            "aea_ledger_cosmos.CosmosApi.is_transaction_settled", return_value=True,
+            "aea_ledger_cosmos.CosmosApi.is_transaction_settled",
+            return_value=True,
         ):
             is_settled = self.ledger_apis.is_transaction_settled(
-                identifier=CosmosCrypto.identifier, tx_receipt="tx_receipt",
+                identifier=CosmosCrypto.identifier,
+                tx_receipt="tx_receipt",
             )
             assert is_settled
 
     def test_is_transaction_valid(self):
         """Test the is_transaction_valid."""
         with mock.patch(
-            "aea_ledger_cosmos.CosmosApi.is_transaction_valid", return_value=True,
+            "aea_ledger_cosmos.CosmosApi.is_transaction_valid",
+            return_value=True,
         ):
             is_valid = self.ledger_apis.is_transaction_valid(
                 identifier=CosmosCrypto.identifier,
@@ -163,10 +169,12 @@ class TestLedgerApis:
         """Test the get_hash."""
         expected_hash = "hash"
         with mock.patch(
-            "aea_ledger_cosmos.CosmosApi.get_hash", return_value=expected_hash,
+            "aea_ledger_cosmos.CosmosApi.get_hash",
+            return_value=expected_hash,
         ):
             hash_ = self.ledger_apis.get_hash(
-                identifier=CosmosCrypto.identifier, message=b"message",
+                identifier=CosmosCrypto.identifier,
+                message=b"message",
             )
             assert hash_ == expected_hash
 
@@ -178,7 +186,8 @@ class TestLedgerApis:
             return_value=expected_address,
         ):
             address_ = self.ledger_apis.get_contract_address(
-                identifier=CosmosCrypto.identifier, tx_receipt={},
+                identifier=CosmosCrypto.identifier,
+                tx_receipt={},
             )
             assert address_ == expected_address
 

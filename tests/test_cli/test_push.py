@@ -62,7 +62,10 @@ class SaveItemLocallyTestCase(TestCase):
             "cwd", None, "skills", item_id.name
         )
         try_get_item_target_path_mock.assert_called_once_with(
-            ctx_mock.registry_path, item_id.author, item_type + "s", item_id.name,
+            ctx_mock.registry_path,
+            item_id.author,
+            item_type + "s",
+            item_id.name,
         )
         _check_package_public_id_mock.assert_called_once_with(
             "source", item_type, item_id
@@ -84,7 +87,8 @@ class TestPushLocally(AEATestCaseEmpty):
         cls.add_item(cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID), local=True)
 
     def test_vendor_ok(
-        self, copy_tree_mock,
+        self,
+        copy_tree_mock,
     ):
         """Test ok for vendor's item."""
         with mock.patch("os.path.exists", side_effect=[False, True, False]):
@@ -98,7 +102,8 @@ class TestPushLocally(AEATestCaseEmpty):
         )
 
     def test_user_ok(
-        self, copy_tree_mock,
+        self,
+        copy_tree_mock,
     ):
         """Test ok for users's item."""
         with mock.patch(
@@ -115,7 +120,8 @@ class TestPushLocally(AEATestCaseEmpty):
         )
 
     def test_fail_no_item(
-        self, *mocks,
+        self,
+        *mocks,
     ):
         """Test fail, item_not_exists ."""
         expected_path_pattern = ".*" + ".*".join(
@@ -138,14 +144,18 @@ class CheckPackagePublicIdTestCase(TestCase):
     def test__check_package_public_id_positive(self, *mocks):
         """Test for _check_package_public_id positive result."""
         check_package_public_id(
-            "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.0"),
+            "source-path",
+            "item-type",
+            PublicId.from_str(f"{AUTHOR}/name:0.1.0"),
         )
 
     def test__check_package_public_id_negative(self, *mocks):
         """Test for _check_package_public_id negative result."""
         with self.assertRaises(ClickException):
             check_package_public_id(
-                "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.1"),
+                "source-path",
+                "item-type",
+                PublicId.from_str(f"{AUTHOR}/name:0.1.1"),
             )
 
 

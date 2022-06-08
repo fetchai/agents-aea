@@ -77,7 +77,8 @@ def test_run(password_or_none):
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -189,7 +190,8 @@ def test_run_with_profiling():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -297,7 +299,8 @@ def test_run_with_default_connection():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -394,7 +397,8 @@ def test_run_multiple_connections(connection_ids):
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -461,7 +465,8 @@ def test_run_multiple_connections(connection_ids):
         process.expect_all(["Start processing messages"], timeout=40)
         process.control_c()
         process.expect(
-            EOF, timeout=40,
+            EOF,
+            timeout=40,
         )
         process.wait_to_complete(15)
         assert process.returncode == 0
@@ -485,7 +490,8 @@ def test_run_unknown_private_key():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -560,7 +566,8 @@ def test_run_fet_private_key_config():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -619,7 +626,8 @@ def test_run_ethereum_private_key_config():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -682,7 +690,8 @@ def test_run_with_install_deps():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -770,7 +779,8 @@ def test_run_with_install_deps_and_requirement_file():
 
     os.chdir(t)
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+        cli,
+        [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
     )
     assert result.exit_code == 0
 
@@ -891,7 +901,8 @@ class TestRunFailsWhenExceptionOccursInSkill:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -962,7 +973,8 @@ class TestRunFailsWhenConfigurationFileNotFound:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -1018,7 +1030,8 @@ class TestRunFailsWhenConfigurationFileIsEmpty:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -1071,7 +1084,8 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -1161,7 +1175,8 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -1199,8 +1214,8 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             DEFAULT_CONNECTION_CONFIG_FILE,
         )
         cls.connection_configuration_path.unlink()
-        cls.relative_connection_configuration_path = cls.connection_configuration_path.relative_to(
-            Path(cls.t, cls.agent_name)
+        cls.relative_connection_configuration_path = (
+            cls.connection_configuration_path.relative_to(Path(cls.t, cls.agent_name))
         )
 
         cls.result = cls.runner.invoke(
@@ -1353,7 +1368,8 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -1428,7 +1444,8 @@ class TestRunFailsWhenProtocolNotComplete:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -1585,7 +1602,8 @@ class TestExcludeConnection(AEATestCaseEmpty):
         with pytest.raises(Exception, match="^None$"):
             with patch("aea.cli.run.run_aea", raise_err):
                 self.run_cli_command(
-                    "run", cwd=self._get_cwd(),
+                    "run",
+                    cwd=self._get_cwd(),
                 )
         with pytest.raises(Exception, match=f"^..{self.connection2_id}..$"):
             with patch("aea.cli.run.run_aea", raise_err):

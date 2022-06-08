@@ -442,7 +442,10 @@ def test_get_storage_transaction_cosmwasm():
     contract_interface = {"wasm_byte_code": "1234"}
     deployer_address = cc2.address
     deploy_transaction = cosmos_api.get_deploy_transaction(
-        contract_interface, deployer_address, account_number=1, sequence=0,
+        contract_interface,
+        deployer_address,
+        account_number=1,
+        sequence=0,
     )
 
     assert type(deploy_transaction) == dict and len(deploy_transaction) == 2
@@ -780,7 +783,11 @@ def test_multiple_signatures_transaction():
 
     coins = [Coin(denom="DENOM", amount="1234")]
 
-    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    msg_send = MsgSend(
+        from_address=str("from"),
+        to_address=str("to"),
+        amount=coins,
+    )
     send_msg_packed = ProtoAny()
     send_msg_packed.Pack(msg_send, type_url_prefix="/")
 
@@ -810,7 +817,11 @@ def test_multiple_signatures_transaction_missing_pubkeys():
 
     coins = [Coin(denom="DENOM", amount="1234")]
 
-    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    msg_send = MsgSend(
+        from_address=str("from"),
+        to_address=str("to"),
+        amount=coins,
+    )
     send_msg_packed = ProtoAny()
     send_msg_packed.Pack(msg_send, type_url_prefix="/")
 
@@ -838,7 +849,11 @@ def test_multiple_signatures_transaction_wrong_number_of_params():
 
     coins = [Coin(denom="DENOM", amount="1234")]
 
-    msg_send = MsgSend(from_address=str("from"), to_address=str("to"), amount=coins,)
+    msg_send = MsgSend(
+        from_address=str("from"),
+        to_address=str("to"),
+        amount=coins,
+    )
     send_msg_packed = ProtoAny()
     send_msg_packed.Pack(msg_send, type_url_prefix="/")
 

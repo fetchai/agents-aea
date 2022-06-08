@@ -142,7 +142,10 @@ class AEATestWrapper:
 
     @classmethod
     def dummy_envelope(
-        cls, to: str = "test", sender: str = "test", message: Message = None,
+        cls,
+        to: str = "test",
+        sender: str = "test",
+        message: Message = None,
     ) -> Envelope:
         """
         Create envelope, if message is not passed use .dummy_message method.

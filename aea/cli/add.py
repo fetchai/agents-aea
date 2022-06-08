@@ -214,7 +214,10 @@ def fetch_item_remote(
             click.echo("Will try with http repository.")
 
     return fetch_package(
-        item_type, public_id=item_public_id, cwd=ctx.cwd, dest=dest_path,
+        item_type,
+        public_id=item_public_id,
+        cwd=ctx.cwd,
+        dest=dest_path,
     )
 
 
@@ -241,7 +244,10 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.That is, give priority to local registry, and fall back to remote registry in case of failure.

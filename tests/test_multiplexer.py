@@ -542,10 +542,17 @@ async def test_inbox_outbox():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
-    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
     msg.to = "to"
     msg.sender = "sender"
-    envelope = Envelope(to="to", sender="sender", message=msg,)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        message=msg,
+    )
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
@@ -576,7 +583,10 @@ async def test_threaded_mode():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, threaded=True)
-    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
     msg.to = "to"
     msg.sender = "sender"
     envelope = Envelope(to="to", sender="sender", message=msg)
@@ -611,7 +621,10 @@ async def test_outbox_negative():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
-    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
     context = EnvelopeContext(connection_id=connection_1.connection_id)
     envelope = Envelope(
         to="to",
@@ -884,7 +897,8 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         self.conn_key_path = os.path.join(self.t, "conn_private_key.txt")
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
 
@@ -975,7 +989,8 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Start processing messages..."], timeout=20,
+            ["Start processing messages..."],
+            timeout=20,
         )
         self.proc.control_c()
         self.proc.expect_all(
@@ -1003,7 +1018,8 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Start processing messages..."], timeout=20,
+            ["Start processing messages..."],
+            timeout=20,
         )
         self.proc.control_c()
         self.proc.expect_all(

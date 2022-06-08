@@ -93,7 +93,10 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
 
         # compare __init__.py
         init_file_generated = Path(self.t, T_PROTOCOL_NAME, "__init__.py")
-        init_file_original = Path(PATH_TO_T_PROTOCOL, "__init__.py",)
+        init_file_original = Path(
+            PATH_TO_T_PROTOCOL,
+            "__init__.py",
+        )
 
         is_matched, diff = match_files(init_file_generated, init_file_original)
         assert (
@@ -102,13 +105,19 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
 
         # compare message.py
         message_file_generated = Path(self.t, T_PROTOCOL_NAME, "message.py")
-        message_file_original = Path(PATH_TO_T_PROTOCOL, "message.py",)
+        message_file_original = Path(
+            PATH_TO_T_PROTOCOL,
+            "message.py",
+        )
         is_matched, diff = match_files(message_file_generated, message_file_original)
         assert is_matched, f"Difference Found between message.py files:\n{diff}"
 
         # compare serialization.py
         serialization_file_generated = Path(self.t, T_PROTOCOL_NAME, "serialization.py")
-        serialization_file_original = Path(PATH_TO_T_PROTOCOL, "serialization.py",)
+        serialization_file_original = Path(
+            PATH_TO_T_PROTOCOL,
+            "serialization.py",
+        )
         is_matched, diff = match_files(
             serialization_file_generated, serialization_file_original
         )
@@ -116,7 +125,10 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, T_PROTOCOL_NAME, "dialogues.py")
-        dialogue_file_original = Path(PATH_TO_T_PROTOCOL, "dialogues.py",)
+        dialogue_file_original = Path(
+            PATH_TO_T_PROTOCOL,
+            "dialogues.py",
+        )
         is_matched, diff = match_files(dialogue_file_generated, dialogue_file_original)
         assert is_matched, f"Difference Found between dialogues.py files:\n{diff}"
 
@@ -125,7 +137,8 @@ class TestCompareLatestGeneratorOutputWithTestProtocol:
             self.t, T_PROTOCOL_NAME, "{}.proto".format(T_PROTOCOL_NAME)
         )
         proto_file_original = Path(
-            PATH_TO_T_PROTOCOL, "{}.proto".format(T_PROTOCOL_NAME),
+            PATH_TO_T_PROTOCOL,
+            "{}.proto".format(T_PROTOCOL_NAME),
         )
         is_matched, diff = match_files(proto_file_generated, proto_file_original)
         assert is_matched, f"Difference Found between .proto files:\n{diff}"
@@ -197,7 +210,10 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
 
         # compare __init__.py
         init_file_generated = Path(self.t, protocol_name, "__init__.py")
-        init_file_original = Path(path_to_protocol, "__init__.py",)
+        init_file_original = Path(
+            path_to_protocol,
+            "__init__.py",
+        )
         is_matched, diff = match_files(init_file_generated, init_file_original)
         assert (
             is_matched or len(diff) == 194
@@ -205,13 +221,19 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
 
         # compare message.py
         message_file_generated = Path(self.t, protocol_name, "message.py")
-        message_file_original = Path(path_to_protocol, "message.py",)
+        message_file_original = Path(
+            path_to_protocol,
+            "message.py",
+        )
         is_matched, diff = match_files(message_file_generated, message_file_original)
         assert is_matched, f"Difference Found between message.py files:\n{diff}"
 
         # compare serialization.py
         serialization_file_generated = Path(self.t, protocol_name, "serialization.py")
-        serialization_file_original = Path(path_to_protocol, "serialization.py",)
+        serialization_file_original = Path(
+            path_to_protocol,
+            "serialization.py",
+        )
         is_matched, diff = match_files(
             serialization_file_generated, serialization_file_original
         )
@@ -219,7 +241,10 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
 
         # compare dialogues.py
         dialogue_file_generated = Path(self.t, protocol_name, "dialogues.py")
-        dialogue_file_original = Path(path_to_protocol, "dialogues.py",)
+        dialogue_file_original = Path(
+            path_to_protocol,
+            "dialogues.py",
+        )
         is_matched, diff = match_files(dialogue_file_generated, dialogue_file_original)
         assert is_matched, f"Difference Found between dialogues.py files:\n{diff}"
 
@@ -227,7 +252,10 @@ class TestCompareLatestGeneratorOutputWithTestProtocolWithNoCustomTypes:
         proto_file_generated = Path(
             self.t, protocol_name, "{}.proto".format(protocol_name)
         )
-        proto_file_original = Path(path_to_protocol, "{}.proto".format(protocol_name),)
+        proto_file_original = Path(
+            path_to_protocol,
+            "{}.proto".format(protocol_name),
+        )
         is_matched, diff = match_files(proto_file_generated, proto_file_original)
         assert is_matched, f"Difference Found between .proto files:\n{diff}"
 
@@ -1153,7 +1181,8 @@ class ProtocolGeneratorTestCase(TestCase):
                         assert str(cm.exception) == expected_msg
 
     @mock.patch(
-        "aea.protocols.generator.base.validate", return_value=(False, "Some error!"),
+        "aea.protocols.generator.base.validate",
+        return_value=(False, "Some error!"),
     )
     def test_extract_negative_invalid_specification(self, mocked_validate):
         """Negative test the 'extract' method: invalid protocol specification"""

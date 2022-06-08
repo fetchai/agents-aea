@@ -110,7 +110,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         return self._ledger_api_dialogues
 
     def get_balance(
-        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+        self,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
     ) -> LedgerApiMessage:
         """
         Send the request 'get_balance'.
@@ -138,7 +141,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         return response
 
     def get_state(
-        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+        self,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
     ) -> LedgerApiMessage:
         """
         Send the request 'get_state'.
@@ -166,7 +172,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         return response
 
     def get_raw_transaction(
-        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+        self,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
     ) -> LedgerApiMessage:
         """
         Send the request 'get_raw_transaction'.
@@ -202,7 +211,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         return response
 
     def get_transaction_receipt(
-        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+        self,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
     ) -> LedgerApiMessage:
         """
         Send the request 'get_transaction_receipt'.
@@ -267,7 +279,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         return response
 
     def send_signed_transaction(
-        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+        self,
+        api: LedgerApi,
+        message: LedgerApiMessage,
+        dialogue: LedgerApiDialogue,
     ) -> LedgerApiMessage:
         """
         Send the request 'send_signed_tx'.
@@ -301,7 +316,11 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         )
 
     def get_error_message(
-        self, e: Exception, api: LedgerApi, message: Message, dialogue: BaseDialogue,
+        self,
+        e: Exception,
+        api: LedgerApi,
+        message: Message,
+        dialogue: BaseDialogue,
     ) -> LedgerApiMessage:
         """
         Build an error message.

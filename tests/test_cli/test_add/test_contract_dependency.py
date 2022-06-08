@@ -54,7 +54,8 @@ class TestCreate:
     def _run_command(self, options: List, assert_exit_code: bool = True) -> Result:
         """Run command with default options."""
         result = self.runner.invoke(
-            cli, ["-v", "INFO", f"--registry-path={str(REGISTRY_PATH)}", *options],
+            cli,
+            ["-v", "INFO", f"--registry-path={str(REGISTRY_PATH)}", *options],
         )
         if assert_exit_code:
             assert result.exit_code == 0, result.stdout
@@ -70,7 +71,8 @@ class TestCreate:
         self.agent_dir = temp_dir / self.agent_name
         self.runner = CliRunner()
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0, result.stdout
         result = self._run_command(["create", "--empty", "--local", self.agent_name])
@@ -116,6 +118,8 @@ class TestCreate:
             assert "Contract stub_0 initialized." in outputs
             assert "Contract stub_1 initialized." in outputs
 
-    def teardown(self,):
+    def teardown(
+        self,
+    ):
         """Test teardown."""
         os.chdir(str(ROOT_DIR))

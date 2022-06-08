@@ -194,7 +194,10 @@ def _profiling_context(period: int) -> Generator:
         Protocol,
     ]
 
-    profiler = Profiling(period=period, types_to_track=TYPES_TO_TRACK,)
+    profiler = Profiling(
+        period=period,
+        types_to_track=TYPES_TO_TRACK,
+    )
     profiler.start()
     try:
         yield None

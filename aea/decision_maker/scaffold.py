@@ -47,7 +47,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         }  # type: Dict[str, Any]
         # You MUST NOT modify the constructor below:
         super().__init__(
-            identity=identity, wallet=wallet, config=config, **kwargs,
+            identity=identity,
+            wallet=wallet,
+            config=config,
+            **kwargs,
         )
 
     def handle(self, message: Message) -> None:

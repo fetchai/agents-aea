@@ -132,7 +132,9 @@ class TestAEAToACA:
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
-            to="ACA", sender="AEA", message=request_http_message,
+            to="ACA",
+            sender="AEA",
+            message=request_http_message,
         )
 
         try:
@@ -184,7 +186,9 @@ class TestAEAToACA:
             connection_id=HTTPClientConnection.connection_id,
         )
         http_client_connection = HTTPClientConnection(
-            configuration=configuration, data_dir=MagicMock(), identity=identity,
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=identity,
         )
         resources = Resources()
         resources.add_connection(http_client_connection)
@@ -226,7 +230,9 @@ class TestAEAToACA:
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
-            to="ACA", sender="AEA", message=request_http_message,
+            to="ACA",
+            sender="AEA",
+            message=request_http_message,
         )
 
         # add a simple skill with handler

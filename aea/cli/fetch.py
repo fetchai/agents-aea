@@ -63,7 +63,10 @@ except ImportError:
 @click.command(name="fetch")
 @registry_flag()
 @click.option(
-    "--alias", type=str, required=False, help="Provide a local alias for the agent.",
+    "--alias",
+    type=str,
+    required=False,
+    help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context

@@ -446,7 +446,9 @@ class Description:
                 # value type matches data model, but it is not an allowed type
                 raise AttributeInconsistencyException(
                     "Attribute {} has unallowed type: {}. Allowed types: {}".format(
-                        attribute.name, type(value), ALLOWED_ATTRIBUTE_TYPES,
+                        attribute.name,
+                        type(value),
+                        ALLOWED_ATTRIBUTE_TYPES,
                     )
                 )
 
@@ -1007,19 +1009,23 @@ class ConstraintType:
             value_case = constraint_type_pb.values.WhichOneof("values")
             if value_case == proto_set_values["string"]:
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_pb.values.string.values),
+                    set_enum,
+                    tuple(constraint_type_pb.values.string.values),
                 )
             elif value_case == proto_set_values["boolean"]:
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_pb.values.boolean.values),
+                    set_enum,
+                    tuple(constraint_type_pb.values.boolean.values),
                 )
             elif value_case == proto_set_values["integer"]:
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_pb.values.integer.values),
+                    set_enum,
+                    tuple(constraint_type_pb.values.integer.values),
                 )
             elif value_case == proto_set_values["double"]:
                 decoding = ConstraintType(
-                    set_enum, tuple(constraint_type_pb.values.double.values),
+                    set_enum,
+                    tuple(constraint_type_pb.values.double.values),
                 )
             elif value_case == proto_set_values["location"]:
                 locations = [
@@ -1403,11 +1409,15 @@ class Constraint(ConstraintExpr):
             value, type(next(iter(self.constraint_type.value)))
         ):
             return False
-        if type(self.constraint_type.value) not in {
-            list,
-            tuple,
-            set,
-        } and not isinstance(value, type(self.constraint_type.value)):
+        if (
+            type(self.constraint_type.value)
+            not in {
+                list,
+                tuple,
+                set,
+            }
+            and not isinstance(value, type(self.constraint_type.value))
+        ):
             return False
 
         # dispatch the check to the right implementation for the concrete constraint type.
@@ -1625,7 +1635,10 @@ class Query:
         ]
         data_model = DataModel.decode(query_pb.model)
 
-        return cls(constraints, data_model if query_pb.HasField("model") else None,)
+        return cls(
+            constraints,
+            data_model if query_pb.HasField("model") else None,
+        )
 
     @classmethod
     def decode(cls, query_pb: Any) -> "Query":
@@ -1654,7 +1667,12 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     :param lon2: the longitude of the second location.
     :return: the Haversine distance.
     """
-    lat1, lon1, lat2, lon2, = map(radians, [lat1, lon1, lat2, lon2])
+    (
+        lat1,
+        lon1,
+        lat2,
+        lon2,
+    ) = map(radians, [lat1, lon1, lat2, lon2])
     earth_radius = 6372.8  # average earth radius
     dlat = lat2 - lat1
     dlon = lon2 - lon1

@@ -171,7 +171,11 @@ def test_profiling_cross_reference():
     global result
     result = ""
 
-    p = Profiling([Message, MessageContainer], 1, output_function=output_function,)
+    p = Profiling(
+        [Message, MessageContainer],
+        1,
+        output_function=output_function,
+    )
     p.start()
 
     wait_for_condition(lambda: p.is_running, timeout=20)
@@ -205,16 +209,20 @@ def test_profiling_counts_not_equal():
     result = ""
 
     p = Profiling(
-        [Message, MessageContainer, DummyClass], 1, output_function=output_function,
+        [Message, MessageContainer, DummyClass],
+        1,
+        output_function=output_function,
     )
     p.start()
 
     wait_for_condition(lambda: p.is_running, timeout=20)
 
     # Generate some dummy classes to check that they appear in the gc counter
-    dummy_classes_to_count = [  # noqa: F841 we need to store the objects so they appear in the gc
-        DummyClass() for _ in range(1000)
-    ]
+    dummy_classes_to_count = (
+        [  # noqa: F841 we need to store the objects so they appear in the gc
+            DummyClass() for _ in range(1000)
+        ]
+    )
 
     container_a = MessageContainer()  # contains new messages
     MessageContainer(container_a)  # shares the same messages with a

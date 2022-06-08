@@ -119,7 +119,9 @@ class TestLibp2pConnectionPublicDHTRelay:
             temp_dir = os.path.join(self.t, f"dir_{i}")
             os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
-                relay=False, entry_peers=[maddr], data_dir=temp_dir,
+                relay=False,
+                entry_peers=[maddr],
+                data_dir=temp_dir,
             )
             multiplexer = Multiplexer([connection])
             self.log_files.append(connection.node.log_file)
@@ -146,7 +148,9 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    relay=False, entry_peers=[maddr], data_dir=temp_dir_1,
+                    relay=False,
+                    entry_peers=[maddr],
+                    data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 self.log_files.append(connection1.node.log_file)
@@ -156,7 +160,9 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
                 os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_connection(
-                    relay=False, entry_peers=[maddr], data_dir=temp_dir_2,
+                    relay=False,
+                    entry_peers=[maddr],
+                    data_dir=temp_dir_2,
                 )
                 multiplexer2 = Multiplexer([connection2])
                 self.log_files.append(connection2.node.log_file)
@@ -173,7 +179,11 @@ class TestLibp2pConnectionPublicDHTRelay:
                     performative=DefaultMessage.Performative.BYTES,
                     content=b"hello",
                 )
-                envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                envelope = Envelope(
+                    to=addr_2,
+                    sender=addr_1,
+                    message=msg,
+                )
 
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=30)
@@ -210,7 +220,9 @@ class TestLibp2pConnectionPublicDHTRelay:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    relay=False, entry_peers=[maddrs[i]], data_dir=temp_dir_1,
+                    relay=False,
+                    entry_peers=[maddrs[i]],
+                    data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 self.log_files.append(connection1.node.log_file)
@@ -225,7 +237,9 @@ class TestLibp2pConnectionPublicDHTRelay:
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
-                        relay=False, entry_peers=[maddrs[j]], data_dir=temp_dir_2,
+                        relay=False,
+                        entry_peers=[maddrs[j]],
+                        data_dir=temp_dir_2,
                     )
                     multiplexer2 = Multiplexer([connection2])
                     self.log_files.append(connection2.node.log_file)
@@ -241,7 +255,11 @@ class TestLibp2pConnectionPublicDHTRelay:
                         performative=DefaultMessage.Performative.BYTES,
                         content=b"hello",
                     )
-                    envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                    envelope = Envelope(
+                        to=addr_2,
+                        sender=addr_1,
+                        message=msg,
+                    )
 
                     multiplexer1.put(envelope)
                     delivered_envelope = multiplexer2.get(block=True, timeout=30)
@@ -360,7 +378,11 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     performative=DefaultMessage.Performative.BYTES,
                     content=b"hello",
                 )
-                envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                envelope = Envelope(
+                    to=addr_2,
+                    sender=addr_1,
+                    message=msg,
+                )
 
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -435,7 +457,11 @@ class TestLibp2pConnectionPublicDHTDelegate:
                         performative=DefaultMessage.Performative.BYTES,
                         content=b"hello",
                     )
-                    envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                    envelope = Envelope(
+                        to=addr_2,
+                        sender=addr_1,
+                        message=msg,
+                    )
 
                     multiplexer1.put(envelope)
                     delivered_envelope = multiplexer2.get(block=True, timeout=20)

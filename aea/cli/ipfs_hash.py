@@ -138,7 +138,9 @@ def hash_package(
         raise ValueError("configuration.directory cannot be None.")
 
     key = os.path.join(
-        configuration.author, package_type.to_plural(), configuration.directory.name,
+        configuration.author,
+        package_type.to_plural(),
+        configuration.directory.name,
     )
     package_hash = IPFSHashOnly.hash_directory(
         str(configuration.directory), wrap=(not no_wrap)
@@ -342,7 +344,10 @@ def hash_group() -> None:
 @click.option("--no-wrap", is_flag=True)
 @click.option("--check", is_flag=True)
 def generate_all(
-    packages_dir: Path, vendor: Optional[str], no_wrap: bool, check: bool,
+    packages_dir: Path,
+    vendor: Optional[str],
+    no_wrap: bool,
+    check: bool,
 ) -> None:
     """Generate IPFS hashes."""
     packages_dir = Path(packages_dir).absolute()

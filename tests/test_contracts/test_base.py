@@ -136,7 +136,8 @@ def dummy_contract(request):
 def test_get_instance_no_address_ethereum(dummy_contract):
     """Tests get instance method with no address for ethereum."""
     ledger_api = ledger_apis_registry.make(
-        EthereumCrypto.identifier, address=ETHEREUM_DEFAULT_ADDRESS,
+        EthereumCrypto.identifier,
+        address=ETHEREUM_DEFAULT_ADDRESS,
     )
     instance = dummy_contract.get_instance(ledger_api)
     assert type(instance) == web3._utils.datatypes.PropertyCheckingFactory
@@ -165,7 +166,8 @@ def test_get_deploy_transaction_ethereum(
 def test_get_instance_no_address_cosmwasm(dummy_contract):
     """Tests get instance method with no address for fetchai."""
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     instance = dummy_contract.get_instance(ledger_api)
     assert instance is None
@@ -175,7 +177,8 @@ def test_get_deploy_transaction_cosmwasm(dummy_contract):
     """Tests the deploy transaction classmethod for fetchai."""
     aea_ledger_fetchai = crypto_registry.make(FetchAICrypto.identifier)
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     deploy_tx = dummy_contract.get_deploy_transaction(
         ledger_api, aea_ledger_fetchai.address, account_number=1, sequence=0
@@ -202,7 +205,8 @@ def test_contract_method_call():
         os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
     )
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     with pytest.raises(NotImplementedError):
         contract.contract_method_call(ledger_api, "dummy_method")
@@ -225,7 +229,8 @@ def test_build_transaction():
         os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
     )
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     with pytest.raises(NotImplementedError):
         contract.build_transaction(ledger_api, "dummy_method", {}, {})
@@ -248,7 +253,8 @@ def test_get_transaction_transfer_logs():
         os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
     )
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     with pytest.raises(NotImplementedError):
         contract.get_transaction_transfer_logs(ledger_api, "dummy_hash")

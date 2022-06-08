@@ -91,7 +91,9 @@ def make_desc_maker_wallet(
     wallet = Wallet({ledger_id: key_path})
     agent_name = "test"
     identity = Identity(
-        agent_name, addresses=wallet.addresses, default_address_key=ledger_id,
+        agent_name,
+        addresses=wallet.addresses,
+        default_address_key=ledger_id,
     )
     config = {}  # type: ignore
     decision_maker_handler = DecisionMakerHandler(
@@ -223,7 +225,14 @@ def main(
     }
 
     def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-        return multi_run(int(number_of_runs), run, (ledger_id, amount_of_tx,),)
+        return multi_run(
+            int(number_of_runs),
+            run,
+            (
+                ledger_id,
+                amount_of_tx,
+            ),
+        )
 
     return print_results(output_format, parameters, result_fn)
 

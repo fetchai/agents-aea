@@ -755,7 +755,9 @@ class TestHandlerRegistry:
             is_dynamically_added=True,
         )
         assert len(self.registry._dynamically_added) == 1
-        self.registry.unregister((PublicId.from_str("author/name:0.1.0"), "name"),)
+        self.registry.unregister(
+            (PublicId.from_str("author/name:0.1.0"), "name"),
+        )
         assert len(self.registry._dynamically_added) == 0
 
     def test_register_and_teardown_dynamically(self):

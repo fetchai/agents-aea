@@ -126,7 +126,11 @@ def main(messages: str, number_of_runs: int, output_format: str) -> Any:
     parameters = {"Messages": messages, "Number of runs": number_of_runs}
 
     def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-        return multi_run(int(number_of_runs), run, (int(messages),),)
+        return multi_run(
+            int(number_of_runs),
+            run,
+            (int(messages),),
+        )
 
     return print_results(output_format, parameters, result_fn)
 

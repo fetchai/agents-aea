@@ -25,24 +25,24 @@ _CONTRACTAPIMESSAGE_RAWTRANSACTION = _CONTRACTAPIMESSAGE.nested_types_by_name[
     "RawTransaction"
 ]
 _CONTRACTAPIMESSAGE_STATE = _CONTRACTAPIMESSAGE.nested_types_by_name["State"]
-_CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
-    "Get_Deploy_Transaction_Performative"
-]
-_CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
-    "Get_Raw_Transaction_Performative"
-]
-_CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
-    "Get_Raw_Message_Performative"
-]
+_CONTRACTAPIMESSAGE_GET_DEPLOY_TRANSACTION_PERFORMATIVE = (
+    _CONTRACTAPIMESSAGE.nested_types_by_name["Get_Deploy_Transaction_Performative"]
+)
+_CONTRACTAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = (
+    _CONTRACTAPIMESSAGE.nested_types_by_name["Get_Raw_Transaction_Performative"]
+)
+_CONTRACTAPIMESSAGE_GET_RAW_MESSAGE_PERFORMATIVE = (
+    _CONTRACTAPIMESSAGE.nested_types_by_name["Get_Raw_Message_Performative"]
+)
 _CONTRACTAPIMESSAGE_GET_STATE_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
     "Get_State_Performative"
 ]
 _CONTRACTAPIMESSAGE_STATE_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
     "State_Performative"
 ]
-_CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
-    "Raw_Transaction_Performative"
-]
+_CONTRACTAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = (
+    _CONTRACTAPIMESSAGE.nested_types_by_name["Raw_Transaction_Performative"]
+)
 _CONTRACTAPIMESSAGE_RAW_MESSAGE_PERFORMATIVE = _CONTRACTAPIMESSAGE.nested_types_by_name[
     "Raw_Message_Performative"
 ]

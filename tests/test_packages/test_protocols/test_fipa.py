@@ -59,7 +59,11 @@ def test_cfp_serialization():
         query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -89,7 +93,11 @@ def test_propose_serialization():
         proposal=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -118,7 +126,11 @@ def test_accept_serialization():
         performative=FipaMessage.Performative.ACCEPT,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -147,7 +159,11 @@ def test_decline_serialization():
         performative=FipaMessage.Performative.DECLINE,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -176,7 +192,11 @@ def test_match_accept_serialization():
         performative=FipaMessage.Performative.MATCH_ACCEPT,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -206,7 +226,11 @@ def test_accept_with_inform_serialization():
         info={"address": "dummy_address"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -236,7 +260,11 @@ def test_match_accept_with_inform_serialization():
         info={"address": "dummy_address", "signature": "my_signature"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -266,7 +294,11 @@ def test_inform_serialization():
         info={"foo": "bar"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -295,7 +327,11 @@ def test_end_serialization():
         performative=FipaMessage.Performative.END,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -343,7 +379,9 @@ def test_performative_string_value():
 
 def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = FipaMessage(performative=FipaMessage.Performative.ACCEPT,)
+    msg = FipaMessage(
+        performative=FipaMessage.Performative.ACCEPT,
+    )
 
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(FipaMessage.Performative, "__eq__", return_value=False):
@@ -352,7 +390,9 @@ def test_encoding_unknown_performative():
 
 def test_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
-    msg = FipaMessage(performative=FipaMessage.Performative.ACCEPT,)
+    msg = FipaMessage(
+        performative=FipaMessage.Performative.ACCEPT,
+    )
 
     encoded_msg = FipaMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):

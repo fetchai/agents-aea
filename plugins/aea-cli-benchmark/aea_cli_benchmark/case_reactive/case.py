@@ -113,7 +113,15 @@ def run(
     agent.stop()
     t.join(5)
 
-    data = list(map(lambda x: x[1] - x[0], zip(connection.sends, connection.recvs,)))
+    data = list(
+        map(
+            lambda x: x[1] - x[0],
+            zip(
+                connection.sends,
+                connection.recvs,
+            ),
+        )
+    )
     if not data:
         raise ValueError("Could not collect enough data.")
 

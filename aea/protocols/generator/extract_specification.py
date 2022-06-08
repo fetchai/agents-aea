@@ -235,12 +235,14 @@ def extract(
             )
         ]
         spec.reply = cast(
-            Dict[str, List[str]], protocol_specification.dialogue_config["reply"],
+            Dict[str, List[str]],
+            protocol_specification.dialogue_config["reply"],
         )
         spec.terminal_performatives = [
             terminal_performative.upper()
             for terminal_performative in cast(
-                List[str], protocol_specification.dialogue_config["termination"],
+                List[str],
+                protocol_specification.dialogue_config["termination"],
             )
         ]
         roles_set = cast(

@@ -154,7 +154,11 @@ def make_envelope(sender: str, to: str, message: Optional[Message] = None) -> En
         )
     message.sender = sender
     message.to = to
-    return Envelope(to=to, sender=sender, message=message,)
+    return Envelope(
+        to=to,
+        sender=sender,
+        message=message,
+    )
 
 
 class GeneratorConnection(Connection):
@@ -200,9 +204,13 @@ class GeneratorConnection(Connection):
         return envelope
 
     @classmethod
-    def make(cls,) -> "GeneratorConnection":
+    def make(
+        cls,
+    ) -> "GeneratorConnection":
         """Construct connection instance."""
-        configuration = ConnectionConfig(connection_id=cls.connection_id,)
+        configuration = ConnectionConfig(
+            connection_id=cls.connection_id,
+        )
         test_connection = cls(
             configuration=configuration,
             identity=Identity("name", "address", "pubkey"),

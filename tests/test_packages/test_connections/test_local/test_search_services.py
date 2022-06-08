@@ -96,7 +96,9 @@ class TestNoValidDialogue:
         cls.address_1 = "address_1"
         cls.public_key_1 = "public_key_1"
         cls.connection = _make_local_connection(
-            cls.address_1, cls.public_key_1, cls.node,
+            cls.address_1,
+            cls.public_key_1,
+            cls.node,
         )
         cls.multiplexer = Multiplexer([cls.connection])
 
@@ -157,7 +159,13 @@ class TestEmptySearch:
         cls.address_1 = "address_1"
         cls.public_key_1 = "public_key_1"
         cls.multiplexer = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.public_key_1, cls.node,)]
+            [
+                _make_local_connection(
+                    cls.address_1,
+                    cls.public_key_1,
+                    cls.node,
+                )
+            ]
         )
 
         cls.multiplexer.connect()
@@ -207,7 +215,13 @@ class TestSimpleSearchResult:
         self.address_1 = "address"
         self.public_key_1 = "public_key_1"
         self.multiplexer = Multiplexer(
-            [_make_local_connection(self.address_1, self.public_key_1, self.node,)]
+            [
+                _make_local_connection(
+                    self.address_1,
+                    self.public_key_1,
+                    self.node,
+                )
+            ]
         )
 
         self.multiplexer.connect()
@@ -281,12 +295,24 @@ class TestUnregister:
         cls.address_1 = "address_1"
         cls.public_key_1 = "public_key_1"
         cls.multiplexer1 = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.public_key_1, cls.node,)]
+            [
+                _make_local_connection(
+                    cls.address_1,
+                    cls.public_key_1,
+                    cls.node,
+                )
+            ]
         )
         cls.address_2 = "address_2"
         cls.public_key_2 = "public_key_2"
         cls.multiplexer2 = Multiplexer(
-            [_make_local_connection(cls.address_2, cls.public_key_2, cls.node,)]
+            [
+                _make_local_connection(
+                    cls.address_2,
+                    cls.public_key_2,
+                    cls.node,
+                )
+            ]
         )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
@@ -415,7 +441,13 @@ class TestAgentMessage:
         cls.address_1 = "address_1"
         cls.public_key_1 = "public_key_1"
         cls.multiplexer1 = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.public_key_1, cls.node,)]
+            [
+                _make_local_connection(
+                    cls.address_1,
+                    cls.public_key_1,
+                    cls.node,
+                )
+            ]
         )
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -447,7 +479,9 @@ class TestAgentMessage:
         )
         with pytest.raises(ConnectionError):
             await _make_local_connection(
-                self.address_1, self.public_key_1, self.node,
+                self.address_1,
+                self.public_key_1,
+                self.node,
             ).send(envelope)
 
         self.multiplexer1.connect()
@@ -456,7 +490,11 @@ class TestAgentMessage:
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         self.multiplexer1.put(envelope)
 
         # check the result
@@ -490,10 +528,22 @@ class TestFilteredSearchResult:
         cls.address_2 = "multiplexer2"
         cls.public_key_2 = "public_key_2"
         cls.multiplexer1 = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.public_key_1, cls.node,)]
+            [
+                _make_local_connection(
+                    cls.address_1,
+                    cls.public_key_1,
+                    cls.node,
+                )
+            ]
         )
         cls.multiplexer2 = Multiplexer(
-            [_make_local_connection(cls.address_2, cls.public_key_2, cls.node,)]
+            [
+                _make_local_connection(
+                    cls.address_2,
+                    cls.public_key_2,
+                    cls.node,
+                )
+            ]
         )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()

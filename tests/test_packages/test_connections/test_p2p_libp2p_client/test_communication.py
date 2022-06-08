@@ -124,7 +124,9 @@ class TestLibp2pClientConnectionEchoEnvelope:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, delegate=True, delegate_port=cls.delegate_port,
+            data_dir=temp_dir,
+            delegate=True,
+            delegate_port=cls.delegate_port,
         )
         cls.multiplexer_node = Multiplexer(
             [cls.connection_node], protocols=[MockDefaultMessageProtocol]
@@ -310,7 +312,9 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
         os.mkdir(temp_dir_node_1)
         cls.connection_node_1 = _make_libp2p_connection(
-            data_dir=temp_dir_node_1, delegate_port=cls.ports[0], delegate=True,
+            data_dir=temp_dir_node_1,
+            delegate_port=cls.ports[0],
+            delegate=True,
         )
         cls.multiplexer_node_1 = Multiplexer(
             [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
@@ -518,7 +522,9 @@ class TestLibp2pClientConnectionRouting:
             temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
             os.mkdir(temp_dir_node_1)
             cls.connection_node_1 = _make_libp2p_connection(
-                data_dir=temp_dir_node_1, delegate_port=cls.ports[0], delegate=True,
+                data_dir=temp_dir_node_1,
+                delegate_port=cls.ports[0],
+                delegate=True,
             )
             cls.multiplexer_node_1 = Multiplexer(
                 [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
@@ -664,7 +670,9 @@ class BaseTestLibp2pClientSamePeer:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, delegate=True, delegate_port=cls.delegate_port,
+            data_dir=temp_dir,
+            delegate=True,
+            delegate_port=cls.delegate_port,
         )
         cls.multiplexer_node = Multiplexer(
             [cls.connection_node], protocols=[MockDefaultMessageProtocol]

@@ -74,7 +74,8 @@ class TestFipaHandler(ERC1155ClientTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"unidentified dialogue for message={incoming_message}.",
+            logging.INFO,
+            f"unidentified dialogue for message={incoming_message}.",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -96,7 +97,8 @@ class TestFipaHandler(ERC1155ClientTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:1],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:1],
             ),
         )
         incoming_message = cast(
@@ -166,7 +168,8 @@ class TestFipaHandler(ERC1155ClientTestCase):
         assert contract_api_dialogue.associated_fipa_dialogue == fipa_dialogue
 
         mock_logger.assert_any_call(
-            logging.INFO, "requesting single hash message from contract api...",
+            logging.INFO,
+            "requesting single hash message from contract api...",
         )
 
     def test_handle_propose_ii(self):
@@ -177,7 +180,8 @@ class TestFipaHandler(ERC1155ClientTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:1],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:1],
             ),
         )
         incoming_message = cast(
@@ -205,13 +209,15 @@ class TestFipaHandler(ERC1155ClientTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:2],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:2],
             ),
         )
         incoming_message = cast(
             FipaMessage,
             self.build_incoming_message_for_skill_dialogue(
-                dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+                dialogue=fipa_dialogue,
+                performative=FipaMessage.Performative.ACCEPT,
             ),
         )
 
@@ -598,7 +604,9 @@ class TestSigningHandler(ERC1155ClientTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_message(self,):
+    def test_handle_signed_message(
+        self,
+    ):
         """Test the _handle_signed_message method of the signing handler."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -636,7 +644,8 @@ class TestSigningHandler(ERC1155ClientTestCase):
                 dialogue=signing_dialogue,
                 performative=SigningMessage.Performative.SIGNED_MESSAGE,
                 signed_message=SigningMessage.SignedMessage(
-                    self.ledger_id, "some_body",
+                    self.ledger_id,
+                    "some_body",
                 ),
             ),
         )

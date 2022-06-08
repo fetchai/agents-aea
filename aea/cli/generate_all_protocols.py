@@ -129,7 +129,12 @@ def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
         raise click.ClickException(str(e)) from e
 
     AEAProject.run_cli(
-        sys.executable, "-m", "black", "-q", str(directory.absolute()), **kwargs,
+        sys.executable,
+        "-m",
+        "black",
+        "-q",
+        str(directory.absolute()),
+        **kwargs,
     )
     AEAProject.run_cli(
         sys.executable,
@@ -183,7 +188,9 @@ def _fingerprint_protocol(name: str) -> None:
     """Fingerprint the generated (and modified) protocol."""
     log(f"Fingerprint the generated (and modified) protocol '{name}'")
     protocol_config = load_component_configuration(
-        ComponentType.PROTOCOL, Path(PROTOCOLS, name), skip_consistency_check=True,
+        ComponentType.PROTOCOL,
+        Path(PROTOCOLS, name),
+        skip_consistency_check=True,
     )
     AEAProject.run_aea("fingerprint", "protocol", str(protocol_config.public_id))
 
@@ -430,7 +437,9 @@ def _process_packages_protocol(
     default=Path(".").resolve(),
 )
 @click.option(
-    "--check-clean", is_flag=True, help="Check if git tree is clean..",
+    "--check-clean",
+    is_flag=True,
+    help="Check if git tree is clean..",
 )
 def generate_all_protocols(
     packages_dir: Path,
@@ -454,7 +463,10 @@ def generate_all_protocols(
             if not no_bump:
                 _bump_protocol_specification_id_if_needed(package_path)
             _process_packages_protocol(
-                package_path, no_bump, no_format, root_dir,
+                package_path,
+                no_bump,
+                no_format,
+                root_dir,
             )
 
     if check_clean:

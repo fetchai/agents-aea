@@ -107,7 +107,9 @@ class TestCommon(TestCase):
         output_1 = _camel_case_to_snake_case(input_text_1)
         assert output_1 == expected_1
 
-    def test_match_brackets(self,):
+    def test_match_brackets(
+        self,
+    ):
         """Positive test the '_match_brackets' method."""
         text_1 = "[so[met[hi]]ng]"
         assert _match_brackets(text_1, 0) == 14
@@ -121,7 +123,8 @@ class TestCommon(TestCase):
         self.assertEqual(
             str(cm.exception),
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_2, text_2[index_2],
+                index_2,
+                text_2[index_2],
             ),
         )
 
@@ -131,7 +134,8 @@ class TestCommon(TestCase):
         self.assertEqual(
             str(cm.exception),
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_3, text_2[index_3],
+                index_3,
+                text_2[index_3],
             ),
         )
 
@@ -144,7 +148,9 @@ class TestCommon(TestCase):
             + str(index_4),
         )
 
-    def test_has_matched_brackets(self,):
+    def test_has_matched_brackets(
+        self,
+    ):
         """Positive test the '_has_matched_brackets' method."""
         valid_text_1 = "[so[met[hi]]ng]"
         assert _has_matched_brackets(valid_text_1) is True
@@ -167,7 +173,9 @@ class TestCommon(TestCase):
         invalid_text_4 = "[[]"
         assert _has_matched_brackets(invalid_text_4) is False
 
-    def test_get_sub_types_of_compositional_types_positive(self,):
+    def test_get_sub_types_of_compositional_types_positive(
+        self,
+    ):
         """Positive test the '_get_sub_types_of_compositional_types' method."""
         composition_type_1 = "pt:set[pt:int, integer, bool]"
         expected_1 = ("pt:int", "integer", "bool")
@@ -244,7 +252,9 @@ class TestCommon(TestCase):
         )
         assert _get_sub_types_of_compositional_types(composition_type_11) == expected_11
 
-    def test_get_sub_types_of_compositional_types_negative(self,):
+    def test_get_sub_types_of_compositional_types_negative(
+        self,
+    ):
         """Negative test the '_get_sub_types_of_compositional_types' method"""
         composition_type_1 = "pt:int"
         with self.assertRaises(SyntaxError) as cm:
@@ -270,7 +280,9 @@ class TestCommon(TestCase):
             "Bad formatting. No matching close bracket ']' for the open bracket at pt:set[",
         )
 
-    def test_union_sub_type_to_protobuf_variable_name(self,):
+    def test_union_sub_type_to_protobuf_variable_name(
+        self,
+    ):
         """Test the '_union_sub_type_to_protobuf_variable_name' method"""
         content_name = "proposal"
 
@@ -304,7 +316,9 @@ class TestCommon(TestCase):
             == "proposal_type_DataModel"
         )
 
-    def test_python_pt_or_ct_type_to_proto_type(self,):
+    def test_python_pt_or_ct_type_to_proto_type(
+        self,
+    ):
         """Test the '_python_pt_or_ct_type_to_proto_type' method"""
         content_type_bytes = "bytes"
         assert _python_pt_or_ct_type_to_proto_type(content_type_bytes) == "bytes"
@@ -324,7 +338,9 @@ class TestCommon(TestCase):
         content_type_ct = "Query"
         assert _python_pt_or_ct_type_to_proto_type(content_type_ct) == "Query"
 
-    def test_includes_custom_type(self,):
+    def test_includes_custom_type(
+        self,
+    ):
         """Test the '_includes_custom_type' method"""
         content_type_includes_1 = "Optional[DataModel]"
         assert _includes_custom_type(content_type_includes_1) is True
@@ -394,7 +410,8 @@ class TestCommon(TestCase):
             check_prerequisites()
 
     @mock.patch(
-        "aea.protocols.generator.common.subprocess.call", return_value=1,
+        "aea.protocols.generator.common.subprocess.call",
+        return_value=1,
     )
     def test_check_prerequisites_negative_protolint_is_not_installed(
         self, mocked_is_installed
@@ -414,7 +431,9 @@ class TestCommon(TestCase):
         with self.assertRaises(FileNotFoundError):
             check_prerequisites()
 
-    def test_load_protocol_specification(self,):
+    def test_load_protocol_specification(
+        self,
+    ):
         """Test the 'load_protocol_specification' method"""
         spec = load_protocol_specification(PATH_TO_T_PROTOCOL_SPECIFICATION)
         assert spec.name == T_PROTOCOL_NAME
@@ -426,7 +445,9 @@ class TestCommon(TestCase):
         assert spec.speech_acts is not None
         assert spec.protobuf_snippets is not None and spec.protobuf_snippets != ""
 
-    def test_create_protocol_file(self,):
+    def test_create_protocol_file(
+        self,
+    ):
         """Test the '_create_protocol_file' method"""
         file_name = "temp_file"
         file_content = "this is a temporary file"

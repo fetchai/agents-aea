@@ -69,7 +69,10 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         super().__init__(**kwargs)
 
     def contract_method_call(
-        self, contract_instance: Any, method_name: str, **method_args: Any,
+        self,
+        contract_instance: Any,
+        method_name: str,
+        **method_args: Any,
     ) -> Optional[JSONLike]:
         """Call a contract's method
 

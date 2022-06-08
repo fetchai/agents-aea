@@ -385,9 +385,18 @@ agent_config_files = [
 ]
 
 protocol_specification_files = [
-    os.path.join(PROTOCOL_SPECS_PREF_1, "sample.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
-    os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
+    os.path.join(
+        PROTOCOL_SPECS_PREF_1,
+        "sample.yaml",
+    ),
+    os.path.join(
+        PROTOCOL_SPECS_PREF_2,
+        "sample_specification.yaml",
+    ),
+    os.path.join(
+        PROTOCOL_SPECS_PREF_2,
+        "sample_specification_no_custom_types.yaml",
+    ),
 ]
 
 # ports for testing, call next() on to avoid assignment overlap
@@ -730,7 +739,9 @@ def _ganache_context(
 @pytest.fixture(scope="class")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20,
+    fetchd_configuration,
+    timeout: float = 2.0,
+    max_attempts: int = 20,
 ):
     """Launch the Fetch ledger image."""
     with _fetchd_context(fetchd_configuration, timeout, max_attempts) as fetchd:
@@ -814,7 +825,9 @@ def double_escape_windows_path_separator(path):
 
 
 def _make_dummy_connection() -> Connection:
-    configuration = ConnectionConfig(connection_id=DummyConnection.connection_id,)
+    configuration = ConnectionConfig(
+        connection_id=DummyConnection.connection_id,
+    )
     dummy_connection = DummyConnection(
         configuration=configuration,
         data_dir=MagicMock(),

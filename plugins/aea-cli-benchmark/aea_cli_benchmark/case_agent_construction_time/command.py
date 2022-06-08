@@ -43,6 +43,10 @@ def main(agents: int, number_of_runs: int, output_format: str) -> Any:
     parameters = {"Agents": agents, "Number of runs": number_of_runs}
 
     def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-        return multi_run(int(number_of_runs), run, (agents,),)
+        return multi_run(
+            int(number_of_runs),
+            run,
+            (agents,),
+        )
 
     return print_results(output_format, parameters, result_fn)

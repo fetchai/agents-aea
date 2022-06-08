@@ -75,7 +75,8 @@ class TestFipaHandler(ERC1155DeployTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"unidentified dialogue for message={incoming_message}.",
+            logging.INFO,
+            f"unidentified dialogue for message={incoming_message}.",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -114,7 +115,8 @@ class TestFipaHandler(ERC1155DeployTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received CFP from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
+            logging.INFO,
+            f"received CFP from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         mock_prop.assert_called_once()
@@ -156,11 +158,13 @@ class TestFipaHandler(ERC1155DeployTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received CFP from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
+            logging.INFO,
+            f"received CFP from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, "Contract items not minted yet. Try again later.",
+            logging.INFO,
+            "Contract items not minted yet. Try again later.",
         )
 
         self.assert_quantity_in_outbox(0)
@@ -173,7 +177,8 @@ class TestFipaHandler(ERC1155DeployTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:2],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:2],
             ),
         )
         fipa_dialogue.proposal = self.mocked_proposal
@@ -233,7 +238,8 @@ class TestFipaHandler(ERC1155DeployTestCase):
         assert contract_api_dialogue.terms == self.mocked_terms
 
         mock_logger.assert_any_call(
-            logging.INFO, "requesting single atomic swap transaction...",
+            logging.INFO,
+            "requesting single atomic swap transaction...",
         )
 
     def test_handle_accept_w_inform_ii(self):
@@ -243,7 +249,8 @@ class TestFipaHandler(ERC1155DeployTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:2],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:2],
             ),
         )
         fipa_dialogue.proposal = self.mocked_proposal
@@ -272,13 +279,15 @@ class TestFipaHandler(ERC1155DeployTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:2],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:2],
             ),
         )
         incoming_message = cast(
             FipaMessage,
             self.build_incoming_message_for_skill_dialogue(
-                dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+                dialogue=fipa_dialogue,
+                performative=FipaMessage.Performative.ACCEPT,
             ),
         )
 
@@ -407,7 +416,8 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, "requesting transaction receipt.",
+            logging.INFO,
+            "requesting transaction receipt.",
         )
 
     def test_handle_transaction_receipt_i(self):
@@ -837,7 +847,9 @@ class TestSigningHandler(ERC1155DeployTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction(self,):
+    def test_handle_signed_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_dialogue = cast(
@@ -1021,7 +1033,8 @@ class TestOefSearchHandler(ERC1155DeployTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.registration_behaviour, "register_service",
+                self.registration_behaviour,
+                "register_service",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -1048,7 +1061,8 @@ class TestOefSearchHandler(ERC1155DeployTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.registration_behaviour, "register_genus",
+                self.registration_behaviour,
+                "register_genus",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -1075,7 +1089,8 @@ class TestOefSearchHandler(ERC1155DeployTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.registration_behaviour, "register_classification",
+                self.registration_behaviour,
+                "register_classification",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
