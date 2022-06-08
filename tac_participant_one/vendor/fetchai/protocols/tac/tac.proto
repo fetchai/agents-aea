@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package aea.fetchai.tac.v1_0_0;
+
+message TacMessage{
+
+  // Custom Types
+  message ErrorCode{
+    enum ErrorCodeEnum {
+      GENERIC_ERROR = 0;
+      REQUEST_NOT_VALID = 1;
+      AGENT_ADDR_ALREADY_REGISTERED = 2;
+      AGENT_NAME_ALREADY_REGISTERED = 3;
+      AGENT_NOT_REGISTERED = 4;
+      TRANSACTION_NOT_VALID = 5;
+      TRANSACTION_NOT_MATCHING = 6;
+      AGENT_NAME_NOT_IN_WHITELIST = 7;
+      COMPETITION_NOT_RUNNING = 8;
+      DIALOGUE_INCONSISTENT = 9;
+    }
+    ErrorCodeEnum error_code = 1;
+  }
+
+
+  // Performatives and contents
+  message Register_Performative{
+    string agent_name = 1;
+  }
+
+  message Unregister_Performative{
+  }
+
+  message Transaction_Performative{
+    string transaction_id = 1;
+    string ledger_id = 2;
+    string sender_address = 3;
+    string counterparty_address = 4;
+    map<string, int32> amount_by_currency_id = 5;
+    map<string, int32> fee_by_currency_id = 6;
+    map<string, int32> quantities_by_good_id = 7;
+    string nonce = 8;
+    string sender_signature = 9;
+    string counterparty_signature = 10;
+  }
+
+  message Cancelled_Performative{
+  }
+
+  message Game_Data_Performative{
+    map<string, int32> amount_by_currency_id = 1;
+    map<string, float> exchange_params_by_currency_id = 2;
+    map<string, int32> quantities_by_good_id = 3;
+    map<string, float> utility_params_by_good_id = 4;
+    map<string, int32> fee_by_currency_id = 5;
+    map<string, string> agent_addr_to_name = 6;
+    map<string, string> currency_id_to_name = 7;
+    map<string, string> good_id_to_name = 8;
+    string version_id = 9;
+    map<string, string> info = 10;
+    bool info_is_set = 11;
+  }
+
+  message Transaction_Confirmation_Performative{
+    string transaction_id = 1;
+    map<string, int32> amount_by_currency_id = 2;
+    map<string, int32> quantities_by_good_id = 3;
+  }
+
+  message Tac_Error_Performative{
+    ErrorCode error_code = 1;
+    map<string, string> info = 2;
+    bool info_is_set = 3;
+  }
+
+
+  oneof performative{
+    Cancelled_Performative cancelled = 5;
+    Game_Data_Performative game_data = 6;
+    Register_Performative register = 7;
+    Tac_Error_Performative tac_error = 8;
+    Transaction_Performative transaction = 9;
+    Transaction_Confirmation_Performative transaction_confirmation = 10;
+    Unregister_Performative unregister = 11;
+  }
+}

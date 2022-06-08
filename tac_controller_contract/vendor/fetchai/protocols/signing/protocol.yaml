@@ -1,0 +1,20 @@
+name: signing
+author: fetchai
+version: 1.1.1
+protocol_specification_id: fetchai/signing:1.0.0
+type: protocol
+description: A protocol for communication between skills and decision maker.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmZTtCmYF6mc1KQddhE8c4z2Zy8ToqdDFNRo5r4P2BLYj9
+  __init__.py: QmTJ8Uxo1EZHH5tkebkVVddzm24xgPU8pCGYbBGpxGWuWQ
+  custom_types.py: QmQTVJEAzTMYa5uhuoaV5ax4t4M1FGsS4yUzeng1xbkszV
+  dialogues.py: QmeVvBdgfjB7YsCP5ubkUGZasSFEXnghucbEJaCtg5Av78
+  message.py: QmXFuxNWaYA4JYDdKx9CDJYV2HNDf8AHHapxNFd7vSvoeT
+  serialization.py: QmeRu5i5VKkbEQQk7zCWk9FerNx9dnvecxyxF2QPhzBCax
+  signing.proto: QmbHQYswu1d5JTq8QD3WY9Trw7CwCFbv4c1wmgwiZC5756
+  signing_pb2.py: QmaYoSC2uxSATBzNY9utPp7J78drWgyYocr4cPjEhyLf7y
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

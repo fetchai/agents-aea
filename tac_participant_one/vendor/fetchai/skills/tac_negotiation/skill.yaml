@@ -1,0 +1,111 @@
+name: tac_negotiation
+author: fetchai
+version: 0.29.1
+type: skill
+description: The tac negotiation skill implements the logic for an AEA to do fipa
+  negotiation in the TAC.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
+  __init__.py: QmY8TmzjGKbvDW7DK8sq5kxSFYrp2AxA8TNSaE4PyRE4QB
+  behaviours.py: QmRYUEG3Xh6D53BcWwhepTaXHTsz5Ag2ZghETLfc37AvsB
+  dialogues.py: Qme98nNXajpA42LcZY6r1QARtycYkovnJWvJdfUoV6dtgB
+  handlers.py: Qmbhp5Kvwsz1r1tctv4m4iocmfosYyVJN6ZTbgUfVimR9C
+  helpers.py: QmXPzdgo8yHsa8H4YT8cNjZ8gN2K8qQNyAynNp6VnaehGe
+  strategy.py: QmXpKEvsCCvPQ3kZZUBEyLCR3myRvLaYyDcBgUu4x36fAc
+  transactions.py: QmXLunaZALbzA2jQJ2NFd7PHqM25Hu2GYmB8tcNGYQQDZW
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.21.0
+contracts:
+- fetchai/erc1155:0.23.1
+protocols:
+- fetchai/contract_api:1.1.1
+- fetchai/cosm_trade:0.2.1
+- fetchai/default:1.1.1
+- fetchai/fipa:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/oef_search:1.1.1
+- fetchai/signing:1.1.1
+skills:
+- fetchai/tac_participation:0.25.1
+behaviours:
+  clean_up:
+    args:
+      tick_interval: 5.0
+    class_name: TransactionCleanUpBehaviour
+  tac_negotiation:
+    args:
+      max_soef_registration_retries: 5
+      search_interval: 15.0
+    class_name: GoodsRegisterAndSearchBehaviour
+handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  cosm_trade:
+    args: {}
+    class_name: CosmTradeHandler
+  fipa:
+    args: {}
+    class_name: FipaNegotiationHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef:
+    args: {}
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  cosm_trade_dialogues:
+    args: {}
+    class_name: CosmTradeDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      classification:
+        piece: classification
+        value: tac.participant
+      is_contract_tx: false
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
+      register_as: both
+      search_for: both
+      search_radius: 5.0
+      service_key: tac_service
+      tx_fee_proposal: 1500000000000000
+    class_name: Strategy
+  transactions:
+    args:
+      pending_transaction_timeout: 30
+    class_name: Transactions
+dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0
+is_abstract: false

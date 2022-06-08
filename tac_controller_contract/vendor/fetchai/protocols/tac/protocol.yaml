@@ -1,0 +1,21 @@
+name: tac
+author: fetchai
+version: 1.1.1
+protocol_specification_id: fetchai/tac:1.0.0
+type: protocol
+description: The tac protocol implements the messages an AEA needs to participate
+  in the TAC.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmPTrinyFeYKEiwiyS8K683wDLCVdor4ny1BvZ1jSwLbqQ
+  __init__.py: QmTKHDeB2xQmC9KtzAyiVKB7UAzKFuwqDVEwYn4UCm715L
+  custom_types.py: QmQ1ygDWcBnRzkpyf7epNFT5Mwf4FKJHz3PRRZp7J2q3F6
+  dialogues.py: QmRmCJ4CscK8yBQKfobv6XAXeRgVygD5i2SwQQ6RTKqkeM
+  message.py: Qmd1hrxuruLrkJumWhPDty1X7Mdd9VRDrqtRm7yjrsmLxC
+  serialization.py: QmcoX3JNxsnia3AtA53Peb13jonKgtzRDM1ZfZEtEmcbCh
+  tac.proto: QmTjxGkEoMdvdDvBMoKhjkBV4CNNgsn6JWt6rJEwXfnq7Z
+  tac_pb2.py: QmUBYXuuLfRJEYNbtjLM5UfwRacFf7EybBbrbE3nv78oy6
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

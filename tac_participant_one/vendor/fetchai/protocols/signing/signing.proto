@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package aea.fetchai.signing.v1_0_0;
+
+message SigningMessage{
+
+  // Custom Types
+  message ErrorCode{
+    enum ErrorCodeEnum {
+      UNSUCCESSFUL_MESSAGE_SIGNING = 0;
+      UNSUCCESSFUL_TRANSACTION_SIGNING = 1;
+    }
+    ErrorCodeEnum error_code = 1;
+  }
+
+  message RawMessage{
+    bytes raw_message = 1;
+  }
+
+  message RawTransaction{
+    bytes raw_transaction = 1;
+  }
+
+  message SignedMessage{
+    bytes signed_message = 1;
+  }
+
+  message SignedTransaction{
+    bytes signed_transaction = 1;
+  }
+
+  message Terms{
+    bytes terms = 1;
+  }
+
+
+  // Performatives and contents
+  message Sign_Transaction_Performative{
+    Terms terms = 1;
+    RawTransaction raw_transaction = 2;
+  }
+
+  message Sign_Message_Performative{
+    Terms terms = 1;
+    RawMessage raw_message = 2;
+  }
+
+  message Signed_Transaction_Performative{
+    SignedTransaction signed_transaction = 1;
+  }
+
+  message Signed_Message_Performative{
+    SignedMessage signed_message = 1;
+  }
+
+  message Error_Performative{
+    ErrorCode error_code = 1;
+  }
+
+
+  oneof performative{
+    Error_Performative error = 5;
+    Sign_Message_Performative sign_message = 6;
+    Sign_Transaction_Performative sign_transaction = 7;
+    Signed_Message_Performative signed_message = 8;
+    Signed_Transaction_Performative signed_transaction = 9;
+  }
+}

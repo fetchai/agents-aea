@@ -1,0 +1,108 @@
+name: tac_control_contract
+author: fetchai
+version: 0.27.1
+type: skill
+description: The tac control skill implements the logic for an AEA to control an instance
+  of the TAC.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmX9HuMvkRptLc4QnuagUGmN4HzxH5jnxXJYtw565dMnXg
+  __init__.py: QmVUntdzHoUcKbt8iLJqryBKd3F3WqCmZGpFx5Ja2MAz7m
+  behaviours.py: QmVHoXbH2NRkhvGTiBTf1QnZtABvMtLuKK7mc7iaNVe5La
+  dialogues.py: QmV4V7MxSHQaAsN3MA3ybQkfZ8WYgoymqQkf6byz1GkiBe
+  game.py: QmSFZKLLqSjcoWqF9skD8zjd1SwDvUwNro77zk4QWEY49J
+  handlers.py: QmciC8zCHiV1j21qfJ28gGQnDd5PVy73rZTyGCnMeEywac
+  helpers.py: QmS7SVagLtusYtL5b6cWRGq34V6AuSLyeqFb9Fz6BCrfzr
+  parameters.py: QmRrLushp6g67XXZGBhgFitG9n5vxMjFUYrrm1FcFMG3hx
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.21.0
+contracts:
+- fetchai/erc1155:0.23.1
+protocols:
+- fetchai/contract_api:1.1.1
+- fetchai/default:1.1.1
+- fetchai/ledger_api:1.1.1
+- fetchai/oef_search:1.1.1
+- fetchai/signing:1.1.1
+- fetchai/tac:1.1.1
+skills:
+- fetchai/tac_control:0.25.1
+behaviours:
+  tac:
+    args: {}
+    class_name: TacBehaviour
+handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef:
+    args: {}
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+  tac:
+    args: {}
+    class_name: TacHandler
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  game:
+    args: {}
+    class_name: Game
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  parameters:
+    args:
+      base_good_endowment: 4
+      competition_timeout: 360
+      currency_ids: []
+      good_ids: []
+      inactivity_timeout: 60
+      item_setup_timeout: 120
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      lower_bound_factor: 1
+      min_nb_agents: 2
+      money_endowment: 2000000
+      nb_currencies: 1
+      nb_goods: 9
+      registration_start_time: 01 01 2020  00:01
+      registration_timeout: 60
+      service_data:
+        key: tac
+        value: v1
+      tx_fee: 1
+      contract_execute_tx_fee: 2000000000000000
+      contract_init_tx_fee: 2000000000000000
+      contract_deploy_tx_fee: 2000000000000000
+      upper_bound_factor: 1
+      whitelist: []
+    class_name: Parameters
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  tac_dialogues:
+    args: {}
+    class_name: TacDialogues
+dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0
+  numpy: {}
+is_abstract: false

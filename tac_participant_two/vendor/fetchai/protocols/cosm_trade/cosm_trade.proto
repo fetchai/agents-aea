@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package aea.fetchai.cosm_trade.v1_0_0;
+
+message CosmTradeMessage{
+
+  // Custom Types
+  message SignedTransaction{
+    bytes signed_transaction = 1;
+  }
+
+
+  // Performatives and contents
+  message Inform_Public_Key_Performative{
+    string public_key = 1;
+  }
+
+  message Inform_Signed_Transaction_Performative{
+    SignedTransaction signed_transaction = 1;
+    repeated string fipa_dialogue_id = 2;
+    bool fipa_dialogue_id_is_set = 3;
+  }
+
+  message Error_Performative{
+    int32 code = 1;
+    string message = 2;
+    bool message_is_set = 3;
+    bytes data = 4;
+    bool data_is_set = 5;
+  }
+
+  message End_Performative{
+  }
+
+
+  oneof performative{
+    End_Performative end = 5;
+    Error_Performative error = 6;
+    Inform_Public_Key_Performative inform_public_key = 7;
+    Inform_Signed_Transaction_Performative inform_signed_transaction = 8;
+  }
+}
