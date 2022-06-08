@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
@@ -92,7 +92,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -111,7 +111,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -153,7 +153,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -173,7 +173,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
@@ -197,7 +197,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.7]
+        python_version: ["3.10",]
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     steps:
@@ -227,7 +227,7 @@ jobs:
           - { os: windows-latest, shell: "msys2 {0}" }
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
-        python_version: [3.7]
+        python_version: ["3.10",]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
@@ -260,7 +260,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
@@ -289,7 +289,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
@@ -304,7 +304,7 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
       - name: Async integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and not ledger and not profiling'
+        run: tox -e py3.10 -- -m 'integration and not unstable and not ledger and not profiling'
 
   profiling_checks:
     continue-on-error: True
@@ -321,7 +321,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
@@ -336,7 +336,7 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
       - name: Async integration tests
-        run: tox -e py3.8 -- -m 'profiling'
+        run: tox -e py3.10 -- -m 'profiling'
 
   integration_checks_ledger:
     continue-on-error: True
@@ -353,7 +353,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.8
+          python-version: "3.10"
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -361,7 +361,7 @@ jobs:
           sudo apt-get autoclean
           pip install tox
       - name: Integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and ledger and not profiling'
+        run: tox -e py3.10 -- -m 'integration and not unstable and ledger and not profiling'
 
   platform_checks:
     continue-on-error: True
@@ -376,7 +376,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.7, 3.8, 3.9]
+        python_version: ['3.7', '3.8', '3.9', '3.10']
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@master
@@ -479,7 +479,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.7]
+        python-version: ["3.10"]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@master
@@ -506,7 +506,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: "3.10"
       - uses: actions/setup-go@v3
         with:
           go-version: "1.17.7"
@@ -525,8 +525,8 @@ jobs:
       # sudo apt-get install -y protobuf-compiler
       - name: Run all tests
         run: |
-          tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
-          tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
+          tox -e py3.10-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+          tox -e plugins-py3.10-cov -- --cov-append -m 'not unstable'
         continue-on-error: true
       - name: Show full coverage report
         run: |

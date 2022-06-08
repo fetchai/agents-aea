@@ -374,7 +374,8 @@ class TCPSocketChannel(IPCChannel):
 
         try:
             await asyncio.wait_for(self._connected.wait(), timeout)
-        except asyncio.TimeoutError:  # pragma: no cover
+        except asyncio.TimeoutError as e:  # pragma: no cover
+            self.logger.debug(f"Error while connecting {e}")
             return False
 
         self._server.close()
@@ -572,7 +573,7 @@ class TCPSocketChannelClient(IPCChannelClient):
 
     async def _open_connection(self) -> TCPSocketProtocol:
         reader, writer = await asyncio.open_connection(
-            self._host, self._port, loop=self._loop,  # pylint: disable=protected-access
+            self._host, self._port  # pylint: disable=protected-access
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 

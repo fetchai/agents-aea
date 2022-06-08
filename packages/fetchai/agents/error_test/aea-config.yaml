@@ -8,7 +8,7 @@ fingerprint:
   README.md: QmdQh43mUtMJSLa9ghvwoZjiAcgU98Rb7c98HCf2t2vBNA
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0:QmZ5AZHR6Gh8LFS7Kgce2R9uV4HbSw9T523gHz33wvAs9c
+- fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z
 contracts: []
 protocols: []
 skills:
