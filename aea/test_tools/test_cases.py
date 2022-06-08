@@ -123,7 +123,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def set_config(
-        cls, dotted_path: str, value: Any, type_: Optional[str] = None
+        cls, dotted_path: str, value: Any, type_: Optional[str] = None, aev: bool = False
     ) -> Result:
         """
         Set a config.
@@ -139,14 +139,20 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if type_ is None:
             type_ = type(value).__name__
 
-        return cls.run_cli_command(
+        cmd = [
             "config",
             "set",
             dotted_path,
             str(value),
             "--type",
-            type_,
-            "--aev",
+            type_
+        ]
+
+        if aev:
+            cmd.append("--aev")
+
+        return cls.run_cli_command(
+            *cmd,
             cwd=cls._get_cwd(),
         )
 
