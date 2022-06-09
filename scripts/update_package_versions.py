@@ -432,11 +432,11 @@ def _can_disambiguate_from_context(
     :return: if True/False, the old string can/cannot be replaced. If None, we don't know.
     """
     match = re.search(
-        fr"aea +add +(skill|protocol|connection|contract) +{old_string}", line
+        rf"aea +add +(skill|protocol|connection|contract) +{old_string}", line
     )
     if match is not None:
         return match.group(1) == type_[:-1]
-    if re.search(fr"aea +fetch +{old_string}", line) is not None:
+    if re.search(rf"aea +fetch +{old_string}", line) is not None:
         return type_ == "agents"
     match = re.search(
         "(skill|SKILL|"
@@ -483,7 +483,7 @@ def replace_aea_fetch_statements(
     """Replace statements of the type: 'aea fetch <old_string>'."""
     if type_ == "agents":
         content = re.sub(
-            fr"aea +fetch +{old_string}", f"aea fetch {new_string}", content
+            rf"aea +fetch +{old_string}", f"aea fetch {new_string}", content
         )
     return content
 
@@ -494,7 +494,7 @@ def replace_aea_add_statements(
     """Replace statements of the type: 'aea add <type> <old_string>'."""
     if type_ != "agents":
         content = re.sub(
-            fr"aea +add +{type_} +{old_string}",
+            rf"aea +add +{type_} +{old_string}",
             f"aea add {type_} {new_string}",
             content,
         )

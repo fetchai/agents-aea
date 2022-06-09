@@ -244,11 +244,11 @@ class PublicId(JSONSerializable):
     PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
 
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
-    VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    VERSION_REGEX = rf"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_URI_REGEX = (
-        fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
+        rf"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
-    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:{VERSION_REGEX})?(:{IPFS_HASH_REGEX})?$"
+    PUBLIC_ID_REGEX = rf"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:{VERSION_REGEX})?(:{IPFS_HASH_REGEX})?$"
 
     ANY_VERSION = "any"
     LATEST_VERSION = "latest"

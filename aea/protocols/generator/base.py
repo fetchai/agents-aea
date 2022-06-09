@@ -626,11 +626,14 @@ class ProtocolGenerator:
             )
             self._change_indent(-1)
         else:
-            check_str += self.indent + "enforce({}, \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type({})))\n".format(
-                _type_check(content_variable, self._to_custom_custom(content_type)),
-                content_name,
-                content_type,
-                content_variable,
+            check_str += (
+                self.indent
+                + "enforce({}, \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type({})))\n".format(
+                    _type_check(content_variable, self._to_custom_custom(content_type)),
+                    content_name,
+                    content_type,
+                    content_variable,
+                )
             )
         if optional:
             self._change_indent(-1)
@@ -1293,9 +1296,12 @@ class ProtocolGenerator:
                 self.indent
                 + "Encode an instance of this class into the protocol buffer object.\n\n"
             )
-            cls_str += self.indent + "The protocol buffer object in the {}_protobuf_object argument is matched with the instance of this class in the '{}_object' argument.\n\n".format(
-                _camel_case_to_snake_case(custom_type),
-                _camel_case_to_snake_case(custom_type),
+            cls_str += (
+                self.indent
+                + "The protocol buffer object in the {}_protobuf_object argument is matched with the instance of this class in the '{}_object' argument.\n\n".format(
+                    _camel_case_to_snake_case(custom_type),
+                    _camel_case_to_snake_case(custom_type),
+                )
             )
             cls_str += (
                 self.indent
@@ -1661,10 +1667,13 @@ class ProtocolGenerator:
                 self.protocol_specification_in_camel_case, performative.upper()
             )
             self._change_indent(1)
-            cls_str += self.indent + "performative = {}_pb2.{}Message.{}_Performative()  # type: ignore\n".format(
-                self.protocol_specification.name,
-                self.protocol_specification_in_camel_case,
-                performative.title(),
+            cls_str += (
+                self.indent
+                + "performative = {}_pb2.{}Message.{}_Performative()  # type: ignore\n".format(
+                    self.protocol_specification.name,
+                    self.protocol_specification_in_camel_case,
+                    performative.title(),
+                )
             )
             for content_name, content_type in contents.items():
                 cls_str += self._encoding_message_content_from_python_to_protobuf(

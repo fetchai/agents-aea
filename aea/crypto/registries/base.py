@@ -32,7 +32,7 @@ from aea.helpers.base import RegexConstrainedString, SIMPLE_ID_REGEX
 
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
-ITEM_ID_REGEX = fr"({SIMPLE_ID_REGEX})|{PublicId.PUBLIC_ID_REGEX}"
+ITEM_ID_REGEX = rf"({SIMPLE_ID_REGEX})|{PublicId.PUBLIC_ID_REGEX}"
 ItemType = TypeVar("ItemType")
 
 

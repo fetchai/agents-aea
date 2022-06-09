@@ -1409,15 +1409,11 @@ class Constraint(ConstraintExpr):
             value, type(next(iter(self.constraint_type.value)))
         ):
             return False
-        if (
-            type(self.constraint_type.value)
-            not in {
-                list,
-                tuple,
-                set,
-            }
-            and not isinstance(value, type(self.constraint_type.value))
-        ):
+        if type(self.constraint_type.value) not in {
+            list,
+            tuple,
+            set,
+        } and not isinstance(value, type(self.constraint_type.value)):
             return False
 
         # dispatch the check to the right implementation for the concrete constraint type.
