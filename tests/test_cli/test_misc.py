@@ -54,10 +54,8 @@ Options:
   --version                     Show the version and exit.
   -v, --verbosity LVL           One of NOTSET, DEBUG, INFO, WARNING, ERROR,
                                 CRITICAL, OFF
-
   -s, --skip-consistency-check  Skip consistency checks of agent during command
                                 execution.
-
   --registry-path DIRECTORY     Provide a local registry directory full path.
   --help                        Show this message and exit.
 
@@ -77,11 +75,9 @@ Commands:
   generate-all-protocols  Generate all protocols.
   generate-key            Generate a private key and place it in a file.
   generate-wealth         Generate wealth for the agent on a test network.
-  get-address             Get the address associated with a private key of
-                          the...
-
-  get-multiaddress        Get the multiaddress associated with a private key...
-  get-public-key          Get the public key associated with a private key of...
+  get-address             Get the address associated with a private key of...
+  get-multiaddress        Get the multiaddress associated with a private...
+  get-public-key          Get the public key associated with a private key...
   get-wealth              Get the wealth associated with the private key of...
   hash                    Hashing utils.
   init                    Initialize your AEA configurations.
@@ -103,9 +99,7 @@ Commands:
   run                     Run the agent.
   scaffold                Scaffold a package for the agent.
   search                  Search for packages in the registry.
-  transfer                Transfer wealth associated with a private key of
-                          the...
-
+  transfer                Transfer wealth associated with a private key of...
   upgrade                 Upgrade the packages of the agent.
 """
     )
