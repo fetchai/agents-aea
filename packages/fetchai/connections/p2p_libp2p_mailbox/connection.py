@@ -59,7 +59,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_mailbox:0.2.1")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_mailbox:0.2.2")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 

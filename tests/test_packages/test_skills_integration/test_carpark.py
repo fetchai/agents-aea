@@ -64,9 +64,9 @@ class TestCarPark(AEATestCaseManyFlaky):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("skill", "fetchai/carpark_detection:0.27.1")
         setting_path = (
@@ -102,9 +102,9 @@ class TestCarPark(AEATestCaseManyFlaky):
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("skill", "fetchai/carpark_client:0.27.2")
         setting_path = (
@@ -244,9 +244,9 @@ class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("skill", "fetchai/carpark_detection:0.27.1")
         setting_path = "agent.default_routing"
@@ -285,9 +285,9 @@ class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("skill", "fetchai/carpark_client:0.27.2")
         setting_path = "agent.default_routing"

@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.29.1
+version: 0.29.2
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUk1XEpYnxte5GKZjSvJY2LJPpVzzP6zLvnxT2Y1g9f4m
-  __init__.py: QmdxpSGSGZM7QrLpZb9DvcJxhTztURC7oAKxK7aCDmvwPm
+  __init__.py: QmXprsonoqw46z91v5g1YUTRLKaGpSJSEzExZiUPZ4aH9R
   behaviours.py: QmeKKwsRGKfW6Lw6UVDZigyrcJpnQ9eLLUR4jWb4kJJuWt
   dialogues.py: QmRnu5pRsV9jXMxYu81W4Z5Hp8v7RE2zz4yXKJHi8UNYTS
   handlers.py: QmPnor8sPHxXrL2TWj246zpibhUkUABqB2cWmjb8akY3fn

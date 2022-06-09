@@ -10,7 +10,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.1
 - fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
+- fetchai/p2p_libp2p:0.27.1
 - fetchai/soef:0.27.1
 contracts: []
 protocols:
@@ -68,9 +68,9 @@ logging_config:
 dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
-default_connection: fetchai/p2p_libp2p:0.27.0
+default_connection: fetchai/p2p_libp2p:0.27.1
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: null

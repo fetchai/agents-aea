@@ -63,24 +63,24 @@ aea config set --type dict agent.default_routing \
 aea generate-wealth fetchai --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add protocol fetchai/fipa:1.1.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add protocol fetchai/fipa:1.1.1
 aea add protocol fetchai/signing:1.1.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 ```
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \

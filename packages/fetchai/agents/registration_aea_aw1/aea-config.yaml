@@ -8,7 +8,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
+- fetchai/p2p_libp2p:0.27.1
 - fetchai/soef:0.27.1
 contracts: []
 protocols:
@@ -21,7 +21,7 @@ skills:
 - fetchai/registration_aw1:0.13.1
 - fetchai/simple_service_registration:0.23.1
 - fetchai/simple_service_search:0.11.1
-default_connection: fetchai/p2p_libp2p:0.27.0
+default_connection: fetchai/p2p_libp2p:0.27.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -72,7 +72,7 @@ models:
       whitelist:
       - PUT_WHITELIST_ADDRESSES_HERE
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: null
