@@ -276,6 +276,8 @@ ipfs
 command_line
 PublicId
 multiaddr
+tox
+python3.10
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
