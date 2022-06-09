@@ -32,7 +32,9 @@ from aea.cli.utils.context import Context
 
 @click.command()
 @click.argument(
-    "agent_name", type=AgentDirectory(), required=True,
+    "agent_name",
+    type=AgentDirectory(),
+    required=True,
 )
 @click.pass_context
 def delete(click_context: click.Context, agent_name: str) -> None:

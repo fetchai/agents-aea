@@ -120,7 +120,9 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         )
         with pytest.raises(Exception):
             P2PLibp2pClientConnection(
-                configuration=configuration, data_dir=self.t, identity=self.identity,
+                configuration=configuration,
+                data_dir=self.t,
+                identity=self.identity,
             )
 
     @classmethod
@@ -152,7 +154,9 @@ class TestLibp2pClientConnectionNodeDisconnected:
         os.mkdir(temp_node_dir)
         try:
             cls.connection_node = _make_libp2p_connection(
-                data_dir=temp_node_dir, delegate=True, delegate_port=cls.delegate_port,
+                data_dir=temp_node_dir,
+                delegate=True,
+                delegate_port=cls.delegate_port,
             )
             cls.multiplexer_node = Multiplexer([cls.connection_node])
             cls.log_files.append(cls.connection_node.node.log_file)
@@ -291,7 +295,9 @@ class TestLibp2pClientConnectionCheckSignature:
         temp_dir = os.path.join(cls.t, "temp_dir_node")
         os.mkdir(temp_dir)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, delegate_port=cls.delegate_port, delegate=True,
+            data_dir=temp_dir,
+            delegate_port=cls.delegate_port,
+            delegate=True,
         )
         temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client)

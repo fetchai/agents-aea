@@ -244,11 +244,11 @@ class PublicId(JSONSerializable):
     PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
 
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
-    VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    VERSION_REGEX = rf"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_URI_REGEX = (
-        fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
+        rf"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
-    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:{VERSION_REGEX})?(:{IPFS_HASH_REGEX})?$"
+    PUBLIC_ID_REGEX = rf"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:{VERSION_REGEX})?(:{IPFS_HASH_REGEX})?$"
 
     ANY_VERSION = "any"
     LATEST_VERSION = "latest"
@@ -293,7 +293,9 @@ class PublicId(JSONSerializable):
         return self._package_version
 
     @property
-    def hash(self,) -> str:
+    def hash(
+        self,
+    ) -> str:
         """Returns the hash for the package."""
         if self._package_hash is None:
             raise ValueError("Package hash was not provided.")
@@ -490,7 +492,9 @@ class PublicId(JSONSerializable):
             )
         )
 
-    def without_hash(self,) -> "PublicId":
+    def without_hash(
+        self,
+    ) -> "PublicId":
         """Returns a `PublicId` object with same parameters."""
         return PublicId(self.author, self.name, self.version)
 
@@ -611,7 +615,9 @@ class PackageId:
         """
         return f"{str(self.package_type)}/{self.author}/{self.name}/{self.version}"
 
-    def without_hash(self,) -> "PackageId":
+    def without_hash(
+        self,
+    ) -> "PackageId":
         """Returns PackageId object without hash"""
         return PackageId(self.package_type, self.public_id.without_hash())
 
@@ -622,7 +628,8 @@ class PackageId:
     def __str__(self) -> str:
         """Get the string representation."""
         return "({package_type}, {public_id})".format(
-            package_type=self.package_type.value, public_id=self.public_id,
+            package_type=self.package_type.value,
+            public_id=self.public_id,
         )
 
     def __repr__(self) -> str:
@@ -704,10 +711,13 @@ class ComponentId(PackageId):
     def from_json(cls, json_data: Dict) -> "ComponentId":
         """Create  component id from json data."""
         return cls(
-            component_type=json_data["type"], public_id=PublicId.from_json(json_data),
+            component_type=json_data["type"],
+            public_id=PublicId.from_json(json_data),
         )
 
-    def without_hash(self,) -> "ComponentId":
+    def without_hash(
+        self,
+    ) -> "ComponentId":
         """Returns PackageId object without hash"""
         return ComponentId(self.component_type, self.public_id.without_hash())
 

@@ -75,6 +75,13 @@ def main(
         }
 
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-            return multi_run(int(number_of_runs), run, (ledger_id, test_time,),)
+            return multi_run(
+                int(number_of_runs),
+                run,
+                (
+                    ledger_id,
+                    test_time,
+                ),
+            )
 
         return print_results(output_format, parameters, result_fn)

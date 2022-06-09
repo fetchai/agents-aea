@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -234,7 +234,8 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self_.prepare_skill_dialogue(
-                dialogues=self_.fipa_dialogues, messages=self_.list_of_messages,
+                dialogues=self_.fipa_dialogues,
+                messages=self_.list_of_messages,
             ),
         )
         fipa_dialogue.terms = "terms"  # type: ignore

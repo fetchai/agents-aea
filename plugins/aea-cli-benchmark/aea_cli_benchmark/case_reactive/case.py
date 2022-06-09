@@ -113,7 +113,15 @@ def run(
     agent.stop()
     t.join(5)
 
-    data = list(map(lambda x: x[1] - x[0], zip(connection.sends, connection.recvs,)))
+    data = list(
+        map(
+            lambda x: x[1] - x[0],
+            zip(
+                connection.sends,
+                connection.recvs,
+            ),
+        )
+    )
     if not data:
         raise ValueError("Could not collect enough data.")
 
@@ -123,6 +131,6 @@ def run(
     return [
         ("envelopes received", len(connection.recvs)),
         ("envelopes sent", len(connection.sends)),
-        ("latency(ms)", 10 ** 6 * latency),
+        ("latency(ms)", 10**6 * latency),
         ("rate(envelopes/second)", rate),
     ]

@@ -77,7 +77,8 @@ class TestGetWealth(AEATestCaseEmpty):
     def test_get_wealth(self, _echo_mock, password_or_none):
         """Run the main test."""
         self.generate_private_key(
-            ledger_api_id=FetchAICrypto.identifier, password=password_or_none,
+            ledger_api_id=FetchAICrypto.identifier,
+            password=password_or_none,
         )
         self.add_private_key(
             ledger_api_id=FetchAICrypto.identifier,

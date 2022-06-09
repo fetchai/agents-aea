@@ -42,7 +42,10 @@ PACKAGES = [
 
 @click.command(name="multiagent_http_dialogues")
 @click.option(
-    "--duration", default=1, help="Run time in seconds.", show_default=True,
+    "--duration",
+    default=1,
+    help="Run time in seconds.",
+    show_default=True,
 )
 @runtime_mode_deco
 @click.option(
@@ -59,7 +62,10 @@ PACKAGES = [
     show_default=True,
 )
 @click.option(
-    "--num_of_agents", default=2, help="Amount of agents to run.", show_default=True,
+    "--num_of_agents",
+    default=2,
+    help="Amount of agents to run.",
+    show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco

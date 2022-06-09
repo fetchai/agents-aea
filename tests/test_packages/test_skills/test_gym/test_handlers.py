@@ -52,7 +52,8 @@ class TestGymHandler(GymTestCase):
         self.assert_quantity_in_outbox(0)
 
         mock_logger.assert_any_call(
-            logging.INFO, "Gym handler: setup method called.",
+            logging.INFO,
+            "Gym handler: setup method called.",
         )
         mocked_enqueue_task.assert_any_call(self.gym_handler.task)
         assert self.gym_handler._task_id == self.mocked_task_id
@@ -98,7 +99,8 @@ class TestGymHandler(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:3],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:3],
             ),
         )
         incoming_message = cast(
@@ -117,7 +119,10 @@ class TestGymHandler(GymTestCase):
         self.gym_handler.task.proxy_env._active_dialogue = gym_dialogue
 
         # operation
-        with patch.object(self.gym_handler.task.proxy_env_queue, "put",) as mocked_put:
+        with patch.object(
+            self.gym_handler.task.proxy_env_queue,
+            "put",
+        ) as mocked_put:
             self.gym_handler.handle(incoming_message)
 
         # after
@@ -129,7 +134,8 @@ class TestGymHandler(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:3],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:3],
             ),
         )
         incoming_message = cast(
@@ -148,7 +154,8 @@ class TestGymHandler(GymTestCase):
         gym_dialogue_ii = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:1],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:1],
             ),
         )
         self.gym_handler.task.proxy_env._active_dialogue = gym_dialogue_ii
@@ -159,7 +166,8 @@ class TestGymHandler(GymTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, "gym dialogue not active dialogue.",
+            logging.WARNING,
+            "gym dialogue not active dialogue.",
         )
 
     def test_handle_status_i(self):
@@ -168,7 +176,8 @@ class TestGymHandler(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:1],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:1],
             ),
         )
         incoming_message = cast(
@@ -183,7 +192,10 @@ class TestGymHandler(GymTestCase):
         self.gym_handler.task.proxy_env._active_dialogue = gym_dialogue
 
         # operation
-        with patch.object(self.gym_handler.task.proxy_env_queue, "put",) as mocked_put:
+        with patch.object(
+            self.gym_handler.task.proxy_env_queue,
+            "put",
+        ) as mocked_put:
             self.gym_handler.handle(incoming_message)
 
         # after
@@ -195,7 +207,8 @@ class TestGymHandler(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:1],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:1],
             ),
         )
         incoming_message = cast(
@@ -210,7 +223,8 @@ class TestGymHandler(GymTestCase):
         gym_dialogue_ii = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:1],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:1],
             ),
         )
         self.gym_handler.task.proxy_env._active_dialogue = gym_dialogue_ii
@@ -221,14 +235,16 @@ class TestGymHandler(GymTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, "gym dialogue not active dialogue.",
+            logging.WARNING,
+            "gym dialogue not active dialogue.",
         )
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the gym handler."""
         # setup
         incoming_message = self.build_incoming_message(
-            message_type=GymMessage, performative=GymMessage.Performative.RESET,
+            message_type=GymMessage,
+            performative=GymMessage.Performative.RESET,
         )
 
         # operation
@@ -267,10 +283,12 @@ class TestGymHandler(GymTestCase):
         self.assert_quantity_in_outbox(0)
 
         mock_logger.assert_any_call(
-            logging.INFO, "Gym handler: teardown method called.",
+            logging.INFO,
+            "Gym handler: teardown method called.",
         )
         mocked_gym_task_teardown.assert_called_once()
         mocked_get_result.assert_any_call(self.mocked_task_id)
         mock_logger.assert_any_call(
-            logging.WARNING, "Task not successful!",
+            logging.WARNING,
+            "Task not successful!",
         )

@@ -15,7 +15,7 @@ fingerprint:
   message.py: QmeHjyNVGkb6T6UwZBxdBajmGR4wQrUycZdSePAkA6Zibo
   serialization.py: QmPR6pQociRaSbDqd4GgizfrNtpoLq7yKeesoWRWUQd5aJ
   tendermint.proto: QmZup4Pkm26FqQvhXtH2JZsAzUQsrdgmUdhdCEM9774cxJ
-  tendermint_pb2.py: QmQyAhhVTpea4UJtzGNtJGf65Vuoa6fiT5WUYZpksp4TAC
+  tendermint_pb2.py: QmTAe7UQ3hiL92VSWujkCS5dgzLUBcd7RZgiVZT4AVRjK4
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

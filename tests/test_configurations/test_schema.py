@@ -139,7 +139,8 @@ def test_config_validation(schema_file_path, config_file_path):
     # TODO a bit inefficient to load each schema everytime; consider making the validators as fixtures.
     schema = json.load(open(schema_file_path))
     resolver = jsonschema.RefResolver(
-        make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()), schema,
+        make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+        schema,
     )
     validator = Draft4Validator(schema, resolver=resolver)
     config_data = list(yaml.safe_load_all(open(config_file_path)))

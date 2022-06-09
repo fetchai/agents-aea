@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +39,9 @@ class ResetPasswordTestCase(TestCase):
         """Test for CLI reset_password positive result."""
         email = "email@example.com"
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "reset_password", email], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "reset_password", email],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
         registry_reset_password_mock.assert_called_once_with(email)

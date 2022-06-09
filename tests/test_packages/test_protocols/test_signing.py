@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -131,7 +131,9 @@ class TestSigningMessage:
 
 def test_consistency_check_negative():
     """Test the consistency check, negative case."""
-    tx_msg = SigningMessage(performative=SigningMessage.Performative.SIGN_TRANSACTION,)
+    tx_msg = SigningMessage(
+        performative=SigningMessage.Performative.SIGN_TRANSACTION,
+    )
     assert not tx_msg._is_consistent()
 
 

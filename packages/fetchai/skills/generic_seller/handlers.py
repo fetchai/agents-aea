@@ -145,7 +145,8 @@ class GenericFipaHandler(Handler):
                 "declined the CFP from sender={}".format(fipa_msg.sender[-5:])
             )
             decline_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=fipa_msg,
             )
             self.context.outbox.put_message(message=decline_msg)
 
@@ -193,7 +194,8 @@ class GenericFipaHandler(Handler):
         )
         self.context.logger.info(
             "sending MATCH_ACCEPT_W_INFORM to sender={} with info={}".format(
-                fipa_msg.sender[-5:], info,
+                fipa_msg.sender[-5:],
+                info,
             )
         )
         self.context.outbox.put_message(message=match_accept_msg)
@@ -253,7 +255,8 @@ class GenericFipaHandler(Handler):
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, fipa_msg.sender[-5:],
+                    fipa_dialogue.data_for_sale,
+                    fipa_msg.sender[-5:],
                 )
             )
         else:
@@ -342,7 +345,8 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
 
@@ -385,7 +389,8 @@ class GenericLedgerApiHandler(Handler):
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, last_message.sender[-5:],
+                    fipa_dialogue.data_for_sale,
+                    last_message.sender[-5:],
                 )
             )
         else:
@@ -421,7 +426,8 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 
@@ -568,6 +574,7 @@ class GenericOefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )

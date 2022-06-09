@@ -234,7 +234,10 @@ class AcnNodeStandalone:
                     log_file.write(line)
                     log_file.flush()
         else:
-            self._proc = subprocess.Popen(cmd, shell=False,)  # nosec
+            self._proc = subprocess.Popen(  # nosec
+                cmd,
+                shell=False,
+            )
 
         try:
             self._proc.wait()

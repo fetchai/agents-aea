@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,7 +163,9 @@ class TestGenericStrategy(BaseSkillTestCase):
         total_price = len(self.data_for_sale) * self.unit_price
         sale_quantity = len(self.data_for_sale)
         tx_nonce = LedgerApis.generate_tx_nonce(
-            identifier=self.ledger_id, seller=seller, client=COUNTERPARTY_AGENT_ADDRESS,
+            identifier=self.ledger_id,
+            seller=seller,
+            client=COUNTERPARTY_AGENT_ADDRESS,
         )
         query = Query(
             [Constraint("seller_service", ConstraintType("==", "some_service"))]

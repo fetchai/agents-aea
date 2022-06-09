@@ -64,8 +64,8 @@ from aea.exceptions import enforce
 
 STRING_LENGTH_LIMIT = 128
 IPFS_HASH_LENGTH_LIMIT = 46
-SIMPLE_ID_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
-IPFS_HASH_REGEX = fr"[a-zA-Z_][a-zA-Z0-9]{{{IPFS_HASH_LENGTH_LIMIT - 1}}}"
+SIMPLE_ID_REGEX = rf"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
+IPFS_HASH_REGEX = rf"[a-zA-Z_][a-zA-Z0-9]{{{IPFS_HASH_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
@@ -431,7 +431,9 @@ def _is_dict_like(obj: Any) -> bool:
 
 
 def recursive_update(
-    to_update: Dict, new_values: Dict, allow_new_values: bool = False,
+    to_update: Dict,
+    new_values: Dict,
+    allow_new_values: bool = False,
 ) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.

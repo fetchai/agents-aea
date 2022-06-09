@@ -373,7 +373,12 @@ class Case:
             protocol_specification_id=LedgerApiMessage.protocol_specification_id,
         )
 
-        resources.add_protocol(Protocol(pconfig, message_class=LedgerApiMessage,))
+        resources.add_protocol(
+            Protocol(
+                pconfig,
+                message_class=LedgerApiMessage,
+            )
+        )
 
         connection = LedgerConnection(
             data_dir="./",
@@ -490,7 +495,9 @@ def run(ledger_id: str, running_time: float) -> List[Tuple[str, Union[int, float
                 private_keys=private_keys,
             )
 
-            tx_processed, execution_time = case.run(time_in_seconds=running_time,)
+            tx_processed, execution_time = case.run(
+                time_in_seconds=running_time,
+            )
 
         return [
             ("run_time (seconds)", execution_time),

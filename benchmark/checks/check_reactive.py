@@ -118,13 +118,21 @@ def run(
     agent.stop()
     t.join(5)
 
-    latency = mean(map(lambda x: x[1] - x[0], zip(connection.sends, connection.recvs,)))
+    latency = mean(
+        map(
+            lambda x: x[1] - x[0],
+            zip(
+                connection.sends,
+                connection.recvs,
+            ),
+        )
+    )
     total_amount = len(connection.recvs)
     rate = total_amount / duration
     return [
         ("envelopes received", len(connection.recvs)),
         ("envelopes sent", len(connection.sends)),
-        ("latency(ms)", 10 ** 6 * latency),
+        ("latency(ms)", 10**6 * latency),
         ("rate(envelopes/second)", rate),
     ]
 
@@ -156,7 +164,9 @@ def main(
 
     def result_fn() -> List[Tuple[str, Any, Any, Any]]:
         return multi_run(
-            int(number_of_runs), run, (duration, runtime_mode, connection_mode),
+            int(number_of_runs),
+            run,
+            (duration, runtime_mode, connection_mode),
         )
 
     return print_results(output_format, parameters, result_fn)

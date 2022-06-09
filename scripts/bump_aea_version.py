@@ -364,7 +364,8 @@ class PythonPackageVersionBumper:
         old_specifier_set_regex = get_regex_from_specifier_set(old_specifier_set)
         for pattern_template in self.specifier_set_patterns:
             regex = pattern_template.format(
-                package_name=self.package_name, specifier_set=old_specifier_set_regex,
+                package_name=self.package_name,
+                specifier_set=old_specifier_set_regex,
             )
             pattern = re.compile(regex)
             if pattern.search(content) is not None:
@@ -540,7 +541,9 @@ def bump(arguments: argparse.Namespace) -> int:
         )
     else:
         logging.info("Updating hashes and fingerprints.")
-        return_code = update_hashes(packages_dir=ROOT_DIR / "packages",)
+        return_code = update_hashes(
+            packages_dir=ROOT_DIR / "packages",
+        )
     return return_code
 
 

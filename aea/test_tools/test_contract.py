@@ -231,7 +231,9 @@ class BaseContractTestCase(ABC):
         :return: the transaction receipt for initial transaction deployment
         """
         tx = contract.get_deploy_transaction(
-            ledger_api=ledger_api, deployer_address=deployer_crypto.address, gas=gas,
+            ledger_api=ledger_api,
+            deployer_address=deployer_crypto.address,
+            gas=gas,
         )
 
         if tx is None:

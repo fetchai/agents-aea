@@ -279,7 +279,9 @@ def registry_path_option(f: Callable) -> Callable:
     )(f)
 
 
-def component_flag(wrap_public_id: bool = False,) -> Callable:
+def component_flag(
+    wrap_public_id: bool = False,
+) -> Callable:
     """Wraps a command with component types argument"""
 
     def wrapper(f: Callable) -> Callable:

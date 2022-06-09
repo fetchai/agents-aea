@@ -73,7 +73,8 @@ class TestScaffoldSkill:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -130,7 +131,7 @@ class TestScaffoldSkill:
         init_module_content = p.read_text()
         expected_public_id = f"{AUTHOR}/{self.resource_name}:{DEFAULT_VERSION}"
         matches = re.findall(
-            fr'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
+            rf'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
             init_module_content,
             re.MULTILINE,
         )
@@ -239,7 +240,7 @@ class TestScaffoldSkillToRegistry:
         init_module_content = p.read_text()
         expected_public_id = f"{AUTHOR}/{self.resource_name}:{DEFAULT_VERSION}"
         matches = re.findall(
-            fr'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
+            rf'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
             init_module_content,
             re.MULTILINE,
         )
@@ -273,7 +274,8 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -340,7 +342,8 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -413,7 +416,8 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(
@@ -425,7 +429,8 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         # change the dumping of yaml module to raise an exception.
         cls.patch = unittest.mock.patch(
-            "yaml.dump", side_effect=ValidationError("test error message"),
+            "yaml.dump",
+            side_effect=ValidationError("test error message"),
         )
         cls.patch.start()
 
@@ -484,7 +489,8 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
         )
         assert result.exit_code == 0
         result = cls.runner.invoke(

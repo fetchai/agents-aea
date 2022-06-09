@@ -123,7 +123,11 @@ def check_correct_author(runner: CliRunner) -> None:
 
     :param runner: the cli runner
     """
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init"], standalone_mode=False,)
+    result = runner.invoke(
+        cli,
+        [*CLI_LOG_OPTION, "init"],
+        standalone_mode=False,
+    )
     if "{'author': 'fetchai'}" not in result.output:
         print("Log in with fetchai credentials. Stopping...")
         sys.exit(0)
@@ -201,7 +205,9 @@ def push_package(package_id: PackageId, runner: CliRunner) -> None:
     finally:
         os.chdir(cwd)
         result = runner.invoke(
-            cli, [*CLI_LOG_OPTION, "delete", agent_name], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "delete", agent_name],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
     print(
@@ -243,7 +249,9 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
         assert result.exit_code == 0, "Local fetch failed."
         os.chdir(str(package_id.public_id.name))
         result = runner.invoke(
-            cli, [*CLI_LOG_OPTION, "publish", "--remote"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "publish", "--remote"],
+            standalone_mode=False,
         )
         assert (
             result.exit_code == 0

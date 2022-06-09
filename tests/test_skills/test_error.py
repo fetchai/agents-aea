@@ -132,7 +132,11 @@ class TestSkillError:
             performative=FipaMessage.Performative.ACCEPT,
         )
         msg.to = self.address
-        envelope = Envelope(to=msg.to, sender=self.address, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=self.address,
+            message=msg,
+        )
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
@@ -152,7 +156,11 @@ class TestSkillError:
             performative=FipaMessage.Performative.ACCEPT,
         )
         msg.to = self.address
-        envelope = Envelope(to=msg.to, sender=self.address, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=self.address,
+            message=msg,
+        )
 
         self.my_error_handler.send_decoding_error(envelope)
         wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
@@ -172,7 +180,11 @@ class TestSkillError:
         )
         msg.to = self.address
         msg.sender = self.address
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
 
@@ -187,7 +199,10 @@ class TestSkillError:
         """Test the 'send_unsupported_skill' when the skill id in the envelope is None."""
         protocol_id = PublicId.from_str("author/name:0.1.0")
         envelope = Envelope(
-            to="", sender="", protocol_specification_id=protocol_id, message=b"",
+            to="",
+            sender="",
+            protocol_specification_id=protocol_id,
+            message=b"",
         )
         with unittest.mock.patch.object(self.skill_context.outbox, "put_message"):
             with unittest.mock.patch.object(

@@ -82,7 +82,10 @@ def create(
 
 @clean_after
 def create_aea(
-    ctx: Context, agent_name: str, author: Optional[str] = None, empty: bool = False,
+    ctx: Context,
+    agent_name: str,
+    author: Optional[str] = None,
+    empty: bool = False,
 ) -> None:
     """
     Create AEA project.

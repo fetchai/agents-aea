@@ -159,7 +159,9 @@ def _handle_error_while_loading_component_module_not_found(
     e_str = parse_exception(new_exc)
     raise AEAPackageLoadingError(
         "Package loading error: An error occurred while loading {} {}:\n{}".format(
-            str(configuration.component_type), configuration.public_id, e_str,
+            str(configuration.component_type),
+            configuration.public_id,
+            e_str,
         )
     )
 

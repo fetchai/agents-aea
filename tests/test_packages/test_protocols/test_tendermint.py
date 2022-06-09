@@ -69,7 +69,8 @@ def test_performative_name_value_matching():
 
 
 @pytest.mark.parametrize(
-    "performative, kwargs", zip(PERFORMATIVE, PERFORMATIVE_TEST_KWARGS),
+    "performative, kwargs",
+    zip(PERFORMATIVE, PERFORMATIVE_TEST_KWARGS),
 )
 def test_serialization(performative, kwargs):
     """Test that the serialization for the 'tendermint' protocol works."""

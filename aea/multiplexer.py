@@ -160,7 +160,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._recv_loop_task = None  # type: Optional[asyncio.Task]
         self._send_loop_task = None  # type: Optional[asyncio.Task]
 
-        self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
+        self._loop: asyncio.AbstractEventLoop = (
+            loop if loop is not None else asyncio.new_event_loop()
+        )
         self.set_loop(self._loop)
 
     @property
@@ -967,7 +969,9 @@ class OutBox:
         self._multiplexer.put(envelope)
 
     def put_message(
-        self, message: Message, context: Optional[EnvelopeContext] = None,
+        self,
+        message: Message,
+        context: Optional[EnvelopeContext] = None,
     ) -> None:
         """
         Put a message in the outbox.
@@ -984,6 +988,9 @@ class OutBox:
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.to, sender=message.sender, message=message, context=context,
+            to=message.to,
+            sender=message.sender,
+            message=message,
+            context=context,
         )
         self.put(envelope)

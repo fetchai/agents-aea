@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,7 +122,8 @@ class GenericFipaHandler(Handler):
         """
         self.context.logger.info(
             "received proposal={} from sender={}".format(
-                fipa_msg.proposal.values, fipa_msg.sender[-5:],
+                fipa_msg.proposal.values,
+                fipa_msg.sender[-5:],
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -135,7 +136,8 @@ class GenericFipaHandler(Handler):
             terms = strategy.terms_from_proposal(fipa_msg.proposal, fipa_msg.sender)
             fipa_dialogue.terms = terms
             accept_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.ACCEPT, target_message=fipa_msg,
+                performative=FipaMessage.Performative.ACCEPT,
+                target_message=fipa_msg,
             )
             self.context.outbox.put_message(message=accept_msg)
         else:
@@ -143,7 +145,8 @@ class GenericFipaHandler(Handler):
                 "declining the proposal from sender={}".format(fipa_msg.sender[-5:])
             )
             decline_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=fipa_msg,
             )
             self.context.outbox.put_message(message=decline_msg)
 
@@ -380,7 +383,8 @@ class GenericOefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )
 
@@ -573,7 +577,8 @@ class GenericLedgerApiHandler(Handler):
         if ledger_api_msg.balance > 0:
             self.context.logger.info(
                 "starting balance on {} ledger={}.".format(
-                    strategy.ledger_id, ledger_api_msg.balance,
+                    strategy.ledger_id,
+                    ledger_api_msg.balance,
                 )
             )
             strategy.balance = ledger_api_msg.balance
@@ -715,6 +720,7 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )

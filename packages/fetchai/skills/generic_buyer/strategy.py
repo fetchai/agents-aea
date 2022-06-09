@@ -157,7 +157,9 @@ class GenericStrategy(Model):
                 self._search_query["search_value"],
             ),
         )
-        query = Query([close_to_my_service, service_key_filter],)
+        query = Query(
+            [close_to_my_service, service_key_filter],
+        )
         return query
 
     def get_service_query(self) -> Query:

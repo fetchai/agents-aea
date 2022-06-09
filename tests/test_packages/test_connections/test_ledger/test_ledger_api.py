@@ -155,7 +155,11 @@ async def test_get_balance(
         ledger_id=ledger_id,
         address=address,
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -209,7 +213,11 @@ async def test_get_state(
         args=args,
         kwargs=kwargs,
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -270,7 +278,11 @@ async def test_send_signed_transaction_ethereum(
         ),
     )
     request = cast(LedgerApiMessage, request)
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -297,7 +309,11 @@ async def test_send_signed_transaction_ethereum(
             ),
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -330,7 +346,11 @@ async def test_send_signed_transaction_ethereum(
             transaction_digest=response_message.transaction_digest,
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()

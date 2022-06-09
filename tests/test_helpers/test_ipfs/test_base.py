@@ -52,13 +52,17 @@ def test_hash_for_big_file():
 class TestDirectoryHashing:
     """Test recursive directory hashing."""
 
-    def setup(self,) -> None:
+    def setup(
+        self,
+    ) -> None:
         """Setup test."""
 
         self.hash_tool = IPFSHashOnly()
         self.ipfs_tool = IPFSTool(addr="/ip4/127.0.0.1/tcp/5001")
 
-    def test_depth_0(self,) -> None:
+    def test_depth_0(
+        self,
+    ) -> None:
         """Test directory with only one file and no child directories."""
 
         with TemporaryDirectory() as temp_dir:
@@ -71,7 +75,9 @@ class TestDirectoryHashing:
                 hash_daemon == hash_local
             ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}\n{d}"
 
-    def test_depth_1(self,) -> None:
+    def test_depth_1(
+        self,
+    ) -> None:
         """Test directory with only one file and a child directory."""
 
         with TemporaryDirectory() as temp_dir:
@@ -86,7 +92,9 @@ class TestDirectoryHashing:
                 hash_daemon == hash_local
             ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}\n{d}"
 
-    def test_depth_multi(self,) -> None:
+    def test_depth_multi(
+        self,
+    ) -> None:
         """Test directory with only one file and a child directory."""
 
         with TemporaryDirectory() as temp_dir:

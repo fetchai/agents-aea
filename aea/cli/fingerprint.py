@@ -47,7 +47,9 @@ from aea.helpers.io import open_file
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def fingerprint(click_context: click.core.Context,) -> None:
+def fingerprint(
+    click_context: click.core.Context,
+) -> None:
     """Fingerprint a non-vendor package of the agent."""
     if click_context.invoked_subcommand is None:
         fingerprint_agent(click_context)

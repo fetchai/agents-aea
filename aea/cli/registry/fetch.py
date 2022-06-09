@@ -80,7 +80,8 @@ def fetch_agent(
 
     if alias or target_dir:
         shutil.move(
-            os.path.join(ctx.cwd, name), aea_folder,
+            os.path.join(ctx.cwd, name),
+            aea_folder,
         )
 
     ctx.cwd = aea_folder

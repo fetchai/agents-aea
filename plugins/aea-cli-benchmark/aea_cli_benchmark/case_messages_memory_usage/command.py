@@ -36,7 +36,10 @@ PACKAGES = [("protocol", "fetchai/default")]
 
 @click.command(name="messages_mem_usage")
 @click.option(
-    "--messages", default=10 ** 6, help="Amount of messages.", show_default=True,
+    "--messages",
+    default=10**6,
+    help="Amount of messages.",
+    show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco
@@ -48,7 +51,11 @@ def main(messages: int, number_of_runs: int, output_format: str) -> Any:
         parameters = {"Messages": messages, "Number of runs": number_of_runs}
 
         def result_fn() -> List[Tuple[str, Any, Any, Any]]:
-            return multi_run(int(number_of_runs), run, (int(messages),),)
+            return multi_run(
+                int(number_of_runs),
+                run,
+                (int(messages),),
+            )
 
         return print_results(output_format, parameters, result_fn)
 

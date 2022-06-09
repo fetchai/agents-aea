@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,10 +60,13 @@ def test_get_contract_instance(ethereum_testnet_config, ganache):
     erc1155_contract_address = cast(Dict, receipt)["contractAddress"]
     interface = {"abi": [], "bytecode": b""}
     instance = ethereum_api.get_contract_instance(
-        contract_interface=interface, contract_address=erc1155_contract_address,
+        contract_interface=interface,
+        contract_address=erc1155_contract_address,
     )
     assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
-    instance = ethereum_api.get_contract_instance(contract_interface=interface,)
+    instance = ethereum_api.get_contract_instance(
+        contract_interface=interface,
+    )
     assert (
         str(type(instance)) == "<class 'web3._utils.datatypes.PropertyCheckingFactory'>"
     )

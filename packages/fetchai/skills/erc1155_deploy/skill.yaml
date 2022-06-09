@@ -9,21 +9,21 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
   __init__.py: QmXT2fFD2y4hXNU7WLtaGnMJ74GG3UDuWeYXufDBdnXWcv
-  behaviours.py: QmZLACzjAHi3XmhdK4Wgr9R891buKLzLax1Sw9J4FfTUAs
+  behaviours.py: QmatnZhzx8k5Gdw1o9huKyN67VVQB2UiGTzddButBVW9Ke
   dialogues.py: QmT9ytEAKc6Gqdc7AxtB2on61uVyGne7wpsFAoHESDPMrb
-  handlers.py: QmQZqpiM1iFStmyrgM1gJAYvZR1MB8bNRy56gxazptVMqg
-  strategy.py: QmXPNZ8u59GNAu4uhY8CZwuVoaffpf3dadtuXyFLeFvAoM
+  handlers.py: QmbfRjCm7C2aB5fMeDUJBmYfQxMwmrkdaBQzYyX1Yhwq4s
+  strategy.py: Qmb4yHRtGYwZFdKHdKZS7NLyFhFbnipvGh3SznVDbZRpGd
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:QmPCbasPNL1wFno9pFCF8wTqR9CaCt8i1QagMF2HmdkP2s
+- fetchai/ledger:0.19.0:QmR2bvMWRzbcWMgqVP3xWpZ3GBnGyrtW9jQMXuFY51PWvt
 contracts:
 - fetchai/erc1155:0.22.0:QmcWju76BLXDzeH6po8nHhkZL7BgSEq4KqgvTgP1Y1ZUQ2
 protocols:
-- fetchai/contract_api:1.0.0:QmXfEAhomDMvdR9oDKzLmmegyS5Kf6Un2KxWPLgfbRF1kt
-- fetchai/default:1.0.0:QmNuQp2z2bq2SsEGCUdYAyXLXyCRtB16RrsR2enGPaF3Nr
-- fetchai/fipa:1.0.0:QmQELeVL8MvqAW28Jbzzz3sRS4Ewdi3tviZt3zsCwHKD79
-- fetchai/ledger_api:1.0.0:QmZ6SPoXVUhjbgsL3qw1JM2UJxsCSr4G3Jm16nsT3MG7jA
-- fetchai/oef_search:1.0.0:QmPVwWnsvSRFxu89kRFcQSpbgeDuGrwscJYXXhtQAu7KqK
+- fetchai/contract_api:1.0.0:QmTg7H4cM428TegTqMWFaaz9pyaHhG1fBz28aLiZpgkVj6
+- fetchai/default:1.0.0:QmVxny6aqskQokYacKcEhxSSJrdA14eDQRX69N9xXKjLsT
+- fetchai/fipa:1.0.0:Qmbe2oDXWp8eJ5SQfrChiHWPVA1qmaUmcWYXpnQKuSVUDb
+- fetchai/ledger_api:1.0.0:QmNVqsvmEaZ21QTK25s4S6Cdfc2vyAA4ipxoLZKA3NPRes
+- fetchai/oef_search:1.0.0:QmVD8sxmqeca59CM7XkVA8XJV8HhhzaffGHudUKSA956uV
 - open_aea/signing:1.0.0:QmYvwPTb6HXrNcKYvQwCWiHsB6sYQGHPLxr5DXQFtAbMrf
 skills: []
 behaviours:

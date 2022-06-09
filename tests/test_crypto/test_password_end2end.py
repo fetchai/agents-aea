@@ -72,5 +72,10 @@ class TestKeyEncryption(AEATestCaseEmpty):
             )
             assert r.exit_code == 0
 
-            r = self.invoke("get-address", ledger_name, "--password", password,)
+            r = self.invoke(
+                "get-address",
+                ledger_name,
+                "--password",
+                password,
+            )
             assert r.exit_code == 0

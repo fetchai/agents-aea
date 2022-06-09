@@ -54,7 +54,9 @@ def install_dependency(
 
 
 def install_dependencies(
-    dependencies: List[Dependency], logger: Logger, install_timeout: float = 300,
+    dependencies: List[Dependency],
+    logger: Logger,
+    install_timeout: float = 300,
 ) -> None:
     """
     Install python dependencies to the current python environment.

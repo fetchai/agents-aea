@@ -138,7 +138,9 @@ class FetchCommandTestCase(TestCase):
     def test_fetch_positive_mixed(self, *mocks):
         """Test for CLI push connection positive result."""
         self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "fetch", "author/name:0.1.0"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "fetch", "author/name:0.1.0"],
+            standalone_mode=False,
         )
 
     def test_fetch_positive_local(self, *mocks):
@@ -233,7 +235,8 @@ class TestFetchAgentMixed(BaseAEATestCase):
         side_effect=click.ClickException(""),
     )
     @mock.patch(
-        "aea.cli.fetch.fetch_agent_locally", side_effect=click.ClickException(""),
+        "aea.cli.fetch.fetch_agent_locally",
+        side_effect=click.ClickException(""),
     )
     def test_fetch_mixed(
         self, mock_fetch_package, _mock_fetch_locally, _mock_fetch_agent_locally
@@ -269,7 +272,8 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
         if type(self) == BaseTestFetchAgentError:
             pytest.skip("Base test class.")
         with pytest.raises(
-            Exception, match=self.EXPECTED_ERROR_MESSAGE,
+            Exception,
+            match=self.EXPECTED_ERROR_MESSAGE,
         ):
             self.run_cli_command(
                 *(
@@ -308,7 +312,9 @@ def test_fetch_mixed_no_local_registry():
             name = "my_first_aea"
             runner = CliRunner()
             result = runner.invoke(
-                cli, ["fetch", "fetchai/my_first_aea"], catch_exceptions=False,
+                cli,
+                ["fetch", "fetchai/my_first_aea"],
+                catch_exceptions=False,
             )
             assert result.exit_code == 0, result.stdout
             assert os.path.exists(name)

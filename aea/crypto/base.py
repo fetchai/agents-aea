@@ -213,7 +213,11 @@ class Helper(ABC):
     @staticmethod
     @abstractmethod
     def is_transaction_valid(
-        tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: JSONLike,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -450,7 +454,10 @@ class LedgerApi(Helper, ABC):
 
     @abstractmethod
     def contract_method_call(
-        self, contract_instance: Any, method_name: str, **method_args: Any,
+        self,
+        contract_instance: Any,
+        method_name: str,
+        **method_args: Any,
     ) -> Optional[JSONLike]:
         """Call a contract's method
 

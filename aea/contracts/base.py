@@ -248,7 +248,10 @@ class Contract(Component):
 
     @classmethod
     def get_transaction_transfer_logs(
-        cls, ledger_api: LedgerApi, tx_hash: str, target_address: Optional[str] = None,
+        cls,
+        ledger_api: LedgerApi,
+        tx_hash: str,
+        target_address: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Retrieve the logs from a transaction.

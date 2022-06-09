@@ -993,7 +993,8 @@ class _SkillComponentLoader:
         return result
 
     def _get_component_instances(
-        self, component_loading_items: List[_SkillComponentLoadingItem],
+        self,
+        component_loading_items: List[_SkillComponentLoadingItem],
     ) -> _ComponentsHelperIndex:
         """
         Instantiate classes declared in configuration files.
@@ -1014,7 +1015,8 @@ class _SkillComponentLoader:
 
     @classmethod
     def _get_skill_component_type(
-        cls, skill_component_type: Type[SkillComponent],
+        cls,
+        skill_component_type: Type[SkillComponent],
     ) -> Type[Union[Handler, Behaviour, Model]]:
         """Get the concrete skill component type."""
         parent_skill_component_types = list(

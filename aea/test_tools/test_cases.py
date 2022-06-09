@@ -149,7 +149,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if aev:
             cmd.append("--aev")
 
-        return cls.run_cli_command(*cmd, cwd=cls._get_cwd(),)
+        return cls.run_cli_command(
+            *cmd,
+            cwd=cls._get_cwd(),
+        )
 
     @classmethod
     def nested_set_config(cls, dotted_path: str, value: Any) -> None:
@@ -220,7 +223,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         kwargs.update(win_popen_kwargs())
 
         process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
-            [sys.executable, *args], **kwargs,
+            [sys.executable, *args],
+            **kwargs,
         )
         cls.subprocesses.append(process)
         return process
@@ -447,7 +451,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def terminate_agents(
-        cls, *subprocesses: subprocess.Popen, timeout: int = 20,
+        cls,
+        *subprocesses: subprocess.Popen,
+        timeout: int = 20,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -646,7 +652,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def remove_private_key(
-        cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False,
+        cls,
+        ledger_api_id: str = DEFAULT_LEDGER,
+        connection: bool = False,
     ) -> Result:
         """
         Remove private key with CLI command.

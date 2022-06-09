@@ -57,7 +57,8 @@ def issue_certificates(
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(
-        ctx.cwd, substitude_env_vars=apply_environment_variables,
+        ctx.cwd,
+        substitude_env_vars=apply_environment_variables,
     )
     issue_certificates_(ctx.cwd, agent_config_manager, password=password)
 

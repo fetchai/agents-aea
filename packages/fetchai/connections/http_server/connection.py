@@ -169,7 +169,9 @@ class Request(OpenAPIRequest):
         return request
 
     def to_envelope_and_set_id(
-        self, dialogues: HttpDialogues, target_skill_id: PublicId,
+        self,
+        dialogues: HttpDialogues,
+        target_skill_id: PublicId,
     ) -> Envelope:
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
@@ -192,7 +194,9 @@ class Request(OpenAPIRequest):
         dialogue = cast(HttpDialogue, http_dialogue)
         self.id = dialogue.incomplete_dialogue_label
         envelope = Envelope(
-            to=http_message.to, sender=http_message.sender, message=http_message,
+            to=http_message.to,
+            sender=http_message.sender,
+            message=http_message,
         )
         return envelope
 
@@ -455,7 +459,8 @@ class HTTPChannel(BaseAsyncChannel):
             # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
 
             response_message = await asyncio.wait_for(
-                self.pending_requests[request.id], timeout=self.timeout_window,
+                self.pending_requests[request.id],
+                timeout=self.timeout_window,
             )
             return Response.from_message(response_message)
 

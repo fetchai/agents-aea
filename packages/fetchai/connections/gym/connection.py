@@ -189,7 +189,11 @@ class GymChannel:
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self._send(envelope)
 
     async def _send(self, envelope: Envelope) -> None:

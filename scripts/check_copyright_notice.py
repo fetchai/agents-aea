@@ -336,13 +336,15 @@ def fix_header(check_info: Dict) -> bool:
             copyright_string = "#   Copyright {start_year} Valory AG".format(
                 start_year=check_info["last_modification"].year,
             )
-            copyright_string += "\n#   Copyright {start_year}{end_year} Fetch.AI Limited".format(
-                start_year=check_info["start_year"],
-                end_year=(
-                    "-" + str(check_info["end_year"])
-                    if check_info["end_year"] is not None
-                    else ""
-                ),
+            copyright_string += (
+                "\n#   Copyright {start_year}{end_year} Fetch.AI Limited".format(
+                    start_year=check_info["start_year"],
+                    end_year=(
+                        "-" + str(check_info["end_year"])
+                        if check_info["end_year"] is not None
+                        else ""
+                    ),
+                )
             )
             is_update_needed = True
         else:
@@ -350,9 +352,11 @@ def fix_header(check_info: Dict) -> bool:
             # this probably will be used only once
 
             copyright_string = f"#   Copyright {CURRENT_YEAR} Valory AG"
-            copyright_string += "\n#   Copyright {start_year}-{end_year} Fetch.AI Limited".format(
-                start_year=check_info["start_year"],
-                end_year=check_info["last_modification"].year,
+            copyright_string += (
+                "\n#   Copyright {start_year}-{end_year} Fetch.AI Limited".format(
+                    start_year=check_info["start_year"],
+                    end_year=check_info["last_modification"].year,
+                )
             )
             is_update_needed = True
 
@@ -365,13 +369,15 @@ def fix_header(check_info: Dict) -> bool:
                 start_year=check_info["start_year"],
                 end_year=check_info["last_modification"].year,
             )
-            copyright_string += "\n#   Copyright {start_year}{end_year} Fetch.AI Limited".format(
-                start_year=check_info["fetchai_year_data"][0],
-                end_year=(
-                    "-" + str(check_info["fetchai_year_data"][1])
-                    if check_info["fetchai_year_data"][1] is not None
-                    else ""
-                ),
+            copyright_string += (
+                "\n#   Copyright {start_year}{end_year} Fetch.AI Limited".format(
+                    start_year=check_info["fetchai_year_data"][0],
+                    end_year=(
+                        "-" + str(check_info["fetchai_year_data"][1])
+                        if check_info["fetchai_year_data"][1] is not None
+                        else ""
+                    ),
+                )
             )
             is_update_needed = True
 

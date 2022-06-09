@@ -261,7 +261,8 @@ class BaseTestMultiAgentManager(BaseCase):
 
         with pytest.raises(ValueError, match="already exists"):
             self.manager.add_agent(
-                self.project_public_id, self.agent_name,
+                self.project_public_id,
+                self.agent_name,
             )
 
     def test_set_overrides(self, *args):
@@ -349,7 +350,8 @@ class BaseTestMultiAgentManager(BaseCase):
         self.manager.add_project(project_id, local=True)
 
         self.manager.add_agent(
-            project_id, agent_name,
+            project_id,
+            agent_name,
         )
 
         agent_alias = self.manager.get_agent_alias(agent_name)

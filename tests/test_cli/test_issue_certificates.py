@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -288,6 +288,7 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
     def test_run(self):
         """Run the test."""
         with pytest.raises(
-            Exception, match="Cannot find private key with id 'bad_ledger_id'",
+            Exception,
+            match="Cannot find private key with id 'bad_ledger_id'",
         ):
             self.run_cli_command("issue-certificates", cwd=self._get_cwd())

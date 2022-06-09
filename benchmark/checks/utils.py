@@ -138,7 +138,11 @@ def make_envelope(
         )
     message.sender = sender
     message.to = to
-    return Envelope(to=to, sender=sender, message=message,)
+    return Envelope(
+        to=to,
+        sender=sender,
+        message=message,
+    )
 
 
 class GeneratorConnection(Connection):
@@ -184,9 +188,13 @@ class GeneratorConnection(Connection):
         return envelope
 
     @classmethod
-    def make(cls,) -> "GeneratorConnection":
+    def make(
+        cls,
+    ) -> "GeneratorConnection":
         """Construct connection instance."""
-        configuration = ConnectionConfig(connection_id=cls.connection_id,)
+        configuration = ConnectionConfig(
+            connection_id=cls.connection_id,
+        )
         test_connection = cls(
             configuration=configuration,
             identity=Identity("name", "address", "public_key"),
@@ -251,7 +259,7 @@ def make_skill(
 
 def get_mem_usage_in_mb() -> float:
     """Get memory usage of the current process in megabytes."""
-    return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+    return 1.0 * psutil.Process(os.getpid()).memory_info().rss / 1024**2
 
 
 def multi_run(

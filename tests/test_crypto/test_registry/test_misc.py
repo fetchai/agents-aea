@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
+#   Copyright 2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +54,6 @@ def test_validation_item_id(current_id, is_valid):
     else:
         with pytest.raises(
             AEAException,
-            match=fr"Malformed ItemId: '{current_id}'\. It must be of the form .*\.",
+            match=rf"Malformed ItemId: '{current_id}'\. It must be of the form .*\.",
         ):
             registry.register(current_id, entry_point=entrypoint)

@@ -62,7 +62,9 @@ class Context:
         self._registry_type = None
 
     @property
-    def registry_type(self,) -> str:
+    def registry_type(
+        self,
+    ) -> str:
         """Returns registry type to be used for session"""
         if self._registry_type is None:
             logger.warning("Registry not set, returning local as registry type")

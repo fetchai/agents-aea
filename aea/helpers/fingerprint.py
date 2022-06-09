@@ -59,7 +59,8 @@ def _replace_fingerprint_non_invasive(
 
 
 def compute_fingerprint(  # pylint: disable=unsubscriptable-object
-    package_path: Path, fingerprint_ignore_patterns: Optional[Collection[str]],
+    package_path: Path,
+    fingerprint_ignore_patterns: Optional[Collection[str]],
 ) -> Dict[str, str]:
     """
     Compute the fingerprint of a package.
@@ -69,7 +70,8 @@ def compute_fingerprint(  # pylint: disable=unsubscriptable-object
     :return: the fingerprint
     """
     fingerprint = _compute_fingerprint(
-        package_path, ignore_patterns=fingerprint_ignore_patterns,
+        package_path,
+        ignore_patterns=fingerprint_ignore_patterns,
     )
     return fingerprint
 

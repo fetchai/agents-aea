@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,7 +69,10 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -
     packages_public_ids_to_types = dict(
         [
             *map(lambda x: (x, PackageType.PROTOCOL), ctx.agent_config.protocols),
-            *map(lambda x: (x, PackageType.CONNECTION), ctx.agent_config.connections,),
+            *map(
+                lambda x: (x, PackageType.CONNECTION),
+                ctx.agent_config.connections,
+            ),
             *map(lambda x: (x, PackageType.SKILL), ctx.agent_config.skills),
             *map(lambda x: (x, PackageType.CONTRACT), ctx.agent_config.contracts),
         ]

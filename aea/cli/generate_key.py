@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,13 +46,18 @@ from aea.crypto.registries import crypto_registry
 )
 @password_option(confirmation_prompt=True)
 @click.option(
-    "--add-key", is_flag=True, help="Add key generated.",
+    "--add-key",
+    is_flag=True,
+    help="Add key generated.",
 )
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
 )
 @click.option(
-    "--extra-entropy", type=str, required=False, default="",
+    "--extra-entropy",
+    type=str,
+    required=False,
+    default="",
 )
 @click.pass_context
 def generate_key(

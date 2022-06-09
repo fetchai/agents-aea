@@ -10,15 +10,15 @@ fingerprint:
   __init__.py: QmdbXPv9mGP9jhyjL8odSUrFxWESaMJD27Scze7RF9LwM4
   dialogues.py: QmTXi5973ww57PSh1aEpZfy4Gt6CWsjQHui9amsiVNUryM
   handlers.py: Qmenjg4jCoL6R7Qsbf26LZ5kp3nrVZzazFfvHHAdMakVyr
-  helpers.py: QmQQ69aze51AbVibqFGnZmnYMN6oq2i8SKysxSnK1CEQ9S
+  helpers.py: QmXxsdmntq2ZKFKDH6dDZa473EAhNRWZ2zrJdx3GnLH2DD
   rl_agent.py: Qmc93aj586usDy5a34c9HPM1Pv1azD4VTvT7qTHoMuabEA
   tasks.py: QmaZe6dwZU9G9FLsuzrVDE1oRCbxzi2GKSu6np1tAkJxre
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:QmRQtBH1mxYvKovuHCVCD5FRPxdwtBykWFX2rhQNssE1uF
+- fetchai/gym:0.19.0:QmTBP9GVNG77w8J9TnhaekLCsgPzyBJkcnwhNaXpk7zvvo
 contracts: []
 protocols:
-- fetchai/gym:1.0.0:QmRTJHxbo9qWupgtGtqDphjmivT5ko6vEyLvh9gWvXYgJ6
+- fetchai/gym:1.0.0:QmRdTUcCzKWVhjqsqN6L9GqLftRnHPoVdGi45FNGsn5HnK
 skills: []
 behaviours: {}
 handlers:
