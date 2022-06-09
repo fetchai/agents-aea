@@ -222,6 +222,52 @@ nav:
             - Exceptions: 'api/plugins/aea_cli_ipfs/exceptions.md'
             - Registry: 'api/plugins/aea_cli_ipfs/registry.md'
             - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
+          - Benchmark:
+              - Core: api/plugins/aea_cli_benchmark/core.md
+              - Utils:  api/plugins/aea_cli_benchmark/utils.md
+              - Cases:
+                - ACN Communication: 
+                  - Base: api/plugins/aea_cli_benchmark/case_acn_communication/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_acn_communication/command.md
+                  - Utils: api/plugins/aea_cli_benchmark/case_acn_communication/utils.md
+                - ACN Startup:
+                  - Base: api/plugins/aea_cli_benchmark/case_acn_startup/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_acn_startup/command.md
+                  - Utils: api/plugins/aea_cli_benchmark/case_acn_startup/utils.md
+                - Agent Construction:
+                  - Base: api/plugins/aea_cli_benchmark/case_agent_construction_time/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_agent_construction_time/command.md
+                - Decision Maker:
+                  - Base: api/plugins/aea_cli_benchmark/case_decision_maker/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_decision_maker/command.md
+                - Dialogues Memory Usage:
+                  - Base: api/plugins/aea_cli_benchmark/case_dialogues_memory_usage/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_dialogues_memory_usage/command.md
+                - Memory Usage:
+                  - Base: api/plugins/aea_cli_benchmark/case_mem_usage/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_mem_usage/command.md
+                - Messages Memory Usage:
+                  - Base: api/plugins/aea_cli_benchmark/case_messages_memory_usage/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_messages_memory_usage/command.md
+                - Multiagent:
+                  - Base: api/plugins/aea_cli_benchmark/case_multiagent/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_multiagent/command.md
+                - Multiagent HTTP Dialogues:
+                  - Base: api/plugins/aea_cli_benchmark/case_multiagent_http_dialogues/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_multiagent_http_dialogues/command.md
+                - Proactive:
+                  - Base: api/plugins/aea_cli_benchmark/case_proactive/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_proactive/command.md
+                - Reactive:
+                  - Base: api/plugins/aea_cli_benchmark/case_reactive/case.md
+                  - Command: api/plugins/aea_cli_benchmark/case_reactive/command.md
+                - Transaction Generation:
+                  - Base: api/plugins/aea_cli_benchmark/case_tx_generate/case.md
+                  - Core: api/plugins/aea_cli_benchmark/case_tx_generate/core.md
+                  - Command: api/plugins/aea_cli_benchmark/case_tx_generate/command.md
+                  - Dialogues: api/plugins/aea_cli_benchmark/case_tx_generate/dialogues.md
+                  - Docker Image: api/plugins/aea_cli_benchmark/case_tx_generate/docker_image.md
+                  - Legder Utils: api/plugins/aea_cli_benchmark/case_tx_generate/ledger_utils.md
         - Ledger:
           - Cosmos:
             - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'

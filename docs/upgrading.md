@@ -7,6 +7,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.9.0` to `v1.10.0`
+
+Python 3.6 no longer supported
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.8.0` to `v1.9.0`
 
 No backwards incompatible changes.

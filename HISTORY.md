@@ -1,5 +1,25 @@
 # Release History - open AEA
 
+## 1.10.0 (2022-06-09)
+
+AEA:
+- Makes config loader patchable
+- Adds support for Python 3.10 and removes support for Python 3.6
+- Enables fingerprinting for files in `Agent` components
+- Adds support for specifying vendors when generating hashes
+- Enables the usage of environment variables on `aea config` command
+
+Plugins:
+- Introduces benchmark CLI plugin
+
+Docs:
+- Add docs for benchmark CLI plugin
+
+Chore:
+- Pins correct versions on CI workflow
+- Bumps `pywin32` version to `304`
+- Bumps `black` and `click` to stable versions
+- Separates tox environments for python{3.7, 3.8, 3.9} and Python3.10
 
 ## 1.9.0 (2022-05-25)
 
