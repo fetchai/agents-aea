@@ -14,7 +14,7 @@ fingerprint:
   game.py: QmSFZKLLqSjcoWqF9skD8zjd1SwDvUwNro77zk4QWEY49J
   handlers.py: QmXoh3h5Xj2A3iFC4ur3CQethP3EYphG2x2U7AzWHvjQBy
   helpers.py: QmS7SVagLtusYtL5b6cWRGq34V6AuSLyeqFb9Fz6BCrfzr
-  parameters.py: QmXHxHrYyvLpYoHDDvUpJDvaRfDpibbqDc4PbRomYuCfSu
+  parameters.py: QmQDgHpapxWQgLRza1dNgi79z5dBxhWsnTgnznTf1zmjPR
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.21.0
