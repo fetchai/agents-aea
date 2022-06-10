@@ -30,7 +30,6 @@ jobs:
           pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
           pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
           pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
-          pipenv lock
       - name: Check plugin consistency
         run: |
           # these two files should not be different;
