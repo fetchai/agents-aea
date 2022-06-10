@@ -28,6 +28,7 @@ config:
           gas_price_api_key: null
           gas_price_strategy: fast
         eip1559: {}
+      poa_chain: false
     fetchai:
       address: https://rest-dorado.fetch.ai:443
       denom: atestfet
