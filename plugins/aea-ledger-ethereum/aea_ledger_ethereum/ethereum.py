@@ -44,6 +44,7 @@ from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
 from web3.exceptions import SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
+from web3.middleware import geth_poa_middleware
 from web3.types import TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
@@ -790,6 +791,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self._gas_price_strategies: Dict[str, Dict] = kwargs.pop(
             "gas_price_strategies", DEFAULT_GAS_PRICE_STRATEGIES
         )
+
+        if kwargs.pop("poa_chain", False):
+            self._api.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     @property
     def api(self) -> Web3:
