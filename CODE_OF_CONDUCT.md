@@ -34,13 +34,13 @@ Examples of unacceptable behaviour by participants include:
 ## Our Responsibilities
 
 Project maintainers are responsible for clarifying the standards of acceptable
-behaviour and are expected to take appropriate and fair corrective action in
-response to any instances of unacceptable behaviour.
+behavior and are expected to take appropriate and fair corrective action in
+response to any instances of unacceptable behavior.
 
 Project maintainers have the right and responsibility to remove, edit, or
 reject comments, commits, code, wiki edits, issues, and other contributions
 that are not aligned to this Code of Conduct, or to ban temporarily or
-permanently any contributor for other behaviours that they deem inappropriate,
+permanently any contributor for other behaviors that they deem inappropriate,
 threatening, offensive, or harmful.
 
 ## Scope
@@ -54,7 +54,7 @@ further defined and clarified by project maintainers.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behaviour may be
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported by contacting the project team at developer@fetch.ai. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
@@ -68,9 +68,9 @@ members of the project's leadership.
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
-available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
+available at <https://www.contributor-covenant.org/version/1/4/code-of-conduct.html>
 
 [homepage]: https://www.contributor-covenant.org
 
 For answers to common questions about this code of conduct, see
-https://www.contributor-covenant.org/faq
+<https://www.contributor-covenant.org/faq>

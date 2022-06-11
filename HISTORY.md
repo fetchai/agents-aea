@@ -1,26 +1,29 @@
 # Release History
 
-
 ## 1.2.0 (2022-05-05)
 
 AEA:
+
 - Adds support for Python 3.10
-- Updates protobuf dependency 
+- Updates protobuf dependency
 - Updates asyncio dependency
 - Updates golang modules
 - Updates many dependencies to their latest versions
 - Fixes dependency issues
 
 Plugins:
+
 - Upgrades fetchai plugin to be compatible with Dorado networks
 - Upgrades cosmos plugin to be compatible with Dorado networks
 
 Packages:
+
 - Adds more logging to the p2p_libp2p packages (vanilla, client, mailbox)
 - Aries demo updated to cover the full base scenario
 - Protocols were regenerated with newer protobuf
 
 Chores:
+
 - Fixed various tests
 - Fixed docker container issue in tests
 - Added automated script to add support for new versions of the Fetchai network
@@ -32,23 +35,28 @@ Chores:
 ## 1.1.1 (2021-12-15)
 
 AEA:
+
 - Updates the protocol generator to generate protocols that satisfy linter constraints
 
 Plugins:
- - aea-cli-ipfs plugin small update
+
+- aea-cli-ipfs plugin small update
 
 Packages:
+
 - Fixes fetchai/p2p_libp2p connection to address a slow DHT lookup problem
 - Updates protocols with the latest protocol generator
 - Updates random beacon agent so it produces block data instead of the (now deprecated feature of the test-net) random beacon data
 
 Misc
+
 - Bumps go library versions
 - Various fixes and improvements
 
 ## 1.1.0 (2021-10-13)
 
 AEA:
+
 - Adds public keys to agent identity and skill context
 - Adds contract test tool
 - Adds multiprocess support for task manager
@@ -65,27 +73,30 @@ AEA:
 - Fixes IPFS hash calculation for large files
 - Fixes protobuf dictionary serializer's uncovered cases and makes it deterministic
 - Fixes scaffolding of error and decision maker handlers
-- Fixes pywin32 problem when checking dependency 
+- Fixes pywin32 problem when checking dependency
 - Improves existing testing tools
 
 Benchmarks:
+
 - Adds agents construction and decision maker benchmark cases
 
 Plugins:
+
 - Upgrades fetchai plugin to use CosmPy instead of CLI calls
 - Upgrades cosmos plugin to use CosmPy instead of CLI calls
-- Upgrades fetchai plugin to use StargateWorld 
+- Upgrades fetchai plugin to use StargateWorld
 - Upgrades cosmos plugin to Stargate
 - Sets the correct maximum Gas for fetch.ai plugin
 
 Packages:
+
 - Adds support for Tac to be run against fetchai StargateWorld test-net
 - Adds more informative error messages to CosmWasm ERC1155 contract
 - Adds support for atomic swap to CosmWasm ERC1155 contract
-- Adds an ACN protocol that formalises ACN communication using the framework's protocol language 
+- Adds an ACN protocol that formalises ACN communication using the framework's protocol language
 - Adds `cosm_trade` protocol for preparing atomic swap transactions for cosmos-based networks
 - Adds https support for server connection
-- Adds parametrising of http(s) in soef connection 
+- Adds parametrising of http(s) in soef connection
 - Fixes http server content length response problem
 - Updates Oracle contract to 0.14
 - Implements the full ACN spec throughout the ACN packages
@@ -97,22 +108,26 @@ Packages:
 - Multiple fixes and stability improvements for `p2p_libp2p` connections
 
 Docs:
+
 - Adds ACN internals documentation
 - Fixes tutorial for HTTP connection and skill
 - Multiple additional docs updates
 - Adds more context to private keys docs
 
 Chores:
+
 - Various development features bumped
 - Bumped Mermaid-JS, for UML diagrams to major version 8
 - Applies darglint to the code
 
 Examples:
+
 - Adds a unified script for running various versions/modes of Tac
 
 ## 1.0.2 (2021-06-03)
 
 AEA:
+
 - Bounds versions of dependencies by next major
 - Fixes incoherent warning message during package loading
 - Improves various incomprehensible error messages
@@ -125,9 +140,11 @@ AEA:
 - Fixes `aea get-multiaddress` command to consider overrides
 
 Plugins:
+
 - Bounds versions of dependencies by next major
 
 Packages:
+
 - Updates `p2p_libp2p` connection to use TCP sockets for all platforms
 - Multiple fixes on `libp2p_node` including better error handling and stream creation
 - Adds sending queue in `p2p_libp2p` connection to handle sending failures
@@ -142,11 +159,13 @@ Packages:
 - Multiple additional tests and test stability fixes
 
 Docs:
+
 - Extends demo docs to include guidance of usage in AEA Manager
 - Adds short guide on Kubernetes deployment
 - Multiple additional docs updates
 
 Chores:
+
 - Adds `--no-bump` option to `generate_all_protocols` script
 - Adds script to detect if aea or plugins need bumping
 - Bumps various development dependencies
@@ -154,11 +173,13 @@ Chores:
 - Adds `darglint` to CI
 
 Examples:
+
 - Updates TAC deployment scripts and images
 
 ## - (2021-05-05)
 
 Packages:
+
 - Adds node watcher to `p2p_libp2p` connection
 - Improves logging and error handling in `p2p_libp2p` node
 - Addresses potential overflow issue in `p2p_libp2p` node
@@ -172,16 +193,19 @@ Packages:
 ## 1.0.1 (2021-04-30)
 
 AEA:
+
 - Fixes wheels issue for Windows
 - Fixes password propagation for certificate issuance in `MultiAgentManager`
 - Improves error message when local registry not present
 
 AEALite:
+
 - Adds full protocol support
 - Adds end-to-end interaction example with AEA (based on `fetchai/fipa` protocol)
 - Multiple additional tests and test stability fixes
 
 Packages:
+
 - Fixes multiple bugs in `ERC1155` version of TAC
 - Refactors p2p connections for better separation of concerns and maintainability
 - Integrates aggregation with simple oracle skill
@@ -194,11 +218,13 @@ Packages:
 - Multiple additional tests and test stability fixes
 
 Docs:
+
 - Extends car park demo with usage guide for AEA manager
 - Multiple additional docs updates
 
 Examples:
-- Adds TAC deployment example 
+
+- Adds TAC deployment example
 
 ## 1.0.0 (2021-03-30)
 
@@ -251,7 +277,6 @@ Examples:
 - Multiple minor fixes
 - Multiple docs updates to fix order of CLI commands with respect to installing dependencies
 - Multiple additional tests and test stability fixes
-
 
 ## 0.11.2 (2021-03-17)
 
@@ -696,7 +721,7 @@ Examples:
 - Updates connection loading mechanism
 - Updates all connections for compatibility with new loading mechanism
 - Extracts multiplexer into its own module
-- Implements list all CLI command 
+- Implements list all CLI command
 - Updates wallet to split into several crypto stores
 - Refactors component registry and resources
 - Extends soef connection functionality
@@ -989,7 +1014,6 @@ Examples:
 - Extended docs
 - Increased test coverage
 - Multiple additional minor fixes and changes
-
 
 ## 0.1.4 (2019-09-20)
 

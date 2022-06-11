@@ -13,10 +13,10 @@
     <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
   </a>
   <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/l/aea">
   </a>
   <a href="https://pypi.org/project/aea/">
-    <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/dm/aea">
   </a>
   <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY">
     <img alt="Slack" src="https://img.shields.io/badge/slack-fetchai-purple.svg">
@@ -103,7 +103,7 @@ This repository contains submodules. Clone with recursive strategy:
 
 All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in [Preliminaries](#preliminaries)).
 
-You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism. 
+You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism.
 
 ### Preliminaries
 
@@ -135,7 +135,7 @@ We welcome contributions to the framework, its plugins, related tools and packag
 
 ## Cite
 
-If you are using our software in a publication, please 
+If you are using our software in a publication, please
 consider to cite it with the following BibTex entry:
 
 ```
