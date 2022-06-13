@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get upgrade -y
@@ -55,7 +55,7 @@ COPY . /build
 
 RUN sudo make clean
 
-RUN pipenv --python python3.8
+RUN pipenv --python python3.10
 RUN pipenv run pip3 install --upgrade pip
 RUN pipenv install --dev --skip-lock
 
