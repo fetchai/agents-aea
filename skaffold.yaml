@@ -20,3 +20,13 @@ build:
     docker:
       dockerfile: Dockerfile
 
+profiles:
+  - name: docs
+    build:
+      tagPolicy:
+        envTemplate:
+          template: "{{.VERSION}}"
+      artifacts:
+      - image: valory/open-aea-docs
+        docker:
+          dockerfile: docs-image/Dockerfile
