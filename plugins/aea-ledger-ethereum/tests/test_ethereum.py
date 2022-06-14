@@ -192,6 +192,12 @@ def test_api_creation(ethereum_testnet_config):
     assert EthereumApi(**ethereum_testnet_config), "Failed to initialise the api"
 
 
+def test_api_creation_poa(ethereum_testnet_config):
+    """Test api instantiation with the poa flag enabled."""
+    ethereum_testnet_config["poa_chain"] = True
+    assert EthereumApi(**ethereum_testnet_config), "Failed to initialise the api"
+
+
 def test_api_none(ethereum_testnet_config):
     """Test the "api" of the cryptoApi is none."""
     eth_api = EthereumApi(**ethereum_testnet_config)
