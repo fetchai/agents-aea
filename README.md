@@ -110,6 +110,12 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 - Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
 
+- Install Skaffold to manage containers & tagging:
+
+```bash
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.33.0/skaffold-linux-amd64 && \
+sudo install skaffold /usr/local/bin/
+```
 ## Documentation
 
 - All documentation is hosted [here](https://valory-xyz.github.io/open-aea/).
