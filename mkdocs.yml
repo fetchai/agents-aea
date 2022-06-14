@@ -1,5 +1,5 @@
 site_name: open-aea
-site_url: https://valory-xyz.github.io/open-aea/
+site_url: https://open-aea.docs.autonolas.tech/
 site_description: Everything you need to know about (open) AEAs.
 repo_url: https://github.com/valory-xyz/open-aea
 site_author: developer@fetch.ai,info@valory.xyz
@@ -226,7 +226,7 @@ nav:
               - Core: api/plugins/aea_cli_benchmark/core.md
               - Utils:  api/plugins/aea_cli_benchmark/utils.md
               - Cases:
-                - ACN Communication: 
+                - ACN Communication:
                   - Base: api/plugins/aea_cli_benchmark/case_acn_communication/case.md
                   - Command: api/plugins/aea_cli_benchmark/case_acn_communication/command.md
                   - Utils: api/plugins/aea_cli_benchmark/case_acn_communication/utils.md
