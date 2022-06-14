@@ -793,6 +793,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
 
         if kwargs.pop("poa_chain", False):
+            # https://web3py.readthedocs.io/en/stable/middleware.html#geth-style-proof-of-authority
             self._api.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     @property
