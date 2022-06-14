@@ -40,6 +40,6 @@
 
 18. [CURRENTLY SKIPPED] Release packages into registry: `python scripts/deploy_to_registry.py`. If necessary, run it several times until all packages are updated.
 
-19. The `user-image` and `develop-image` are updated via CI.
+19. Build the latest images using `skaffold build` and publish them on docker.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
