@@ -210,49 +210,64 @@ def get_ipfs_node_multiaddr(default: str = DEFAULT_IPFS_URL) -> str:
     )
 
 
-def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:
+def load_item_config(
+    item_type: str, package_path: Path, package_type_config_class: Optional[Dict] = None
+) -> PackageConfiguration:
     """
     Load item configuration.
 
     :param item_type: type of item.
     :param package_path: path to package from which config should be loaded.
+    :param package_type_config_class: Package type to config loader mappings.
 
     :return: configuration object.
     """
     configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
     configuration_path = package_path / configuration_file_name
-    configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
+    configuration_loader = ConfigLoader.from_configuration_type(
+        PackageType(item_type), package_type_config_class=package_type_config_class
+    )
     with open_file(configuration_path) as file_input:
         item_config = configuration_loader.load(file_input)
     return item_config
 
 
 def dump_item_config(
-    package_configuration: PackageConfiguration, package_path: Path
+    package_configuration: PackageConfiguration,
+    package_path: Path,
+    package_type_config_class: Optional[Dict] = None,
 ) -> None:
     """
     Dump item configuration.
 
     :param package_configuration: the package configuration.
     :param package_path: path to package from which config should be dumped.
+    :param package_type_config_class: Package type to config loader mappings.
     """
     configuration_file_name = _get_default_configuration_file_name_from_type(
         package_configuration.package_type
     )
     configuration_path = package_path / configuration_file_name
     configuration_loader = ConfigLoader.from_configuration_type(
-        package_configuration.package_type
+        package_configuration.package_type,
+        package_type_config_class=package_type_config_class,
     )
     with configuration_path.open("w") as file_output:
         configuration_loader.dump(package_configuration, file_output)  # type: ignore
 
 
-def update_item_config(item_type: str, package_path: Path, **kwargs: Any) -> None:
+def update_item_config(
+    item_type: str,
+    package_path: Path,
+    package_type_config_class: Optional[Dict] = None,
+    **kwargs: Any
+) -> None:
     """
     Update item config and item config file.
 
     :param item_type: type of item.
     :param package_path: path to a package folder.
+    :param package_type_config_class: Package type to config loader mappings.
     :param kwargs: pairs of config key-value to update.
     """
     item_config = load_item_config(item_type, package_path)
@@ -262,22 +277,33 @@ def update_item_config(item_type: str, package_path: Path, **kwargs: Any) -> Non
     config_filepath = os.path.join(
         package_path, item_config.default_configuration_filename
     )
-    loader = ConfigLoaders.from_package_type(item_type)
+    loader = ConfigLoaders.from_package_type(
+        item_type, package_type_config_class=package_type_config_class
+    )
     with open_file(config_filepath, "w") as f:
         loader.dump(item_config, f)
 
 
-def validate_item_config(item_type: str, package_path: Path) -> None:
+def validate_item_config(
+    item_type: str,
+    package_path: Path,
+    package_type_config_class: Optional[Dict] = None,
+) -> None:
     """
     Validate item configuration.
 
     :param item_type: type of item.
     :param package_path: path to a package folder.
+    :param package_type_config_class: Package type to config loader mappings.
 
     :raises AEAConfigException: if something is wrong with item configuration.
     """
-    item_config = load_item_config(item_type, package_path)
-    loader = ConfigLoaders.from_package_type(item_type)
+    item_config = load_item_config(
+        item_type, package_path, package_type_config_class=package_type_config_class
+    )
+    loader = ConfigLoaders.from_package_type(
+        item_type, package_type_config_class=package_type_config_class
+    )
     for field_name in loader.required_fields:
         try:
             getattr(item_config, field_name)

@@ -20,7 +20,7 @@
 """Implementation of the 'aea add' subcommand."""
 import os
 from pathlib import Path
-from typing import Dict, Union, cast
+from typing import Dict, Optional, Union, cast
 
 import click
 
@@ -122,14 +122,19 @@ def fingerprint_item(ctx: Context, item_type: str, item_public_id: PublicId) -> 
         raise click.ClickException(str(e))
 
 
-def fingerprint_package_by_path(package_dir: Path) -> None:
+def fingerprint_package_by_path(
+    package_dir: Path, package_type_config_class: Optional[Dict] = None
+) -> None:
     """
     Fingerprint package placed in package_dir.
 
     :param package_dir: directory of the package
+    :param package_type_config_class: Package type to config loader mappings.
     """
     package_type = determine_package_type_for_directory(package_dir)
-    fingerprint_package(package_dir, package_type)
+    fingerprint_package(
+        package_dir, package_type, package_type_config_class=package_type_config_class
+    )
 
 
 def determine_package_type_for_directory(package_dir: Path) -> PackageType:
@@ -162,18 +167,23 @@ def determine_package_type_for_directory(package_dir: Path) -> PackageType:
 
 
 def fingerprint_package(
-    package_dir: Path, package_type: Union[str, PackageType]
+    package_dir: Path,
+    package_type: Union[str, PackageType],
+    package_type_config_class: Optional[Dict] = None,
 ) -> None:
     """
     Fingerprint components of an item.
 
     :param package_dir: the package directory.
     :param package_type: the package type.
+    :param package_type_config_class: Package type to config loader mappings.
     """
     package_type = PackageType(package_type)
     item_type = str(package_type)
     default_config_file_name = _get_default_configuration_file_name_from_type(item_type)
-    config_loader = ConfigLoader.from_configuration_type(item_type)
+    config_loader = ConfigLoader.from_configuration_type(
+        item_type, package_type_config_class=package_type_config_class
+    )
     config_file_path = Path(package_dir, default_config_file_name)
     config = config_loader.load(open_file(config_file_path))
 

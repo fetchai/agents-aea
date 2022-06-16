@@ -21,7 +21,7 @@
 import os
 from pathlib import Path
 from shutil import copytree
-from typing import Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 import click
 from click.exceptions import ClickException
@@ -143,12 +143,17 @@ def push_item_from_path(
     component_type: str,
     path: Path,
     registry: str,
+    package_type_config_class: Optional[Dict] = None,
 ) -> None:
     """Push item from path."""
 
     ctx = cast(Context, context.obj)
     component_path = Path(path)
-    item_config = load_item_config(component_type, component_path)
+    item_config = load_item_config(
+        component_type,
+        component_path,
+        package_type_config_class=package_type_config_class,
+    )
 
     if registry == REGISTRY_LOCAL:
         push_item_local(ctx, component_type, component_path, item_config.public_id)

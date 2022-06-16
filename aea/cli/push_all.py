@@ -21,7 +21,7 @@
 
 
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 
@@ -39,7 +39,18 @@ from aea.configurations.constants import PACKAGES, PYCACHE
 @registry_flag()
 def push_all(packages_dir: Optional[Path], registry: str) -> None:
     """Push all available packages to a registry."""
+    try:
+        push_all_packages(registry, packages_dir)
+    except ValueError as e:
+        raise click.ClickException(str(e)) from e
 
+
+def push_all_packages(
+    registry: str,
+    packages_dir: Optional[Path] = None,
+    package_type_config_class: Optional[Dict] = None,
+) -> None:
+    """Push all packages."""
     if registry != REGISTRY_REMOTE:
         raise click.ClickException(
             "Pushing all packages is not supported for the local registry."
@@ -58,6 +69,8 @@ def push_all(packages_dir: Optional[Path], registry: str) -> None:
             continue
 
         click.echo(f"Pushing: {package_path}")
-        item_config = load_item_config(package_path.parent.name[:-1], package_path)
+        item_config = load_item_config(
+            package_path.parent.name[:-1], package_path, package_type_config_class
+        )
         push_item_ipfs(package_path, item_config.public_id)
         click.echo("")

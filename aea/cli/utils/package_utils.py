@@ -308,7 +308,10 @@ def copy_package_directory(src: Path, dst: str) -> Path:
 
 
 def find_item_locally(
-    ctx: Context, item_type: str, item_public_id: PublicId
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    package_type_config_class: Optional[Dict] = None,
 ) -> Tuple[Path, ComponentConfiguration]:
     """
     Find an item in the local registry.
@@ -316,6 +319,7 @@ def find_item_locally(
     :param ctx: the CLI context.
     :param item_type: the type of the item to load. One of: protocols, connections, skills
     :param item_public_id: the public id of the item to find.
+    :param package_type_config_class: Package type to config loader mappings.
 
     :return: tuple of path to the package directory (either in registry or in aea directory) and component configuration
 
@@ -343,7 +347,7 @@ def find_item_locally(
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(
-            PackageType(item_type)
+            PackageType(item_type), package_type_config_class=package_type_config_class
         )
         with open_file(item_configuration_filepath) as fp:
             item_configuration = item_configuration_loader.load(fp)
@@ -367,7 +371,10 @@ def find_item_locally(
 
 
 def find_item_in_distribution(  # pylint: disable=unused-argument
-    ctx: Context, item_type: str, item_public_id: PublicId
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    package_type_config_class: Optional[Dict] = None,
 ) -> Path:
     """
     Find an item in the AEA directory.
@@ -375,6 +382,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
     :param ctx: the CLI context.
     :param item_type: the type of the item to load. One of: protocols, connections, skills
     :param item_public_id: the public id of the item to find.
+    :param package_type_config_class: Package type to config loader mappings.
     :return: path to the package directory (either in registry or in aea directory).
     :raises ClickException: if the search fails.
     """
@@ -393,7 +401,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
     # try to load the item configuration file
     try:
         item_configuration_loader = ConfigLoader.from_configuration_type(
-            PackageType(item_type)
+            PackageType(item_type), package_type_config_class=package_type_config_class
         )
         with open_file(item_configuration_filepath) as fp:
             item_configuration = item_configuration_loader.load(fp)
