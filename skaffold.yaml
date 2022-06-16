@@ -1,0 +1,32 @@
+apiVersion: skaffold/v2beta6
+kind: Config
+metadata:
+  name: open-aea
+build:
+  tagPolicy:
+    envTemplate:
+      template: "1.10.0"
+  artifacts:
+  - image: valory/open-aea-develop
+    docker:
+      dockerfile: develop-image/Dockerfile
+
+  - image: valory/open-aea-user
+    docker:
+      dockerfile: user-image/Dockerfile
+
+  - image: valory/open-aea-deploy
+    context: deploy-image
+    docker:
+      dockerfile: Dockerfile
+
+profiles:
+  - name: docs
+    build:
+      tagPolicy:
+        envTemplate:
+          template: "{{.VERSION}}"
+      artifacts:
+      - image: valory/open-aea-docs
+        docker:
+          dockerfile: docs-image/Dockerfile

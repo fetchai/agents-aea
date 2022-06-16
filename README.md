@@ -13,10 +13,10 @@
     <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/open-aea">
   </a>
   <a href="https://github.com/valory-xyz/open-aea/blob/main/LICENSE">
-    <img alt="License" src="https://img.shields.io/pypi/l/open-aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/l/open-aea">
   </a>
   <a href="https://pypi.org/project/open-aea/">
-    <img alt="License" src="https://img.shields.io/pypi/dm/open-aea"> 
+    <img alt="License" src="https://img.shields.io/pypi/dm/open-aea">
   </a>
 </p>
 <p align="center">
@@ -60,7 +60,7 @@ This is a fork of <a href="https://github.com/fetchai/agents-aea">the original A
 
        pip install "open-aea[all]"
 
-3. Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
+3. Then, build your agent as described in the [docs](https://open-aea.docs.autonolas.tech/).
 
 ## Alternatively (1): Use `pipx` (CLI usage only)
 
@@ -92,7 +92,7 @@ This repository contains submodules. Clone with recursive strategy:
 
 All python specific framework dependencies are specified in `setup.py` and installed with the framework. All development dependencies are specified in `Pipfile` (and installed via the commands specified in [Preliminaries](#preliminaries)).
 
-You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism. 
+You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism.
 
 ### Preliminaries
 
@@ -108,11 +108,17 @@ You can have more control on the installed dependencies by leveraging the setupt
 
       pip install ".[all]"
 
-- Then, build your agent as described in the [docs](https://valory-xyz.github.io/open-aea/).
+- Then, build your agent as described in the [docs](https://open-aea.docs.autonolas.tech/).
 
+- Install Skaffold to manage containers & tagging:
+
+```bash
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.33.0/skaffold-linux-amd64 && \
+sudo install skaffold /usr/local/bin/
+```
 ## Documentation
 
-- All documentation is hosted [here](https://valory-xyz.github.io/open-aea/).
+- All documentation is hosted [here](https://open-aea.docs.autonolas.tech/).
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
@@ -124,7 +130,7 @@ We welcome contributions to the framework, its plugins, related tools and packag
 
 ## Cite
 
-If you are using our software in a publication, please 
+If you are using our software in a publication, please
 consider to cite it with the following BibTex entry:
 
 ```

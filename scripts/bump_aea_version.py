@@ -116,6 +116,7 @@ AEA_PATHS: PatternByPath = {
         "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
     ): "(?<=open-aea/tags/v){version}",
     Path("user-image", "docker-env.sh"): "(?<=aea-user:){version}",
+    Path("skaffold.yaml"): "{version}",
 }
 
 
