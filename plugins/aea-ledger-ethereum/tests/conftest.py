@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -178,6 +178,24 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
             "gas_station": DEFAULT_GAS_STATION_STRATEGY,
             "eip1559": DEFAULT_EIP1559_STRATEGY,
         },
+    }
+    return new_config
+
+
+@pytest.fixture(scope="session")
+def polygon_testnet_config(ganache_addr, ganache_port):
+    """Get Polygon ledger api configurations using Ganache."""
+    new_uri = f"{ganache_addr}:{ganache_port}"
+    new_config = {
+        "address": new_uri,
+        "chain_id": DEFAULT_GANACHE_CHAIN_ID,
+        "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+        "default_gas_price_strategy": "eip1559",
+        "gas_price_strategies": {
+            "gas_station": DEFAULT_GAS_STATION_STRATEGY,
+            "eip1559": DEFAULT_EIP1559_STRATEGY,
+        },
+        "poa_chain": True,
     }
     return new_config
 
