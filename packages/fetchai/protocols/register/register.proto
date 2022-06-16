@@ -14,7 +14,7 @@ message RegisterMessage{
   }
 
   message Error_Performative{
-    int32 error_code = 1;
+    int64 error_code = 1;
     string error_msg = 2;
     map<string, string> info = 3;
   }
