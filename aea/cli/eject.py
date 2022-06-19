@@ -243,7 +243,7 @@ def _eject_item(
         aea_version=new_aea_range,
     )
 
-    update_item_config(item_type, Path(dst), **item_config_update)
+    update_item_config(item_type, Path(dst), None, **item_config_update)
     update_item_public_id_in_init(item_type, Path(dst), new_public_id)
     shutil.rmtree(src)
 
