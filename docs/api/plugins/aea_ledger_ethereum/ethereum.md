@@ -72,7 +72,7 @@ Get the gas price strategy.
 def get_gas_price_strategy_eip1559_polygon(
         gas_endpoint: str,
         fallback_estimate: Dict[str, Optional[int]],
-        speed: Optional[str] = "fast") -> Callable[[], Dict[str, Wei]]
+        speed: Optional[str] = SPEED_FAST) -> Callable[[], Dict[str, Wei]]
 ```
 
 Get the gas price strategy.
