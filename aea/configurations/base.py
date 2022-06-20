@@ -55,6 +55,7 @@ from aea.configurations.constants import (
     DEFAULT_LICENSE,
     DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SERVICE_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
     PACKAGE_PUBLIC_ID_VAR_NAME,
@@ -136,6 +137,8 @@ def _get_default_configuration_file_name_from_type(
         return DEFAULT_SKILL_CONFIG_FILE
     if item_type == PackageType.CONTRACT:
         return DEFAULT_CONTRACT_CONFIG_FILE
+    if item_type == PackageType.SERVICE:
+        return DEFAULT_SERVICE_CONFIG_FILE
     raise ValueError(  # pragma: no cover
         "Item type not valid: {}".format(str(item_type))
     )
