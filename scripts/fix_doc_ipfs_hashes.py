@@ -54,7 +54,7 @@ def fix_ipfs_hashes() -> None:
     """Fix ipfs hashes in the docs"""
     _, hashes_to_package = get_hashes()
 
-    all_md_files = [p for p in Path("docs").rglob("*.md")]
+    all_md_files = Path("docs").rglob("*.md")
     errors = False
 
     for md_file in all_md_files:
