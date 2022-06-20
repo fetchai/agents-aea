@@ -67,9 +67,10 @@ ETH_GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 _ABI = "abi"
 _BYTECODE = "bytecode"
 EIP1559 = "eip1559"
+EIP1559_POLYGON = "eip1559_polygon"
 GAS_STATION = "gas_station"
-AVAILABLE_STRATEGIES = (EIP1559, GAS_STATION)
-
+AVAILABLE_STRATEGIES = (EIP1559, GAS_STATION, EIP1559_POLYGON)
+SPEED_FAST = "fast"
 MAX_GAS_FAST = 1500
 
 # How many blocks to consider for priority fee estimation
@@ -105,11 +106,18 @@ DEFAULT_EIP1559_STRATEGY = {
 }
 
 
+DEFAULT_EIP1559_STRATEGY_POLYGON = {
+    "speed": SPEED_FAST,
+    "fallback_estimate": FALLBACK_ESTIMATE,
+}
+
+
 DEFAULT_GAS_STATION_STRATEGY = {"gas_price_api_key": "", "gas_price_strategy": "fast"}
 
 DEFAULT_GAS_PRICE_STRATEGIES = {
     EIP1559: DEFAULT_EIP1559_STRATEGY,
     GAS_STATION: DEFAULT_GAS_STATION_STRATEGY,
+    EIP1559_POLYGON: DEFAULT_EIP1559_STRATEGY_POLYGON,
 }
 
 # The tip increase is the minimum required of 10%.
@@ -255,6 +263,31 @@ def get_gas_price_strategy_eip1559(
             "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
             "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
         }
+
+    return eip1559_price_strategy
+
+
+def get_gas_price_strategy_eip1559_polygon(
+    fallback_estimate: Dict[str, Optional[int]],
+    speed: Optional[str] = "fast",  # safeLow, standard, fast
+) -> Callable[[], Dict[str, Wei]]:
+    """Get the gas price strategy."""
+
+    def eip1559_price_strategy(
+        web3: Web3,  # pylint: disable=redefined-outer-name
+        transaction_params: TxParams,  # pylint: disable=unused-argument
+    ) -> Dict[str, Wei]:
+        try:
+            response = requests.get("https://gasstation-mainnet.matic.network/v2")
+            if response.status_code == 200:
+                data = response.json()[speed]
+                return {
+                    "maxFeePerGas": Wei(to_wei(data["maxFee"], "gwei")),
+                    "maxPriorityFeePerGas": Wei(to_wei(data["maxPriorityFee"], "gwei")),
+                }
+            return fallback_estimate
+        except requests.exceptions.RequestException:
+            return fallback_estimate
 
     return eip1559_price_strategy
 
@@ -766,6 +799,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     _gas_price_strategy_callables: Dict[str, Callable] = {
         GAS_STATION: get_gas_price_strategy,
         EIP1559: get_gas_price_strategy_eip1559,
+        EIP1559_POLYGON: get_gas_price_strategy_eip1559_polygon,
     }
 
     def __init__(self, **kwargs: Any):
@@ -792,7 +826,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "gas_price_strategies", DEFAULT_GAS_PRICE_STRATEGIES
         )
 
-        if kwargs.pop("poa_chain", False):
+        self._poa_chain = kwargs.pop("poa_chain", False)
+        if self._poa_chain:
             # https://web3py.readthedocs.io/en/stable/middleware.html#geth-style-proof-of-authority
             self._api.middleware_onion.inject(
                 geth_poa_middleware, name="geth_poa_middleware", layer=0
@@ -995,7 +1030,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             return gas_price
 
         gas_price = cast(Dict[str, Wei], gas_price)
-        if gas_price_strategy == EIP1559:
+        if gas_price_strategy in (EIP1559, EIP1559_POLYGON):
             updated_max_fee_per_gas = self.__reprice(old_price["maxFeePerGas"])
             updated_max_priority_fee_per_gas = self.__reprice(
                 old_price["maxPriorityFeePerGas"]
