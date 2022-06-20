@@ -35,6 +35,7 @@ import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.ethereum import (
     DEFAULT_EIP1559_STRATEGY,
+    DEFAULT_EIP1559_STRATEGY_POLYGON,
     DEFAULT_GAS_STATION_STRATEGY,
 )
 
@@ -192,8 +193,7 @@ def polygon_testnet_config(ganache_addr, ganache_port):
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
         "default_gas_price_strategy": "eip1559",
         "gas_price_strategies": {
-            "gas_station": DEFAULT_GAS_STATION_STRATEGY,
-            "eip1559": DEFAULT_EIP1559_STRATEGY,
+            "eip1559_polygon": DEFAULT_EIP1559_STRATEGY_POLYGON,
         },
         "poa_chain": True,
     }

@@ -64,6 +64,19 @@ def get_gas_price_strategy_eip1559(
 
 Get the gas price strategy.
 
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_gas_price_strategy_eip1559_polygon"></a>
+
+#### get`_`gas`_`price`_`strategy`_`eip1559`_`polygon
+
+```python
+def get_gas_price_strategy_eip1559_polygon(
+        gas_endpoint: str,
+        fallback_estimate: Dict[str, Optional[int]],
+        speed: Optional[str] = SPEED_FAST) -> Callable[[], Dict[str, Wei]]
+```
+
+Get the gas price strategy.
+
 <a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.rpc_gas_price_strategy_wrapper"></a>
 
 #### rpc`_`gas`_`price`_`strategy`_`wrapper

@@ -47,6 +47,7 @@ from aea_ledger_ethereum.ethereum import (
     DEFAULT_EIP1559_STRATEGY,
     DEFAULT_GAS_STATION_STRATEGY,
     EIP1559,
+    EIP1559_POLYGON,
     GAS_STATION,
     TIP_INCREASE,
 )
@@ -804,6 +805,7 @@ def test_revert_reason(
     (
         {"name": EIP1559, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
         {"name": GAS_STATION, "params": ("gasPrice",)},
+        {"name": EIP1559_POLYGON, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
     ),
 )
 def test_try_get_gas_pricing(
@@ -838,10 +840,7 @@ def test_try_get_gas_pricing(
 
 @pytest.mark.parametrize(
     "strategy",
-    (
-        {"name": EIP1559, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
-        {"name": GAS_STATION, "params": ("gasPrice",)},
-    ),
+    ({"name": EIP1559_POLYGON, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},),
 )
 def test_try_get_gas_pricing_poa(
     strategy: Dict[str, Union[str, Tuple[str, ...]]],
