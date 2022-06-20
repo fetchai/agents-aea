@@ -274,7 +274,7 @@ def get_gas_price_strategy_eip1559_polygon(
     """Get the gas price strategy."""
 
     def eip1559_price_strategy(
-        web3: Web3,  # pylint: disable=redefined-outer-name
+        web3: Web3,  # pylint: disable=redefined-outer-name,unused-argument
         transaction_params: TxParams,  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         try:
