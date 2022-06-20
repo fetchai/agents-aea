@@ -47,6 +47,7 @@ from aea_ledger_ethereum.ethereum import (
     DEFAULT_EIP1559_STRATEGY,
     DEFAULT_GAS_STATION_STRATEGY,
     EIP1559,
+    EIP1559_POLYGON,
     GAS_STATION,
     TIP_INCREASE,
 )
@@ -189,6 +190,12 @@ def test_dump_positive(ethereum_private_key_file):
 
 def test_api_creation(ethereum_testnet_config):
     """Test api instantiation."""
+    assert EthereumApi(**ethereum_testnet_config), "Failed to initialise the api"
+
+
+def test_api_creation_poa(ethereum_testnet_config):
+    """Test api instantiation with the poa flag enabled."""
+    ethereum_testnet_config["poa_chain"] = True
     assert EthereumApi(**ethereum_testnet_config), "Failed to initialise the api"
 
 
@@ -798,6 +805,7 @@ def test_revert_reason(
     (
         {"name": EIP1559, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
         {"name": GAS_STATION, "params": ("gasPrice",)},
+        {"name": EIP1559_POLYGON, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
     ),
 )
 def test_try_get_gas_pricing(
@@ -807,6 +815,41 @@ def test_try_get_gas_pricing(
 ) -> None:
     """Test `try_get_gas_pricing`."""
     ethereum_api = EthereumApi(**ethereum_testnet_config)
+
+    # test gas pricing
+    gas_price = ethereum_api.try_get_gas_pricing(gas_price_strategy=strategy["name"])
+    assert set(strategy["params"]) == set(gas_price.keys())
+    assert all(
+        gas_price[param] > 0 and isinstance(gas_price[param], int)
+        for param in strategy["params"]
+    )
+
+    # test gas repricing
+    gas_reprice = ethereum_api.try_get_gas_pricing(
+        gas_price_strategy=strategy["name"], old_price=gas_price
+    )
+    assert all(
+        gas_reprice[param] > 0 and isinstance(gas_reprice[param], int)
+        for param in strategy["params"]
+    )
+    assert gas_reprice == {
+        gas_price_param: math.ceil(gas_price[gas_price_param] * TIP_INCREASE)
+        for gas_price_param in strategy["params"]
+    }, "The repricing was performed incorrectly!"
+
+
+@pytest.mark.parametrize(
+    "strategy",
+    ({"name": EIP1559_POLYGON, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},),
+)
+def test_try_get_gas_pricing_poa(
+    strategy: Dict[str, Union[str, Tuple[str, ...]]],
+    polygon_testnet_config: dict,
+    ganache: Generator,
+) -> None:
+    """Test `try_get_gas_pricing` for a poa chain like Rinkeby."""
+    ethereum_api = EthereumApi(**polygon_testnet_config)
+    assert "geth_poa_middleware" in ethereum_api.api.middleware_onion.keys()
 
     # test gas pricing
     gas_price = ethereum_api.try_get_gas_pricing(gas_price_strategy=strategy["name"])
