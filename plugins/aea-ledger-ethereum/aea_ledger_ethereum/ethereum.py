@@ -71,6 +71,7 @@ EIP1559_POLYGON = "eip1559_polygon"
 GAS_STATION = "gas_station"
 AVAILABLE_STRATEGIES = (EIP1559, GAS_STATION, EIP1559_POLYGON)
 SPEED_FAST = "fast"
+POLYGON_GAS_ENDPOINT = "https://gasstation-mainnet.matic.network/v2"
 MAX_GAS_FAST = 1500
 
 # How many blocks to consider for priority fee estimation
@@ -107,6 +108,7 @@ DEFAULT_EIP1559_STRATEGY = {
 
 
 DEFAULT_EIP1559_STRATEGY_POLYGON = {
+    "gas_endpoint": POLYGON_GAS_ENDPOINT,
     "speed": SPEED_FAST,
     "fallback_estimate": FALLBACK_ESTIMATE,
 }
@@ -268,6 +270,7 @@ def get_gas_price_strategy_eip1559(
 
 
 def get_gas_price_strategy_eip1559_polygon(
+    gas_endpoint: str,
     fallback_estimate: Dict[str, Optional[int]],
     speed: Optional[str] = "fast",  # safeLow, standard, fast
 ) -> Callable[[], Dict[str, Wei]]:
@@ -278,7 +281,7 @@ def get_gas_price_strategy_eip1559_polygon(
         transaction_params: TxParams,  # pylint: disable=unused-argument
     ) -> Dict[str, Wei]:
         try:
-            response = requests.get("https://gasstation-mainnet.matic.network/v2")
+            response = requests.get(gas_endpoint)
             if response.status_code == 200:
                 data = response.json()[speed]
                 return {
