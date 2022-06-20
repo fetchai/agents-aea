@@ -70,7 +70,7 @@ EIP1559 = "eip1559"
 EIP1559_POLYGON = "eip1559_polygon"
 GAS_STATION = "gas_station"
 AVAILABLE_STRATEGIES = (EIP1559, GAS_STATION, EIP1559_POLYGON)
-SPEED_FAST = "fast"
+SPEED_FAST = "fast"  # safeLow, standard, fast
 POLYGON_GAS_ENDPOINT = "https://gasstation-mainnet.matic.network/v2"
 MAX_GAS_FAST = 1500
 
@@ -272,7 +272,7 @@ def get_gas_price_strategy_eip1559(
 def get_gas_price_strategy_eip1559_polygon(
     gas_endpoint: str,
     fallback_estimate: Dict[str, Optional[int]],
-    speed: Optional[str] = "fast",  # safeLow, standard, fast
+    speed: Optional[str] = SPEED_FAST,
 ) -> Callable[[], Dict[str, Wei]]:
     """Get the gas price strategy."""
 
