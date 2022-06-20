@@ -792,7 +792,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
             "gas_price_strategies", DEFAULT_GAS_PRICE_STRATEGIES
         )
 
-        if kwargs.pop("poa_chain", False):
+        self._poa_chain = kwargs.pop("poa_chain", False)
+        if self._poa_chain:
             # https://web3py.readthedocs.io/en/stable/middleware.html#geth-style-proof-of-authority
             self._api.middleware_onion.inject(
                 geth_poa_middleware, name="geth_poa_middleware", layer=0
