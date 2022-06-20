@@ -840,9 +840,7 @@ def test_try_get_gas_pricing(
 
 @pytest.mark.parametrize(
     "strategy",
-    (
-        {"name": EIP1559_POLYGON, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},
-    ),
+    ({"name": EIP1559_POLYGON, "params": ("maxPriorityFeePerGas", "maxFeePerGas")},),
 )
 def test_try_get_gas_pricing_poa(
     strategy: Dict[str, Union[str, Tuple[str, ...]]],

@@ -35,8 +35,8 @@ import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.ethereum import (
     DEFAULT_EIP1559_STRATEGY,
-    DEFAULT_GAS_STATION_STRATEGY,
     DEFAULT_EIP1559_STRATEGY_POLYGON,
+    DEFAULT_GAS_STATION_STRATEGY,
 )
 
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
