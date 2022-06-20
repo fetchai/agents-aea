@@ -1,4 +1,4 @@
-This is a simple demo that introduces you to the main components of an AEA. 
+This is a simple demo that introduces you to the main components of an AEA.
 
 A full break down of the development is covered within the <a href="../quickstart/">Development Quickstart</a>. It is highly recommended that developers begin by following the quick start!
 
@@ -7,7 +7,7 @@ This demo assumes you have followed the setup guide.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0 --local
+aea fetch fetchai/my_first_aea:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies

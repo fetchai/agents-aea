@@ -22,9 +22,9 @@ The following hints can help:
 <ul>
 <li>To install Go, follow the official guide, depending on your platform <a href="https://go.dev/doc/install" target="_blank">here</a></li>
 
-<li>Python is already included by default on 
+<li>Python is already included by default on
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
-To check you have the right version, open a terminal and run: 
+To check you have the right version, open a terminal and run:
 ``` bash
 python3 --version
 ```
@@ -34,7 +34,7 @@ python3 --version
 
 <li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
-  E.g. for Python 3.8: 
+  E.g. for Python 3.8:
 ``` bash
 sudo apt-get install python3.8-dev
 ```
@@ -80,16 +80,16 @@ docker pull fetchai/aea-user:latest
 To run the image on Linux and MacOs:
 
 ``` bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
 ```
 
 And on Windows:
 
 ``` bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
 ```
 
-Once successfully logged into the docker container, 
+Once successfully logged into the docker container,
 you can follow the rest of the guide the same way as if not using docker.
 ​
 </details>
@@ -158,12 +158,12 @@ svn checkout https://github.com/valory-xyz/open-aea/tags/v1.10.0/packages packag
 
 ## Echo skill demo
 
-This is a simple demo that introduces you to the main components of an AEA. 
+This is a simple demo that introduces you to the main components of an AEA.
 
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0 --local
+aea fetch fetchai/my_first_aea:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
