@@ -1,6 +1,6 @@
 <a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
-<img src="../assets/skill-components.jpg" alt="Skill components of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/skill-components.svg" alt="Skill components of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
@@ -33,7 +33,7 @@ For example, in the `ErrorHandler(Handler)` class, the code often grabs a refere
 
 ``` python
 self.context.outbox.put_message(message=reply)
-``` 
+```
 
 Moreover, you can read/write to the _agent context namespace_ by accessing the attribute `SkillContext.namespace`.
 
@@ -41,7 +41,7 @@ Importantly, however, a skill does not have access to the context of another ski
 
 ## What to code
 
-Each of the skill classes has three methods that must be implemented. All of them include a `setup()` and `teardown()` method which the developer must implement. 
+Each of the skill classes has three methods that must be implemented. All of them include a `setup()` and `teardown()` method which the developer must implement.
 
 Then there is a specific method that the framework requires for each class.
 
@@ -82,10 +82,10 @@ The framework supports different types of behaviours:
 
 - <a href="../api/skills/behaviours#oneshotbehaviour-objects">`OneShotBehaviour`</a>: this behaviour is executed only once.
 - <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a>: the `act()` method is called every `tick_interval`. E.g. if the `TickerBehaviour` subclass is instantiated
- 
+
 There is another category of behaviours, called <a href="../api/skills/behaviours#compositebehaviour-objects">`CompositeBehaviour`</a>:
 
-- <a href="../api/skills/behaviours#sequencebehaviour-objects">`SequenceBehaviour`</a>: a sequence of `Behaviour` classes, executed 
+- <a href="../api/skills/behaviours#sequencebehaviour-objects">`SequenceBehaviour`</a>: a sequence of `Behaviour` classes, executed
   one after the other.
 - <a href="../api/skills/behaviours#fsmbehaviour-objects">`FSMBehaviour`</a>: a state machine of `State` behaviours. A state is in charge of scheduling the next state.
 
@@ -101,7 +101,7 @@ Follows an example of a custom behaviour:
 from aea.skills.behaviours import OneShotBehaviour
 
 class HelloWorldBehaviour(OneShotBehaviour):
-        
+
     def setup(self):
         """This method is called once, when the behaviour gets loaded."""
 
@@ -111,7 +111,7 @@ class HelloWorldBehaviour(OneShotBehaviour):
 
     def teardown(self):
         """This method is called once, when the behaviour is teared down."""
-    
+
 
 ```
 
@@ -131,9 +131,9 @@ self.context.new_behaviours.put(OneShotBehaviour(act=hello, name="hello_world", 
 ```
 
 The callable passed to the `act` parameter is equivalent to the implementation
-of the `act` method described above. 
+of the `act` method described above.
 
-The framework is then in charge of registering the behaviour and scheduling it 
+The framework is then in charge of registering the behaviour and scheduling it
 for execution.
 
 ### `tasks.py`
@@ -142,17 +142,17 @@ Conceptually, a `Task` is where the developer codes any internal tasks the AEA r
 
 There can be one or more `Task` classes per skill. The developer subclasses abstract class `Task` to create a new `Task`.
 
-* `execute(self)`: is how the framework calls a `Task`. 
+* `execute(self)`: is how the framework calls a `Task`.
 
 The `Task` class implements the <a href="https://en.wikipedia.org/wiki/Function_object" target="_blank">functor pattern</a>.
-An instance of the `Task` class can be invoked as if it 
+An instance of the `Task` class can be invoked as if it
 were an ordinary function. Once completed, it will store the
 result in the property `result`. Raises error if the task has not been executed yet,
 or an error occurred during computation.
 
 We suggest using the `task_manager`, accessible through the skill context,
-to manage long-running tasks. The task manager uses `multiprocessing` to 
-schedule tasks, so be aware that the changes on the task object will 
+to manage long-running tasks. The task manager uses `multiprocessing` to
+schedule tasks, so be aware that the changes on the task object will
 not be updated.
 
 Here's an example:
@@ -236,7 +236,7 @@ class SomeModel(Model):
 Then, an instance of this class is available on the context level like so:
 ``` python
 some_model = self.context.some_model
-``` 
+```
 
 ### Skill configuration
 
@@ -270,7 +270,7 @@ protocols:
 
 All AEAs have a default `error` skill that contains error handling code for a number of scenarios:
 
-* Received envelopes with unsupported protocols 
+* Received envelopes with unsupported protocols
 * Received envelopes with unsupported skills (i.e. protocols for which no handler is registered)
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
@@ -280,7 +280,7 @@ The error skill relies on the `fetchai/default:1.0.0` protocol which provides er
 
 ## Custom Error handler
 
-The framework implements a default <a href="../api/error_handler/default#errorhandler-objects">`ErrorHandler`</a>. 
+The framework implements a default <a href="../api/error_handler/default#errorhandler-objects">`ErrorHandler`</a>.
 You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `ErrorHandler`:
 
 ``` bash
@@ -288,7 +288,7 @@ aea scaffold error-handler
 ```
 
 Now you will see a file called `error_handler.py` in the AEA project root.
-You can then implement your own custom logic to process messages. 
+You can then implement your own custom logic to process messages.
 
 
 <br />
