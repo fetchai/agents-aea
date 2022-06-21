@@ -150,9 +150,9 @@ aea init --local
 AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
 
 
-To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">SVN</a> to checkout the specific folders;
+To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">aea fetch</a> to checkout the specific packages;
 ```bash
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.10.0/packages packages
+aea fetch PUBLIC_ID_OR_HASH
 ```
 
 
@@ -321,7 +321,7 @@ The following test class replicates the preceding demo and tests it's correct be
 First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
 ``` bash
-svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
+aea fetch fetchai/my_first_aea:0.27.0:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
 ```
 
 Then write the test:
