@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 
-FETCH_COMMAND_REGEX = r"aea fetch (?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?(?P<hash>Q.*) \-\-remote"
+AEA_COMMAND_REGEX = r"(?P<full_cmd>(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+))"
 
 
 def read_file(filepath: str) -> str:
@@ -56,10 +56,23 @@ def fix_ipfs_hashes() -> None:
     errors = False
 
     for md_file in all_md_files:
-        print(f"Checking {md_file}")
         content = read_file(str(md_file))
-        for match in re.findall(FETCH_COMMAND_REGEX, content):
-            doc_vendor, doc_package, doc_version, doc_hash = match
+        for match in re.findall(AEA_COMMAND_REGEX, content):
+            (
+                doc_full_cmd,
+                doc_cli,
+                doc_cmd,
+                doc_vendor,
+                doc_package,
+                doc_version,
+                doc_hash,
+            ) = match
+
+            if not doc_vendor and not doc_package:
+                print(
+                    f"Warning: can't check a IPFS hash in {md_file} because this commands just uses the hash:\n\t{doc_full_cmd}"
+                )
+                continue
 
             # Look for potential matching packages
             potential_packages = {
@@ -67,6 +80,15 @@ def fix_ipfs_hashes() -> None:
                 for h, p in hashes_to_package.items()
                 if p.startswith(doc_vendor) and p.endswith(doc_package)
             }
+
+            package_type = (
+                doc_cmd.replace("add", "").strip() if "add" in doc_cmd else None
+            )
+
+            if package_type:
+                potential_packages = {
+                    p: h for p, h in potential_packages.items() if package_type in p
+                }
 
             if not potential_packages:
                 print(
@@ -92,11 +114,13 @@ def fix_ipfs_hashes() -> None:
             if doc_hash == expected_hash:
                 continue
 
-            new_command = f"aea fetch {doc_vendor}/{doc_package}:{doc_version + ':' if doc_version else ''}{expected_hash} --remote"
+            new_command = ""
+            if doc_vendor and doc_package:
+                new_command = f"{doc_cli} {doc_cmd} {doc_vendor}/{doc_package}:{doc_version + ':' if doc_version else ''}{expected_hash}"
+            else:
+                new_command = f"{doc_cli} {doc_cmd} {expected_hash}"
 
-            new_content = re.sub(
-                FETCH_COMMAND_REGEX, new_command, content, count=0, flags=0
-            )
+            new_content = content.replace(doc_full_cmd, new_command)
 
             with open(str(md_file), "w", encoding="utf-8") as qs_file:
                 qs_file.write(new_content)
