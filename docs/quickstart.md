@@ -150,10 +150,6 @@ aea init --local
 AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
 
 
-To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">aea fetch</a> to checkout the specific packages;
-```bash
-aea fetch PUBLIC_ID_OR_HASH
-```
 
 
 ## Echo skill demo
@@ -163,7 +159,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
+aea fetch open_aea/my_first_aea:0.1.0:QmbyFaoHWikC8dHcpdTVboxVnkXX2vMgch4UUXmwCfJhRu --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -321,7 +317,7 @@ The following test class replicates the preceding demo and tests it's correct be
 First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
+svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 
 Then write the test:

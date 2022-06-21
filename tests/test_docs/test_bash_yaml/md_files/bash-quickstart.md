@@ -150,9 +150,6 @@ pipenv run pytest test.py
 aea delete my_first_aea
 ```
 
-```bash
-aea fetch PUBLIC_ID_OR_HASH
-```
 
 ``` bash
 aea fetch fetchai/my_first_aea:0.27.0:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
