@@ -78,11 +78,20 @@ PUSH_ITEMS_FLAG = "--push-missing"
     "--push-missing", is_flag=True, help="Push missing components to registry."
 )
 @click.pass_context
-@check_aea_project
 def publish(
     click_context: click.Context, registry: str, push_missing: bool
 ) -> None:  # pylint: disable=unused-argument
     """Publish the agent to the registry."""
+
+    publish_agent_package(click_context, registry, push_missing)
+
+
+@check_aea_project
+def publish_agent_package(
+    click_context: click.Context, registry: str, push_missing: bool
+) -> None:
+    """Publish an agent package to a registry."""
+
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
