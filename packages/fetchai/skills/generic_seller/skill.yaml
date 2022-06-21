@@ -15,7 +15,7 @@ fingerprint:
   strategy.py: QmQKMb3YcmpewEq3mXabnk3rX6ZzipxCgdAPu8VDo2VEwL
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:QmXdvUTMifmPkcdvg1zrHVtEHtkZLNCVnjKPsiPrvi7N5q
+- fetchai/ledger:0.19.0:QmcgQJ4kPyKiugWnqZtnnQX2HuWFwQpX6ggDFnWTPRxcyC
 contracts: []
 protocols:
 - fetchai/default:1.0.0:QmPbj4NogUssHakMCWpUPMB3byS7GT7HTXS9BwQRBtJu3s

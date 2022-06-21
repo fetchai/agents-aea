@@ -602,7 +602,7 @@ Get the underlying API object.
 #### get`_`balance
 
 ```python
-def get_balance(address: Address) -> Optional[int]
+def get_balance(address: Address, raise_on_try: bool = False) -> Optional[int]
 ```
 
 Get the balance of a given account.
