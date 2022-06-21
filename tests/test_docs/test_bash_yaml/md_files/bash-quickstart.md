@@ -13,10 +13,10 @@ chmod +x install.sh
 docker pull fetchai/aea-user:latest
 ```
 ```bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
 ```
 ```bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
 ```
 ``` bash
 mkdir my_aea_projects/
@@ -44,7 +44,7 @@ svn checkout https://github.com/valory-xyz/open-aea/tags/v1.10.0/packages packag
 ``` bash
 sudo apt-get install python3.7-dev
 ```
-``` bash 
+``` bash
 aea init --local
 ```
 ``` bash
@@ -148,4 +148,13 @@ pipenv run pytest test.py
 ```
 ``` bash
 aea delete my_first_aea
+```
+
+```bash
+aea fetch PUBLIC_ID_OR_HASH
+```
+
+``` bash
+aea fetch fetchai/my_first_aea:0.27.0:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
+cd my_first_aea
 ```
