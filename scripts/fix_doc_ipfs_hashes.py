@@ -25,9 +25,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 
-FETCH_COMMAND_REGEX = (
-    r"aea fetch (?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?(?P<hash>Q.*) \-\-remote"
-)
+FETCH_COMMAND_REGEX = r"aea fetch (?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?(?P<hash>Q.*) \-\-remote"
 
 
 def read_file(filepath: str) -> str:
@@ -94,9 +92,7 @@ def fix_ipfs_hashes() -> None:
             if doc_hash == expected_hash:
                 continue
 
-            new_command = (
-                f"aea fetch {doc_vendor}/{doc_package}:{doc_version + ':' if doc_version else ''}{expected_hash} --remote"
-            )
+            new_command = f"aea fetch {doc_vendor}/{doc_package}:{doc_version + ':' if doc_version else ''}{expected_hash} --remote"
 
             new_content = re.sub(
                 FETCH_COMMAND_REGEX, new_command, content, count=0, flags=0

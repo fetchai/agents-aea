@@ -27,9 +27,7 @@ from scripts.fix_doc_ipfs_hashes import get_hashes, read_file
 from tests.conftest import ROOT_DIR
 
 
-AEA_COMMAND_REGEX = (
-    r"(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+)"
-)
+AEA_COMMAND_REGEX = r"(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+)"
 
 
 def test_ipfs_hashes() -> None:
@@ -49,7 +47,9 @@ def test_ipfs_hashes() -> None:
 
             if not doc_vendor and not doc_package:
                 # Some commands only reference the has, not the vendor or the package name
-                assert doc_hash in hashes_to_package.keys(), f"Unknown IPFS hash referenced in {md_file}: {doc_hash}"
+                assert (
+                    doc_hash in hashes_to_package.keys()
+                ), f"Unknown IPFS hash referenced in {md_file}: {doc_hash}"
                 continue
 
             # Look for potential matching packages
@@ -75,5 +75,3 @@ def test_ipfs_hashes() -> None:
                 assert (
                     doc_hash == expected_hash
                 ), f"IPFS hash not matching in {md_file}. Expected {expected_hash}, got {doc_hash}"
-
-
