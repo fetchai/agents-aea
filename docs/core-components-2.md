@@ -1,12 +1,12 @@
 The AEA framework consists of several core components, some required to run an AEA and others optional.
 
-In <a href="../core-components-1">Core Components - Part 1</a> we described the common components each AEA uses. In this page, we will look at more advanced components. 
+In <a href="../core-components-1">Core Components - Part 1</a> we described the common components each AEA uses. In this page, we will look at more advanced components.
 
 ## Required components used by AEAs
 
 ### Decision Maker
 
-<img src="../assets/decision-maker.jpg" alt="Decision Maker of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/decision-maker.svg" alt="Decision Maker of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;">
 
 The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of as a `Wallet` manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component with access to the `Wallet`'s private keys.
 
@@ -23,7 +23,7 @@ The agent has two sets of private keys, as configured in the `aea-config.yaml`:
 
 It is the responsibility of the AEA's user to safe-guard the keys used and ensure that keys are only used in a single AEA. Using the same key across different AEAs will lead to various failure modes.
 
-Private keys can be encrypted at rest. The CLI commands used for interacting with the wallet allow specifying a password for encryption/decryption. 
+Private keys can be encrypted at rest. The CLI commands used for interacting with the wallet allow specifying a password for encryption/decryption.
 
 ### Identity
 
@@ -35,7 +35,7 @@ The identity can be accessed in a `Skill` via the <a href="../api/context/base#a
 
 ### Contracts
 
-<img src="../assets/contracts.jpg" alt="Contracts of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/contracts.svg" alt="Contracts of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;">
 
 <a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the `Skills`.
 
@@ -47,7 +47,7 @@ The identity can be accessed in a `Skill` via the <a href="../api/context/base#a
 
 Taken together, the core components from this section and the <a href="../core-components-1">first part</a> provide the following simplified illustration of an AEA:
 
-<img src="../assets/simplified-aea.jpg" alt="Simplified illustration of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
+<img src="../assets/simplified-aea.svg" alt="Simplified illustration of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 ## Next steps
 

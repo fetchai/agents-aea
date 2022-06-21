@@ -16,7 +16,7 @@ The smart contract wrapped in a AEA contract package might be a third-party smar
 
 Interacting with contracts in almost all cases requires network access. Therefore, the framework executes contract related logic in a <a href="../connection">Connection</a>.
 
-<img src="../assets/message-flow-contract-ledger.jpg" alt="Message flow for contract and ledger interactions" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/message-flow-contract-ledger.svg" alt="Message flow for contract and ledger interactions" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 In particular, the `fetchai/ledger:0.19.0` connection can be used to execute contract related logic. The skills communicate with the `fetchai/ledger:0.19.0` connection via the `fetchai/contract_api:1.0.0` protocol. This protocol implements a request-response pattern to serve the four types of methods listed above:
 
@@ -120,7 +120,7 @@ aea scaffold contract my_new_contract
 
 This will scaffold a contract package called `my_new_contract` with three files:
 
-* `__init__.py` 
+* `__init__.py`
 * `contract.py`, containing the scaffolded contract class
 * `contract.yaml` containing the scaffolded configuration file
 

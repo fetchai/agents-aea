@@ -6,7 +6,7 @@
 
 The AEAs currently use the addresses associated with their private-public key pairs to identify themselves.
 
-<img src="../assets/keys.jpg" alt="Keys of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/keys.svg" alt="Keys of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 To learn how to generate a private-public key pair check out the relevant <a href="../cli-commands"> CLI commands </a>.
 

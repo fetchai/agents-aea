@@ -30,7 +30,7 @@ At its core, the ACN implements a distributed hash table (DHT). A DHT is similar
 - Consistent hashing: decide responsibility for assignment of the DHT key-value storage
 - Structured overlays: organize the participating peers in a well-defined topology for efficient routing
 
-<img src="../assets/dht.jpg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/dht.svg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 For the ACN, we use the DHT to store and maintain association between an agent address and the (network) location of its peer.
 
@@ -39,7 +39,7 @@ For the ACN, we use the DHT to store and maintain association between an agent a
 
 To satisfy different resource constraints and flexible deployment the ACN is implemented as a multi-tier architecture. As such, it provides an extension of the client-server model. The agent framework exploits this by implementing different tiers as different <a href="../api/connections/base#connection-objects">`Connections`</a>:
 
-<img src="../assets/acn-tiers.jpg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/acn-tiers.png" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
@@ -51,14 +51,14 @@ To satisfy different resource constraints and flexible deployment the ACN is imp
 
 An agent can choose which connection to use depending on the resource and trust requirements:
 
-- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`</a> 
+- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`</a>
 connection: the agent maintains a peer of the ACN. The agent has full control over the peer and does not need to trust any other entity.
-- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`</a> 
+- <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`</a>
 connection: the agent maintains a client connection to a server which is operated by a peer of the ACN. The agent does need to trust the entity operating the peer.
 
 All communication protocols use public cryptography to ensure security (authentication, confidentiality, and availability) using TLS handshakes with pre-shared public keys.
 
-<img src="../assets/acn-trust-security.jpg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/acn-trust-security.svg" alt="DHT" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 
 <br />
