@@ -1,3 +1,4 @@
+
 # Agent-oriented development
 
 In this section, we discuss some of the most fundamental characteristics of an agent-oriented approach to solution development, which might be different from existing paradigms and methodologies that you may be used to. We hope that with this, we can guide you towards the right mindset when designing your own agent-based solutions to real world problems.
@@ -49,16 +50,16 @@ Another related issue, is that unlike some agent-based simulation (ABS) systems 
 
 ## Complex, Incomplete, Inconsistent and Uncertain
 
-The fourth characteristic(s) relate to the environment in which agents are expected to operate in, and these have been mentioned a number of times in the previous sections.
+The fourth characteristic(s) related to the environment in which agents are expected to operate in, and these have been mentioned a number of times in the previous sections.
 The environment agents are suited for typically tend to be complex, to the point that it is usually impossible for any single agent to perceive the whole of the environment on its own. This means that at any point in time, any agent has a limited knowledge about the state of the environment. In other words, the agents;' information tend to be incomplete due to the complexity and sophistication of the world in which they reside. 
 
 Consider an agent which represents a driverless vehicle. The complexity of the problem of driving on the road makes it impossible for a single vehicle to have an accurate and up-to-date knowledge of the overall state of the world . This means that an agent's model of the world is at best uncertain. For instance, the vehicle, through its sensor may detect green light at a junction, and by being aware of what it means, it may infer that it is safe to cross a junction. However, that simply may not be true as another car in the opposite direction may still cross the junction violating their red light. Therefore, there is uncertainty associated with the knowledge "it is safe to cross the road because the light is green", and the agent must recognise that. 
 
-Furthermore, the often conflicting nature of the environment means information obtained from multiple sources (agents) may be inconsistent. Again, this must be taken into consideration when designing an agent which is expected to operate successfully in a potentially conflicting environment. 
+Furthermore, the often conflicting nature of the environment means information obtained from multiple sources (i.e. agents) may be inconsistent. Again, this must be taken into consideration when designing an agent which is expected to operate successfully in a potentially conflicting environment. 
 
 ## Further Reading
 
-* Wooldridge, M. (2009). _An Introduction to MultiAgent Systems_. Wiley, Second edition.
-* Shoham, Y. and Leyton-Brown, K. (2008). _Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations_. Cambridge University Press
+- Wooldridge, M. (2009). _An Introduction to MultiAgent Systems_. Wiley, Second edition.
+- Shoham, Y. and Leyton-Brown, K. (2008). _Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations_. Cambridge University Press
 
 <br />
