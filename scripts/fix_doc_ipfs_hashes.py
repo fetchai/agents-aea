@@ -26,7 +26,7 @@ from typing import Dict, Tuple
 
 
 FETCH_COMMAND_REGEX = (
-    r"aea fetch (?P<vendor>.*)\/(?P<package>.*):(?P<hash>Q.*) \-\-remote"
+    r"aea fetch (?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?(?P<hash>Q.*) \-\-remote"
 )
 
 
@@ -61,7 +61,7 @@ def fix_ipfs_hashes() -> None:
         print(f"Checking {md_file}")
         content = read_file(str(md_file))
         for match in re.findall(FETCH_COMMAND_REGEX, content):
-            doc_vendor, doc_package, doc_hash = match
+            doc_vendor, doc_package, doc_version, doc_hash = match
 
             # Look for potential matching packages
             potential_packages = {
@@ -95,7 +95,7 @@ def fix_ipfs_hashes() -> None:
                 continue
 
             new_command = (
-                f"aea fetch {doc_vendor}/{doc_package}:{expected_hash} --remote"
+                f"aea fetch {doc_vendor}/{doc_package}:{doc_version + ':' if doc_version else ''}{expected_hash} --remote"
             )
 
             new_content = re.sub(

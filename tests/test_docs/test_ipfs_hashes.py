@@ -28,7 +28,7 @@ from tests.conftest import ROOT_DIR
 
 
 FETCH_COMMAND_REGEX = (
-    r"aea fetch (?P<vendor>.*)\/(?P<package>.*):(?P<hash>Q.*) \-\-remote"
+    r"aea fetch (?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?(?P<hash>Q.*) \-\-remote"
 )
 
 
@@ -45,7 +45,7 @@ def test_ipfs_hashes() -> None:
     for md_file in all_md_files:
         content = read_file(str(md_file))
         for match in re.findall(FETCH_COMMAND_REGEX, content):
-            doc_vendor, doc_package, doc_hash = match
+            doc_vendor, doc_package, _, doc_hash = match
 
             # Look for potential matching packages
             potential_packages = {
