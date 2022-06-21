@@ -26,7 +26,7 @@ cd my_aea
 Add the http server connection package:
 
 ``` bash
-aea add connection fetchai/http_server:0.22.0:Qmdr2Ajx5BRBJCC6xP8wUNSCMbhStHHZaVgzkoSW6Pvu7S
+aea add connection fetchai/http_server:0.22.0:Qmdr2Ajx5BRBJCC6xP8wUNSCMbhStHHZaVgzkoSW6Pvu7S --remote
 ```
 
 Update the default connection:
