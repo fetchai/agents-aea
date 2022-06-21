@@ -259,14 +259,14 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.21.0
+aea add connection fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z
 ```
 <br>
 <b>Add the echo skill</b>
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.19.0
+aea add skill fetchai/echo:0.19.0:QmReV2qgjE4mkY9n5iwJDoEcv174Sxbjhxo84YZpLyvcR2
 ```
 This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>

@@ -1,6 +1,6 @@
 ## Description
 
-The HTTP client and HTTP server connections enable an AEA to communicate with external servers, respectively clients, via HTTP. 
+The HTTP client and HTTP server connections enable an AEA to communicate with external servers, respectively clients, via HTTP.
 
 The HTTP client connection receives request envelops from an agent's skill, translates each into an HTTP request and sends it to a server external to the agent. If it receives an HTTP response from the server within a timeout window, it translates it into a response envelope, and sends this back to the relevant skill inside the agent.
 
@@ -12,7 +12,7 @@ The `fetchai/simple_data_request:0.13.0` skill demonstrates a simple use case of
 
 The `HttpRequestBehaviour` in `behaviours.py` periodically sends HTTP envelops to the HTTP client connection. Its `act()` method, periodically called, simply calls `_generate_http_request` which contains the logic for enqueueing an HTTP request envelop.
 
-The `HttpHandler` in `handler.py` is a basic handler for dealing with HTTP response envelops received from the HTTP client connection. In the `handle()` method, the responses are dealt with by the private `_handle_response` method which essentially logs the response and adds the body of the response into the skill's shared state. 
+The `HttpHandler` in `handler.py` is a basic handler for dealing with HTTP response envelops received from the HTTP client connection. In the `handle()` method, the responses are dealt with by the private `_handle_response` method which essentially logs the response and adds the body of the response into the skill's shared state.
 
 ## HTTP Server
 
@@ -26,7 +26,7 @@ cd my_aea
 Add the http server connection package:
 
 ``` bash
-aea add connection fetchai/http_server:0.22.0
+aea add connection fetchai/http_server:0.22.0:Qmdr2Ajx5BRBJCC6xP8wUNSCMbhStHHZaVgzkoSW6Pvu7S
 ```
 
 Update the default connection:
@@ -46,7 +46,7 @@ Ensure the file exists under the specified path!
 Create and add a private key:
 
 ``` bash
-aea generate-key ethereum 
+aea generate-key ethereum
 aea add-key ethereum
 ```
 
@@ -71,7 +71,7 @@ Next implement a basic handler which prints the received envelopes and responds.
 
 
 Then, replace the content of `handlers.py` with the following code snippet,
-after having replaced the placeholder `YOUR_USERNAME` with 
+after having replaced the placeholder `YOUR_USERNAME` with
 the author username (i.e. the output of `aea config get agent.author`):
 
 ``` python
@@ -327,7 +327,7 @@ In our case, this is the `http_echo` that you have just scaffolded.
 Its public id will be `<your-author-name>/http_echo:0.1.0`.
 
 ``` bash
-aea config set vendor.fetchai.connections.http_server.config.target_skill_id "$(aea config get agent.author)/http_echo:0.1.0" 
+aea config set vendor.fetchai.connections.http_server.config.target_skill_id "$(aea config get agent.author)/http_echo:0.1.0"
 ```
 
 You can now run the AEA:
