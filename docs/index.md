@@ -1,44 +1,12 @@
 
-The AEA framework provides the tools for creating Autonomous Economic Agents (AEA).
+# Introduction
 
-## What are AEAs?
 
-We define an autonomous economic agent or AEA as:
+The Autonomous Economic Agent (AEA) Framework is a software development toolkit which equips you with an efficient and accessible set of tools for building and running AEAs out of components. This framework attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks. The aim is to pursue a goal or optimise an internal utility function. More specifically, an AEA is an intelligent agent acting on an owner's behalf (with limited or no interference) and whose goal is to generate economic value for its owner, by having the ability to interact and participate in alternate types of economic exchange with other AEAs, people, and organisations on its own. In order to accomplish this, an agent usually needs to connect to and communicate with many other services and other agents. Here, Distributed Ledger Technologies (DLT) support the primary settlement and commitment (or smart contracting) layer. AEAs are characterised in programming terms by the software components they incorporate, the data with which they are initialised, and the wallet they govern. Cryptographic key-pairs are kept in their wallet and are used to sign transactions and messages. The framework also offers auxiliary tools and services, including a command line interface (CLI), a protocol generator to generate protocols' code from their specifications, test tools, a registry for framework packages, and a desktop app to run finished agents.
 
-> An intelligent agent acting on an owner's behalf, with limited or no interference, and whose goal is to generate economic value for its owner.
+The AEA framework is not the first agent framework. In fact, there have been many frameworks proposed in the literature and multiple implementations exist, but the AEA framework differs from them because of its fully decentralised nature, making it a truly decentralised multi-stakeholder environment with native support for DLT, developers and users of agents. The AEA framework is modular, extensible, and composable and is currently implemented in Python. AEAs achieve their goals with the help of a search & discovery service for AEAs - the simple Open Economic Framework (sOEF) - a decentralised agent communication system - the Agent Communication Network (ACN) - and using Fetch.ai's blockchain as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as Ethereum.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-An AEA represents an individual, organisation or object and looks after its interests. AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goals. Their purpose is to create economic value for you, their owner, in clearly defined domains. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
-
-### What is not an AEA
-
-* Any <a href="https://en.wikipedia.org/wiki/Software_agent" target="_blank">agent</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
-* APIs or sensors which do not have agency.
-* <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
-* <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.</p>
-</div>
-
-## What is the AEA Framework?
-
-The AEA framework is a development suite, currently implemented in Python, which equips you with an efficient and accessible set of tools for building and running AEAs. The framework is modular, extensible, and composable. It attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
-
-AEAs achieve their goals with the help of a search & discovery service for AEAs -- the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a> -- a decentralized agent communication system -- the <a href="acn">Agent Communication Network (ACN)</a> -- and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
-
-
-## Why build with the AEA Framework?
-
-The AEA framework provides the developer with a number of features, which combined cannot be found anywhere else:
-
-* The peer-to-peer <a href="acn">agent communication network (ACN)</a> allows your AEAs to interact with all other AEAs over the public internet.
-* The search and discovery system <a href="simple-oef">sOEF</a> allows your AEAs to find other AEAs.
-* The <a href="https://aea-registry.fetch.ai/" target="_blank">AEA registry</a> enables code sharing and re-use by providing a space in which AEAs or their individual components may be shared.
-* The framework's <a href="ledger-integration">crypto and ledger APIs</a> make it possible for AEAs to interact with blockchains.
-* The <a href="contract">contract</a> packages enable AEAs to interact with smart contracts in Fetch.ai and other third-party decentralised ledgers. 
 
 
 ## Next steps
