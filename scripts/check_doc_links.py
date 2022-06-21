@@ -193,7 +193,8 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
 
         png_index = result.find(".png")
         jpg_index = result.find(".jpg")
-        if png_index != -1 or jpg_index != -1:
+        svg_index = result.find(".svg")
+        if png_index != -1 or jpg_index != -1 or svg_index != -1:
             img_path = Path("docs/{}".format(result[RELATIVE_PATH_STR_LEN:]))
             if not img_path.exists():
                 raise ValueError(
@@ -205,7 +206,7 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
                 raise ValueError(
                     "Could not reach url={} in file={}!".format(result, str(file))
                 )
-        raise ValueError("Image path={} in file={} not `.png` or `.jpg`!")
+        raise ValueError("Image path={} in file={} not `.png` or `.jpg` or `.svg`!")
 
 
 def _checks_target_blank(file: Path) -> None:

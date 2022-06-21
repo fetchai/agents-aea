@@ -2,7 +2,7 @@ A <a href="../api/connections/base#connection-objects">`Connection`</a> provides
 
 The messages constructed or received by a connection are eventually processed by one or several <a href="../skill">skills</a> which deal with handling and generating messages related to a specific business objective.
 
-<img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/multiplexer.svg" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>. Connections are passive in terms of multiplexer interactions (its methods are called by the Multiplexer), but they can run their own asynchronous or threaded tasks.
 
