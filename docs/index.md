@@ -9,16 +9,6 @@ The AEA framework is not the first agent framework. In fact, there have been man
 <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
-## Next steps
-
-To get started developing your own AEA, check out the <a href="quickstart">getting started</a> section.
-
-To learn more about some of the distinctive characteristics of agent-oriented development, check out the guide on <a href="agent-oriented-development">agent-oriented development</a>.
-
-If you would like to develop an AEA in a language different to Python then check out our <a href="language-agnostic-definition">language agnostic AEA definition</a>.
-
-If you want to run a demo, check out the <a href="demos">demo guides</a>.
-
 
 ## Help us improve
 
