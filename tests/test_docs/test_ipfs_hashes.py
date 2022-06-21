@@ -27,8 +27,8 @@ from scripts.fix_doc_ipfs_hashes import get_hashes, read_file
 from tests.conftest import ROOT_DIR
 
 
-FETCH_COMMAND_REGEX = (
-    r"aea fetch (?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?(?P<hash>Q.*) \-\-remote"
+AEA_COMMAND_REGEX = (
+    r"(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+)"
 )
 
 
@@ -44,8 +44,13 @@ def test_ipfs_hashes() -> None:
 
     for md_file in all_md_files:
         content = read_file(str(md_file))
-        for match in re.findall(FETCH_COMMAND_REGEX, content):
-            doc_vendor, doc_package, _, doc_hash = match
+        for match in re.findall(AEA_COMMAND_REGEX, content):
+            _, _, doc_vendor, doc_package, _, doc_hash = match
+
+            if not doc_vendor and not doc_package:
+                # Some commands only reference the has, not the vendor or the package name
+                assert doc_hash in hashes_to_package.keys(), f"Unknown IPFS hash referenced in {md_file}: {doc_hash}"
+                continue
 
             # Look for potential matching packages
             potential_packages = {
@@ -53,6 +58,7 @@ def test_ipfs_hashes() -> None:
                 for h, p in hashes_to_package.items()
                 if p.startswith(doc_vendor) and p.endswith(doc_package)
             }
+
             # Check that there is at least one similar package in hashes.csv
             assert (
                 potential_packages
@@ -69,3 +75,5 @@ def test_ipfs_hashes() -> None:
                 assert (
                     doc_hash == expected_hash
                 ), f"IPFS hash not matching in {md_file}. Expected {expected_hash}, got {doc_hash}"
+
+
