@@ -27,7 +27,7 @@ from scripts.fix_doc_ipfs_hashes import get_hashes, read_file
 from tests.conftest import ROOT_DIR
 
 
-AEA_COMMAND_REGEX = r"(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+)"
+AEA_COMMAND_REGEX = r"(?P<full_cmd>(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+))"
 
 
 def test_ipfs_hashes() -> None:
@@ -43,7 +43,7 @@ def test_ipfs_hashes() -> None:
     for md_file in all_md_files:
         content = read_file(str(md_file))
         for match in re.findall(AEA_COMMAND_REGEX, content):
-            _, _, doc_vendor, doc_package, _, doc_hash = match
+            _, _, _, doc_vendor, doc_package, _, doc_hash = match
 
             if not doc_vendor and not doc_package:
                 # Some commands only reference the has, not the vendor or the package name
