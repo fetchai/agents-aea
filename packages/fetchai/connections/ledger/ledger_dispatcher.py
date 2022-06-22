@@ -123,7 +123,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the dialogue
         :return: the ledger api message
         """
-        balance = api.get_balance(message.address)
+        balance = api.get_balance(message.address, raise_on_try=True)
         if balance is None:
             response = self.get_error_message(
                 ValueError("No balance returned"), api, message, dialogue
@@ -196,6 +196,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             amount=message.terms.sender_payable_amount,
             tx_fee=message.terms.fee,
             tx_nonce=message.terms.nonce,
+            raise_on_try=True,
             **message.terms.kwargs,
         )
         if raw_transaction is None:
@@ -229,6 +230,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param dialogue: the dialogue
         :return: the ledger api message
         """
+        transaction_receipt = None
         is_settled = False
         attempts = 0
         while (
@@ -299,7 +301,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """
         try:
             transaction_digest = api.send_signed_transaction(
-                message.signed_transaction.body, raise_on_try=True
+                message.signed_transaction.body,
+                raise_on_try=True,
             )
         except Exception as e:  # pylint: disable=broad-except
             return self.get_error_message(e, api, message, dialogue)
