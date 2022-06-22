@@ -10,7 +10,7 @@ Plugins:
 - Adds gas pricing mechanism for `Polygon` chain on ethereum plugin 
 
 Docs:
-- Updates docs to use IPFS hashes to work with the pacakges
+- Updates docs to use IPFS hashes to work with the packages
 - Updates images are in .SVG
 
 Chores:
