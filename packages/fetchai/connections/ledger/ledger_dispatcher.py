@@ -145,7 +145,6 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         api: LedgerApi,
         message: LedgerApiMessage,
         dialogue: LedgerApiDialogue,
-        raise_on_try: bool = False,
     ) -> LedgerApiMessage:
         """
         Send the request 'get_state'.
@@ -153,13 +152,12 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         :param api: the API object.
         :param message: the Ledger API message
         :param dialogue: the dialogue
-        :param raise_on_try: whether the method will raise or log on error
         :return: the ledger api message
         """
         result = api.get_state(
             message.callable,
             *message.args,
-            raise_on_try=raise_on_try,
+            raise_on_try=True,
             **message.kwargs.body,
         )
         if result is None:  # pragma: nocover
