@@ -7,6 +7,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.10.0` to `v1.11.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.9.0` to `v1.10.0`
 
 Python 3.6 no longer supported
@@ -423,3 +429,5 @@ As a result of this feature, you are now able to pass key-pairs to your connecti
 You must update your connections as the old implementation is no longer supported.
 </li>
 </ul>
+
+

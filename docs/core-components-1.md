@@ -6,7 +6,7 @@ The following sections discuss the inner workings of the AEA framework and how i
 
 ### Envelope
 
-<img src="../assets/envelope.jpg" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/envelope.svg" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 <a href="../api/aea#aea-objects">`AEAs`</a> communicate asynchronously via  exchange of  <a href="../api/protocols/base#message-objects">`Messages`</a> wrapped in <a href="../api/mail/base#envelope-objects">`Envelopes`</a> containing five attributes:
 
@@ -58,13 +58,13 @@ It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a hr
 
 ### Skill
 
-<img src="../assets/skills.jpg" alt="Skills of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/skills.svg" alt="Skills of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 <a href="../api/skills/base#skill-objects">`Skills`</a> are the core focus of the framework's extensibility as they implement business logic to deliver economic value for the AEA. They are self-contained capabilities that AEAs can dynamically take on board, in order to expand their effectiveness in different situations.
 
 A `Skill` encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
-* <a href="../api/skills/base#handler-objects">`Handler`</a>: each `Skill` has zero, one or more `Handler` objects. There is a one-to-one correspondence between `Handlers` and the protocols in an AEA (also known as the _registered protocols_). Handlers implement AEAs' **reactive** behaviour. If an AEA understands a `Protocol` referenced in a received `Envelope` (i.e. the protocol is registered in this AEA), this envelope is sent to the corresponding `Handler` which executes the AEA's reaction to this `Message`. 
+* <a href="../api/skills/base#handler-objects">`Handler`</a>: each `Skill` has zero, one or more `Handler` objects. There is a one-to-one correspondence between `Handlers` and the protocols in an AEA (also known as the _registered protocols_). Handlers implement AEAs' **reactive** behaviour. If an AEA understands a `Protocol` referenced in a received `Envelope` (i.e. the protocol is registered in this AEA), this envelope is sent to the corresponding `Handler` which executes the AEA's reaction to this `Message`.
 * <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: a `skill` can have zero, one or more `Behaviours`, each encapsulating actions which further the AEAs goal and are initiated by internals of the AEA rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of simple and composite behaviours (e.g. cyclic, one-shot, finite-state-machine, etc), and these define how often and in what order a behaviour and its sub-behaviours must be executed.
 * <a href="../api/skills/base#model-objects">`Model`</a>: zero, one or more `Models` that inherit from the `Model` abstract base class and are accessible via the `SkillContext`.
 * <a href="../api/skills/tasks#task-objects">`Task`</a>: zero, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of `Skills`, but `Tasks` are declared in or from `Skills` if a packaging approach for AEA creation is used.
@@ -112,4 +112,3 @@ In most cases, one of the available `Connection` packages can be used. Occasiona
 - <a href="../connection">Connections</a>
 
 <br />
-

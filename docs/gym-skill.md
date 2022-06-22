@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch open_aea/gym_aea:0.1.0 --local
+aea fetch open_aea/gym_aea:0.1.0:QmddxSr8ZfKgHw5Urdxjdw52yofjLLRgM1AyJvxRaK4V6U --remote
 cd gym_aea
 aea install
 ```
@@ -36,7 +36,7 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.20.0
+aea add skill fetchai/gym:0.20.0:QmdQisuqLhq81NHuas9ALYgP1tw1cZoE3vGueREgG8PgCZ --remote
 ```
 
 ### Set gym connection as default
@@ -126,7 +126,7 @@ The `GymTask` is responsible for training the RL agent. In particular, `MyRLAgen
 
 In this particular skill, which chiefly serves for demonstration purposes, we implement a very basic RL agent. The agent trains a model of price of `n` goods: it aims to discover the most likely price of each good. To this end, the agent randomly selects one of the `n` goods on each training step and then chooses as an `action` the price which it deems is most likely accepted. Each good is represented by an id and the possible price range `[1,100]` divided into 100 integer bins. For each price bin, a `PriceBandit` is created which models the likelihood of this price. In particular, a price bandit maintains a <a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank">beta distribution</a>. The beta distribution is initialized to the uniform distribution. Each time the price associated with a given `PriceBandit` is accepted or rejected the distribution maintained by the `PriceBandit` is updated. For each good, the agent can therefore over time learn which price is most likely.
 
-<img src="../assets/gym-skill.jpg" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+<img src="../assets/gym-skill.svg" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 The illustration shows how the RL agent only interacts with the proxy environment by sending it `action (A)` and receiving `observation (O)`, `reward (R)`, `done (D)` and  `info (I)`.
 

@@ -1,6 +1,6 @@
 # Component Registry
 
-Individual components are stored on the  <a href="https://ipfs.io" target="_blank">`IPFS registry`</a>. This registry allows other developer to reuse these components. Anyone case register a new component which is uniquely identifiable by a hash of the contents of the component. 
+Individual components are stored on the  <a href="https://ipfs.io" target="_blank">`IPFS registry`</a>. This registry allows other developer to reuse these components. Anyone case register a new component which is uniquely identifiable by a hash of the contents of the component.
 
 ## Creating a Project
 We can create a new agent with the bare minimal components as so;
@@ -12,7 +12,7 @@ Creating project directory './agent'
 Creating config file aea-config.yaml
 Adding default packages ...
 Adding protocol 'open_aea/signing:latest'...
-Using registry: ipfs 
+Using registry: ipfs
 Downloading open_aea/signing:latest from IPFS.
 Successfully added protocol 'open_aea/signing:1.0.0'.
 ```
@@ -22,14 +22,14 @@ Successfully added protocol 'open_aea/signing:1.0.0'.
 Once we have an agent, we can add individual components to the agent as so;
 
 ```
-aea add skill fetchai/echo:0.19.0
+aea add skill fetchai/echo:0.19.0:QmReV2qgjE4mkY9n5iwJDoEcv174Sxbjhxo84YZpLyvcR2 --remote
 Registry path not provided and local registry `packages` not found in current (.) and parent directory.
 Trying remote registry (`--remote`).
 Adding skill 'fetchai/echo:latest'...
-Using registry: ipfs 
+Using registry: ipfs
 Downloading fetchai/echo:latest from IPFS.
 Adding protocol 'fetchai/default:1.0.0'...
-Using registry: ipfs 
+Using registry: ipfs
 Downloading fetchai/default:1.0.0 from IPFS.
 Successfully added protocol 'fetchai/default:1.0.0'.
 Successfully added skill 'fetchai/echo:0.19.0'.
