@@ -85,7 +85,7 @@ spec:
     metadata:
       name: acn-data
     spec:
-      storageClassName: nfs
+      storageClassName: nfs-client
       accessModes:
       - ReadWriteOnce
       resources:
