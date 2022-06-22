@@ -30,7 +30,7 @@ from pathlib import Path
 from unittest import mock
 
 from tests.conftest import ROOT_DIR
-from tests.test_docs.helper import BaseTestMarkdownDocs
+from tests.test_docs.helper import BaseTestMarkdownDocs, replace_vendor_to_packages
 
 
 class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
@@ -54,8 +54,8 @@ class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
 
     def test_handlers_code_snippet(self):
         """Test the 'handlers.py' code snippet."""
-        handlers_code_snippet = self.python_blocks[0]["text"].replace(
-            "from vendor.", "from packages."
+        handlers_code_snippet = replace_vendor_to_packages(
+            self.python_blocks[0]["text"]
         )
 
         # the handlers code snippet contains the YOUR_USERNAME placeholder
@@ -71,9 +71,10 @@ class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
 
     def test_dialogues_code_snippet(self):
         """Test the 'dialogues.py' code snippet."""
-        dialogues_code_snippet = self.python_blocks[1]["text"].replace(
-            "from vendor.", "from packages."
+        dialogues_code_snippet = replace_vendor_to_packages(
+            self.python_blocks[1]["text"]
         )
+
         expected_dialogues_code = self.http_echo_dialogues
         assert dialogues_code_snippet in expected_dialogues_code
 
