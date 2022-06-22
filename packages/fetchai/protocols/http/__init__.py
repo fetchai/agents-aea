@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the http protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.10.0`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.11.0`.
 """
 
 from packages.fetchai.protocols.http.message import HttpMessage

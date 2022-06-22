@@ -12,7 +12,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/gym:1.0.0:QmNgr5VRs1aggJ88w3B2rXb88gkCZmpNN89HpG3W4FoVRd
+- fetchai/gym:1.0.0:QmSd1SpzSV1U1LyQJ7C5hrZT5c7rQXfJLez5fGBnveFLVx
 class_name: GymConnection
 config:
   env: ''

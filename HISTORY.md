@@ -1,5 +1,23 @@
 # Release History - open AEA
 
+## 1.11.0 (2022-06-22)
+
+AEA:
+- Makes `aea publish`, `aea fetch`, `aea push-all` commands patchable to support service packages on `open-autonomy`
+
+Plugins:
+- Adds `Proof Of Authority` chain support on ethereum plugin
+- Adds gas pricing mechanism for `Polygon` chain on ethereum plugin 
+
+Docs:
+- Updates docs to use IPFS hashes to work with the packages
+- Updates images are in .SVG
+
+Chores:
+- Updates the release guide
+- Updates Dockerfiles to use `Python 3.10`
+- Adds skaffold config to build and tag images
+
 ## 1.10.0 (2022-06-09)
 
 AEA:
