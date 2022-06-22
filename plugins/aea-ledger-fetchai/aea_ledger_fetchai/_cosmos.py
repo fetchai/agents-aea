@@ -679,7 +679,10 @@ class _CosmosApi(LedgerApi):
         :return: the transaction dictionary
         """
         response = self._try_get_state(
-            callable_name, *args, raise_on_try=raise_on_try, **kwargs
+            callable_name,
+            *args,
+            raise_on_try=raise_on_try,
+            **kwargs,
         )
         return response
 

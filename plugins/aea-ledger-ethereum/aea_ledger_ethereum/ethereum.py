@@ -857,10 +857,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return self._api.eth.get_balance(check_address)  # pylint: disable=no-member
 
     def get_state(
-        self, callable_name: str, *args: Any, **kwargs: Any
+        self, callable_name: str, *args: Any, raise_on_try: bool = False, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
-        response = self._try_get_state(callable_name, *args, **kwargs)
+        logging.error(f"HERE IT IS: {raise_on_try}, {kwargs}")
+        response = self._try_get_state(
+            callable_name, *args, raise_on_try=raise_on_try, **kwargs
+        )
         return response
 
     @try_decorator("Unable to get state: {}", logger_method="warning")
@@ -868,6 +871,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self, callable_name: str, *args: Any, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Try to call a function on the ledger API."""
+
+        if "raise_on_try" in kwargs:
+            logging.info(
+                f"popping `raise_on_try` from {self.__class__.__name__}.get_state kwargs"
+            )
+            kwargs.pop("raise_on_try")
 
         function = getattr(self._api.eth, callable_name)
         response = function(*args, **kwargs)
