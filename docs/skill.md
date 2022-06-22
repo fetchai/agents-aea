@@ -196,7 +196,7 @@ In `behaviours.py`:
 ``` python
 
 from aea.skills.behaviours import TickerBehaviour
-from packages.my_author_name.skills.my_skill.tasks import LongTask
+from vendor.my_author_name.skills.my_skill.tasks import LongTask
 
 
 class MyBehaviour(TickerBehaviour):

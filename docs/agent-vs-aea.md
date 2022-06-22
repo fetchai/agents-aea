@@ -6,7 +6,15 @@ In this guide we show some of the differences in terms of code.
 
 The <a href="../build-aea-programmatically">Build an AEA programmatically</a> guide shows how to programmatically build an AEA. We can build an agent of the <a href="../api/agent#agent-objects">`Agent`</a> class programmatically as well.
 
-First, import the python and application specific libraries. (Get the packages directory from the AEA repository `svn export https://github.com/valory-xyz/open-aea.git/trunk/packages`.)
+First, create an empty agent and add the stub connection and default protocol.
+```bash
+aea create my_aea
+cd my_aea
+aea add connection fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z --remote
+aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+```
+
+Then, in your script, import the python and application specific libraries.
 ``` python
 import os
 import time
@@ -20,8 +28,8 @@ from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.stub.connection import StubConnection
-from packages.fetchai.protocols.default.message import DefaultMessage
+from vendor.fetchai.connections.stub.connection import StubConnection
+from vendor.fetchai.protocols.default.message import DefaultMessage
 ```
 
 Unlike an `AEA`, an `Agent` does not require a `Wallet`, `LedgerApis` or `Resources` module.
@@ -179,8 +187,8 @@ from aea.helpers.file_io import write_with_lock
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.stub.connection import StubConnection
-from packages.fetchai.protocols.default.message import DefaultMessage
+from vendor.fetchai.connections.stub.connection import StubConnection
+from vendor.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input_file"

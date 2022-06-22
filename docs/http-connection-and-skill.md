@@ -27,6 +27,8 @@ Add the http server connection package:
 
 ``` bash
 aea add connection fetchai/http_server:0.22.0:Qmdr2Ajx5BRBJCC6xP8wUNSCMbhStHHZaVgzkoSW6Pvu7S --remote
+aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocols fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
 ```
 
 Update the default connection:
@@ -81,9 +83,9 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.http.message import HttpMessage
-from packages.YOUR_USERNAME.skills.http_echo.dialogues import (
+from vendor.fetchai.protocols.default import DefaultMessage
+from vendor.fetchai.protocols.http.message import HttpMessage
+from vendor.YOUR_USERNAME.skills.http_echo.dialogues import (
     DefaultDialogues,
     HttpDialogue,
     HttpDialogues,
@@ -224,14 +226,14 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.default.dialogues import (
+from vendor.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
-from packages.fetchai.protocols.default.dialogues import (
+from vendor.fetchai.protocols.default.dialogues import (
     DefaultDialogues as BaseDefaultDialogues,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
-from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from vendor.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
+from vendor.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 
 
 DefaultDialogue = BaseDefaultDialogue
