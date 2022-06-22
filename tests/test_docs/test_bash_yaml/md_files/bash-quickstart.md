@@ -40,7 +40,6 @@ pip install open-aea[all]
 svn checkout https://github.com/valory-xyz/open-aea/tags/v1.10.0/packages packages
 ```
 
-
 ``` bash
 sudo apt-get install python3.7-dev
 ```
@@ -66,7 +65,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0 --local
+aea fetch open_aea/my_first_aea:0.1.0:QmbyFaoHWikC8dHcpdTVboxVnkXX2vMgch4UUXmwCfJhRu --remote
 cd my_first_aea
 ```
 ``` bash
