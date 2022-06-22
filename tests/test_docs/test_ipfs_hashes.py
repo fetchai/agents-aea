@@ -43,7 +43,7 @@ def test_ipfs_hashes() -> None:
     for md_file in all_md_files:
         content = read_file(str(md_file))
         for match in re.findall(AEA_COMMAND_REGEX, content):
-            _, _, _, doc_vendor, doc_package, _, doc_hash = match
+            doc_full_cmd, _, _, doc_vendor, doc_package, _, doc_hash = match
 
             if not doc_vendor and not doc_package:
                 # Some commands only reference the has, not the vendor or the package name
@@ -62,7 +62,7 @@ def test_ipfs_hashes() -> None:
             # Check that there is at least one similar package in hashes.csv
             assert (
                 potential_packages
-            ), f"The doc file {md_file} contains an 'aea fetch' command with a reference to an unknown package: '{doc_vendor}/{doc_package}:{doc_hash}'"
+            ), f"The doc file {md_file} contains an 'aea' command with a reference to an unknown package:\n'{doc_full_cmd}'"
 
             # Check that there is only one similar package in hashes.csv. If there is more than one, at least one of those has a matching hash.
             assert (

@@ -3,9 +3,6 @@ aea create my_aea
 cd my_aea
 ```
 ``` bash
-aea add connection fetchai/http_server:0.22.0:Qmdr2Ajx5BRBJCC6xP8wUNSCMbhStHHZaVgzkoSW6Pvu7S --remote
-```
-``` bash
 aea config set agent.default_connection fetchai/http_server:0.22.0
 ```
 ``` bash
@@ -42,4 +39,10 @@ models:
   http_dialogues:
     args: {}
     class_name: HttpDialogues
+```
+
+``` bash
+aea add connection fetchai/http_server:0.22.0:QmbTKQYumbrBQBwSy91GyEhKr4kgGD2S9rHjybb3EDD8PA --remote
+aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocols fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
 ```

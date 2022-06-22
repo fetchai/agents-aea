@@ -5,7 +5,7 @@ First, get the packages directory from IPFS:
 ```bash
 aea create my_aea
 cd my_aea
-aea add protocols open-aea/signing:1.0.0:QmRL1Qt5TEzbw6xRn3grz1fe22uM761AXL8UQ8QvGmQn8K --remote
+aea add protocol open_aea/signing:1.0.0:QmRL1Qt5TEzbw6xRn3grz1fe22uM761AXL8UQ8QvGmQn8K --remote
 ```
 
 Then, import the libraries and the set the constant values.

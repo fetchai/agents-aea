@@ -31,6 +31,7 @@ class TestQuickstartTest(BasePythonMarkdownDocs):
     """Test the quickstart test."""
 
     DOC_PATH = Path(ROOT_DIR, "docs", "quickstart.md")
+    REPLACE_VENDOR_TO_PACKAGES = True
 
 
 def test_correct_echo_string():

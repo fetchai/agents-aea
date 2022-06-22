@@ -92,7 +92,7 @@ def fix_ipfs_hashes() -> None:
 
             if not potential_packages:
                 print(
-                    f"Could not check an IPFS hash on doc file {md_file} because it references an unknown package: '{doc_vendor}/{doc_package}:{doc_hash}'"
+                    f"Could not check an IPFS hash on doc file {md_file} because it references an unknown package:\n'{doc_full_cmd}'"
                 )
                 errors = True
                 continue
@@ -103,7 +103,7 @@ def fix_ipfs_hashes() -> None:
             ):
                 print(
                     f"\nCould not check an IPFS hash on doc file {md_file} because there are multiple matching packages in hashes.csv. Fix it manually:\n"
-                    f"Referenced package in docs {doc_vendor}/{doc_package}:{doc_hash}\nPotential packages: {potential_packages}.\n"
+                    f"Command in docs: {doc_full_cmd}\nPotential packages: {potential_packages}.\n"
                 )
                 errors = True
                 continue

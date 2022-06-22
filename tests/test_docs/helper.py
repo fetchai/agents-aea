@@ -139,6 +139,8 @@ class BaseTestMarkdownDocs:
 class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
     """Test Markdown documentation by running Python snippets in sequence."""
 
+    REPLACE_VENDOR_TO_PACKAGES = False
+
     @classmethod
     def setup_class(cls):
         """
@@ -159,6 +161,8 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
 
         globals_, locals_ = self.globals, self.locals
         for python_block in python_blocks:
-            python_code = python_block["text"]
+            python_code = python_block["text"].replace("from vendor.", "from packages.")
+            if self.REPLACE_VENDOR_TO_PACKAGES:
+                python_code = python_code.replace("from vendor.", "from packages.")
             exec(python_code, globals_, locals_)  # nosec
         self._assert(locals_, *mocks)
