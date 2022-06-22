@@ -1,6 +1,6 @@
 ``` bash
 pipenv shell
-aea fetch open_aea/http_echo:0.1.0 --local 
+aea fetch open_aea/http_echo:0.1.0:QmdyEJWRz4B2PU7ioD17HVVGELihjc4feos6nS2DSL94Rf --remote
 cd http_echo
 aea generate-key ethereum; aea add-key ethereum
 aea run --aev
@@ -15,10 +15,10 @@ Successfully added connection 'fetchai/http_server:0.22.0'.
 Adding skill 'fetchai/http_echo:0.20.0'...
 Successfully added skill 'fetchai/http_echo:0.20.0'.
 Agent http_echo successfully fetched.
-    _     _____     _    
-   / \   | ____|   / \   
-  / _ \  |  _|    / _ \  
- / ___ \ | |___  / ___ \ 
+    _     _____     _
+   / \   | ____|   / \
+  / _ \  |  _|    / _ \
+ / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
 v1.4.0

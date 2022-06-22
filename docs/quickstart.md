@@ -22,9 +22,9 @@ The following hints can help:
 <ul>
 <li>To install Go, follow the official guide, depending on your platform <a href="https://go.dev/doc/install" target="_blank">here</a></li>
 
-<li>Python is already included by default on 
+<li>Python is already included by default on
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
-To check you have the right version, open a terminal and run: 
+To check you have the right version, open a terminal and run:
 ``` bash
 python3 --version
 ```
@@ -34,7 +34,7 @@ python3 --version
 
 <li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
-  E.g. for Python 3.8: 
+  E.g. for Python 3.8:
 ``` bash
 sudo apt-get install python3.8-dev
 ```
@@ -80,16 +80,16 @@ docker pull fetchai/aea-user:latest
 To run the image on Linux and MacOs:
 
 ``` bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
 ```
 
 And on Windows:
 
 ``` bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
 ```
 
-Once successfully logged into the docker container, 
+Once successfully logged into the docker container,
 you can follow the rest of the guide the same way as if not using docker.
 ​
 </details>
@@ -150,20 +150,16 @@ aea init --local
 AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
 
 
-To load Valory packages please use <a href="https://subversion.apache.org/packages.html" target="_blank">SVN</a> to checkout the specific folders;
-```bash
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.10.0/packages packages
-```
 
 
 ## Echo skill demo
 
-This is a simple demo that introduces you to the main components of an AEA. 
+This is a simple demo that introduces you to the main components of an AEA.
 
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0 --local
+aea fetch open_aea/my_first_aea:0.1.0:QmbyFaoHWikC8dHcpdTVboxVnkXX2vMgch4UUXmwCfJhRu --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -259,14 +255,14 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.21.0
+aea add connection fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z --remote
 ```
 <br>
 <b>Add the echo skill</b>
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.19.0
+aea add skill fetchai/echo:0.19.0:QmReV2qgjE4mkY9n5iwJDoEcv174Sxbjhxo84YZpLyvcR2 --remote
 ```
 This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
