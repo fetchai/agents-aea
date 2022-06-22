@@ -66,7 +66,7 @@ def is_url_reachable(url: str, attempts: int = 3) -> bool:
             response = requests.head(url, timeout=60)
             if response.status_code == 200:
                 return True
-            elif response.status_code in [403, 405, 302, 404]:
+            if response.status_code in [403, 405, 302, 404]:
                 return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
     except Exception as e:  # pylint: disable=broad-except
         print(e)
