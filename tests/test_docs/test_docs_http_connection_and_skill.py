@@ -54,7 +54,9 @@ class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
 
     def test_handlers_code_snippet(self):
         """Test the 'handlers.py' code snippet."""
-        handlers_code_snippet = self.python_blocks[0]["text"].replace("from vendor.", "from packages.")
+        handlers_code_snippet = self.python_blocks[0]["text"].replace(
+            "from vendor.", "from packages."
+        )
 
         # the handlers code snippet contains the YOUR_USERNAME placeholder
         # to be replaced by the user. We need to replace it with 'fetchai'
@@ -69,7 +71,9 @@ class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
 
     def test_dialogues_code_snippet(self):
         """Test the 'dialogues.py' code snippet."""
-        dialogues_code_snippet = self.python_blocks[1]["text"].replace("from vendor.", "from packages.")
+        dialogues_code_snippet = self.python_blocks[1]["text"].replace(
+            "from vendor.", "from packages."
+        )
         expected_dialogues_code = self.http_echo_dialogues
         assert dialogues_code_snippet in expected_dialogues_code
 
