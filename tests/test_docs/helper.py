@@ -112,6 +112,11 @@ def compare_enum_classes(expected_enum_class, actual_enum_class):
         )
 
 
+def replace_vendor_to_packages(source: str) -> str:
+    """Replaces the 'from vendor.' string to 'from packages.'"""
+    return source.replace("from vendor.", "from packages.")
+
+
 class BaseTestMarkdownDocs:
     """Base test class for testing Markdown documents."""
 
@@ -161,8 +166,8 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
 
         globals_, locals_ = self.globals, self.locals
         for python_block in python_blocks:
-            python_code = python_block["text"].replace("from vendor.", "from packages.")
+            python_code = python_block["text"]
             if self.REPLACE_VENDOR_TO_PACKAGES:
-                python_code = python_code.replace("from vendor.", "from packages.")
+                python_code = replace_vendor_to_packages(python_code)
             exec(python_code, globals_, locals_)  # nosec
         self._assert(locals_, *mocks)
