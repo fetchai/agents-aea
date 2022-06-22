@@ -612,7 +612,9 @@ Get the balance of a given account.
 #### get`_`state
 
 ```python
-def get_state(callable_name: str, *args: Any,
+def get_state(callable_name: str,
+              *args: Any,
+              raise_on_try: bool = False,
               **kwargs: Any) -> Optional[JSONLike]
 ```
 
