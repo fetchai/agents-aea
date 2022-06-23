@@ -21,13 +21,27 @@
 
 import re
 from pathlib import Path
+from typing import Dict, Tuple
 
-from scripts.fix_doc_ipfs_hashes import get_hashes, read_file
+from scripts.fix_doc_ipfs_hashes import read_file
 
 from tests.conftest import ROOT_DIR
 
 
 AEA_COMMAND_REGEX = r"(?P<full_cmd>(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+))"
+
+
+def get_hashes() -> Tuple[Dict[str, str], Dict[str, str]]:
+    """Get a dictionary with all packages and their hashes"""
+    CSV_HASH_REGEX = r"(?P<vendor>.*)\/(?P<type>.*)\/(?P<name>.*),(?P<hash>.*)\n"
+    hashes_file = Path("packages", "hashes.csv").relative_to(".")
+    hashes_content = read_file(str(hashes_file))
+    package_to_hashes = {}
+    hashes_to_package = {}
+    for match in re.findall(CSV_HASH_REGEX, hashes_content):
+        package_to_hashes[f"{match[0]}/{match[1]}/{match[2]}"] = match[3]
+        hashes_to_package[match[3]] = f"{match[0]}/{match[1]}/{match[2]}"
+    return package_to_hashes, hashes_to_package
 
 
 def test_ipfs_hashes() -> None:
