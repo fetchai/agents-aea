@@ -335,19 +335,22 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_balance(self, address: Address) -> Optional[int]:
+    def get_balance(
+        self, address: Address, raise_on_try: bool = False
+    ) -> Optional[int]:
         """
         Get the balance of a given account.
 
         This usually takes the form of a web request to be waited synchronously.
 
         :param address: the address.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the balance.
         """
 
     @abstractmethod
     def get_state(
-        self, callable_name: str, *args: Any, **kwargs: Any
+        self, callable_name: str, *args: Any, raise_on_try: bool = False, **kwargs: Any
     ) -> Optional[JSONLike]:
         """
         Call a specified function on the underlying ledger API.
@@ -356,6 +359,7 @@ class LedgerApi(Helper, ABC):
 
         :param callable_name: the name of the API function to be called.
         :param args: the positional arguments for the API function.
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: the keyword arguments for the API function.
         :return: the ledger API response.
         """
@@ -397,20 +401,26 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
+    def get_transaction_receipt(
+        self, tx_digest: str, raise_on_try: bool = False
+    ) -> Optional[JSONLike]:
         """
         Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the tx receipt, if present
         """
 
     @abstractmethod
-    def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
+    def get_transaction(
+        self, tx_digest: str, raise_on_try: bool = False
+    ) -> Optional[JSONLike]:
         """
         Get the transaction for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the tx, if present
         """
 
@@ -431,6 +441,7 @@ class LedgerApi(Helper, ABC):
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
+        raise_on_try: bool = False,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -438,6 +449,7 @@ class LedgerApi(Helper, ABC):
 
         :param contract_interface: the contract interface.
         :param deployer_address: The address that will deploy the contract.
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: the keyword arguments.
         :returns tx: the transaction dictionary.
         """
@@ -462,7 +474,7 @@ class LedgerApi(Helper, ABC):
         """Call a contract's method
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract call parameters
         """
         raise NotImplementedError
@@ -474,13 +486,15 @@ class LedgerApi(Helper, ABC):
         method_name: str,
         method_args: Optional[Dict],
         tx_args: Optional[Dict],
+        raise_on_try: bool = False,
     ) -> Optional[JSONLike]:
         """Prepare a transaction
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract parameters
         :param tx_args: the transaction parameters
+        :param raise_on_try: whether the method will raise or log on error
         """
         raise NotImplementedError
 

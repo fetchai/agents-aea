@@ -844,21 +844,26 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Get the underlying API object."""
         return self._api
 
-    def get_balance(self, address: Address) -> Optional[int]:
+    def get_balance(
+        self, address: Address, raise_on_try: bool = False
+    ) -> Optional[int]:
         """Get the balance of a given account."""
-        return self._try_get_balance(address)
+        return self._try_get_balance(address, raise_on_try=raise_on_try)
 
     @try_decorator("Unable to retrieve balance: {}", logger_method="warning")
-    def _try_get_balance(self, address: Address) -> Optional[int]:
+    def _try_get_balance(self, address: Address, **_kwargs: Any) -> Optional[int]:
         """Get the balance of a given account."""
         check_address = self._api.toChecksumAddress(address)
         return self._api.eth.get_balance(check_address)  # pylint: disable=no-member
 
     def get_state(
-        self, callable_name: str, *args: Any, **kwargs: Any
+        self, callable_name: str, *args: Any, raise_on_try: bool = False, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
-        response = self._try_get_state(callable_name, *args, **kwargs)
+        logging.error(f"HERE IT IS: {raise_on_try}, {kwargs}")
+        response = self._try_get_state(
+            callable_name, *args, raise_on_try=raise_on_try, **kwargs
+        )
         return response
 
     @try_decorator("Unable to get state: {}", logger_method="warning")
@@ -866,6 +871,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self, callable_name: str, *args: Any, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Try to call a function on the ledger API."""
+
+        if "raise_on_try" in kwargs:
+            logging.info(
+                f"popping `raise_on_try` from {self.__class__.__name__}.get_state kwargs"
+            )
+            kwargs.pop("raise_on_try")
 
         function = getattr(self._api.eth, callable_name)
         response = function(*args, **kwargs)
@@ -894,6 +905,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
         gas_price_strategy_extra_config: Optional[Dict] = None,
+        raise_on_try: bool = False,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -910,6 +922,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
         :param gas_price_strategy_extra_config: extra config for gas price strategy.
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: keyword arguments
         :return: the transfer transaction
         """
@@ -917,7 +930,10 @@ class EthereumApi(LedgerApi, EthereumHelper):
         chain_id = chain_id if chain_id is not None else self._chain_id
         destination_address = self._api.toChecksumAddress(destination_address)
         sender_address = self._api.toChecksumAddress(sender_address)
-        nonce = self._try_get_transaction_count(sender_address)
+        nonce = self._try_get_transaction_count(
+            sender_address,
+            raise_on_try=raise_on_try,
+        )
         if nonce is None:
             return transaction
         transaction = {
@@ -933,7 +949,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         if max_fee_per_gas is not None:
             max_priority_fee_per_gas = (
-                self._try_get_max_priority_fee()
+                self._try_get_max_priority_fee(raise_on_try=raise_on_try)
                 if max_priority_fee_per_gas is None
                 else max_priority_fee_per_gas
             )
@@ -949,7 +965,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         if gas_price is None and max_fee_per_gas is None:
             gas_pricing = self.try_get_gas_pricing(
-                gas_price_strategy, gas_price_strategy_extra_config
+                gas_price_strategy,
+                gas_price_strategy_extra_config,
+                raise_on_try=raise_on_try,
             )
             if gas_pricing is None:
                 return transaction  # pragma: nocover
@@ -1003,6 +1021,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         gas_price_strategy: Optional[str] = None,
         extra_config: Optional[Dict] = None,
         old_price: Optional[Dict[str, Wei]] = None,
+        **_kwargs: Any,
     ) -> Optional[Dict[str, Wei]]:
         """
         Try get the gas price based on the provided strategy.
@@ -1011,6 +1030,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
             Can be either `eip1559` or `gas_station`.
         :param extra_config: gas price strategy getter parameters.
         :param old_price: the old gas price params in case that we are trying to resubmit a transaction.
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: a dictionary with the gas data.
         """
 
@@ -1050,7 +1071,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
-    def _try_get_transaction_count(self, address: Address) -> Optional[int]:
+    def _try_get_transaction_count(
+        self, address: Address, **_kwargs: Any
+    ) -> Optional[int]:
         """Try get the transaction count."""
         nonce = self._api.eth.get_transaction_count(  # pylint: disable=no-member
             self._api.toChecksumAddress(address)
@@ -1114,29 +1137,42 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return tx_digest
 
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
+    def get_transaction_receipt(
+        self, tx_digest: str, raise_on_try: bool = False
+    ) -> Optional[JSONLike]:
         """
         Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the tx receipt, if present
         """
-        tx_receipt = self._try_get_transaction_receipt(tx_digest)
+        tx_receipt = self._try_get_transaction_receipt(
+            tx_digest,
+            raise_on_try=raise_on_try,
+        )
 
         if tx_receipt is not None and not bool(tx_receipt["status"]):
-            tx = self.get_transaction(tx_digest)
-            tx_receipt["revert_reason"] = self._try_get_revert_reason(tx)
+            tx = self.get_transaction(tx_digest, raise_on_try=raise_on_try)
+            tx_receipt["revert_reason"] = self._try_get_revert_reason(
+                tx,
+                raise_on_try=raise_on_try,
+            )
 
         return tx_receipt
 
     @try_decorator(
         "Error when attempting getting tx receipt: {}", logger_method="debug"
     )
-    def _try_get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
+    def _try_get_transaction_receipt(
+        self, tx_digest: str, **_kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Try get the transaction receipt.
 
         :param tx_digest: the digest associated to the transaction.
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: the tx receipt, if present
         """
         tx_receipt = self._api.eth.get_transaction_receipt(  # pylint: disable=no-member
@@ -1144,22 +1180,31 @@ class EthereumApi(LedgerApi, EthereumHelper):
         )
         return AttributeDictTranslator.to_dict(tx_receipt)
 
-    def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
+    def get_transaction(
+        self,
+        tx_digest: str,
+        raise_on_try: bool = False,
+    ) -> Optional[JSONLike]:
         """
         Get the transaction for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the tx, if present
         """
-        tx = self._try_get_transaction(tx_digest)
+        tx = self._try_get_transaction(tx_digest, raise_on_try=raise_on_try)
         return tx
 
     @try_decorator("Error when attempting getting tx: {}", logger_method="debug")
-    def _try_get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
+    def _try_get_transaction(
+        self, tx_digest: str, **_kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Get the transaction.
 
         :param tx_digest: the transaction digest.
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: the tx, if found
         """
         tx = self._api.eth.get_transaction(
@@ -1170,11 +1215,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator(
         "Error when attempting getting tx revert reason: {}", logger_method="debug"
     )
-    def _try_get_revert_reason(self, tx: TxData) -> str:
+    def _try_get_revert_reason(self, tx: TxData, **_kwargs: Any) -> str:
         """Try to check the revert reason of a transaction.
 
         :param tx: the transaction for which we want to get the revert reason.
-
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: the revert reason message.
         """
         # build a new transaction to replay:
@@ -1233,6 +1279,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         gas_price: Optional[str] = None,
         gas_price_strategy: Optional[str] = None,
         gas_price_strategy_extra_config: Optional[Dict] = None,
+        raise_on_try: bool = False,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -1246,13 +1293,16 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param max_priority_fee_per_gas: the part of the fee that goes to the miner (in Wei).
         :param gas_price: the gas price (in Wei)
         :param gas_price_strategy: the gas price strategy to be used.
-        :param gas_price_strategy_extra_config: extra config for gas price strategy..
+        :param gas_price_strategy_extra_config: extra config for gas price strategy.
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: keyword arguments
         :return: the transaction dictionary.
         """
         transaction: Optional[JSONLike] = None
         _deployer_address = self.api.toChecksumAddress(deployer_address)
-        nonce = self._try_get_transaction_count(_deployer_address)
+        nonce = self._try_get_transaction_count(
+            _deployer_address, raise_on_try=raise_on_try
+        )
         if nonce is None:
             return transaction
         instance = self.get_contract_instance(contract_interface)
@@ -1262,7 +1312,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         }
         if max_fee_per_gas is not None:
             max_priority_fee_per_gas = (
-                self._try_get_max_priority_fee()
+                self._try_get_max_priority_fee(raise_on_try=raise_on_try)
                 if max_priority_fee_per_gas is None
                 else max_priority_fee_per_gas
             )
@@ -1280,7 +1330,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
         if gas_price is None and max_fee_per_gas is None:
             gas_pricing = self.try_get_gas_pricing(
-                gas_price_strategy, gas_price_strategy_extra_config
+                gas_price_strategy,
+                gas_price_strategy_extra_config,
+                raise_on_try=raise_on_try,
             )
 
             if gas_pricing is None:
@@ -1301,7 +1353,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         return transaction
 
     @try_decorator("Unable to retrieve max_priority_fee: {}", logger_method="warning")
-    def _try_get_max_priority_fee(self) -> str:
+    def _try_get_max_priority_fee(self, **_kwargs: Any) -> str:
         """Try get the gas estimate."""
         return cast(str, self.api.eth.max_priority_fee)
 
@@ -1325,7 +1377,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """Call a contract's method
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract call parameters
         :return: the call result
         """
@@ -1339,13 +1391,15 @@ class EthereumApi(LedgerApi, EthereumHelper):
         method_name: str,
         method_args: Dict,
         tx_args: Dict,
+        raise_on_try: bool = False,
     ) -> Optional[JSONLike]:
         """Prepare a transaction
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract parameters
         :param tx_args: the transaction parameters
+        :param raise_on_try: whether the method will raise or log on error
         :return: the transaction
         """
         method = getattr(contract_instance.functions, method_name)
@@ -1372,7 +1426,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
             and "maxFeePerGas" not in tx_params
             and "maxPriorityFeePerGas" not in tx_params
         ):
-            gas_data = self.try_get_gas_pricing(old_price=tx_args.get("old_price"))
+            gas_data = self.try_get_gas_pricing(
+                old_price=tx_args.get("old_price"), raise_on_try=raise_on_try
+            )
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)

@@ -77,7 +77,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         """Call a contract's method
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract call parameters
         """
         raise NotImplementedError
@@ -88,13 +88,15 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
         method_name: str,
         method_args: Optional[Dict],
         tx_args: Optional[Dict],
+        raise_on_try: bool = False,
     ) -> Optional[JSONLike]:
         """Prepare a transaction
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract parameters
         :param tx_args: the transaction parameters
+        :param raise_on_try: whether the method will raise or log on error
         """
         raise NotImplementedError
 
@@ -109,7 +111,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
 
         :param contract_instance: the contract
         :param tx_hash: the transaction hash
-        :param target_address: optional address to filter tranfer events to just those that affect it
+        :param target_address: optional address to filter transfer events to just those that affect it
         """
         raise NotImplementedError
 
