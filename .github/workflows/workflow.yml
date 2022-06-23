@@ -228,7 +228,7 @@ jobs:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
         python_version: ["3.10",]
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@master
       - if: matrix.sys.os == 'windows-latest'
