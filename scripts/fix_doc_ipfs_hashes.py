@@ -22,7 +22,7 @@
 
 import re
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 import yaml
 
@@ -40,10 +40,12 @@ def read_file(filepath: str) -> str:
 
 
 class Package:
+    """Class that represents a package in hashes.csv"""
 
     CSV_HASH_REGEX = r"(?P<vendor>.*)\/(?P<type>.*)\/(?P<name>.*),(?P<hash>.*)(?:\n|$)"
 
     def __init__(self, package_line: str) -> None:
+        """Constructor"""
         m = re.match(self.CSV_HASH_REGEX, package_line)
         if not m:
             raise ValueError(
@@ -96,15 +98,17 @@ class Package:
 
 
 class PackageHashManager:
+    """Class that represents the packages in hashes.csv"""
+
     def __init__(self) -> None:
+        """Constructor"""
         hashes_file = Path("packages", "hashes.csv").relative_to(".")
         with open(hashes_file, "r", encoding="utf-8") as file_:
             self.packages = [Package(line) for line in file_.readlines()]
             self.packages = [p for p in self.packages if p.name != "scaffold"]
 
-        self.package_tree = {}
+        self.package_tree: Dict = {}
         for p in self.packages:
-            # print(p.type)
             self.package_tree.setdefault(p.vendor, {})
             self.package_tree[p.vendor].setdefault(p.type, {})
             self.package_tree[p.vendor][p.type].setdefault(p.name, p)
