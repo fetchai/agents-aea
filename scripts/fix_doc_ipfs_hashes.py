@@ -48,12 +48,27 @@ def get_hashes() -> Tuple[Dict[str, str], Dict[str, str]]:
     return package_to_hashes, hashes_to_package
 
 
+def update_test_files(old_to_new_hashes: Dict[str, str]) -> None:
+    """Update IPFS hashes in test md files"""
+    all_test_files = Path("tests", "test_docs", "test_bash_yaml", "md_files").rglob(
+        "*.md"
+    )
+
+    for md_file in all_test_files:
+        content = read_file(str(md_file))
+        for old_hash, new_hash in old_to_new_hashes.items():
+            content = content.replace(old_hash, new_hash)
+        with open(str(md_file), "w", encoding="utf-8") as qs_file:
+            qs_file.write(content)
+
+
 def fix_ipfs_hashes() -> None:
     """Fix ipfs hashes in the docs"""
     _, hashes_to_package = get_hashes()
 
     all_md_files = Path("docs").rglob("*.md")
     errors = False
+    old_to_new_hashes = {}
 
     for md_file in all_md_files:
         content = read_file(str(md_file))
@@ -125,6 +140,9 @@ def fix_ipfs_hashes() -> None:
             with open(str(md_file), "w", encoding="utf-8") as qs_file:
                 qs_file.write(new_content)
             print(f"Fixed an IPFS hash on doc file {md_file}")
+            old_to_new_hashes[doc_hash] = expected_hash
+
+    update_test_files(old_to_new_hashes)
 
     if errors:
         raise ValueError(
