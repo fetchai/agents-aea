@@ -262,7 +262,7 @@ aea add connection fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQ
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.19.0:QmReV2qgjE4mkY9n5iwJDoEcv174Sxbjhxo84YZpLyvcR2 --remote
+aea add skill fetchai/echo:0.19.0:QmQxMpYwxRNCNzEqWaPmNXFTWgu4Xmz89ZjTp2TQu3wbPM --remote
 ```
 This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>

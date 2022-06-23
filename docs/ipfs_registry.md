@@ -38,7 +38,7 @@ Packages can be downloaded using both extended public ids and hashes
 
 Add the signing protocol using
 
-`aea add protocol QmWdCAiXpeT1tgrcf8uofKdQ6fLxMH77D5jwgQbbMo41df --remote`
+`aea add protocol QmRL1Qt5TEzbw6xRn3grz1fe22uM761AXL8UQ8QvGmQn8K --remote`
 
 Or
 
