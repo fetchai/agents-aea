@@ -65,7 +65,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmbyFaoHWikC8dHcpdTVboxVnkXX2vMgch4UUXmwCfJhRu --remote
+aea fetch open_aea/my_first_aea:0.1.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
 cd my_first_aea
 ```
 ``` bash
