@@ -252,10 +252,10 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "fetchai",
 }
-PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/staging.acn.autonolas.tech/tcp/9003/p2p/16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2"
-PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/staging.acn.autonolas.tech/tcp/9004/p2p/16Uiu2HAmCQqXLFWaqqUv8hFdFPDwwNQf9qEQox8Kcf78heb33e7x"
-PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "staging.acn.autonolas.tech:9005"
-PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "staging.acn.autonolas.tech:9006"
+PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.staging.autonolas.tech/tcp/9003/p2p/16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2"
+PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.staging.autonolas.tech/tcp/9004/p2p/16Uiu2HAmCQqXLFWaqqUv8hFdFPDwwNQf9qEQox8Kcf78heb33e7x"
+PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "acn.staging.autonolas.tech:9005"
+PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "acn.staging.autonolas.tech:9006"
 PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
     "0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d"
 )
