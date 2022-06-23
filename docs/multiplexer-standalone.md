@@ -3,10 +3,15 @@ The `Multiplexer` can be used stand-alone. This way a developer can utilise the 
 First, get the required packages from IPFS.
 
 ```bash
+mkdir packages
 aea create my_aea
 cd my_aea
-aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push connection fetchai/default --local
 aea add connection fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z --remote
+aea push connection fetchai/stub --local
+cd ..
+aea delete my_aea
 ```
 
 Then, import the Python and application specific libraries and set the static variables.
@@ -23,8 +28,8 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from vendor.fetchai.connections.stub.connection import StubConnection
-from vendor.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input.txt"
@@ -152,8 +157,8 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from vendor.fetchai.connections.stub.connection import StubConnection
-from vendor.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input.txt"

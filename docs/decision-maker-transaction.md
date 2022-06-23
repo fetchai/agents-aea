@@ -3,9 +3,13 @@ This guide can be considered as a part 2 of the <a href="../standalone-transacti
 First, get the packages directory from IPFS:
 
 ```bash
+mkdir packages
 aea create my_aea
 cd my_aea
 aea add protocol open_aea/signing:1.0.0:QmRL1Qt5TEzbw6xRn3grz1fe22uM761AXL8UQ8QvGmQn8K --remote
+aea push protocol open_aea/signing --local
+cd ..
+aea delete my_aea
 ```
 
 Then, import the libraries and the set the constant values.
@@ -29,11 +33,11 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue
 from aea.skills.base import Handler, Model, Skill, SkillContext
 
-from vendor.open_aea.protocols.signing.dialogues import SigningDialogue
-from vendor.open_aea.protocols.signing.dialogues import (
+from packages.open_aea.protocols.signing.dialogues import SigningDialogue
+from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
-from vendor.open_aea.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import get_wealth_if_needed
 
@@ -327,11 +331,11 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue
 from aea.skills.base import Handler, Model, Skill, SkillContext
 
-from vendor.open_aea.protocols.signing.dialogues import SigningDialogue
-from vendor.open_aea.protocols.signing.dialogues import (
+from packages.open_aea.protocols.signing.dialogues import SigningDialogue
+from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
-from vendor.open_aea.protocols.signing.message import SigningMessage
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import get_wealth_if_needed
 

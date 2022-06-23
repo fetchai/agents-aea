@@ -26,9 +26,17 @@ cd my_aea
 Add the http server connection package:
 
 ``` bash
+mkdir packages
+aea create my_aea
+cd my_aea
 aea add connection fetchai/http_server:0.22.0:QmbTKQYumbrBQBwSy91GyEhKr4kgGD2S9rHjybb3EDD8PA --remote
-aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
-aea add protocols fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
+aea push connection fetchai/http_server --local
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+aea add protocol fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
+aea push protocol fetchai/http --local
+cd ..
+aea delete my_aea
 ```
 
 Update the default connection:
@@ -83,9 +91,9 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from vendor.fetchai.protocols.default import DefaultMessage
-from vendor.fetchai.protocols.http.message import HttpMessage
-from vendor.YOUR_USERNAME.skills.http_echo.dialogues import (
+from packages.fetchai.protocols.default import DefaultMessage
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.YOUR_USERNAME.skills.http_echo.dialogues import (
     DefaultDialogues,
     HttpDialogue,
     HttpDialogues,
@@ -226,14 +234,14 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
 
-from vendor.fetchai.protocols.default.dialogues import (
+from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
-from vendor.fetchai.protocols.default.dialogues import (
+from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogues as BaseDefaultDialogues,
 )
-from vendor.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
-from vendor.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 
 
 DefaultDialogue = BaseDefaultDialogue

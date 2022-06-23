@@ -6,9 +6,13 @@ These instructions detail the Python code you need for running an AEA outside th
 Get the needed packages from IPFS:
 
 ```bash
+mkdir packages
 aea create my_aea
 cd my_aea
-aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+cd ..
+aea delete my_aea
 ```
 
 Also, install `open-aea-ledger-fetchai` plug-in:
@@ -99,7 +103,7 @@ Also, we can add a component that was instantiated programmatically. :
     from aea.protocols.base import Message
     from aea.skills.base import Handler
 
-    from vendor.fetchai.protocols.default.message import DefaultMessage
+    from packages.fetchai.protocols.default.message import DefaultMessage
 
     class DummyHandler(Handler):
         """Dummy handler to handle messages."""
@@ -236,7 +240,7 @@ def run():
     from aea.protocols.base import Message
     from aea.skills.base import Handler
 
-    from vendor.fetchai.protocols.default.message import DefaultMessage
+    from packages.fetchai.protocols.default.message import DefaultMessage
 
     class DummyHandler(Handler):
         """Dummy handler to handle messages."""

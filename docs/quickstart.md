@@ -317,8 +317,12 @@ The following test class replicates the preceding demo and tests it's correct be
 First, get the needed packages directory from IPFS (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
 ```bash
+mkdir packages
 cd my_first_aea
-aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+cd ..
+aea delete my_aea
 ```
 
 Then write the test:
@@ -332,9 +336,9 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 
-from vendor.fetchai.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
-from vendor.fetchai.protocols.default.message import DefaultMessage
-from vendor.fetchai.protocols.default.serialization import DefaultSerializer
+from packages.fetchai.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
+from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCase
 
 
