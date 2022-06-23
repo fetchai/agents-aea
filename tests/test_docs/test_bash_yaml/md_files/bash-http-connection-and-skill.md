@@ -42,7 +42,15 @@ models:
 ```
 
 ``` bash
+mkdir packages
+aea create my_aea
+cd my_aea
 aea add connection fetchai/http_server:0.22.0:QmbTKQYumbrBQBwSy91GyEhKr4kgGD2S9rHjybb3EDD8PA --remote
-aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
-aea add protocols fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
+aea push connection fetchai/http_server --local
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+aea add protocol fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
+aea push protocol fetchai/http --local
+cd ..
+aea delete my_aea
 ```

@@ -25,11 +25,7 @@ from pathlib import Path
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from tests.conftest import CUR_PATH, ROOT_DIR
-from tests.test_docs.helper import (
-    extract_code_blocks,
-    extract_python_code,
-    replace_vendor_to_packages,
-)
+from tests.test_docs.helper import extract_code_blocks, extract_python_code
 from tests.test_docs.test_multiplexer_standalone.multiplexer_standalone import run
 
 
@@ -52,7 +48,7 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
     def test_read_md_file(self):
         """Read the code blocks. Last block should be the whole code."""
         assert (
-            replace_vendor_to_packages(self.code_blocks[-1]) == self.python_file
+            self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
     def test_run_agent(self):
@@ -74,5 +70,5 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         """Test that all the code-blocks exist in the python file."""
         for blocks in self.code_blocks:
             assert (
-                replace_vendor_to_packages(blocks) in self.python_file
+                blocks in self.python_file
             ), "Code-block doesn't exist in the python file."

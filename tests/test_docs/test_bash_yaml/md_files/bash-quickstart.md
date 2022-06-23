@@ -161,6 +161,10 @@ cd my_first_aea
 ```
 
 ```bash
+mkdir packages
 cd my_first_aea
-aea add protocols fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+cd ..
+aea delete my_aea
 ```
