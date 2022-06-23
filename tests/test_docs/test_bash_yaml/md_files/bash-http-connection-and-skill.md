@@ -3,7 +3,7 @@ aea create my_aea
 cd my_aea
 ```
 ``` bash
-aea add connection fetchai/http_server:0.22.0:Qmdr2Ajx5BRBJCC6xP8wUNSCMbhStHHZaVgzkoSW6Pvu7S --remote
+aea add connection fetchai/http_server:0.22.0:QmbTKQYumbrBQBwSy91GyEhKr4kgGD2S9rHjybb3EDD8PA --remote
 ```
 ``` bash
 aea config set agent.default_connection fetchai/http_server:0.22.0

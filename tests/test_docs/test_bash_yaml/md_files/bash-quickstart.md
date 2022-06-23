@@ -151,6 +151,6 @@ aea delete my_first_aea
 
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.27.0:QmcmunuEAvaKfLCJsgeqF8M5dKARHixu4otUFVGbEenaCm --remote
+aea fetch open_aea/my_first_aea:0.27.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
 cd my_first_aea
 ```
