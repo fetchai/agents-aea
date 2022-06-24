@@ -70,6 +70,7 @@ class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
     def test_dialogues_code_snippet(self):
         """Test the 'dialogues.py' code snippet."""
         dialogues_code_snippet = self.python_blocks[1]["text"]
+
         expected_dialogues_code = self.http_echo_dialogues
         assert dialogues_code_snippet in expected_dialogues_code
 

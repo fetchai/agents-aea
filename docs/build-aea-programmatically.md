@@ -3,10 +3,16 @@ These instructions detail the Python code you need for running an AEA outside th
 
 ## Preparation
 
-Get the packages' directory from the AEA repository:
+Get the needed packages from IPFS:
 
-``` bash
-svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
+```bash
+mkdir packages
+aea create my_aea
+cd my_aea
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+cd ..
+aea delete my_aea
 ```
 
 Also, install `open-aea-ledger-fetchai` plug-in:

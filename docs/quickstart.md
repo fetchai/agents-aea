@@ -314,10 +314,15 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 The following test class replicates the preceding demo and tests it's correct behaviour. The <code>AEATestCase</code> classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
-First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
+First, get the needed packages directory from IPFS (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
-``` bash
-svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
+```bash
+mkdir packages
+cd my_first_aea
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+cd ..
+aea delete my_aea
 ```
 
 Then write the test:

@@ -154,3 +154,17 @@ aea delete my_first_aea
 aea fetch open_aea/my_first_aea:0.1.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
 cd my_first_aea
 ```
+
+``` bash
+aea fetch open_aea/my_first_aea:0.1.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
+cd my_first_aea
+```
+
+```bash
+mkdir packages
+cd my_first_aea
+aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea push protocol fetchai/default --local
+cd ..
+aea delete my_aea
+```

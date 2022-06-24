@@ -1,6 +1,18 @@
 This guide can be considered as a part 2 of the <a href="../standalone-transaction/">the stand-alone transaction demo</a>. The main difference is that now we are going to use the decision-maker to sign the transaction.
 
-First, import the libraries and the set the constant values. (Get the packages directory from the AEA repository `svn export https://github.com/valory-xyz/open-aea.git/trunk/packages`.)
+First, get the packages directory from IPFS:
+
+```bash
+mkdir packages
+aea create my_aea
+cd my_aea
+aea add protocol open_aea/signing:1.0.0:QmRL1Qt5TEzbw6xRn3grz1fe22uM761AXL8UQ8QvGmQn8K --remote
+aea push protocol open_aea/signing --local
+cd ..
+aea delete my_aea
+```
+
+Then, import the libraries and the set the constant values.
 
 ``` python
 import logging

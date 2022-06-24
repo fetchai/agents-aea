@@ -22,10 +22,14 @@
 
 import re
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Optional
+
+import yaml
 
 
 AEA_COMMAND_REGEX = r"(?P<full_cmd>(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+))"
+
+ROOT_DIR = Path(__file__).parent.parent
 
 
 def read_file(filepath: str) -> str:
@@ -35,96 +39,184 @@ def read_file(filepath: str) -> str:
     return file_str
 
 
-def get_hashes() -> Tuple[Dict[str, str], Dict[str, str]]:
-    """Get a dictionary with all packages and their hashes"""
-    CSV_HASH_REGEX = r"(?P<vendor>.*)\/(?P<type>.*)\/(?P<name>.*),(?P<hash>.*)\n"
-    hashes_file = Path("packages", "hashes.csv").relative_to(".")
-    hashes_content = read_file(str(hashes_file))
-    package_to_hashes = {}
-    hashes_to_package = {}
-    for match in re.findall(CSV_HASH_REGEX, hashes_content):
-        package_to_hashes[f"{match[0]}/{match[1]}/{match[2]}"] = match[3]
-        hashes_to_package[match[3]] = f"{match[0]}/{match[1]}/{match[2]}"
-    return package_to_hashes, hashes_to_package
+class Package:
+    """Class that represents a package in hashes.csv"""
+
+    CSV_HASH_REGEX = r"(?P<vendor>.*)\/(?P<type>.*)\/(?P<name>.*),(?P<hash>.*)(?:\n|$)"
+
+    def __init__(self, package_line: str) -> None:
+        """Constructor"""
+        m = re.match(self.CSV_HASH_REGEX, package_line)
+        if not m:
+            raise ValueError(
+                f"PackageHashManager: the line {package_line} does not match the package format"
+            )
+        self.vendor = m.groupdict()["vendor"]
+        self.type = m.groupdict()["type"]
+        self.name = m.groupdict()["name"]
+        self.hash = m.groupdict()["hash"]
+
+        if self.name == "scaffold":
+            return
+
+        if self.type not in (
+            "connections",
+            "agents",
+            "protocols",
+            "services",
+            "skills",
+            "contracts",
+        ):
+            raise ValueError(
+                f"Package: unknown package type in hashes.csv: {self.type}"
+            )
+        self.type = self.type[:-1]  # remove last s
+
+        self.last_version = None
+        yaml_file_path = Path(
+            ROOT_DIR,
+            "packages",
+            self.vendor,
+            self.type + "s",
+            self.name,
+            f"{'aea-config' if self.type == 'agent' else self.type}.yaml",
+        )
+        with open(yaml_file_path, "r", encoding="utf-8") as file:
+            content = yaml.load_all(file, Loader=yaml.FullLoader)
+            for resource in content:
+                if "version" in resource:
+                    self.last_version = resource["version"]
+                    break
+
+    def get_command(self) -> str:
+        """Get the add command"""
+        if self.type == "agent":
+            return (
+                f"aea fetch {self.vendor}/{self.name}:{self.last_version}:{self.hash}"
+            )
+        return f"aea add {self.type} {self.vendor}/{self.name}:{self.last_version}:{self.hash}"
+
+
+class PackageHashManager:
+    """Class that represents the packages in hashes.csv"""
+
+    def __init__(self) -> None:
+        """Constructor"""
+        hashes_file = Path("packages", "hashes.csv").relative_to(".")
+        with open(hashes_file, "r", encoding="utf-8") as file_:
+            self.packages = [Package(line) for line in file_.readlines()]
+            self.packages = [p for p in self.packages if p.name != "scaffold"]
+
+        self.package_tree: Dict = {}
+        for p in self.packages:
+            self.package_tree.setdefault(p.vendor, {})
+            self.package_tree[p.vendor].setdefault(p.type, {})
+            self.package_tree[p.vendor][p.type].setdefault(p.name, p)
+
+    def get_package_by_hash(self, package_hash: str) -> Optional[Package]:
+        """Get a package given its hash"""
+        packages = list(filter(lambda p: p.hash == package_hash, self.packages))
+        if not packages:
+            return None
+        if len(packages) > 1:
+            raise ValueError(
+                f"PackageHashManager: hash search for {package_hash} returned more than 1 result in hashes.csv"
+            )
+        return packages[0]
+
+    def get_hash_by_package_line(
+        self, package_line: str, md_file: str
+    ) -> Optional[str]:
+        """Get a hash given its package line"""
+
+        try:
+            m = re.match(AEA_COMMAND_REGEX, package_line)
+
+            # No match
+            if not m:
+                print(
+                    f"Docs [{md_file}]: line '{package_line}' does not match an aea command format"
+                )
+                return None
+            d = m.groupdict()
+
+            # Underspecified commands that only use the hash
+            if not d["vendor"] and not d["package"]:
+                package = self.get_package_by_hash(d["hash"])
+
+                # This hash exists in hashes.csv
+                if package:
+                    return package.hash
+
+                # This hash does not exist in hashes.csv
+                print(
+                    f"Docs [{md_file}]: unknown IPFS hash in line '{package_line}'. Can't fix because this command just uses the hash"
+                )
+                return None
+
+            # Complete command, succesfully retrieved
+            package_type = "agent" if d["cmd"] == "fetch" else d["cmd"].split(" ")[-1]
+            return self.package_tree[d["vendor"]][package_type][d["package"]].hash
+
+        # Otherwise log the error
+        except KeyError:
+            print(
+                f"Docs [{md_file}]: could not find the corresponding hash for line '{package_line}'"
+            )
+            return None
+
+
+def update_test_files(old_to_new_hashes: Dict[str, str]) -> None:
+    """Update IPFS hashes in test md files"""
+    all_test_files = Path("tests", "test_docs", "test_bash_yaml", "md_files").rglob(
+        "*.md"
+    )
+    for md_file in all_test_files:
+        content = read_file(str(md_file))
+        for old_hash, new_hash in old_to_new_hashes.items():
+            content = content.replace(old_hash, new_hash)
+        with open(str(md_file), "w", encoding="utf-8") as qs_file:
+            qs_file.write(content)
 
 
 def fix_ipfs_hashes() -> None:
     """Fix ipfs hashes in the docs"""
-    _, hashes_to_package = get_hashes()
 
     all_md_files = Path("docs").rglob("*.md")
     errors = False
+    old_to_new_hashes = {}
+    package_manager = PackageHashManager()
 
     for md_file in all_md_files:
         content = read_file(str(md_file))
         for match in re.findall(AEA_COMMAND_REGEX, content):
-            (
-                doc_full_cmd,
-                doc_cli,
-                doc_cmd,
-                doc_vendor,
-                doc_package,
-                doc_version,
-                doc_hash,
-            ) = match
-
-            if not doc_vendor and not doc_package:
-                print(
-                    f"Warning: can't check a IPFS hash in {md_file} because this commands just uses the hash:\n\t{doc_full_cmd}"
-                )
-                continue
-
-            # Look for potential matching packages
-            potential_packages = {
-                p: h
-                for h, p in hashes_to_package.items()
-                if p.startswith(doc_vendor) and p.endswith(doc_package)
-            }
-
-            package_type = (
-                doc_cmd.replace("add", "").strip() if "add" in doc_cmd else None
+            doc_full_cmd = match[0]
+            doc_hash = match[-1]
+            expected_hash = package_manager.get_hash_by_package_line(
+                doc_full_cmd, str(md_file)
             )
-
-            if package_type:
-                potential_packages = {
-                    p: h for p, h in potential_packages.items() if package_type in p
-                }
-
-            if not potential_packages:
-                print(
-                    f"Could not check an IPFS hash on doc file {md_file} because it references an unknown package: '{doc_vendor}/{doc_package}:{doc_hash}'"
-                )
+            if not expected_hash:
+                errors = True
+                continue
+            expected_package = package_manager.get_package_by_hash(expected_hash)
+            if not expected_package:
                 errors = True
                 continue
 
-            if (
-                len(potential_packages) != 1
-                and doc_hash not in potential_packages.values()
-            ):
-                print(
-                    f"\nCould not check an IPFS hash on doc file {md_file} because there are multiple matching packages in hashes.csv. Fix it manually:\n"
-                    f"Referenced package in docs {doc_vendor}/{doc_package}:{doc_hash}\nPotential packages: {potential_packages}.\n"
-                )
-                errors = True
-                continue
+            new_command = expected_package.get_command()
 
             # Overwrite with new hash
-            expected_hash = list(potential_packages.values())[0]
-
             if doc_hash == expected_hash:
                 continue
-
-            new_command = ""
-            if doc_vendor and doc_package:
-                new_command = f"{doc_cli} {doc_cmd} {doc_vendor}/{doc_package}:{doc_version + ':' if doc_version else ''}{expected_hash}"
-            else:
-                new_command = f"{doc_cli} {doc_cmd} {expected_hash}"
 
             new_content = content.replace(doc_full_cmd, new_command)
 
             with open(str(md_file), "w", encoding="utf-8") as qs_file:
                 qs_file.write(new_content)
             print(f"Fixed an IPFS hash on doc file {md_file}")
+            old_to_new_hashes[doc_hash] = expected_hash
+
+    update_test_files(old_to_new_hashes)
 
     if errors:
         raise ValueError(

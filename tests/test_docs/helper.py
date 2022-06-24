@@ -160,5 +160,6 @@ class BasePythonMarkdownDocs(BaseTestMarkdownDocs):
         globals_, locals_ = self.globals, self.locals
         for python_block in python_blocks:
             python_code = python_block["text"]
+            python_code = python_code
             exec(python_code, globals_, locals_)  # nosec
         self._assert(locals_, *mocks)
