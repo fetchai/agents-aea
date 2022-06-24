@@ -643,16 +643,18 @@ class _CosmosApi(LedgerApi):
         """Get the underlying API object."""
         return self._api
 
-    def get_balance(self, address: Address) -> Optional[int]:
+    def get_balance(
+        self, address: Address, raise_on_try: bool = False
+    ) -> Optional[int]:
         """Get the balance of a given account."""
-        balance = self._try_get_balance(address)
+        balance = self._try_get_balance(address, raise_on_try=raise_on_try)
         return balance
 
     @try_decorator(
         "Encountered exception when trying get balance: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_balance(self, address: Address) -> Optional[int]:
+    def _try_get_balance(self, address: Address, **_kwargs: Any) -> Optional[int]:
         QueryBalanceRequest = lazy_load()["QueryBalanceRequest"]
         res = self.bank_client.Balance(
             QueryBalanceRequest(address=address, denom=self.denom)
@@ -660,7 +662,7 @@ class _CosmosApi(LedgerApi):
         return int(res.balance.amount)
 
     def get_state(
-        self, callable_name: str, *args: Any, **kwargs: Any
+        self, callable_name: str, *args: Any, raise_on_try: bool = False, **kwargs: Any
     ) -> Optional[JSONLike]:
         """
         Call a specified function on the ledger API.
@@ -672,10 +674,16 @@ class _CosmosApi(LedgerApi):
 
         :param callable_name: name of the callable
         :param args: positional arguments
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: keyword arguments
         :return: the transaction dictionary
         """
-        response = self._try_get_state(callable_name, *args, **kwargs)
+        response = self._try_get_state(
+            callable_name,
+            *args,
+            raise_on_try=raise_on_try,
+            **kwargs,
+        )
         return response
 
     @try_decorator(
@@ -700,6 +708,7 @@ class _CosmosApi(LedgerApi):
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
+        raise_on_try: bool = False,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -709,6 +718,7 @@ class _CosmosApi(LedgerApi):
 
         :param contract_interface: the contract interface.
         :param deployer_address: The address that will deploy the contract.
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: keyword arguments.
         :return: the transaction dictionary.
         """
@@ -733,7 +743,8 @@ class _CosmosApi(LedgerApi):
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
-                deployer_address
+                deployer_address,
+                raise_on_try=raise_on_try,
             )
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
@@ -914,6 +925,7 @@ class _CosmosApi(LedgerApi):
         account_number: Optional[int] = None,
         sequence: Optional[int] = None,
         tx_fee_denom: Optional[str] = None,
+        raise_on_try: bool = False,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm HandleMsg transaction.
@@ -930,6 +942,7 @@ class _CosmosApi(LedgerApi):
         :param account_number: Account number
         :param sequence: Sequence
         :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
+        :param raise_on_try: whether the method will raise or log on error
         :return: the unsigned CosmWasm HandleMsg
         """
         MsgExecuteContract, Coin = (
@@ -941,7 +954,8 @@ class _CosmosApi(LedgerApi):
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
-                sender_address
+                sender_address,
+                raise_on_try=raise_on_try,
             )
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
@@ -974,16 +988,22 @@ class _CosmosApi(LedgerApi):
         return tx
 
     def execute_contract_query(
-        self, contract_address: Address, query_msg: JSONLike
+        self,
+        contract_address: Address,
+        query_msg: JSONLike,
+        raise_on_try: bool = False,
     ) -> Optional[JSONLike]:
         """
         Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
         :param contract_address: the address of the smart contract.
         :param query_msg: QueryMsg in JSON format.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the message receipt
         """
-        result = self._try_execute_wasm_query(contract_address, query_msg)
+        result = self._try_execute_wasm_query(
+            contract_address, query_msg, raise_on_try=raise_on_try
+        )
         return result
 
     @try_decorator(
@@ -991,13 +1011,18 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def _try_execute_wasm_query(
-        self, contract_address: Address, query_msg: JSONLike
+        self,
+        contract_address: Address,
+        query_msg: JSONLike,
+        **_kwargs,
     ) -> Optional[JSONLike]:
         """
         Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
         :param contract_address: the address of the smart contract.
         :param query_msg: QueryMsg in JSON format.
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: the message receipt
         """
         QuerySmartContractStateRequest = lazy_load()["QuerySmartContractStateRequest"]
@@ -1021,6 +1046,7 @@ class _CosmosApi(LedgerApi):
         account_number: Optional[int] = None,
         sequence: Optional[int] = None,
         tx_fee_denom: Optional[str] = None,
+        raise_on_try: bool = False,
         **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
@@ -1038,6 +1064,7 @@ class _CosmosApi(LedgerApi):
         :param account_number: Account number
         :param sequence: Sequence
         :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
+        :param raise_on_try: whether the method will raise or log on error
         :param kwargs: keyword arguments.
         :return: the transfer transaction
         """
@@ -1048,7 +1075,8 @@ class _CosmosApi(LedgerApi):
 
         if account_number is None or sequence is None:
             account_number, sequence = self._try_get_account_number_and_sequence(
-                sender_address
+                sender_address,
+                raise_on_try=raise_on_try,
             )
             if account_number is None or sequence is None:
                 return None  # pragma: nocover
@@ -1159,6 +1187,7 @@ class _CosmosApi(LedgerApi):
         chain_id: Optional[str] = None,
         denom: Optional[str] = None,
         tx_fee_denom: Optional[str] = None,
+        raise_on_try: bool = False,
     ) -> JSONLike:
         """
         Generate transaction with multiple messages
@@ -1172,6 +1201,7 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the chain ID of the transaction.
         :param denom: the denomination of tx fee
         :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
+        :param raise_on_try: whether the method will raise or log on error
 
         :raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
 
@@ -1191,7 +1221,8 @@ class _CosmosApi(LedgerApi):
         sequences: List[int] = []
         for address in from_addresses:
             account_number, sequence = self._try_get_account_number_and_sequence(
-                address
+                address,
+                raise_on_try=raise_on_try,
             )
             account_numbers.append(account_number)
             sequences.append(sequence)
@@ -1321,12 +1352,16 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def _try_get_account_number_and_sequence(
-        self, address: Address
+        self,
+        address: Address,
+        **_kwargs: Any,
     ) -> Tuple[Optional[int], Optional[int]]:
         """
         Try get account number and sequence for an address.
 
         :param address: the address
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: a tuple of account number and sequence
         """
         QueryAccountRequest, BaseAccount = (
@@ -1375,14 +1410,19 @@ class _CosmosApi(LedgerApi):
             return None
         return broad_tx_resp.tx_response.txhash
 
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
+    def get_transaction_receipt(
+        self, tx_digest: str, raise_on_try: bool = False
+    ) -> Optional[JSONLike]:
         """
         Get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the tx receipt, if present
         """
-        tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
+        tx_with_receipt = self._try_get_transaction_with_receipt(
+            tx_digest, raise_on_try=raise_on_try
+        )
 
         if tx_with_receipt is None:
             return None
@@ -1392,11 +1432,17 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying to get transaction receipt: {}",
         logger_method=_default_logger.warning,
     )
-    def _try_get_transaction_with_receipt(self, tx_digest: str) -> Optional[JSONLike]:
+    def _try_get_transaction_with_receipt(
+        self,
+        tx_digest: str,
+        **_kwargs: Any,
+    ) -> Optional[JSONLike]:
         """
         Try get the transaction receipt for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param _kwargs: the keyword arguments. Possible kwargs are:
+            `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
         :return: the tx receipt, if present
         """
         GetTxRequest = lazy_load()["GetTxRequest"]
@@ -1404,15 +1450,20 @@ class _CosmosApi(LedgerApi):
         tx_response = self.tx_client.GetTx(tx_request)
         return MessageToDict(tx_response)
 
-    def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
+    def get_transaction(
+        self, tx_digest: str, raise_on_try: bool = False
+    ) -> Optional[JSONLike]:
         """
         Get the transaction for a transaction digest.
 
         :param tx_digest: the digest associated to the transaction.
+        :param raise_on_try: whether the method will raise or log on error
         :return: the tx, if present
         """
         # Cosmos does not distinguish between transaction receipt and transaction
-        tx_with_receipt = self._try_get_transaction_with_receipt(tx_digest)
+        tx_with_receipt = self._try_get_transaction_with_receipt(
+            tx_digest, raise_on_try=raise_on_try
+        )
         if tx_with_receipt is None:
             return None
         return {"tx": tx_with_receipt.get("tx")}
@@ -1450,7 +1501,7 @@ class _CosmosApi(LedgerApi):
         """Call a contract's method
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract call parameters
         """
         raise NotImplementedError
@@ -1461,13 +1512,15 @@ class _CosmosApi(LedgerApi):
         method_name: str,
         method_args: Optional[Dict],
         tx_args: Optional[Dict],
+        raise_on_try: bool = False,
     ) -> Optional[JSONLike]:
         """Prepare a transaction
 
         :param contract_instance: the contract to use
-        :param method_name: the contract methof to call
+        :param method_name: the contract method to call
         :param method_args: the contract parameters
         :param tx_args: the transaction parameters
+        :param raise_on_try: whether the method will raise or log on error
         """
         raise NotImplementedError
 

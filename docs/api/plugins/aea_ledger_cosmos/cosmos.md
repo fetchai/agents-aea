@@ -542,7 +542,7 @@ Get the underlying API object.
 #### get`_`balance
 
 ```python
-def get_balance(address: Address) -> Optional[int]
+def get_balance(address: Address, raise_on_try: bool = False) -> Optional[int]
 ```
 
 Get the balance of a given account.
@@ -552,7 +552,9 @@ Get the balance of a given account.
 #### get`_`state
 
 ```python
-def get_state(callable_name: str, *args: Any,
+def get_state(callable_name: str,
+              *args: Any,
+              raise_on_try: bool = False,
               **kwargs: Any) -> Optional[JSONLike]
 ```
 
@@ -567,6 +569,7 @@ as the callable_name and the rest of the path as args.
 
 - `callable_name`: name of the callable
 - `args`: positional arguments
+- `raise_on_try`: whether the method will raise or log on error
 - `kwargs`: keyword arguments
 
 **Returns**:

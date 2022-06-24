@@ -3,7 +3,7 @@
 dns:
   enabled: true
   dnsname: acn-node-443
-  publicdnsname: staging.acn.autonolas.tech
+  publicdnsname: acn.staging.autonolas.tech
 
 acnnodes:
   enabled: true
@@ -20,7 +20,6 @@ acnnodes:
       delegateport: 11003
       privkey: SECRET_KEY
       peerid: 16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2
-      address: cosmos1uwyrqt6kxs4xmz7520kynet70w04y7ef226vxr
     - p2pport: 9004
       delegateport: 11004
       privkey: SECRET_KEY

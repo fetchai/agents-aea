@@ -48,27 +48,29 @@ WHITELIST_URL_TO_CODE = {
 IGNORE: Set[str] = {"https://faucet.metamask.io/", "https://ipfs.io/"}
 
 
-def is_url_reachable(url: str) -> bool:
+def is_url_reachable(url: str, attempts: int = 3) -> bool:
     """
-    Check if a url is reachable.
+    Check if an url is reachable.
 
     :param url: the url to check
+    :param attempts: how often to retry connecting
     :return: bool
     """
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
         return True
     if url in IGNORE:
         return True
+
     try:
-        response = requests.head(url, timeout=60)
-        if response.status_code == 200:
-            return True
-        if response.status_code in [403, 405, 302, 404]:
-            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
-        return False
+        for _ in range(attempts):
+            response = requests.head(url, timeout=60)
+            if response.status_code == 200:
+                return True
+            if response.status_code in [403, 405, 302, 404]:
+                return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
     except Exception as e:  # pylint: disable=broad-except
         print(e)
-        return False
+    return False
 
 
 def check_header_in_file(header: str, file: Path) -> None:

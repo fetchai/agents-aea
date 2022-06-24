@@ -81,7 +81,7 @@ def test_ipfs_hashes() -> None:
             # Check that there is only one similar package in hashes.csv. If there is more than one, at least one of those has a matching hash.
             assert (
                 len(potential_packages) == 1 or doc_hash in potential_packages.values()
-            ), f"More than one package can correspond to the 'aea fecth' command in {md_file}. Candidates: {potential_packages}"
+            ), f"More than one package can correspond to the 'aea fetch' command in {md_file}. Candidates: {potential_packages}"
 
             # If there was only one match, check that the hashes match
             if len(potential_packages) == 1:
