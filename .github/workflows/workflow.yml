@@ -25,7 +25,8 @@ jobs:
           pip install pipenv
       - name: Pipenv install requirements and check it can be locked
         run: |
-          pipenv install --dev --skip-lock --clear
+          pipenv --clear
+          pipenv install --dev --skip-lock
           pipenv run pip install -e .[all]
           pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
           pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
