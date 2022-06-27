@@ -860,7 +860,6 @@ class EthereumApi(LedgerApi, EthereumHelper):
         self, callable_name: str, *args: Any, raise_on_try: bool = False, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
-        logging.error(f"HERE IT IS: {raise_on_try}, {kwargs}")
         response = self._try_get_state(
             callable_name, *args, raise_on_try=raise_on_try, **kwargs
         )
