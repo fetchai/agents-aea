@@ -185,8 +185,8 @@ jobs:
           pip install tox
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
-      - name: Check Docs links
-        run: tox -e check_doc_links
+      - name: Check Docs links and IPFS hashes
+        run: tox -e check_doc_links_hashes
       - name: Check API Docs updated
         run: tox -e check_api_docs
       - name: Check spelling
