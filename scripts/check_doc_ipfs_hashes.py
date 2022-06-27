@@ -20,7 +20,9 @@
 
 """This module contains the tools for autoupdating ipfs hashes in the documentation."""
 
+import argparse
 import re
+import sys
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -39,7 +41,7 @@ def read_file(filepath: str) -> str:
     return file_str
 
 
-class Package:
+class Package:  # pylint: disable=too-few-public-methods
     """Class that represents a package in hashes.csv"""
 
     CSV_HASH_REGEX = r"(?P<vendor>.*)\/(?P<type>.*)\/(?P<name>.*),(?P<hash>.*)(?:\n|$)"
@@ -179,11 +181,12 @@ def update_test_files(old_to_new_hashes: Dict[str, str]) -> None:
             qs_file.write(content)
 
 
-def fix_ipfs_hashes() -> None:
+def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-locals
     """Fix ipfs hashes in the docs"""
 
     all_md_files = Path("docs").rglob("*.md")
     errors = False
+    hash_mismatches = False
     old_to_new_hashes = {}
     package_manager = PackageHashManager()
 
@@ -209,21 +212,37 @@ def fix_ipfs_hashes() -> None:
             if doc_hash == expected_hash:
                 continue
 
-            new_content = content.replace(doc_full_cmd, new_command)
+            hash_mismatches = True
 
-            with open(str(md_file), "w", encoding="utf-8") as qs_file:
-                qs_file.write(new_content)
-            print(f"Fixed an IPFS hash on doc file {md_file}")
-            old_to_new_hashes[doc_hash] = expected_hash
+            if fix:
+                new_content = content.replace(doc_full_cmd, new_command)
 
-    update_test_files(old_to_new_hashes)
+                with open(str(md_file), "w", encoding="utf-8") as qs_file:
+                    qs_file.write(new_content)
+                print(f"Fixed an IPFS hash on doc file {md_file}")
+                old_to_new_hashes[doc_hash] = expected_hash
+            else:
+                print(
+                    f"IPFS hash mismatch on doc file {md_file}. Expected {expected_hash}, got {doc_hash}:\n    {doc_full_cmd}"
+                )
 
-    if errors:
+    if fix:
+        update_test_files(old_to_new_hashes)
+
+    if fix and errors:
         raise ValueError(
             "There were some errors while processing the docs. Check the logs."
         )
+
+    if not fix and (hash_mismatches or errors):
+        print("There are mismatching IPFS hashes in the docs.")
+        sys.exit(1)
+
     print("OK")
 
 
 if __name__ == "__main__":
-    fix_ipfs_hashes()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fix", action="store_true")
+    args = parser.parse_args()
+    check_ipfs_hashes(fix=args.fix)
