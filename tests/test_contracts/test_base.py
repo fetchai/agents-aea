@@ -268,3 +268,114 @@ def test_get_transaction_transfer_logs_2():
     ledger_api = MagicMock()
     ledger_api.get_transaction_transfer_logs.return_value = {}
     contract.get_transaction_transfer_logs(ledger_api, "dummy_hash")
+
+
+def test_get_method_data():
+    """Tests get_method_data."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    contract_instance = MagicMock()
+    method = MagicMock()
+    method.abi = {
+        "inputs": [{"name": "inputA"}, {"name": "inputB"}, {"name": "inputC"}]
+    }
+    contract_instance.get_function_by_name.return_value = method
+    contract_instance.encodeABI.return_value = dummy_address
+    ledger_api = MagicMock()
+    ledger_api.get_contract_instance.return_value = contract_instance
+
+    res = contract.get_method_data(
+        ledger_api=ledger_api,
+        contract_address=dummy_address,
+        method_name="dummy_method_name",
+        inputA=0,
+        inputB=0,
+        inputC=0,
+    )
+    assert res == {
+        "data": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    }
+
+
+def test_get_method_data__key_error():
+    """Tests get_method_data."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    contract_instance = MagicMock()
+    method = MagicMock()
+    method.abi = {
+        "inputs": [{"name": "inputA"}, {"name": "inputB"}, {"name": "inputC"}]
+    }
+    contract_instance.get_function_by_name.return_value = method
+    contract_instance.encodeABI.return_value = dummy_address
+    ledger_api = MagicMock()
+    ledger_api.get_contract_instance.return_value = contract_instance
+
+    res = contract.get_method_data(
+        ledger_api=ledger_api,
+        contract_address=dummy_address,
+        method_name="dummy_method_name",
+        inputA=0,
+        inputB=0,
+        # missing inputC to provoke a KeyError exception
+    )
+    assert not res
+
+
+def test_get_method_data__attribute_error():
+    """Tests get_method_data."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    contract_instance = MagicMock()
+    method = None  # provoke an attribute error when accessing method.abi
+    contract_instance.get_function_by_name.return_value = method
+    contract_instance.encodeABI.return_value = dummy_address
+    ledger_api = MagicMock()
+    ledger_api.get_contract_instance.return_value = contract_instance
+
+    res = contract.get_method_data(
+        ledger_api=ledger_api,
+        contract_address=dummy_address,
+        method_name="dummy_method_name",
+    )
+    assert not res
+
+
+def test_get_method_data_type_error():
+    """Tests get_method_data."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    def dummy_fun(fn_name, args):
+        raise TypeError
+
+    contract_instance = MagicMock()
+    method = MagicMock()
+    method.abi = {
+        "inputs": [{"name": "inputA"}, {"name": "inputB"}, {"name": "inputC"}]
+    }
+    contract_instance.get_function_by_name.return_value = method
+    contract_instance.encodeABI = dummy_fun
+    ledger_api = MagicMock()
+    ledger_api.get_contract_instance.return_value = contract_instance
+
+    res = contract.get_method_data(
+        ledger_api=ledger_api,
+        contract_address=dummy_address,
+        method_name="dummy_method_name",
+        inputA=0,
+        inputB=0,
+        inputC=0,
+    )
+    assert not res

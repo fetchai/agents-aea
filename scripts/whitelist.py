@@ -300,3 +300,4 @@ get_protocol_specification_id_from_specification  # unused function  (aea/helper
 protocol_dialogues  # unused property (aea/skills/base.py:513)
 SERVICES  # unused variable (aea/configurations/constants.py:57)
 DEFAULT_SERVICE_CONFIG_FILE  # unused variable (aea/configurations/constants.py:65)
+_.get_method_data  # unused method (aea/contracts/base.py:283)
