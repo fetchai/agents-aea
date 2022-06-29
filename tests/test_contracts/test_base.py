@@ -268,3 +268,24 @@ def test_get_transaction_transfer_logs_2():
     ledger_api = MagicMock()
     ledger_api.get_transaction_transfer_logs.return_value = {}
     contract.get_transaction_transfer_logs(ledger_api, "dummy_hash")
+
+
+def test_get_method_data():
+    """Tests get_method_data."""
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+    dummy_address = "0x0000000000000000000000000000000000000000"
+    contract_instance = MagicMock()
+    contract_instance.encodeABI.return_value = dummy_address
+    ledger_api = MagicMock()
+    ledger_api.get_contract_instance.return_value = contract_instance
+    res = contract.get_method_data(
+        ledger_api=ledger_api,
+        contract_address=dummy_address,
+        method_name="dummy_method_name",
+        arg1=0,
+    )
+    assert res == {
+        "data": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    }
