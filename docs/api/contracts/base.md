@@ -4,6 +4,16 @@
 
 The base contract.
 
+<a id="aea.contracts.base.snake_to_camel"></a>
+
+#### snake`_`to`_`camel
+
+```python
+def snake_to_camel(string: str) -> str
+```
+
+Convert snake_case to camelCase
+
 <a id="aea.contracts.base.Contract"></a>
 
 ## Contract Objects
@@ -284,4 +294,8 @@ Retrieve the logs from a transaction.
 **Returns**:
 
 the tx logs
+
+<a id="aea.contracts.base.Contract.get_method_data"></a>
+
+#### get`_`method`_`data
 
