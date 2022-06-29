@@ -42,8 +42,8 @@ fingerprint:
   libp2p_node/dht/monitoring/file.go: QmZwH59RcraRfgYjugVafVojakv1oEcgBUKuMdFAoeZBhS
   libp2p_node/dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
-  libp2p_node/go.mod: QmREU96KzTa75gqHeTLtBzHnhHNPcEN6sW1zp59LgDLCBA
-  libp2p_node/go.sum: QmY81CXMuRFgtJMDs4371QHp6PMGgvZPoZJM1CttuN4cKN
+  libp2p_node/go.mod: QmWJwSZP3BzuyZjSUUADTuKD7Y3LhJE8NSd8CVke7noFeD
+  libp2p_node/go.sum: QmSPKTBqNZJaTSacn5cPN2sC3MqwzeAN7L2RnCwRhpGR1Q
   libp2p_node/libp2p_node.go: Qmcp82gLaEpyJU7Q8NnsB6Wp7wF5FMV5ZRv9Y3XdNgPJ2L
   libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
   libp2p_node/mocks/mock_host.go: QmSJ7g6S2PGhC5j8xBQyrjs56hXJGEewkgFgiivyZDthbW
