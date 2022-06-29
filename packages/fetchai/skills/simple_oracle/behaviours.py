@@ -154,6 +154,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting grant role transaction...")
 
+    def _get_tx_expriration_block(self) -> int:
+        """Return max block number for no expiration."""
+        return 2 ** 256 - 1
+
     def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
         """Request transaction that updates value in Fetch oracle contract."""
         strategy = cast(Strategy, self.context.strategy)
@@ -161,6 +165,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
+        update_kwargs = {
+            **update_kwargs,
+            "txExpirationBlock": self._get_tx_expriration_block(),
+        }
         contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
             counterparty=str(LEDGER_API_ADDRESS),
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
