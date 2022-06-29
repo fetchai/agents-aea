@@ -40,6 +40,17 @@ contract_registry: Registry["Contract"] = Registry["Contract"]()
 _default_logger = logging.getLogger(__name__)
 
 
+def snake_to_camel(string: str) -> str:
+    """Convert snake_case to camelCase"""
+
+    if "_" in string:
+        camel_case = string.split("_")
+        for i in range(1, len(camel_case)):
+            camel_case[i] = camel_case[i][0].upper() + camel_case[i][1:]
+        string = ("").join(camel_case)
+    return string
+
+
 class Contract(Component):
     """Abstract definition of a contract."""
 
@@ -267,6 +278,47 @@ class Contract(Component):
             contract_instance, tx_hash, target_address
         )
         return tx_logs
+
+    @classmethod
+    def get_method_data(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        method_name: str,
+        **kwargs: Any,
+    ) -> Optional[JSONLike]:
+        """
+        Get a contract call encoded data.
+
+        :param ledger_api: the ledger apis.
+        :param contract_address: the contract address.
+        :param method_name: the contract method name
+        :param kwargs: the contract method args
+        :return: the tx  # noqa: DAR202
+        """
+        instance = cls.get_instance(ledger_api, contract_address)
+
+        method_name = snake_to_camel(method_name)
+        kwargs = {snake_to_camel(key): value for key, value in kwargs.items()}
+
+        try:
+            # Get an ordered argument list from the method's abi
+            method = instance.get_function_by_name(method_name)
+            input_names = [i["name"] for i in method.abi["inputs"]]
+
+            args = [kwargs[i] for i in input_names]
+            # Encode and return the contract call
+            data = instance.encodeABI(fn_name=method_name, args=args)
+        except KeyError as e:  # pragma: nocover
+            _default_logger.warning(f"No such information in method ABI:\n{e}")
+            return None
+        except AttributeError as e:  # pragma: nocover
+            _default_logger.warning(f"No such attribute:\n{e}")
+            return None
+        except TypeError as e:  # pragma: nocover
+            _default_logger.warning(f"Method called with wrong arguments:\n{e}")
+            return None
+        return {"data": bytes.fromhex(data[2:])}  # type: ignore
 
 
 def _try_to_register_contract(configuration: ContractConfig) -> None:
