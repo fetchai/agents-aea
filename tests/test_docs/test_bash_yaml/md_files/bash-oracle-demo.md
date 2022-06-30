@@ -2,14 +2,12 @@
 aea fetch fetchai/coin_price_oracle:0.17.0
 cd coin_price_oracle
 aea install
-aea build
 ```
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.24.1
 aea add connection fetchai/ledger:0.21.0
-aea add connection fetchai/p2p_libp2p:0.27.0
 aea add skill fetchai/advanced_data_request:0.7.1
 aea add skill fetchai/simple_oracle:0.16.0
 aea config set --type dict agent.dependencies \
@@ -19,7 +17,6 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea install
-aea build
 ```
 ``` bash
 aea config set --type str vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd"
@@ -45,38 +42,22 @@ LEDGER_ID=fetchai
 LEDGER_ID=ethereum
 ```
 ``` bash
-aea config set agent.default_ledger $LEDGER_ID
-aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
+aea config set agent.default_ledger ethereum
 ```
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id $LEDGER_ID
-```
-``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
-```
-``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id ethereum
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function updateOracleValue
 ```
 ``` bash
-aea generate-key $LEDGER_ID
-aea add-key $LEDGER_ID
+aea generate-key $LEDGER_ID --add-key
 ```
 ``` bash
 aea generate-wealth $LEDGER_ID
 ```
 ``` bash
-aea generate-key fetchai fetchai_connection_private_key.txt
-aea add-key fetchai fetchai_connection_private_key.txt --connection
-```
-``` bash
-aea issue-certificates
-```
-``` bash
 aea fetch fetchai/coin_price_oracle_client:0.12.0
 cd coin_price_oracle_client
 aea install
-aea build
 ```
 ``` bash
 aea create coin_price_oracle_client
@@ -106,16 +87,10 @@ aea config set agent.default_ledger $LEDGER_ID
 ```
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id $LEDGER_ID
-```
-``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function query_oracle_value
-```
-``` bash
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
 ```
 ``` bash
-aea generate-key $LEDGER_ID
-aea add-key $LEDGER_ID
+aea generate-key $LEDGER_ID --add-key
 ```
 ``` bash
 aea generate-wealth $LEDGER_ID

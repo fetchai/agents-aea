@@ -22,7 +22,7 @@ protocols:
 skills:
 - fetchai/simple_oracle_client:0.13.0
 default_connection: fetchai/ledger:0.21.0
-default_ledger: ethereum
+default_ledger: fetchai
 required_ledgers:
 - fetchai
 - ethereum
@@ -46,5 +46,5 @@ type: skill
 models:
   strategy:
     args:
-      ledger_id: ethereum
-      query_function: queryOracleValue
+      ledger_id: fetchai
+      query_function: query_oracle_value

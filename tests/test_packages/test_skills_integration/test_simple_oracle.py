@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
-import json
 import os
 
 import pytest
@@ -25,8 +24,6 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
-
-from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
     CUR_PATH,
@@ -81,11 +78,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
 
             # add packages for oracle agent
             self.set_agent_context(oracle_agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
             self.add_item("connection", "fetchai/ledger:0.21.0")
             self.add_item("connection", "fetchai/http_client:0.24.1")
             self.add_item("connection", "fetchai/prometheus:0.9.1")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+            self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
@@ -128,22 +124,16 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
                 connection=True,
             )
-            setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
-            settings = json.dumps(
-                [
-                    {
-                        "identifier": "acn",
-                        "ledger_id": ledger_id,
-                        "not_after": "2023-01-01",
-                        "not_before": "2022-01-01",
-                        "public_key": FetchAICrypto.identifier,
-                        "message_format": "{public_key}",
-                        "save_path": ".certs/conn_cert.txt",
-                    }
-                ]
-            )
-            self.set_config(setting_path, settings, type_="list")
             self.run_install()
+
+            diff = self.difference_to_fetched_agent(
+                "fetchai/coin_price_oracle:0.17.0", oracle_agent_name
+            )
+            assert (
+                diff == []
+            ), "Difference between created and fetched project for files={}".format(
+                diff
+            )
 
             # redirect fetchai ledger address to local test node
             setting_path = (
@@ -192,6 +182,15 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function"
             self.set_config(setting_path, query_function)
 
+            diff = self.difference_to_fetched_agent(
+                "fetchai/coin_price_oracle_client:0.12.0", client_agent_name
+            )
+            assert (
+                diff == []
+            ), "Difference between created and fetched project for files={}".format(
+                diff
+            )
+
             # redirect fetchai ledger address to local test node
             setting_path = (
                 "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
@@ -203,25 +202,8 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
 
             # run oracle agent
             self.set_agent_context(oracle_agent_name)
-            self.run_cli_command("build", cwd=self._get_cwd())
-            self.run_cli_command("issue-certificates", cwd=self._get_cwd())
             oracle_aea_process = self.run_agent()
             processes.append(oracle_aea_process)
-
-            check_strings = (
-                "Starting libp2p node...",
-                "Connecting to libp2p node...",
-                "Successfully connected to libp2p node!",
-                LIBP2P_SUCCESS_MESSAGE,
-            )
-            missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
-            )
-            assert (
-                missing_strings == []
-            ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, self.stdout[oracle_aea_process.pid]
-            )
 
             check_strings = (
                 "setting up HttpHandler",
@@ -318,11 +300,10 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
 
             # add packages for oracle agent
             self.set_agent_context(oracle_agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
             self.add_item("connection", "fetchai/ledger:0.21.0")
             self.add_item("connection", "fetchai/http_client:0.24.1")
             self.add_item("connection", "fetchai/prometheus:0.9.1")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+            self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
                 "agent.required_ledgers",
@@ -366,31 +347,7 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
                 FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
                 connection=True,
             )
-            setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
-            settings = json.dumps(
-                [
-                    {
-                        "identifier": "acn",
-                        "ledger_id": ledger_id,
-                        "not_after": "2023-01-01",
-                        "not_before": "2022-01-01",
-                        "public_key": FetchAICrypto.identifier,
-                        "message_format": "{public_key}",
-                        "save_path": ".certs/conn_cert.txt",
-                    }
-                ]
-            )
-            self.set_config(setting_path, settings, type_="list")
             self.run_install()
-
-            diff = self.difference_to_fetched_agent(
-                "fetchai/coin_price_oracle:0.17.0", oracle_agent_name
-            )
-            assert (
-                diff == []
-            ), "Difference between created and fetched project for files={}".format(
-                diff
-            )
 
             # set erc20 address
             setting_path = (
@@ -433,15 +390,6 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function"
             self.set_config(setting_path, query_function)
 
-            diff = self.difference_to_fetched_agent(
-                "fetchai/coin_price_oracle_client:0.12.0", client_agent_name
-            )
-            assert (
-                diff == []
-            ), "Difference between created and fetched project for files={}".format(
-                diff
-            )
-
             # set addresses *after* comparison with fetched agent!
             setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address"
             self.set_config(setting_path, erc20_address)
@@ -452,21 +400,6 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             self.run_cli_command("issue-certificates", cwd=self._get_cwd())
             oracle_aea_process = self.run_agent()
             processes.append(oracle_aea_process)
-
-            check_strings = (
-                "Starting libp2p node...",
-                "Connecting to libp2p node...",
-                "Successfully connected to libp2p node!",
-                LIBP2P_SUCCESS_MESSAGE,
-            )
-            missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
-            )
-            assert (
-                missing_strings == []
-            ), "Strings {} didn't appear in aea output: \n{}".format(
-                missing_strings, self.stdout[oracle_aea_process.pid]
-            )
 
             check_strings = (
                 "setting up HttpHandler",

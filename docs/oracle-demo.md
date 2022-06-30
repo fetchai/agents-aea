@@ -22,10 +22,9 @@ Fetch the AEA that will deploy and update the oracle contract.
 aea fetch fetchai/coin_price_oracle:0.17.0
 cd coin_price_oracle
 aea install
-aea build
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
+<details><summary>Alternatively, create from scratch (and customize the data source).</summary>
 <p>
 
 Create the AEA that will deploy the contract.
@@ -35,7 +34,6 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.24.1
 aea add connection fetchai/ledger:0.21.0
-aea add connection fetchai/p2p_libp2p:0.27.0
 aea add skill fetchai/advanced_data_request:0.7.1
 aea add skill fetchai/simple_oracle:0.16.0
 aea config set --type dict agent.dependencies \
@@ -45,7 +43,6 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
 aea install
-aea build
 ```
 
 Set the URL for the data request skill:
@@ -76,56 +73,40 @@ aea config set --type dict agent.default_routing \
 </p>
 </details>
 
-The following steps depend on the type of ledger the oracle will be run on.
-Select a ledger type by setting a temporary variable to either `fetchai` or `ethereum`:
+This demo runs on the `fetchai` ledger by default. Set the following variable for use in the configuration steps:
 ``` bash
 LEDGER_ID=fetchai
 ```
-or
+
+<details><summary>Alternatively, configure the agent to use an ethereum ledger.</summary>
+<p>
+
 ``` bash
 LEDGER_ID=ethereum
 ```
 
-Update the default ledger and cert requests using the chosen ledger.
+Update the default ledger.
 ``` bash
-aea config set agent.default_ledger $LEDGER_ID
-aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
+aea config set agent.default_ledger ethereum
 ```
 
 Set the following configuration for the oracle skill:
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id $LEDGER_ID
-```
-If running on the Fetch.ai ledger:
-``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
-```
-Otherwise, if running on an Ethereum-based ledger:
-``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id ethereum
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function updateOracleValue
 ```
 
+</p>
+</details>
+
 Additionally, create the private key for the oracle AEA. Generate and add a key for use with the ledger:
 ``` bash
-aea generate-key $LEDGER_ID
-aea add-key $LEDGER_ID
+aea generate-key $LEDGER_ID --add-key
 ```
 
 If running on a testnet (not including Ganache), generate some wealth for your AEA:
 ``` bash
 aea generate-wealth $LEDGER_ID
-```
-
-Next, create a private key used to secure the AEA's communications:
-``` bash
-aea generate-key fetchai fetchai_connection_private_key.txt
-aea add-key fetchai fetchai_connection_private_key.txt --connection
-```
-
-Finally, certify the keys for use by the connections that request them:
-``` bash
-aea issue-certificates
 ```
 
 ### Create the oracle client AEA
@@ -174,6 +155,9 @@ aea config set --type dict agent.default_routing \
 
 Similar to above, set a temporary variable `LEDGER_ID=fetchai` or `LEDGER_ID=ethereum`.
 
+<details><summary>Follow these steps to configure for an ethereum ledger</summary>
+<p>
+
 Set the default ledger:
 ``` bash
 aea config set agent.default_ledger $LEDGER_ID
@@ -181,21 +165,16 @@ aea config set agent.default_ledger $LEDGER_ID
 Set the following configuration for the oracle client skill:
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id $LEDGER_ID
-```
-If running on the Fetch.ai ledger:
-``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function query_oracle_value
-```
-Otherwise, if running on an Ethereum-based ledger:
-``` bash
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
 ```
+
+</p>
+</details>
 
 Create the private key for the oracle client AEA. Generate and add a key for use on the ledger:
 
 ``` bash
-aea generate-key $LEDGER_ID
-aea add-key $LEDGER_ID
+aea generate-key $LEDGER_ID --add-key
 ```
 
 If running on a testnet (not including Ganache), generate some wealth for your AEA:
@@ -203,9 +182,12 @@ If running on a testnet (not including Ganache), generate some wealth for your A
 aea generate-wealth $LEDGER_ID
 ```
 
-The oracle AEAs require either a locally running test node or a connection to a remote testnet.
+### Configuring a ledger
 
-### Setting up with a local Ganache node (Ethereum ledger only)
+The oracle AEAs require either a locally running ledger node or a connection to a remote ledger. By default, they are configured to use the latest `fetchai` testnet.
+
+<details><summary>Follow these steps to configure local Ethereum test node</summary>
+<p>
 
 The easiest way to test the oracle agents on an Ethereum-based ledger to set up a local test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
 
@@ -213,8 +195,7 @@ The easiest way to test the oracle agents on an Ethereum-based ledger to set up 
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
 ```
 
-<details><summary>Run the enclosed Python script (with <code>web3</code> installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.</summary>
-<p>
+Run the following Python script (with <code>web3</code> installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.
 
 ``` python
 import json
@@ -268,14 +249,14 @@ tx_hash = fet_erc20_mock.functions.transfer(client_account.address, int(1e20)).t
 tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
 ```
 
-</p>
-</details>
-
-### Set the ERC20 contract address for the oracle AEA (Ethereum ledger only):
+Set the ERC20 contract address for the oracle AEA:
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address ERC20_ADDRESS
 ```
 where `ERC20_ADDRESS` is in the output of the script above.
+
+</p>
+</details>
 
 ### Run the oracle AEA
 
