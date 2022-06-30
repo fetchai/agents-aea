@@ -8,6 +8,7 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.24.1
 aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/prometheus:0.9.1
 aea add skill fetchai/advanced_data_request:0.7.1
 aea add skill fetchai/simple_oracle:0.16.0
 aea config set --type dict agent.dependencies \
@@ -15,7 +16,7 @@ aea config set --type dict agent.dependencies \
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/ledger:0.21.0
 aea install
 ```
 ``` bash
@@ -34,6 +35,13 @@ aea config set --type dict agent.default_routing \
 "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
 "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0"
 }'
+```
+``` bash
+aea config set agent.default_ledger fetchai
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
 ```
 ``` bash
 LEDGER_ID=fetchai
@@ -72,7 +80,6 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/ledger:0.21.0
 aea install
-aea build
 ```
 ``` bash
 aea config set --type dict agent.default_routing \
@@ -83,10 +90,17 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 ``` bash
-aea config set agent.default_ledger $LEDGER_ID
+aea config set agent.default_ledger fetchai
 ```
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id $LEDGER_ID
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id fetchai
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function query_oracle_value
+```
+``` bash
+aea config set agent.default_ledger ethereum
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id ethereum
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
 ```
 ``` bash
@@ -99,8 +113,12 @@ aea generate-wealth $LEDGER_ID
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
 ```
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address ERC20_ADDRESS
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address $ERC20_ADDRESS
 ```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address $ERC20_ADDRESS
+```
+
 ``` bash
 aea run
 ```
@@ -112,8 +130,7 @@ info: [coin_price_oracle] Oracle role successfully granted!
 info: [coin_price_oracle] Oracle value successfully updated!
 ```
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address ERC20_ADDRESS
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address $ORACLE_ADDRESS
 ```
 ``` bash
 Oracle contract successfully deployed at address: ORACLE_ADDRESS

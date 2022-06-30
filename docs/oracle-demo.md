@@ -24,7 +24,7 @@ cd coin_price_oracle
 aea install
 ```
 
-<details><summary>Alternatively, create from scratch (and customize the data source).</summary>
+<details><summary>Alternatively, create from scratch (and customize the data source)</summary>
 <p>
 
 Create the AEA that will deploy the contract.
@@ -34,6 +34,7 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.24.1
 aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/prometheus:0.9.1
 aea add skill fetchai/advanced_data_request:0.7.1
 aea add skill fetchai/simple_oracle:0.16.0
 aea config set --type dict agent.dependencies \
@@ -41,7 +42,7 @@ aea config set --type dict agent.dependencies \
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/ledger:0.21.0
 aea install
 ```
 
@@ -70,6 +71,17 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 
+Update the default ledger.
+``` bash
+aea config set agent.default_ledger fetchai
+```
+
+Set the following configuration for the oracle skill:
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
+```
+
 </p>
 </details>
 
@@ -78,7 +90,7 @@ This demo runs on the `fetchai` ledger by default. Set the following variable fo
 LEDGER_ID=fetchai
 ```
 
-<details><summary>Alternatively, configure the agent to use an ethereum ledger.</summary>
+<details><summary>Alternatively, configure the agent to use an ethereum ledger</summary>
 <p>
 
 ``` bash
@@ -119,7 +131,7 @@ cd coin_price_oracle_client
 aea install
 ```
 
-<details><summary>Alternatively, create from scratch.</summary>
+<details><summary>Alternatively, create from scratch</summary>
 <p>
 
 Create the AEA that will deploy the contract.
@@ -137,7 +149,6 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/ledger:0.21.0
 aea install
-aea build
 ```
 
 Then update the agent configuration with the default routing:
@@ -150,6 +161,16 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 
+Set the default ledger:
+``` bash
+aea config set agent.default_ledger fetchai
+```
+Set the following configuration for the oracle client skill:
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id fetchai
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function query_oracle_value
+```
+
 </p>
 </details>
 
@@ -160,11 +181,11 @@ Similar to above, set a temporary variable `LEDGER_ID=fetchai` or `LEDGER_ID=eth
 
 Set the default ledger:
 ``` bash
-aea config set agent.default_ledger $LEDGER_ID
+aea config set agent.default_ledger ethereum
 ```
 Set the following configuration for the oracle client skill:
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id $LEDGER_ID
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id ethereum
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
 ```
 
@@ -249,9 +270,13 @@ tx_hash = fet_erc20_mock.functions.transfer(client_account.address, int(1e20)).t
 tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
 ```
 
-Set the ERC20 contract address for the oracle AEA:
+Set the ERC20 contract address for the oracle AEA
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address ERC20_ADDRESS
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address $ERC20_ADDRESS
+```
+as well as for the oracle client AEA
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address $ERC20_ADDRESS
 ```
 where `ERC20_ADDRESS` is in the output of the script above.
 
@@ -277,8 +302,7 @@ The oracle contract will continue to be updated with the latest retrieved coin p
 
 ### Set the ERC20 and oracle contract addresses for the oracle client AEA:
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address ERC20_ADDRESS
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address $ORACLE_ADDRESS
 ```
 where `ORACLE_ADDRESS` should be set to the address shown in the oracle AEA logs:
 ``` bash
