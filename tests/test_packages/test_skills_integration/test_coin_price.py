@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the integration test for the coin price skill."""
-
 import time
 from typing import Dict
 
@@ -26,6 +24,8 @@ import pytest
 
 from aea.helpers import http_requests as requests
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from tests.common.utils import wait_for_condition
 
 
 def parse_prometheus_output(prom_data: bytes) -> Dict[str, float]:
@@ -102,10 +102,16 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
 
-        response = requests.get("http://127.0.0.1:8000/data")
-        assert response.status_code == 200, "Failed to get response code 200"
-        coin_price = response.json()
-        assert "price" in coin_price, "Response does not contain 'price'"
+        def wait():
+            response = requests.get("http://127.0.0.1:8000/data")
+            if response.status_code != 200:
+                return False
+            coin_price = response.json()
+            return "price" in coin_price
+
+        wait_for_condition(
+            wait, timeout=10, period=1, error_msg="Response does not contain 'price'"
+        )
 
         response = requests.get("http://127.0.0.1:8000")
         assert response.status_code == 404

@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmX9HuMvkRptLc4QnuagUGmN4HzxH5jnxXJYtw565dMnXg
   __init__.py: QmZbqix1H5WKfsFhEbhoGxRWVDCgjSyEsqSJNotQscoWxh
-  behaviours.py: QmZaRbS43xxRnF8FBz6dXxSy1s95PYmboB3NZy7bbxAHom
+  behaviours.py: QmekFp4Y2ssXxsPRzNZ8Dx2euAppUeKT8LScYQBPavgbEu
   dialogues.py: QmV4V7MxSHQaAsN3MA3ybQkfZ8WYgoymqQkf6byz1GkiBe
   game.py: QmSFZKLLqSjcoWqF9skD8zjd1SwDvUwNro77zk4QWEY49J
   handlers.py: QmXoh3h5Xj2A3iFC4ur3CQethP3EYphG2x2U7AzWHvjQBy
