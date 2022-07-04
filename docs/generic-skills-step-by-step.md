@@ -18,9 +18,9 @@ cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.0
+aea fetch fetchai/generic_buyer:0.30.1
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.27.1
+aea eject skill fetchai/generic_buyer:0.27.2
 cd ..
 ```
 
@@ -3116,7 +3116,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       min_quantity: 1
       search_query:
@@ -3185,13 +3185,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add protocol fetchai/fipa:1.1.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea run
 ```
 
@@ -3202,14 +3202,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add protocol fetchai/fipa:1.1.1
 aea add protocol fetchai/signing:1.1.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:

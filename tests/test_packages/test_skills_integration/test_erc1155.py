@@ -70,10 +70,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("connection", "fetchai/soef:0.27.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -125,7 +125,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.nested_set_config(setting_path, location)
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.34.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.34.1", deploy_aea_name
         )
         assert (
             diff == []
@@ -133,10 +133,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("connection", "fetchai/soef:0.27.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -187,7 +187,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.nested_set_config(setting_path, location)
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.34.0", client_aea_name
+            "fetchai/erc1155_client:0.34.1", client_aea_name
         )
         assert (
             diff == []

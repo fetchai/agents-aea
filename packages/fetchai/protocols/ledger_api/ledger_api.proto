@@ -54,7 +54,7 @@ message LedgerApiMessage{
 
   message Balance_Performative{
     string ledger_id = 1;
-    int32 balance = 2;
+    int64 balance = 2;
   }
 
   message Raw_Transaction_Performative{
@@ -82,7 +82,7 @@ message LedgerApiMessage{
   }
 
   message Error_Performative{
-    int32 code = 1;
+    int64 code = 1;
     string message = 2;
     bool message_is_set = 3;
     bytes data = 4;

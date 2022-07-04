@@ -1,13 +1,13 @@
 name: generic_buyer
 author: fetchai
-version: 0.27.1
+version: 0.27.2
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmd7hF4eNgxUoGaxkPEKVPQNxpLG2aG4DvovSLKkwKxVYt
-  __init__.py: QmXSAZNfo2h4MGmvaLCoZ18nBBU2WgS9YHWigx8KXTFQT5
+  __init__.py: QmdNsFvxVhmtSwd5S7TDrXNuqfrQELsJdSjZqmhhK3njHV
   behaviours.py: QmephYoPF78rWrwqBwpKWKSJhKUV6pe5GpEm4fgoR3BpPx
   dialogues.py: QmaZsSYcxyjNJ4FQz4gTxYjW5qYi4hfkv3Aky5eCXNLbfc
   handlers.py: QmUrPrqGB2aW8ZWv1NLPsNCAgjZbMw83g1yk5qGEGsZ8SE
@@ -70,7 +70,7 @@ models:
         longitude: 0.127
       max_negotiations: 1
       max_quantity: 100
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       min_quantity: 1
       search_query:

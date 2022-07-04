@@ -20,7 +20,7 @@ message PrometheusMessage{
   }
 
   message Response_Performative{
-    int32 code = 1;
+    int64 code = 1;
     string message = 2;
     bool message_is_set = 3;
   }
