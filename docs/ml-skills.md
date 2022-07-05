@@ -57,7 +57,8 @@ Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and
 
 ### Preparation instructions
 
-Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+* Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+* Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
 
 ### Demo instructions
 
@@ -96,7 +97,8 @@ Follow this approach when using the `aea` CLI.
 
 #### Dependencies
 
-Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+* Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
+* Install <a href="https://www.tensorflow.org/install/" target="_blank">Tensorflow</a>
 
 ### Demo instructions
 
