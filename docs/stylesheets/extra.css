@@ -1,34 +1,30 @@
 @font-face {
-    font-family: 'triakis__font_lightregular';
-    src: url('../fonts/Webfont/triakisfont-regular-webfont.woff2') format('woff2'),
-        url('../fonts/Webfont/triakisfont-regular-webfont.woff') format('woff');
+    font-family: 'manrope__font_regular';
+    src: url('../fonts/Manrope/Manrope-Regular.ttf');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'triakis__font_medium';
-    src: url('../fonts/Webfont/triakisfont-medium-webfont.woff2') format('woff2'),
-        url('../fonts/Webfont/triakisfont-medium-webfont.woff') format('woff');
+    font-family: 'manrope__font_medium';
+    src: url('../fonts/Manrope/Manrope-Medium.ttf') format('ttf');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'triakis__font_bold';
-    src: url('../fonts/Webfont/triakisfont-bold-webfont.woff2') format('woff2'),
-        url('../fonts/Webfont/triakisfont-bold-webfont.woff') format('woff');
+    font-family: 'manrope__font_bold';
+    src: url('../fonts/Manrope/Manrope-Bold.ttf') format('ttf');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'triakis__font_heavy';
-    src: url('../fonts/Webfont/triakisfont-heavy-webfont.woff2') format('woff2'),
-        url('../fonts/Webfont/triakisfont-heavy-webfont.woff') format('woff');
+    font-family: 'manrope__font_heavy';
+    src: url('../fonts/Manrope/Manrope-ExtraBold.ttf') format('ttf');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -37,19 +33,21 @@
 /* can add more font from autonolas repo if more fonts are needed */
 
 :root {
-    --md-primary-fg-color: #00D948;
+    --md-primary-fg-color: #7200D6;
     --md-primary-fg-color--light: rgb(0 217 72 / 10%);
     --md-primary-fg-color--dark: #086228;
     --md-typeset-a-color: var(--md-primary-fg-color--dark);
 
+    --md-extra-color-white: #FFFFFF;
     --md-extra-color-black: #000000;
     --md-extra-color-gray-1: #585858;
     --md-extra-color-gray-2: #f8f8f7;
     --md-extra-color-gray-3: #000000;
-    --md-text-font-lightregular: "triakis__font_lightregular";
-    --md-text-font-medium: "triakis__font_medium";
-    --md-text-font-bold: "triakis__font_bold";
-    --md-text-font-heavy: "triakis__font_heavy";
+    --md-text-font-lightregular: "manrope__font_regular";
+    --md-text-font-medium: "manrope__font_medium";
+    --md-text-font-bold: "manrope__font_bold";
+    --md-text-font-heavy: "manrope__font_heavy";
+    --md-text-font-family: "manrope__font_regular";
 }
 
 /* font changes */
@@ -63,7 +61,7 @@
 
 /* header & tabs */
 .md-header {
-    color: var(--md-extra-color-black);
+    color: var(--md-extra-color-white);
 }
 
 /* hiding icon at top */
