@@ -37,7 +37,9 @@ import subprocess  # nosec
 import sys
 import time
 import traceback
+from contextlib import suppress
 from pathlib import Path
+from subprocess import TimeoutExpired  # nosec
 from typing import Collection, Dict, List, Optional, Tuple, Type, cast
 
 import ipfshttpclient
@@ -249,7 +251,8 @@ class IPFSDaemon:
         if self.process is None:
             return
         self.process.send_signal(signal.SIGTERM)
-        self.process.wait(timeout=30)
+        with suppress(TimeoutExpired):
+            self.process.wait(timeout=30)
         poll = self.process.poll()
         if poll is None:
             self.process.terminate()
