@@ -8,7 +8,7 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
+- fetchai/p2p_libp2p:0.27.1
 - fetchai/soef:0.27.1
 contracts: []
 protocols:
@@ -21,7 +21,7 @@ protocols:
 skills:
 - fetchai/carpark_detection:0.27.1
 - fetchai/generic_seller:0.28.1
-default_connection: fetchai/p2p_libp2p:0.27.0
+default_connection: fetchai/p2p_libp2p:0.27.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai

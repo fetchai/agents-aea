@@ -67,7 +67,7 @@ SERIALIZATION_DOT_PY_FILE_NAME = "serialization.py"
 
 PYTHON_TYPE_TO_PROTO_TYPE = {
     "bytes": "bytes",
-    "int": "int32",
+    "int": "int64",
     "float": "float",
     "bool": "bool",
     "str": "string",

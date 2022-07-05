@@ -309,7 +309,7 @@ class TestCommon(TestCase):
         assert _python_pt_or_ct_type_to_proto_type(content_type_bytes) == "bytes"
 
         content_type_int = "int"
-        assert _python_pt_or_ct_type_to_proto_type(content_type_int) == "int32"
+        assert _python_pt_or_ct_type_to_proto_type(content_type_int) == "int64"
 
         content_type_float = "float"
         assert _python_pt_or_ct_type_to_proto_type(content_type_float) == "float"

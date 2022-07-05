@@ -31,7 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.11.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.11.1")
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.oracle_client.contract"

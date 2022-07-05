@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.34.0
+aea fetch fetchai/erc1155_deployer:0.34.1
 cd erc1155_deployer
 aea install
 aea build
@@ -7,7 +7,7 @@ aea build
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add skill fetchai/erc1155_deploy:0.31.1
@@ -17,7 +17,7 @@ aea config set --type dict agent.dependencies \
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
@@ -44,7 +44,7 @@ aea add-key fetchai fetchai_connection_private_key.txt --connection
 aea issue-certificates
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.34.0
+aea fetch fetchai/erc1155_client:0.34.1
 cd erc1155_client
 aea install
 aea build
@@ -52,7 +52,7 @@ aea build
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add skill fetchai/erc1155_client:0.29.1
@@ -62,7 +62,7 @@ aea config set --type dict agent.dependencies \
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
@@ -135,7 +135,7 @@ default_routing:
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

@@ -9,7 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.1
 - fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
+- fetchai/p2p_libp2p:0.27.1
 - fetchai/soef:0.27.1
 contracts: []
 protocols:
@@ -29,7 +29,7 @@ skills:
 - fetchai/simple_seller:0.14.1
 - fetchai/simple_service_registration:0.23.1
 - fetchai/simple_service_search:0.11.1
-default_connection: fetchai/p2p_libp2p:0.27.0
+default_connection: fetchai/p2p_libp2p:0.27.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -106,7 +106,7 @@ models:
         search_key: registration_service
         search_value: aw5-registration
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: null
