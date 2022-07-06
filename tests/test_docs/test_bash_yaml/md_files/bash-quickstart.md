@@ -37,7 +37,7 @@ svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 pip install open-aea[all]
 ```
 ```
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.11.0/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.12.0/packages packages
 ```
 
 ``` bash
@@ -65,7 +65,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
+aea fetch open_aea/my_first_aea:0.1.0:QmZgZRnT8VJoE5RKDNoJTeaaj4PDzaHAbggSXxcWuRjxkq --remote
 cd my_first_aea
 ```
 ``` bash
@@ -151,19 +151,19 @@ aea delete my_first_aea
 
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
+aea fetch open_aea/my_first_aea:0.1.0:QmZgZRnT8VJoE5RKDNoJTeaaj4PDzaHAbggSXxcWuRjxkq --remote
 cd my_first_aea
 ```
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmPnksZuyuJxRxCChsSN8QVFB3RGynLmPQLQk53rRTFA1K --remote
+aea fetch open_aea/my_first_aea:0.1.0:QmZgZRnT8VJoE5RKDNoJTeaaj4PDzaHAbggSXxcWuRjxkq --remote
 cd my_first_aea
 ```
 
 ```bash
 mkdir packages
 cd my_first_aea
-aea add protocol fetchai/default:1.0.0:QmYNdsSrdKRvJGKjAbREuvkjGXgnanDjxCBS8CfJb9fzr1 --remote
+aea add protocol fetchai/default:1.0.0:QmWoiXYAKqwyqXDQ4gC1b11uRAxKRBiicWWuqthqeNWyEw --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea

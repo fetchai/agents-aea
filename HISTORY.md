@@ -1,5 +1,24 @@
 # Release History - open AEA
 
+
+## 1.12.0 (2022-07-6)
+
+AEA:
+- Updated the default IPFS node multiaddr to the production one
+- Fixes CSV io issues on windows
+- Makes `publish` command patchable for `open-autonomy`
+
+Plugins:
+- Introduces the `raise_on_retry` parameter to the ledgers.
+
+Docs:
+- Updates the default font family
+- Updates documentation to use IPFS hashes to work with the components 
+
+Chore:
+- Fixes resolution issues for `packaging` dependency
+- Introduces script to check IPFS hash consistency in the documentation 
+
 ## 1.11.0 (2022-06-22)
 
 AEA:

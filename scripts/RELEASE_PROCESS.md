@@ -9,11 +9,11 @@
 
 3. Bump plugin versions if necessary by running `python scripts/update_plugin_versions.py --update "PLUGIN_NAME,NEW_VERSION"`. Commit if satisfied.
 
-4. Check the protocols are up-to-date by running `aea generate-all-protocols --check-clean`. Commit if changes occurred.
+4. Check the protocols are up-to-date by running `aea generate-all-protocols --check-clean`. Commit if changes occurred. Do the same for test protocols using `aea generate-all-protocols tests/data/packages --check-clean`
 
 5. [CURRENTLY SKIPPED] Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
-6. Update the package and dependency hashes using `aea hash all`. Commit if changes occurred.
+6. Update the package and dependency hashes using `aea hash all`. And the same for the test packages using `aea hash all --packages-dir tests/data/packages/`. Commit if changes occurred.
 
 7. Check the package upgrades are correct by running `python -m aea.cli check-packages` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 

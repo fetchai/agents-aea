@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmYJqcqfbCFE3LHMgok2xkP9z8myB9NNZsm6iR6NXh2HQF
-  __init__.py: QmYbXLmc14WW8rdYDWB92dWbqaVNYPKy4T1d6ACg1eaPxM
+  __init__.py: QmWZefrAQ4eXSybVkAAhP93TQpjfwYwajccxgeJg9ptMfZ
   contract_api.proto: QmVezvQ3vgN19nzJD1CfgvjHxjdaP4yLUSwaQDMQq85vUZ
   contract_api_pb2.py: QmXgS6swWgask1MH1B1rGWeF4YgPwcVnuZuAVPGwgNV7XH
   custom_types.py: QmUyCSgCKMUkL1FJBjBjS6mCxAoniqDUT8T3nVNkkf87B7
