@@ -28,6 +28,7 @@ from aea import __version__
 from aea.cli.login import do_login
 from aea.cli.register import do_register
 from aea.cli.registry.settings import (
+    DEFAULT_IPFS_URL,
     DEFAULT_REGISTRY_CONFIG,
     REGISTRY_CONFIG_KEY,
     REGISTRY_LOCAL,
@@ -54,7 +55,9 @@ from aea.cli.utils.package_utils import (
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 @registry_flag(mark_default=False)
 @remote_registry_flag(mark_default=False)
-@click.option("--ipfs-node", type=str, default=None, help="Multiaddr for IPFS node.")
+@click.option(
+    "--ipfs-node", type=str, default=DEFAULT_IPFS_URL, help="Multiaddr for IPFS node."
+)
 @pass_ctx
 def init(  # pylint: disable=unused-argument
     ctx: Context,

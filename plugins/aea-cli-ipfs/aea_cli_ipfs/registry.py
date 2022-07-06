@@ -30,7 +30,7 @@ import jsonschema
 from aea_cli_ipfs.exceptions import HashNotProvided
 from aea_cli_ipfs.ipfs_utils import DownloadError, IPFSTool, NodeError
 
-from aea.cli.registry.settings import DEFAULT_IPFS_URL
+from aea.cli.registry.settings import DEFAULT_IPFS_URL_LOCAL
 from aea.cli.utils.config import get_ipfs_node_multiaddr
 from aea.configurations.base import PublicId
 
@@ -161,7 +161,7 @@ def fetch_ipfs(
     if remote:
         ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
     else:
-        ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL)
+        ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL_LOCAL)
 
     try:
         package_hash = public_id.hash

@@ -33,7 +33,7 @@ from aea_cli_ipfs.ipfs_utils import (
 )
 from aea_cli_ipfs.registry import register_item_to_local_registry
 
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import get_ipfs_node_multiaddr, load_item_config
 from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
 
 
@@ -41,7 +41,7 @@ from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
 @click.pass_context
 def ipfs(click_context: click.Context) -> None:
     """IPFS Commands"""
-    ipfs_tool = IPFSTool()
+    ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
     click_context.obj = ipfs_tool
     try:
         ipfs_tool.check_ipfs_node_running()

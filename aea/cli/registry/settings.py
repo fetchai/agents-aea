@@ -39,7 +39,9 @@ REGISTRY_API_URL_KEY = "registry_api_url"
 # but the name of the field in the configuration file.
 AUTH_TOKEN_KEY = "auth_token"  # nosec
 
-DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
+DEFAULT_IPFS_URL = "/dns/registry.autonolas.tech/tcp/443/https"
+DEFAULT_IPFS_URL_LOCAL = "/ip4/127.0.0.1/tcp/5001"
+
 DEFAULT_REGISTRY_CONFIG: Dict = {
     "default": None,
     "settings": {
