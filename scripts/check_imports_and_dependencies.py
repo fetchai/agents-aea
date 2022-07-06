@@ -26,8 +26,20 @@ import re
 import sys
 from collections import defaultdict
 from functools import wraps
+from importlib.machinery import ModuleSpec
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 from pip._internal.commands.show import search_packages_info  # type: ignore
 
@@ -165,8 +177,8 @@ class CheckTool:
         spec = importlib.util.spec_from_file_location(
             "setup", str(AEA_ROOT_DIR / "setup.py")
         )
-        setup = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = setup
+        setup = importlib.util.module_from_spec(cast(ModuleSpec, spec))
+        sys.modules[cast(ModuleSpec, spec).name] = setup
         spec.loader.exec_module(setup)  # type: ignore
 
         sections_dependencies = copy.deepcopy(setup.all_extras)  # type: ignore

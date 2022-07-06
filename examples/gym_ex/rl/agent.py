@@ -36,7 +36,7 @@ Reward = float
 Done = bool
 Info = dict
 
-Feedback = Tuple[Observation, Reward, Done, Info]
+Feedback = Tuple[Observation, Reward, Done, Info]  # type: ignore
 
 
 class PriceBandit:
@@ -140,7 +140,7 @@ class RLAgent:
 
     def _update_model(  # pylint: disable=unused-argument
         self,
-        observation: Observation,
+        observation: Observation,  # type: ignore
         reward: Reward,
         done: Done,
         info: Info,

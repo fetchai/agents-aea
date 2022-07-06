@@ -140,6 +140,7 @@ new_env: clean
 	if [ -z "$v" ];\
 	then\
 		pipenv --rm;\
+		pipenv --clear;\
 		pipenv --python 3.10;\
 		pipenv install --dev --skip-lock;\
 		pipenv run pip install -e .[all];\

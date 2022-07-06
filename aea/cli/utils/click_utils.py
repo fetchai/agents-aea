@@ -22,7 +22,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union, cast
 
 import click
 from click import argument, option
@@ -132,7 +132,7 @@ class PublicIdOrPathParameter(click.ParamType):
         if parsed_value is None:
             self.fail(value, param, ctx)
 
-        return parsed_value
+        return cast(Path, parsed_value)
 
 
 class PublicIdParameter(click.ParamType):
@@ -169,7 +169,7 @@ class PublicIdParameter(click.ParamType):
         if parsed is None:
             self.fail(value, param, ctx)
 
-        return parsed
+        return cast(PublicId, parsed)
 
 
 class AgentDirectory(click.Path):

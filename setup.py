@@ -35,7 +35,7 @@ def get_all_extras() -> Dict:
         "click==8.0.2",
         "pyyaml>=4.2b1,<6.0",
         "jsonschema>=3.0.0,<4.0.0",
-        "packaging>=20.3,<21.0",
+        "packaging>=20.3,<22.0",
         "semver>=2.9.1,<3.0.0",
     ]
 
@@ -55,7 +55,7 @@ base_deps = [
     "semver>=2.9.1,<3.0.0",
     "base58>=1.0.3,<3.0.0",
     "jsonschema>=3.0.0,<4.0.0",
-    "packaging>=20.3,<21.0",
+    "packaging>=20.3,<22.0",
     "protobuf>=3.19.0,<4.0.0",
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1,<6.0",

@@ -36,7 +36,7 @@ Reward = float
 Done = bool
 Info = dict
 
-Feedback = Tuple[Observation, Reward, Done, Info]
+Feedback = Tuple[Observation, Reward, Done, Info]  # type: ignore
 
 
 class BanditEnv(gym.Env):
@@ -72,7 +72,7 @@ class BanditEnv(gym.Env):
         self.seed()  # seed environment randomness
 
     @staticmethod
-    def reset() -> Observation:
+    def reset() -> Observation:  # type: ignore
         """
         Reset the environment.
 
