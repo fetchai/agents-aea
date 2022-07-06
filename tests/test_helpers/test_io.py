@@ -19,12 +19,21 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the 'aea.helpers.io' module."""
 import os
+import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
-from aea.helpers.io import open_file
+from aea.helpers.io import from_csv, open_file, to_csv
+
+
+DUMMY_CSV_DATA = {
+    "key_0": "value_0",
+    "key_1": "value_1",
+    "key_2": "value_2",
+    "key_3": "value_3",
+}
 
 
 @pytest.mark.parametrize(argnames="path_builder", argvalues=[os.path.join, Path])
@@ -46,3 +55,18 @@ def test_raise_if_binary_mode():
     """Raise if mode is binary mode."""
     with pytest.raises(ValueError, match="This function can only work in text mode."):
         open_file(MagicMock(), mode="rb")
+
+
+def test_csv_io() -> None:
+    """Test csv utils."""
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        csv_file = Path(temp_dir, "file.csv")
+
+        to_csv(DUMMY_CSV_DATA, csv_file)
+        assert csv_file.exists()
+
+        csv_data = from_csv(csv_file)
+        assert any(
+            [csv_data[key] == value for key, value in DUMMY_CSV_DATA.items()]
+        ), csv_data

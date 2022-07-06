@@ -95,7 +95,7 @@ def to_csv(data: Dict[str, str], path: Path) -> None:
     """Outputs a dictionary to CSV."""
     try:
         ordered = collections.OrderedDict(sorted(data.items()))
-        with open(path, "w") as csv_file:
+        with open(path, "w", newline="") as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(ordered.items())
     except IOError:
