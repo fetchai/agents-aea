@@ -26,7 +26,6 @@ This script requires that you have IPFS installed:
 - https://docs.ipfs.io/guides/guides/install/
 """
 
-import os
 import sys
 import traceback
 from pathlib import Path
@@ -137,10 +136,12 @@ def hash_package(
     if configuration.directory is None:
         raise ValueError("configuration.directory cannot be None.")
 
-    key = os.path.join(
-        configuration.author,
-        package_type.to_plural(),
-        configuration.directory.name,
+    key = "/".join(
+        [
+            configuration.author,
+            package_type.to_plural(),
+            configuration.directory.name,
+        ]
     )
     package_hash = IPFSHashOnly.hash_directory(
         str(configuration.directory), wrap=(not no_wrap)
