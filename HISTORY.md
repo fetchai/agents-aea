@@ -17,7 +17,7 @@ Docs:
 
 Chore:
 - Fixes resolution issues for `packaging` dependency
-- Itroduces script to check IPFS hash consistency in the documentation 
+- Introduces script to check IPFS hash consistency in the documentation 
 
 ## 1.11.0 (2022-06-22)
 
