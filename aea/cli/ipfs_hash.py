@@ -232,9 +232,7 @@ def update_hashes(
                 extend_public_ids(item_config, public_id_to_hash_mappings)
                 dump_yaml(config_file, item_config, extra_config)
 
-                configuration_obj = config_loader(
-                    package_id.package_type.value, package_path
-                )
+                configuration_obj = config_loader(package_id.package_type, package_path)
                 sort_configuration_file(configuration_obj)
                 update_fingerprint(configuration_obj)
                 key, package_hash = hash_package(

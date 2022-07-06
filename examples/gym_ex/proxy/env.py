@@ -85,6 +85,8 @@ def role_from_first_message(  # pylint: disable=unused-argument
 class ProxyEnv(gym.Env):
     """This class implements a proxy gym environment."""
 
+    _agent_thread: Optional[Thread]
+
     def __init__(self, gym_env: gym.Env) -> None:
         """
         Instantiate the proxy environment.
@@ -106,7 +108,7 @@ class ProxyEnv(gym.Env):
     @property
     def active_dialogue(self) -> GymDialogue:
         """Get the active dialogue."""
-        return self._active_dialogue
+        return cast(GymDialogue, self._active_dialogue)
 
     def step(self, action: Action) -> Feedback:
         """
@@ -143,7 +145,7 @@ class ProxyEnv(gym.Env):
 
         :param mode: the run mode
         """
-        self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)
+        self._agent.runtime.multiplexer.default_connection.channel.gym_env.render(mode)  # type: ignore
 
     def reset(self) -> None:
         """Reset the environment."""
@@ -160,7 +162,7 @@ class ProxyEnv(gym.Env):
         # Wait (blocking!) for the response envelope from the environment
         in_envelope = self._queue.get(block=True, timeout=None)  # type: GymMessage
 
-        self._decode_status(in_envelope)
+        self._decode_status(cast(Envelope, in_envelope))
 
     def close(self) -> None:
         """Close the environment."""
@@ -177,9 +179,9 @@ class ProxyEnv(gym.Env):
 
     def _connect(self):
         """Connect to this proxy environment. It starts a proxy agent that can interact with the framework."""
-        if self._agent_thread.is_alive():
+        if cast(Thread, self._agent_thread).is_alive():
             raise ValueError("Agent already running.")
-        self._agent_thread.start()
+        cast(Thread, self._agent_thread).start()
 
         while not self._agent.runtime.is_running:  # check agent completely running
             time.sleep(0.01)
@@ -187,7 +189,7 @@ class ProxyEnv(gym.Env):
     def _disconnect(self):
         """Disconnect from this proxy environment. It stops the proxy agent and kills its thread."""
         self._agent.stop()
-        self._agent_thread.join()
+        cast(Thread, self._agent_thread).join()
         self._agent_thread = None
 
     def _encode_and_send_action(self, action: Action, step_id: int) -> None:

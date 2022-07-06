@@ -23,8 +23,9 @@ import logging
 import sys
 import types
 from abc import ABC
+from importlib.machinery import ModuleSpec
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -178,7 +179,7 @@ def perform_load_aea_package(
             import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
 
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
-        module = importlib.util.module_from_spec(spec)
+        module = importlib.util.module_from_spec(cast(ModuleSpec, spec))
         sys.modules[import_path] = module
         _default_logger.debug(f"loading {import_path}: {module}")
         spec.loader.exec_module(module)  # type: ignore

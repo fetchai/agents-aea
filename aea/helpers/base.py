@@ -91,12 +91,12 @@ def locate(path: str) -> Any:
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
         _default_logger.debug("Trying to import {}".format(module_location))
-        nextmodule = _get_module(spec)
+        nextmodule = _get_module(cast(ModuleSpec, spec))
         if nextmodule is None:
             module_location = file_location + ".py"
             spec = importlib.util.spec_from_file_location(spec_name, module_location)
             _default_logger.debug("Trying to import {}".format(module_location))
-            nextmodule = _get_module(spec)
+            nextmodule = _get_module(cast(ModuleSpec, spec))
 
         if nextmodule:
             module, n = nextmodule, n + 1
@@ -125,7 +125,7 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     :raises Exception: if the execution of the module raises exception.  # noqa: DAR402
     """
     spec = importlib.util.spec_from_file_location(dotted_path, str(filepath))
-    module = importlib.util.module_from_spec(spec)
+    module = importlib.util.module_from_spec(cast(ModuleSpec, spec))
     spec.loader.exec_module(module)  # type: ignore
     return module
 
@@ -530,7 +530,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     # compute the topological order
     queue: Deque[T] = deque()
     order = []
-    queue.extendleft(sorted(roots))
+    queue.extendleft(sorted(roots))  # type: ignore
     while len(queue) > 0:
         current = queue.pop()
         order.append(current)
