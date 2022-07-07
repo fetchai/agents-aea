@@ -1,6 +1,6 @@
 name: ml_data_provider
 author: fetchai
-version: 0.27.1
+version: 0.27.2
 type: skill
 description: The ml data provider skill implements a provider for Machine Learning
   datasets in order to monetize data.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmYBr97UhQA8GoWFN6yNKdWix1AKJYx4zY246HYAFGpYRP
-  __init__.py: QmZ5w1LXicHh15xyV78u1mkCvbjtYTwWYrorTwWRAK56kR
+  __init__.py: QmeiKVXdPPR7w3uiaAtAAnZFVYC9khKdLACFoT5nssGudx
   behaviours.py: QmU6DnhfLsYNGoJMrW9jeQ9CknpJG5cp2WjCFwPQfuJkiV
   dialogues.py: QmTWTeidShLf6Pg5pxrYTxAFMYWQ5rRdgLrXLcXMJS8vYn
   handlers.py: Qmda9SU3rhoMQFiWFfpFRJ9dEwDtqopsYFGnNFydRrQ8ms
@@ -54,7 +54,7 @@ models:
   strategy:
     args:
       batch_size: 2
-      buyer_tx_fee: 10
+      buyer_tx_fee: 1550000000000000
       classification:
         piece: classification
         value: seller
@@ -75,5 +75,5 @@ models:
 dependencies:
   numpy: {}
   tensorflow:
-    version: ~=2.4.0
+    version: <3.0.0,>=2.4.0
 is_abstract: false

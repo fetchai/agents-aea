@@ -71,12 +71,12 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
         for (i, agent) in enumerate(agents):
             # add packages for agent
             self.set_agent_context(agent)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
             self.add_item("connection", "fetchai/http_client:0.24.1")
             self.add_item("connection", "fetchai/http_server:0.23.1")
             self.add_item("connection", "fetchai/soef:0.27.1")
             self.add_item("connection", "fetchai/prometheus:0.9.1")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
             )

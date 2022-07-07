@@ -7,7 +7,7 @@ aea build
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add skill fetchai/thermometer:0.27.1
@@ -15,7 +15,7 @@ aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
@@ -25,7 +25,7 @@ aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.31.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.31.1 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
@@ -33,15 +33,15 @@ aea build
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/thermometer_client:0.26.1
+aea add skill fetchai/thermometer_client:0.26.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
@@ -141,7 +141,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
-      max_tx_fee: 1
+      max_tx_fee: 3550000000000000
       max_unit_price: 20
       search_query:
         constraint_type: ==
@@ -153,7 +153,7 @@ models:
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

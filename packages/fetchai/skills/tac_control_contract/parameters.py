@@ -28,9 +28,9 @@ from aea.helpers.transaction.base import Terms
 from packages.fetchai.skills.tac_control.parameters import Parameters as BaseParameters
 
 
-DEFAULT_CONTRACT_DEPLOY_FEE = 1
-DEFAULT_CONTRACT_INIT_FEE = 1
-DEFAULT_CONTRACT_EXECUTE_FEE = 1
+DEFAULT_CONTRACT_DEPLOY_FEE = 2000000000000000
+DEFAULT_CONTRACT_INIT_FEE = 2000000000000000
+DEFAULT_CONTRACT_EXECUTE_FEE = 2000000000000000
 
 
 class Parameters(BaseParameters):

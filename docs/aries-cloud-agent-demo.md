@@ -191,7 +191,7 @@ The following steps create <b>Alice_AEA</b> from scratch:
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/http_client:0.24.1
 aea add connection fetchai/webhook:0.20.1
@@ -257,7 +257,7 @@ Finally run **Alice_AEA**:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's P2P address**.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.1 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's P2P address**.
 
 ### Faber_AEA
 
@@ -275,7 +275,7 @@ The following steps create <b>Faber_AEA</b> from scratch:
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/http_client:0.24.1
 aea add connection fetchai/webhook:0.20.1

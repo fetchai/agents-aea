@@ -63,7 +63,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
@@ -72,7 +72,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("skill", "fetchai/weather_station:0.27.1")
         dotted_path = (
@@ -108,7 +108,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
@@ -117,10 +117,10 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/weather_client:0.26.1")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("skill", "fetchai/weather_client:0.26.2")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -256,7 +256,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
@@ -265,7 +265,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
         self.add_item("skill", "fetchai/weather_station:0.27.1")
         setting_path = "agent.default_routing"
@@ -304,7 +304,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/soef:0.27.1")
         self.set_config(
             "agent.dependencies",
@@ -313,15 +313,15 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
         self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/weather_client:0.26.1")
+        self.add_item("skill", "fetchai/weather_client:0.26.2")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.33.0", weather_client_aea_name
+            "fetchai/weather_client:0.33.1", weather_client_aea_name
         )
         assert (
             diff == []

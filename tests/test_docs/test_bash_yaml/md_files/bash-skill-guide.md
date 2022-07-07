@@ -10,10 +10,10 @@ aea add protocol fetchai/oef_search:1.1.1
 ```
 ``` bash
 aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"

@@ -56,7 +56,10 @@ from packages.fetchai.skills.tac_control_contract.handlers import (
     LedgerApiHandler,
     SigningHandler,
 )
-from packages.fetchai.skills.tac_control_contract.parameters import Parameters
+from packages.fetchai.skills.tac_control_contract.parameters import (
+    DEFAULT_CONTRACT_DEPLOY_FEE,
+    Parameters,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -810,7 +813,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
                     "amount": 0,
                     "code_id": self.code_id,
                     "deployer_address": self.skill.skill_context.agent_address,
-                    "tx_fee": 0,
+                    "tx_fee": DEFAULT_CONTRACT_DEPLOY_FEE,
                 }
             ),
         )

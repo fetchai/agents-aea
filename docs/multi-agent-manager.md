@@ -24,7 +24,7 @@ We first add a couple of finished AEA project:
 from aea.configurations.base import PublicId
 
 weather_station_id = PublicId.from_str("fetchai/weather_station:0.32.0")
-weather_client_id = PublicId.from_str("fetchai/weather_client:0.33.0")
+weather_client_id = PublicId.from_str("fetchai/weather_client:0.33.1")
 manager.add_project(weather_station_id)
 manager.add_project(weather_client_id)
 weather_station_name = weather_station_id.name
@@ -41,7 +41,7 @@ agent_overrides = {
     "connection_private_key_paths": {"fetchai": "fetchai_connection_private_key.txt"}
 }
 
-p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.27.0")
+p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.27.1")
 soef_public_id = PublicId.from_str("fetchai/soef:0.27.1")
 
 component_overrides = [{
