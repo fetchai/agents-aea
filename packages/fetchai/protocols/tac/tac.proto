@@ -35,9 +35,9 @@ message TacMessage{
     string ledger_id = 2;
     string sender_address = 3;
     string counterparty_address = 4;
-    map<string, int32> amount_by_currency_id = 5;
-    map<string, int32> fee_by_currency_id = 6;
-    map<string, int32> quantities_by_good_id = 7;
+    map<string, int64> amount_by_currency_id = 5;
+    map<string, int64> fee_by_currency_id = 6;
+    map<string, int64> quantities_by_good_id = 7;
     string nonce = 8;
     string sender_signature = 9;
     string counterparty_signature = 10;
@@ -47,11 +47,11 @@ message TacMessage{
   }
 
   message Game_Data_Performative{
-    map<string, int32> amount_by_currency_id = 1;
+    map<string, int64> amount_by_currency_id = 1;
     map<string, float> exchange_params_by_currency_id = 2;
-    map<string, int32> quantities_by_good_id = 3;
+    map<string, int64> quantities_by_good_id = 3;
     map<string, float> utility_params_by_good_id = 4;
-    map<string, int32> fee_by_currency_id = 5;
+    map<string, int64> fee_by_currency_id = 5;
     map<string, string> agent_addr_to_name = 6;
     map<string, string> currency_id_to_name = 7;
     map<string, string> good_id_to_name = 8;
@@ -62,8 +62,8 @@ message TacMessage{
 
   message Transaction_Confirmation_Performative{
     string transaction_id = 1;
-    map<string, int32> amount_by_currency_id = 2;
-    map<string, int32> quantities_by_good_id = 3;
+    map<string, int64> amount_by_currency_id = 2;
+    map<string, int64> quantities_by_good_id = 3;
   }
 
   message Tac_Error_Performative{

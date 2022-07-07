@@ -25,7 +25,7 @@ aea build
 ``` bash
 aea create tac_controller
 cd tac_controller
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add skill fetchai/tac_control:0.25.1
@@ -33,7 +33,7 @@ aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
@@ -58,16 +58,16 @@ aea create tac_participant_two
 ```
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add skill fetchai/tac_participation:0.25.1
-aea add skill fetchai/tac_negotiation:0.29.1
+aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
@@ -84,16 +84,16 @@ aea build
 ```
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/p2p_libp2p:0.27.0
+aea add connection fetchai/p2p_libp2p:0.27.1
 aea add connection fetchai/soef:0.27.1
 aea add connection fetchai/ledger:0.21.0
 aea add skill fetchai/tac_participation:0.25.1
-aea add skill fetchai/tac_negotiation:0.29.1
+aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
@@ -162,7 +162,7 @@ aea delete tac_participant_two
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
@@ -173,7 +173,7 @@ config:
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: 127.0.0.1:11002

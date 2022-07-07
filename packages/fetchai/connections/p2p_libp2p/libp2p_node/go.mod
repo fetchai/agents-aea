@@ -6,7 +6,7 @@ require (
 	bou.ke/monkey v1.0.2
 	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d
-	github.com/ethereum/go-ethereum v1.10.10
+	github.com/ethereum/go-ethereum v1.10.17
 	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.3.0

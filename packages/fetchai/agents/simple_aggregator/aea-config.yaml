@@ -9,7 +9,7 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.1
 - fetchai/http_server:0.23.1
-- fetchai/p2p_libp2p:0.27.0
+- fetchai/p2p_libp2p:0.27.1
 - fetchai/prometheus:0.9.1
 - fetchai/soef:0.27.1
 contracts: []
@@ -24,7 +24,7 @@ protocols:
 skills:
 - fetchai/advanced_data_request:0.7.1
 - fetchai/simple_aggregation:0.3.1
-default_connection: fetchai/p2p_libp2p:0.27.0
+default_connection: fetchai/p2p_libp2p:0.27.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai

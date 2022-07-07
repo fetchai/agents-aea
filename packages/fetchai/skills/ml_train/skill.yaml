@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.29.1
+version: 0.29.2
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUk1XEpYnxte5GKZjSvJY2LJPpVzzP6zLvnxT2Y1g9f4m
-  __init__.py: QmdxpSGSGZM7QrLpZb9DvcJxhTztURC7oAKxK7aCDmvwPm
+  __init__.py: QmXprsonoqw46z91v5g1YUTRLKaGpSJSEzExZiUPZ4aH9R
   behaviours.py: QmeKKwsRGKfW6Lw6UVDZigyrcJpnQ9eLLUR4jWb4kJJuWt
   dialogues.py: QmRnu5pRsV9jXMxYu81W4Z5Hp8v7RE2zz4yXKJHi8UNYTS
   handlers.py: QmPnor8sPHxXrL2TWj246zpibhUkUABqB2cWmjb8akY3fn
@@ -25,7 +25,7 @@ protocols:
 - fetchai/oef_search:1.1.1
 - fetchai/signing:1.1.1
 skills:
-- fetchai/generic_buyer:0.27.1
+- fetchai/generic_buyer:0.27.2
 behaviours:
   search:
     args:
@@ -71,7 +71,7 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
-      max_buyer_tx_fee: 20
+      max_buyer_tx_fee: 1550000000000000
       max_negotiations: 2
       max_unit_price: 70
       search_query:
@@ -86,5 +86,5 @@ dependencies:
     version: <2.0.0,>=1.0.0
   numpy: {}
   tensorflow:
-    version: ~=2.4.0
+    version: <3.0.0,>=2.4.0
 is_abstract: false

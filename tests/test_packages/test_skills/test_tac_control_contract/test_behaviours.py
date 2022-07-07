@@ -43,7 +43,11 @@ from packages.fetchai.skills.tac_control_contract.game import (
     Game,
     Phase,
 )
-from packages.fetchai.skills.tac_control_contract.parameters import Parameters
+from packages.fetchai.skills.tac_control_contract.parameters import (
+    DEFAULT_CONTRACT_DEPLOY_FEE,
+    DEFAULT_CONTRACT_EXECUTE_FEE,
+    Parameters,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -134,6 +138,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 {
                     "deployer_address": self.skill.skill_context.agent_address,
                     "gas": 5000000,
+                    "tx_fee": DEFAULT_CONTRACT_DEPLOY_FEE,
                 }
             ),
         )
@@ -304,6 +309,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     "deployer_address": self.skill.skill_context.agent_address,
                     "token_ids": [2, 3, 1],
                     "gas": 5000000,
+                    "tx_fee": DEFAULT_CONTRACT_EXECUTE_FEE,
                 }
             ),
         )
@@ -374,6 +380,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     "token_ids": [2, 3, 1],
                     "mint_quantities": [1, 2, 10],
                     "gas": 5000000,
+                    "tx_fee": DEFAULT_CONTRACT_EXECUTE_FEE,
                 }
             ),
         )
@@ -473,6 +480,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                     "token_ids": [2, 3, 1],
                     "mint_quantities": [1, 2, 10],
                     "gas": 5000000,
+                    "tx_fee": DEFAULT_CONTRACT_EXECUTE_FEE,
                 }
             ),
         )

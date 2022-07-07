@@ -8,13 +8,13 @@ message StateUpdateMessage{
   message Initialize_Performative{
     map<string, float> exchange_params_by_currency_id = 1;
     map<string, float> utility_params_by_good_id = 2;
-    map<string, int32> amount_by_currency_id = 3;
-    map<string, int32> quantities_by_good_id = 4;
+    map<string, int64> amount_by_currency_id = 3;
+    map<string, int64> quantities_by_good_id = 4;
   }
 
   message Apply_Performative{
-    map<string, int32> amount_by_currency_id = 1;
-    map<string, int32> quantities_by_good_id = 2;
+    map<string, int64> amount_by_currency_id = 1;
+    map<string, int64> quantities_by_good_id = 2;
   }
 
   message End_Performative{

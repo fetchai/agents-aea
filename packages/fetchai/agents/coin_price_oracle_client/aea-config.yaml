@@ -11,7 +11,7 @@ connections:
 - fetchai/ledger:0.21.0
 contracts:
 - fetchai/fet_erc20:0.9.1
-- fetchai/oracle_client:0.11.0
+- fetchai/oracle_client:0.11.1
 protocols:
 - fetchai/contract_api:1.1.1
 - fetchai/default:1.1.1
@@ -20,7 +20,7 @@ protocols:
 - fetchai/signing:1.1.1
 - fetchai/state_update:1.1.1
 skills:
-- fetchai/simple_oracle_client:0.13.0
+- fetchai/simple_oracle_client:0.13.1
 default_connection: fetchai/ledger:0.21.0
 default_ledger: fetchai
 required_ledgers:
@@ -41,7 +41,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/simple_oracle_client:0.13.0
+public_id: fetchai/simple_oracle_client:0.13.1
 type: skill
 models:
   strategy:
