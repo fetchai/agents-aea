@@ -931,8 +931,8 @@ def _make_libp2p_connection(
         conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
         agent_key.identifier,
-        "2021-01-01",
-        "2021-01-02",
+        "2022-01-01",
+        "2023-01-01",
         "{public_key}",
         f"./{agent_key.address}_cert.txt",
     )
@@ -1022,8 +1022,8 @@ def _make_libp2p_client_connection(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
-        "2021-01-01",
-        "2021-01-02",
+        "2022-01-01",
+        "2023-01-01",
         "{public_key}",
         f"./{crypto.address}_cert.txt",
     )
@@ -1074,8 +1074,8 @@ def _make_libp2p_mailbox_connection(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
-        "2021-01-01",
-        "2021-01-02",
+        "2022-01-01",
+        "2023-01-01",
         "{public_key}",
         f"./{crypto.address}_cert.txt",
     )

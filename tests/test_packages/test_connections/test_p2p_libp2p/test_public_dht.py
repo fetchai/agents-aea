@@ -626,8 +626,8 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
                 CertRequest(
                     identifier="acn",
                     ledger_id=agent_ledger_id,
-                    not_after="2022-01-01",
-                    not_before="2021-01-01",
+                    not_after="2023-01-01",
+                    not_before="2022-01-01",
                     public_key=public_key,
                     message_format="{public_key}",
                     save_path=f"./cli_test_cert_{public_key}.txt",

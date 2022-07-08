@@ -36,7 +36,7 @@ aea add-key ethereum ethereum_private_key.txt
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 aea config set agent.default_ledger ethereum
-json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
+json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 json=$(printf '{"delegate_uri": null, "entry_peers": [], "local_uri": "127.0.0.1:10000", "public_uri": "127.0.0.1:10000"}')
@@ -67,7 +67,7 @@ aea add-key ethereum ethereum_private_key.txt
 aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 aea config set agent.default_ledger ethereum
-json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
+json=$(printf '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]')
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests "$json"
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:1%0.4d", "public_uri": null}' "$PEER" "$i")

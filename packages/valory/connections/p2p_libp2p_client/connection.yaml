@@ -29,15 +29,15 @@ cert_requests:
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: 0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d
   save_path: .certs/acn_cosmos_9005.txt
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: 02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7
   save_path: .certs/acn_cosmos_9006.txt
 excluded_protocols: []

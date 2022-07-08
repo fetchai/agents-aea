@@ -439,8 +439,8 @@ class BaseTestCertRequestError:
     PUBLIC_KEY = "a_public_key"
     IDENTIFIER = "an_identifier"
     LEDGER_ID = "a_ledger_id"
-    NOT_BEFORE = "2020-01-01"
-    NOT_AFTER = "2020-01-02"
+    NOT_BEFORE = "2022-01-01"
+    NOT_AFTER = "2023-01-01"
     MESSAGE_FORMAT = "{public_key}"
     PATH = "some/path"
     ERROR_MESSAGE_PATTERN = ""
@@ -523,8 +523,8 @@ class BaseTestCertRequestInstantiation:
         cls.expected_public_key = cls.PUBLIC_KEY
         cls.expected_identifier = "identifier"
         cls.expected_ledger_id = "ledger_id"
-        cls.not_before = "2020-01-01"
-        cls.not_after = "2020-01-02"
+        cls.not_before = "2022-01-01"
+        cls.not_after = "2023-01-01"
         cls.message_format = "{public_key}"
         cls.expected_path = os.path.abspath("some/path")
         cls.cert_request = CertRequest(

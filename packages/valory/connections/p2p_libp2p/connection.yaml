@@ -73,8 +73,8 @@ cert_requests:
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: cosmos
   save_path: .certs/conn_cert.txt
 excluded_protocols: []

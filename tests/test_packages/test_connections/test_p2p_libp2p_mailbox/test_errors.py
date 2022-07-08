@@ -88,8 +88,8 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             cls.peer_crypto.public_key,
             POR_DEFAULT_SERVICE_ID,
             DEFAULT_LEDGER,
-            "2021-01-01",
-            "2021-01-02",
+            "2022-01-01",
+            "2023-01-01",
             "{public_key}",
             f"./{crypto.address}_cert.txt",
         )
