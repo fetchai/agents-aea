@@ -33,7 +33,7 @@ aea add connection fetchai/http_server:0.22.0:QmbJ2Bcv156rY4ikSc7RB6Z4EwsXeZW1Mq
 aea push connection fetchai/http_server --local
 aea add protocol fetchai/default:1.0.0:QmWoiXYAKqwyqXDQ4gC1b11uRAxKRBiicWWuqthqeNWyEw --remote
 aea push protocol fetchai/default --local
-aea add protocol fetchai/http:1.0.0:Qmdz2FD7P9VXzUMZpLUh3DV5YtgWZwJKDxxw78heeaHv4M --remote
+aea add protocol fetchai/http:1.0.0:QmVUoaxD2pMd2czgrUjFH6LifM8h9KUt4TzRRPjUHCCYyv --remote
 aea push protocol fetchai/http --local
 cd ..
 aea delete my_aea

@@ -12,7 +12,7 @@ fingerprint:
   __init__.py: QmRo1DRePomRccoY2tB3GnKV2rUoNFaaE26WDRKp4ATs33
   check_dependencies.py: QmQCTSKYKcB5nj3x4esNHQkkW6u39grQ2j5KJ9g3nNnJzx
   connection.py: Qmagjyj3QrcmU3q7LGvSiHLzQFfLkzvux2mxaWFVCbij2D
-  consts.py: QmWAHrbN2fhqEe8o6cVLtwhWaEFp6h5cUJtJddYWbibPJj
+  consts.py: QmcWL5iosNdNFGxupotnzvfWGf87Nd18SE1QijN7F7t65o
   libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
   libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
   libp2p_node/acn/utils.go: QmNiWQ87SvY6qdqExFiZWcG734SocG8bZtVVj9z8A2ECM4
@@ -56,7 +56,7 @@ fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- valory/acn:1.1.0:Qmb5oWjLDDx8WrjKHFAXPRnMiGN6YvTCfqk8n8o1YhtWUW
+- valory/acn:1.1.0:QmXkHRhdKnH1M7cazbGQBbUnF4jyvdmSDpyxitMiL6xd1S
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
