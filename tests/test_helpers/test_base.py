@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helper module."""
-import datetime
 import os
 import platform
 import re
@@ -27,6 +26,7 @@ import signal
 import tempfile
 import time
 from copy import copy
+from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 from subprocess import Popen  # nosec
@@ -64,6 +64,10 @@ from aea.helpers.base import (
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
+
+
+NOT_BEFORE = "2022-01-01"
+NOT_AFTER = "2023-01-01"
 
 
 class TestHelpersBase:
@@ -439,8 +443,8 @@ class BaseTestCertRequestError:
     PUBLIC_KEY = "a_public_key"
     IDENTIFIER = "an_identifier"
     LEDGER_ID = "a_ledger_id"
-    NOT_BEFORE = "2022-01-01"
-    NOT_AFTER = "2023-01-01"
+    NOT_BEFORE = NOT_BEFORE
+    NOT_AFTER = NOT_AFTER
     MESSAGE_FORMAT = "{public_key}"
     PATH = "some/path"
     ERROR_MESSAGE_PATTERN = ""
@@ -523,8 +527,8 @@ class BaseTestCertRequestInstantiation:
         cls.expected_public_key = cls.PUBLIC_KEY
         cls.expected_identifier = "identifier"
         cls.expected_ledger_id = "ledger_id"
-        cls.not_before = "2022-01-01"
-        cls.not_after = "2023-01-01"
+        cls.not_before = NOT_BEFORE
+        cls.not_after = NOT_AFTER
         cls.message_format = "{public_key}"
         cls.expected_path = os.path.abspath("some/path")
         cls.cert_request = CertRequest(
@@ -539,26 +543,27 @@ class BaseTestCertRequestInstantiation:
 
     def test_instantiation(self):
         """Test instantiation."""
+
+        def tuplify(time: str) -> time.struct_time:
+            return datetime.strptime(time, date_format).timetuple()
+
         assert self.cert_request.public_key == self.EXPECTED_PUBLIC_KEY
         assert self.cert_request.key_identifier == self.EXPECTED_KEY_IDENTIFIER
         assert self.cert_request.identifier == self.expected_identifier
         assert self.cert_request.ledger_id == self.expected_ledger_id
 
-        expected_not_before = datetime.datetime(
-            2020, 1, 1, 0, 0, 0, 0, datetime.timezone.utc
-        )
-        assert self.cert_request.not_before == expected_not_before
+        date_format = "%Y-%m-%d"
 
-        expected_not_after = datetime.datetime(
-            2020, 1, 2, 0, 0, 0, 0, datetime.timezone.utc
-        )
+        expected_not_before = datetime(*tuplify(NOT_BEFORE)[:-3], 0, timezone.utc)
+        assert self.cert_request.not_before == expected_not_before
+        expected_not_after = datetime(*tuplify(NOT_AFTER)[:-3], 0, timezone.utc)
         assert self.cert_request.not_after == expected_not_after
 
         assert self.cert_request.not_before_string == expected_not_before.strftime(
-            "%Y-%m-%d"
+            date_format
         )
         assert self.cert_request.not_after_string == expected_not_after.strftime(
-            "%Y-%m-%d"
+            date_format
         )
         some_key = "some_key"
         assert self.cert_request.get_message(some_key) == "some_key".encode("ascii")
