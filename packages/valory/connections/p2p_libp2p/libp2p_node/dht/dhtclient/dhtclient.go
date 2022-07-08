@@ -84,12 +84,22 @@ func (notifee *Notifee) Listen(network.Network, multiaddr.Multiaddr) {}
 func (notifee *Notifee) ListenClose(network.Network, multiaddr.Multiaddr) {}
 
 // Connected called when a connection opened
-func (notifee *Notifee) Connected(network.Network, network.Conn) {}
+func (notifee *Notifee) Connected(net network.Network, conn network.Conn) {
+	notifee.logger.Info().Msgf(
+		"Connected to peer %s",
+		conn.RemotePeer().Pretty(),
+	)
+
+}
 
 // Disconnected called when a connection closed
 // Reconnects if connection is to relay peer and not currenctly closing connection.
 func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 
+	notifee.logger.Info().Msgf(
+		"Disconnected from peer %s",
+		conn.RemotePeer().Pretty(),
+	)
 	pinfo := notifee.myRelayPeer
 	if conn.RemotePeer().Pretty() != pinfo.ID.Pretty() {
 		return
@@ -409,6 +419,10 @@ func (dhtClient *DHTClient) Close() []error {
 // MultiAddr always return empty string
 func (dhtClient *DHTClient) MultiAddr() string {
 	return ""
+}
+
+func (dhtClient *DHTClient) PeerID() string {
+	return dhtClient.routedHost.ID().Pretty()
 }
 
 // RouteEnvelope routes the provided envelope to its destination contact peer
