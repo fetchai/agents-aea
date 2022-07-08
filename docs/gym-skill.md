@@ -15,7 +15,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Download the necessary directories into your working directory:
 
 ``` bash
-mkdir gym_skills_agent
+mkdir gym_skill_agent
 svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 ```
 
