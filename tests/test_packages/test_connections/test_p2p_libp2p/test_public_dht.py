@@ -37,6 +37,10 @@ from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
@@ -626,8 +630,8 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
                 CertRequest(
                     identifier="acn",
                     ledger_id=agent_ledger_id,
-                    not_after="2023-01-01",
-                    not_before="2022-01-01",
+                    not_before=LIBP2P_CERT_NOT_BEFORE,
+                    not_after=LIBP2P_CERT_NOT_AFTER,
                     public_key=public_key,
                     message_format="{public_key}",
                     save_path=f"./cli_test_cert_{public_key}.txt",

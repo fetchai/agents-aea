@@ -34,6 +34,10 @@ from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
 from packages.valory.connections.p2p_libp2p_client.connection import (
     NodeClient,
     P2PLibp2pClientConnection,
@@ -89,8 +93,8 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             cls.peer_crypto.public_key,
             POR_DEFAULT_SERVICE_ID,
             DEFAULT_LEDGER,
-            "2022-01-01",
-            "2023-01-01",
+            LIBP2P_CERT_NOT_BEFORE,
+            LIBP2P_CERT_NOT_AFTER,
             "{public_key}",
             f"./{crypto.address}_cert.txt",
         )

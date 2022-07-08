@@ -27,6 +27,10 @@ from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.valory.connections import p2p_libp2p_client
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
 from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
 from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
@@ -37,7 +41,6 @@ from tests.conftest import libp2p_log_on_failure, libp2p_log_on_failure_all
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
-
 DEFAULT_LAUNCH_TIMEOUT = 10
 
 
@@ -97,8 +100,8 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
                 CertRequest(
                     identifier="acn",
                     ledger_id=ledger_id,
-                    not_after="2023-01-01",
-                    not_before="2022-01-01",
+                    not_before=LIBP2P_CERT_NOT_BEFORE,
+                    not_after=LIBP2P_CERT_NOT_AFTER,
                     public_key=self.node_connection.node.pub,
                     message_format="{public_key}",
                     save_path="./cli_test_cert.txt",

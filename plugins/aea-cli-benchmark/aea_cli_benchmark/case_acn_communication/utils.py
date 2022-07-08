@@ -38,7 +38,11 @@ from packages.valory.connections.p2p_libp2p.connection import (
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
 )
-from packages.valory.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+    LIBP2P_NODE_MODULE_NAME,
+)
 from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
@@ -100,8 +104,8 @@ def _make_libp2p_connection(
         conn_crypto_store.public_keys[DEFAULT_LEDGER],
         POR_DEFAULT_SERVICE_ID,
         key.identifier,
-        "2022-01-01",
-        "2023-01-01",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         f"./{key.address}_cert.txt",
     )
@@ -180,8 +184,8 @@ def _make_libp2p_client_connection(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
-        "2022-01-01",
-        "2023-01-01",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         f"./{crypto.address}_cert.txt",
     )
@@ -222,8 +226,8 @@ def _make_libp2p_mailbox_connection(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
-        "2022-01-01",
-        "2023-01-01",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         f"./{crypto.address}_cert.txt",
     )

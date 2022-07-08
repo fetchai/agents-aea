@@ -37,6 +37,10 @@ from tests.conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_
 from tests.data.dummy_connection.connection import DummyConnection
 
 
+NOT_BEFORE = "2022-01-01"
+NOT_AFTER = "2023-01-01"
+
+
 class BaseTestIssueCertificates(AEATestCaseEmpty):
     """Base test class for 'aea issue-certificates' tests."""
 
@@ -78,8 +82,8 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
         cls.cert_request_1 = CertRequest(
             identifier=cls.cert_id_1,
             ledger_id=FetchAICrypto.identifier,
-            not_after="2023-01-01",
-            not_before="2022-01-01",
+            not_before=NOT_BEFORE,
+            not_after=NOT_AFTER,
             public_key=FetchAICrypto.identifier,
             message_format="{public_key}",
             save_path=cls.expected_path_1,
@@ -87,8 +91,8 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
         cls.cert_request_2 = CertRequest(
             identifier=cls.cert_id_2,
             ledger_id=FetchAICrypto.identifier,
-            not_after="2023-01-01",
-            not_before="2022-01-01",
+            not_before=NOT_BEFORE,
+            not_after=NOT_AFTER,
             public_key="0xABCDEF123456",
             message_format="{public_key}",
             save_path=cls.expected_path_2,
@@ -170,8 +174,8 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
         cls.cert_request_3 = CertRequest(
             identifier=cls.cert_id_3,
             ledger_id=EthereumCrypto.identifier,
-            not_after="2023-01-01",
-            not_before="2022-01-01",
+            not_before=NOT_BEFORE,
+            not_after=NOT_AFTER,
             public_key=EthereumCrypto.identifier,
             message_format="{public_key}",
             save_path=cls.expected_path_3,
@@ -179,8 +183,8 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
         cls.cert_request_4 = CertRequest(
             identifier=cls.cert_id_4,
             ledger_id=EthereumCrypto.identifier,
-            not_after="2023-01-01",
-            not_before="2022-01-01",
+            not_before=NOT_BEFORE,
+            not_after=NOT_AFTER,
             public_key="0xABCDEF123456",
             message_format="{public_key}",
             save_path=cls.expected_path_4,
@@ -234,8 +238,8 @@ class TestIssueCertificatesWrongConnectionKey(BaseTestIssueCertificates):
         cls.cert_request_1 = CertRequest(
             identifier=cls.cert_id_1,
             ledger_id=FetchAICrypto.identifier,
-            not_after="2023-01-01",
-            not_before="2022-01-01",
+            not_before=NOT_BEFORE,
+            not_after=NOT_AFTER,
             public_key="bad_ledger_id",
             message_format="{public_key}",
             save_path="path",
@@ -262,8 +266,8 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
         cls.cert_request_1 = CertRequest(
             identifier=cls.cert_id_1,
             ledger_id="bad_ledger_id",
-            not_after="2023-01-01",
-            not_before="2022-01-01",
+            not_before=NOT_BEFORE,
+            not_after=NOT_AFTER,
             public_key=FetchAICrypto.identifier,
             message_format="{public_key}",
             save_path="path",
