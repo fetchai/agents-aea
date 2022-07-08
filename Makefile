@@ -204,7 +204,7 @@ common-checks:
 
 .PHONY: doc-checks
 doc-checks:
-	tox -e check_doc_links -e check_api_docs
+	tox -e check_doc_links_hashes -e check_api_docs
 
 .PHONY: copyright
 copyright:
