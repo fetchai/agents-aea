@@ -109,6 +109,10 @@ from packages.valory.connections.p2p_libp2p.connection import (
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
 )
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
 from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
@@ -931,8 +935,8 @@ def _make_libp2p_connection(
         conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
         agent_key.identifier,
-        "2021-01-01",
-        "2021-01-02",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         f"./{agent_key.address}_cert.txt",
     )
@@ -1022,8 +1026,8 @@ def _make_libp2p_client_connection(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
-        "2021-01-01",
-        "2021-01-02",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         f"./{crypto.address}_cert.txt",
     )
@@ -1074,8 +1078,8 @@ def _make_libp2p_mailbox_connection(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
-        "2021-01-01",
-        "2021-01-02",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         f"./{crypto.address}_cert.txt",
     )

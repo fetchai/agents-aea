@@ -52,6 +52,8 @@ from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
 DEFAULT_TIMEOUT = 120
+NOT_BEFORE = "2022-01-01"
+NOT_AFTER = "2023-01-01"
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
@@ -603,8 +605,8 @@ class BaseTestMultiAgentManager(BaseCase):
                     {
                         "identifier": "acn",
                         "ledger_id": "fetchai",
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_before": NOT_BEFORE,
+                        "not_after": NOT_AFTER,
                         "public_key": "fetchai",
                         "message_format": "{public_key}",
                         "save_path": cert_filename,

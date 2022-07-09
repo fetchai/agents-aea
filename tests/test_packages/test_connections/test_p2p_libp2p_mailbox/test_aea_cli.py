@@ -27,6 +27,10 @@ from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.valory.connections import p2p_libp2p_mailbox
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
 from packages.valory.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
 
 from tests.conftest import (
@@ -100,8 +104,8 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
                 CertRequest(
                     identifier="acn",
                     ledger_id=ledger_id,
-                    not_after="2022-01-01",
-                    not_before="2021-01-01",
+                    not_before=LIBP2P_CERT_NOT_BEFORE,
+                    not_after=LIBP2P_CERT_NOT_AFTER,
                     public_key=self.node_connection.node.pub,
                     message_format="{public_key}",
                     save_path="./cli_test_cert.txt",

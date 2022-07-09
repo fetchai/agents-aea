@@ -12,7 +12,7 @@ fingerprint:
   __init__.py: QmRo1DRePomRccoY2tB3GnKV2rUoNFaaE26WDRKp4ATs33
   check_dependencies.py: QmQCTSKYKcB5nj3x4esNHQkkW6u39grQ2j5KJ9g3nNnJzx
   connection.py: Qmagjyj3QrcmU3q7LGvSiHLzQFfLkzvux2mxaWFVCbij2D
-  consts.py: QmWAHrbN2fhqEe8o6cVLtwhWaEFp6h5cUJtJddYWbibPJj
+  consts.py: QmcWL5iosNdNFGxupotnzvfWGf87Nd18SE1QijN7F7t65o
   libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
   libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
   libp2p_node/acn/utils.go: QmNiWQ87SvY6qdqExFiZWcG734SocG8bZtVVj9z8A2ECM4
@@ -74,8 +74,8 @@ cert_requests:
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: cosmos
   save_path: .certs/conn_cert.txt
 excluded_protocols: []

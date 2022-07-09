@@ -32,6 +32,10 @@ from packages.valory.connections import p2p_libp2p
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
 
 from tests.conftest import DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
 from tests.conftest import default_ports as ports
@@ -155,8 +159,8 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
                 {
                     "identifier": "acn",
                     "ledger_id": Ethereum.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
+                    "not_before": LIBP2P_CERT_NOT_BEFORE,
+                    "not_after": LIBP2P_CERT_NOT_AFTER,
                     "public_key": CosmosCrypto.identifier,
                     "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
