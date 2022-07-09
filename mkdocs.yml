@@ -279,7 +279,7 @@ nav:
   - Registries:
     - IPFS: ipfs_registry.md
   - Glossary: 'glossary.md'
-  - Q&A: 'questions-and-answers.md'
+  - FAQ: 'faq.md'
 
 plugins:
     - markdownmermaid

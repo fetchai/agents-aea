@@ -1,3 +1,5 @@
+#Frequently Asked Questions (FAQ)
+
 <details><summary>What is an AEA?</summary>
 AEA stands for "Autonomous Economic Agent". An AEA can represent an individual, organisation or object and looks after its owner's interests. AEAs act independently of constant user input and autonomously execute actions to achieve their prescribed goals. Their purpose is to create economic value for their owners.
 </details>
