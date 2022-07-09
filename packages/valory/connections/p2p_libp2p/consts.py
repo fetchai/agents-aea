@@ -22,6 +22,9 @@ import os
 import platform
 
 
+LIBP2P_CERT_NOT_BEFORE = "2022-01-01"
+LIBP2P_CERT_NOT_AFTER = "2023-01-01"
+
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
 
 LIBP2P_NODE_MODULE = str(

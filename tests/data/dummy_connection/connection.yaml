@@ -31,14 +31,14 @@ cert_requests:
 - identifier: cert_id_1
   ledger_id: some_ledger_id
   message_format: '{public_key}'
-  not_after: '2020-01-02'
-  not_before: '2020-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: key_id
   save_path: /source/some/path_1
 - identifier: cert_id_2
   ledger_id: some_ledger_id
   message_format: '{public_key}'
-  not_after: '2020-01-02'
-  not_before: '2020-01-01'
+  not_after: '2023-01-01'
+  not_before: '2022-01-01'
   public_key: '0xABCDEF123456'
   save_path: /source/some/path_2

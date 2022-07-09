@@ -26,7 +26,7 @@ from aea.crypto.registries import make_crypto
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.base import CertRequest
 
-from tests.conftest import _process_cert
+from tests.conftest import LIBP2P_CERT_NOT_AFTER, LIBP2P_CERT_NOT_BEFORE, _process_cert
 
 
 def test_agent_record(change_directory):
@@ -43,8 +43,8 @@ def test_agent_record(change_directory):
         peer_public_key_1,
         "test_service",
         DEFAULT_LEDGER,
-        "2021-01-01",
-        "2022-01-01",
+        LIBP2P_CERT_NOT_BEFORE,
+        LIBP2P_CERT_NOT_AFTER,
         "{public_key}",
         cert_path,
     )
