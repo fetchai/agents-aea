@@ -32,15 +32,15 @@ def addr_to_url(addr: str) -> str
 
 Convert address to url.
 
-<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.is_remote"></a>
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.is_remote_addr"></a>
 
-#### is`_`remote
+#### is`_`remote`_`addr
 
 ```python
-def is_remote(host: str) -> bool
+def is_remote_addr(host: str) -> bool
 ```
 
-Check is addr is remote or local.
+Check if addr is remote or local.
 
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon"></a>
 
