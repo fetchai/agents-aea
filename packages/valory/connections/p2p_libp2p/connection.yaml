@@ -50,7 +50,7 @@ fingerprint:
   libp2p_node/mocks/mock_peerstore.go: QmeH1TucFNbbv9yrLFWHSMDMnsmUmZQbzJYfo25JLyFoYf
   libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmWDoniHr3wa5freLHDESv7SgC9ggYenrLyibw4jFkTc4r
   libp2p_node/protocols/acn/v1_0_0/acn.proto: QmcguMcKttJfsuPYrUVWFJ1Trr1VxrSSfan94Z3yNAxNEW
-  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmeqaYRWL5bVRE8FKgbiAspgFkoi5HKtkSncT7fCf1JAex
+  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUxjEyzwQP7TWad5RfCefS2qfpbhJgVFjaEN4LUoA3ys5
   libp2p_node/utils/utils.go: QmdVRRhcoWZE5tt9aD1zYapAcbs5hfJh7z8p4AwgnkT4i2
   libp2p_node/utils/utils_test.go: Qmd2tbXhEDQELjkyKHyCqmcBitECK9mrVENyPWaev5HF63
 fingerprint_ignore_patterns: []
