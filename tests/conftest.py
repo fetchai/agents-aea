@@ -110,8 +110,15 @@ from packages.valory.connections.p2p_libp2p.connection import (
     POR_DEFAULT_SERVICE_ID,
 )
 from packages.valory.connections.p2p_libp2p.consts import (
+    DEFAULT_LEDGER_LIBP2P_NODE,
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
+    PUBLIC_STAGING_DHT_DELEGATE_URI_1,
+    PUBLIC_STAGING_DHT_DELEGATE_URI_2,
+    PUBLIC_STAGING_DHT_P2P_MADDR_1,
+    PUBLIC_STAGING_DHT_P2P_MADDR_2,
+    PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1,
+    PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2,
 )
 from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
@@ -256,16 +263,6 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "fetchai",
 }
-PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.staging.autonolas.tech/tcp/9003/p2p/16Uiu2HAkzqwxz5HdbnXS6mB4nTwJ3WysQa6udvbZ3te2sCHZ6ih2"
-PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.staging.autonolas.tech/tcp/9004/p2p/16Uiu2HAmCQqXLFWaqqUv8hFdFPDwwNQf9qEQox8Kcf78heb33e7x"
-PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "acn.staging.autonolas.tech:9005"
-PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "acn.staging.autonolas.tech:9006"
-PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
-    "0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d"
-)
-PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
-    "02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7"
-)
 
 # TODO: temporary overwriting of addresses, URIs and public keys
 #  used in test_p2p_libp2p/test_public_dht.py
@@ -275,8 +272,6 @@ PUBLIC_DHT_DELEGATE_URI_1 = PUBLIC_STAGING_DHT_DELEGATE_URI_1
 PUBLIC_DHT_DELEGATE_URI_2 = PUBLIC_STAGING_DHT_DELEGATE_URI_2
 PUBLIC_DHT_P2P_PUBLIC_KEY_1 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1
 PUBLIC_DHT_P2P_PUBLIC_KEY_2 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2
-
-DEFAULT_LEDGER_LIBP2P_NODE = "cosmos"  # Secp256k1 keys
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
