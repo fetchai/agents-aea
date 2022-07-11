@@ -12,7 +12,7 @@ contracts: []
 protocols:
 - fetchai/oef_search:1.1.1
 - fetchai/default:1.1.1
-- fetchai/tac:1.1.1
+- fetchai/tac:1.1.2
 - fetchai/fipa:1.1.1
 skills:
 - fetchai/echo:0.20.1

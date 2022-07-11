@@ -16,10 +16,10 @@ fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.12.1
 protocols:
-- fetchai/contract_api:1.1.1
+- fetchai/contract_api:1.1.2
 - fetchai/default:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/prometheus:1.1.1
+- fetchai/ledger_api:1.1.2
+- fetchai/prometheus:1.1.2
 - fetchai/signing:1.1.1
 skills: []
 behaviours:

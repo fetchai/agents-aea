@@ -1,6 +1,6 @@
 name: cosm_trade
 author: fetchai
-version: 0.2.1
+version: 0.2.2
 protocol_specification_id: fetchai/cosm_trade:1.0.0
 type: protocol
 description: A protocol for preparing an atomic swap bilateral transaction for cosmos-based
@@ -8,13 +8,13 @@ description: A protocol for preparing an atomic swap bilateral transaction for c
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmS1YSZ486r288dt9Smd51NMH8ij7P1BU6dS4PBdnqMgae
+  README.md: QmVyco7jZ7HryTUys1e92qj8VQZi7jwXyjKKebZw3tCzp9
   __init__.py: QmVKF1brp8wTMJBe4CX2fPTjvjY535JD1TY4eTZNLZM3p2
   cosm_trade.proto: QmWJZbNWJD8Qz1A1ju89wWoxFjMhC7RHn1pkeVPW3s3CPT
   cosm_trade_pb2.py: QmYemym9eR1FxFbdxVLGAWNoLKLoBLeMzDVPgP2YM4336P
   custom_types.py: QmS4h6s3ZnbzrDrud9ZPfaUesN3CczZHC4LPqFX8VGFPcj
   dialogues.py: QmNWYxmPJJEuqyc8NS5zxXMB3w2avNxZwBVdvX1Fms6oDD
-  message.py: QmYPHHPcp4KMdC4TtT8mPtBzbVAFNpoa8srPYtyGmkzGvf
+  message.py: QmSpcJoWw9fYemaRHyTf3aFYVfhtmzktcyfdCP67bBoYK4
   serialization.py: QmU8ZVMYPB3AMhjCxbTdqfK8HiYsSGcUrRwg5zaR3HLw2u
 fingerprint_ignore_patterns: []
 dependencies:

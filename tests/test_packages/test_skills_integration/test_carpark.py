@@ -52,7 +52,7 @@ class TestCarPark(AEATestCaseManyFlaky):
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -232,7 +232,7 @@ class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -254,7 +254,7 @@ class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_detector:0.32.0", carpark_aea_name
+            "fetchai/car_detector:0.32.1", carpark_aea_name
         )
         assert (
             diff == []

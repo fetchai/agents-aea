@@ -19,7 +19,7 @@ contracts: []
 protocols:
 - fetchai/default:1.1.1
 - fetchai/fipa:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/ledger_api:1.1.2
 - fetchai/oef_search:1.1.1
 - fetchai/signing:1.1.1
 skills:

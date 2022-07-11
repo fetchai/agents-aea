@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/thermometer_aea:0.30.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.30.1 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -18,7 +18,7 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
@@ -44,7 +44,7 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install

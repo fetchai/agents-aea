@@ -51,7 +51,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -244,7 +244,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(weather_station_aea_name, weather_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -273,7 +273,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.32.0", weather_station_aea_name
+            "fetchai/weather_station:0.32.1", weather_station_aea_name
         )
         assert (
             diff == []

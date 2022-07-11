@@ -20,8 +20,8 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
@@ -65,8 +65,8 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
@@ -123,14 +123,14 @@ aea delete erc1155_client
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
+  fetchai/contract_api:1.1.2: fetchai/ledger:0.21.0
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.0
   fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
+  fetchai/contract_api:1.1.2: fetchai/ledger:0.21.0
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.0
   fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
 ```
 ``` yaml

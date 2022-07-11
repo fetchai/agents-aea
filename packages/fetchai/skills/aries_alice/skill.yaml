@@ -19,7 +19,7 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:1.1.1
-- fetchai/http:1.1.1
+- fetchai/http:1.1.2
 - fetchai/oef_search:1.1.1
 skills: []
 behaviours:

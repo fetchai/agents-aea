@@ -22,7 +22,7 @@ contracts:
 protocols:
 - fetchai/default:1.1.1
 - fetchai/oef_search:1.1.1
-- fetchai/tac:1.1.1
+- fetchai/tac:1.1.2
 skills: []
 behaviours:
   tac:

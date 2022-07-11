@@ -77,7 +77,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.32.0",
+            "fetchai/simple_service_registration:0.32.1",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)

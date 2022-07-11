@@ -53,7 +53,7 @@ class TestGenericSkills(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -242,7 +242,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -264,7 +264,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.29.0", seller_aea_name
+            "fetchai/generic_seller:0.29.1", seller_aea_name
         )
         assert (
             diff == []

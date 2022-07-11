@@ -57,8 +57,8 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
+            "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 

@@ -16,8 +16,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/http:1.1.1
-- fetchai/prometheus:1.1.1
+- fetchai/http:1.1.2
+- fetchai/prometheus:1.1.2
 skills: []
 behaviours:
   advanced_data_request_behaviour:

@@ -17,7 +17,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/register:1.1.1
+- fetchai/register:1.1.2
 - fetchai/signing:1.1.1
 skills:
 - fetchai/simple_service_search:0.11.1

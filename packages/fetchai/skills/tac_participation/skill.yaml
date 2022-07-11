@@ -19,8 +19,8 @@ contracts:
 - fetchai/erc1155:0.23.1
 protocols:
 - fetchai/oef_search:1.1.1
-- fetchai/state_update:1.1.1
-- fetchai/tac:1.1.1
+- fetchai/state_update:1.1.2
+- fetchai/tac:1.1.2
 skills: []
 behaviours:
   tac_search:

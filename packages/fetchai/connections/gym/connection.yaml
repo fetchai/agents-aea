@@ -12,13 +12,13 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/gym:1.1.1
+- fetchai/gym:1.1.2
 class_name: GymConnection
 config:
   env: ''
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/gym:1.1.1
+- fetchai/gym:1.1.2
 dependencies:
   gym: {}
 is_abstract: false

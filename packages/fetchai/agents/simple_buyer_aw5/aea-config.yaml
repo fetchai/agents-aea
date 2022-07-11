@@ -14,14 +14,14 @@ connections:
 - fetchai/soef:0.27.1
 contracts: []
 protocols:
-- fetchai/contract_api:1.1.1
+- fetchai/contract_api:1.1.2
 - fetchai/default:1.1.1
 - fetchai/fipa:1.1.1
-- fetchai/http:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/http:1.1.2
+- fetchai/ledger_api:1.1.2
 - fetchai/oef_search:1.1.1
 - fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/state_update:1.1.2
 skills:
 - fetchai/confirmation_aw3:0.12.2
 - fetchai/generic_buyer:0.27.2
@@ -29,8 +29,8 @@ default_ledger: fetchai
 required_ledgers:
 - fetchai
 default_routing:
-  fetchai/http:1.1.1: fetchai/http_client:0.24.1
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
+  fetchai/http:1.1.2: fetchai/http_client:0.24.1
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.0
   fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
 connection_private_key_paths: {}
 private_key_paths: {}

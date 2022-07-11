@@ -1,6 +1,6 @@
 agent_name: fipa_dummy_buyer
 author: fetchai
-version: 0.5.0
+version: 0.5.1
 description: Sample agent for FIPA interaction
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

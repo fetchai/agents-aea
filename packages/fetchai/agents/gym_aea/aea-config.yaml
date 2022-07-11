@@ -12,9 +12,9 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:1.1.1
-- fetchai/gym:1.1.1
+- fetchai/gym:1.1.2
 - fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/state_update:1.1.2
 skills:
 - fetchai/gym:0.21.1
 default_connection: fetchai/gym:0.20.1

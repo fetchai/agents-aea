@@ -57,7 +57,7 @@ Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</
 
 The following steps assume you have launched the AEA Manager Desktop app.
 
-1. Add a new AEA called `car_detector` with public id `fetchai/car_detector:0.32.0`.
+1. Add a new AEA called `car_detector` with public id `fetchai/car_detector:0.32.1`.
 
 2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.33.1`.
 
@@ -97,7 +97,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the car detector AEA:
 ``` bash
-aea fetch fetchai/car_detector:0.32.0
+aea fetch fetchai/car_detector:0.32.1
 cd car_detector
 aea install
 aea build
@@ -121,7 +121,7 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
@@ -159,7 +159,7 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install

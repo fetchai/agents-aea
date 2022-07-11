@@ -106,7 +106,7 @@ Follow this approach when using the `aea` CLI.
 
 First, fetch the data provider AEA:
 ``` bash
-aea fetch fetchai/ml_data_provider:0.32.0
+aea fetch fetchai/ml_data_provider:0.32.1
 cd ml_data_provider
 aea install
 aea build
@@ -130,7 +130,7 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install
@@ -168,7 +168,7 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 aea install

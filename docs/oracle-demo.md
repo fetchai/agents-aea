@@ -67,9 +67,9 @@ Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-"fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
-"fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0"
+"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+"fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0"
 }'
 ```
 
@@ -133,7 +133,7 @@ aea issue-certificates
 From a new terminal (in the same top-level directory), fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.12.0
+aea fetch fetchai/coin_price_oracle_client:0.12.1
 cd coin_price_oracle_client
 aea install
 ```
@@ -163,9 +163,9 @@ Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-"fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
-"fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0"
+"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+"fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0"
 }'
 ```
 

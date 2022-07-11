@@ -18,7 +18,7 @@ connections: []
 contracts: []
 protocols:
 - fetchai/default:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/ledger_api:1.1.2
 - fetchai/ml_trade:1.1.1
 - fetchai/oef_search:1.1.1
 skills:

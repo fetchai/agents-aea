@@ -11,7 +11,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.29.0
+aea fetch fetchai/generic_seller:0.29.1
 cd generic_seller
 aea eject skill fetchai/generic_seller:0.28.1
 cd ..
@@ -1411,7 +1411,7 @@ contracts: []
 protocols:
 - fetchai/default:1.1.1
 - fetchai/fipa:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/ledger_api:1.1.2
 - fetchai/oef_search:1.1.1
 skills: []
 behaviours:
@@ -3066,7 +3066,7 @@ contracts: []
 protocols:
 - fetchai/default:1.1.1
 - fetchai/fipa:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/ledger_api:1.1.2
 - fetchai/oef_search:1.1.1
 - fetchai/signing:1.1.1
 skills: []
@@ -3167,7 +3167,7 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
   "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
 }'
 ```

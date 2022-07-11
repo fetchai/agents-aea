@@ -72,10 +72,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             self.create_agents(oracle_agent_name, client_agent_name)
 
             default_routing = {
-                "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
-                "fetchai/prometheus:1.1.1": "fetchai/prometheus:0.9.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+                "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.1",
             }
 
             # add packages for oracle agent
@@ -173,9 +173,9 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             )
 
             default_routing = {
-                "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
             }
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -309,10 +309,10 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             self.create_agents(oracle_agent_name, client_agent_name)
 
             default_routing = {
-                "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
-                "fetchai/prometheus:1.1.1": "fetchai/prometheus:0.9.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+                "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.1",
             }
 
             # add packages for oracle agent
@@ -414,9 +414,9 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             )
 
             default_routing = {
-                "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
             }
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -433,7 +433,7 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             self.set_config(setting_path, query_function)
 
             diff = self.difference_to_fetched_agent(
-                "fetchai/coin_price_oracle_client:0.12.0", client_agent_name
+                "fetchai/coin_price_oracle_client:0.12.1", client_agent_name
             )
             assert (
                 diff == []

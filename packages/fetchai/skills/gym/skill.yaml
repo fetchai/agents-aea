@@ -18,7 +18,7 @@ connections:
 - fetchai/gym:0.20.1
 contracts: []
 protocols:
-- fetchai/gym:1.1.1
+- fetchai/gym:1.1.2
 skills: []
 behaviours: {}
 handlers:

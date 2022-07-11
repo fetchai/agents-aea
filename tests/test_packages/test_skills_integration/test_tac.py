@@ -103,7 +103,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.30.0", tac_controller_name
+            "fetchai/tac_controller:0.30.1", tac_controller_name
         )
         assert (
             diff == []
@@ -140,7 +140,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
         self.nested_set_config(setting_path, data)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -171,7 +171,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
             self.nested_set_config(setting_path, data)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.32.0", agent_name
+                "fetchai/tac_participant:0.32.1", agent_name
             )
             assert (
                 diff == []
@@ -355,8 +355,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # default routing (both for controller and participants)
         default_routing = {
-            "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -866,8 +866,8 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # default routing (both for controller and participants)
         default_routing = {
-            "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 

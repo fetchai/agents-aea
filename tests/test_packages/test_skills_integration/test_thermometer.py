@@ -52,7 +52,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -250,7 +250,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
             "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
         }
 
@@ -279,7 +279,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.30.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.30.1", thermometer_aea_name
         )
         assert (
             diff == []

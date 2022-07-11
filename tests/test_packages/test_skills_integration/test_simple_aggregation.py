@@ -145,7 +145,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
 
             if i == 0:
                 diff = self.difference_to_fetched_agent(
-                    "fetchai/simple_aggregator:0.5.0", agent
+                    "fetchai/simple_aggregator:0.5.1", agent
                 )
                 assert (
                     diff == []

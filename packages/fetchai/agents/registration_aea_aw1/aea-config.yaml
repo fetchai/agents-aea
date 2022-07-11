@@ -1,6 +1,6 @@
 agent_name: registration_aea_aw1
 author: fetchai
-version: 0.18.1
+version: 0.18.2
 description: This is an agent to register for Agent World 1.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -14,9 +14,9 @@ contracts: []
 protocols:
 - fetchai/default:1.1.1
 - fetchai/oef_search:1.1.1
-- fetchai/register:1.1.1
+- fetchai/register:1.1.2
 - fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/state_update:1.1.2
 skills:
 - fetchai/registration_aw1:0.13.1
 - fetchai/simple_service_registration:0.23.1

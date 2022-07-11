@@ -13,10 +13,10 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:1.1.1
-- fetchai/http:1.1.1
-- fetchai/prometheus:1.1.1
+- fetchai/http:1.1.2
+- fetchai/prometheus:1.1.2
 - fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/state_update:1.1.2
 skills:
 - fetchai/advanced_data_request:0.7.1
 default_connection: fetchai/http_server:0.23.1
@@ -24,8 +24,8 @@ default_ledger: fetchai
 required_ledgers:
 - fetchai
 default_routing:
-  fetchai/http:1.1.1: fetchai/http_client:0.24.1
-  fetchai/prometheus:1.1.1: fetchai/prometheus:0.9.1
+  fetchai/http:1.1.2: fetchai/http_client:0.24.1
+  fetchai/prometheus:1.1.2: fetchai/prometheus:0.9.1
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:

@@ -15,8 +15,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/contract_api:1.1.2
+- fetchai/ledger_api:1.1.2
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -29,7 +29,7 @@ config:
       chain_id: dorado-1
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/contract_api:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/contract_api:1.1.2
+- fetchai/ledger_api:1.1.2
 dependencies: {}
 is_abstract: false

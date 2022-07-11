@@ -19,7 +19,7 @@ Repeat the following process four times in four different terminals (for each {`
 Fetch the aggregator AEA:
 ``` bash
 agent_name="agg$i"
-aea fetch fetchai/simple_aggregator:0.5.0 --alias $agent_name
+aea fetch fetchai/simple_aggregator:0.5.1 --alias $agent_name
 cd $agent_name
 aea install
 aea build

@@ -11,9 +11,9 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:1.1.1
-- fetchai/ledger_api:1.1.1
+- fetchai/ledger_api:1.1.2
 - fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/state_update:1.1.2
 skills:
 - fetchai/fetch_block:0.12.1
 default_connection: fetchai/ledger:0.21.0

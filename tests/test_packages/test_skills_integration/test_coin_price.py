@@ -56,8 +56,8 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.set_config("agent.default_connection", "fetchai/http_server:0.23.1")
 
         default_routing = {
-            "fetchai/http:1.1.1": "fetchai/http_client:0.24.1",
-            "fetchai/prometheus:1.1.1": "fetchai/prometheus:0.9.1",
+            "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+            "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.1",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
