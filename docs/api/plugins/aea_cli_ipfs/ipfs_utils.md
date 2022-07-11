@@ -32,6 +32,16 @@ def addr_to_url(addr: str) -> str
 
 Convert address to url.
 
+<a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.is_remote"></a>
+
+#### is`_`remote
+
+```python
+def is_remote(host: str) -> bool
+```
+
+Check is addr is remote or local.
+
 <a id="plugins.aea-cli-ipfs.aea_cli_ipfs.ipfs_utils.IPFSDaemon"></a>
 
 ## IPFSDaemon Objects
@@ -51,7 +61,7 @@ Set up the IPFS daemon.
 #### `__`init`__`
 
 ```python
-def __init__(node_url: str = "http://127.0.0.1:5001")
+def __init__(node_url: str = "http://127.0.0.1:5001", is_remote: bool = False)
 ```
 
 Initialise IPFS daemon.

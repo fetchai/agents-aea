@@ -88,6 +88,11 @@ def addr_to_url(addr: str) -> str:
     return f"{protocol}://{host}:{port}"
 
 
+def is_remote_addr(host: str) -> bool:
+    """Check is addr is remote or local."""
+    return host not in ("localhost", "127.0.0.1", "0.0.0.0")
+
+
 class IPFSDaemon:
     """
     Set up the IPFS daemon.
@@ -97,9 +102,12 @@ class IPFSDaemon:
 
     api_url: str
     node_url: str
+    is_remote: bool
     process: Optional[subprocess.Popen]
 
-    def __init__(self, node_url: str = "http://127.0.0.1:5001"):
+    def __init__(
+        self, node_url: str = "http://127.0.0.1:5001", is_remote: bool = False
+    ):
         """Initialise IPFS daemon."""
 
         if node_url.endswith("/"):
@@ -108,7 +116,10 @@ class IPFSDaemon:
         self.node_url = node_url
         self.api_url = node_url + IPFS_NODE_CHECK_ENDPOINT
         self.process = None
-        self._check_ipfs()
+        self.is_remote = is_remote
+
+        if not is_remote:
+            self._check_ipfs()
 
     @staticmethod
     def _check_ipfs() -> None:
@@ -193,28 +204,23 @@ class IPFSTool:
         :param addr: multiaddr string for IPFS client.
         """
 
-        if addr is not None:
-            _ = resolve_addr(addr)  # verify addr
-            self._addr = addr
+        if addr is None:
+            addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
 
+        _, host, *_ = resolve_addr(addr)  # verify addr
+
+        self._addr = addr
+        self.is_remote = is_remote_addr(host)
         self.client = ipfshttpclient.Client(addr=self.addr)
-        self.daemon = IPFSDaemon(node_url=addr_to_url(self.addr))
+        self.daemon = IPFSDaemon(
+            node_url=addr_to_url(self.addr), is_remote=self.is_remote
+        )
 
     @property
     def addr(
         self,
     ) -> str:
         """Node address"""
-        if self._addr is None:
-            addr = os.environ.get("OPEN_AEA_IPFS_ADDR", DEFAULT_IPFS_URL)
-            try:
-                _ = resolve_addr(addr)
-                self._addr = addr
-            except ValueError as e:
-                raise ValueError(
-                    f"Error picking IPFS Addr from env; Addr : {addr}"
-                ) from e
-
         return cast(str, self._addr)
 
     def is_a_package(self, package_hash: str) -> bool:
