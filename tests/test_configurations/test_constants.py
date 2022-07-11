@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Test if constants as valid."""
+"""Test if constants are valid."""
 
 from pathlib import Path
 
