@@ -22,7 +22,7 @@
 __title__ = "aea"
 __description__ = "Autonomous Economic Agent framework"
 __url__ = "https://github.com/fetchai/agents-aea.git"
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 __author__ = "Fetch.AI Limited"
 __license__ = "Apache-2.0"
 __copyright__ = "2022 Fetch.AI Limited"
