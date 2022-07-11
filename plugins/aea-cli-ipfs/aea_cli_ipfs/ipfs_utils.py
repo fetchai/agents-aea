@@ -90,7 +90,7 @@ def addr_to_url(addr: str) -> str:
 
 def is_remote_addr(host: str) -> bool:
     """Check is addr is remote or local."""
-    return host not in ("localhost", "127.0.0.1", "0.0.0.0")
+    return host not in ("localhost", "127.0.0.1", "0.0.0.0")  # nosec
 
 
 class IPFSDaemon:
