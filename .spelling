@@ -290,7 +290,7 @@ CosmWasm
  - docs/ledger-integration.md
 atestfet
 v0.2.x
- - docs/questions-and-answers.md
+ - docs/faq.md
 state_update
 txt
  - docs/protocol-generator.md
