@@ -17,7 +17,7 @@ fingerprint:
   libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
   libp2p_node/acn/utils.go: QmNiWQ87SvY6qdqExFiZWcG734SocG8bZtVVj9z8A2ECM4
   libp2p_node/aea/api.go: QmSGxHYYdbz9KZtJWcyGTLb4iP1Zik27dmSwnYuuL1rTzj
-  libp2p_node/aea/envelope.pb.go: QmZq6PDh3CzXwgvedZeYAofmBNVRVMtzNDb9b5UXfqxdy2
+  libp2p_node/aea/envelope.pb.go: QmShNYxd1WZZbzq3KQPk6yLYjCq82rLSNvyeMNdkrJwfaq
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe.go: QmV3EzagcaE3roByErDNYYwzWgF6gAjtgLX7737u5eyMnt
   libp2p_node/aea/utils.go: QmUoDfXZZ3WK44889nDJcKfsqatfNhUR9DoZkviTfV8zUz
@@ -48,7 +48,7 @@ fingerprint:
   libp2p_node/mocks/mock_net.go: QmeDAYbKoV1dDz5Z2zvPtZ7BWf1p5xyr5ZnZJLwN6wgfPJ
   libp2p_node/mocks/mock_network.go: Qmbm9SnYb2zF8xvqD2qs2Q6CGfSCbCL4kZcQpjpLdEgWTN
   libp2p_node/mocks/mock_peerstore.go: QmeH1TucFNbbv9yrLFWHSMDMnsmUmZQbzJYfo25JLyFoYf
-  libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmWDoniHr3wa5freLHDESv7SgC9ggYenrLyibw4jFkTc4r
+  libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmTKcfvxo9UfqD7FJcAzMv895dtYmRMZjBQ5ypyaLFq7cU
   libp2p_node/protocols/acn/v1_0_0/acn.proto: QmcguMcKttJfsuPYrUVWFJ1Trr1VxrSSfan94Z3yNAxNEW
   libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUxjEyzwQP7TWad5RfCefS2qfpbhJgVFjaEN4LUoA3ys5
   libp2p_node/utils/utils.go: QmdVRRhcoWZE5tt9aD1zYapAcbs5hfJh7z8p4AwgnkT4i2
