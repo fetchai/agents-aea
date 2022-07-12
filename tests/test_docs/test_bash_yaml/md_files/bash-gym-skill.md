@@ -1,4 +1,11 @@
 ``` bash
+mkdir gym_skill_agent
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+```
+``` bash
+pip install numpy gym
+```
+``` bash
 aea fetch fetchai/gym_aea:0.26.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
