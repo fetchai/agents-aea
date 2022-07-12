@@ -9,7 +9,6 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.24.2
 - fetchai/ledger:0.21.1
-- fetchai/p2p_libp2p:0.27.1
 - fetchai/prometheus:0.9.2
 contracts:
 - fetchai/oracle:0.12.1
@@ -24,8 +23,8 @@ protocols:
 skills:
 - fetchai/advanced_data_request:0.7.2
 - fetchai/simple_oracle:0.16.1
-default_connection: fetchai/p2p_libp2p:0.27.1
-default_ledger: ethereum
+default_connection: fetchai/ledger:0.21.0
+default_ledger: fetchai
 required_ledgers:
 - fetchai
 - ethereum
@@ -60,17 +59,6 @@ type: skill
 models:
   strategy:
     args:
-      ledger_id: ethereum
+      ledger_id: fetchai
       oracle_value_name: price
-      update_function: updateOracleValue
----
-public_id: fetchai/p2p_libp2p:0.27.1
-type: connection
-cert_requests:
-- identifier: acn
-  ledger_id: ethereum
-  not_after: '2023-01-01'
-  not_before: '2022-01-01'
-  public_key: fetchai
-  message_format: '{public_key}'
-  save_path: .certs/conn_cert.txt
+      update_function: update_oracle_value

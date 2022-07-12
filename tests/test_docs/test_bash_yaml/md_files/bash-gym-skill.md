@@ -1,5 +1,16 @@
 ``` bash
+<<<<<<< HEAD
 aea fetch fetchai/gym_aea:0.26.1 --alias my_gym_aea
+=======
+mkdir gym_skill_agent
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+```
+``` bash
+pip install numpy gym
+```
+``` bash
+aea fetch fetchai/gym_aea:0.26.0 --alias my_gym_aea
+>>>>>>> 22b4fb2e66320dd44e3ae644eda0ff690ae6b025
 cd my_gym_aea
 aea install
 ```
