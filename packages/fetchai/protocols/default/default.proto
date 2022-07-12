@@ -7,11 +7,11 @@ message DefaultMessage{
   // Custom Types
   message ErrorCode{
     enum ErrorCodeEnum {
-      UNSUPPORTED_PROTOCOL = 0;
-      DECODING_ERROR = 1;
-      INVALID_MESSAGE = 2;
-      UNSUPPORTED_SKILL = 3;
-      INVALID_DIALOGUE = 4;
+      ERROR_CODE_ENUM_UNSUPPORTED_PROTOCOL = 0;
+      ERROR_CODE_ENUM_DECODING_ERROR = 1;
+      ERROR_CODE_ENUM_INVALID_MESSAGE = 2;
+      ERROR_CODE_ENUM_UNSUPPORTED_SKILL = 3;
+      ERROR_CODE_ENUM_INVALID_DIALOGUE = 4;
     }
     ErrorCodeEnum error_code = 1;
   }
