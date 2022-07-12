@@ -13,4 +13,4 @@ class_name: MyScaffoldContract
 contract_interface_paths: {}
 dependencies: {}
 contracts:
-- default_author/stub_0:0.1.0:QmeLYjfy6VxvkErTxTc5Gm1MRHH4rkP1E715aQ693PnS6y
+- default_author/stub_0:0.1.0:bafybeihnwq6ljbce7wbrs3ld36xhbbszcuy4wbgtwxtzyjz4uqybno2vay

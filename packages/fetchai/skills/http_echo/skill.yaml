@@ -13,10 +13,10 @@ fingerprint:
   handlers.py: QmWPorow1KQLFcHkyX7FMziF2ugyDQ9NiUzUvKYpMsNaHo
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.22.0:QmbJ2Bcv156rY4ikSc7RB6Z4EwsXeZW1MqvdYcjw4kKY9z
+- fetchai/http_server:0.22.0:bafybeiannv2hpue6llxrp34oetbhhpptht7qudpgszowe4vb6yx46fwdf4
 contracts: []
 protocols:
-- fetchai/http:1.0.0:Qmdz2FD7P9VXzUMZpLUh3DV5YtgWZwJKDxxw78heeaHv4M
+- fetchai/http:1.0.0:bafybeihioisrxummu4ksssqsglayme5n2hxzz4hvy4h4tqbj3sbmacpzey
 skills: []
 behaviours: {}
 handlers:
