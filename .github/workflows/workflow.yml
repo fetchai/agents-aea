@@ -77,11 +77,11 @@ jobs:
       - name: Static type check
         run: tox -e mypy
       - name: Golang code style check (aealite)
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.28
+          version: v1.45.2
           args: --version
           working-directory: libs/go/aealite
 

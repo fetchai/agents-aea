@@ -145,7 +145,7 @@ func main() {
 		check(err)
 	}
 	defer node.Close()
-
+	logger.Info().Msgf("Peer ID: %s", node.PeerID())
 	// Connect to the agent
 	fmt.Println(libp2pMultiaddrsListStart) // keyword
 	fmt.Println(node.MultiAddr())
