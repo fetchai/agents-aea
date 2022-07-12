@@ -22,20 +22,6 @@ import os
 import platform
 
 
-PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.staging.autonolas.tech/tcp/9003/p2p/16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"
-PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.staging.autonolas.tech/tcp/9004/p2p/16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"
-
-PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "acn.staging.autonolas.tech:9005"
-PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "acn.staging.autonolas.tech:9006"
-
-PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
-    "02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77"
-)
-PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
-    "02e741c62d706e1dcf6986bf37fa74b98681bc32669623ac9ee6ff72488d4f59e8"
-)
-
-
 LIBP2P_CERT_NOT_BEFORE = "2022-01-01"
 LIBP2P_CERT_NOT_AFTER = "2023-01-01"
 
