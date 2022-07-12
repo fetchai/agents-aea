@@ -36,7 +36,7 @@ liccheck = "==0.6.0"
 markdown = "==3.3.6"
 matplotlib = ">=3.3.0,<3.4"
 memory-profiler = "==0.57.0"
-mistune = "==2.0.3"
+mistune = "==2.0.0a4"
 mkdocs = "==1.1"
 mkdocs-material = "==6.2.8"
 mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
