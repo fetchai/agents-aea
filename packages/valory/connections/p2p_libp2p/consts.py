@@ -22,8 +22,6 @@ import os
 import platform
 
 
-DEFAULT_LEDGER_LIBP2P_NODE = "cosmos"  # Secp256k1 keys
-
 PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.staging.autonolas.tech/tcp/9003/p2p/16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"
 PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.staging.autonolas.tech/tcp/9004/p2p/16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"
 

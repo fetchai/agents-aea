@@ -110,7 +110,6 @@ from packages.valory.connections.p2p_libp2p.connection import (
     POR_DEFAULT_SERVICE_ID,
 )
 from packages.valory.connections.p2p_libp2p.consts import (
-    DEFAULT_LEDGER_LIBP2P_NODE,
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
     PUBLIC_STAGING_DHT_DELEGATE_URI_1,
@@ -263,6 +262,8 @@ NON_GENESIS_CONFIG_TWO = {
     "public_uri": "127.0.0.1:9002",
     "ledger_id": "fetchai",
 }
+
+DEFAULT_LEDGER_LIBP2P_NODE = "cosmos"  # Secp256k1 keys
 
 # TODO: temporary overwriting of addresses, URIs and public keys
 #  used in test_p2p_libp2p/test_public_dht.py
