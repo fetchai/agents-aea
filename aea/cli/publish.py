@@ -60,6 +60,7 @@ from aea.configurations.constants import (
     PROTOCOLS,
     SKILLS,
 )
+from aea.helpers.cid import to_v1
 
 
 try:
@@ -412,6 +413,7 @@ def _publish_agent_ipfs(ctx: Context, push_missing: bool) -> None:
             readme_file_target_path = os.path.join(package_dir, DEFAULT_README_FILE)
             shutil.copy(readme_source_path, readme_file_target_path)
         _, package_hash, _ = registry.ipfs_tool.add(package_dir)
+        package_hash = to_v1(package_hash)
 
     click.echo(
         f"Successfully published agent {name} to the Registry with.\n\tPublic ID: {ctx.agent_config.public_id}\n\tPackage hash: {package_hash}"
