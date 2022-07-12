@@ -1,13 +1,13 @@
 name: simple_aggregation
 author: fetchai
-version: 0.3.1
+version: 0.3.2
 type: skill
 description: The skill for aggregating observations between AEAs
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSFsC6K217XxwuH5fXGQYU29J44VvW9Qim5yNPAbXLegV
-  __init__.py: QmVH3YAtvLZDuAoZDFSC17bTga57dwN6FVoQRg843LLgb9
+  __init__.py: Qmd7J4iDtLq2K8WwNTkG93odCfmSd5yrTMHYio6fE7eKyJ
   behaviours.py: QmXLXWgyMh9tkNJtrX7NgqQMwDmQqtWsgobXLTpazPJw2h
   dialogues.py: QmPBSUmeve76gRwrDuYCdJrLMgwgrrCKYbo6Btepd9SZbm
   handlers.py: QmZn43P6YPZqg9bRApkGTJfFuW4VjfKJwSEzXZchdJJGky
@@ -16,8 +16,8 @@ fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/aggregation:0.2.2
-- fetchai/default:1.1.1
-- fetchai/oef_search:1.1.1
+- fetchai/default:1.1.2
+- fetchai/oef_search:1.1.2
 skills: []
 behaviours:
   aggregation:

@@ -7,10 +7,10 @@ aea build
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
-aea add connection fetchai/http_client:0.24.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/http_client:0.24.2
+aea add connection fetchai/ledger:0.21.1
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add skill fetchai/advanced_data_request:0.7.1
+aea add skill fetchai/advanced_data_request:0.7.2
 aea add skill fetchai/simple_oracle:0.16.1
 aea config set --type dict agent.dependencies \
 '{
@@ -33,9 +33,9 @@ aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_v
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-"fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
-"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0"
+"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+"fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
+"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1"
 }'
 ```
 ``` bash
@@ -81,24 +81,24 @@ aea build
 ``` bash
 aea create coin_price_oracle_client
 cd coin_price_oracle_client
-aea add connection fetchai/http_client:0.24.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/http_client:0.24.2
+aea add connection fetchai/ledger:0.21.1
 aea add skill fetchai/simple_oracle_client:0.13.1
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/ledger:0.21.0
+aea config set agent.default_connection fetchai/ledger:0.21.1
 aea install
 aea build
 ```
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-"fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
-"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0"
+"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+"fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
+"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1"
 }'
 ```
 ``` bash

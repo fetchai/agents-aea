@@ -119,8 +119,8 @@ The following steps create the controller from scratch:
 aea create tac_controller_contract
 cd tac_controller_contract
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
 aea add skill fetchai/tac_control_contract:0.27.2
 aea config set --type dict agent.dependencies \
 '{
@@ -133,9 +133,9 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier fetchai_v
 aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "fetchai", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -174,9 +174,9 @@ Build participant one:
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_participation:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_participation:0.25.2
 aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -190,9 +190,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -209,9 +209,9 @@ Then, build participant two:
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_participation:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_participation:0.25.2
 aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -225,9 +225,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -379,8 +379,8 @@ The following steps create the controller from scratch:
 aea create tac_controller_contract
 cd tac_controller_contract
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
 aea add skill fetchai/tac_control_contract:0.27.2
 aea config set --type dict agent.dependencies \
 '{
@@ -393,9 +393,9 @@ aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 aea config set --type bool vendor.fetchai.skills.tac_control.is_abstract true
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -434,9 +434,9 @@ Build participant one:
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_participation:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_participation:0.25.2
 aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -450,9 +450,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -469,9 +469,9 @@ Then, build participant two:
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_participation:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_participation:0.25.2
 aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -485,9 +485,9 @@ aea config set vendor.fetchai.skills.tac_participation.models.game.args.is_using
 aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.is_contract_tx 'True' --type bool
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{

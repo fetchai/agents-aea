@@ -72,18 +72,18 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             self.create_agents(oracle_agent_name, client_agent_name)
 
             default_routing = {
-                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
-                "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
+                "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.2",
             }
 
             # add packages for oracle agent
             self.set_agent_context(oracle_agent_name)
             self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.add_item("connection", "fetchai/prometheus:0.9.1")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.add_item("connection", "fetchai/prometheus:0.9.2")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
@@ -91,7 +91,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             )
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
-            self.add_item("skill", "fetchai/advanced_data_request:0.7.1")
+            self.add_item("skill", "fetchai/advanced_data_request:0.7.2")
             self.add_item("contract", "fetchai/oracle:0.12.1")
             self.add_item("skill", "fetchai/simple_oracle:0.16.1")
 
@@ -164,18 +164,18 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
 
             # add packages for oracle client agent
             self.set_agent_context(client_agent_name)
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.set_config("agent.default_connection", "fetchai/ledger:0.21.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
             )
 
             default_routing = {
-                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
             }
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -309,18 +309,18 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             self.create_agents(oracle_agent_name, client_agent_name)
 
             default_routing = {
-                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
-                "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
+                "fetchai/prometheus:1.1.2": "fetchai/prometheus:0.9.2",
             }
 
             # add packages for oracle agent
             self.set_agent_context(oracle_agent_name)
             self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.add_item("connection", "fetchai/prometheus:0.9.1")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.add_item("connection", "fetchai/prometheus:0.9.2")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
@@ -329,7 +329,7 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             )
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
-            self.add_item("skill", "fetchai/advanced_data_request:0.7.1")
+            self.add_item("skill", "fetchai/advanced_data_request:0.7.2")
             self.add_item("contract", "fetchai/oracle:0.12.1")
             self.add_item("skill", "fetchai/simple_oracle:0.16.1")
 
@@ -404,9 +404,9 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
 
             # add packages for oracle client agent
             self.set_agent_context(client_agent_name)
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.set_config("agent.default_connection", "fetchai/ledger:0.21.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
                 "agent.required_ledgers",
@@ -414,9 +414,9 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             )
 
             default_routing = {
-                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.0",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.1",
+                "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+                "fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
             }
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)

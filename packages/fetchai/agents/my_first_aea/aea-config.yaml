@@ -1,6 +1,6 @@
 agent_name: my_first_aea
 author: fetchai
-version: 0.28.0
+version: 0.28.1
 description: A simple agent to demo the echo skill.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -10,11 +10,11 @@ connections:
 - fetchai/stub:0.21.1
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/signing:1.1.1
+- fetchai/default:1.1.2
+- fetchai/signing:1.1.2
 - fetchai/state_update:1.1.2
 skills:
-- fetchai/echo:0.20.1
+- fetchai/echo:0.20.2
 default_connection: fetchai/stub:0.21.1
 default_ledger: fetchai
 required_ledgers:

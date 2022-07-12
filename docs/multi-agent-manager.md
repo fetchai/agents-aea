@@ -42,7 +42,7 @@ agent_overrides = {
 }
 
 p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.27.1")
-soef_public_id = PublicId.from_str("fetchai/soef:0.27.1")
+soef_public_id = PublicId.from_str("fetchai/soef:0.27.2")
 
 component_overrides = [{
     **p2p_public_id.json,

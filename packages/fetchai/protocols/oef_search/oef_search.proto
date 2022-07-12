@@ -15,10 +15,10 @@ message OefSearchMessage{
 
   message OefErrorOperation{
     enum OefErrorEnum {
-      OEF_ERROR_ENUM_REGISTER_SERVICE = 0;
-      OEF_ERROR_ENUM_UNREGISTER_SERVICE = 1;
-      OEF_ERROR_ENUM_SEARCH_SERVICES = 2;
-      OEF_ERROR_ENUM_SEND_MESSAGE = 3;
+      REGISTER_SERVICE = 0;
+      UNREGISTER_SERVICE = 1;
+      SEARCH_SERVICES = 2;
+      SEND_MESSAGE = 3;
     }
     OefErrorEnum oef_error = 1;
   }

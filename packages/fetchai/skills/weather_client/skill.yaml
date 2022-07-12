@@ -16,11 +16,11 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/fipa:1.1.1
+- fetchai/default:1.1.2
+- fetchai/fipa:1.1.2
 - fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.1
-- fetchai/signing:1.1.1
+- fetchai/oef_search:1.1.2
+- fetchai/signing:1.1.2
 skills:
 - fetchai/generic_buyer:0.27.2
 behaviours:

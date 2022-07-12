@@ -1037,7 +1037,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
     IS_EMPTY = True
 
     GENERIC_SELLER = ComponentId(
-        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.28.1")
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.28.2")
     )
     unmocked = get_latest_version_available_in_registry
 
@@ -1143,7 +1143,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.27.1")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.27.2")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 

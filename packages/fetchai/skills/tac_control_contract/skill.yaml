@@ -17,18 +17,18 @@ fingerprint:
   parameters.py: QmQDgHpapxWQgLRza1dNgi79z5dBxhWsnTgnznTf1zmjPR
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
+- fetchai/ledger:0.21.1
 contracts:
 - fetchai/erc1155:0.23.1
 protocols:
 - fetchai/contract_api:1.1.2
-- fetchai/default:1.1.1
+- fetchai/default:1.1.2
 - fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.1
-- fetchai/signing:1.1.1
+- fetchai/oef_search:1.1.2
+- fetchai/signing:1.1.2
 - fetchai/tac:1.1.2
 skills:
-- fetchai/tac_control:0.25.1
+- fetchai/tac_control:0.25.2
 behaviours:
   tac:
     args: {}

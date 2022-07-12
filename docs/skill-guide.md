@@ -343,7 +343,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.1
+- fetchai/oef_search:1.1.2
 skills: []
 behaviours:
   my_search_behaviour:
@@ -422,21 +422,21 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:1.1.1
+aea add protocol fetchai/oef_search:1.1.2
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.27.1
+aea add connection fetchai/soef:0.27.2
 aea add connection fetchai/p2p_libp2p:0.27.1
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 ```
 
@@ -1033,7 +1033,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.1
+- fetchai/oef_search:1.1.2
 skills: []
 behaviours:
   service:

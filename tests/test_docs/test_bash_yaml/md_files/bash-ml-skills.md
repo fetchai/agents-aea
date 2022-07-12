@@ -17,8 +17,8 @@ aea build
 aea create ml_data_provider
 cd ml_data_provider
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
 aea add skill fetchai/ml_data_provider:0.27.2
 aea config set --type dict agent.dependencies \
 '{
@@ -27,8 +27,8 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea install
 aea build
@@ -43,8 +43,8 @@ aea build
 aea create ml_model_trainer
 cd ml_model_trainer
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
 aea add skill fetchai/ml_train:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -53,8 +53,8 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea install
 aea build

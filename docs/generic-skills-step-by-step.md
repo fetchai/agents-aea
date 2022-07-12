@@ -13,7 +13,7 @@ This step-by-step guide goes through the creation of two AEAs which are already 
 ``` bash
 aea fetch fetchai/generic_seller:0.29.1
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.28.1
+aea eject skill fetchai/generic_seller:0.28.2
 cd ..
 ```
 
@@ -1406,13 +1406,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
+- fetchai/ledger:0.21.1
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/fipa:1.1.1
+- fetchai/default:1.1.2
+- fetchai/fipa:1.1.2
 - fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.1
+- fetchai/oef_search:1.1.2
 skills: []
 behaviours:
   service_registration:
@@ -3061,14 +3061,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
+- fetchai/ledger:0.21.1
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/fipa:1.1.1
+- fetchai/default:1.1.2
+- fetchai/fipa:1.1.2
 - fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.1
-- fetchai/signing:1.1.1
+- fetchai/oef_search:1.1.2
+- fetchai/signing:1.1.2
 skills: []
 behaviours:
   search:
@@ -3167,8 +3167,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 ```
 
@@ -3186,9 +3186,9 @@ Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add protocol fetchai/fipa:1.1.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add protocol fetchai/fipa:1.1.2
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
@@ -3203,10 +3203,10 @@ Add the remaining packages for the buyer AEA:
 
 ``` bash
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add protocol fetchai/fipa:1.1.1
-aea add protocol fetchai/signing:1.1.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add protocol fetchai/fipa:1.1.2
+aea add protocol fetchai/signing:1.1.2
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
