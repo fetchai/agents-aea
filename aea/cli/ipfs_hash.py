@@ -120,7 +120,6 @@ def hash_package(
     configuration: PackageConfiguration,
     package_type: PackageType,
     no_wrap: bool = False,
-    cid_v1: bool = True,
 ) -> Tuple[str, str]:
     """
     Hashes a package and its components.
@@ -128,7 +127,6 @@ def hash_package(
     :param configuration: the package configuration.
     :param package_type: the package type.
     :param no_wrap: Whether to use the wrapper node or not.
-    :param cid_v1: Whether to use CID v1 or not.
     :return: the identifier of the hash (e.g. 'fetchai/protocols/default')
            | and the hash of the whole package.
     """
@@ -150,10 +148,7 @@ def hash_package(
         str(configuration.directory), wrap=(not no_wrap)
     )
 
-    if cid_v1:
-        return key, to_v1(package_hash)
-
-    return key, package_hash
+    return key, to_v1(package_hash)
 
 
 def load_configuration(
@@ -212,7 +207,6 @@ def update_hashes(
     config_loader: Callable[
         [PackageType, Path], PackageConfiguration
     ] = load_configuration,
-    cid_v1: bool = True,
 ) -> int:
     """Process all AEA packages, update fingerprint, and update hashes.csv files."""
     return_code = 0
@@ -245,10 +239,7 @@ def update_hashes(
                 sort_configuration_file(configuration_obj)
                 update_fingerprint(configuration_obj)
                 key, package_hash = hash_package(
-                    configuration_obj,
-                    package_id.package_type,
-                    no_wrap=no_wrap,
-                    cid_v1=cid_v1,
+                    configuration_obj, package_id.package_type, no_wrap=no_wrap
                 )
                 public_id_to_hash_mappings[package_id] = package_hash
 
@@ -271,7 +262,6 @@ def check_same_ipfs_hash(
     package_type: PackageType,
     all_expected_hashes: Dict[str, str],
     no_wrap: bool = False,
-    cid_v1: bool = True,
 ) -> bool:
     """
     Compute actual package hash and compare with expected hash.
@@ -280,13 +270,10 @@ def check_same_ipfs_hash(
     :param package_type: the type of package.
     :param all_expected_hashes: the dictionary of all the expected hashes.
     :param no_wrap: Whether to use the wrapper node or not.
-    :param cid_v1: Whether to use CID v1 or not.
     :return: True if the IPFS hash match, False otherwise.
     """
 
-    key, actual_hash = hash_package(
-        configuration, package_type, no_wrap=no_wrap, cid_v1=cid_v1
-    )
+    key, actual_hash = hash_package(configuration, package_type, no_wrap=no_wrap)
     expected_hash = all_expected_hashes.get(key)
     if expected_hash is None:
         click.echo(f"Hash not found for {configuration.package_id}, skipping check.")
