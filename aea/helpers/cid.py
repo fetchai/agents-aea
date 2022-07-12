@@ -96,11 +96,7 @@ class BaseCID:
         if not isinstance(other, BaseCID):
             return NotImplemented
 
-        return (
-            (self.version == other.version)
-            and (self.codec == other.codec)
-            and (self.multihash == other.multihash)
-        )
+        return self.__dict__ == other.__dict__
 
 
 class CIDv0(BaseCID):

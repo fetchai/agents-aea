@@ -36,13 +36,13 @@ def test_conversion() -> None:
 
     with pytest.raises(
         ValueError,
-        match="QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR is already v0.",
+        match=f"{HASH_V0} is already v0.",
     ):
         to_v0(HASH_V0)
 
     with pytest.raises(
         ValueError,
-        match="bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi is already v1.",
+        match=f"{HASH_V1} is already v1.",
     ):
         to_v1(HASH_V1)
 
