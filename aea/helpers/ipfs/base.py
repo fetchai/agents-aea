@@ -100,7 +100,8 @@ class IPFSHashOnly:
         Get the IPFS hash for a single file.
 
         :param file_path: the file path
-        :param wrap: weather to wrap the content in wrapper node or not
+        :param wrap: whether to wrap the content in wrapper node or not
+        :param cid_v1: whether to use CID v1 hashes
         :return: the ipfs hash
         """
         file_b = _read(file_path)
@@ -126,7 +127,8 @@ class IPFSHashOnly:
         Get the IPFS hash for a directory.
 
         :param dir_path: the directory path
-        :param wrap: weather to wrap the content in wrapper node or not
+        :param wrap: whether to wrap the content in wrapper node or not
+        :param cid_v1: whether to use CID v1 hashes
         :return: the ipfs hash
         """
 

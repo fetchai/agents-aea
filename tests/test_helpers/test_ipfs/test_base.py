@@ -25,9 +25,9 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
-from aea_cli_ipfs.ipfs_utils import IPFSTool
+from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
 
-from aea.helpers.cid import to_v1  # type: ignore
+from aea.helpers.cid import to_v1
 from aea.helpers.ipfs.base import IPFSHashOnly, _is_text
 
 
