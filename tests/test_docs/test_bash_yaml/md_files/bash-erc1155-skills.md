@@ -8,9 +8,9 @@ aea build
 aea create erc1155_deployer
 cd erc1155_deployer
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/erc1155_deploy:0.31.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/erc1155_deploy:0.31.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
@@ -20,9 +20,9 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -53,9 +53,9 @@ aea build
 aea create erc1155_client
 cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/erc1155_client:0.29.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/erc1155_client:0.29.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
@@ -65,9 +65,9 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
@@ -123,15 +123,15 @@ aea delete erc1155_client
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
+  fetchai/contract_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/oef_search:1.1.2: fetchai/soef:0.27.2
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
+  fetchai/contract_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/oef_search:1.1.2: fetchai/soef:0.27.2
 ```
 ``` yaml
 ---

@@ -10,7 +10,7 @@ This is a protocol for interacting with a client/server via HTTP requests and re
 ---
 name: http
 author: fetchai
-version: 1.1.1
+version: 1.1.2
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

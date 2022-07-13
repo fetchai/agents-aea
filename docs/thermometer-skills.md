@@ -55,7 +55,7 @@ Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</
 
 The following steps assume you have launched the AEA Manager Desktop app.
 
-1. Add a new AEA called `my_thermometer_aea` with public id `fetchai/thermometer_aea:0.30.0`.
+1. Add a new AEA called `my_thermometer_aea` with public id `fetchai/thermometer_aea:0.30.1`.
 
 2. Add another new AEA called `my_thermometer_client` with public id `fetchai/thermometer_client:0.31.1`.
 
@@ -97,7 +97,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.30.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.30.1 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -111,16 +111,16 @@ The following steps create the thermometer AEA from scratch:
 aea create my_thermometer_aea
 cd my_thermometer_aea
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/thermometer:0.27.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/thermometer:0.27.2
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 ```
 
@@ -145,16 +145,16 @@ The following steps create the thermometer client from scratch:
 aea create my_thermometer_client
 cd my_thermometer_client
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
 aea add skill fetchai/thermometer_client:0.26.2
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 ```
 

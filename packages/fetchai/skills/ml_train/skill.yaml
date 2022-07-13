@@ -16,14 +16,14 @@ fingerprint:
   tasks.py: QmaxqQ4hBbd2eFAiSzxv66GLpWCpkN7AydQWFFPHQWUsuf
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
+- fetchai/ledger:0.21.1
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/ml_trade:1.1.1
-- fetchai/oef_search:1.1.1
-- fetchai/signing:1.1.1
+- fetchai/default:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/ml_trade:1.1.2
+- fetchai/oef_search:1.1.2
+- fetchai/signing:1.1.2
 skills:
 - fetchai/generic_buyer:0.27.2
 behaviours:

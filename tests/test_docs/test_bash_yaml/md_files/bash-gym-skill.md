@@ -6,7 +6,7 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/examples
 pip install numpy gym
 ```
 ``` bash
-aea fetch fetchai/gym_aea:0.26.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.26.1 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -15,10 +15,10 @@ aea create my_gym_aea
 cd my_gym_aea
 ```
 ``` bash
-aea add skill fetchai/gym:0.21.1
+aea add skill fetchai/gym:0.21.2
 ```
 ``` bash
-aea config set agent.default_connection fetchai/gym:0.20.1
+aea config set agent.default_connection fetchai/gym:0.20.2
 ```
 ``` bash
 aea install

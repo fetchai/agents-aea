@@ -17,7 +17,7 @@
 }
 ```
 ``` bash
-aea fetch fetchai/tac_controller:0.30.0
+aea fetch fetchai/tac_controller:0.30.1
 cd tac_controller
 aea install
 aea build
@@ -26,9 +26,9 @@ aea build
 aea create tac_controller
 cd tac_controller
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_control:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_control:0.25.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
@@ -37,18 +37,18 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.32.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.32.1 --alias tac_participant_one
 cd tac_participant_one
 aea install
 aea build
 cd ..
-aea fetch fetchai/tac_participant:0.32.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.32.1 --alias tac_participant_two
 cd tac_participant_two
 aea build
 ```
@@ -59,9 +59,9 @@ aea create tac_participant_two
 ``` bash
 cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_participation:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_participation:0.25.2
 aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -71,8 +71,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -85,9 +85,9 @@ aea build
 ``` bash
 cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/tac_participation:0.25.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/tac_participation:0.25.2
 aea add skill fetchai/tac_negotiation:0.29.2
 aea config set --type dict agent.dependencies \
 '{
@@ -97,8 +97,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{

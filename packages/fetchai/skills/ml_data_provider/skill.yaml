@@ -17,12 +17,12 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/ml_trade:1.1.1
-- fetchai/oef_search:1.1.1
+- fetchai/default:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/ml_trade:1.1.2
+- fetchai/oef_search:1.1.2
 skills:
-- fetchai/generic_seller:0.28.1
+- fetchai/generic_seller:0.28.2
 behaviours:
   service_registration:
     args:

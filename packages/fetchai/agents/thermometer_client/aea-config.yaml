@@ -7,17 +7,17 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
+- fetchai/ledger:0.21.1
 - fetchai/p2p_libp2p:0.27.1
-- fetchai/soef:0.27.1
+- fetchai/soef:0.27.2
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/fipa:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/oef_search:1.1.1
-- fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/default:1.1.2
+- fetchai/fipa:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/oef_search:1.1.2
+- fetchai/signing:1.1.2
+- fetchai/state_update:1.1.2
 skills:
 - fetchai/generic_buyer:0.27.2
 - fetchai/thermometer_client:0.26.2
@@ -30,8 +30,8 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/oef_search:1.1.2: fetchai/soef:0.27.2
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:
