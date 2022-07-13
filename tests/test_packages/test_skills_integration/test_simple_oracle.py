@@ -78,10 +78,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
 
             # add packages for oracle agent
             self.set_agent_context(oracle_agent_name)
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.add_item("connection", "fetchai/prometheus:0.9.1")
-            self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.add_item("connection", "fetchai/prometheus:0.9.2")
+            self.set_config("agent.default_connection", "fetchai/ledger:0.21.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
@@ -300,10 +300,10 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
 
             # add packages for oracle agent
             self.set_agent_context(oracle_agent_name)
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.add_item("connection", "fetchai/prometheus:0.9.1")
-            self.set_config("agent.default_connection", "fetchai/ledger:0.21.0")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.add_item("connection", "fetchai/prometheus:0.9.2")
+            self.set_config("agent.default_connection", "fetchai/ledger:0.21.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
                 "agent.required_ledgers",
