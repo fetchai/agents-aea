@@ -8,14 +8,14 @@ description: The tac protocol implements the messages an AEA needs to participat
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmRKpjkcyW9vQUfVQFAZqTc8tXj6MeKQvwFseCaZcMt4AK
-  __init__.py: QmXdsBisnsdRYwnR3DrYAUxCWEd3M9VG9gBNTkkQ93N3Uw
-  custom_types.py: QmNzs8yaVU3xL7XKA7WZWHyuEctAdj5UJLnZfompFvXf1i
-  dialogues.py: QmPmqYyKNJLrfS2kyuujoK4qMzeyJ9yfEQmWeETXXgZ7Lr
-  message.py: QmSSGEPx2kR2Q1bdXFCKxQAkt9RDXxwhoWeozf76MY2Kce
-  serialization.py: QmaaUfm1tKj77JBXfdhVWVzKyrFuNCdA9TGc7oonCZm9Uf
-  tac.proto: QmTjxGkEoMdvdDvBMoKhjkBV4CNNgsn6JWt6rJEwXfnq7Z
-  tac_pb2.py: QmWAQ22NBCVLsBDK7x5CNXcC9GQcZRxZkQyHteJmRYiAQX
+  README.md: bafybeibmlti3bag4zk4o7nhjglt7nrrujpstfudd7pje4qfgofoxq5vbea
+  __init__.py: bafybeiekeiu3izqfhmcwvqd3vc225cksx472ns4oiailmqhgctf56dldiq
+  custom_types.py: bafybeiajzip37odvfonxcalejaxua3un3lzfepk74mltev5jxil4l6t5ae
+  dialogues.py: bafybeiavj53ybxin7cf3rez6c27qqqbx4mwsbyb5corz55ze32vzk726a4
+  message.py: bafybeib433ir5ko7kxt6kj74pbub5zr2fecpkozksczna3566v5b6ivsom
+  serialization.py: bafybeifv24cywhafg5db6mmqxc3fz3jmt7bjg4jsaioeivqkvv2ra7rimq
+  tac.proto: bafybeicqiktmsp2ud7zbddsovubo4cd6jtgqwdpm3dwegvf7xhlc3culmq
+  tac_pb2.py: bafybeiduhujxst63ocjj4nh2pddbxqyqbpibmcvrx2xkqubo3dj247gqoa
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

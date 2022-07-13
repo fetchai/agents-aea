@@ -141,6 +141,7 @@ nav:
         - Async Utils: 'api/helpers/async_utils.md'
         - Base: 'api/helpers/base.md'
         - Constants: 'api/helpers/constants.md'
+        - CID: 'api/helpers/cid.md'
         - Dependency Tree: 'api/helpers/dependency_tree.md'
         - Env Vars: 'api/helpers/env_vars.md'
         - Exception Policy: 'api/helpers/exception_policy.md'

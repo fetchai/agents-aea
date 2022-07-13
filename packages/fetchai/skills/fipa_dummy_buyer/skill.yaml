@@ -6,16 +6,16 @@ description: Sample skill for FIPA interaction as a buyer.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmRvuk8JPFrir9kwiT1zRBWYZvYUBrjyqMurk2UMaDBABW
-  __init__.py: QmRVfKtoBgWnERZBKqrTWCaGGAmQyRk8mWkj4mEFAKy3rD
-  behaviours.py: QmVn1uzrci7L8DnwEKwYbAR4rJzgpgZXERrK2e9KE13gVJ
-  dialogues.py: QmVvGT3H23LqmueuWiT8m8zY7YJnn7xA7KpJUhfvsMDjHG
-  handlers.py: QmYVqptZNFhX5wvpguqcbopBNq3eaHf4YrrnEv5eHEjVmS
+  README.md: bafybeibvlhhopizopyoly5ciiarmwdq2casbkc5zk7vec72oc3o66wracu
+  __init__.py: bafybeibo4h6frngou3bba3e7sxxo46kky7bm7ok5rpuaee4eqngby27v5y
+  behaviours.py: bafybeidoqfhcsefrhjjcwbvfrjtt7kezrmrtdd3bq6kzfcz4hxolyrwh2u
+  dialogues.py: bafybeidqtzrqju57jnesnvyy7m5atjscaszprwekuzzwno47aeyutxqag4
+  handlers.py: bafybeiew56vkcg2hron3fq4putdzj6sqtqnkakgrqeunlfdlal75ugimue
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/fipa:1.0.0:QmcBRxvzfCTCCNCbAnEJ5wEvHQPHk81eVAuXGPR5d6cR5V
+- fetchai/fipa:1.0.0:bafybeigqtdznl6x5eo5xhz63y4v2tjodybog2ksk5bufezlqvybrl5ohcq
 skills: []
 behaviours:
   initializer:

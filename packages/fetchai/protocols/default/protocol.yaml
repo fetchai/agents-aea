@@ -7,14 +7,14 @@ description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmNN1eJSSeAGs4uny1tqWkeQwyr6SVV2QgKAoPz18W5jnV
-  __init__.py: QmRLdL7cKHfFzT1551QM8kF3SKh7oothVfuBtaj5VdGP4B
-  custom_types.py: QmVbmxfpiHM8xDvsRvytPr4jmjD5Ktc5171fweYGBkXvBd
-  default.proto: QmWYzTSHVbz7FBS84iKFMhGSXPxay2mss29vY7ufz2BFJ8
-  default_pb2.py: QmPX9tm18ddM5Q928JLd1HmdUZKp2ssKhCJzhZ53FJmjxM
-  dialogues.py: Qmf8f7w8vr1zNgcRFiiNSd2EcrwQdffhv61X9qQ2tSNUxj
-  message.py: QmcTXLt4K18kGxuQXivwEVrqYWse1gaXkD5oh7wSnAmiGv
-  serialization.py: QmXKrfcSiUzHnP6Jh5zXsTT4yktNSFZTUbyEQJ6M7Qbjt9
+  README.md: bafybeiaalfafx7ky4iejqpyvm6pm44shf42v2r4ho7xqwm2cr4pym2ujqy
+  __init__.py: bafybeibmsgafqopadndbk4eytwaikemzpacklztofontn7i3yznz3hmg5a
+  custom_types.py: bafybeidl4g4c5dcouqmhiiv7vcrftx3d6at7ljkhcp5a7rgruphz4gkrxq
+  default.proto: bafybeid2a3fq62vzd7no6bfcq6adpt55kcqpzhktw3fag6s2mp2qajx6te
+  default_pb2.py: bafybeiarrr7dxi2k6lj4ojkcbm22qlnp6ci5or3nhaet3zqm3dreh4jcui
+  dialogues.py: bafybeihzqqwczdvfzskslup72mpmzumic7irvgz274olbuqbdjm3hdnj4q
+  message.py: bafybeigryznjuxefo5htam6xrrn7e6hfkki7h2sbaaxg22omcp4mhb7bf4
+  serialization.py: bafybeiefqupq73s7eczkga2t5yd622owcm6elj7fa4fm5hq236j3avwhpy
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
