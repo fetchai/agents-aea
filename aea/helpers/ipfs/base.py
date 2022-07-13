@@ -28,6 +28,7 @@ from typing import Any, Dict, Generator, Sized, Tuple, cast
 
 import base58
 
+from aea.helpers.cid import to_v1
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.utils import _protobuf_python_implementation
 
@@ -86,15 +87,15 @@ class IPFSHashOnly:
     # according to https://pkg.go.dev/github.com/ipfs/go-ipfs-chunker#pkg-constants
 
     @classmethod
-    def get(cls, file_path: str, wrap: bool = True) -> str:
+    def get(cls, file_path: str, wrap: bool = True, cid_v1: bool = True) -> str:
         """Get the IPFS hash."""
         if os.path.isdir(file_path):
-            return cls.hash_directory(file_path, wrap=wrap)
+            return cls.hash_directory(file_path, wrap=wrap, cid_v1=cid_v1)
 
         return cls.hash_file(file_path, wrap=wrap)
 
     @classmethod
-    def hash_file(cls, file_path: str, wrap: bool = True) -> str:
+    def hash_file(cls, file_path: str, wrap: bool = True, cid_v1: bool = True) -> str:
         """
         Get the IPFS hash for a single file.
 
@@ -108,12 +109,19 @@ class IPFSHashOnly:
         if wrap:
             link_hash = cls._generate_multihash_bytes(file_pb)
             link = cls.create_link(link_hash, file_length, Path(file_path).name)
-            return cls.wrap_in_a_node(link)
+            file_hash = cls.wrap_in_a_node(link)
+        else:
+            file_hash = cls._generate_multihash(file_pb)
 
-        return cls._generate_multihash(file_pb)
+        if cid_v1:
+            return to_v1(file_hash)
+
+        return file_hash
 
     @classmethod
-    def hash_directory(cls, dir_path: str, wrap: bool = True) -> str:
+    def hash_directory(
+        cls, dir_path: str, wrap: bool = True, cid_v1: bool = True
+    ) -> str:
         """
         Get the IPFS hash for a directory.
 
@@ -132,9 +140,14 @@ class IPFSHashOnly:
                 + cast(int, hashed_dir.get("content_size")),
                 path.name,
             )
-            return cls.wrap_in_a_node(link)
+            dir_hash = cls.wrap_in_a_node(link)
+        else:
+            dir_hash = cast(str, hashed_dir.get("hash"))
 
-        return cast(str, hashed_dir.get("hash"))
+        if cid_v1:
+            return to_v1(dir_hash)
+
+        return dir_hash
 
     @staticmethod
     def create_link(link_hash: bytes, tsize: int, name: str) -> Any:

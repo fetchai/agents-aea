@@ -222,6 +222,8 @@ class IPFSRegistry(BaseRegistry):
             )
 
         _, package_hash, _ = self.ipfs_tool.add(component_path)
+        package_hash = to_v1(package_hash)
+
         click.echo("Pushed missing package with:")
         click.echo(f"\tPublicId: {public_id}")
         click.echo(f"\tPackage hash: {package_hash}")

@@ -25,8 +25,9 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
-from aea_cli_ipfs.ipfs_utils import IPFSTool  # type: ignore
+from aea_cli_ipfs.ipfs_utils import IPFSTool
 
+from aea.helpers.cid import to_v1  # type: ignore
 from aea.helpers.ipfs.base import IPFSHashOnly, _is_text
 
 
@@ -70,6 +71,7 @@ class TestDirectoryHashing:
 
             hash_local = self.hash_tool.get(temp_dir)
             d, hash_daemon, _ = self.ipfs_tool.add(temp_dir)
+            hash_daemon = to_v1(hash_daemon)
 
             assert (
                 hash_daemon == hash_local
@@ -87,6 +89,7 @@ class TestDirectoryHashing:
 
             hash_local = self.hash_tool.get(temp_dir)
             d, hash_daemon, _ = self.ipfs_tool.add(temp_dir)
+            hash_daemon = to_v1(hash_daemon)
 
             assert (
                 hash_daemon == hash_local
@@ -127,6 +130,7 @@ class TestDirectoryHashing:
 
             hash_local = self.hash_tool.get(temp_dir)
             _, hash_daemon, _ = self.ipfs_tool.add(temp_dir)
+            hash_daemon = to_v1(hash_daemon)
 
             assert (
                 hash_daemon == hash_local
