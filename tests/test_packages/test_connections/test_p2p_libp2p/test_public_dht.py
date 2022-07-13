@@ -88,9 +88,6 @@ AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
-# temporary until keys are resolved in connection.yaml
-pytest.skip(allow_module_level=True)
-
 
 @pytest.fixture
 def maddrs(request):
