@@ -7,13 +7,13 @@ description: The HTTP server connection that wraps http server implementing a RE
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: Qme8ZDTZKeMMh8gxGu3x9qt2JcdujzYrynk9asTh8GTt9q
-  __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
-  connection.py: QmTjoH8uorJJ3ybq8QPuX1AyaV2HUqJ8R37k2E6wLeNrEb
+  README.md: bafybeihkuhhsdfw5qqtz2jwpfppub6yvsehzmvmaqjlxnal4v76x47mcrq
+  __init__.py: bafybeif5pkr5oarwd7yagdgn46miolmdmvgdyxv4kadgws2bf3iwshom24
+  connection.py: bafybeicqhb5zrdmjt6vtb253luc7nfr4p4vrxkmniigqsokgatrsoeptoa
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeihioisrxummu4ksssqsglayme5n2hxzz4hvy4h4tqbj3sbmacpzey
+- fetchai/http:1.0.0:bafybeig2ptkejftwyinluap5howedgop67di2fjgupxqlnkvsyl43srydy
 class_name: HTTPServerConnection
 config:
   api_spec_path: null

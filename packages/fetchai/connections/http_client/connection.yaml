@@ -7,13 +7,13 @@ description: The HTTP_client connection that wraps a web-based client connecting
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmS6oZ4AKuTm2Gj5Xjz99s9b7BXgXyBifcFPo7ZNPrWsqx
-  __init__.py: QmPdKAks8A6XKAgZiopJzPZYXJumTeUqChd8UorqmLQQPU
-  connection.py: QmeCktoKZDwXhwodihWSDgiNxt6JpVzcq5jePXsGNoS9fE
+  README.md: bafybeibx4ko4f5xbgozqlgfnxwc3rksm5b7khtikf46izrlndjrojv2lw4
+  __init__.py: bafybeiateb3vma46yihntj5gbai3eqcy3fkx55lkrwye6tbr4cuo5xktdm
+  connection.py: bafybeihlwvleotrr5cgzokgcia7wek36c7pcflbuaminiqgvdrt2iuihoe
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeihioisrxummu4ksssqsglayme5n2hxzz4hvy4h4tqbj3sbmacpzey
+- fetchai/http:1.0.0:bafybeig2ptkejftwyinluap5howedgop67di2fjgupxqlnkvsyl43srydy
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1

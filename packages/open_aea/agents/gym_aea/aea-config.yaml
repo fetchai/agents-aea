@@ -6,18 +6,18 @@ description: The gym aea demos the interaction between a skill containing a RL a
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmNZkqQZByU5yn18ELka8TAyypiRxhHjAfMSdZfUy9mRwy
+  README.md: bafybeiadln5ca6tu6rzbsgjpeluf6nz5efxl3u223c3vxwgf2iynkj5n6q
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:bafybeih4cs2ave2mg4nbtimsmuawejy4vdsprxld5wxf6rm2j5vjxstn74
+- fetchai/gym:0.19.0:bafybeibmnpgyxcuse6vrvf3jqziwvdbrm5zaq2c4c4ht3fsrixqxx5khcq
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeid5zr7hsoc6iabrx37hhgqjomlvbjpg3doisyeplbumfvazzybxaa
-- fetchai/gym:1.0.0:bafybeifcnfdhluqv7szmn3weptsx2rvf42loyzdwqrilbnpx7jqxmceduu
-- fetchai/state_update:1.0.0:bafybeifchmbddn2cwad62eqaev3x4c2hqhw4jioh6gfn6iont2ocesjtf4
-- open_aea/signing:1.0.0:bafybeieb4ohx5rboiwibfrtuis2eytlhuof6xq7zwwmmyz4cillzk2fvai
+- fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu
+- fetchai/gym:1.0.0:bafybeibmlvpcrriozlgoceame2o7wknnlpbx4wyqtainn7sslkwcs42ejq
+- fetchai/state_update:1.0.0:bafybeib7csz2erncmeblrcc5qsltuyd4spovwz23bko7nrj6bfqudagg5q
+- open_aea/signing:1.0.0:bafybeievkw5bnmrssxwckf7leszpw2eyull6b5avithgrhd2sdd5izfjku
 skills:
-- fetchai/gym:0.20.0:bafybeiatr3xtyfcgz4r5ukutrkfxstl7i5e2zwy77nfwxqvytpqwhkhavu
+- fetchai/gym:0.20.0:bafybeihiciz7ohtyfqlcalmaxjxsmotwg3zis3nmoqpiou7gd7ieypnbxq
 default_connection: fetchai/gym:0.19.0
 default_ledger: ethereum
 private_key_paths: {}

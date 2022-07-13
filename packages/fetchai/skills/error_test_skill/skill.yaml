@@ -6,9 +6,9 @@ description: The error test skil for testing.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmagPotUCmCn9Ht33h3TL4VFX8g4gqB7UMTKzpXMvy6Nq9
-  __init__.py: QmaLzrddsWcfsEh25fJswftajxDXU1rhyqXTBgFHw6p1nq
-  behaviours.py: QmPhDNExYsfrdzPtPAT8Y1xeQwDiefT4QGKzkLD8oBW39o
+  README.md: bafybeifxlmbo5m3dc3n7ybsb2mq7biu3k7otlgetkxgmozmjbtlkagxaiq
+  __init__.py: bafybeifsmmc7233kyv54edt2asyykxnaoavucvw2hqfwwpywf4uqdumczi
+  behaviours.py: bafybeiauea5khasy274mcmwki5zp25cm7iiwv4scng3s4fq4rennzqnw5y
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []

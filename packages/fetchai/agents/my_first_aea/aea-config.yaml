@@ -5,17 +5,17 @@ description: A simple agent to demo the echo skill.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmaQRtL9NESStgoojt3oUkp8o1Xb9ZyhCmqhVBijYiBc7U
+  README.md: bafybeiftiqiqpxn7ghrurhepquzqzk3su3x6wanlnolt2uj772fzgz574m
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0:bafybeiht6b44da2wkfoajqcathf3zck5amsrbob27n2rwwbkkpknb22a5m
+- fetchai/stub:0.21.0:bafybeihby6suvjc4kiw7wwm6ul6wggcvrj3sizars6le4rerqdgetuzdvu
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeid5zr7hsoc6iabrx37hhgqjomlvbjpg3doisyeplbumfvazzybxaa
-- fetchai/state_update:1.0.0:bafybeifchmbddn2cwad62eqaev3x4c2hqhw4jioh6gfn6iont2ocesjtf4
-- open_aea/signing:1.0.0:bafybeieb4ohx5rboiwibfrtuis2eytlhuof6xq7zwwmmyz4cillzk2fvai
+- fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu
+- fetchai/state_update:1.0.0:bafybeib7csz2erncmeblrcc5qsltuyd4spovwz23bko7nrj6bfqudagg5q
+- open_aea/signing:1.0.0:bafybeievkw5bnmrssxwckf7leszpw2eyull6b5avithgrhd2sdd5izfjku
 skills:
-- fetchai/echo:0.19.0:bafybeihxayqoe6d6ztvjgj7odhw7xh22kcas47eq2fl4rknk3fcmmgia6e
+- fetchai/echo:0.19.0:bafybeic6bju74eupc6vrpeizwvldcxpi2e7a73gllepj3ifmjwx23slcx4
 default_connection: fetchai/stub:0.21.0
 default_ledger: fetchai
 required_ledgers:

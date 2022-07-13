@@ -6,19 +6,19 @@ description: The gym skill wraps an RL agent.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmTvuKGZHdk5cRZkWFVSM8nBdEeXeJ8xAW4vpumBnuxzdA
-  __init__.py: QmdbXPv9mGP9jhyjL8odSUrFxWESaMJD27Scze7RF9LwM4
-  dialogues.py: QmTXi5973ww57PSh1aEpZfy4Gt6CWsjQHui9amsiVNUryM
-  handlers.py: Qmenjg4jCoL6R7Qsbf26LZ5kp3nrVZzazFfvHHAdMakVyr
-  helpers.py: QmXxsdmntq2ZKFKDH6dDZa473EAhNRWZ2zrJdx3GnLH2DD
-  rl_agent.py: Qmc93aj586usDy5a34c9HPM1Pv1azD4VTvT7qTHoMuabEA
-  tasks.py: QmaZe6dwZU9G9FLsuzrVDE1oRCbxzi2GKSu6np1tAkJxre
+  README.md: bafybeictcczi3z3o7gcz3764jjotnfpek4da2w25j7d3sedbjb5phsskvu
+  __init__.py: bafybeihcv27rv6jafmrgjgeqn3fsmep54k2epi7tkiv6zfxwtczwah4klm
+  dialogues.py: bafybeicnd6qc3hrzk5unxfcvcrvv4qflqwfcuq6trsih4i57btxxrxc56a
+  handlers.py: bafybeihung2kbhewqdjceudcgmlbv5jbgh66knjsboigpo2qsoei6xrute
+  helpers.py: bafybeiepac2mjvl4xnhzsthwen5nstzjoopzuv6fvoisw36frww2km4fpa
+  rl_agent.py: bafybeignbkbhfiswcohlk7ode6uc76bekownpcnsmqjtasv5bm4bzsisfm
+  tasks.py: bafybeifvuancp2y57rjgwuzxgrzxiqkc4gzzbskgwch3uze5vlbvptlswm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:bafybeih4cs2ave2mg4nbtimsmuawejy4vdsprxld5wxf6rm2j5vjxstn74
+- fetchai/gym:0.19.0:bafybeibmnpgyxcuse6vrvf3jqziwvdbrm5zaq2c4c4ht3fsrixqxx5khcq
 contracts: []
 protocols:
-- fetchai/gym:1.0.0:bafybeifcnfdhluqv7szmn3weptsx2rvf42loyzdwqrilbnpx7jqxmceduu
+- fetchai/gym:1.0.0:bafybeibmlvpcrriozlgoceame2o7wknnlpbx4wyqtainn7sslkwcs42ejq
 skills: []
 behaviours: {}
 handlers:

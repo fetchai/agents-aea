@@ -8,13 +8,13 @@ description: The libp2p client connection implements a tcp connection to a runni
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmRmDYNeEsKRgKjroGCJmLVJqjfnUm9FNXBXv3YYBBwsXq
-  __init__.py: QmWYz6a1UrsXsG55CQj6X2snQZWU7isUGBiWJWwDqEpYyS
-  connection.py: Qmdwk9NtXpcZeQFF7fp6pYv9xbhQZKNP7p51onCaeCXqDc
+  README.md: bafybeibs3yp2sx6ax6h7isibyffq5unamfdxupmrb4wybjrhcjjmoycksq
+  __init__.py: bafybeid2azroxglu6fl7bxdfcsv3j77vyzgpikjnfwpxg73zeb5orez6ju
+  connection.py: bafybeihh3tdukc2p3f2t27tinlfbo2jk3fg5wfrr7q4lvc3iafezdkwe3m
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- valory/acn:1.1.0:bafybeif5liwcnmzow2o2vcayos3eujpzighd5twdezcdbmhqcfuwxxise4
+- valory/acn:1.1.0:bafybeicsz3jbxwkx7euxkhrtuahpreboarxnmofjisn4k4uzrpdyozuv7i
 class_name: P2PLibp2pMailboxConnection
 config:
   connect_retries: 3

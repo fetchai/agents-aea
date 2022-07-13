@@ -5,17 +5,17 @@ license: Apache-2.0
 description: Http echo agent configured with default variables.
 aea_version: '>=1.3.0, <2.0.0'
 fingerprint:
-  README.md: QmRCnmoG28y5vCQnrC7Z6rA9vTcZomEnTZiVy6Zk2eYkVi
+  README.md: bafybeibkr6ecv5efx3hwxvxposvpmr76ugrj6kydeasb7bppo3ibynnjcu
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.22.0:bafybeiannv2hpue6llxrp34oetbhhpptht7qudpgszowe4vb6yx46fwdf4
+- fetchai/http_server:0.22.0:bafybeid37iptudzuyxmnq66aovmtz2ua2qpmyp65ehcgqupsjraybrnmim
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeid5zr7hsoc6iabrx37hhgqjomlvbjpg3doisyeplbumfvazzybxaa
-- fetchai/http:1.0.0:bafybeihioisrxummu4ksssqsglayme5n2hxzz4hvy4h4tqbj3sbmacpzey
-- open_aea/signing:1.0.0:bafybeieb4ohx5rboiwibfrtuis2eytlhuof6xq7zwwmmyz4cillzk2fvai
+- fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu
+- fetchai/http:1.0.0:bafybeig2ptkejftwyinluap5howedgop67di2fjgupxqlnkvsyl43srydy
+- open_aea/signing:1.0.0:bafybeievkw5bnmrssxwckf7leszpw2eyull6b5avithgrhd2sdd5izfjku
 skills:
-- fetchai/http_echo:0.20.0:bafybeiajxutip74a4ohggeqqw7iy7ovzsb46agwwwyabsnwvnw3mldqxba
+- fetchai/http_echo:0.20.0:bafybeice4mjreybf2f5wxxau5mzlj27clh6wshsbybbjaqbulre4qyjcm4
 default_ledger: ethereum
 required_ledgers:
 - ethereum

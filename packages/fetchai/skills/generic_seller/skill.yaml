@@ -7,21 +7,21 @@ description: The weather station skill implements the functionality to sell weat
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQ3hBSdCTwsFziUgPkbUqRcBU95yF2yZfrGXbowgaof5R
-  __init__.py: QmNgbxAZUeLtGGA1eAAQufEd4y7eGpjC97wytq7yuWfjZR
-  behaviours.py: QmZMdMaxM6gShJVxo83HoZGPQ1CZH2UxHe85R2nydsU9GQ
-  dialogues.py: QmV4CzjeTnss1M3cDa7xwv6hfRCkeoDwaTDR6mHGkm9hrE
-  handlers.py: Qmd1ZxjxJZgW4HFm3Ay8sAuo1AxGypgtThRMMmeg4Tweow
-  strategy.py: QmQKMb3YcmpewEq3mXabnk3rX6ZzipxCgdAPu8VDo2VEwL
+  README.md: bafybeiazl5fv537mvhkqu2jsxhztcbe5cpa5mrdcm3xnnbinz3on3whipa
+  __init__.py: bafybeiafdr7ynn72cev3ldmh7jpm2hkavrli7fwmq5h2is6632kiaqi3qa
+  behaviours.py: bafybeifdwcntgwobpzagul3fxgmtptlrkk4e2yuhq2icb6crxf2onqwf6u
+  dialogues.py: bafybeiddznyqdx5h7mzbmdgzs2w635hxhcjo3fcck2h5o4rpnl4rl3e6m4
+  handlers.py: bafybeigz7pthvel63y4o3xq77icym2thcw4jy53hcj4a7t56eebqzdbgay
+  strategy.py: bafybeia5mjxph7ui2iav5uxutwnr6q2uf4otxdge5vuk7g5ycaso3jldkm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeifnuvn42w6au2yenyf5f62tfspqmb5gzx7bm3vrryjmvgdph7la24
+- fetchai/ledger:0.19.0:bafybeifwwva7wypbxwkjdshwdgk7phecrvtpbe5b7ekvdq7jxocp7uljna
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeid5zr7hsoc6iabrx37hhgqjomlvbjpg3doisyeplbumfvazzybxaa
-- fetchai/fipa:1.0.0:bafybeignu35mielvgvaxz6oaq5zl7c5wdhg4ppqhw627igwef3sfdmeuvq
-- fetchai/ledger_api:1.0.0:bafybeihigx3lcmbvlpc3qdj36k5t5g7navkihrk5tarmjdxvcnxen3qkka
-- fetchai/oef_search:1.0.0:bafybeif6rbdv3c3hfzikymhaarp7l7xfdje5qglujq2psgjsqflkv36oja
+- fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu
+- fetchai/fipa:1.0.0:bafybeigqtdznl6x5eo5xhz63y4v2tjodybog2ksk5bufezlqvybrl5ohcq
+- fetchai/ledger_api:1.0.0:bafybeigbmbrle24alueecon37b3udfwyaos2bfv7macgcwuunk74ep6gye
+- fetchai/oef_search:1.0.0:bafybeihug4aa26ztua2425j4u327htgewkzf5uwsrzlwb2ou5ztinwplxa
 skills: []
 behaviours:
   service_registration:

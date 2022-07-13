@@ -7,14 +7,14 @@ description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmRzU4RAYqfnDKxHv6iH9hmbG59uEJequ6CA4rwwbvgjuW
-  __init__.py: QmezL25XfbqEuY5XUvwDrZQx5dQ3SjCfy7txmMriqRDd4a
-  custom_types.py: QmeyJUULbC8HuNbaU8kmQYau9BJo6gBkTTsZPFmk8ngtPf
-  dialogues.py: QmTQL6ccCPnYCwaFQiJGtuWQx5SbCXmukUaPainmreyFBZ
-  message.py: QmRAqT4QhYP4b3o1HbU1NcU6hpzoxRbyzv4PEYwVZbnV9T
-  oef_search.proto: QmaYkawAXEeeNuCcjmwcvdsttnE3owtuP9ouAYVyRu7M2J
-  oef_search_pb2.py: QmSCvcwkLmwWESqiAs2Vj2yioUwLmdzMGaCDRo3sHT1ByL
-  serialization.py: QmPoGQ7xvQQWoByWMTLJEPnQL9J5EXxWCVCCo4HQn9PiCW
+  README.md: bafybeibwimlpsr55jdty46gmhzvptw3g4rvmcyobdogdsirwwnglcycw6u
+  __init__.py: bafybeihxmhw3m4ug4e7jqden3l67a7u2ryrin23xbnawyoslrpic7on574
+  custom_types.py: bafybeihxd2m5g4fi5yr3t2zyvjem7qzu6tyuelecr6siinaur2cqxn4xky
+  dialogues.py: bafybeiclho3juuqzvbldcmmljx2wjvzs723fxj6hqukoqgzjj3in5kmyrq
+  message.py: bafybeibkb5s2pay6olrs3ff3j2ebzsyzngaah4djdvpuxtacgoefkvtsai
+  oef_search.proto: bafybeifvmxnxg4cuxkj64iqeifyv7jl4ihxgsope7p4j74yotedboai7jm
+  oef_search_pb2.py: bafybeibzoqlyihqvgvvpz2bbjekf547n6j677ufw3hy2eqlyhedcuqqbjm
+  serialization.py: bafybeiavvusik7aycfaqsuign5hpqfq5bgw5vwimpeqxtgymbuokvdd5f4
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

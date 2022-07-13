@@ -7,13 +7,13 @@ description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVzD8i4VPm36TKUn8yfuswTJbeaMBSuSqb4amokQCDc9d
-  __init__.py: QmQA5f4HtnZqNwqhch5Pg7X9pzCxu88hb9ab6Dp4CbKrCt
-  dialogues.py: Qmc7ZyMiofAp95bwty32Ty3bgtEuWN2A76LWhKeYVpDNWj
-  http.proto: QmfJj4aoNpVCZs8HsQNmf1Zx2y8b9JbuPG2Dysow4LwRQU
-  http_pb2.py: QmeQd42QbVdvnjuW1Eqz9UGxn2GsdMgb1Ew4Vb52xN9DKk
-  message.py: QmTDPec1WvDciucFTFskyVBCLcaNdF8ZnptCHTy7mVVfR5
-  serialization.py: QmXgJtLZfoLyMYegpfAMzhwfLTTobD6QxtEmzJnZAfYKHc
+  README.md: bafybeidrud26nk67pjj2jehbhpy4ycdjy3kv3kqknd74z5gjc32hqae2sa
+  __init__.py: bafybeia3aiyw6gufjywyytwqblrb3z2jz7ea3fafts5qbn34oszutvcfuu
+  dialogues.py: bafybeigmvg25g5qy5zitzhsnl5vm3tqvvzxdxg4yhvnxl3a7rql4esd4ia
+  http.proto: bafybeih4dbyct3d3g4umebk2egoz47oetggob7mqxcawg27hknplpkg4we
+  http_pb2.py: bafybeihox5yofjmegpwlbh4gmk5hb5bw6btjgdtvzuthio4km4j2axpbd4
+  message.py: bafybeicinzlrgvhjb3wjegef2nars2dtlqlts3zg4jgk443dsm5jlhjz5q
+  serialization.py: bafybeiekyjreps7iqgmsxzgvlf55kqnhgzt3pvh7qtytmi2o2sui2ulrum
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
