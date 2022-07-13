@@ -50,7 +50,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
     """Test that oracle skills work."""
 
     @pytest.mark.ledger
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
+    # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_oracle(
         self, fund_fetchai_accounts,
     ):
@@ -127,7 +127,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             self.run_install()
 
             diff = self.difference_to_fetched_agent(
-                "fetchai/coin_price_oracle:0.17.1", oracle_agent_name
+                "fetchai/coin_price_oracle:0.17.2", oracle_agent_name
             )
             assert (
                 diff == []
@@ -183,7 +183,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             self.set_config(setting_path, query_function)
 
             diff = self.difference_to_fetched_agent(
-                "fetchai/coin_price_oracle_client:0.12.0", client_agent_name
+                "fetchai/coin_price_oracle_client:0.12.2", client_agent_name
             )
             assert (
                 diff == []

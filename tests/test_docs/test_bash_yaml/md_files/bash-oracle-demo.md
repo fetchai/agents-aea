@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.17.1
+aea fetch fetchai/coin_price_oracle:0.17.2
 cd coin_price_oracle
 aea install
 ```
@@ -63,7 +63,7 @@ aea generate-key $LEDGER_ID --add-key
 aea generate-wealth $LEDGER_ID
 ```
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.12.1
+aea fetch fetchai/coin_price_oracle_client:0.12.2
 cd coin_price_oracle_client
 aea install
 ```

@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.17.1
+aea fetch fetchai/coin_price_oracle:0.17.2
 cd coin_price_oracle
 aea install
 ```
@@ -126,7 +126,7 @@ aea generate-wealth $LEDGER_ID
 From a new terminal (in the same top-level directory), fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.12.1
+aea fetch fetchai/coin_price_oracle_client:0.12.2
 cd coin_price_oracle_client
 aea install
 ```
