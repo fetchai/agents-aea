@@ -148,7 +148,7 @@ def hash_package(
         str(configuration.directory), wrap=(not no_wrap)
     )
 
-    return key, to_v1(package_hash)
+    return key, package_hash
 
 
 def load_configuration(
