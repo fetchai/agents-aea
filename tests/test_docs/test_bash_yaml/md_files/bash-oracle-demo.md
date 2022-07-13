@@ -6,24 +6,17 @@ aea install
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
-<<<<<<< HEAD
 aea add connection fetchai/http_client:0.24.2
 aea add connection fetchai/ledger:0.21.1
-aea add connection fetchai/p2p_libp2p:0.27.1
+aea add connection fetchai/prometheus:0.9.2
 aea add skill fetchai/advanced_data_request:0.7.2
-=======
-aea add connection fetchai/http_client:0.24.1
-aea add connection fetchai/ledger:0.21.0
-aea add connection fetchai/prometheus:0.9.1
-aea add skill fetchai/advanced_data_request:0.7.1
->>>>>>> 22b4fb2e66320dd44e3ae644eda0ff690ae6b025
 aea add skill fetchai/simple_oracle:0.16.1
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/ledger:0.21.0
+aea config set agent.default_connection fetchai/ledger:0.21.1
 aea install
 ```
 ``` bash
@@ -70,18 +63,7 @@ aea generate-key $LEDGER_ID --add-key
 aea generate-wealth $LEDGER_ID
 ```
 ``` bash
-<<<<<<< HEAD
-aea generate-key fetchai fetchai_connection_private_key.txt
-aea add-key fetchai fetchai_connection_private_key.txt --connection
-```
-``` bash
-aea issue-certificates
-```
-``` bash
 aea fetch fetchai/coin_price_oracle_client:0.12.1
-=======
-aea fetch fetchai/coin_price_oracle_client:0.12.0
->>>>>>> 22b4fb2e66320dd44e3ae644eda0ff690ae6b025
 cd coin_price_oracle_client
 aea install
 ```
@@ -136,7 +118,6 @@ aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_ad
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address $ERC20_ADDRESS
 ```
-
 ``` bash
 aea run
 ```
