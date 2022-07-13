@@ -7,14 +7,14 @@ description: A protocol for interacting with a gym connection.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZ2MAW1FRkoNFt2NJYwv9qFVZ7nKUAnTVyTHjGoP1YT8n
-  __init__.py: Qmch1dAQuhuRfYVRkVNV49BCQUDeRjfZB8MeC6LPJK16s5
-  custom_types.py: QmTQSizkRh6awSk4J2cPGjidMcZ356bTyYxNG2HSgfkj9B
-  dialogues.py: QmYPuD9fkw6Rowu6eXJV5yaCjUe9jX9Ji3JSx3kQ6xaDKK
-  gym.proto: QmSYD1qtmNwKnfuTUtPGzbfW3kww4viJ714aRTPupLdV62
-  gym_pb2.py: QmeUmYahs7P3iehNKnEF3pcQQ4kvMkhKaKc1nwVCFB2eA4
-  message.py: QmWBrPTavG6GjyWJj52Y4AgaCE2YhUHGQZ5EHt2dUABMzA
-  serialization.py: QmNRi51HSCzCqUgBNMrdghjACAo1j5QoDU5HWPhjwWjSLP
+  README.md: bafybeie6ybbxlmpqad7pgwbeljnw4fmeee7cjipdk52dahnzskwwplknam
+  __init__.py: bafybeigvhlq222isx3wwwwt73tcdknfasejnaovkqrdegn4ae2nt3so7zq
+  custom_types.py: bafybeiclim2o6bqe35sbkjpd3y43iokghvytrrh662jenj3ri5ri2p5rpi
+  dialogues.py: bafybeievnia7w6znkpj6guqeheiuo53t55sabv3iz2tequw5s4a5xi2szy
+  gym.proto: bafybeib6msvdolcufgcbjulzwclzv5oo6qhkj5sp7vxeerbyupfcrbnbim
+  gym_pb2.py: bafybeihpz5o5kus64bsz7rextgizhqhaqidtxgnq7ijhhta5hnyfvlh6re
+  message.py: bafybeidutr4rssoui26znxgbhkxsjpqx7mrdiryvjpnbm7ls6vtrbz3jim
+  serialization.py: bafybeiabjo2b3y7jy6jlo4qt7fhhnkz2ge7bjvej4mfapxgfyehjp6pera
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

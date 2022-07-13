@@ -7,14 +7,14 @@ description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmYJqcqfbCFE3LHMgok2xkP9z8myB9NNZsm6iR6NXh2HQF
-  __init__.py: QmWZefrAQ4eXSybVkAAhP93TQpjfwYwajccxgeJg9ptMfZ
-  contract_api.proto: QmVezvQ3vgN19nzJD1CfgvjHxjdaP4yLUSwaQDMQq85vUZ
-  contract_api_pb2.py: QmXgS6swWgask1MH1B1rGWeF4YgPwcVnuZuAVPGwgNV7XH
-  custom_types.py: QmUyCSgCKMUkL1FJBjBjS6mCxAoniqDUT8T3nVNkkf87B7
-  dialogues.py: QmcZkkLmVg6a1QZZxCA9KN9DrKBaYY8b6y8cwUnUpqbXhq
-  message.py: Qmbe4GiQYi9fUPm8M9trSHsGygWYUeay6cTtbtMVU7XnYe
-  serialization.py: QmbDFNH8iu6rUEt1prtmqya9U339qSaXXXZF9C2Vxa9Rhf
+  README.md: bafybeieudyfo6cwvbqjfeqjck7xqxtrmn3znlu5ie5uofftcphtpnvbsvq
+  __init__.py: bafybeid2giahzxx6vthrrxm3me42cjtfq4gdwhncejezg3ttyoxpag55wq
+  contract_api.proto: bafybeidmwuo6fyvw3fkmnoilev46kvayvqcxhntnmrcv737x5c2ek53yqi
+  contract_api_pb2.py: bafybeiekzkfrnzwyooyow3oihqf7kdc4cubyxymda23cbnm3w5e63cpqyq
+  custom_types.py: bafybeidcqluzfgdrtgth3umd4nybqaldho2uauxewcqnyzoxfortttazxi
+  dialogues.py: bafybeigtl37mvilzuqqdhheqopnitbr4dmwktkb6e55izkf3z7bbrsxuna
+  message.py: bafybeigftvzbo5xf42rxvyjqj3f3sladfpm3dikjymasasu73uo3emfrn4
+  serialization.py: bafybeif7ij4l5e6mx7gfuwggdlarohqblpluik6hkfq4s2ha7nubwwiwyy
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

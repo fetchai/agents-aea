@@ -147,6 +147,7 @@ def hash_package(
     package_hash = IPFSHashOnly.hash_directory(
         str(configuration.directory), wrap=(not no_wrap)
     )
+
     return key, package_hash
 
 

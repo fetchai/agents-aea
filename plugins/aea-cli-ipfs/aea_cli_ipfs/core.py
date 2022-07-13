@@ -35,6 +35,7 @@ from aea_cli_ipfs.registry import register_item_to_local_registry
 
 from aea.cli.utils.config import get_ipfs_node_multiaddr, load_item_config
 from aea.configurations.constants import CONFIG_FILE_TO_PACKAGE_TYPE
+from aea.helpers.cid import to_v1
 
 
 @click.group()
@@ -168,6 +169,7 @@ def register_package(
 
     click.echo(f"Processing package: {dir_path}")
     name, package_hash, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
+    package_hash = to_v1(package_hash)
     path_data = _get_path_data(dir_path)
     if path_data is not None:
         package_path, item_type = path_data

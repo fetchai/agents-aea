@@ -6,14 +6,14 @@ description: The error skill implements basic error handling required by all AEA
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmXqqMwZhZWcrUFxQ4S9FsFsUw5RmMaDQwR9LcKUrRTpH7
-  __init__.py: QmbLQTjfciugQ3gKgy5o6vXMoRhbqv17GgozpFKqbWUBfp
-  handlers.py: QmUAEGHJS9kjhTkdutAtSYRR6UHzzkULq93qah3pDHTUAk
+  README.md: bafybeiengmjaouqmsgyersxfph5y56d3y2auopqufdcj7jqjlhuelbmjgi
+  __init__.py: bafybeigbc7i65emm34lmmqou7zphytqorbbopbbswqr3cytltn7fkuyjpm
+  handlers.py: bafybeicwpkwfeoitucpmd4bubtxquxl5ohxmsz5lwdu3rkokzbmdbrroke
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.0.0:QmWoiXYAKqwyqXDQ4gC1b11uRAxKRBiicWWuqthqeNWyEw
+- fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu
 skills: []
 behaviours: {}
 handlers:

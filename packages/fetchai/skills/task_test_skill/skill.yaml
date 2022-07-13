@@ -6,10 +6,10 @@ description: Skill with simple task to run.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmYkiShbUg3zyT8SMxh9ty2MLg7LMgVwEJAAGxVEXyjRk8
-  __init__.py: QmazN7StSakYRKa1RBvMqZGtScy6o9EACXg9qn9Z22ozaN
-  behaviours.py: QmWGYNBuPYW11gQVZcNhZt6guKLsw4mDotN2dUMAkgBwk1
-  tasks.py: QmabnVM4atJhDuTakuHz2rV44exULtprJtgSJsYhJSA8TN
+  README.md: bafybeie2x4d7ucozkyvwb6idwtgizuyufbmbghv3x3io2gaff5t7ue5egu
+  __init__.py: bafybeif36wgaf6cjgs4ejt35rgvapcipxhprtocwinuzodzf2gy4puolom
+  behaviours.py: bafybeidvz776taykskrrfvffgkbvhn5x2ub5gflc7xj4nqqxvbc5vyu5oy
+  tasks.py: bafybeifwftaiw4nl2n3z447x6cyfpq56ayytm2u4dsmiorzulpvry433bu
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []

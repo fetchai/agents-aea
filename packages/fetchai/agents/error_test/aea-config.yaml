@@ -5,14 +5,14 @@ description: A simple agent to test error raised in skill.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmdQh43mUtMJSLa9ghvwoZjiAcgU98Rb7c98HCf2t2vBNA
+  README.md: bafybeig75bdp2xp2k44ohxt277etnzeqhwdkwsjfciz7upwgymawmfo2vm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0:QmektTWmXcjThQd8md8nSYgLapR3Gks3n3WEzwAWQFgc4z
+- fetchai/stub:0.21.0:bafybeihby6suvjc4kiw7wwm6ul6wggcvrj3sizars6le4rerqdgetuzdvu
 contracts: []
 protocols: []
 skills:
-- fetchai/error_test_skill:0.1.0:QmZhWDHmU1VTY6ghwFHvcaCUrFBGg7utTdDkckY4Xiy3fr
+- fetchai/error_test_skill:0.1.0:bafybeihsbtlpe7h6fsvoxban5rilkmwviwkokul5cqym6atoolirontiyu
 default_connection: fetchai/stub:0.21.0
 default_ledger: fetchai
 required_ledgers:
