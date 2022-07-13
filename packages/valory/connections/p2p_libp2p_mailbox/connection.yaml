@@ -21,7 +21,7 @@ config:
   ledger_id: cosmos
   nodes:
   - uri: acn.staging.autonolas.tech:9005
-    public_key: 0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d
+    public_key: 02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77
   tls_connection_signature_timeout: 5.0
 cert_requests:
 - identifier: acn
@@ -29,14 +29,14 @@ cert_requests:
   message_format: '{public_key}'
   not_after: '2023-01-01'
   not_before: '2022-01-01'
-  public_key: 0250827315351f6f4d3777b77d4bfd67280156240313bf221750b36404344bb35d
+  public_key: 02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77
   save_path: .certs/acn_cosmos_9005.txt
 - identifier: acn
   ledger_id: ethereum
   message_format: '{public_key}'
   not_after: '2023-01-01'
   not_before: '2022-01-01'
-  public_key: 02fc5fe35c21a1f8ba2de52fd38ef95379be19d5390f1275b825c343167590d3b7
+  public_key: 02e741c62d706e1dcf6986bf37fa74b98681bc32669623ac9ee6ff72488d4f59e8
   save_path: .certs/acn_cosmos_9006.txt
 excluded_protocols: []
 restricted_to_protocols: []
