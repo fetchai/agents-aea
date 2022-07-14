@@ -30,7 +30,7 @@ A helper class which allows construction of an IPFS hash without interacting wit
 
 ```python
 @classmethod
-def get(cls, file_path: str, wrap: bool = True) -> str
+def get(cls, file_path: str, wrap: bool = True, cid_v1: bool = True) -> str
 ```
 
 Get the IPFS hash.
@@ -41,7 +41,10 @@ Get the IPFS hash.
 
 ```python
 @classmethod
-def hash_file(cls, file_path: str, wrap: bool = True) -> str
+def hash_file(cls,
+              file_path: str,
+              wrap: bool = True,
+              cid_v1: bool = True) -> str
 ```
 
 Get the IPFS hash for a single file.
@@ -49,7 +52,8 @@ Get the IPFS hash for a single file.
 **Arguments**:
 
 - `file_path`: the file path
-- `wrap`: weather to wrap the content in wrapper node or not
+- `wrap`: whether to wrap the content in wrapper node or not
+- `cid_v1`: whether to use CID v1 hashes
 
 **Returns**:
 
@@ -61,7 +65,10 @@ the ipfs hash
 
 ```python
 @classmethod
-def hash_directory(cls, dir_path: str, wrap: bool = True) -> str
+def hash_directory(cls,
+                   dir_path: str,
+                   wrap: bool = True,
+                   cid_v1: bool = True) -> str
 ```
 
 Get the IPFS hash for a directory.
@@ -69,7 +76,8 @@ Get the IPFS hash for a directory.
 **Arguments**:
 
 - `dir_path`: the directory path
-- `wrap`: weather to wrap the content in wrapper node or not
+- `wrap`: whether to wrap the content in wrapper node or not
+- `cid_v1`: whether to use CID v1 hashes
 
 **Returns**:
 
