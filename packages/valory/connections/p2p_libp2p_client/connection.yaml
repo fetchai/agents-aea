@@ -14,7 +14,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- valory/acn:1.1.0:bafybeicsz3jbxwkx7euxkhrtuahpreboarxnmofjisn4k4uzrpdyozuv7i
+- valory/acn:1.1.0:bafybeiflq6xjf6xnadomxayp3na52cq6iswlshljzqkckyowp55at3fhha
 class_name: P2PLibp2pClientConnection
 config:
   connect_retries: 3

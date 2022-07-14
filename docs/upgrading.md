@@ -7,6 +7,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.12.0` to `v1.13.0`
+
+This releases introduces the usage of CID v1 IPFS hashes. We still support CID v0 hashes, but it is advisable to switch to CID v1 hashes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.11.0` to `v1.12.0`
 
 No backwards incompatible changes.

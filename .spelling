@@ -280,10 +280,15 @@ tox
 python3.10
 skaffold
 io
+v1
+v0
+ipfsdaemon
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
 a-zA-Z0-9
+Qm
+ba
  - docs/simple-oef.md
 _do_
 CosmWasm

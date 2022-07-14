@@ -11,11 +11,11 @@ connections:
 - fetchai/stub:0.21.0:bafybeihby6suvjc4kiw7wwm6ul6wggcvrj3sizars6le4rerqdgetuzdvu
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu
-- fetchai/state_update:1.0.0:bafybeib7csz2erncmeblrcc5qsltuyd4spovwz23bko7nrj6bfqudagg5q
-- open_aea/signing:1.0.0:bafybeievkw5bnmrssxwckf7leszpw2eyull6b5avithgrhd2sdd5izfjku
+- fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny
+- fetchai/state_update:1.0.0:bafybeiaszshe2raobqmvayhxhwwzm5svvfgvdilr2hitdykg5k4mysekyy
+- open_aea/signing:1.0.0:bafybeigf4hdi4yiiieaafftztcmommbxdzslpsvwm6trmvlizipcr7b6bm
 skills:
-- fetchai/echo:0.19.0:bafybeic6bju74eupc6vrpeizwvldcxpi2e7a73gllepj3ifmjwx23slcx4
+- fetchai/echo:0.19.0:bafybeigxdesrwwkytn7kjm2hf3ksanozwbvlvafrkkf62cdovlmbt2txdu
 default_connection: fetchai/stub:0.21.0
 default_ledger: ethereum
 required_ledgers:

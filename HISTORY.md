@@ -1,7 +1,23 @@
 # Release History - open AEA
 
 
-## 1.12.0 (2022-07-6)
+## 1.13.0 (2022-07-14)
+
+AEA:
+- Add test to check package hash on signing protocol constant
+- Adds support for CID v1 IPFS hashes
+
+Plugins:
+- Updates the `IPFSDaemon` to perform ipfs installation check only when initialised locally.
+
+Packages:
+- Upgrades certificate request dates on connection components
+- Adds extra logging on internode communication
+
+Docs:
+- Adds a FAQ section
+
+## 1.12.0 (2022-07-06)
 
 AEA:
 - Updated the default IPFS node multiaddr to the production one
