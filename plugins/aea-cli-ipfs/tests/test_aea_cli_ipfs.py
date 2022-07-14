@@ -41,6 +41,8 @@ from aea_cli_ipfs.core import (  # noqa # type: ignore  # pylint: disable=wrong-
 )
 
 
+DUMMY_HASH = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR"
+
 cli.add_command(ipfs)
 
 
@@ -101,7 +103,8 @@ def test_ipfs_add():
     with patch("ipfshttpclient.Client.name.publish") as ipfs_publish, patch(
         "ipfshttpclient.Client.id"
     ) as ipfs_id, patch(
-        "ipfshttpclient.Client.add", return_value=[{"Name": "name", "Hash": "hash"}] * 2
+        "ipfshttpclient.Client.add",
+        return_value=[{"Name": "name", "Hash": DUMMY_HASH}] * 2,
     ) as ipfs_add, patch(
         "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
     ):
@@ -114,7 +117,8 @@ def test_ipfs_add():
     with patch(
         "ipfshttpclient.Client.name.publish", side_effect=PublishError("oops")
     ) as ipfs_publish, patch("ipfshttpclient.Client.id") as ipfs_id, patch(
-        "ipfshttpclient.Client.add", return_value=[{"Name": "name", "Hash": "hash"}] * 2
+        "ipfshttpclient.Client.add",
+        return_value=[{"Name": "name", "Hash": DUMMY_HASH}] * 2,
     ) as ipfs_add, patch(
         "aea_cli_ipfs.ipfs_utils.IPFSDaemon._check_ipfs", new=lambda *_: None
     ):

@@ -324,6 +324,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.multiplexer_node_1 = Multiplexer(
             [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
         )
+        cls.multiplexer_node_1.CONNECT_TIMEOUT = 120
         cls.log_files.append(cls.connection_node_1.node.log_file)
         cls.multiplexer_node_1.connect()
         cls.mutliplexers.append(cls.multiplexer_node_1)
@@ -343,6 +344,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.multiplexer_node_2 = Multiplexer(
                 [cls.connection_node_2], protocols=[MockDefaultMessageProtocol]
             )
+            cls.multiplexer_node_2.CONNECT_TIMEOUT = 120
             cls.log_files.append(cls.connection_node_2.node.log_file)
             cls.multiplexer_node_2.connect()
             cls.mutliplexers.append(cls.multiplexer_node_2)
@@ -538,6 +540,7 @@ class TestLibp2pClientConnectionRouting:
             cls.multiplexer_node_1 = Multiplexer(
                 [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
             )
+            cls.multiplexer_node_1.CONNECT_TIMEOUT = 120
             cls.log_files.append(cls.connection_node_1.node.log_file)
             cls.multiplexer_node_1.connect()
             cls.multiplexers.append(cls.multiplexer_node_1)
@@ -558,6 +561,7 @@ class TestLibp2pClientConnectionRouting:
             cls.multiplexer_node_2 = Multiplexer(
                 [cls.connection_node_2], protocols=[MockDefaultMessageProtocol]
             )
+            cls.multiplexer_node_2.CONNECT_TIMEOUT = 120
             cls.log_files.append(cls.connection_node_2.node.log_file)
             cls.multiplexer_node_2.connect()
 

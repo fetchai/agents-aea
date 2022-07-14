@@ -7,9 +7,9 @@ description: The scaffold connection provides a scaffold for a connection to be 
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmVdEbfzEyGcS59ypmWaMNHGv9N3CDV7s2tdwnH7Xhmq4q
-  connection.py: QmcMDwByumudUqC8PRHgRvKLt8gRDr1VePcAa2P1567pc8
-  readme.md: Qmdt71SaCCwAG1c24VktXDm4pxgUBiPMg4bWfUTiqorypf
+  __init__.py: bafybeidmifvya6yjc6h7xppntnwqji2crm5o74xrwhmkutycdo4cqdryhy
+  connection.py: bafybeigqfexwzamkgssmesfglbtnd3fstlwbsaveerzfezoipmkkk7ceke
+  readme.md: bafybeihg5yfzgqvg5ngy7r2o5tfeqnelx2ffxw4po5hmheqjfhumpmxpoq
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []

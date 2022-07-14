@@ -116,7 +116,7 @@ message DefaultMessage{
 }
 ```
 </li>
-<li> The protocol id MUST match the following regular expression: <code>^([a-zA-Z_][a-zA-Z0-9_]{0,127})/([a-zA-Z_][a-zA-Z0-9_]{0,127})(:(any|latest|((0|[1-9]\d*))\.((0|[1-9]\d*))\.((0|[1-9]\d*))(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?))?(:[a-zA-Z_][a-zA-Z0-9]{45})?$</code></li>
+<li> The protocol id MUST match the following regular expression: <code>^([a-zA-Z_][a-zA-Z0-9_]{0,127})/([a-zA-Z_][a-zA-Z0-9_]{0,127})(:(any|latest|((0|[1-9]\d*))\.((0|[1-9]\d*))\.((0|[1-9]\d*))(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?))?(:((Qm[a-zA-Z0-9]{44})|(ba[a-zA-Z0-9]{57})))?$</code></li>
 <li> It is recommended that it processes <code>Envelopes</code> asynchronously. Note, the specification regarding the processing of messages does not impose any particular implementation, and the AEA can be designed to process envelopes either synchronously and asynchronously. However, asynchronous message handling enables the agent to be more responsive and scalable in maintaining many concurrent dialogues with its peers.
 </li>
 <li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
