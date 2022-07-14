@@ -12,7 +12,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/oef_search:1.0.0:bafybeihug4aa26ztua2425j4u327htgewkzf5uwsrzlwb2ou5ztinwplxa
+- fetchai/oef_search:1.0.0:bafybeieghr6muigpv44ccpdbskpn5fuixbk5nzr5hbwvv3eiezvhjbp33u
 class_name: OEFLocalConnection
 config: {}
 excluded_protocols: []
