@@ -4,11 +4,11 @@
 ## 1.13.0 (2022-07-14)
 
 AEA:
+- Add test to check package hash on signing protocol constant
+- Adds support for CID v1 IPFS hashes
 
 Plugins:
 - Updates the `IPFSDaemon` to perform ipfs installation check only when initialised locally.
-- Add test to check package hash on signing protocol constant
-- Adds support for CID v1 IPFS hashes
 
 Packages:
 - Upgrades certificate request dates on connection components
