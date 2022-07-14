@@ -278,6 +278,10 @@ class FipaNegotiationHandler(Handler):
                     contract_api_dialogues = cast(
                         ContractApiDialogues, self.context.contract_api_dialogues
                     )
+                    kwargs = strategy.kwargs_from_terms(
+                        fipa_dialogue.terms, is_from_terms_sender=False
+                    )
+                    kwargs.pop("tx_fee", None)
                     (
                         contract_api_msg,
                         contract_api_dialogue,
@@ -288,11 +292,7 @@ class FipaNegotiationHandler(Handler):
                         contract_id=strategy.contract_id,
                         contract_address=strategy.contract_address,
                         callable="get_hash_batch",
-                        kwargs=ContractApiMessage.Kwargs(
-                            strategy.kwargs_from_terms(
-                                fipa_dialogue.terms, is_from_terms_sender=False
-                            )
-                        ),
+                        kwargs=ContractApiMessage.Kwargs(kwargs),
                     )
                     contract_api_dialogue = cast(
                         ContractApiDialogue, contract_api_dialogue

@@ -1,6 +1,6 @@
 agent_name: car_data_buyer
 author: fetchai
-version: 0.33.0
+version: 0.33.1
 description: An agent which searches for an instance of a `car_detector` agent and
   attempts to purchase car park data from it.
 license: Apache-2.0
@@ -8,21 +8,21 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
-- fetchai/soef:0.27.1
+- fetchai/ledger:0.21.1
+- fetchai/p2p_libp2p:0.27.1
+- fetchai/soef:0.27.2
 contracts: []
 protocols:
-- fetchai/default:1.1.1
-- fetchai/fipa:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/oef_search:1.1.1
-- fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/default:1.1.2
+- fetchai/fipa:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/oef_search:1.1.2
+- fetchai/signing:1.1.2
+- fetchai/state_update:1.1.2
 skills:
-- fetchai/carpark_client:0.27.1
-- fetchai/generic_buyer:0.27.1
-default_connection: fetchai/p2p_libp2p:0.27.0
+- fetchai/carpark_client:0.27.2
+- fetchai/generic_buyer:0.27.2
+default_connection: fetchai/p2p_libp2p:0.27.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -31,8 +31,8 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/oef_search:1.1.2: fetchai/soef:0.27.2
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:

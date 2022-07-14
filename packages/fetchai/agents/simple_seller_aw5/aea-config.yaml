@@ -1,42 +1,42 @@
 agent_name: simple_seller_aw5
 author: fetchai
-version: 0.5.1
+version: 0.5.2
 license: Apache-2.0
 description: An agent that participates in Agent World 5 as a simple seller.
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.1
-- fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
-- fetchai/soef:0.27.1
+- fetchai/http_client:0.24.2
+- fetchai/ledger:0.21.1
+- fetchai/p2p_libp2p:0.27.1
+- fetchai/soef:0.27.2
 contracts: []
 protocols:
-- fetchai/contract_api:1.1.1
-- fetchai/default:1.1.1
-- fetchai/fipa:1.1.1
-- fetchai/http:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/oef_search:1.1.1
-- fetchai/register:1.1.1
-- fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/contract_api:1.1.2
+- fetchai/default:1.1.2
+- fetchai/fipa:1.1.2
+- fetchai/http:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/oef_search:1.1.2
+- fetchai/register:1.1.2
+- fetchai/signing:1.1.2
+- fetchai/state_update:1.1.2
 skills:
-- fetchai/generic_seller:0.28.1
-- fetchai/registration_aw1:0.13.1
-- fetchai/simple_data_request:0.14.1
-- fetchai/simple_seller:0.14.1
-- fetchai/simple_service_registration:0.23.1
-- fetchai/simple_service_search:0.11.1
-default_connection: fetchai/p2p_libp2p:0.27.0
+- fetchai/generic_seller:0.28.2
+- fetchai/registration_aw1:0.13.2
+- fetchai/simple_data_request:0.14.2
+- fetchai/simple_seller:0.14.2
+- fetchai/simple_service_registration:0.23.2
+- fetchai/simple_service_search:0.11.2
+default_connection: fetchai/p2p_libp2p:0.27.1
 default_ledger: fetchai
 required_ledgers:
 - fetchai
 default_routing:
-  fetchai/http:1.1.1: fetchai/http_client:0.24.1
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/oef_search:1.1.1: fetchai/soef:0.27.1
+  fetchai/http:1.1.2: fetchai/http_client:0.24.2
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/oef_search:1.1.2: fetchai/soef:0.27.2
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -70,7 +70,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/registration_aw1:0.13.1
+public_id: fetchai/registration_aw1:0.13.2
 type: skill
 models:
   strategy:
@@ -81,7 +81,7 @@ models:
       whitelist:
       - PUT_WHITELIST_ADDRESSES_HERE
 ---
-public_id: fetchai/simple_service_registration:0.23.1
+public_id: fetchai/simple_service_registration:0.23.2
 type: skill
 models:
   strategy:
@@ -93,7 +93,7 @@ models:
         key: agentworld-5
         value: PUT_YOUR_DEVELOPER_HANDLE_HERE
 ---
-public_id: fetchai/simple_service_search:0.11.1
+public_id: fetchai/simple_service_search:0.11.2
 type: skill
 models:
   strategy:
@@ -106,7 +106,7 @@ models:
         search_key: registration_service
         search_value: aw5-registration
 ---
-public_id: fetchai/p2p_libp2p:0.27.0
+public_id: fetchai/p2p_libp2p:0.27.1
 type: connection
 config:
   delegate_uri: null
@@ -114,12 +114,12 @@ config:
   entry_peers:
   - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
-public_id: fetchai/soef:0.27.1
+public_id: fetchai/soef:0.27.2
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
 ---
-public_id: fetchai/ledger:0.21.0
+public_id: fetchai/ledger:0.21.1
 type: connection
 config:
   ledger_apis:
@@ -127,7 +127,7 @@ config:
       address: https://rest-dorado.fetch.ai:443
       chain_id: dorado-1
 ---
-public_id: fetchai/simple_seller:0.14.1
+public_id: fetchai/simple_seller:0.14.2
 type: skill
 models:
   strategy:
@@ -142,7 +142,7 @@ models:
       shared_state_key: my_data
       unit_price: 10
 ---
-public_id: fetchai/simple_data_request:0.14.1
+public_id: fetchai/simple_data_request:0.14.2
 type: skill
 behaviours:
   http_request:

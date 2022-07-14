@@ -15,7 +15,7 @@ message HttpMessage{
 
   message Response_Performative{
     string version = 1;
-    int32 status_code = 2;
+    int64 status_code = 2;
     string status_text = 3;
     string headers = 4;
     bytes body = 5;

@@ -17,9 +17,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This script checks that dependencies in tox.ini and Pipfile match."""
-
+import re
 import sys
 from typing import Dict
 
@@ -27,7 +26,9 @@ from typing import Dict
 # specified in setup.py
 WHITELIST = {"base58": ">=1.0.3"}
 # fix for python 3.6 and tox
-EXCLUSIONS_LIST = [("tensorflow", "2.4.0")]
+EXCLUSIONS_LIST = [("tensorflow", "==2.4.0")]
+
+DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 
 def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
@@ -68,19 +69,26 @@ def check_versions_in_tox_correct(file: str = "tox.ini") -> None:
 
     with open(file, "r") as f:
         for line in f:
-            for match_type in ["==", ">="]:
+            line = line.strip()
+            looks_like_deps = False
+            for match_type in ["==", ">=", "<"]:
                 if match_type in line:
-                    name_part, version_part = line.split(match_type)
-                    check_match(
-                        name_part.strip(" "),
-                        version_part.strip("\n"),
-                        dependencies,
-                        match_type,
-                    )
+                    looks_like_deps = True
+                    break
+            if not looks_like_deps:
+                continue
+            m = DEP_NAME_RE.match(line)
+            if not m:
+                continue
+            name_part = m.groups()[0]
+            version_part = line.replace(name_part, "").strip()
+            check_match(
+                name_part.strip(" "), version_part.strip("\n"), dependencies,
+            )
 
 
 def check_match(
-    name_part: str, version_part: str, dependencies: Dict[str, str], match_type: str
+    name_part: str, version_part: str, dependencies: Dict[str, str]
 ) -> None:
     """Check for a match independencies."""
     if (name_part, version_part) in EXCLUSIONS_LIST:
@@ -88,11 +96,11 @@ def check_match(
     result = False
     for package, version_and_match_type in dependencies.items():
         if package == name_part:
-            if version_and_match_type == f"{match_type}{version_part}":
+            if version_and_match_type == f"{version_part}":
                 result = True
                 break
             print(
-                f"Non-matching versions for package={package}, {name_part}. Expected='{version_and_match_type}', found='{match_type}{version_part}'."
+                f"Non-matching versions for package={package}, {name_part}. Expected='{version_and_match_type}', found='{version_part}'."
             )
             sys.exit(1)
 

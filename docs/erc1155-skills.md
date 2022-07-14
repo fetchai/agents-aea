@@ -25,7 +25,7 @@ The scope of this guide is demonstrating how you can deploy a smart contract and
 Fetch the AEA that will deploy the contract:
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.34.0
+aea fetch fetchai/erc1155_deployer:0.34.1
 cd erc1155_deployer
 aea install
 aea build
@@ -39,25 +39,25 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.27.0
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/erc1155_deploy:0.31.1
+aea add connection fetchai/p2p_libp2p:0.27.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/erc1155_deploy:0.31.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 aea install
 aea build
 ```
@@ -95,7 +95,7 @@ aea issue-certificates
 In another terminal, fetch the client AEA which will receive some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.34.0
+aea fetch fetchai/erc1155_client:0.34.1
 cd erc1155_client
 aea install
 aea build
@@ -109,25 +109,25 @@ Create the AEA that will get some tokens from the deployer.
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.27.0
-aea add connection fetchai/soef:0.27.1
-aea add connection fetchai/ledger:0.21.0
-aea add skill fetchai/erc1155_client:0.29.1
+aea add connection fetchai/p2p_libp2p:0.27.1
+aea add connection fetchai/soef:0.27.2
+aea add connection fetchai/ledger:0.21.1
+aea add skill fetchai/erc1155_client:0.29.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-  "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1"
+  "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2023-01-01", "not_before": "2022-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 aea install
 aea build
 ```
@@ -199,7 +199,7 @@ aea run
 
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. 
 
-Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.0 -u public_uri` to retrieve the address. The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
+Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.27.1 -u public_uri` to retrieve the address. The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
 
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the deployer.
 

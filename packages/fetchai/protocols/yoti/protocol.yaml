@@ -1,19 +1,19 @@
 name: yoti
 author: fetchai
-version: 1.1.1
+version: 1.1.2
 protocol_specification_id: fetchai/yoti:1.0.0
 type: protocol
 description: A protocol for communication between yoti skills and yoti connection.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQzeUjMJ1QSaMBgnCFRD3Nx2Uj7Ac6aQKbXRsTWE1hP4x
-  __init__.py: QmbRaqux8nPKULixg7JQLPfm6GYMAdi7FWNRsB8CnEXKJ5
+  README.md: QmUG5HFBbSGJUPQ2p5NcSfmVW9qtx4XGhQNWSatj7brF8g
+  __init__.py: QmQayVpNA8XmywJRojGqVeYdymsDuD7x912ck99SK7H2uq
   dialogues.py: QmNy36Xc6b9ZcextPkH9M2Ej7CSZJAVHJ13RtfiHU7iiyu
-  message.py: QmWxTkPthsnzCpJirdfopVzmaAocenxgZbTBLh3E5ntaqJ
+  message.py: QmVxuAKanNeNfHBEJLAsQVNht7ML2kkiFZwYeTKbvyvxty
   serialization.py: QmSu7FYEc5qcKSnBkTSviGenh4a2HbEq2QyqTxqwqyKo67
-  yoti.proto: Qmasuw6KKGB95zygCfMjJwjWMad2Q1XY7KBnf3yA8h4JCB
-  yoti_pb2.py: Qme5UkcqgTNE34km1jVWRutTVWoj5B1NvSXVoRgMD4D5G8
+  yoti.proto: QmY9KxWcQBsUjP9KhRwM9jSkLEoJZjRVSHbQkg1yg6HVYm
+  yoti_pb2.py: QmdG6Y8joN8Cb2NEWiEWkWdwXHSAGGu9xoCopAnuy81r4P
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

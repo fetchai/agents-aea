@@ -11,7 +11,7 @@ It allows for registering of agents and services, and searching of agents and se
 ---
 name: oef_search
 author: fetchai
-version: 1.1.1
+version: 1.1.2
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

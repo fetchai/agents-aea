@@ -1,4 +1,4 @@
-The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://gym.openai.com" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
+The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.ml/" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
 ### Discussion
 
@@ -12,6 +12,19 @@ The example decouples the RL agent from the `gym.Env` allowing them to run in se
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+Download the necessary directories into your working directory:
+
+``` bash
+mkdir gym_skill_agent
+svn export https://github.com/fetchai/agents-aea.git/trunk/examples
+```
+
+Install the `gym` and `numpy` library.
+
+``` bash
+pip install numpy gym
+```
+
 ## Demo instructions
 
 
@@ -19,7 +32,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.26.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.26.1 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -36,12 +49,12 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.21.1
+aea add skill fetchai/gym:0.21.2
 ```
 
 ### Set gym connection as default
 ``` bash
-aea config set agent.default_connection fetchai/gym:0.20.1
+aea config set agent.default_connection fetchai/gym:0.20.2
 ```
 
 ### Install the skill dependencies

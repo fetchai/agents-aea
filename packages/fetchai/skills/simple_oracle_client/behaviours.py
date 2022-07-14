@@ -125,7 +125,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
                     "from_address": self.context.agent_address,
                     "spender": strategy.client_contract_address,
                     "amount": strategy.approve_amount,
-                    "gas": strategy.default_gas_approve,
+                    "gas": strategy.gas_limit_approve,
                 }
             ),
         )
@@ -153,7 +153,8 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
                     "from_address": self.context.agent_address,
                     "query_function": strategy.query_function,
                     "amount": strategy.query_oracle_fee,
-                    "gas": strategy.default_gas_query,
+                    "gas": strategy.gas_limit_query,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_query,
                 }
             ),
         )

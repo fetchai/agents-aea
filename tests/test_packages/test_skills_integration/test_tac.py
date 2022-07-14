@@ -78,7 +78,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
         )
 
         default_routing = {
-            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
+            "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2",
         }
 
         # generate random location
@@ -93,17 +93,17 @@ class TestTacSkills(AEATestCaseManyFlaky):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
-        self.add_item("connection", "fetchai/soef:0.27.1")
-        self.add_item("skill", "fetchai/tac_control:0.25.1")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
+        self.add_item("connection", "fetchai/soef:0.27.2")
+        self.add_item("skill", "fetchai/tac_control:0.25.2")
         self.set_config("agent.default_ledger", FetchAICrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.30.0", tac_controller_name
+            "fetchai/tac_controller:0.30.1", tac_controller_name
         )
         assert (
             diff == []
@@ -140,8 +140,8 @@ class TestTacSkills(AEATestCaseManyFlaky):
         self.nested_set_config(setting_path, data)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+            "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2",
         }
 
         self.run_cli_command("build", cwd=self._get_cwd())
@@ -153,12 +153,12 @@ class TestTacSkills(AEATestCaseManyFlaky):
             (tac_aea_two, NON_GENESIS_CONFIG_TWO),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
-            self.add_item("connection", "fetchai/soef:0.27.1")
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("skill", "fetchai/tac_participation:0.25.1")
-            self.add_item("skill", "fetchai/tac_negotiation:0.29.1")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
+            self.add_item("connection", "fetchai/soef:0.27.2")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("skill", "fetchai/tac_participation:0.25.2")
+            self.add_item("skill", "fetchai/tac_negotiation:0.29.2")
             self.set_config("agent.default_ledger", FetchAICrypto.identifier)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -171,7 +171,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
             self.nested_set_config(setting_path, data)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.32.0", agent_name
+                "fetchai/tac_participant:0.32.1", agent_name
             )
             assert (
                 diff == []
@@ -355,9 +355,9 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # default routing (both for controller and participants)
         default_routing = {
-            "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
+            "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+            "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2",
         }
 
         # generate random location
@@ -372,11 +372,11 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
-        self.add_item("connection", "fetchai/soef:0.27.1")
-        self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.27.1")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
+        self.add_item("connection", "fetchai/soef:0.27.2")
+        self.add_item("connection", "fetchai/ledger:0.21.1")
+        self.add_item("skill", "fetchai/tac_control_contract:0.27.2")
         self.set_config("agent.default_ledger", FetchAICrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -409,8 +409,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                 {
                     "identifier": "acn",
                     "ledger_id": EthereumCrypto.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
+                    "not_after": "2023-01-01",
+                    "not_before": "2022-01-01",
                     "public_key": FetchAICrypto.identifier,
                     "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
@@ -423,8 +423,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                 {
                     "identifier": "acn",
                     "ledger_id": FetchAICrypto.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
+                    "not_after": "2023-01-01",
+                    "not_before": "2022-01-01",
                     "public_key": FetchAICrypto.identifier,
                     "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
@@ -453,7 +453,7 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # check manually built agent is the same as the fetched one
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.32.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.32.1", tac_controller_name
         )
         assert (
             diff == []
@@ -473,8 +473,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                 {
                     "identifier": "acn",
                     "ledger_id": EthereumCrypto.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
+                    "not_after": "2023-01-01",
+                    "not_before": "2022-01-01",
                     "public_key": FetchAICrypto.identifier,
                     "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
@@ -499,14 +499,14 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             self.set_agent_context(agent_name)
 
             # add items
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-            self.add_item("connection", "fetchai/soef:0.27.1")
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("skill", "fetchai/tac_participation:0.25.1")
-            self.add_item("skill", "fetchai/tac_negotiation:0.29.1")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+            self.add_item("connection", "fetchai/soef:0.27.2")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("skill", "fetchai/tac_participation:0.25.2")
+            self.add_item("skill", "fetchai/tac_negotiation:0.29.2")
 
             # set AEA config (no component overrides)
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.set_config("agent.default_ledger", FetchAICrypto.identifier)
             self.nested_set_config(
                 "agent.required_ledgers",
@@ -547,8 +547,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                     {
                         "identifier": "acn",
                         "ledger_id": EthereumCrypto.identifier,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -561,8 +561,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                     {
                         "identifier": "acn",
                         "ledger_id": FetchAICrypto.identifier,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -607,7 +607,7 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             self.nested_set_config(setting_path, data)
 
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant_contract:0.22.0", agent_name
+                "fetchai/tac_participant_contract:0.22.1", agent_name
             )
             assert (
                 diff == []
@@ -629,8 +629,8 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
                     {
                         "identifier": "acn",
                         "ledger_id": EthereumCrypto.identifier,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -866,9 +866,9 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # default routing (both for controller and participants)
         default_routing = {
-            "fetchai/contract_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/ledger_api:1.1.1": "fetchai/ledger:0.21.0",
-            "fetchai/oef_search:1.1.1": "fetchai/soef:0.27.1",
+            "fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
+            "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
+            "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2",
         }
 
         # generate random location
@@ -883,11 +883,11 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
-        self.add_item("connection", "fetchai/soef:0.27.1")
-        self.add_item("connection", "fetchai/ledger:0.21.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.27.1")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
+        self.add_item("connection", "fetchai/soef:0.27.2")
+        self.add_item("connection", "fetchai/ledger:0.21.1")
+        self.add_item("skill", "fetchai/tac_control_contract:0.27.2")
         self.set_config("agent.default_ledger", FetchAICrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -923,8 +923,8 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
                 {
                     "identifier": "acn",
                     "ledger_id": EthereumCrypto.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
+                    "not_after": "2023-01-01",
+                    "not_before": "2022-01-01",
                     "public_key": FetchAICrypto.identifier,
                     "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
@@ -937,8 +937,8 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
                 {
                     "identifier": "acn",
                     "ledger_id": FetchAICrypto.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
+                    "not_after": "2023-01-01",
+                    "not_before": "2022-01-01",
                     "public_key": FetchAICrypto.identifier,
                     "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
@@ -967,7 +967,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # check manually built agent is the same as the fetched one
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.32.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.32.1", tac_controller_name
         )
         assert (
             diff == []
@@ -1006,14 +1006,14 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             self.set_agent_context(agent_name)
 
             # add items
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-            self.add_item("connection", "fetchai/soef:0.27.1")
-            self.add_item("connection", "fetchai/ledger:0.21.0")
-            self.add_item("skill", "fetchai/tac_participation:0.25.1")
-            self.add_item("skill", "fetchai/tac_negotiation:0.29.1")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+            self.add_item("connection", "fetchai/soef:0.27.2")
+            self.add_item("connection", "fetchai/ledger:0.21.1")
+            self.add_item("skill", "fetchai/tac_participation:0.25.2")
+            self.add_item("skill", "fetchai/tac_negotiation:0.29.2")
 
             # set AEA config (no component overrides)
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.set_config("agent.default_ledger", FetchAICrypto.identifier)
             self.nested_set_config(
                 "agent.required_ledgers",
@@ -1059,8 +1059,8 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
                     {
                         "identifier": "acn",
                         "ledger_id": EthereumCrypto.identifier,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -1073,8 +1073,8 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
                     {
                         "identifier": "acn",
                         "ledger_id": FetchAICrypto.identifier,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -1119,7 +1119,7 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
             self.nested_set_config(setting_path, data)
 
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant_contract:0.22.0", agent_name
+                "fetchai/tac_participant_contract:0.22.1", agent_name
             )
             assert (
                 diff == []

@@ -599,8 +599,8 @@ class BaseTestMultiAgentManager(BaseCase):
                     {
                         "identifier": "acn",
                         "ledger_id": "fetchai",
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": "fetchai",
                         "message_format": "{public_key}",
                         "save_path": cert_filename,
@@ -940,7 +940,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.1 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.2 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

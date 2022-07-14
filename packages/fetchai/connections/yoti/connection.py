@@ -35,7 +35,7 @@ from packages.fetchai.protocols.yoti.dialogues import YotiDialogues as BaseYotiD
 from packages.fetchai.protocols.yoti.message import YotiMessage
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.7.1")
+PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.7.2")
 
 
 def rgetattr(obj: Any, attr: str, *args: Any) -> Any:

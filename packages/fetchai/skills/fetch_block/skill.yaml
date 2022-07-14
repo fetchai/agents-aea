@@ -1,22 +1,22 @@
 name: fetch_block
 author: fetchai
-version: 0.12.1
+version: 0.12.2
 type: skill
 description: Retrieve the latest block from the Fetch ledger
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTSH7GkNmRif1a7dZf5aTmBjkr2tVpu7bnBNMTVFKfg5Z
-  __init__.py: QmfBQdWyNNkKSMvEM3qYTXwy4bg1w6FG7EHJhH1sHTFK9R
+  __init__.py: QmXwc1J2DpXv3NM1NdDnv4KCkRGvKpM3e1npBH3yuEqSTA
   behaviours.py: QmeoEs3jpFy5y8EDeSMyTfdKZ7rS1p9NfzWf9iuSoRw4pc
   dialogues.py: Qmb1oXK3xhZtGNdeNi63wrJFvJjVKo3kSWiC4BDWvhEeHS
   handlers.py: QmSFjiEtd4NTaK6oaMbw6N7Z4MtBxv2qXxU3rvSVHaSy2U
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.0
+- fetchai/ledger:0.21.1
 contracts: []
 protocols:
-- fetchai/ledger_api:1.1.1
+- fetchai/ledger_api:1.1.2
 skills: []
 behaviours:
   fetch_block_behaviour:

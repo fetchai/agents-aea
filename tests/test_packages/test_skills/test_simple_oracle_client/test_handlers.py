@@ -403,7 +403,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
                     "init_msg": {
                         "oracle_contract_address": strategy.oracle_contract_address
                     },
-                    "gas": strategy.default_gas_deploy,
+                    "gas": strategy.gas_limit_instantiate,
+                    "tx_fee": strategy.gas_price * strategy.gas_limit_instantiate,
                     "amount": 0,
                     "code_id": 8888,
                     "deployer_address": "test_agent_address",
