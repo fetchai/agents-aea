@@ -60,7 +60,7 @@ from aea.configurations.constants import (
     PROTOCOLS,
     SKILLS,
 )
-from aea.helpers.cid import to_v1
+from aea.helpers.cid import to_v0, to_v1
 
 
 try:
@@ -201,7 +201,7 @@ class IPFSRegistry(BaseRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """Check if item is pinned on the node."""
-        if not self.ipfs_tool.is_a_package(public_id.hash):
+        if not self.ipfs_tool.is_a_package(to_v0(public_id.hash)):
             raise click.ClickException(
                 f"Dependency {public_id} is missing from registry.\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically."
             )

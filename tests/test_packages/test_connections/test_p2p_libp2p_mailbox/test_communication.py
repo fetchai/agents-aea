@@ -324,7 +324,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         cls.multiplexer_node_1 = Multiplexer(
             [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
         )
-        cls.multiplexer_client_1.CONNECT_TIMEOUT = 120
+        cls.multiplexer_node_1.CONNECT_TIMEOUT = 120
         cls.log_files.append(cls.connection_node_1.node.log_file)
         cls.multiplexer_node_1.connect()
         cls.mutliplexers.append(cls.multiplexer_node_1)
