@@ -44,6 +44,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     Union,
     cast,
 )
@@ -1120,38 +1121,35 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
         try:
             return fn(self, *args, **kwargs)
         except Exception:
-            for log_file in self.log_files:
-                print("libp2p log file ======================= {}".format(log_file))
+            for log_file in getattr(self, "log_files", []):
+                print(f"libp2p log file ======================= {log_file}")
                 try:
                     with open(log_file, "r") as f:
                         print(f.read())
                 except FileNotFoundError:
-                    pass
+                    print(f"FileNotFoundError")
                 print("=======================================")
             raise
 
     return wrapper
 
 
-def libp2p_log_on_failure_all(cls):
+def libp2p_log_on_failure_all(cls: Type) -> Type:
     """
     Decorate every method of a class with `libp2p_log_on_failure`.
 
     :return: class with decorated methods.
     """
     for name, fn in inspect.getmembers(cls):
+        wrapped_callable = libp2p_log_on_failure(fn)
         if isinstance(fn, FunctionType):
-            setattr(cls, name, libp2p_log_on_failure(fn))
-        continue
-        if isinstance(fn, MethodType):
-            if fn.im_self is None:
-                wrapped_fn = libp2p_log_on_failure(fn.im_func)
-                method = MethodType(wrapped_fn, None, cls)
-                setattr(cls, name, method)
-            else:
-                wrapped_fn = libp2p_log_on_failure(fn.im_func)
-                clsmethod = MethodType(wrapped_fn, cls, type)
-                setattr(cls, name, clsmethod)
+            # regular method on class (not instance)
+            # and @staticmethod on class or instance
+            setattr(cls, name, wrapped_callable)
+        elif isinstance(fn, MethodType):
+            # regular method on instance (not class)
+            # and @classmethod on class or instance
+            setattr(cls, name, MethodType(wrapped_callable, cls))
     return cls
 
 
@@ -1159,7 +1157,7 @@ class CwdException(Exception):
     """Exception to raise if cwd was not restored by test."""
 
     def __init__(self):
-        """Init expcetion with default message."""
+        """Init exception with default message."""
         super().__init__("CWD was not restored")
 
 
