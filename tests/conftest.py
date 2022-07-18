@@ -35,7 +35,6 @@ import time
 from contextlib import contextmanager
 from functools import wraps
 from pathlib import Path
-from types import FunctionType, MethodType
 from typing import (
     Callable,
     Dict,
@@ -44,10 +43,12 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     Union,
     cast,
 )
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
 
 import docker as docker
 import gym
@@ -158,6 +159,8 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 )
 
 DUMMY_ENV = gym.GoalEnv
+
+LOCAL_HOST = urlparse("http://127.0.0.1")
 
 # URL to local Ganache instance
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
@@ -805,7 +808,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("127.0.0.1", 0))
+    s.bind((LOCAL_HOST.hostname, 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()
@@ -820,7 +823,7 @@ def get_host():
         s.connect(("10.255.255.255", 1))
         IP = s.getsockname()[0]
     except Exception:
-        IP = "127.0.0.1"
+        IP = LOCAL_HOST.hostname
     finally:
         s.close()
     return IP
@@ -1120,38 +1123,27 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
         try:
             return fn(self, *args, **kwargs)
         except Exception:
-            for log_file in self.log_files:
-                print("libp2p log file ======================= {}".format(log_file))
+            for log_file in getattr(self, "log_files", []):
+                print(f"libp2p log file ======================= {log_file}")
                 try:
                     with open(log_file, "r") as f:
                         print(f.read())
                 except FileNotFoundError:
-                    pass
+                    print(f"FileNotFoundError")
                 print("=======================================")
             raise
 
     return wrapper
 
 
-def libp2p_log_on_failure_all(cls):
+def libp2p_log_on_failure_all(cls: Type) -> Type:
     """
     Decorate every method of a class with `libp2p_log_on_failure`.
 
     :return: class with decorated methods.
     """
-    for name, fn in inspect.getmembers(cls):
-        if isinstance(fn, FunctionType):
-            setattr(cls, name, libp2p_log_on_failure(fn))
-        continue
-        if isinstance(fn, MethodType):
-            if fn.im_self is None:
-                wrapped_fn = libp2p_log_on_failure(fn.im_func)
-                method = MethodType(wrapped_fn, None, cls)
-                setattr(cls, name, method)
-            else:
-                wrapped_fn = libp2p_log_on_failure(fn.im_func)
-                clsmethod = MethodType(wrapped_fn, cls, type)
-                setattr(cls, name, clsmethod)
+    for name, fn in inspect.getmembers(cls, inspect.isfunction):
+        setattr(cls, name, libp2p_log_on_failure(fn))
     return cls
 
 
@@ -1159,7 +1151,7 @@ class CwdException(Exception):
     """Exception to raise if cwd was not restored by test."""
 
     def __init__(self):
-        """Init expcetion with default message."""
+        """Init exception with default message."""
         super().__init__("CWD was not restored")
 
 
