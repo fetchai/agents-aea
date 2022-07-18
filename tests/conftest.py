@@ -35,7 +35,6 @@ import time
 from contextlib import contextmanager
 from functools import wraps
 from pathlib import Path
-from types import FunctionType, MethodType
 from typing import (
     Callable,
     Dict,
@@ -49,6 +48,7 @@ from typing import (
     cast,
 )
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlparse
 
 import docker as docker
 import gym
@@ -159,6 +159,8 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 )
 
 DUMMY_ENV = gym.GoalEnv
+
+LOCAL_HOST = urlparse("http://127.0.0.1")
 
 # URL to local Ganache instance
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
@@ -806,7 +808,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("127.0.0.1", 0))
+    s.bind((LOCAL_HOST.hostname, 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()
@@ -821,7 +823,7 @@ def get_host():
         s.connect(("10.255.255.255", 1))
         IP = s.getsockname()[0]
     except Exception:
-        IP = "127.0.0.1"
+        IP = LOCAL_HOST.hostname
     finally:
         s.close()
     return IP
@@ -1140,16 +1142,8 @@ def libp2p_log_on_failure_all(cls: Type) -> Type:
 
     :return: class with decorated methods.
     """
-    for name, fn in inspect.getmembers(cls):
-        wrapped_callable = libp2p_log_on_failure(fn)
-        if isinstance(fn, FunctionType):
-            # regular method on class (not instance)
-            # and @staticmethod on class or instance
-            setattr(cls, name, wrapped_callable)
-        elif isinstance(fn, MethodType):
-            # regular method on instance (not class)
-            # and @classmethod on class or instance
-            setattr(cls, name, MethodType(wrapped_callable, cls))
+    for name, fn in inspect.getmembers(cls, inspect.isfunction):
+        setattr(cls, name, libp2p_log_on_failure(fn))
     return cls
 
 
