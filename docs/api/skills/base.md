@@ -404,3 +404,582 @@ This class defines an abstract interface for skill component classes.
 
 #### `__`init`__`
 
+```python
+def __init__(name: str,
+             skill_context: SkillContext,
+             configuration: Optional[SkillComponentConfiguration] = None,
+             **kwargs: Any) -> None
+```
+
+Initialize a skill component.
+
+**Arguments**:
+
+- `name`: the name of the component.
+- `configuration`: the configuration for the component.
+- `skill_context`: the skill context.
+- `kwargs`: the keyword arguments.
+
+<a id="aea.skills.base.SkillComponent.name"></a>
+
+#### name
+
+```python
+@property
+def name() -> str
+```
+
+Get the name of the skill component.
+
+<a id="aea.skills.base.SkillComponent.context"></a>
+
+#### context
+
+```python
+@property
+def context() -> SkillContext
+```
+
+Get the context of the skill component.
+
+<a id="aea.skills.base.SkillComponent.skill_id"></a>
+
+#### skill`_`id
+
+```python
+@property
+def skill_id() -> PublicId
+```
+
+Get the skill id of the skill component.
+
+<a id="aea.skills.base.SkillComponent.configuration"></a>
+
+#### configuration
+
+```python
+@property
+def configuration() -> SkillComponentConfiguration
+```
+
+Get the skill component configuration.
+
+<a id="aea.skills.base.SkillComponent.config"></a>
+
+#### config
+
+```python
+@property
+def config() -> Dict[Any, Any]
+```
+
+Get the config of the skill component.
+
+<a id="aea.skills.base.SkillComponent.setup"></a>
+
+#### setup
+
+```python
+@abstractmethod
+def setup() -> None
+```
+
+Implement the setup.
+
+<a id="aea.skills.base.SkillComponent.teardown"></a>
+
+#### teardown
+
+```python
+@abstractmethod
+def teardown() -> None
+```
+
+Implement the teardown.
+
+<a id="aea.skills.base.SkillComponent.parse_module"></a>
+
+#### parse`_`module
+
+```python
+@classmethod
+@abstractmethod
+def parse_module(cls, path: str, configs: Dict[str,
+                                               SkillComponentConfiguration],
+                 skill_context: SkillContext) -> dict
+```
+
+Parse the component module.
+
+<a id="aea.skills.base.AbstractBehaviour"></a>
+
+## AbstractBehaviour Objects
+
+```python
+class AbstractBehaviour(SkillComponent, ABC)
+```
+
+Abstract behaviour for periodical calls.
+
+tick_interval: float, interval to call behaviour's act.
+start_at: optional datetime, when to start periodical calls.
+
+<a id="aea.skills.base.AbstractBehaviour.tick_interval"></a>
+
+#### tick`_`interval
+
+```python
+@property
+def tick_interval() -> float
+```
+
+Get the tick_interval in seconds.
+
+<a id="aea.skills.base.AbstractBehaviour.start_at"></a>
+
+#### start`_`at
+
+```python
+@property
+def start_at() -> Optional[datetime.datetime]
+```
+
+Get the start time of the behaviour.
+
+<a id="aea.skills.base.Behaviour"></a>
+
+## Behaviour Objects
+
+```python
+class Behaviour(AbstractBehaviour, ABC)
+```
+
+This class implements an abstract behaviour.
+
+In a subclass of Behaviour, the flag 'is_programmatically_defined'
+ can be used by the developer to signal to the framework that the class
+ is meant to be used programmatically; hence, in case the class is
+ not declared in the configuration file but it is present in a skill
+ module, the framework will just ignore this class instead of printing
+ a warning message.
+
+<a id="aea.skills.base.Behaviour.act"></a>
+
+#### act
+
+```python
+@abstractmethod
+def act() -> None
+```
+
+Implement the behaviour.
+
+**Returns**:
+
+None
+
+<a id="aea.skills.base.Behaviour.is_done"></a>
+
+#### is`_`done
+
+```python
+def is_done() -> bool
+```
+
+Return True if the behaviour is terminated, False otherwise.
+
+<a id="aea.skills.base.Behaviour.act_wrapper"></a>
+
+#### act`_`wrapper
+
+```python
+def act_wrapper() -> None
+```
+
+Wrap the call of the action. This method must be called only by the framework.
+
+<a id="aea.skills.base.Behaviour.parse_module"></a>
+
+#### parse`_`module
+
+```python
+@classmethod
+def parse_module(cls, path: str,
+                 behaviour_configs: Dict[str, SkillComponentConfiguration],
+                 skill_context: SkillContext) -> Dict[str, "Behaviour"]
+```
+
+Parse the behaviours module.
+
+**Arguments**:
+
+- `path`: path to the Python module containing the Behaviour classes.
+- `behaviour_configs`: a list of behaviour configurations.
+- `skill_context`: the skill context
+
+**Returns**:
+
+a list of Behaviour.
+
+<a id="aea.skills.base.Handler"></a>
+
+## Handler Objects
+
+```python
+class Handler(SkillComponent, ABC)
+```
+
+This class implements an abstract behaviour.
+
+In a subclass of Handler, the flag 'is_programmatically_defined'
+ can be used by the developer to signal to the framework that the component
+ is meant to be used programmatically; hence, in case the class is
+ not declared in the configuration file but it is present in a skill
+ module, the framework will just ignore this class instead of printing
+ a warning message.
+
+SUPPORTED_PROTOCOL is read by the framework when the handlers are loaded
+ to register them as 'listeners' to the protocol identified by the specified
+ public id. Whenever a message of protocol 'SUPPORTED_PROTOCOL' is sent
+ to the agent, the framework will call the 'handle' method.
+
+<a id="aea.skills.base.Handler.handle"></a>
+
+#### handle
+
+```python
+@abstractmethod
+def handle(message: Message) -> None
+```
+
+Implement the reaction to a message.
+
+**Arguments**:
+
+- `message`: the message
+
+**Returns**:
+
+None
+
+<a id="aea.skills.base.Handler.handle_wrapper"></a>
+
+#### handle`_`wrapper
+
+```python
+def handle_wrapper(message: Message) -> None
+```
+
+Wrap the call of the handler. This method must be called only by the framework.
+
+<a id="aea.skills.base.Handler.parse_module"></a>
+
+#### parse`_`module
+
+```python
+@classmethod
+def parse_module(cls, path: str,
+                 handler_configs: Dict[str, SkillComponentConfiguration],
+                 skill_context: SkillContext) -> Dict[str, "Handler"]
+```
+
+Parse the handler module.
+
+**Arguments**:
+
+- `path`: path to the Python module containing the Handler class.
+- `handler_configs`: the list of handler configurations.
+- `skill_context`: the skill context
+
+**Returns**:
+
+an handler, or None if the parsing fails.
+
+<a id="aea.skills.base.Handler.protocol_dialogues"></a>
+
+#### protocol`_`dialogues
+
+```python
+def protocol_dialogues(attribute: Optional[str] = None)
+```
+
+Protocol dialogues
+
+<a id="aea.skills.base.Model"></a>
+
+## Model Objects
+
+```python
+class Model(SkillComponent, ABC)
+```
+
+This class implements an abstract model.
+
+<a id="aea.skills.base.Model.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(name: str,
+             skill_context: SkillContext,
+             configuration: Optional[SkillComponentConfiguration] = None,
+             keep_terminal_state_dialogues: Optional[bool] = None,
+             **kwargs: Any) -> None
+```
+
+Initialize a model.
+
+**Arguments**:
+
+- `name`: the name of the component.
+- `configuration`: the configuration for the component.
+- `skill_context`: the skill context.
+- `keep_terminal_state_dialogues`: specify do dialogues in terminal state should stay or not
+- `kwargs`: the keyword arguments.
+
+<a id="aea.skills.base.Model.setup"></a>
+
+#### setup
+
+```python
+def setup() -> None
+```
+
+Set the class up.
+
+<a id="aea.skills.base.Model.teardown"></a>
+
+#### teardown
+
+```python
+def teardown() -> None
+```
+
+Tear the class down.
+
+<a id="aea.skills.base.Model.parse_module"></a>
+
+#### parse`_`module
+
+```python
+@classmethod
+def parse_module(cls, path: str,
+                 model_configs: Dict[str, SkillComponentConfiguration],
+                 skill_context: SkillContext) -> Dict[str, "Model"]
+```
+
+Parse the model module.
+
+**Arguments**:
+
+- `path`: path to the Python skill module.
+- `model_configs`: a list of model configurations.
+- `skill_context`: the skill context
+
+**Returns**:
+
+a list of Model.
+
+<a id="aea.skills.base.Skill"></a>
+
+## Skill Objects
+
+```python
+class Skill(Component)
+```
+
+This class implements a skill.
+
+<a id="aea.skills.base.Skill.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(configuration: SkillConfig,
+             skill_context: Optional[SkillContext] = None,
+             handlers: Optional[Dict[str, Handler]] = None,
+             behaviours: Optional[Dict[str, Behaviour]] = None,
+             models: Optional[Dict[str, Model]] = None,
+             **kwargs: Any)
+```
+
+Initialize a skill.
+
+**Arguments**:
+
+- `configuration`: the skill configuration.
+- `skill_context`: the skill context.
+- `handlers`: dictionary of handlers.
+- `behaviours`: dictionary of behaviours.
+- `models`: dictionary of models.
+- `kwargs`: the keyword arguments.
+
+<a id="aea.skills.base.Skill.skill_context"></a>
+
+#### skill`_`context
+
+```python
+@property
+def skill_context() -> SkillContext
+```
+
+Get the skill context.
+
+<a id="aea.skills.base.Skill.handlers"></a>
+
+#### handlers
+
+```python
+@property
+def handlers() -> Dict[str, Handler]
+```
+
+Get the handlers.
+
+<a id="aea.skills.base.Skill.behaviours"></a>
+
+#### behaviours
+
+```python
+@property
+def behaviours() -> Dict[str, Behaviour]
+```
+
+Get the handlers.
+
+<a id="aea.skills.base.Skill.models"></a>
+
+#### models
+
+```python
+@property
+def models() -> Dict[str, Model]
+```
+
+Get the handlers.
+
+<a id="aea.skills.base.Skill.from_dir"></a>
+
+#### from`_`dir
+
+```python
+@classmethod
+def from_dir(cls, directory: str, agent_context: AgentContext,
+             **kwargs: Any) -> "Skill"
+```
+
+Load the skill from a directory.
+
+**Arguments**:
+
+- `directory`: the directory to the skill package.
+- `agent_context`: the skill context.
+- `kwargs`: the keyword arguments.
+
+**Returns**:
+
+the skill object.
+
+<a id="aea.skills.base.Skill.logger"></a>
+
+#### logger
+
+```python
+@property
+def logger() -> Logger
+```
+
+Get the logger.
+
+In the case of a skill, return the
+logger provided by the skill context.
+
+**Returns**:
+
+the logger
+
+<a id="aea.skills.base.Skill.logger"></a>
+
+#### logger
+
+```python
+@logger.setter
+def logger(*args: str) -> None
+```
+
+Set the logger.
+
+<a id="aea.skills.base.Skill.from_config"></a>
+
+#### from`_`config
+
+```python
+@classmethod
+def from_config(cls, configuration: SkillConfig, agent_context: AgentContext,
+                **kwargs: Any) -> "Skill"
+```
+
+Load the skill from configuration.
+
+**Arguments**:
+
+- `configuration`: a skill configuration. Must be associated with a directory.
+- `agent_context`: the agent context.
+- `kwargs`: the keyword arguments.
+
+**Returns**:
+
+the skill.
+
+<a id="aea.skills.base._SkillComponentLoadingItem"></a>
+
+## `_`SkillComponentLoadingItem Objects
+
+```python
+class _SkillComponentLoadingItem()
+```
+
+Class to represent a triple (component name, component configuration, component class).
+
+<a id="aea.skills.base._SkillComponentLoadingItem.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(name: str, config: SkillComponentConfiguration,
+             class_: Type[SkillComponent], type_: _SKILL_COMPONENT_TYPES)
+```
+
+Initialize the item.
+
+<a id="aea.skills.base._SkillComponentLoader"></a>
+
+## `_`SkillComponentLoader Objects
+
+```python
+class _SkillComponentLoader()
+```
+
+This class implements the loading policy for skill components.
+
+<a id="aea.skills.base._SkillComponentLoader.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(configuration: SkillConfig, skill_context: SkillContext,
+             **kwargs: Any)
+```
+
+Initialize the helper class.
+
+<a id="aea.skills.base._SkillComponentLoader.load_skill"></a>
+
+#### load`_`skill
+
+```python
+def load_skill() -> Skill
+```
+
+Load the skill.
+

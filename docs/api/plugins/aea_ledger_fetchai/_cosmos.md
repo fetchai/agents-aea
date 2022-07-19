@@ -580,3 +580,429 @@ the transaction dictionary
 
 #### get`_`deploy`_`transaction
 
+```python
+def get_deploy_transaction(contract_interface: Dict[str, str],
+                           deployer_address: Address,
+                           raise_on_try: bool = False,
+                           **kwargs: Any) -> Optional[JSONLike]
+```
+
+Get the transaction to deploy the smart contract.
+
+Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `deployer_address`: The address that will deploy the contract.
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: keyword arguments.
+
+**Returns**:
+
+the transaction dictionary.
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_handle_transaction"></a>
+
+#### get`_`handle`_`transaction
+
+```python
+def get_handle_transaction(sender_address: Address,
+                           contract_address: Address,
+                           handle_msg: Any,
+                           amount: int,
+                           tx_fee: int,
+                           denom: Optional[str] = None,
+                           gas: int = DEFAULT_GAS_AMOUNT,
+                           memo: str = "",
+                           chain_id: Optional[str] = None,
+                           account_number: Optional[int] = None,
+                           sequence: Optional[int] = None,
+                           tx_fee_denom: Optional[str] = None,
+                           raise_on_try: bool = False) -> Optional[JSONLike]
+```
+
+Create a CosmWasm HandleMsg transaction.
+
+**Arguments**:
+
+- `sender_address`: the sender address of the message initiator.
+- `contract_address`: the address of the smart contract.
+- `handle_msg`: HandleMsg in JSON format.
+- `amount`: Funds amount sent with transaction.
+- `tx_fee`: the tx fee accepted.
+- `denom`: the name of the denomination of the contract funds
+- `gas`: Maximum amount of gas to be used on executing command.
+- `memo`: any string comment.
+- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
+- `account_number`: Account number
+- `sequence`: Sequence
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
+- `raise_on_try`: whether the method will raise or log on error
+
+**Returns**:
+
+the unsigned CosmWasm HandleMsg
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.execute_contract_query"></a>
+
+#### execute`_`contract`_`query
+
+```python
+def execute_contract_query(contract_address: Address,
+                           query_msg: JSONLike,
+                           raise_on_try: bool = False) -> Optional[JSONLike]
+```
+
+Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
+
+**Arguments**:
+
+- `contract_address`: the address of the smart contract.
+- `query_msg`: QueryMsg in JSON format.
+- `raise_on_try`: whether the method will raise or log on error
+
+**Returns**:
+
+the message receipt
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transfer_transaction"></a>
+
+#### get`_`transfer`_`transaction
+
+```python
+def get_transfer_transaction(sender_address: Address,
+                             destination_address: Address,
+                             amount: int,
+                             tx_fee: int,
+                             tx_nonce: str,
+                             denom: Optional[str] = None,
+                             gas: int = DEFAULT_GAS_AMOUNT,
+                             memo: str = "",
+                             chain_id: Optional[str] = None,
+                             account_number: Optional[int] = None,
+                             sequence: Optional[int] = None,
+                             tx_fee_denom: Optional[str] = None,
+                             raise_on_try: bool = False,
+                             **kwargs: Any) -> Optional[JSONLike]
+```
+
+Submit a transfer transaction to the ledger.
+
+**Arguments**:
+
+- `sender_address`: the sender address of the payer.
+- `destination_address`: the destination address of the payee.
+- `amount`: the amount of wealth to be transferred.
+- `tx_fee`: the transaction fee.
+- `tx_nonce`: verifies the authenticity of the tx
+- `denom`: the denomination of tx fee and amount
+- `gas`: the gas used.
+- `memo`: memo to include in tx.
+- `chain_id`: the chain ID of the transaction.
+- `account_number`: Account number
+- `sequence`: Sequence
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
+- `raise_on_try`: whether the method will raise or log on error
+- `kwargs`: keyword arguments.
+
+**Returns**:
+
+the transfer transaction
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_exec_msg"></a>
+
+#### get`_`packed`_`exec`_`msg
+
+```python
+def get_packed_exec_msg(sender_address: Address,
+                        contract_address: str,
+                        msg: JSONLike,
+                        funds: int = 0,
+                        denom: Optional[str] = None) -> ProtoAny
+```
+
+Create and pack MsgExecuteContract
+
+**Arguments**:
+
+- `sender_address`: Address of sender
+- `contract_address`: Address of contract
+- `msg`: Paramaters to be passed to smart contract
+- `funds`: Funds to be sent to smart contract
+- `denom`: the denomination of funds
+
+**Returns**:
+
+Packed MsgExecuteContract
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_packed_send_msg"></a>
+
+#### get`_`packed`_`send`_`msg
+
+```python
+def get_packed_send_msg(from_address: Address,
+                        to_address: Address,
+                        amount: int,
+                        denom: Optional[str] = None) -> ProtoAny
+```
+
+Generate and pack MsgSend
+
+**Arguments**:
+
+- `from_address`: Address of sender
+- `to_address`: Address of recipient
+- `amount`: amount of coins to be sent
+- `denom`: the denomination of and amount
+
+**Returns**:
+
+packer ProtoAny type message
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_multi_transaction"></a>
+
+#### get`_`multi`_`transaction
+
+```python
+def get_multi_transaction(from_addresses: List[str],
+                          pub_keys: Optional[List[bytes]],
+                          msgs: List[ProtoAny],
+                          gas: int,
+                          tx_fee: int = 0,
+                          memo: str = "",
+                          chain_id: Optional[str] = None,
+                          denom: Optional[str] = None,
+                          tx_fee_denom: Optional[str] = None,
+                          raise_on_try: bool = False) -> JSONLike
+```
+
+Generate transaction with multiple messages
+
+**Arguments**:
+
+- `from_addresses`: Addresses of signers
+- `pub_keys`: Public keys of signers
+- `msgs`: Messages to be included in transaction
+- `gas`: the gas used.
+- `tx_fee`: the transaction fee.
+- `memo`: memo to include in tx.
+- `chain_id`: the chain ID of the transaction.
+- `denom`: the denomination of tx fee
+- `tx_fee_denom`: Denomination of tx_fee, identical with denom param when None
+- `raise_on_try`: whether the method will raise or log on error
+
+**Raises**:
+
+- `None`: RuntimeError if number of pubkeys is not equal to number of from_addresses
+
+**Returns**:
+
+the transaction
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.send_signed_transaction"></a>
+
+#### send`_`signed`_`transaction
+
+```python
+def send_signed_transaction(tx_signed: JSONLike,
+                            raise_on_try: bool = False) -> Optional[str]
+```
+
+Send a signed transaction and wait for confirmation.
+
+**Arguments**:
+
+- `tx_signed`: the signed transaction
+- `raise_on_try`: whether the method will raise or log on error
+
+**Returns**:
+
+tx_digest, if present
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction_receipt"></a>
+
+#### get`_`transaction`_`receipt
+
+```python
+def get_transaction_receipt(tx_digest: str,
+                            raise_on_try: bool = False) -> Optional[JSONLike]
+```
+
+Get the transaction receipt for a transaction digest.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+- `raise_on_try`: whether the method will raise or log on error
+
+**Returns**:
+
+the tx receipt, if present
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction"></a>
+
+#### get`_`transaction
+
+```python
+def get_transaction(tx_digest: str,
+                    raise_on_try: bool = False) -> Optional[JSONLike]
+```
+
+Get the transaction for a transaction digest.
+
+**Arguments**:
+
+- `tx_digest`: the digest associated to the transaction.
+- `raise_on_try`: whether the method will raise or log on error
+
+**Returns**:
+
+the tx, if present
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_contract_instance"></a>
+
+#### get`_`contract`_`instance
+
+```python
+def get_contract_instance(contract_interface: Dict[str, str],
+                          contract_address: Optional[str] = None) -> Any
+```
+
+Get the instance of a contract.
+
+**Arguments**:
+
+- `contract_interface`: the contract interface.
+- `contract_address`: the contract address.
+
+**Returns**:
+
+the contract instance
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.update_with_gas_estimate"></a>
+
+#### update`_`with`_`gas`_`estimate
+
+```python
+def update_with_gas_estimate(transaction: JSONLike) -> JSONLike
+```
+
+Attempts to update the transaction with a gas estimate
+
+**Arguments**:
+
+- `transaction`: the transaction
+
+**Raises**:
+
+- `None`: NotImplementedError
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.contract_method_call"></a>
+
+#### contract`_`method`_`call
+
+```python
+def contract_method_call(contract_instance: Any, method_name: str,
+                         **method_args: Any) -> Optional[JSONLike]
+```
+
+Call a contract's method
+
+**Arguments**:
+
+- `contract_instance`: the contract to use
+- `method_name`: the contract method to call
+- `method_args`: the contract call parameters
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.build_transaction"></a>
+
+#### build`_`transaction
+
+```python
+def build_transaction(contract_instance: Any,
+                      method_name: str,
+                      method_args: Optional[Dict],
+                      tx_args: Optional[Dict],
+                      raise_on_try: bool = False) -> Optional[JSONLike]
+```
+
+Prepare a transaction
+
+**Arguments**:
+
+- `contract_instance`: the contract to use
+- `method_name`: the contract method to call
+- `method_args`: the contract parameters
+- `tx_args`: the transaction parameters
+- `raise_on_try`: whether the method will raise or log on error
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos._CosmosApi.get_transaction_transfer_logs"></a>
+
+#### get`_`transaction`_`transfer`_`logs
+
+```python
+def get_transaction_transfer_logs(
+        contract_instance: Any,
+        tx_hash: str,
+        target_address: Optional[str] = None) -> Optional[JSONLike]
+```
+
+Get all transfer events derived from a transaction.
+
+**Arguments**:
+
+- `contract_instance`: the contract
+- `tx_hash`: the transaction hash
+- `target_address`: optional address to filter tranfer events to just those that affect it
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosApi"></a>
+
+## CosmosApi Objects
+
+```python
+class CosmosApi(_CosmosApi, CosmosHelper)
+```
+
+Class to interact with the Cosmos SDK via a HTTP APIs.
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi"></a>
+
+## CosmosFaucetApi Objects
+
+```python
+class CosmosFaucetApi(FaucetApi)
+```
+
+Cosmos testnet faucet API.
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(poll_interval: Optional[float] = None,
+             final_wait_interval: Optional[float] = None)
+```
+
+Initialize CosmosFaucetApi.
+
+<a id="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.CosmosFaucetApi.get_wealth"></a>
+
+#### get`_`wealth
+
+```python
+def get_wealth(address: Address, url: Optional[str] = None) -> None
+```
+
+Get wealth from the faucet for the provided address.
+
+**Arguments**:
+
+- `address`: the address.
+- `url`: the url
+
+**Raises**:
+
+- `None`: RuntimeError of explicit faucet failures
+
