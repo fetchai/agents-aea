@@ -339,7 +339,7 @@ class Libp2pNode:
         self.monitoring_uri = monitoring_uri
 
         # entry peer
-        self.entry_peers = entry_peers if entry_peers is not None else []
+        self.entry_peers = entry_peers or []
 
         self.mailbox_uri = mailbox_uri
 
@@ -356,31 +356,28 @@ class Libp2pNode:
 
         # node startup
         self.source = os.path.abspath(module_path)
-        self.clargs = clargs if clargs is not None else []
+        self.clargs = clargs or []
 
         # node libp2p multiaddress
-        self.multiaddrs = []  # type: Sequence[MultiAddr]
+        self.multiaddrs: Sequence[MultiAddr] = []
 
         # log file
-        self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
+        self.log_file = log_file or LIBP2P_NODE_LOG_FILE
         if not Path(self.log_file).is_absolute():
             self.log_file = os.path.join(data_dir, self.log_file)  # pragma: nocover
         # env file
-        self.env_file = env_file if env_file is not None else LIBP2P_NODE_ENV_FILE
+        self.env_file = env_file or LIBP2P_NODE_ENV_FILE
         if not Path(self.env_file).is_absolute():
             self.env_file = os.path.join(data_dir, self.env_file)
 
         # named pipes (fifos)
-        self.pipe = None  # type: Optional[IPCChannel]
-
-        self._loop = None  # type: Optional[AbstractEventLoop]
-        self.proc = None  # type: Optional[subprocess.Popen]
-        self._log_file_desc = None  # type: Optional[IO[str]]
+        self.pipe: Optional[IPCChannel] = None
+        self._loop: Optional[AbstractEventLoop] = None
+        self.proc: Optional[subprocess.Popen] = None
+        self._log_file_desc: Optional[IO[str]] = None
 
         self.logger = logger
-        self._connection_timeout = (
-            connection_timeout if connection_timeout is not None else PIPE_CONN_TIMEOUT
-        )
+        self._connection_timeout = connection_timeout or PIPE_CONN_TIMEOUT
         self._max_restarts = max_restarts
         self._restart_counter: int = 0
         self._is_on_stop: bool = False
@@ -453,9 +450,7 @@ class Libp2pNode:
 
     def _child_watcher_callback(self, *_) -> None:  # type: ignore # pragma: nocover
         """Log if process was terminated before stop was called."""
-        if self._is_on_stop:
-            return
-        if self.proc is None:
+        if self._is_on_stop or self.proc is None:
             return
         self.proc.poll()
         returncode = self.proc.returncode
@@ -478,8 +473,6 @@ class Libp2pNode:
             self._loop = asyncio.get_event_loop()
 
         self._log_file_desc = open(self.log_file, "a", 1)
-        self._log_file_desc.write("test")
-        self._log_file_desc.flush()
 
         # tcp socket on every platform
         self.pipe = TCPSocketChannel(logger=self.logger)
@@ -525,9 +518,8 @@ class Libp2pNode:
                         )
                     )
             else:  # pragma: nocover
-                self.logger.error(
-                    "Please check log file {} for more details.".format(self.log_file)
-                )
+                log_data = Path(self.log_file).read_text()
+                self.logger.error(f"Failure to connect to Libp2pNode:\n{log_data}")
 
             await self.stop()
             raise e
@@ -572,7 +564,7 @@ class Libp2pNode:
         LIST_START = "MULTIADDRS_LIST_START"
         LIST_END = "MULTIADDRS_LIST_END"
 
-        multiaddrs = []  # type: List[MultiAddr]
+        multiaddrs: List[MultiAddr] = []
 
         with open(self.log_file, "r") as f:
             lines = f.readlines()
@@ -638,7 +630,7 @@ class Libp2pNode:
             try:
                 await self.pipe.close()
             except Exception as e:  # pragma: nocover pylint: disable=broad-except
-                self.logger.exception((f"Failure during pipe closing. Exception: {e}"))
+                self.logger.exception(f"Failure during pipe closing. Exception: {e}")
             self.pipe = None
         else:
             self.logger.debug("Called stop when pipe not set!")  # pragma: no cover
