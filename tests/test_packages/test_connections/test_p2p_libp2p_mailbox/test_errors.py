@@ -20,7 +20,6 @@
 """This test module contains negative tests for Libp2p tcp client connection."""
 import asyncio
 import os
-import shutil
 import tempfile
 from asyncio.futures import Future
 from unittest.mock import Mock, patch
@@ -44,12 +43,13 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
 )
 
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     _process_cert,
     default_ports,
-    libp2p_log_on_failure,
+    libp2p_log_on_failure_all,
 )
 
 
@@ -68,15 +68,14 @@ class TestLibp2pClientConnectionFailureNodeNotConnected:
                 await conn.connect()
 
 
-class TestLibp2pClientConnectionFailureConnectionSetup:
+class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
     """Test that connection fails when setup incorrectly"""
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
+
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
         cls.node_port = next(default_ports)
@@ -128,33 +127,19 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
                 identity=self.identity,
             )
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
-
-class TestLibp2pClientConnectionNodeDisconnected:
+@libp2p_log_on_failure_all
+class TestLibp2pClientConnectionNodeDisconnected(BaseP2PLibp2pTest):
     """Test that connection will properly handle node disconnecting"""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        cls.delegate_port = next(default_ports)
-        os.chdir(cls.t)
+        super().setup_class()
 
-        cls.log_files = []
-        cls.multiplexers = []
+        cls.delegate_port = next(default_ports)
 
         temp_node_dir = os.path.join(cls.t, "node_dir")
-        os.mkdir(temp_node_dir)
         try:
             cls.connection_node = _make_libp2p_connection(
                 data_dir=temp_node_dir, delegate=True, delegate_port=cls.delegate_port
@@ -165,7 +150,6 @@ class TestLibp2pClientConnectionNodeDisconnected:
             cls.multiplexers.append(cls.multiplexer_node)
 
             temp_client_dir = os.path.join(cls.t, "client_dir")
-            os.mkdir(temp_client_dir)
             cls.connection_client = _make_libp2p_client_connection(
                 data_dir=temp_client_dir,
                 peer_public_key=cls.connection_node.node.pub,
@@ -183,17 +167,6 @@ class TestLibp2pClientConnectionNodeDisconnected:
         assert self.connection_client.is_connected is True
         self.multiplexer_client.disconnect()
         self.multiplexer_node.disconnect()
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
 
 done_future: asyncio.Future = asyncio.Future()

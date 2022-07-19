@@ -20,8 +20,6 @@
 """This test module contains tests for P2PLibp2p connection."""
 import os
 import re
-import shutil
-import tempfile
 from unittest.mock import Mock
 
 import pytest
@@ -38,6 +36,7 @@ from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     default_ports,
@@ -52,20 +51,18 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 
 
 @pytest.mark.asyncio
-class TestMailboxAPI:
+class TestMailboxAPI(BaseP2PLibp2pTest):
     """Test that connection is established and torn down correctly"""
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
+        super().setup_class()
+
         cls.delegate_port = next(default_ports)
         cls.mailbox_port = next(default_ports)
-        os.chdir(cls.t)
 
         cls.temp_dir = os.path.join(cls.t, "temp_dir_node")
-        os.mkdir(cls.temp_dir)
         cls.connection_node = _make_libp2p_connection(
             data_dir=cls.temp_dir,
             delegate=True,
@@ -74,9 +71,7 @@ class TestMailboxAPI:
             mailbox_port=cls.mailbox_port,
         )
         temp_dir_client1 = os.path.join(cls.t, "temp_dir_client")
-        os.mkdir(temp_dir_client1)
         temp_dir_client2 = os.path.join(cls.t, "temp_dir_client2")
-        os.mkdir(temp_dir_client2)
         cls.connection1 = _make_libp2p_client_connection(
             data_dir=temp_dir_client1,
             peer_public_key=cls.connection_node.node.pub,
@@ -191,8 +186,4 @@ class TestMailboxAPI:
     def teardown_class(cls):
         """Tear down the test"""
         cls.multiplexer1.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        super().teardown_class()
