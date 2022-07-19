@@ -19,8 +19,6 @@
 # ------------------------------------------------------------------------------
 """This test module contains resilience and fault tolerance tests for P2PLibp2p connection."""
 import os
-import shutil
-import tempfile
 import time
 
 import pytest
@@ -35,9 +33,9 @@ from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     MAX_FLAKY_RERUNS_INTEGRATION,
     _make_libp2p_connection,
-    libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
@@ -47,18 +45,14 @@ DEFAULT_PORT = 10234
 
 @pytest.mark.skip
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
-class BaseTestLibp2pRelay:
+class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
     """Base test class for libp2p connection relay."""
 
-    @libp2p_log_on_failure
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Set the test up"""
-        self.cwd = os.getcwd()
-        self.t = tempfile.mkdtemp()
-        os.chdir(self.t)
-        build_node(self.t)
-        self.log_files = []
-        self.multiplexers = []
+        super().setup_class()
+        build_node(cls.t)
 
     def change_state_and_wait(
         self,
@@ -78,85 +72,69 @@ class BaseTestLibp2pRelay:
             lambda: multiplexer.is_connected == expected_is_connected, timeout=timeout
         )
 
-    def teardown(self):
-        """Tear down the test"""
-        for mux in self.multiplexers:
-            mux.disconnect()
-        os.chdir(self.cwd)
-        try:
-            shutil.rmtree(self.t)
-        except (OSError, IOError):
-            pass
-
 
 @pytest.mark.skip
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay):
     """Test that connection will reliably receive envelopes after its relay node restarted"""
 
-    @libp2p_log_on_failure
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Set the test up"""
-        super().setup()
-        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
-        os.mkdir(temp_dir_gen)
-        self.genesis = _make_libp2p_connection(
-            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=self.t
+        super().setup_class()
+        temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
+        cls.genesis = _make_libp2p_connection(
+            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=cls.t
         )
 
-        self.multiplexer_genesis = Multiplexer(
-            [self.genesis], protocols=[DefaultMessage]
-        )
-        self.multiplexer_genesis.connect()
-        self.log_files.append(self.genesis.node.log_file)
-        self.multiplexers.append(self.multiplexer_genesis)
+        cls.multiplexer_genesis = Multiplexer([cls.genesis], protocols=[DefaultMessage])
+        cls.multiplexer_genesis.connect()
+        cls.log_files.append(cls.genesis.node.log_file)
+        cls.multiplexers.append(cls.multiplexer_genesis)
 
-        genesis_peer = self.genesis.node.multiaddrs[0]
+        genesis_peer = cls.genesis.node.multiaddrs[0]
 
         file = "node_key"
         make_crypto("fetchai").dump(file)
-        self.relay_key_path = file
+        cls.relay_key_path = file
 
-        temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
-        os.mkdir(temp_dir_rel)
-        self.relay = _make_libp2p_connection(
+        temp_dir_rel = os.path.join(cls.t, "temp_dir_rel")
+        cls.relay = _make_libp2p_connection(
             data_dir=temp_dir_rel,
             entry_peers=[genesis_peer],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
+            node_key_file=cls.relay_key_path,
+            build_directory=cls.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
-        self.multiplexer_relay.connect()
-        self.log_files.append(self.relay.node.log_file)
-        self.multiplexers.append(self.multiplexer_relay)
+        cls.multiplexer_relay = Multiplexer([cls.relay], protocols=[DefaultMessage])
+        cls.multiplexer_relay.connect()
+        cls.log_files.append(cls.relay.node.log_file)
+        cls.multiplexers.append(cls.multiplexer_relay)
 
-        relay_peer = self.relay.node.multiaddrs[0]
+        relay_peer = cls.relay.node.multiaddrs[0]
 
-        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
-        os.mkdir(temp_dir_1)
-        self.connection = _make_libp2p_connection(
+        temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
+        cls.connection = _make_libp2p_connection(
             data_dir=temp_dir_1,
             relay=False,
             entry_peers=[relay_peer],
-            build_directory=self.t,
+            build_directory=cls.t,
         )
-        self.multiplexer = Multiplexer([self.connection], protocols=[DefaultMessage])
-        self.multiplexer.connect()
-        self.log_files.append(self.connection.node.log_file)
-        self.multiplexers.append(self.multiplexer)
+        cls.multiplexer = Multiplexer([cls.connection], protocols=[DefaultMessage])
+        cls.multiplexer.connect()
+        cls.log_files.append(cls.connection.node.log_file)
+        cls.multiplexers.append(cls.multiplexer)
 
-        temp_dir_2 = os.path.join(self.t, "temp_dir_2")
-        os.mkdir(temp_dir_2)
-        self.connection2 = _make_libp2p_connection(
+        temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
+        cls.connection2 = _make_libp2p_connection(
             data_dir=temp_dir_2,
             relay=False,
             entry_peers=[relay_peer],
-            build_directory=self.t,
+            build_directory=cls.t,
         )
-        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
-        self.multiplexer2.connect()
-        self.log_files.append(self.connection2.node.log_file)
-        self.multiplexers.append(self.multiplexer2)
+        cls.multiplexer2 = Multiplexer([cls.connection2], protocols=[DefaultMessage])
+        cls.multiplexer2.connect()
+        cls.log_files.append(cls.connection2.node.log_file)
+        cls.multiplexers.append(cls.multiplexer2)
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -306,56 +284,51 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
 class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay):
     """Test that connection will reliably route envelope to destination in case of relay node restart within timeout"""
 
-    @libp2p_log_on_failure
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Set the test up"""
-        super().setup()
-        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
-        os.mkdir(temp_dir_gen)
-        self.genesis = _make_libp2p_connection(
-            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=self.t
+        super().setup_class()
+        temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
+        cls.genesis = _make_libp2p_connection(
+            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=cls.t
         )
 
-        self.multiplexer_genesis = Multiplexer(
-            [self.genesis], protocols=[DefaultMessage]
-        )
-        self.multiplexer_genesis.connect()
-        self.log_files.append(self.genesis.node.log_file)
-        self.multiplexers.append(self.multiplexer_genesis)
+        cls.multiplexer_genesis = Multiplexer([cls.genesis], protocols=[DefaultMessage])
+        cls.multiplexer_genesis.connect()
+        cls.log_files.append(cls.genesis.node.log_file)
+        cls.multiplexers.append(cls.multiplexer_genesis)
 
-        genesis_peer = self.genesis.node.multiaddrs[0]
+        genesis_peer = cls.genesis.node.multiaddrs[0]
 
         file = "node_key"
         make_crypto("fetchai").dump(file)
-        self.relay_key_path = file
+        cls.relay_key_path = file
 
-        temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
-        os.mkdir(temp_dir_rel)
-        self.relay = _make_libp2p_connection(
+        temp_dir_rel = os.path.join(cls.t, "temp_dir_rel")
+        cls.relay = _make_libp2p_connection(
             data_dir=temp_dir_rel,
             entry_peers=[genesis_peer],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
+            node_key_file=cls.relay_key_path,
+            build_directory=cls.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
-        self.multiplexer_relay.connect()
-        self.log_files.append(self.relay.node.log_file)
-        self.multiplexers.append(self.multiplexer_relay)
+        cls.multiplexer_relay = Multiplexer([cls.relay], protocols=[DefaultMessage])
+        cls.multiplexer_relay.connect()
+        cls.log_files.append(cls.relay.node.log_file)
+        cls.multiplexers.append(cls.multiplexer_relay)
 
-        relay_peer = self.relay.node.multiaddrs[0]
+        relay_peer = cls.relay.node.multiaddrs[0]
 
-        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
-        os.mkdir(temp_dir_1)
-        self.connection = _make_libp2p_connection(
+        temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
+        cls.connection = _make_libp2p_connection(
             data_dir=temp_dir_1,
             relay=False,
             entry_peers=[relay_peer],
-            build_directory=self.t,
+            build_directory=cls.t,
         )
-        self.multiplexer = Multiplexer([self.connection], protocols=[DefaultMessage])
-        self.multiplexer.connect()
-        self.log_files.append(self.connection.node.log_file)
-        self.multiplexers.append(self.multiplexer)
+        cls.multiplexer = Multiplexer([cls.connection], protocols=[DefaultMessage])
+        cls.multiplexer.connect()
+        cls.log_files.append(cls.connection.node.log_file)
+        cls.multiplexers.append(cls.multiplexer)
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -436,45 +409,40 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
 class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
     """Test that connection will correctly route envelope to destination that changed its peer"""
 
-    @libp2p_log_on_failure
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Set the test up"""
-        super().setup()
-        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
-        os.mkdir(temp_dir_gen)
-        self.genesis = _make_libp2p_connection(data_dir=temp_dir_gen, port=DEFAULT_PORT)
+        super().setup_class()
+        temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
+        cls.genesis = _make_libp2p_connection(data_dir=temp_dir_gen, port=DEFAULT_PORT)
 
-        self.multiplexer_genesis = Multiplexer(
-            [self.genesis], protocols=[DefaultMessage]
-        )
-        self.log_files.append(self.genesis.node.log_file)
-        self.multiplexer_genesis.connect()
-        self.multiplexers.append(self.multiplexer_genesis)
+        cls.multiplexer_genesis = Multiplexer([cls.genesis], protocols=[DefaultMessage])
+        cls.log_files.append(cls.genesis.node.log_file)
+        cls.multiplexer_genesis.connect()
+        cls.multiplexers.append(cls.multiplexer_genesis)
 
-        genesis_peer = self.genesis.node.multiaddrs[0]
+        genesis_peer = cls.genesis.node.multiaddrs[0]
 
-        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
-        os.mkdir(temp_dir_1)
-        self.connection1 = _make_libp2p_connection(
+        temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
+        cls.connection1 = _make_libp2p_connection(
             data_dir=temp_dir_1, entry_peers=[genesis_peer]
         )
-        self.multiplexer1 = Multiplexer([self.connection1], protocols=[DefaultMessage])
-        self.log_files.append(self.connection1.node.log_file)
-        self.multiplexer1.connect()
-        self.multiplexers.append(self.multiplexer1)
+        cls.multiplexer1 = Multiplexer([cls.connection1], protocols=[DefaultMessage])
+        cls.log_files.append(cls.connection1.node.log_file)
+        cls.multiplexer1.connect()
+        cls.multiplexers.append(cls.multiplexer1)
 
-        self.connection_key = make_crypto("fetchai")
-        temp_dir_2 = os.path.join(self.t, "temp_dir_2")
-        os.mkdir(temp_dir_2)
-        self.connection2 = _make_libp2p_connection(
+        cls.connection_key = make_crypto("fetchai")
+        temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
+        cls.connection2 = _make_libp2p_connection(
             data_dir=temp_dir_2,
             entry_peers=[genesis_peer],
-            agent_key=self.connection_key,
+            agent_key=cls.connection_key,
         )
-        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
-        self.log_files.append(self.connection2.node.log_file)
-        self.multiplexer2.connect()
-        self.multiplexers.append(self.multiplexer2)
+        cls.multiplexer2 = Multiplexer([cls.connection2], protocols=[DefaultMessage])
+        cls.log_files.append(cls.connection2.node.log_file)
+        cls.multiplexer2.connect()
+        cls.multiplexers.append(cls.multiplexer2)
 
     def test_connection_is_established(self):
         """Test connection established."""

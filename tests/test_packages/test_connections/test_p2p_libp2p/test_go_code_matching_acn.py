@@ -23,8 +23,6 @@ import difflib
 import filecmp
 import logging
 import os
-import shutil
-import stat
 import tempfile
 from collections import Counter, namedtuple
 from typing import Iterable, List
@@ -32,7 +30,7 @@ from typing import Iterable, List
 import git
 import pytest
 
-from tests.conftest import libp2p_log_on_failure_all
+from tests.conftest import libp2p_log_on_failure_all, remove_test_directory
 
 
 PACKAGE = "packages.valory.connections.p2p_libp2p.libp2p_node"
@@ -68,17 +66,10 @@ def get_relative_file_paths(root: str, *abs_paths) -> List[str]:
 def acn_repo_dir():
     """We keep the ACN repo around for all tests."""
 
-    def readonly_handler(func, path, execinfo) -> None:
-        """If permission is readonly, we change and retry."""
-
-        os.chmod(path, stat.S_IWRITE)
-        func(path)
-
     tmp_dir = tempfile.mkdtemp()
     acn_repo = git.Repo.clone_from(ACN_GITHUB_URL, tmp_dir)
     yield tmp_dir, acn_repo
-    # we need `onerror` to deal with permissions on Windows
-    shutil.rmtree(tmp_dir, onerror=readonly_handler)  # destroy once tests are done
+    remove_test_directory(tmp_dir)
 
 
 @pytest.fixture(scope="class")
