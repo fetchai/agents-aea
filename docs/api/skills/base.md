@@ -30,6 +30,17 @@ Initialize a skill context.
 - `agent_context`: the agent context.
 - `skill`: the skill.
 
+<a id="aea.skills.base.SkillContext.is_abstract_component"></a>
+
+#### is`_`abstract`_`component
+
+```python
+@property
+def is_abstract_component() -> bool
+```
+
+Get if the skill is abstract.
+
 <a id="aea.skills.base.SkillContext.logger"></a>
 
 #### logger

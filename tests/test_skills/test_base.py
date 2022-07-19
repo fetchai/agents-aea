@@ -216,6 +216,17 @@ class BaseTestSkillContext:
 class TestSkillContextDefault(BaseTestSkillContext):
     """Test skill context with default dm."""
 
+    @pytest.mark.parametrize("flag", (True, False))
+    def test_is_abstract(self, flag: bool):
+        """Test the `is_abstract` property."""
+        skill_context = SkillContext(
+            MagicMock(),
+            Skill(
+                SkillConfig("test_name", "test_author", is_abstract=flag), MagicMock()
+            ),
+        )
+        assert skill_context.is_abstract_component is flag
+
 
 class SkillContextTestCase(TestCase):
     """Test case for SkillContext class."""
