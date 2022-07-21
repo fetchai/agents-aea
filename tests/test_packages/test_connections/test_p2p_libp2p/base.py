@@ -34,7 +34,7 @@ from tests.conftest import TEMP_LIBP2P_TEST_DIR, remove_test_directory
 
 
 class BaseP2PLibp2pTest:
-    """Base class for p2p libp2p tests"""
+    """Base class for ACN p2p libp2p tests"""
 
     cwd: str
     t: str
@@ -48,12 +48,14 @@ class BaseP2PLibp2pTest:
     def setup_class(cls):
         """Set the test up"""
 
+        atexit.register(cls.teardown_class)
         cls.cwd, cls.t = os.getcwd(), TEMP_LIBP2P_TEST_DIR
+        if Path(cls.t).exists():
+            cls.remove_temp_test_dir()
         cls.tmp_dir = os.path.join(cls.t, "temp_dir")
-        cls.tmp_client_dir = os.path.join(cls.t, "tmp_client_dir")
+        cls.tmp_client_dir = os.path.join(cls.t, "temp_client_dir")
         Path(cls.tmp_dir).mkdir(parents=True, exist_ok=True)
         os.chdir(cls.t)
-        atexit.register(cls.teardown_class)
 
     @classmethod
     def teardown_class(cls):
@@ -68,8 +70,15 @@ class BaseP2PLibp2pTest:
         cls.log_files.clear()
         os.chdir(cls.cwd)
         if Path(cls.t).exists():
-            remove_test_directory(cls.t)
-        logging.debug(f"Teardown of {cls.__name__} successful")
+            cls.remove_temp_test_dir()
+        logging.debug(f"Teardown of {cls.__name__} completed")
+
+    @classmethod
+    def remove_temp_test_dir(cls) -> None:
+        """Attempt to remove the temporary directory used during tests"""
+        success = remove_test_directory(cls.t)
+        if not success:
+            logging.debug(f"{cls.t} could NOT be deleted")
 
     def enveloped_default_message(self, to: str, sender: str) -> Envelope:
         """Generate a enveloped default message for tests"""

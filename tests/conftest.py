@@ -416,8 +416,15 @@ DEFAULT_HOST = LOCAL_HOST.hostname
 default_ports = itertools.count(10234)
 
 
-def remove_test_directory(directory: str) -> None:
-    """Destroy a directory once tests are done, change permissions if needed"""
+def remove_test_directory(directory: str, retries: int = 3) -> bool:
+    """Destroy a directory once tests are done, change permissions if needed.
+
+    Note that on Windows directories and files that are open cannot be deleted.
+
+    :param directory: directory to be deleted
+    :param retries: number of re-attempts
+    :return: whether the directory was successfully deleted
+    """
 
     def readonly_handler(func, path, execinfo) -> None:
         """If permission is readonly, we change these and retry."""
@@ -425,7 +432,13 @@ def remove_test_directory(directory: str) -> None:
         func(path)
 
     # we need `onerror` to deal with permissions, e.g. on Windows
-    shutil.rmtree(directory, onerror=readonly_handler)
+    while os.path.exists(directory) and retries:
+        try:
+            shutil.rmtree(directory, onerror=readonly_handler)
+        except Exception:  # pylint: disable=broad-except
+            retries -= 1
+            time.sleep(1)
+    return not os.path.exists(directory)
 
 
 @contextmanager
