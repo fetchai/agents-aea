@@ -100,5 +100,4 @@ class BaseP2PLibp2pTest:
         """Check if attributes on sent match those on delivered envelope"""
 
         attrs = ["to", "sender", "protocol_specification_id", "message_bytes"]
-        DefaultMessage.serializer.decode(delivered.message)
         return all(getattr(sent, attr) == getattr(delivered, attr) for attr in attrs)
