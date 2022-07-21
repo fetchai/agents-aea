@@ -413,7 +413,7 @@ protocol_specification_files = [
 
 TEMP_LIBP2P_TEST_DIR = tempfile.mkdtemp()
 DEFAULT_HOST = LOCAL_HOST.hostname
-default_ports = itertools.count(10234)  # call next(default_ports) to avoid assignment overlap
+default_ports = itertools.count(10234)
 
 
 def remove_test_directory(directory: str) -> None:
