@@ -20,10 +20,10 @@
 """This test module contains tests for P2PLibp2p connection."""
 import itertools
 import os
-import shutil
-import tempfile
 from copy import copy
 from unittest.mock import Mock
+
+import pytest
 
 from aea.helpers.acn.uri import Uri
 from aea.mail.base import Envelope
@@ -32,10 +32,10 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
-    libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
@@ -49,74 +49,18 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 )
 
 
+@pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionIntegrationTest:
+class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
     """Test mix of relay/delegate agents and client connections work together"""
 
     @classmethod
-    def make_connection(cls, name, **kwargs):
-        """Make a p2p connection."""
-        if name in cls.multiplexers_dict:
-            raise ValueError(f"Connection with name `{name}` already added")
-        temp_dir = os.path.join(cls.t, name)
-        os.mkdir(temp_dir)
-        conn_options = copy(kwargs)
-
-        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
-        conn = _make_libp2p_connection(**conn_options)
-        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-        cls.log_files.append(conn.node.log_file)
-        multiplexer.connect()
-        cls.multiplexers_dict[name] = multiplexer
-        cls.connections_dict[name] = conn
-        return conn
-
-    @classmethod
-    def make_client_connection(cls, name, **kwargs):
-        """Make a p2p client connection."""
-        if name in cls.multiplexers_dict:
-            raise ValueError(f"Connection with name `{name}` already added")
-        temp_dir = os.path.join(cls.t, name)
-        os.mkdir(temp_dir)
-        conn_options = copy(kwargs)
-
-        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
-        conn = _make_libp2p_client_connection(**conn_options)
-        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-        multiplexer.connect()
-        cls.multiplexers_dict[name] = multiplexer
-        cls.connections_dict[name] = conn
-        return conn
-
-    @classmethod
-    def make_mailbox_connection(cls, name, **kwargs):
-        """Make a p2p mailbox connection."""
-        if name in cls.multiplexers_dict:
-            raise ValueError(f"Connection with name `{name}` already added")
-        temp_dir = os.path.join(cls.t, name)
-        os.mkdir(temp_dir)
-        conn_options = copy(kwargs)
-
-        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
-        conn = _make_libp2p_mailbox_connection(**conn_options)
-        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-        multiplexer.connect()
-        cls.multiplexers_dict[name] = multiplexer
-        cls.connections_dict[name] = conn
-        return conn
-
-    @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
 
-        cls.log_files = []
         cls.multiplexers_dict = {}
         cls.connections_dict = {}
-        cls.multiplexers = []
 
         try:
             cls.main_relay = cls.make_connection("main_relay", relay=True)
@@ -180,6 +124,55 @@ class TestP2PLibp2pConnectionIntegrationTest:
         except Exception:
             cls.teardown_class()
             raise
+
+    @classmethod
+    def make_connection(cls, name, **kwargs):
+        """Make a p2p connection."""
+        if name in cls.multiplexers_dict:
+            raise ValueError(f"Connection with name `{name}` already added")
+        temp_dir = os.path.join(cls.t, name)
+        conn_options = copy(kwargs)
+
+        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
+        conn = _make_libp2p_connection(**conn_options)
+        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
+        cls.log_files.append(conn.node.log_file)
+        multiplexer.connect()
+        cls.multiplexers_dict[name] = multiplexer
+        cls.connections_dict[name] = conn
+        return conn
+
+    @classmethod
+    def make_client_connection(cls, name, **kwargs):
+        """Make a p2p client connection."""
+        if name in cls.multiplexers_dict:
+            raise ValueError(f"Connection with name `{name}` already added")
+        temp_dir = os.path.join(cls.t, name)
+        conn_options = copy(kwargs)
+
+        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
+        conn = _make_libp2p_client_connection(**conn_options)
+        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
+        multiplexer.connect()
+        cls.multiplexers_dict[name] = multiplexer
+        cls.connections_dict[name] = conn
+        return conn
+
+    @classmethod
+    def make_mailbox_connection(cls, name, **kwargs):
+        """Make a p2p mailbox connection."""
+        if name in cls.multiplexers_dict:
+            raise ValueError(f"Connection with name `{name}` already added")
+        temp_dir = os.path.join(cls.t, name)
+        conn_options = copy(kwargs)
+
+        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
+        conn = _make_libp2p_mailbox_connection(**conn_options)
+        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
+        multiplexer.connect()
+        cls.multiplexers_dict[name] = multiplexer
+        cls.connections_dict[name] = conn
+        return conn
 
     @classmethod
     def get_delegate_host_port(cls, delegate_uri: Uri) -> dict:
@@ -247,14 +240,6 @@ class TestP2PLibp2pConnectionIntegrationTest:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-
         for mux in cls.multiplexers_dict.values():
             mux.disconnect()
-
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        super().teardown_class()

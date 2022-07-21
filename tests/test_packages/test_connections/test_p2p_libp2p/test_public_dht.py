@@ -22,8 +22,6 @@
 
 import json
 import os
-import shutil
-import tempfile
 
 import pytest
 
@@ -46,6 +44,7 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 )
 
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     DEFAULT_LEDGER,
     DEFAULT_LEDGER_LIBP2P_NODE,
     PUBLIC_DHT_DELEGATE_URI_1,
@@ -64,7 +63,7 @@ from tests.conftest import (
     _make_libp2p_connection,
 )
 from tests.conftest import default_ports as ports
-from tests.conftest import libp2p_log_on_failure, libp2p_log_on_failure_all
+from tests.conftest import libp2p_log_on_failure_all
 
 
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
@@ -103,16 +102,8 @@ def delegate_uris_public_keys(request):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTRelay:
+class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
     """Test that public DHT's relay service is working properly"""
-
-    def setup(self):
-        """Set the test up"""
-        self.cwd = os.getcwd()
-        self.t = tempfile.mkdtemp()
-        os.chdir(self.t)
-
-        self.log_files = []
 
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
@@ -121,7 +112,6 @@ class TestLibp2pConnectionPublicDHTRelay:
         """Test connectivity."""
         for i, maddr in enumerate(maddrs):
             temp_dir = os.path.join(self.t, f"dir_{i}")
-            os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
                 relay=False,
                 entry_peers=[maddr],
@@ -150,7 +140,6 @@ class TestLibp2pConnectionPublicDHTRelay:
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
-                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
                     relay=False,
                     entry_peers=[maddr],
@@ -162,7 +151,6 @@ class TestLibp2pConnectionPublicDHTRelay:
                 multiplexers.append(multiplexer1)
 
                 temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
-                os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_connection(
                     relay=False,
                     entry_peers=[maddr],
@@ -222,7 +210,6 @@ class TestLibp2pConnectionPublicDHTRelay:
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
-                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
                     relay=False,
                     entry_peers=[maddrs[i]],
@@ -239,7 +226,6 @@ class TestLibp2pConnectionPublicDHTRelay:
                         continue
 
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
-                    os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
                         relay=False,
                         entry_peers=[maddrs[j]],
@@ -288,24 +274,11 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    def teardown(self):
-        """Tear down the test"""
-        os.chdir(self.cwd)
-        try:
-            shutil.rmtree(self.t)
-        except (OSError, IOError):
-            pass
-
 
 @pytest.mark.integration
-class TestLibp2pConnectionPublicDHTDelegate:
+@libp2p_log_on_failure_all
+class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
     """Test that public DHT's delegate service is working properly"""
-
-    def setup(self):
-        """Set the test up"""
-        self.cwd = os.getcwd()
-        self.t = tempfile.mkdtemp()
-        os.chdir(self.t)
 
     @pytest.mark.parametrize(
         "delegate_uris_public_keys",
@@ -322,7 +295,6 @@ class TestLibp2pConnectionPublicDHTDelegate:
             uri = delegate_uris[i]
             peer_public_key = public_keys[i]
             temp_dir = os.path.join(self.t, f"dir_{i}")
-            os.mkdir(temp_dir)
             connection = _make_libp2p_client_connection(
                 peer_public_key=peer_public_key, uri=uri, data_dir=temp_dir
             )
@@ -355,7 +327,6 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
-                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_client_connection(
                     peer_public_key=peer_public_key, uri=uri, data_dir=temp_dir_1
                 )
@@ -364,7 +335,6 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 multiplexers.append(multiplexer1)
 
                 temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
-                os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_client_connection(
                     peer_public_key=peer_public_key, uri=uri, data_dir=temp_dir_2
                 )
@@ -426,7 +396,6 @@ class TestLibp2pConnectionPublicDHTDelegate:
             multiplexers = []
             try:
                 temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
-                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_client_connection(
                     peer_public_key=public_keys[i],
                     uri=delegate_uris[i],
@@ -443,7 +412,6 @@ class TestLibp2pConnectionPublicDHTDelegate:
                         continue
 
                     temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
-                    os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_client_connection(
                         peer_public_key=public_keys[j],
                         uri=delegate_uris[j],
@@ -490,20 +458,12 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    def teardown(self):
-        """Tear down the test"""
-        os.chdir(self.cwd)
-        try:
-            shutil.rmtree(self.t)
-        except (OSError, IOError):
-            pass
-
 
 @pytest.mark.integration
+@libp2p_log_on_failure_all
 class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
-    @libp2p_log_on_failure
     @pytest.mark.parametrize(
         "maddrs", [PUBLIC_DHT_MADDRS, PUBLIC_STAGING_DHT_MADDRS], indirect=True
     )
@@ -577,6 +537,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
 
 
 @pytest.mark.integration
+@libp2p_log_on_failure_all
 class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 

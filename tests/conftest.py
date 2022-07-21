@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
+import atexit
 import difflib
 import inspect
 import itertools
@@ -27,6 +28,7 @@ import platform
 import random
 import shutil
 import socket
+import stat
 import string
 import sys
 import tempfile
@@ -97,6 +99,7 @@ from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
 from aea.identity.base import Identity
+from aea.multiplexer import Multiplexer
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import BaseAEATestCase
@@ -163,7 +166,7 @@ DUMMY_ENV = gym.GoalEnv
 LOCAL_HOST = urlparse("http://127.0.0.1")
 
 # URL to local Ganache instance
-DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
+DEFAULT_GANACHE_ADDR = LOCAL_HOST.geturl()
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 DEFAULT_MAX_PRIORITY_FEE_PER_GAS = 1_000_000_000
@@ -171,7 +174,7 @@ DEFAULT_MAX_FEE_PER_GAS = 1_000_000_000
 
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.10.2"
-DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
+DEFAULT_FETCH_LEDGER_ADDR = LOCAL_HOST.geturl()
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
 DEFAULT_FETCH_ADDR_REMOTE = "https://rest-dorado.fetch.ai:443"
@@ -410,8 +413,20 @@ protocol_specification_files = [
 ]
 
 # ports for testing, call next() on to avoid assignment overlap
-DEFAULT_HOST = "127.0.0.1"
+DEFAULT_HOST = LOCAL_HOST.hostname
 default_ports = itertools.count(10234)
+
+
+def remove_test_directory(directory: str) -> None:
+    """Destroy a directory once tests are done, change permissions if needed"""
+
+    def readonly_handler(func, path, execinfo) -> None:
+        """If permission is readonly, we change these and retry."""
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
+    # we need `onerror` to deal with permissions, e.g. on Windows
+    shutil.rmtree(directory, onerror=readonly_handler)
 
 
 @contextmanager
@@ -458,11 +473,6 @@ def find_difference(fname1: str, fname2: str) -> str:
                 line = line[2:].lstrip()
                 diff += line
     return diff
-
-
-def number_of_diff_lines(diff: str) -> int:
-    """Give number of lines in a diff string."""
-    return diff.count("\n") if diff != "" else 0
 
 
 def only_windows(fn: Callable) -> Callable:
@@ -893,33 +903,58 @@ def is_port_in_use(host: str, port: int) -> bool:
         return s.connect_ex((host, port)) == 0
 
 
+class BaseP2PLibp2pTest:
+    """Base class for p2p libp2p tests"""
+
+    cwd: str
+    t: str
+    tmp_dir: str
+    log_files: List[str] = []
+    multiplexers: List[Multiplexer] = []
+    capture_log = True
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd, cls.t = os.getcwd(), tempfile.mkdtemp()
+        cls.tmp_dir = os.path.join(cls.t, "temp_dir")
+        Path(cls.tmp_dir).mkdir(exist_ok=True)
+        os.chdir(cls.t)
+        atexit.register(cls.teardown_class)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        logger.debug(f"Cleaning up {cls.__name__}")
+        for mux in cls.multiplexers:
+            mux.disconnect()
+        cls.multiplexers.clear()
+        cls.log_files.clear()
+        os.chdir(cls.cwd)
+        remove_test_directory(cls.t)
+        logger.debug(f"Teardown of {cls.__name__} successful")
+
+
 def _make_libp2p_connection(
     data_dir: str,
     port: Optional[int] = None,
-    host: str = DEFAULT_HOST,
+    host: Optional[str] = DEFAULT_HOST,
     relay: bool = True,
     delegate: bool = False,
     mailbox: bool = False,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
     delegate_port: Optional[int] = None,
-    delegate_host: str = DEFAULT_HOST,
+    delegate_host: Optional[str] = DEFAULT_HOST,
     mailbox_port: Optional[int] = None,
-    mailbox_host: str = DEFAULT_HOST,
-    node_key_file: Optional[str] = None,
+    mailbox_host: Optional[str] = DEFAULT_HOST,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
     peer_registration_delay: str = "0.0",
 ) -> P2PLibp2pConnection:
     """Get a libp2p connection."""
 
-    if not os.path.isdir(data_dir):
-        raise ValueError("Data dir must be directory and exist!")
-
-    port = port or next(default_ports)
-    delegate_port = delegate_port or next(default_ports)
-    mailbox_port = mailbox_port or next(default_ports)
-
-    log_file = os.path.join(data_dir, "libp2p_node_{}.log".format(port))
+    Path(data_dir).mkdir(exist_ok=True)
+    log_file = os.path.join(data_dir, f"libp2p_node_{port}.log")
     if os.path.exists(log_file):
         os.remove(log_file)
 
@@ -930,13 +965,12 @@ def _make_libp2p_connection(
         public_key=agent_key.public_key,
         default_address_key=agent_key.identifier,
     )
-    if node_key_file is not None:
-        conn_crypto_store = CryptoStore({DEFAULT_LEDGER_LIBP2P_NODE: node_key_file})
-    else:
-        node_key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
-        node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
-        node_key.dump(node_key_path)
-        conn_crypto_store = CryptoStore({node_key.identifier: node_key_path})
+
+    node_key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
+    node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
+    node_key.dump(node_key_path)
+    conn_crypto_store = CryptoStore({node_key.identifier: node_key_path})
+
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
         POR_DEFAULT_SERVICE_ID,
@@ -947,53 +981,29 @@ def _make_libp2p_connection(
         f"./{agent_key.address}_cert.txt",
     )
     _process_cert(agent_key, cert_request, path_prefix=data_dir)
-    if not build_directory:
-        build_directory = os.getcwd()
-    config = {"ledger_id": node_key.identifier}
-    if relay and delegate:
-        configuration = ConnectionConfig(
-            node_key_file=node_key_file,
-            local_uri="{}:{}".format(host, port),
-            public_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            delegate_uri="{}:{}".format(delegate_host, delegate_port),
-            peer_registration_delay=peer_registration_delay,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-            cert_requests=[cert_request],
-            **config,  # type: ignore
-        )
-    elif relay and not delegate:
-        configuration = ConnectionConfig(
-            node_key_file=node_key_file,
-            local_uri="{}:{}".format(host, port),
-            public_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            peer_registration_delay=peer_registration_delay,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-            cert_requests=[cert_request],
-            **config,  # type: ignore
-        )
-    else:
-        configuration = ConnectionConfig(
-            node_key_file=node_key_file,
-            local_uri="{}:{}".format(host, port),
-            entry_peers=entry_peers,
-            log_file=log_file,
-            peer_registration_delay=peer_registration_delay,
-            connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=build_directory,
-            cert_requests=[cert_request],
-            **config,  # type: ignore
-        )
 
+    build_directory = build_directory or os.getcwd()
+    config = {"ledger_id": node_key.identifier}
+    port = port or next(default_ports)
+    configuration = ConnectionConfig(
+        local_uri=f"{host}:{port}",
+        entry_peers=entry_peers,
+        log_file=log_file,
+        peer_registration_delay=peer_registration_delay,
+        connection_id=P2PLibp2pConnection.connection_id,
+        build_directory=build_directory,
+        cert_requests=[cert_request],
+        **config,  # type: ignore
+    )
+
+    if relay:
+        configuration.config["public_uri"] = f"{host}:{port}"
+    if delegate:
+        delegate_port = delegate_port or next(default_ports)
+        configuration.config["delegate_uri"] = f"{delegate_host}:{delegate_port}"
     if mailbox:
+        mailbox_port = mailbox_port or next(default_ports)
         configuration.config["mailbox_uri"] = f"{mailbox_host}:{mailbox_port}"
-    else:
-        configuration.config["mailbox_uri"] = ""
 
     if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
         build_node(build_directory)
@@ -1010,17 +1020,14 @@ def _make_libp2p_client_connection(
     peer_public_key: str,
     data_dir: str,
     node_port: int = None,
-    node_host: str = DEFAULT_HOST,
+    node_host: Optional[str] = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
     """Get a libp2p client connection."""
 
-    if not os.path.isdir(data_dir):
-        raise ValueError("Data dir must be directory and exist!")
-
+    Path(data_dir).mkdir(exist_ok=True)
     node_port = node_port or next(default_ports)
-
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
         "identity",
@@ -1062,17 +1069,14 @@ def _make_libp2p_mailbox_connection(
     peer_public_key: str,
     data_dir: str,
     node_port: Optional[int] = None,
-    node_host: str = DEFAULT_HOST,
+    node_host: Optional[str] = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
     """Get a libp2p mailbox connection."""
 
-    if not os.path.isdir(data_dir):
-        raise ValueError("Data dir must be directory and exist!")
-
+    Path(data_dir).mkdir(exist_ok=True)
     node_port = node_port or next(default_ports)
-
     crypto = make_crypto(ledger_api_id)
     identity = Identity(
         "identity",

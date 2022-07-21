@@ -38,7 +38,6 @@ from tests.conftest import (
     DEFAULT_LEDGER,
     _make_libp2p_connection,
     default_ports,
-    libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
@@ -53,13 +52,11 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     """Test AEA with p2p_libp2p_client connection is correctly run"""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set up the test class."""
         super().setup_class()
 
         temp_dir = os.path.join(cls.t, "temp_dir_node")
-        os.mkdir(temp_dir)
         cls.mailbox_port = next(default_ports)
         cls.node_connection = _make_libp2p_connection(
             data_dir=temp_dir,

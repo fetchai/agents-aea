@@ -20,8 +20,7 @@
 """This test module contains tests for P2PLibp2p connection."""
 import asyncio
 import os
-import shutil
-import tempfile
+from itertools import permutations
 from unittest import mock
 from unittest.mock import Mock, call
 
@@ -38,8 +37,8 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     _make_libp2p_connection,
-    libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
@@ -54,21 +53,14 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 
 
 @pytest.mark.asyncio
-class TestP2PLibp2pConnectionConnectDisconnect:
+@libp2p_log_on_failure_all
+class TestP2PLibp2pConnectionConnectDisconnect(BaseP2PLibp2pTest):
     """Test that connection is established and torn down correctly"""
-
-    def setup(self):
-        """Set the test up"""
-        self.cwd = os.getcwd()
-        self.t = tempfile.mkdtemp()
-        os.chdir(self.t)
 
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect_default(self):
         """Test connect then disconnect."""
-        temp_dir = os.path.join(self.t, "temp_dir")
-        os.mkdir(temp_dir)
-        connection = _make_libp2p_connection(data_dir=temp_dir)
+        connection = _make_libp2p_connection(data_dir=self.tmp_dir)
 
         assert connection.is_connected is False
         try:
@@ -84,10 +76,8 @@ class TestP2PLibp2pConnectionConnectDisconnect:
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect_ethereum(self):
         """Test connect then disconnect."""
-        temp_dir = os.path.join(self.t, "temp_dir")
-        os.mkdir(temp_dir)
         crypto = make_crypto(EthereumCrypto.identifier)
-        connection = _make_libp2p_connection(data_dir=temp_dir, agent_key=crypto)
+        connection = _make_libp2p_connection(data_dir=self.tmp_dir, agent_key=crypto)
 
         assert connection.is_connected is False
         try:
@@ -100,36 +90,21 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         await connection.disconnect()
         assert connection.is_connected is False
 
-    def teardown(self):
-        """Tear down the test"""
-        os.chdir(self.cwd)
-        try:
-            shutil.rmtree(self.t)
-        except (OSError, IOError):
-            pass
-
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionEchoEnvelope:
+class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
     """Test that connection will route envelope to destination"""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.log_files = []
-        cls.multiplexers = []
+        super().setup_class()
 
         aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
         aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
 
         try:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
-            os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
                 data_dir=temp_dir_1, agent_key=aea_ledger_fetchai
             )
@@ -143,7 +118,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             genesis_peer = cls.connection1.node.multiaddrs[0]
 
             temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
-            os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
                 data_dir=temp_dir_2,
                 entry_peers=[genesis_peer],
@@ -235,36 +209,18 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope.message != original_envelope.message
         assert original_envelope.message_bytes == delivered_envelope.message_bytes
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
-
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionRouting:
+class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
     """Test that libp2p node will reliably route envelopes in a local network"""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.log_files = []
-        cls.multiplexers = []
+        super().setup_class()
 
         try:
             temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
-            os.mkdir(temp_dir_gen)
             cls.connection_genesis = _make_libp2p_connection(data_dir=temp_dir_gen)
             cls.multiplexer_genesis = Multiplexer(
                 [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
@@ -279,7 +235,6 @@ class TestP2PLibp2pConnectionRouting:
 
             for i in range(DEFAULT_NET_SIZE):
                 temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
-                os.mkdir(temp_dir)
                 conn = _make_libp2p_connection(
                     data_dir=temp_dir, entry_peers=[genesis_peer]
                 )
@@ -304,71 +259,49 @@ class TestP2PLibp2pConnectionRouting:
         """Test star routing connectivity."""
         addrs = [conn.node.address for conn in self.connections]
 
-        for source in range(len(self.multiplexers)):
-            for destination in range(len(self.multiplexers)):
-                if destination == source:
-                    continue
-                msg = DefaultMessage(
-                    dialogue_reference=("", ""),
-                    message_id=1,
-                    target=0,
-                    performative=DefaultMessage.Performative.BYTES,
-                    content=b"hello",
-                )
-                envelope = Envelope(
-                    to=addrs[destination],
-                    sender=addrs[source],
-                    message=msg,
-                )
+        nodes = range(len(self.multiplexers))
+        for u, v in permutations(nodes, 2):
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            envelope = Envelope(
+                to=addrs[v],
+                sender=addrs[u],
+                message=msg,
+            )
 
-                self.multiplexers[source].put(envelope)
-                delivered_envelope = self.multiplexers[destination].get(
-                    block=True, timeout=10
-                )
+            self.multiplexers[u].put(envelope)
+            delivered_envelope = self.multiplexers[v].get(block=True, timeout=10)
 
-                assert delivered_envelope is not None
-                assert delivered_envelope.to == envelope.to
-                assert delivered_envelope.sender == envelope.sender
-                assert (
-                    delivered_envelope.protocol_specification_id
-                    == envelope.protocol_specification_id
-                )
-                assert delivered_envelope.message != envelope.message
-                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-                msg.to = delivered_envelope.to
-                msg.sender = delivered_envelope.sender
-                assert envelope.message == msg
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+            assert delivered_envelope is not None
+            assert delivered_envelope.to == envelope.to
+            assert delivered_envelope.sender == envelope.sender
+            assert (
+                delivered_envelope.protocol_specification_id
+                == envelope.protocol_specification_id
+            )
+            assert delivered_envelope.message != envelope.message
+            msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+            msg.to = delivered_envelope.to
+            msg.sender = delivered_envelope.sender
+            assert envelope.message == msg
 
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
+class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
     """Test that connection will route envelope to destination using the same relay node"""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.log_files = []
-        cls.multiplexers = []
+        super().setup_class()
 
         try:
             temp_dir_rel = os.path.join(cls.t, "temp_dir_rel")
-            os.mkdir(temp_dir_rel)
             cls.relay = _make_libp2p_connection(data_dir=temp_dir_rel)
             cls.multiplexer = Multiplexer([cls.relay])
             cls.log_files.append(cls.relay.node.log_file)
@@ -378,7 +311,6 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             relay_peer = cls.relay.node.multiaddrs[0]
 
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
-            os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
                 data_dir=temp_dir_1,
                 relay=False,
@@ -392,7 +324,6 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             cls.multiplexers.append(cls.multiplexer1)
 
             temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
-            os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
                 data_dir=temp_dir_2, entry_peers=[relay_peer]
             )
@@ -484,36 +415,30 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope.message != original_envelope.message
         assert original_envelope.message_bytes == delivered_envelope.message_bytes
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
-
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
+class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
     """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
 
-        cls.log_files = []
-        cls.multiplexers = []
+        def make_relay(directory, relay_peer):
+            conn = _make_libp2p_connection(
+                data_dir=directory,
+                relay=False,
+                entry_peers=[relay_peer],
+            )
+            mux = Multiplexer([conn])
+            cls.connections.append(conn)
+            cls.log_files.append(conn.node.log_file)
+            mux.connect()
+            cls.multiplexers.append(mux)
 
         try:
             temp_dir_rel_1 = os.path.join(cls.t, "temp_dir_rel_1")
-            os.mkdir(temp_dir_rel_1)
             cls.connection_relay_1 = _make_libp2p_connection(data_dir=temp_dir_rel_1)
             cls.multiplexer_relay_1 = Multiplexer(
                 [cls.connection_relay_1], protocols=[MockDefaultMessageProtocol]
@@ -525,7 +450,6 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
 
             temp_dir_rel_2 = os.path.join(cls.t, "temp_dir_rel_2")
-            os.mkdir(temp_dir_rel_2)
             cls.connection_relay_2 = _make_libp2p_connection(
                 data_dir=temp_dir_rel_2, entry_peers=[relay_peer_1]
             )
@@ -540,33 +464,12 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
 
             cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
 
-            for i in range(int(DEFAULT_NET_SIZE / 2) + 1):
-                temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_1")
-                os.mkdir(temp_dir)
-                conn = _make_libp2p_connection(
-                    data_dir=temp_dir,
-                    relay=False,
-                    entry_peers=[relay_peer_1],
-                )
-                mux = Multiplexer([conn])
-                cls.connections.append(conn)
-                cls.log_files.append(conn.node.log_file)
-                mux.connect()
-                cls.multiplexers.append(mux)
+            for i in range(DEFAULT_NET_SIZE // 2 + 1):
+                temp_dir_1 = os.path.join(cls.t, f"temp_dir_conn_{i}_1")
+                temp_dir_2 = os.path.join(cls.t, f"temp_dir_conn_{i}_2")
+                make_relay(temp_dir_1, relay_peer_1)
+                make_relay(temp_dir_2, relay_peer_2)
 
-            for i in range(int(DEFAULT_NET_SIZE / 2) + 1):
-                temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_2")
-                os.mkdir(temp_dir)
-                conn = _make_libp2p_connection(
-                    data_dir=temp_dir,
-                    relay=False,
-                    entry_peers=[relay_peer_2],
-                )
-                mux = Multiplexer([conn])
-                cls.connections.append(conn)
-                cls.log_files.append(conn.node.log_file)
-                mux.connect()
-                cls.multiplexers.append(mux)
         except Exception as e:
             cls.teardown_class()
             raise e
@@ -582,51 +485,36 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         """Test star routing connectivity."""
         addrs = [conn.node.address for conn in self.connections]
 
-        for source in range(len(self.multiplexers)):
-            for destination in range(len(self.multiplexers)):
-                if destination == source:
-                    continue
-                msg = DefaultMessage(
-                    dialogue_reference=("", ""),
-                    message_id=1,
-                    target=0,
-                    performative=DefaultMessage.Performative.BYTES,
-                    content=b"hello",
-                )
-                envelope = Envelope(
-                    to=addrs[destination],
-                    sender=addrs[source],
-                    message=msg,
-                )
+        nodes = range(len(self.multiplexers))
+        for u, v in permutations(nodes, 2):
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            envelope = Envelope(
+                to=addrs[v],
+                sender=addrs[u],
+                message=msg,
+            )
 
-                self.multiplexers[source].put(envelope)
-                delivered_envelope = self.multiplexers[destination].get(
-                    block=True, timeout=10
-                )
+            self.multiplexers[u].put(envelope)
+            delivered_envelope = self.multiplexers[v].get(block=True, timeout=10)
 
-                assert delivered_envelope is not None
-                assert delivered_envelope.to == envelope.to
-                assert delivered_envelope.sender == envelope.sender
-                assert (
-                    delivered_envelope.protocol_specification_id
-                    == envelope.protocol_specification_id
-                )
-                assert delivered_envelope.message != envelope.message
-                msg = DefaultMessage.serializer.decode(delivered_envelope.message)
-                msg.sender = delivered_envelope.sender
-                msg.to = delivered_envelope.to
-                assert envelope.message == msg
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+            assert delivered_envelope is not None
+            assert delivered_envelope.to == envelope.to
+            assert delivered_envelope.sender == envelope.sender
+            assert (
+                delivered_envelope.protocol_specification_id
+                == envelope.protocol_specification_id
+            )
+            assert delivered_envelope.message != envelope.message
+            msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+            msg.sender = delivered_envelope.sender
+            msg.to = delivered_envelope.to
+            assert envelope.message == msg
 
 
 def test_libp2pconnection_uri():
@@ -637,21 +525,13 @@ def test_libp2pconnection_uri():
 
 
 @pytest.mark.asyncio
-class TestP2PLibp2pNodeRestart:
+class TestP2PLibp2pNodeRestart(BaseP2PLibp2pTest):
     """Test node restart."""
-
-    def setup(self):
-        """Set the test up"""
-        self.cwd = os.getcwd()
-        self.t = tempfile.mkdtemp()
-        os.chdir(self.t)
 
     @pytest.mark.asyncio
     async def test_node_restart(self):
         """Test node restart works."""
-        temp_dir = os.path.join(self.t, "temp_dir")
-        os.mkdir(temp_dir)
-        connection = _make_libp2p_connection(data_dir=temp_dir)
+        connection = _make_libp2p_connection(data_dir=self.tmp_dir)
         try:
             await connection.node.start()
             pipe = connection.node.pipe
@@ -663,17 +543,9 @@ class TestP2PLibp2pNodeRestart:
         finally:
             await connection.node.stop()
 
-    def teardown(self):
-        """Tear down the test"""
-        os.chdir(self.cwd)
-        try:
-            shutil.rmtree(self.t)
-        except (OSError, IOError):
-            pass
-
 
 @libp2p_log_on_failure_all
-class BaseTestP2PLibp2p:
+class BaseTestP2PLibp2p(BaseP2PLibp2pTest):
     """Base test class for p2p libp2p tests with two peers."""
 
     def _make_envelope(
@@ -700,22 +572,15 @@ class BaseTestP2PLibp2p:
         return envelope
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.log_files = []
-        cls.multiplexers = []
+        super().setup_class()
 
         aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
         aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
 
         try:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
-            os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
                 data_dir=temp_dir_1, agent_key=aea_ledger_fetchai
             )
@@ -729,7 +594,6 @@ class BaseTestP2PLibp2p:
             genesis_peer = cls.connection1.node.multiaddrs[0]
 
             temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
-            os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
                 data_dir=temp_dir_2,
                 entry_peers=[genesis_peer],
@@ -744,17 +608,6 @@ class BaseTestP2PLibp2p:
         except Exception as e:
             cls.teardown_class()
             raise e
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
 
 @libp2p_log_on_failure_all
@@ -880,14 +733,14 @@ class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
         addr_2 = self.connection2.address
 
         sent_envelopes = [
-            self._make_envelope(addr_1, addr_2, i, i - 1)
-            for i in range(1, self.NB_ENVELOPES + 1)
+            self._make_envelope(addr_1, addr_2, i + 1, i)
+            for i in range(self.NB_ENVELOPES)
         ]
         for envelope in sent_envelopes:
             self.multiplexer1.put(envelope)
 
         received_envelopes = []
-        for _ in range(1, self.NB_ENVELOPES + 1):
+        for _ in range(self.NB_ENVELOPES):
             envelope = self.multiplexer2.get(block=True, timeout=20)
             received_envelopes.append(envelope)
 

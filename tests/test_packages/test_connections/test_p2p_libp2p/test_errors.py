@@ -22,7 +22,6 @@
 import asyncio
 import os
 import platform
-import shutil
 import subprocess  # nosec
 import sys
 import tempfile
@@ -45,7 +44,7 @@ from packages.valory.connections.p2p_libp2p.connection import (
 )
 from packages.valory.protocols.acn.message import AcnMessage
 
-from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
+from tests.conftest import BaseP2PLibp2pTest, DEFAULT_LEDGER, _make_libp2p_connection
 
 
 check_node_built = (
@@ -55,19 +54,14 @@ check_node_built = (
 DEFAULT_NET_SIZE = 4
 
 
-class TestP2PLibp2pConnectionFailureGolangRun:
+class TestP2PLibp2pConnectionFailureGolangRun(BaseP2PLibp2pTest):
     """Test that golang run fails if wrong path or timeout"""
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        temp_dir = os.path.join(cls.t, "temp_dir")
-        os.mkdir(temp_dir)
-        cls.connection = _make_libp2p_connection(data_dir=temp_dir)
+        super().setup_class()
+        cls.connection = _make_libp2p_connection(data_dir=cls.tmp_dir)
         cls.wrong_path = tempfile.mkdtemp()
 
     def test_wrong_path(self):
@@ -86,30 +80,15 @@ class TestP2PLibp2pConnectionFailureGolangRun:
             muxer.connect()
         muxer.disconnect()
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-            shutil.rmtree(cls.wrong_path)
-        except (OSError, IOError):
-            pass
 
-
-class TestP2PLibp2pConnectionFailureNodeDisconnect:
+class TestP2PLibp2pConnectionFailureNodeDisconnect(BaseP2PLibp2pTest):
     """Test that connection handles node disconnecting properly"""
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        temp_dir = os.path.join(cls.t, "temp_dir")
-        os.mkdir(temp_dir)
-        cls.connection = _make_libp2p_connection(data_dir=temp_dir)
+        super().setup_class()
+        cls.connection = _make_libp2p_connection(data_dir=cls.tmp_dir)
 
     def test_node_disconnect(self):
         """Test node disconnect."""
@@ -119,25 +98,16 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
         self.connection.node.proc.wait()
         muxer.disconnect()
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
-
-class TestP2PLibp2pConnectionFailureSetupNewConnection:
+class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
     """Test that connection constructor ensures proper configuration"""
+
+    key_file: str
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.identity = Identity(
             "identity", address=crypto.address, public_key=crypto.public_key
@@ -178,15 +148,6 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             P2PLibp2pConnection(
                 configuration=configuration, data_dir=self.t, identity=self.identity
             )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
 
 
 def test_libp2pconnection_mixed_ip_address():

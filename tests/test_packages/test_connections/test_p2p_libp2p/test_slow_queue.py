@@ -19,8 +19,6 @@
 # ------------------------------------------------------------------------------
 """This test module contains tests for P2PLibp2p connection."""
 import os
-import shutil
-import tempfile
 from unittest.mock import Mock
 
 import pytest
@@ -32,8 +30,8 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
+    BaseP2PLibp2pTest,
     _make_libp2p_connection,
-    libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
@@ -46,23 +44,16 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 
 
 @libp2p_log_on_failure_all
-class TestSlowQueue:
+class TestSlowQueue(BaseP2PLibp2pTest):
     """Test that libp2p node uses slow queue in case of long DHT lookups."""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.log_files = []
-        cls.multiplexers = []
+        super().setup_class()
 
         try:
             temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
-            os.mkdir(temp_dir_gen)
             cls.bad_address = _make_libp2p_connection(
                 data_dir=temp_dir_gen
             ).node.address
@@ -79,7 +70,6 @@ class TestSlowQueue:
             cls.connections = [cls.connection_genesis]
 
             temp_dir = os.path.join(cls.t, "temp_dir_100")
-            os.mkdir(temp_dir)
 
             cls.conn = _make_libp2p_connection(
                 data_dir=temp_dir, entry_peers=[genesis_peer]
@@ -87,7 +77,6 @@ class TestSlowQueue:
 
             for i in range(2):
                 temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
-                os.mkdir(temp_dir)
                 conn = _make_libp2p_connection(
                     data_dir=temp_dir, entry_peers=[genesis_peer]
                 )
@@ -142,14 +131,3 @@ class TestSlowQueue:
             wait_for_condition(_check, timeout=30, period=1)
         finally:
             await self.conn.disconnect()
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
