@@ -411,11 +411,9 @@ protocol_specification_files = [
     ),
 ]
 
-# ports for testing, call next() on to avoid assignment overlap
-
-DEFAULT_LIBP2P_TEST_DIR = "/tmp/tmp_libp2p_tests"  # nosec
+TEMP_LIBP2P_TEST_DIR = tempfile.mkdtemp()
 DEFAULT_HOST = LOCAL_HOST.hostname
-default_ports = itertools.count(10234)
+default_ports = itertools.count(10234)  # call next(default_ports) to avoid assignment overlap
 
 
 def remove_test_directory(directory: str) -> None:
@@ -905,7 +903,7 @@ def is_port_in_use(host: str, port: int) -> bool:
 
 
 def _make_libp2p_connection(
-    data_dir: str = DEFAULT_LIBP2P_TEST_DIR,
+    data_dir: str = TEMP_LIBP2P_TEST_DIR,
     port: Optional[int] = None,
     host: Optional[str] = DEFAULT_HOST,
     relay: bool = True,
@@ -987,7 +985,7 @@ def _make_libp2p_connection(
 
 def _make_libp2p_client_connection(
     peer_public_key: str,
-    data_dir: str = DEFAULT_LIBP2P_TEST_DIR,
+    data_dir: str = TEMP_LIBP2P_TEST_DIR,
     node_port: int = None,
     node_host: Optional[str] = DEFAULT_HOST,
     uri: Optional[str] = None,
@@ -1036,7 +1034,7 @@ def _make_libp2p_client_connection(
 
 def _make_libp2p_mailbox_connection(
     peer_public_key: str,
-    data_dir: str = DEFAULT_LIBP2P_TEST_DIR,
+    data_dir: str = TEMP_LIBP2P_TEST_DIR,
     node_port: Optional[int] = None,
     node_host: Optional[str] = DEFAULT_HOST,
     uri: Optional[str] = None,

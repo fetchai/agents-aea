@@ -30,7 +30,7 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 
-from tests.conftest import DEFAULT_LIBP2P_TEST_DIR, remove_test_directory
+from tests.conftest import TEMP_LIBP2P_TEST_DIR, remove_test_directory
 
 
 class BaseP2PLibp2pTest:
@@ -48,7 +48,7 @@ class BaseP2PLibp2pTest:
     def setup_class(cls):
         """Set the test up"""
 
-        cls.cwd, cls.t = os.getcwd(), DEFAULT_LIBP2P_TEST_DIR
+        cls.cwd, cls.t = os.getcwd(), TEMP_LIBP2P_TEST_DIR
         cls.tmp_dir = os.path.join(cls.t, "temp_dir")
         cls.tmp_client_dir = os.path.join(cls.t, "tmp_client_dir")
         Path(cls.tmp_dir).mkdir(parents=True, exist_ok=True)
@@ -67,7 +67,8 @@ class BaseP2PLibp2pTest:
         cls.multiplexers.clear()
         cls.log_files.clear()
         os.chdir(cls.cwd)
-        remove_test_directory(cls.t)
+        if Path(cls.t).exists():
+            remove_test_directory(cls.t)
         logging.debug(f"Teardown of {cls.__name__} successful")
 
     def enveloped_default_message(self, to: str, sender: str) -> Envelope:
