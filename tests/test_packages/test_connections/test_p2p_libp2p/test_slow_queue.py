@@ -29,11 +29,8 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import (
-    BaseP2PLibp2pTest,
-    _make_libp2p_connection,
-    libp2p_log_on_failure_all,
-)
+from tests.conftest import _make_libp2p_connection, libp2p_log_on_failure_all
+from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 MockDefaultMessageProtocol = Mock()
@@ -53,11 +50,8 @@ class TestSlowQueue(BaseP2PLibp2pTest):
         super().setup_class()
 
         try:
-            temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
-            cls.bad_address = _make_libp2p_connection(
-                data_dir=temp_dir_gen
-            ).node.address
-            cls.connection_genesis = _make_libp2p_connection(data_dir=temp_dir_gen)
+            cls.bad_address = _make_libp2p_connection().address
+            cls.connection_genesis = _make_libp2p_connection()
             cls.multiplexer_genesis = Multiplexer(
                 [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
             )
@@ -68,20 +62,11 @@ class TestSlowQueue(BaseP2PLibp2pTest):
             genesis_peer = cls.connection_genesis.node.multiaddrs[0]
 
             cls.connections = [cls.connection_genesis]
-
-            temp_dir = os.path.join(cls.t, "temp_dir_100")
-
-            cls.conn = _make_libp2p_connection(
-                data_dir=temp_dir, entry_peers=[genesis_peer]
-            )
+            cls.conn = _make_libp2p_connection(entry_peers=[genesis_peer])
 
             for i in range(2):
-                temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
-                conn = _make_libp2p_connection(
-                    data_dir=temp_dir, entry_peers=[genesis_peer]
-                )
+                conn = _make_libp2p_connection(entry_peers=[genesis_peer])
                 mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-
                 cls.connections.append(conn)
                 cls.log_files.append(conn.node.log_file)
                 mux.connect()
@@ -99,30 +84,18 @@ class TestSlowQueue(BaseP2PLibp2pTest):
         con2 = self.connections[-1]
         await self.conn.connect()
 
-        def _make_envelope(addr):
-            msg = DefaultMessage(
-                dialogue_reference=("", ""),
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=b"hello",
-            )
-
-            envelope = Envelope(
-                to=addr,
-                sender=self.conn.node.address,
-                message=msg,
-            )
-            return envelope
-
         try:
             for _ in range(50):
-                for addr in [con2.node.address, self.bad_address]:
-                    await self.conn._node_client.send_envelope(_make_envelope(addr))
+                for addr in [con2.address, self.bad_address]:
+                    sender = self.conn.address
+                    envelope = self.enveloped_default_message(addr, sender)
+                    await self.conn._node_client.send_envelope(envelope)
 
             for _ in range(2):
-                for addr in [self.bad_address, con2.node.address]:
-                    await self.conn._node_client.send_envelope(_make_envelope(addr))
+                for addr in [self.bad_address, con2.address]:
+                    sender = self.conn.address
+                    envelope = self.enveloped_default_message(addr, sender)
+                    await self.conn._node_client.send_envelope(envelope)
 
             def _check():
                 with open(self.conn.node.log_file) as f:

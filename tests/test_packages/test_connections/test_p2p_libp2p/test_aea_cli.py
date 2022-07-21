@@ -110,14 +110,10 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(
 
         check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+        assert not missing_strings
 
         self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
+        assert self.is_successfully_terminated(process)
 
 
 @libp2p_log_on_failure_all
@@ -180,14 +176,10 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
 
         check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+        assert not missing_strings
 
         self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
+        assert self.is_successfully_terminated(process)
 
 
 @libp2p_log_on_failure_all
@@ -241,12 +233,8 @@ class TestP2PLibp2pConnectionAEARunningFullNode(BaseP2PLibp2pConnectionAEATest):
         assert is_running, "AEA not running within timeout!"
 
         check_strings = "Peer running in "
-        missing_strings = self.missing_from_output(process, check_strings, timeout=30)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert not missing_strings
 
         self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
+        assert self.is_successfully_terminated(process)

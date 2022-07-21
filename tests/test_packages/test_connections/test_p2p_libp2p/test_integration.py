@@ -32,12 +32,12 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
-    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     libp2p_log_on_failure_all,
 )
+from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 DEFAULT_NET_SIZE = 4
@@ -191,36 +191,12 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
 
         from_multiplexer = self.multiplexers_dict[from_name]  # type: ignore
         to_multiplexer = self.multiplexers_dict[to_name]  # type: ignore
-
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=to_addr,
-            sender=from_addr,
-            message=msg,
-        )
-
+        envelope = self.enveloped_default_message(to=to_addr, sender=from_addr)
         from_multiplexer.put(envelope)
-
         delivered_envelope = to_multiplexer.get(block=True, timeout=10)
 
         assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message != envelope.message
-        msg = DefaultMessage.serializer.decode(delivered_envelope.message)  # type: ignore
-        msg.sender = delivered_envelope.sender
-        msg.to = delivered_envelope.to
-        assert envelope.message == msg
+        assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
     def test_send_and_receive(self):
         """Test envelope send/received by every pair of connection."""

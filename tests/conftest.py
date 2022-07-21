@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-import atexit
+
 import difflib
 import inspect
 import itertools
@@ -99,7 +99,6 @@ from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
 from aea.identity.base import Identity
-from aea.multiplexer import Multiplexer
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import BaseAEATestCase
@@ -413,6 +412,8 @@ protocol_specification_files = [
 ]
 
 # ports for testing, call next() on to avoid assignment overlap
+
+DEFAULT_LIBP2P_TEST_DIR = "/tmp/tmp_libp2p_tests"
 DEFAULT_HOST = LOCAL_HOST.hostname
 default_ports = itertools.count(10234)
 
@@ -903,50 +904,18 @@ def is_port_in_use(host: str, port: int) -> bool:
         return s.connect_ex((host, port)) == 0
 
 
-class BaseP2PLibp2pTest:
-    """Base class for p2p libp2p tests"""
-
-    cwd: str
-    t: str
-    tmp_dir: str
-    log_files: List[str] = []
-    multiplexers: List[Multiplexer] = []
-    capture_log = True
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        cls.cwd, cls.t = os.getcwd(), tempfile.mkdtemp()
-        cls.tmp_dir = os.path.join(cls.t, "temp_dir")
-        Path(cls.tmp_dir).mkdir(exist_ok=True)
-        os.chdir(cls.t)
-        atexit.register(cls.teardown_class)
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        logger.debug(f"Cleaning up {cls.__name__}")
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        cls.multiplexers.clear()
-        cls.log_files.clear()
-        os.chdir(cls.cwd)
-        remove_test_directory(cls.t)
-        logger.debug(f"Teardown of {cls.__name__} successful")
-
-
 def _make_libp2p_connection(
-    data_dir: str,
+    data_dir: str = DEFAULT_LIBP2P_TEST_DIR,
     port: Optional[int] = None,
-    host: Optional[str] = DEFAULT_HOST,
+    host: str = DEFAULT_HOST,
     relay: bool = True,
     delegate: bool = False,
     mailbox: bool = False,
     entry_peers: Optional[Sequence[MultiAddr]] = None,
     delegate_port: Optional[int] = None,
-    delegate_host: Optional[str] = DEFAULT_HOST,
+    delegate_host: str = DEFAULT_HOST,
     mailbox_port: Optional[int] = None,
-    mailbox_host: Optional[str] = DEFAULT_HOST,
+    mailbox_host: str = DEFAULT_HOST,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
     peer_registration_delay: str = "0.0",
@@ -982,7 +951,7 @@ def _make_libp2p_connection(
     )
     _process_cert(agent_key, cert_request, path_prefix=data_dir)
 
-    build_directory = build_directory or os.getcwd()
+    build_directory = build_directory or os.path.join(data_dir, "build")
     config = {"ledger_id": node_key.identifier}
     port = port or next(default_ports)
     configuration = ConnectionConfig(
@@ -1018,7 +987,7 @@ def _make_libp2p_connection(
 
 def _make_libp2p_client_connection(
     peer_public_key: str,
-    data_dir: str,
+    data_dir: str = DEFAULT_LIBP2P_TEST_DIR,
     node_port: int = None,
     node_host: Optional[str] = DEFAULT_HOST,
     uri: Optional[str] = None,
@@ -1067,9 +1036,9 @@ def _make_libp2p_client_connection(
 
 def _make_libp2p_mailbox_connection(
     peer_public_key: str,
-    data_dir: str,
+    data_dir: str = DEFAULT_LIBP2P_TEST_DIR,
     node_port: Optional[int] = None,
-    node_host: Optional[str] = DEFAULT_HOST,
+    node_host: str = DEFAULT_HOST,
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pMailboxConnection:
@@ -1215,9 +1184,9 @@ def check_test_threads(request):
     if request.cls:
         yield
         return
-    num_threads = threading.activeCount()
+    num_threads = threading.active_count()
     yield
-    new_num_threads = threading.activeCount()
+    new_num_threads = threading.active_count()
     assert num_threads >= new_num_threads, "Non closed threads!"
 
 
