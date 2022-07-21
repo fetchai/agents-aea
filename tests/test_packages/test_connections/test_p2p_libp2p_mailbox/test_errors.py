@@ -43,7 +43,6 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
 )
 
 from tests.conftest import (
-    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
@@ -51,6 +50,7 @@ from tests.conftest import (
     default_ports,
     libp2p_log_on_failure_all,
 )
+from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 @pytest.mark.asyncio

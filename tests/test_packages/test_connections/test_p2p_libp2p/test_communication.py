@@ -21,7 +21,6 @@
 """This test module contains tests for P2PLibp2p connection."""
 
 import asyncio
-import os
 from itertools import permutations
 from unittest import mock
 from unittest.mock import Mock, call
@@ -191,7 +190,7 @@ class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
 
             genesis_peer = cls.connection_genesis.node.multiaddrs[0]
 
-            for i in range(DEFAULT_NET_SIZE):
+            for _ in range(DEFAULT_NET_SIZE):
                 conn = _make_libp2p_connection(entry_peers=[genesis_peer])
                 mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
                 cls.log_files.append(conn.node.log_file)
@@ -341,7 +340,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
             relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
             cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
 
-            for i in range(DEFAULT_NET_SIZE // 2 + 1):
+            for _ in range(DEFAULT_NET_SIZE // 2 + 1):
                 make_relay(relay_peer_1)
                 make_relay(relay_peer_2)
 
@@ -507,7 +506,9 @@ class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
 
         sender = self.connection1.address
         to = self.connection2.address
-        sent_envelopes = [self.enveloped_default_message(to, sender) for _ in range(self.NB_ENVELOPES)]
+        sent_envelopes = [
+            self.enveloped_default_message(to, sender) for _ in range(self.NB_ENVELOPES)
+        ]
 
         for envelope in sent_envelopes:
             envelope.message = envelope.message_bytes  # encode

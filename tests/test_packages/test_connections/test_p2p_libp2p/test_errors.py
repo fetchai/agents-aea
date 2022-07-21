@@ -189,9 +189,7 @@ def test_build_dir_not_set():
 @pytest.mark.asyncio
 async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
-    with patch(check_node_built, return_value="./"), patch(
-        "tests.conftest.build_node"
-    ):
+    with patch(check_node_built, return_value="./"), patch("tests.conftest.build_node"):
         con = _make_libp2p_connection()
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node

@@ -109,7 +109,7 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
     )
     def test_connectivity(self, maddrs):
         """Test connectivity."""
-        for i, maddr in enumerate(maddrs):
+        for maddr in maddrs:
             connection = _make_libp2p_connection(
                 relay=False,
                 entry_peers=[maddr],
@@ -133,7 +133,7 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
     def test_communication_direct(self, maddrs):
         """Test direct communication via each of the multiaddrs."""
 
-        for i, maddr in enumerate(maddrs):
+        for maddr in maddrs:
             multiplexers = []
             try:
                 connection1 = _make_libp2p_connection(
@@ -259,7 +259,9 @@ class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
         for i in range(len(delegate_uris)):
             uri = delegate_uris[i]
             peer_public_key = public_keys[i]
-            connection = _make_libp2p_client_connection(peer_public_key=peer_public_key, uri=uri)
+            connection = _make_libp2p_client_connection(
+                peer_public_key=peer_public_key, uri=uri
+            )
             multiplexer = Multiplexer([connection])
 
             try:
@@ -289,13 +291,16 @@ class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
             multiplexers = []
             try:
                 connection1 = _make_libp2p_client_connection(
-                    peer_public_key=peer_public_key, uri=uri,
+                    peer_public_key=peer_public_key,
+                    uri=uri,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 multiplexer1.connect()
                 multiplexers.append(multiplexer1)
 
-                connection2 = _make_libp2p_client_connection(peer_public_key=peer_public_key, uri=uri)
+                connection2 = _make_libp2p_client_connection(
+                    peer_public_key=peer_public_key, uri=uri
+                )
                 multiplexer2 = Multiplexer([connection2])
                 multiplexer2.connect()
                 multiplexers.append(multiplexer2)

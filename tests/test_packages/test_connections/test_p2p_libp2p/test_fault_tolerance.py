@@ -191,7 +191,9 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         """Set the test up"""
         super().setup_class()
         temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
-        cls.genesis = _make_libp2p_connection(data_dir=temp_dir_gen, build_directory=cls.t)
+        cls.genesis = _make_libp2p_connection(
+            data_dir=temp_dir_gen, build_directory=cls.t
+        )
 
         cls.multiplexer_genesis = Multiplexer([cls.genesis], protocols=[DefaultMessage])
         cls.multiplexer_genesis.connect()

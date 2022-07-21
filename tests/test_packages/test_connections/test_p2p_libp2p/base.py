@@ -30,7 +30,7 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 
-from tests.conftest import remove_test_directory, DEFAULT_LIBP2P_TEST_DIR
+from tests.conftest import DEFAULT_LIBP2P_TEST_DIR, remove_test_directory
 
 
 class BaseP2PLibp2pTest:
@@ -47,6 +47,7 @@ class BaseP2PLibp2pTest:
     @classmethod
     def setup_class(cls):
         """Set the test up"""
+
         cls.cwd, cls.t = os.getcwd(), DEFAULT_LIBP2P_TEST_DIR
         cls.tmp_dir = os.path.join(cls.t, "temp_dir")
         cls.tmp_client_dir = os.path.join(cls.t, "tmp_client_dir")
@@ -57,6 +58,7 @@ class BaseP2PLibp2pTest:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
+
         logging.debug(f"Cleaning up {cls.__name__}")
         for mux in cls.multiplexers:
             for con in mux.connections:
@@ -90,6 +92,8 @@ class BaseP2PLibp2pTest:
 
     @property
     def all_multiplexer_connections_connected(self) -> bool:
+        """Check if all connection of all multiplexers are connected"""
+
         return all(c.is_connected for mux in self.multiplexers for c in mux.connections)
 
     def sent_is_delivered_envelope(self, sent: Envelope, delivered: Envelope) -> bool:

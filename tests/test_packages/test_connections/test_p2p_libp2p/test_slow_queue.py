@@ -18,12 +18,11 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for P2PLibp2p connection."""
-import os
+
 from unittest.mock import Mock
 
 import pytest
 
-from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -64,7 +63,7 @@ class TestSlowQueue(BaseP2PLibp2pTest):
             cls.connections = [cls.connection_genesis]
             cls.conn = _make_libp2p_connection(entry_peers=[genesis_peer])
 
-            for i in range(2):
+            for _ in range(2):
                 conn = _make_libp2p_connection(entry_peers=[genesis_peer])
                 mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
                 cls.connections.append(conn)

@@ -37,7 +37,6 @@ from packages.valory.connections.p2p_libp2p_client.connection import NodeClient,
 from tests.common.mocks import RegexComparator
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
-    BaseP2PLibp2pTest,
     DEFAULT_LEDGER,
     DEFAULT_LEDGER_LIBP2P_NODE,
     _make_libp2p_client_connection,
@@ -45,6 +44,7 @@ from tests.conftest import (
     default_ports,
     libp2p_log_on_failure_all,
 )
+from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 DEFAULT_CLIENTS_PER_NODE = 1

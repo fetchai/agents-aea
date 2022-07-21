@@ -34,12 +34,12 @@ from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
-    BaseP2PLibp2pTest,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     default_ports,
     libp2p_log_on_failure_all,
 )
+from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 DEFAULT_CLIENTS_PER_NODE = 1

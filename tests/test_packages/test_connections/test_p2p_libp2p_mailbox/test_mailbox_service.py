@@ -36,11 +36,11 @@ from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
-    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     default_ports,
 )
+from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 MockDefaultMessageProtocol = Mock()

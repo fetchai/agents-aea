@@ -26,7 +26,6 @@ from unittest.mock import Mock
 import pytest
 
 from aea.helpers.acn.uri import Uri
-from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.protocols.default.message import DefaultMessage
