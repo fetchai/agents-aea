@@ -413,7 +413,7 @@ protocol_specification_files = [
 
 # ports for testing, call next() on to avoid assignment overlap
 
-DEFAULT_LIBP2P_TEST_DIR = "/tmp/tmp_libp2p_tests"
+DEFAULT_LIBP2P_TEST_DIR = "/tmp/tmp_libp2p_tests"  # nosec
 DEFAULT_HOST = LOCAL_HOST.hostname
 default_ports = itertools.count(10234)
 
