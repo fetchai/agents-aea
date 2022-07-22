@@ -26,9 +26,9 @@ from unittest import mock
 from unittest.mock import Mock, call
 
 import pytest
-
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
+
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Empty
 from aea.multiplexer import Multiplexer
@@ -37,9 +37,9 @@ from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
+    MockDefaultMessageProtocol,
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
-    MockDefaultMessageProtocol,
 )
 
 

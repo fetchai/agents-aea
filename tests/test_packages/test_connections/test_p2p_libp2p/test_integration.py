@@ -29,11 +29,11 @@ from aea.multiplexer import Multiplexer
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    _make_libp2p_connection,
+    MockDefaultMessageProtocol,
     _make_libp2p_client_connection,
+    _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     libp2p_log_on_failure_all,
-    MockDefaultMessageProtocol,
 )
 
 
@@ -106,33 +106,32 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
         # clients
         client_connection_1 = _make_libp2p_client_connection(
             peer_public_key=delegate_1.node.pub,
-            **cls.get_delegate_host_port(delegate_1.node.delegate_uri),
+            node_host=delegate_1.node.delegate_uri.host,
+            node_port=delegate_1.node.delegate_uri.port,
         )
         cls._multiplex_it(client_connection_1)
 
         client_connection_2 = _make_libp2p_client_connection(
             peer_public_key=delegate_2.node.pub,
-            **cls.get_delegate_host_port(delegate_2.node.delegate_uri),
+            node_host=delegate_2.node.delegate_uri.host,
+            node_port=delegate_2.node.delegate_uri.port,
         )
         cls._multiplex_it(client_connection_2)
 
         # mailboxes
         mailbox_connection_1 = _make_libp2p_mailbox_connection(
             peer_public_key=delegate_1.node.pub,
-            **cls.get_delegate_host_port(Uri(delegate_1.node.mailbox_uri)),
+            node_host=Uri(delegate_1.node.mailbox_uri).host,
+            node_port=Uri(delegate_1.node.mailbox_uri).port,
         )
         cls._multiplex_it(mailbox_connection_1)
 
         mailbox_connection_2 = _make_libp2p_mailbox_connection(
             peer_public_key=delegate_2.node.pub,
-            **cls.get_delegate_host_port(Uri(delegate_2.node.mailbox_uri)),
+            node_host=Uri(delegate_2.node.mailbox_uri).host,
+            node_port=Uri(delegate_2.node.mailbox_uri).port,
         )
         cls._multiplex_it(mailbox_connection_2)
-
-    @classmethod
-    def get_delegate_host_port(cls, delegate_uri: Uri) -> dict:
-        """Get delegate/mailbox server config dict."""
-        return {"node_port": delegate_uri.port, "node_host": delegate_uri.host}
 
     def test_connection_is_established(self):
         """Test connection established."""

@@ -25,10 +25,10 @@ import inspect
 import itertools
 import logging
 import os
-from unittest import mock
 import tempfile
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
+from unittest import mock
 
 import yaml
 
@@ -109,6 +109,19 @@ def create_data_dir() -> str:
     return data_dir
 
 
+def create_identity(crypto) -> Identity:
+    """Create identity for ACN libp2p tests"""
+
+    identity = Identity(
+        name="identity",
+        address=crypto.address,
+        public_key=crypto.public_key,
+        default_address_key=crypto.identifier,
+    )
+
+    return identity
+
+
 def make_cert_request(
     public_key: str, ledger_id: Union[SimpleId, str], path_prefix: str
 ) -> CertRequest:
@@ -161,12 +174,7 @@ def _make_libp2p_connection(
         os.remove(log_file)
 
     agent_key = agent_key or make_crypto(DEFAULT_LEDGER)
-    identity = Identity(
-        "identity",
-        address=agent_key.address,
-        public_key=agent_key.public_key,
-        default_address_key=agent_key.identifier,
-    )
+    identity = create_identity(agent_key)
 
     node_key = make_crypto(LIBP2P_LEDGER)
     node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
@@ -228,12 +236,8 @@ def _make_libp2p_client_connection(
     data_dir = data_dir or create_data_dir()
     node_port = node_port or next(ports)
     crypto = make_crypto(ledger_api_id)
-    identity = Identity(
-        "identity",
-        address=crypto.address,
-        public_key=crypto.public_key,
-        default_address_key=crypto.identifier,
-    )
+    identity = create_identity(crypto)
+
     cert_request = make_cert_request(peer_public_key, ledger_api_id, crypto.address)
     _process_cert(crypto, cert_request, path_prefix=data_dir)
     config = {"ledger_id": crypto.identifier}
@@ -265,12 +269,8 @@ def _make_libp2p_mailbox_connection(
     data_dir = data_dir or create_data_dir()
     node_port = node_port or next(ports)
     crypto = make_crypto(ledger_api_id)
-    identity = Identity(
-        "identity",
-        address=crypto.address,
-        public_key=crypto.public_key,
-        default_address_key=crypto.identifier,
-    )
+    identity = create_identity(crypto)
+
     cert_request = make_cert_request(peer_public_key, ledger_api_id, crypto.address)
     _process_cert(crypto, cert_request, path_prefix=data_dir)
     config = {"ledger_id": crypto.identifier}
@@ -368,11 +368,13 @@ class BaseP2PLibp2pTest:
     @classmethod
     def remove_temp_test_dir(cls) -> None:
         """Attempt to remove the temporary directory used during tests"""
+
         success = remove_test_directory(cls.t)
         if not success:
             logging.debug(f"{cls.t} could NOT be deleted")
 
-    def enveloped_default_message(self, to: str, sender: str) -> Envelope:
+    @staticmethod
+    def enveloped_default_message(to: str, sender: str) -> Envelope:
         """Generate a enveloped default message for tests"""
 
         message = DefaultMessage(
@@ -398,13 +400,15 @@ class BaseP2PLibp2pTest:
 
         return all(c.is_connected for mux in self.multiplexers for c in mux.connections)
 
-    def sent_is_delivered_envelope(self, sent: Envelope, delivered: Envelope) -> bool:
+    @staticmethod
+    def sent_is_delivered_envelope(sent: Envelope, delivered: Envelope) -> bool:
         """Check if attributes on sent match those on delivered envelope"""
 
         attrs = ["to", "sender", "protocol_specification_id", "message_bytes"]
         return all(getattr(sent, attr) == getattr(delivered, attr) for attr in attrs)
 
-    def sent_is_echoed_envelope(self, sent: Envelope, echoed: Envelope) -> bool:
+    @staticmethod
+    def sent_is_echoed_envelope(sent: Envelope, echoed: Envelope) -> bool:
         """Check if attributes on sent match those on echoed envelope"""
 
         attrs = ["protocol_specification_id", "message_bytes"]

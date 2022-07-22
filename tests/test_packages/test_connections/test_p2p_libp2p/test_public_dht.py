@@ -54,12 +54,12 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
 )
 
 
-nodes = load_client_connection_yaml_config()["nodes"]
+genesis_nodes = load_client_connection_yaml_config()["nodes"]
 
 
-PUBLIC_DHT_MADDRS = [node["maddr"] for node in nodes]
-PUBLIC_DHT_DELEGATE_URIS = [node["uri"] for node in nodes]
-PUBLIC_DHT_PUBLIC_KEYS = [node["public_key"] for node in nodes]
+PUBLIC_DHT_MADDRS = [node["maddr"] for node in genesis_nodes]
+PUBLIC_DHT_DELEGATE_URIS = [node["uri"] for node in genesis_nodes]
+PUBLIC_DHT_PUBLIC_KEYS = [node["public_key"] for node in genesis_nodes]
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
@@ -360,15 +360,9 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
             config_path,
             {"nodes": [{"uri": uri} for uri in delegate_uris]},
         )
-        self.nested_set_config(
-            p2p_libp2p_client_path + ".config",
-            {
-                "nodes": [
-                    {"uri": uri, "public_key": public_keys[i]}
-                    for i, uri in enumerate(delegate_uris)
-                ]
-            },
-        )
+        zipper = zip(*delegate_uris_public_keys)
+        nodes = [{"uri": uri, "public_key": public_key} for uri, public_key in zipper]
+        self.nested_set_config(p2p_libp2p_client_path + ".config", {"nodes": nodes})
 
         # generate certificates for connection
         self.nested_set_config(
