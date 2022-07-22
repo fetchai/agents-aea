@@ -26,9 +26,9 @@ from unittest import mock
 from unittest.mock import Mock, call
 
 import pytest
-
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
+
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Empty
 from aea.multiplexer import Multiplexer

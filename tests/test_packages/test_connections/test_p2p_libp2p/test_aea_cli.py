@@ -26,6 +26,7 @@ from typing import List
 
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
+
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.valory.connections import p2p_libp2p
