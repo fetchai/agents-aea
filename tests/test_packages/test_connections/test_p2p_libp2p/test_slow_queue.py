@@ -55,9 +55,7 @@ class TestSlowQueue(BaseP2PLibp2pTest):
         genesis_peer = connection_genesis.node.multiaddrs[0]
 
         cls.conn = _make_libp2p_connection(entry_peers=[genesis_peer])
-        mux = Multiplexer(
-            [cls.conn], protocols=[MockDefaultMessageProtocol]
-        )
+        mux = Multiplexer([cls.conn], protocols=[MockDefaultMessageProtocol])
         mux.connect()
         cls.multiplexers.append(mux)
 
