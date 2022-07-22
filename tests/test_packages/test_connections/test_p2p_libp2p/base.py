@@ -25,11 +25,10 @@ import inspect
 import itertools
 import logging
 import os
+import yaml
 import tempfile
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
-
-import yaml
 
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.base import Crypto

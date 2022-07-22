@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains integration tests for P2PLibp2p connection."""
+
 import itertools
 import json
 import os

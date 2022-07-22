@@ -26,7 +26,12 @@ from aea.crypto.registries import make_crypto
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.base import CertRequest
 
-from tests.conftest import LIBP2P_CERT_NOT_AFTER, LIBP2P_CERT_NOT_BEFORE, _process_cert
+from packages.valory.connections.p2p_libp2p.consts import (
+    LIBP2P_CERT_NOT_AFTER,
+    LIBP2P_CERT_NOT_BEFORE,
+)
+
+from tests.test_packages.test_connections.test_p2p_libp2p.base import _process_cert
 
 
 def test_agent_record(change_directory):

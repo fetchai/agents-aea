@@ -17,8 +17,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains tests for P2PLibp2p connection."""
-import os
+
 import re
 from unittest.mock import Mock
 
@@ -35,12 +36,12 @@ from packages.valory.protocols.acn import acn_pb2
 from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import (
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
-    default_ports,
+    ports,
 )
-from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 MockDefaultMessageProtocol = Mock()
@@ -59,27 +60,22 @@ class TestMailboxAPI(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        cls.delegate_port = next(default_ports)
-        cls.mailbox_port = next(default_ports)
+        cls.delegate_port = next(ports)
+        cls.mailbox_port = next(ports)
 
-        cls.temp_dir = os.path.join(cls.t, "temp_dir_node")
         cls.connection_node = _make_libp2p_connection(
-            data_dir=cls.temp_dir,
             delegate=True,
             delegate_port=cls.delegate_port,
             mailbox=True,
             mailbox_port=cls.mailbox_port,
         )
-        temp_dir_client1 = os.path.join(cls.t, "temp_dir_client")
-        temp_dir_client2 = os.path.join(cls.t, "temp_dir_client2")
+
         cls.connection1 = _make_libp2p_client_connection(
-            data_dir=temp_dir_client1,
             peer_public_key=cls.connection_node.node.pub,
             node_port=cls.delegate_port,
         )
 
         cls.connection2 = _make_libp2p_client_connection(
-            data_dir=temp_dir_client2,
             peer_public_key=cls.connection_node.node.pub,
             node_port=cls.delegate_port,
         )
