@@ -17,9 +17,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains tests for P2PLibp2p connection."""
+
 import itertools
-import os
 from copy import copy
 from unittest.mock import Mock
 
@@ -30,13 +31,13 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 
-from tests.conftest import (
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     libp2p_log_on_failure_all,
 )
-from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 DEFAULT_NET_SIZE = 4
@@ -129,10 +130,8 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
         """Make a p2p connection."""
         if name in cls.multiplexers_dict:
             raise ValueError(f"Connection with name `{name}` already added")
-        temp_dir = os.path.join(cls.t, name)
         conn_options = copy(kwargs)
 
-        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
         conn = _make_libp2p_connection(**conn_options)
         multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
         cls.log_files.append(conn.node.log_file)
@@ -146,10 +145,8 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
         """Make a p2p client connection."""
         if name in cls.multiplexers_dict:
             raise ValueError(f"Connection with name `{name}` already added")
-        temp_dir = os.path.join(cls.t, name)
         conn_options = copy(kwargs)
 
-        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
         conn = _make_libp2p_client_connection(**conn_options)
         multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
         multiplexer.connect()
@@ -162,10 +159,8 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
         """Make a p2p mailbox connection."""
         if name in cls.multiplexers_dict:
             raise ValueError(f"Connection with name `{name}` already added")
-        temp_dir = os.path.join(cls.t, name)
         conn_options = copy(kwargs)
 
-        conn_options["data_dir"] = conn_options.get("data_dir", temp_dir)
         conn = _make_libp2p_mailbox_connection(**conn_options)
         multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
         multiplexer.connect()

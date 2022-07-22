@@ -36,8 +36,11 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
-from tests.conftest import _make_libp2p_connection, libp2p_log_on_failure_all
-from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
+    _make_libp2p_connection,
+    libp2p_log_on_failure_all,
+)
 
 
 DEFAULT_NET_SIZE = 4
@@ -132,10 +135,11 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
 
     def test_envelope_routed(self):
         """Test envelope routed."""
-        addr_1 = self.connection1.address
-        addr_2 = self.connection2.address
 
-        envelope = self.enveloped_default_message(to=addr_2, sender=addr_1)
+        sender = self.connection1.address
+        to = self.connection2.address
+
+        envelope = self.enveloped_default_message(to=to, sender=sender)
         self.multiplexer1.put(envelope)
         delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
 
@@ -144,6 +148,7 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
 
     def test_envelope_echoed_back(self):
         """Test envelope echoed back."""
+
         sender = self.connection1.address
         to = self.connection2.address
 
@@ -160,14 +165,7 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
         echoed_envelope = self.multiplexer1.get(block=True, timeout=5)
 
         assert echoed_envelope is not None
-        assert echoed_envelope.to == envelope.sender
-        assert delivered_envelope.sender == envelope.to
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message != envelope.message
-        assert envelope.message_bytes == delivered_envelope.message_bytes
+        self.sent_is_echoed_envelope(envelope, echoed_envelope)
 
 
 @libp2p_log_on_failure_all
@@ -274,6 +272,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
 
     def test_envelope_echoed_back(self):
         """Test envelope echoed back."""
+
         sender = self.connection1.address
         to = self.connection2.address
 
@@ -289,14 +288,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
         echoed_envelope = self.multiplexer1.get(block=True, timeout=5)
 
         assert echoed_envelope is not None
-        assert echoed_envelope.to == envelope.sender
-        assert delivered_envelope.sender == envelope.to
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message != envelope.message
-        assert envelope.message_bytes == delivered_envelope.message_bytes
+        self.sent_is_echoed_envelope(envelope, echoed_envelope)
 
 
 @libp2p_log_on_failure_all

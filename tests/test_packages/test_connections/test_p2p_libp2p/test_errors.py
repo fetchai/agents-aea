@@ -44,8 +44,12 @@ from packages.valory.connections.p2p_libp2p.connection import (
 )
 from packages.valory.protocols.acn.message import AcnMessage
 
-from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
-from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
+    DEFAULT_LEDGER,
+    _make_libp2p_connection,
+    ports,
+)
 
 
 check_node_built = (
@@ -114,7 +118,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             "identity", address=crypto.address, public_key=crypto.public_key
         )
         cls.host = "localhost"
-        cls.port = "10000"
+        cls.port = next(ports)
 
         cls.key_file = os.path.join(cls.t, "keyfile")
         crypto.dump(cls.key_file)
@@ -189,7 +193,7 @@ def test_build_dir_not_set():
 @pytest.mark.asyncio
 async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
-    with patch(check_node_built, return_value="./"), patch("tests.conftest.build_node"):
+    with patch(check_node_built, return_value="./"):
         con = _make_libp2p_connection()
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node

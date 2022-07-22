@@ -28,8 +28,11 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import _make_libp2p_connection, libp2p_log_on_failure_all
-from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
+    _make_libp2p_connection,
+    libp2p_log_on_failure_all,
+)
 
 
 MockDefaultMessageProtocol = Mock()
