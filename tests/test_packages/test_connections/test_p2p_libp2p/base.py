@@ -373,8 +373,7 @@ class BaseP2PLibp2pTest:
         if not success:
             logging.debug(f"{cls.t} could NOT be deleted")
 
-    @staticmethod
-    def enveloped_default_message(to: str, sender: str) -> Envelope:
+    def enveloped_default_message(self, to: str, sender: str) -> Envelope:
         """Generate a enveloped default message for tests"""
 
         message = DefaultMessage(
@@ -400,15 +399,13 @@ class BaseP2PLibp2pTest:
 
         return all(c.is_connected for mux in self.multiplexers for c in mux.connections)
 
-    @staticmethod
-    def sent_is_delivered_envelope(sent: Envelope, delivered: Envelope) -> bool:
+    def sent_is_delivered_envelope(self, sent: Envelope, delivered: Envelope) -> bool:
         """Check if attributes on sent match those on delivered envelope"""
 
         attrs = ["to", "sender", "protocol_specification_id", "message_bytes"]
         return all(getattr(sent, attr) == getattr(delivered, attr) for attr in attrs)
 
-    @staticmethod
-    def sent_is_echoed_envelope(sent: Envelope, echoed: Envelope) -> bool:
+    def sent_is_echoed_envelope(self, sent: Envelope, echoed: Envelope) -> bool:
         """Check if attributes on sent match those on echoed envelope"""
 
         attrs = ["protocol_specification_id", "message_bytes"]
