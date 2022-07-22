@@ -17,9 +17,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains tests for Libp2p tcp client connection."""
+
 import asyncio
-import os
 import time
 from itertools import permutations
 from unittest import mock
@@ -36,15 +37,15 @@ from packages.valory.connections.p2p_libp2p_client.connection import NodeClient,
 
 from tests.common.mocks import RegexComparator
 from tests.common.utils import wait_for_condition
-from tests.conftest import (
-    DEFAULT_LEDGER,
-    DEFAULT_LEDGER_LIBP2P_NODE,
+from tests.conftest import DEFAULT_LEDGER
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
+    LIBP2P_LEDGER,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
-    default_ports,
     libp2p_log_on_failure_all,
+    ports,
 )
-from tests.test_packages.test_connections.test_p2p_libp2p.base import BaseP2PLibp2pTest
 
 
 DEFAULT_CLIENTS_PER_NODE = 1
@@ -65,15 +66,11 @@ class TestLibp2pClientConnectionConnectDisconnect(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        cls.delegate_port = next(default_ports)
-
-        temp_dir = os.path.join(cls.t, "temp_dir_node")
+        cls.delegate_port = next(ports)
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir, delegate=True, delegate_port=cls.delegate_port
+            delegate=True, delegate_port=cls.delegate_port
         )
-        temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         cls.connection = _make_libp2p_client_connection(
-            data_dir=temp_dir_client,
             peer_public_key=cls.connection_node.node.pub,
             node_port=cls.delegate_port,
         )
@@ -103,11 +100,9 @@ class TestLibp2pClientConnectionEchoEnvelope(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        cls.delegate_port = next(default_ports)
+        cls.delegate_port = next(ports)
 
-        temp_dir = os.path.join(cls.t, "temp_dir_node")
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir,
             delegate=True,
             delegate_port=cls.delegate_port,
         )
@@ -118,11 +113,9 @@ class TestLibp2pClientConnectionEchoEnvelope(BaseP2PLibp2pTest):
         cls.multiplexer_node.connect()
 
         try:
-            temp_dir_client_1 = os.path.join(cls.t, "temp_dir_client_1")
             cls.connection_client_1 = _make_libp2p_client_connection(
-                data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node.node.pub,
-                ledger_api_id=DEFAULT_LEDGER_LIBP2P_NODE,
+                ledger_api_id=LIBP2P_LEDGER,
                 node_port=cls.delegate_port,
             )
             cls.multiplexer_client_1 = Multiplexer(
@@ -130,9 +123,7 @@ class TestLibp2pClientConnectionEchoEnvelope(BaseP2PLibp2pTest):
             )
             cls.multiplexer_client_1.connect()
 
-            temp_dir_client_2 = os.path.join(cls.t, "temp_dir_client_2")
             cls.connection_client_2 = _make_libp2p_client_connection(
-                data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node.node.pub,
                 ledger_api_id=DEFAULT_LEDGER,
                 node_port=cls.delegate_port,
@@ -278,11 +269,9 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        cls.ports = next(default_ports), next(default_ports)
+        cls.ports = next(ports), next(ports)
 
-        temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
         cls.connection_node_1 = _make_libp2p_connection(
-            data_dir=temp_dir_node_1,
             delegate_port=cls.ports[0],
             delegate=True,
         )
@@ -295,10 +284,8 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode(BaseP2PLibp2pTest):
 
         genesis_peer = cls.connection_node_1.node.multiaddrs[0]
 
-        temp_dir_node_2 = os.path.join(cls.t, "temp_dir_node_2")
         try:
             cls.connection_node_2 = _make_libp2p_connection(
-                data_dir=temp_dir_node_2,
                 delegate_port=cls.ports[1],
                 entry_peers=[genesis_peer],
                 delegate=True,
@@ -310,9 +297,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode(BaseP2PLibp2pTest):
             cls.multiplexer_node_2.connect()
             cls.multiplexers.append(cls.multiplexer_node_2)
 
-            temp_dir_client_1 = os.path.join(cls.t, "temp_dir_client_1")
             cls.connection_client_1 = _make_libp2p_client_connection(
-                data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node_1.node.pub,
                 node_port=cls.ports[0],
             )
@@ -322,9 +307,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode(BaseP2PLibp2pTest):
             cls.multiplexer_client_1.connect()
             cls.multiplexers.append(cls.multiplexer_client_1)
 
-            temp_dir_client_2 = os.path.join(cls.t, "temp_dir_client_2")
             cls.connection_client_2 = _make_libp2p_client_connection(
-                data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node_2.node.pub,
                 node_port=cls.ports[1],
             )
@@ -467,12 +450,10 @@ class TestLibp2pClientConnectionRouting(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        cls.ports = next(default_ports), next(default_ports)
+        cls.ports = next(ports), next(ports)
 
         try:
-            temp_dir_node_1 = os.path.join(cls.t, "temp_dir_node_1")
             cls.connection_node_1 = _make_libp2p_connection(
-                data_dir=temp_dir_node_1,
                 delegate_port=cls.ports[0],
                 delegate=True,
             )
@@ -485,9 +466,7 @@ class TestLibp2pClientConnectionRouting(BaseP2PLibp2pTest):
 
             entry_peer = cls.connection_node_1.node.multiaddrs[0]
 
-            temp_dir_node_2 = os.path.join(cls.t, "temp_dir_node_2")
             cls.connection_node_2 = _make_libp2p_connection(
-                data_dir=temp_dir_node_2,
                 delegate_port=cls.ports[1],
                 entry_peers=[entry_peer],
                 delegate=True,
@@ -510,16 +489,14 @@ class TestLibp2pClientConnectionRouting(BaseP2PLibp2pTest):
                 cls.connection_node_2.address,
             ]
 
-            for j in range(DEFAULT_CLIENTS_PER_NODE):
+            for _ in range(DEFAULT_CLIENTS_PER_NODE):
                 peers_public_keys = [
                     cls.connection_node_1.node.pub,
                     cls.connection_node_2.node.pub,
                 ]
                 for i, port in enumerate(cls.ports):
                     peer_public_key = peers_public_keys[i]
-                    temp_dir_client = os.path.join(cls.t, f"temp_dir_client__{j}_{i}")
                     conn = _make_libp2p_client_connection(
-                        data_dir=temp_dir_client,
                         peer_public_key=peer_public_key,
                         node_port=port,
                     )
@@ -589,7 +566,7 @@ class BaseTestLibp2pClientSamePeer(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        cls.delegate_port = next(default_ports)
+        cls.delegate_port = next(ports)
 
         MockDefaultMessageProtocol = Mock()
         MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
@@ -597,9 +574,7 @@ class BaseTestLibp2pClientSamePeer(BaseP2PLibp2pTest):
             DefaultMessage.protocol_specification_id
         )
 
-        temp_dir = os.path.join(cls.t, "temp_dir_node")
         cls.connection_node = _make_libp2p_connection(
-            data_dir=temp_dir,
             delegate=True,
             delegate_port=cls.delegate_port,
         )
@@ -610,11 +585,9 @@ class BaseTestLibp2pClientSamePeer(BaseP2PLibp2pTest):
         cls.multiplexer_node.connect()
 
         try:
-            temp_dir_client_1 = os.path.join(cls.t, "temp_dir_client_1")
             cls.connection_client_1 = _make_libp2p_client_connection(
-                data_dir=temp_dir_client_1,
                 peer_public_key=cls.connection_node.node.pub,
-                ledger_api_id=DEFAULT_LEDGER_LIBP2P_NODE,
+                ledger_api_id=LIBP2P_LEDGER,
                 node_port=cls.delegate_port,
             )
             cls.multiplexer_client_1 = Multiplexer(
@@ -622,9 +595,7 @@ class BaseTestLibp2pClientSamePeer(BaseP2PLibp2pTest):
             )
             cls.multiplexer_client_1.connect()
 
-            temp_dir_client_2 = os.path.join(cls.t, "temp_dir_client_2")
             cls.connection_client_2 = _make_libp2p_client_connection(
-                data_dir=temp_dir_client_2,
                 peer_public_key=cls.connection_node.node.pub,
                 ledger_api_id=DEFAULT_LEDGER,
                 node_port=cls.delegate_port,
@@ -754,6 +725,7 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientSamePeer):
         assert delivered_envelope.message == envelope.message
 
 
+@libp2p_log_on_failure_all
 class TestLibp2pClientEnvelopeOrderSamePeer(BaseTestLibp2pClientSamePeer):
     """Test that the order of envelope is the guaranteed to be the same."""
 
