@@ -92,30 +92,29 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
         for maddr in maddrs:
             connection = _make_libp2p_connection(relay=False, entry_peers=[maddr])
             multiplexer = Multiplexer([connection])
+            self.multiplexers.append(multiplexer)
             self.log_files.append(connection.node.log_file)
             multiplexer.connect()
             assert_msg = f"Couldn't connect to public node {maddr}"
             assert connection.is_connected is True, assert_msg
 
-    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize("maddrs", [PUBLIC_DHT_MADDRS], indirect=True)
     def test_communication_direct(self, maddrs):
         """Test direct communication via each of the multiaddrs."""
 
         for maddr in maddrs:
 
-            multiplexers = []
             connection1 = _make_libp2p_connection(relay=False, entry_peers=[maddr])
             multiplexer1 = Multiplexer([connection1])
             self.log_files.append(connection1.node.log_file)
             multiplexer1.connect()
-            multiplexers.append(multiplexer1)
+            self.multiplexers.append(multiplexer1)
 
             connection2 = _make_libp2p_connection(relay=False, entry_peers=[maddr])
             multiplexer2 = Multiplexer([connection2])
             self.log_files.append(connection2.node.log_file)
             multiplexer2.connect()
-            multiplexers.append(multiplexer2)
+            self.multiplexers.append(multiplexer2)
 
             sender = connection1.address
             to = connection2.address
@@ -125,41 +124,33 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
             delivered_envelope = multiplexer2.get(block=True, timeout=30)
             assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-    @pytest.mark.flaky(reruns=5, reruns_delay=5)
     @pytest.mark.parametrize("maddrs", [PUBLIC_DHT_MADDRS], indirect=True)
     def test_communication_indirect(self, maddrs):
         """Test communication indirect."""
 
         assert len(maddrs) > 1, "Test requires at least 2 public dht node"
 
-        for i, maddr in enumerate(maddrs):
-            multiplexers = []
-            connection1 = _make_libp2p_connection(relay=False, entry_peers=[maddr])
+        for maddr1, maddr2 in itertools.permutations(maddrs, 2):
+
+            connection1 = _make_libp2p_connection(relay=False, entry_peers=[maddr1])
             multiplexer1 = Multiplexer([connection1])
             self.log_files.append(connection1.node.log_file)
             multiplexer1.connect()
-            multiplexers.append(multiplexer1)
+            self.multiplexers.append(multiplexer1)
             sender = connection1.address
 
-            for j in range(len(maddrs)):
-                if j == i:
-                    continue
+            connection2 = _make_libp2p_connection(relay=False, entry_peers=[maddr2])
+            multiplexer2 = Multiplexer([connection2])
+            self.log_files.append(connection2.node.log_file)
+            multiplexer2.connect()
+            self.multiplexers.append(multiplexer2)
 
-                connection2 = _make_libp2p_connection(
-                    relay=False,
-                    entry_peers=[maddrs[j]],
-                )
-                multiplexer2 = Multiplexer([connection2])
-                self.log_files.append(connection2.node.log_file)
-                multiplexer2.connect()
-                multiplexers.append(multiplexer2)
+            to = connection2.address
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            multiplexer1.put(envelope)
+            delivered_envelope = multiplexer2.get(block=True, timeout=30)
 
-                to = connection2.address
-                envelope = self.enveloped_default_message(to=to, sender=sender)
-                multiplexer1.put(envelope)
-                delivered_envelope = multiplexer2.get(block=True, timeout=30)
-
-                assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
 
 @pytest.mark.integration
@@ -178,19 +169,13 @@ class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
         """Test connectivity."""
 
         for uri, peer_public_key in zip(*delegate_uris_public_keys):
-
             connection = _make_libp2p_client_connection(
                 peer_public_key=peer_public_key, uri=uri
             )
             multiplexer = Multiplexer([connection])
-
-            try:
-                multiplexer.connect()
-                assert connection.is_connected, f"Couldn't connect to {uri}"
-            except Exception:
-                raise
-            finally:
-                multiplexer.disconnect()
+            self.multiplexers.append(multiplexer)
+            multiplexer.connect()
+            assert connection.is_connected, f"Couldn't connect to {uri}"
 
     @pytest.mark.parametrize(
         "delegate_uris_public_keys",
@@ -203,21 +188,19 @@ class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
         """Test communication direct (i.e. both clients registered to same peer)."""
 
         for uri, peer_public_key in zip(*delegate_uris_public_keys):
-
-            multiplexers = []
             connection1 = _make_libp2p_client_connection(
                 peer_public_key=peer_public_key, uri=uri
             )
             multiplexer1 = Multiplexer([connection1])
             multiplexer1.connect()
-            multiplexers.append(multiplexer1)
+            self.multiplexers.append(multiplexer1)
 
             connection2 = _make_libp2p_client_connection(
                 peer_public_key=peer_public_key, uri=uri
             )
             multiplexer2 = Multiplexer([connection2])
             multiplexer2.connect()
-            multiplexers.append(multiplexer2)
+            self.multiplexers.append(multiplexer2)
 
             sender = connection1.address
             to = connection2.address
@@ -243,14 +226,13 @@ class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
         nodes = range(len(delegate_uris))
         for i, j in itertools.permutations(nodes, 2):
 
-            multiplexers = []
             connection1 = _make_libp2p_client_connection(
                 peer_public_key=public_keys[i],
                 uri=delegate_uris[i],
             )
             multiplexer1 = Multiplexer([connection1])
             multiplexer1.connect()
-            multiplexers.append(multiplexer1)
+            self.multiplexers.append(multiplexer1)
 
             sender = connection1.address
 
@@ -260,7 +242,7 @@ class TestLibp2pConnectionPublicDHTDelegate(BaseP2PLibp2pTest):
             )
             multiplexer2 = Multiplexer([connection2])
             multiplexer2.connect()
-            multiplexers.append(multiplexer2)
+            self.multiplexers.append(multiplexer2)
 
             to = connection2.address
             envelope = self.enveloped_default_message(to=to, sender=sender)

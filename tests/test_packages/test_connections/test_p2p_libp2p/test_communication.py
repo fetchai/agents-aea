@@ -26,30 +26,24 @@ from unittest import mock
 from unittest.mock import Mock, call
 
 import pytest
+
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
-
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Empty
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
+    MockDefaultMessageProtocol,
 )
 
 
 DEFAULT_NET_SIZE = 4
-
-MockDefaultMessageProtocol = Mock()
-MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
-MockDefaultMessageProtocol.protocol_specification_id = (
-    DefaultMessage.protocol_specification_id
-)
 
 
 @pytest.mark.asyncio
@@ -103,30 +97,26 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
         aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
         aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
 
-        try:
-            cls.connection1 = _make_libp2p_connection(agent_key=aea_ledger_fetchai)
-            cls.multiplexer1 = Multiplexer(
-                [cls.connection1], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection1.node.log_file)
-            cls.multiplexer1.connect()
-            cls.multiplexers.append(cls.multiplexer1)
+        cls.connection1 = _make_libp2p_connection(agent_key=aea_ledger_fetchai)
+        cls.multiplexer1 = Multiplexer(
+            [cls.connection1], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection1.node.log_file)
+        cls.multiplexer1.connect()
+        cls.multiplexers.append(cls.multiplexer1)
 
-            genesis_peer = cls.connection1.node.multiaddrs[0]
+        genesis_peer = cls.connection1.node.multiaddrs[0]
 
-            cls.connection2 = _make_libp2p_connection(
-                entry_peers=[genesis_peer],
-                agent_key=aea_ledger_ethereum,
-            )
-            cls.multiplexer2 = Multiplexer(
-                [cls.connection2], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection2.node.log_file)
-            cls.multiplexer2.connect()
-            cls.multiplexers.append(cls.multiplexer2)
-        except Exception as e:
-            cls.teardown_class()
-            raise e
+        cls.connection2 = _make_libp2p_connection(
+            entry_peers=[genesis_peer],
+            agent_key=aea_ledger_ethereum,
+        )
+        cls.multiplexer2 = Multiplexer(
+            [cls.connection2], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection2.node.log_file)
+        cls.multiplexer2.connect()
+        cls.multiplexers.append(cls.multiplexer2)
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -177,26 +167,22 @@ class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        try:
-            cls.connection_genesis = _make_libp2p_connection()
-            cls.multiplexer_genesis = Multiplexer(
-                [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection_genesis.node.log_file)
-            cls.multiplexer_genesis.connect()
-            cls.multiplexers.append(cls.multiplexer_genesis)
+        cls.connection_genesis = _make_libp2p_connection()
+        cls.multiplexer_genesis = Multiplexer(
+            [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection_genesis.node.log_file)
+        cls.multiplexer_genesis.connect()
+        cls.multiplexers.append(cls.multiplexer_genesis)
 
-            genesis_peer = cls.connection_genesis.node.multiaddrs[0]
+        genesis_peer = cls.connection_genesis.node.multiaddrs[0]
 
-            for _ in range(DEFAULT_NET_SIZE):
-                conn = _make_libp2p_connection(entry_peers=[genesis_peer])
-                mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-                cls.log_files.append(conn.node.log_file)
-                mux.connect()
-                cls.multiplexers.append(mux)
-        except Exception as e:
-            cls.teardown_class()
-            raise e
+        for _ in range(DEFAULT_NET_SIZE):
+            conn = _make_libp2p_connection(entry_peers=[genesis_peer])
+            mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
+            cls.log_files.append(conn.node.log_file)
+            mux.connect()
+            cls.multiplexers.append(mux)
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -224,35 +210,31 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        try:
-            cls.relay = _make_libp2p_connection()
-            cls.multiplexer = Multiplexer([cls.relay])
-            cls.log_files.append(cls.relay.node.log_file)
-            cls.multiplexer.connect()
-            cls.multiplexers.append(cls.multiplexer)
+        cls.relay = _make_libp2p_connection()
+        cls.multiplexer = Multiplexer([cls.relay])
+        cls.log_files.append(cls.relay.node.log_file)
+        cls.multiplexer.connect()
+        cls.multiplexers.append(cls.multiplexer)
 
-            relay_peer = cls.relay.node.multiaddrs[0]
+        relay_peer = cls.relay.node.multiaddrs[0]
 
-            cls.connection1 = _make_libp2p_connection(
-                relay=False,
-                entry_peers=[relay_peer],
-            )
-            cls.multiplexer1 = Multiplexer(
-                [cls.connection1], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection1.node.log_file)
-            cls.multiplexer1.connect()
-            cls.multiplexers.append(cls.multiplexer1)
-            cls.connection2 = _make_libp2p_connection(entry_peers=[relay_peer])
-            cls.multiplexer2 = Multiplexer(
-                [cls.connection2], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection2.node.log_file)
-            cls.multiplexer2.connect()
-            cls.multiplexers.append(cls.multiplexer2)
-        except Exception as e:
-            cls.teardown_class()
-            raise e
+        cls.connection1 = _make_libp2p_connection(
+            relay=False,
+            entry_peers=[relay_peer],
+        )
+        cls.multiplexer1 = Multiplexer(
+            [cls.connection1], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection1.node.log_file)
+        cls.multiplexer1.connect()
+        cls.multiplexers.append(cls.multiplexer1)
+        cls.connection2 = _make_libp2p_connection(entry_peers=[relay_peer])
+        cls.multiplexer2 = Multiplexer(
+            [cls.connection2], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection2.node.log_file)
+        cls.multiplexer2.connect()
+        cls.multiplexers.append(cls.multiplexer2)
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -311,34 +293,29 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
             cls.multiplexers.append(mux)
             cls.log_files.append(conn.node.log_file)
 
-        try:
-            cls.connection_relay_1 = _make_libp2p_connection()
-            cls.multiplexer_relay_1 = Multiplexer(
-                [cls.connection_relay_1], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection_relay_1.node.log_file)
-            cls.multiplexer_relay_1.connect()
-            cls.multiplexers.append(cls.multiplexer_relay_1)
+        cls.connection_relay_1 = _make_libp2p_connection()
+        cls.multiplexer_relay_1 = Multiplexer(
+            [cls.connection_relay_1], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection_relay_1.node.log_file)
+        cls.multiplexer_relay_1.connect()
+        cls.multiplexers.append(cls.multiplexer_relay_1)
 
-            relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
-            cls.connection_relay_2 = _make_libp2p_connection(entry_peers=[relay_peer_1])
-            cls.multiplexer_relay_2 = Multiplexer(
-                [cls.connection_relay_2], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection_relay_2.node.log_file)
-            cls.multiplexer_relay_2.connect()
-            cls.multiplexers.append(cls.multiplexer_relay_2)
+        relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
+        cls.connection_relay_2 = _make_libp2p_connection(entry_peers=[relay_peer_1])
+        cls.multiplexer_relay_2 = Multiplexer(
+            [cls.connection_relay_2], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection_relay_2.node.log_file)
+        cls.multiplexer_relay_2.connect()
+        cls.multiplexers.append(cls.multiplexer_relay_2)
 
-            relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
-            cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
+        relay_peer_2 = cls.connection_relay_2.node.multiaddrs[0]
+        cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
 
-            for _ in range(DEFAULT_NET_SIZE // 2 + 1):
-                make_relay(relay_peer_1)
-                make_relay(relay_peer_2)
-
-        except Exception as e:
-            cls.teardown_class()
-            raise e
+        for _ in range(DEFAULT_NET_SIZE // 2 + 1):
+            make_relay(relay_peer_1)
+            make_relay(relay_peer_2)
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -399,29 +376,25 @@ class BaseTestP2PLibp2p(BaseP2PLibp2pTest):
         aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
         aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
 
-        try:
-            cls.connection1 = _make_libp2p_connection(agent_key=aea_ledger_fetchai)
-            cls.multiplexer1 = Multiplexer(
-                [cls.connection1], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection1.node.log_file)
-            cls.multiplexer1.connect()
-            cls.multiplexers.append(cls.multiplexer1)
+        cls.connection1 = _make_libp2p_connection(agent_key=aea_ledger_fetchai)
+        cls.multiplexer1 = Multiplexer(
+            [cls.connection1], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection1.node.log_file)
+        cls.multiplexer1.connect()
+        cls.multiplexers.append(cls.multiplexer1)
 
-            genesis_peer = cls.connection1.node.multiaddrs[0]
-            cls.connection2 = _make_libp2p_connection(
-                entry_peers=[genesis_peer],
-                agent_key=aea_ledger_ethereum,
-            )
-            cls.multiplexer2 = Multiplexer(
-                [cls.connection2], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection2.node.log_file)
-            cls.multiplexer2.connect()
-            cls.multiplexers.append(cls.multiplexer2)
-        except Exception as e:
-            cls.teardown_class()
-            raise e
+        genesis_peer = cls.connection1.node.multiaddrs[0]
+        cls.connection2 = _make_libp2p_connection(
+            entry_peers=[genesis_peer],
+            agent_key=aea_ledger_ethereum,
+        )
+        cls.multiplexer2 = Multiplexer(
+            [cls.connection2], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection2.node.log_file)
+        cls.multiplexer2.connect()
+        cls.multiplexers.append(cls.multiplexer2)
 
 
 @libp2p_log_on_failure_all

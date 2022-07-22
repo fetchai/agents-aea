@@ -21,15 +21,11 @@
 """This test module contains tests for P2PLibp2p connection."""
 
 import itertools
-from copy import copy
-from unittest.mock import Mock
 
 import pytest
 
 from aea.helpers.acn.uri import Uri
 from aea.multiplexer import Multiplexer
-
-from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
@@ -37,16 +33,11 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     _make_libp2p_client_connection,
     _make_libp2p_mailbox_connection,
     libp2p_log_on_failure_all,
+    MockDefaultMessageProtocol,
 )
 
 
 DEFAULT_NET_SIZE = 4
-
-MockDefaultMessageProtocol = Mock()
-MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
-MockDefaultMessageProtocol.protocol_specification_id = (
-    DefaultMessage.protocol_specification_id
-)
 
 
 @pytest.mark.integration

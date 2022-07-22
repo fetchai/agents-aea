@@ -25,6 +25,7 @@ import inspect
 import itertools
 import logging
 import os
+from unittest import mock
 import tempfile
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
@@ -65,6 +66,12 @@ from tests.conftest import DEFAULT_HOST, DEFAULT_LEDGER, remove_test_directory
 
 TEMP_LIBP2P_TEST_DIR = os.path.join(tempfile.gettempdir(), "tmp_libp2p_tests")
 ports = itertools.count(10234)
+
+MockDefaultMessageProtocol = mock.Mock()
+MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
+MockDefaultMessageProtocol.protocol_specification_id = (
+    DefaultMessage.protocol_specification_id
+)
 
 
 @functools.lru_cache()
