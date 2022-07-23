@@ -414,6 +414,7 @@ class BaseP2PLibp2pTest:
 
     @classmethod
     def _multiplex_it(cls, connection):
+        """Create multiplexer, append it, connect it, return connection"""
         multiplexer = Multiplexer([connection], protocols=[MockDefaultMessageProtocol])
         cls.multiplexers.append(multiplexer)
         multiplexer.connect()
@@ -421,14 +422,17 @@ class BaseP2PLibp2pTest:
 
     @classmethod
     def make_connection(cls, **kwargs) -> P2PLibp2pConnection:
+        """Make ACN connection, auto multiplexer for teardown"""
         connection = cls._multiplex_it(_make_libp2p_connection(**kwargs))
         cls.log_files.append(connection.node.log_file)
         return connection
 
     @classmethod
     def make_client_connection(cls, **kwargs) -> P2PLibp2pClientConnection:
+        """Make ACN client connection, auto multiplexer for teardown"""
         return cls._multiplex_it(_make_libp2p_client_connection(**kwargs))
 
     @classmethod
     def make_mailbox_connection(cls, **kwargs) -> P2PLibp2pMailboxConnection:
+        """Make ACN mailbox connection, auto multiplexer for teardown"""
         return cls._multiplex_it(_make_libp2p_mailbox_connection(**kwargs))
