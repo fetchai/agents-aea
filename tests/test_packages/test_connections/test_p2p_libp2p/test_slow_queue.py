@@ -22,12 +22,9 @@
 
 import pytest
 
-from aea.multiplexer import Multiplexer
-
 from tests.common.utils import wait_for_condition
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    MockDefaultMessageProtocol,
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
 )
@@ -42,29 +39,12 @@ class TestSlowQueue(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        connection_genesis = _make_libp2p_connection()
-        cls.log_files.append(connection_genesis.node.log_file)
-
-        multiplexer_genesis = Multiplexer(
-            [connection_genesis], protocols=[MockDefaultMessageProtocol]
-        )
-
-        multiplexer_genesis.connect()
-        cls.multiplexers.append(multiplexer_genesis)
-
+        connection_genesis = cls.make_connection()
         genesis_peer = connection_genesis.node.multiaddrs[0]
 
-        cls.conn = _make_libp2p_connection(entry_peers=[genesis_peer])
-        mux = Multiplexer([cls.conn], protocols=[MockDefaultMessageProtocol])
-        mux.connect()
-        cls.multiplexers.append(mux)
-
+        cls.conn = cls.make_connection(entry_peers=[genesis_peer])
         for _ in range(2):
-            conn = _make_libp2p_connection(entry_peers=[genesis_peer])
-            cls.log_files.append(conn.node.log_file)
-            mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-            mux.connect()
-            cls.multiplexers.append(mux)
+            cls.make_connection(entry_peers=[genesis_peer])
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -75,19 +55,12 @@ class TestSlowQueue(BaseP2PLibp2pTest):
         """Test slow queue."""
 
         bad_address = _make_libp2p_connection().address
-        con2 = self.multiplexers[-1].connections[-1]
+        good_address = self.multiplexers[-1].connections[-1].address
 
-        for _ in range(2):
-            for to in [con2.address, bad_address]:
-                sender = self.conn.address
-                envelope = self.enveloped_default_message(to=to, sender=sender)
-                await self.conn._node_client.send_envelope(envelope)
-
-        for _ in range(2):
-            for to in [bad_address, con2.address]:
-                sender = self.conn.address
-                envelope = self.enveloped_default_message(to=to, sender=sender)
-                await self.conn._node_client.send_envelope(envelope)
+        for to in [good_address, bad_address]:
+            sender = self.conn.address
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            await self.conn._node_client.send_envelope(envelope)
 
         def _check():
             with open(self.conn.node.log_file) as f:
