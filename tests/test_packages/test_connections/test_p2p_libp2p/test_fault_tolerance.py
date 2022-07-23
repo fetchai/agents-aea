@@ -22,7 +22,7 @@
 import pytest
 
 from aea.crypto.registries import make_crypto
-from aea.multiplexer import Multiplexer, Empty
+from aea.multiplexer import Empty, Multiplexer
 
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
 
@@ -68,25 +68,26 @@ class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
 class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
     """Test that connection will reliably forward envelopes after its relay node restarted"""
 
-    def setup(cls):
-        """Set the test up"""
+    def setup(self):
+        """Set up the individual test method"""
 
-        cls.genesis = cls.make_connection()
-        genesis_peer = cls.genesis.node.multiaddrs[0]
-        cls.relay = cls.make_connection(entry_peers=[genesis_peer])
-        relay_peer = cls.relay.node.multiaddrs[0]
-        cls.connection1 = cls.make_connection(relay=False, entry_peers=[relay_peer])
-        cls.connection2 = cls.make_connection(relay=False, entry_peers=[relay_peer])
+        self.genesis = self.make_connection()
+        genesis_peer = self.genesis.node.multiaddrs[0]
+        self.relay = self.make_connection(entry_peers=[genesis_peer])
+        relay_peer = self.relay.node.multiaddrs[0]
+        self.connection1 = self.make_connection(relay=False, entry_peers=[relay_peer])
+        self.connection2 = self.make_connection(relay=False, entry_peers=[relay_peer])
 
         # create references for disconnecting and reconnecting
-        cls.multiplexer_genesis = cls.multiplexers[0]
-        cls.multiplexer_relay = cls.multiplexers[1]
-        cls.multiplexer1 = cls.multiplexers[2]
-        cls.multiplexer2 = cls.multiplexers[3]
+        self.multiplexer_genesis = self.multiplexers[0]
+        self.multiplexer_relay = self.multiplexers[1]
+        self.multiplexer1 = self.multiplexers[2]
+        self.multiplexer2 = self.multiplexers[3]
 
-    def teardown(cls):
-        cls.disconnect()
-        cls.multiplexers.clear()
+    def teardown(self):
+        """Teardown"""
+        self.disconnect()
+        self.multiplexers.clear()
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -157,7 +158,9 @@ class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
         def attempt_sending():
             envelope = self.enveloped_default_message(to=to, sender=sender)
             self.multiplexer1.put(envelope)
-            delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=TIMEOUT)
+            delivered_envelope = self.multiplexer_genesis.get(
+                block=True, timeout=TIMEOUT
+            )
             assert delivered_envelope is not None
             assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
