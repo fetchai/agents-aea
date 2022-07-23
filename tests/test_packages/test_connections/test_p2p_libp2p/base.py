@@ -338,9 +338,7 @@ class BaseP2PLibp2pTest:
         cls.cwd, cls.t = os.getcwd(), TEMP_LIBP2P_TEST_DIR
         if Path(cls.t).exists():
             cls.remove_temp_test_dir()
-        cls.tmp_dir = os.path.join(cls.t, "temp_dir")
-        cls.tmp_client_dir = os.path.join(cls.t, "temp_client_dir")
-        Path(cls.tmp_dir).mkdir(parents=True, exist_ok=True)
+        Path(cls.t).mkdir()
         os.chdir(cls.t)
 
     @classmethod
@@ -413,3 +411,24 @@ class BaseP2PLibp2pTest:
         attrs_are_identical = (getattr(sent, a) == getattr(echoed, a) for a in attrs)
         addresses_inverted = (getattr(sent, k) == getattr(echoed, v) for k, v in items)
         return all(attrs_are_identical) and all(addresses_inverted)
+
+    @classmethod
+    def _multiplex_it(cls, connection):
+        multiplexer = Multiplexer([connection], protocols=[MockDefaultMessageProtocol])
+        cls.multiplexers.append(multiplexer)
+        multiplexer.connect()
+        return connection
+
+    @classmethod
+    def make_connection(cls, **kwargs) -> P2PLibp2pConnection:
+        connection = cls._multiplex_it(_make_libp2p_connection(**kwargs))
+        cls.log_files.append(connection.node.log_file)
+        return connection
+
+    @classmethod
+    def make_client_connection(cls, **kwargs) -> P2PLibp2pClientConnection:
+        return cls._multiplex_it(_make_libp2p_client_connection(**kwargs))
+
+    @classmethod
+    def make_mailbox_connection(cls, **kwargs) -> P2PLibp2pMailboxConnection:
+        return cls._multiplex_it(_make_libp2p_mailbox_connection(**kwargs))
