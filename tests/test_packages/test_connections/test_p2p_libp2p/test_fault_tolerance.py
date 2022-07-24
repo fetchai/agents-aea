@@ -43,7 +43,7 @@ class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
     def setup_class(cls):
         """Set the test up"""
         super().setup_class()
-        build_node(cls.t)
+        build_node(cls.tmp)
 
     def change_state_and_wait(
         self,
@@ -51,14 +51,7 @@ class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
         expected_is_connected: bool = False,
         timeout: int = TIMEOUT,
     ) -> None:
-        """
-        Change state of a multiplexer (either connect or disconnect) and wait.
-
-        :param multiplexer: the multiplexer to connect/disconnect.
-        :param expected_is_connected: whether it should be connected or disconnected.
-        :param timeout: the maximum number seconds to wait.
-        :return: None
-        """
+        """Change state of a multiplexer (either connect or disconnect) and wait."""
         wait_for_condition(
             lambda: multiplexer.is_connected == expected_is_connected, timeout=timeout
         )
@@ -91,7 +84,7 @@ class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_envelope_routed_from_peer_after_relay_restart(self):
         """Test envelope routed from third peer after relay restart."""

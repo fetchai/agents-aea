@@ -61,6 +61,7 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 
+from tests.common.utils import wait_for_condition
 from tests.conftest import DEFAULT_HOST, DEFAULT_LEDGER, remove_test_directory
 
 
@@ -323,7 +324,7 @@ class BaseP2PLibp2pTest:
     """Base class for ACN p2p libp2p tests"""
 
     cwd: str
-    t: str
+    tmp: str
     tmp_dir: str
     tmp_client_dir: str
     log_files: List[str] = []
@@ -335,11 +336,11 @@ class BaseP2PLibp2pTest:
         """Set the test up"""
 
         atexit.register(cls.teardown_class)
-        cls.cwd, cls.t = os.getcwd(), TEMP_LIBP2P_TEST_DIR
-        if Path(cls.t).exists():
+        cls.cwd, cls.tmp = os.getcwd(), TEMP_LIBP2P_TEST_DIR
+        if Path(cls.tmp).exists():
             cls.remove_temp_test_dir()
-        Path(cls.t).mkdir()
-        os.chdir(cls.t)
+        Path(cls.tmp).mkdir()
+        os.chdir(cls.tmp)
 
     @classmethod
     def teardown_class(cls):
@@ -347,10 +348,11 @@ class BaseP2PLibp2pTest:
 
         logging.debug(f"Cleaning up {cls.__name__}")
         cls.disconnect()
+        wait_for_condition(lambda: cls.all_disconnected, timeout=10)
         cls.multiplexers.clear()
         cls.log_files.clear()
         os.chdir(cls.cwd)
-        if Path(cls.t).exists():
+        if Path(cls.tmp).exists():
             cls.remove_temp_test_dir()
         logging.debug(f"Teardown of {cls.__name__} completed")
 
@@ -367,9 +369,9 @@ class BaseP2PLibp2pTest:
     def remove_temp_test_dir(cls) -> None:
         """Attempt to remove the temporary directory used during tests"""
 
-        success = remove_test_directory(cls.t)
+        success = remove_test_directory(cls.tmp)
         if not success:
-            logging.debug(f"{cls.t} could NOT be deleted")
+            logging.debug(f"{cls.tmp} could NOT be deleted")
 
     def enveloped_default_message(self, to: str, sender: str) -> Envelope:
         """Generate a enveloped default message for tests"""
@@ -392,10 +394,16 @@ class BaseP2PLibp2pTest:
         return envelope
 
     @property
-    def all_multiplexer_connections_connected(self) -> bool:
+    def all_connected(self) -> bool:
         """Check if all connection of all multiplexers are connected"""
 
-        return all(c.is_connected for mux in self.multiplexers for c in mux.connections)
+        return all(c.is_connected for m in self.multiplexers for c in m.connections)
+
+    @property
+    def all_disconnected(self) -> bool:
+        """Check if all connection of all multiplexers are disconnected"""
+
+        return all(c.is_disconnected for m in self.multiplexers for c in m.connections)
 
     def sent_is_delivered_envelope(self, sent: Envelope, delivered: Envelope) -> bool:
         """Check if attributes on sent match those on delivered envelope"""

@@ -91,7 +91,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
         cls.identity = create_identity(crypto)
         cls.host = "localhost"
         cls.port = next(ports)
-        cls.key_file = os.path.join(cls.t, "keyfile")
+        cls.key_file = os.path.join(cls.tmp, "keyfile")
         crypto.dump(cls.key_file)
 
     def test_entry_peers_when_no_public_uri_provided(self):
@@ -104,11 +104,11 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=self.t,
+            build_directory=self.tmp,
         )
         with pytest.raises(ValueError, match="Couldn't find connection key"):
             P2PLibp2pConnection(
-                configuration=configuration, data_dir=self.t, identity=self.identity
+                configuration=configuration, data_dir=self.tmp, identity=self.identity
             )
 
     def test_local_uri_provided_when_public_uri_provided(self):
@@ -120,11 +120,11 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=self.t,
+            build_directory=self.tmp,
         )
         with pytest.raises(ValueError, match="Couldn't find connection key"):
             P2PLibp2pConnection(
-                configuration=configuration, data_dir=self.t, identity=self.identity
+                configuration=configuration, data_dir=self.tmp, identity=self.identity
             )
 
 

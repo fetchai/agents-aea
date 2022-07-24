@@ -97,19 +97,16 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
     @property
     def pairs_with_same_entry_peers(self):
         """Multiplexer pairs with different entry peers"""
-        for i in range(0, len(self.multiplexers), 2):
-            yield self.multiplexers[i : i + 2]
+        return itertools.zip_longest(*[iter(self.multiplexers)] * 2)
 
     @property
     def pairs_with_different_entry_peers(self):
         """Multiplexer pairs with different entry peers"""
-        # permutations of each first node of a pair that uses the same entry peer
-        nodes = (self.multiplexers[i] for i in range(0, len(self.multiplexers), 2))
-        return itertools.permutations(nodes, 2)
+        return itertools.permutations(self.multiplexers[::2], 2)
 
     def test_connectivity(self):
         """Test connectivity."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_communication_direct(self):
         """Test direct communication through the same entry peer"""

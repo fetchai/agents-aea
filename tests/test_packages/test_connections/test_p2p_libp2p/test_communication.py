@@ -102,7 +102,7 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_envelope_routed(self):
         """Test envelope routed."""
@@ -154,7 +154,7 @@ class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_star_routing_connectivity(self):
         """Test star routing connectivity."""
@@ -186,7 +186,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_envelope_routed(self):
         """Test envelope routed."""
@@ -242,7 +242,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_star_routing_connectivity(self):
         """Test star routing connectivity."""
@@ -309,7 +309,7 @@ class TestP2PLibp2PSendEnvelope(BaseTestP2PLibp2p):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_envelope_routed(self):
         """Test envelope routed."""

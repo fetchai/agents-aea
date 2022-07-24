@@ -83,7 +83,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
             "identity", address=crypto.address, public_key=crypto.public_key
         )
 
-        cls.key_file = os.path.join(cls.t, "keyfile")
+        cls.key_file = os.path.join(cls.tmp, "keyfile")
         crypto.dump(cls.key_file)
 
         cls.peer_crypto = make_crypto(DEFAULT_LEDGER)
@@ -96,7 +96,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
             "{public_key}",
             f"./{crypto.address}_cert.txt",
         )
-        _process_cert(crypto, cls.cert_request, cls.t)
+        _process_cert(crypto, cls.cert_request, cls.tmp)
 
     def test_empty_nodes(self):
         """Test empty nodes."""
@@ -112,7 +112,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
             cert_requests=[self.cert_request],
         )
         P2PLibp2pMailboxConnection(
-            configuration=configuration, data_dir=self.t, identity=self.identity
+            configuration=configuration, data_dir=self.tmp, identity=self.identity
         )
 
         configuration = ConnectionConfig(
@@ -123,7 +123,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
         with pytest.raises(Exception):
             P2PLibp2pMailboxConnection(
                 configuration=configuration,
-                data_dir=self.t,
+                data_dir=self.tmp,
                 identity=self.identity,
             )
 

@@ -89,7 +89,7 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_send_and_receive(self):
         """Test envelope send/received by every pair of connection."""

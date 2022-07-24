@@ -48,7 +48,7 @@ class TestSlowQueue(BaseP2PLibp2pTest):
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     @pytest.mark.asyncio
     async def test_slow_queue(self):
