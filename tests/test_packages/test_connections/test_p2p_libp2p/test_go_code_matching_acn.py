@@ -30,7 +30,10 @@ from typing import Iterable, List
 import git
 import pytest
 
-from tests.conftest import libp2p_log_on_failure_all, remove_test_directory
+from tests.conftest import remove_test_directory
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    libp2p_log_on_failure_all,
+)
 
 
 PACKAGE = "packages.valory.connections.p2p_libp2p.libp2p_node"

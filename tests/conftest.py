@@ -18,10 +18,9 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
-import atexit
+
 import difflib
 import inspect
-import itertools
 import logging
 import os
 import platform
@@ -37,18 +36,7 @@ import time
 from contextlib import contextmanager
 from functools import wraps
 from pathlib import Path
-from typing import (
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Callable, Dict, Generator, List, Optional, Tuple, cast
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse
 
@@ -85,7 +73,6 @@ from aea.configurations.constants import DEFAULT_LEDGER, PRIVATE_KEY_PATH_SCHEMA
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
-from aea.crypto.base import Crypto
 from aea.crypto.ledger_apis import (
     COSMOS_DEFAULT_ADDRESS,
     DEFAULT_LEDGER_CONFIGS,
@@ -97,32 +84,14 @@ from aea.crypto.ledger_apis import (
 from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
 from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
-from aea.helpers.base import CertRequest, SimpleId, cd
+from aea.helpers.base import cd
 from aea.identity.base import Identity
-from aea.multiplexer import Multiplexer
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
-from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
-from packages.valory.connections.p2p_libp2p.connection import (
-    LIBP2P_NODE_MODULE_NAME,
-    MultiAddr,
-    P2PLibp2pConnection,
-    POR_DEFAULT_SERVICE_ID,
-)
-from packages.valory.connections.p2p_libp2p.consts import (
-    LIBP2P_CERT_NOT_AFTER,
-    LIBP2P_CERT_NOT_BEFORE,
-)
-from packages.valory.connections.p2p_libp2p_client.connection import (
-    P2PLibp2pClientConnection,
-)
-from packages.valory.connections.p2p_libp2p_mailbox.connection import (
-    P2PLibp2pMailboxConnection,
-)
 
 from tests.common.docker_image import (
     DockerImage,
@@ -263,30 +232,6 @@ NON_GENESIS_CONFIG_TWO = {
     "ledger_id": "fetchai",
 }
 
-DEFAULT_LEDGER_LIBP2P_NODE = "cosmos"  # Secp256k1 keys
-
-PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.staging.autonolas.tech/tcp/9003/p2p/16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"
-PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.staging.autonolas.tech/tcp/9004/p2p/16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"
-
-PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "acn.staging.autonolas.tech:9005"
-PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "acn.staging.autonolas.tech:9006"
-
-PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
-    "02d3a830c9d6ea1ae91936951430dee11f4662f33118b02190693be835359a9d77"
-)
-PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
-    "02e741c62d706e1dcf6986bf37fa74b98681bc32669623ac9ee6ff72488d4f59e8"
-)
-
-# TODO: temporary overwriting of addresses, URIs and public keys
-#  used in test_p2p_libp2p/test_public_dht.py
-PUBLIC_DHT_P2P_MADDR_1 = PUBLIC_STAGING_DHT_P2P_MADDR_1
-PUBLIC_DHT_P2P_MADDR_2 = PUBLIC_STAGING_DHT_P2P_MADDR_2
-PUBLIC_DHT_DELEGATE_URI_1 = PUBLIC_STAGING_DHT_DELEGATE_URI_1
-PUBLIC_DHT_DELEGATE_URI_2 = PUBLIC_STAGING_DHT_DELEGATE_URI_2
-PUBLIC_DHT_P2P_PUBLIC_KEY_1 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1
-PUBLIC_DHT_P2P_PUBLIC_KEY_2 = PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2
-
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
 ETHEREUM_TESTNET_CONFIG = {
@@ -412,13 +357,18 @@ protocol_specification_files = [
     ),
 ]
 
-# ports for testing, call next() on to avoid assignment overlap
 DEFAULT_HOST = LOCAL_HOST.hostname
-default_ports = itertools.count(10234)
 
 
-def remove_test_directory(directory: str) -> None:
-    """Destroy a directory once tests are done, change permissions if needed"""
+def remove_test_directory(directory: str, retries: int = 3) -> bool:
+    """Destroy a directory once tests are done, change permissions if needed.
+
+    Note that on Windows directories and files that are open cannot be deleted.
+
+    :param directory: directory to be deleted
+    :param retries: number of re-attempts
+    :return: whether the directory was successfully deleted
+    """
 
     def readonly_handler(func, path, execinfo) -> None:
         """If permission is readonly, we change these and retry."""
@@ -426,7 +376,13 @@ def remove_test_directory(directory: str) -> None:
         func(path)
 
     # we need `onerror` to deal with permissions, e.g. on Windows
-    shutil.rmtree(directory, onerror=readonly_handler)
+    while os.path.exists(directory) and retries:
+        try:
+            shutil.rmtree(directory, onerror=readonly_handler)
+        except Exception:  # pylint: disable=broad-except
+            retries -= 1
+            time.sleep(1)
+    return not os.path.exists(directory)
 
 
 @contextmanager
@@ -887,268 +843,10 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
     return connection
 
 
-def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
-    # must match aea/cli/issue_certificates.py:_process_certificate
-    assert cert.public_key is not None
-    message = cert.get_message(cert.public_key)
-    signature = key.sign_message(message).encode("ascii").hex()
-    Path(cert.get_absolute_save_path(path_prefix)).write_bytes(
-        signature.encode("ascii")
-    )
-
-
 def is_port_in_use(host: str, port: int) -> bool:
     """Check if port is in use"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex((host, port)) == 0
-
-
-class BaseP2PLibp2pTest:
-    """Base class for p2p libp2p tests"""
-
-    cwd: str
-    t: str
-    tmp_dir: str
-    log_files: List[str] = []
-    multiplexers: List[Multiplexer] = []
-    capture_log = True
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        cls.cwd, cls.t = os.getcwd(), tempfile.mkdtemp()
-        cls.tmp_dir = os.path.join(cls.t, "temp_dir")
-        Path(cls.tmp_dir).mkdir(exist_ok=True)
-        os.chdir(cls.t)
-        atexit.register(cls.teardown_class)
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        logger.debug(f"Cleaning up {cls.__name__}")
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        cls.multiplexers.clear()
-        cls.log_files.clear()
-        os.chdir(cls.cwd)
-        remove_test_directory(cls.t)
-        logger.debug(f"Teardown of {cls.__name__} successful")
-
-
-def _make_libp2p_connection(
-    data_dir: str,
-    port: Optional[int] = None,
-    host: Optional[str] = DEFAULT_HOST,
-    relay: bool = True,
-    delegate: bool = False,
-    mailbox: bool = False,
-    entry_peers: Optional[Sequence[MultiAddr]] = None,
-    delegate_port: Optional[int] = None,
-    delegate_host: Optional[str] = DEFAULT_HOST,
-    mailbox_port: Optional[int] = None,
-    mailbox_host: Optional[str] = DEFAULT_HOST,
-    agent_key: Optional[Crypto] = None,
-    build_directory: Optional[str] = None,
-    peer_registration_delay: str = "0.0",
-) -> P2PLibp2pConnection:
-    """Get a libp2p connection."""
-
-    Path(data_dir).mkdir(exist_ok=True)
-    log_file = os.path.join(data_dir, f"libp2p_node_{port}.log")
-    if os.path.exists(log_file):
-        os.remove(log_file)
-
-    agent_key = agent_key or make_crypto(DEFAULT_LEDGER)
-    identity = Identity(
-        "identity",
-        address=agent_key.address,
-        public_key=agent_key.public_key,
-        default_address_key=agent_key.identifier,
-    )
-
-    node_key = make_crypto(DEFAULT_LEDGER_LIBP2P_NODE)
-    node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
-    node_key.dump(node_key_path)
-    conn_crypto_store = CryptoStore({node_key.identifier: node_key_path})
-
-    cert_request = CertRequest(
-        conn_crypto_store.public_keys[DEFAULT_LEDGER_LIBP2P_NODE],
-        POR_DEFAULT_SERVICE_ID,
-        agent_key.identifier,
-        LIBP2P_CERT_NOT_BEFORE,
-        LIBP2P_CERT_NOT_AFTER,
-        "{public_key}",
-        f"./{agent_key.address}_cert.txt",
-    )
-    _process_cert(agent_key, cert_request, path_prefix=data_dir)
-
-    build_directory = build_directory or os.getcwd()
-    config = {"ledger_id": node_key.identifier}
-    port = port or next(default_ports)
-    configuration = ConnectionConfig(
-        local_uri=f"{host}:{port}",
-        entry_peers=entry_peers,
-        log_file=log_file,
-        peer_registration_delay=peer_registration_delay,
-        connection_id=P2PLibp2pConnection.connection_id,
-        build_directory=build_directory,
-        cert_requests=[cert_request],
-        **config,  # type: ignore
-    )
-
-    if relay:
-        configuration.config["public_uri"] = f"{host}:{port}"
-    if delegate:
-        delegate_port = delegate_port or next(default_ports)
-        configuration.config["delegate_uri"] = f"{delegate_host}:{delegate_port}"
-    if mailbox:
-        mailbox_port = mailbox_port or next(default_ports)
-        configuration.config["mailbox_uri"] = f"{mailbox_host}:{mailbox_port}"
-
-    if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
-        build_node(build_directory)
-    connection = P2PLibp2pConnection(
-        configuration=configuration,
-        data_dir=data_dir,
-        identity=identity,
-        crypto_store=conn_crypto_store,
-    )
-    return connection
-
-
-def _make_libp2p_client_connection(
-    peer_public_key: str,
-    data_dir: str,
-    node_port: int = None,
-    node_host: Optional[str] = DEFAULT_HOST,
-    uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-) -> P2PLibp2pClientConnection:
-    """Get a libp2p client connection."""
-
-    Path(data_dir).mkdir(exist_ok=True)
-    node_port = node_port or next(default_ports)
-    crypto = make_crypto(ledger_api_id)
-    identity = Identity(
-        "identity",
-        address=crypto.address,
-        public_key=crypto.public_key,
-        default_address_key=crypto.identifier,
-    )
-    cert_request = CertRequest(
-        peer_public_key,
-        POR_DEFAULT_SERVICE_ID,
-        ledger_api_id,
-        LIBP2P_CERT_NOT_BEFORE,
-        LIBP2P_CERT_NOT_AFTER,
-        "{public_key}",
-        f"./{crypto.address}_cert.txt",
-    )
-    _process_cert(crypto, cert_request, path_prefix=data_dir)
-    config = {"ledger_id": crypto.identifier}
-    configuration = ConnectionConfig(
-        tcp_key_file=None,
-        nodes=[
-            {
-                "uri": str(uri)
-                if uri is not None
-                else "{}:{}".format(node_host, node_port),
-                "public_key": peer_public_key,
-            },
-        ],
-        connection_id=P2PLibp2pClientConnection.connection_id,
-        cert_requests=[cert_request],
-        **config,  # type: ignore
-    )
-    return P2PLibp2pClientConnection(
-        configuration=configuration, data_dir=data_dir, identity=identity
-    )
-
-
-def _make_libp2p_mailbox_connection(
-    peer_public_key: str,
-    data_dir: str,
-    node_port: Optional[int] = None,
-    node_host: Optional[str] = DEFAULT_HOST,
-    uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-) -> P2PLibp2pMailboxConnection:
-    """Get a libp2p mailbox connection."""
-
-    Path(data_dir).mkdir(exist_ok=True)
-    node_port = node_port or next(default_ports)
-    crypto = make_crypto(ledger_api_id)
-    identity = Identity(
-        "identity",
-        address=crypto.address,
-        public_key=crypto.public_key,
-        default_address_key=crypto.identifier,
-    )
-    cert_request = CertRequest(
-        peer_public_key,
-        POR_DEFAULT_SERVICE_ID,
-        ledger_api_id,
-        LIBP2P_CERT_NOT_BEFORE,
-        LIBP2P_CERT_NOT_AFTER,
-        "{public_key}",
-        f"./{crypto.address}_cert.txt",
-    )
-    _process_cert(crypto, cert_request, path_prefix=data_dir)
-    config = {"ledger_id": crypto.identifier}
-    configuration = ConnectionConfig(
-        tcp_key_file=None,
-        nodes=[
-            {
-                "uri": str(uri)
-                if uri is not None
-                else "{}:{}".format(node_host, node_port),
-                "public_key": peer_public_key,
-            },
-        ],
-        connection_id=P2PLibp2pMailboxConnection.connection_id,
-        cert_requests=[cert_request],
-        **config,  # type: ignore
-    )
-    return P2PLibp2pMailboxConnection(
-        configuration=configuration, data_dir=data_dir, identity=identity
-    )
-
-
-def libp2p_log_on_failure(fn: Callable) -> Callable:
-    """
-    Decorate a pytest method running a libp2p node to print its logs in case test fails.
-
-    :return: decorated method.
-    """
-
-    # for pydcostyle
-    @wraps(fn)
-    def wrapper(self, *args, **kwargs):
-        try:
-            return fn(self, *args, **kwargs)
-        except Exception:
-            for log_file in getattr(self, "log_files", []):
-                print(f"libp2p log file ======================= {log_file}")
-                try:
-                    with open(log_file, "r") as f:
-                        print(f.read())
-                except FileNotFoundError:
-                    print(f"FileNotFoundError")
-                print("=======================================")
-            raise
-
-    return wrapper
-
-
-def libp2p_log_on_failure_all(cls: Type) -> Type:
-    """
-    Decorate every method of a class with `libp2p_log_on_failure`.
-
-    :return: class with decorated methods.
-    """
-    for name, fn in inspect.getmembers(cls, inspect.isfunction):
-        setattr(cls, name, libp2p_log_on_failure(fn))
-    return cls
 
 
 class CwdException(Exception):
@@ -1215,9 +913,9 @@ def check_test_threads(request):
     if request.cls:
         yield
         return
-    num_threads = threading.activeCount()
+    num_threads = threading.active_count()
     yield
-    new_num_threads = threading.activeCount()
+    new_num_threads = threading.active_count()
     assert num_threads >= new_num_threads, "Non closed threads!"
 
 

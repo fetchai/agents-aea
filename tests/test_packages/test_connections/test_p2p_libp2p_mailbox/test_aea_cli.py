@@ -19,8 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
+
 import json
-import os
 
 from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
@@ -33,12 +33,11 @@ from packages.valory.connections.p2p_libp2p.consts import (
 )
 from packages.valory.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
 
-from tests.conftest import (
-    DEFAULT_HOST,
-    DEFAULT_LEDGER,
+from tests.conftest import DEFAULT_HOST, DEFAULT_LEDGER
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     _make_libp2p_connection,
-    default_ports,
     libp2p_log_on_failure_all,
+    ports,
 )
 
 
@@ -56,10 +55,8 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         """Set up the test class."""
         super().setup_class()
 
-        temp_dir = os.path.join(cls.t, "temp_dir_node")
-        cls.mailbox_port = next(default_ports)
+        cls.mailbox_port = next(ports)
         cls.node_connection = _make_libp2p_connection(
-            data_dir=temp_dir,
             delegate_host=DEFAULT_HOST,
             mailbox_port=cls.mailbox_port,
             delegate=True,

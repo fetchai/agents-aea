@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains Negative tests for Libp2p connection."""
+
 import asyncio
 import os
 import platform
@@ -44,7 +45,12 @@ from packages.valory.connections.p2p_libp2p.connection import (
 )
 from packages.valory.protocols.acn.message import AcnMessage
 
-from tests.conftest import BaseP2PLibp2pTest, DEFAULT_LEDGER, _make_libp2p_connection
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
+    DEFAULT_LEDGER,
+    _make_libp2p_connection,
+    ports,
+)
 
 
 check_node_built = (
@@ -61,7 +67,7 @@ class TestP2PLibp2pConnectionFailureGolangRun(BaseP2PLibp2pTest):
     def setup_class(cls):
         """Set the test up"""
         super().setup_class()
-        cls.connection = _make_libp2p_connection(data_dir=cls.tmp_dir)
+        cls.connection = _make_libp2p_connection()
         cls.wrong_path = tempfile.mkdtemp()
 
     def test_wrong_path(self):
@@ -88,7 +94,7 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect(BaseP2PLibp2pTest):
     def setup_class(cls):
         """Set the test up"""
         super().setup_class()
-        cls.connection = _make_libp2p_connection(data_dir=cls.tmp_dir)
+        cls.connection = _make_libp2p_connection()
 
     def test_node_disconnect(self):
         """Test node disconnect."""
@@ -113,7 +119,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             "identity", address=crypto.address, public_key=crypto.public_key
         )
         cls.host = "localhost"
-        cls.port = "10000"
+        cls.port = next(ports)
 
         cls.key_file = os.path.join(cls.t, "keyfile")
         crypto.dump(cls.key_file)
@@ -122,8 +128,8 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
         """Test entry peers when no public uri provided."""
         configuration = ConnectionConfig(
             libp2p_key_file=None,
-            local_uri="{}:{}".format(self.host, self.port),
-            delegate_uri="{}:{}".format(self.host, self.port),
+            local_uri=f"{self.host}:{self.port}",
+            delegate_uri=f"{self.host}:{self.port}",
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
@@ -138,7 +144,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
         """Test local uri provided when public uri provided."""
         configuration = ConnectionConfig(
             node_key_file=self.key_file,
-            public_uri="{}:{}".format(self.host, self.port),
+            public_uri=f"{self.host}:{self.port}",
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
@@ -163,27 +169,16 @@ def test_libp2pconnection_mixed_ip_address():
 
 def test_libp2pconnection_node_config_registration_delay():
     """Test node registration delay configuration"""
-    host = "localhost"
 
-    with tempfile.TemporaryDirectory() as data_dir:
-        _make_libp2p_connection(host=host, data_dir=data_dir, build_directory=data_dir)
-    with tempfile.TemporaryDirectory() as data_dir:
-        with pytest.raises(ValueError):
-            _make_libp2p_connection(
-                host=host,
-                data_dir=data_dir,
-                peer_registration_delay="must_be_float",
-                build_directory=data_dir,
-            )
+    with pytest.raises(ValueError):
+        _make_libp2p_connection(peer_registration_delay="must_be_float")
 
 
 def test_build_dir_not_set():
     """Test build dir not set."""
-    host = "localhost"
+
     with tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
+        con = _make_libp2p_connection(data_dir=data_dir)
         con.configuration.build_directory = None
         with pytest.raises(
             ValueError, match="Connection Configuration build directory is not set!"
@@ -199,13 +194,8 @@ def test_build_dir_not_set():
 @pytest.mark.asyncio
 async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
-    host = "localhost"
-    with patch(check_node_built, return_value="./"), patch(
-        "tests.conftest.build_node"
-    ), tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
+    with patch(check_node_built, return_value="./"):
+        con = _make_libp2p_connection()
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
     node.pipe = Mock()
@@ -231,13 +221,8 @@ async def test_reconnect_on_write_failed():
 @pytest.mark.asyncio
 async def test_reconnect_on_write_failed_reconnect_pipe():
     """Test node restart on write fail."""
-    host = "localhost"
-    with patch(check_node_built, return_value="./"), patch(
-        "tests.conftest.build_node"
-    ), tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
+
+    con = _make_libp2p_connection()
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     f = Future()
@@ -269,13 +254,8 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
 @pytest.mark.asyncio
 async def test_reconnect_on_read_failed():
     """Test node restart on read fail."""
-    host = "localhost"
-    with patch(check_node_built, return_value="./"), patch(
-        "tests.conftest.build_node"
-    ), tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
+
+    con = _make_libp2p_connection()
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
     node.pipe = Mock()
@@ -306,6 +286,7 @@ async def test_max_restarts():
 @pytest.mark.asyncio
 async def test_node_stopped_callback():
     """Test node stopped callback called."""
+
     if not (
         platform.system() != "Windows"
         and sys.version_info.major == 3
@@ -314,33 +295,27 @@ async def test_node_stopped_callback():
         pytest.skip(
             "Not supported on this platform. Unix and python >= 3.8 supported only"
         )
-    host = "127.0.0.1"
 
-    with tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
-        con.node.logger.error = Mock()
-        await con.node.start()
-        subprocess.Popen.terminate(con.node.proc)
-        await asyncio.sleep(2)
-        con.node.logger.error.assert_called_once()
-        await con.node.stop()
+    con = _make_libp2p_connection()
+    con.node.logger.error = Mock()
+    await con.node.start()
+    subprocess.Popen.terminate(con.node.proc)
+    await asyncio.sleep(2)
+    con.node.logger.error.assert_called_once()
+    await con.node.stop()
 
-    with tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(
-            host=host, data_dir=data_dir, build_directory=data_dir
-        )
-        con.node.logger.error = Mock()
-        await con.node.start()
-        await con.node.stop()
-        await asyncio.sleep(2)
-        con.node.logger.error.assert_not_called()
+    con = _make_libp2p_connection()
+    con.node.logger.error = Mock()
+    await con.node.start()
+    await con.node.stop()
+    await asyncio.sleep(2)
+    con.node.logger.error.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_send_acn_confirm_failed():
     """Test nodeclient send fails on confirmation from other point ."""
+
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     f = Future()
     f.set_result(None)
