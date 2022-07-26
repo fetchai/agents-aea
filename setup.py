@@ -48,6 +48,7 @@ def get_all_extras() -> Dict:
 
 all_extras = get_all_extras()
 
+
 base_deps = [
     "base58>=1.0.3,<3.0.0",
     "jsonschema>=3.0.0,<4.0.0",
