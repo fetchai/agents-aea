@@ -21,7 +21,6 @@
 
 import pytest
 
-from aea.crypto.registries import make_crypto
 from aea.multiplexer import Empty, Multiplexer
 
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
@@ -79,7 +78,7 @@ class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
 
     def teardown(self):
         """Teardown"""
-        self.disconnect()
+        self._disconnect()
         self.multiplexers.clear()
 
     def test_connection_is_established(self):
@@ -187,7 +186,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         cls.connection1 = cls.make_connection(entry_peers=[genesis_peer])
         cls.connection2 = cls.make_connection(
             entry_peers=[genesis_peer],
-            agent_key=make_crypto("fetchai"),
+            agent_key=cls.default_crypto,
         )
 
         cls.multiplexer_genesis = cls.multiplexers[0]

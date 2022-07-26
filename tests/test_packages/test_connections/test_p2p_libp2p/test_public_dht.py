@@ -26,17 +26,13 @@ import os
 
 import pytest
 
-from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.valory.connections.p2p_libp2p.consts import (
-    LIBP2P_CERT_NOT_AFTER,
-    LIBP2P_CERT_NOT_BEFORE,
-)
+
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
@@ -47,6 +43,7 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     LIBP2P_LEDGER,
     libp2p_log_on_failure_all,
     load_client_connection_yaml_config,
+    make_cert_request,
     ports,
 )
 
@@ -262,18 +259,7 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
         # generate certificates for connection
         self.nested_set_config(
             p2p_libp2p_client_path + ".cert_requests",
-            [
-                CertRequest(
-                    identifier="acn",
-                    ledger_id=agent_ledger_id,
-                    not_before=LIBP2P_CERT_NOT_BEFORE,
-                    not_after=LIBP2P_CERT_NOT_AFTER,
-                    public_key=public_key,
-                    message_format="{public_key}",
-                    save_path=f"./cli_test_cert_{public_key}.txt",
-                )
-                for public_key in public_keys
-            ],
+            [make_cert_request(k, agent_ledger_id, f"./cli_test_{k}") for k in public_keys],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 

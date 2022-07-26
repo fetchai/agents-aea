@@ -32,7 +32,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.registries import make_crypto
 from aea.multiplexer import Multiplexer
 
 from packages.valory.connections.p2p_libp2p.connection import (
@@ -46,7 +45,6 @@ from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    DEFAULT_LEDGER,
     _make_libp2p_connection,
     create_identity,
     ports,
@@ -87,7 +85,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
         """Set the test up"""
 
         super().setup_class()
-        crypto = make_crypto(DEFAULT_LEDGER)
+        crypto = cls.default_crypto
         cls.identity = create_identity(crypto)
         cls.host = "localhost"
         cls.port = next(ports)

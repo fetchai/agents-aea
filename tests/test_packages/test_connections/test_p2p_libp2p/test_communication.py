@@ -26,16 +26,14 @@ from unittest import mock
 from unittest.mock import Mock, call
 
 import pytest
-from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto
 
-from aea.crypto.registries import make_crypto
 from aea.mail.base import Empty
 
 from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
+    TIMEOUT,
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
 )
@@ -50,27 +48,11 @@ class TestP2PLibp2pConnectionConnectDisconnect(BaseP2PLibp2pTest):
     """Test that connection is established and torn down correctly"""
 
     @pytest.mark.asyncio
-    async def test_p2p_libp2p_connection_connect_disconnect_default(self):
+    @pytest.mark.parametrize("crypto", BaseP2PLibp2pTest._cryptos)
+    async def test_p2p_libp2p_connection_connect_disconnect(self, crypto):
         """Test connect then disconnect."""
-        connection = _make_libp2p_connection()
 
-        assert connection.is_connected is False
-        try:
-            await connection.connect()
-            assert connection.is_connected is True
-        except Exception as e:
-            await connection.disconnect()
-            raise e
-
-        await connection.disconnect()
-        assert connection.is_connected is False
-
-    @pytest.mark.asyncio
-    async def test_p2p_libp2p_connection_connect_disconnect_ethereum(self):
-        """Test connect then disconnect."""
-        crypto = make_crypto(EthereumCrypto.identifier)
         connection = _make_libp2p_connection(agent_key=crypto)
-
         assert connection.is_connected is False
         try:
             await connection.connect()
@@ -92,12 +74,11 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
-        aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
-        cls.connection1 = cls.make_connection(agent_key=aea_ledger_fetchai)
+        cls.connection1 = cls.make_connection(agent_key=cls.libp2p_crypto)
         genesis_peer = cls.connection1.node.multiaddrs[0]
         cls.connection2 = cls.make_connection(
-            entry_peers=[genesis_peer], agent_key=aea_ledger_ethereum
+            entry_peers=[genesis_peer],
+            agent_key=cls.default_crypto,
         )
 
     def test_connection_is_established(self):
@@ -112,7 +93,7 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
         envelope = self.enveloped_default_message(to=to, sender=sender)
 
         self.multiplexers[0].put(envelope)
-        delivered_envelope = self.multiplexers[1].get(block=True, timeout=20)
+        delivered_envelope = self.multiplexers[1].get(block=True, timeout=TIMEOUT)
 
         assert delivered_envelope is not None
         assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
@@ -125,14 +106,14 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
         envelope = self.enveloped_default_message(to=to, sender=sender)
 
         self.multiplexers[0].put(envelope)
-        delivered_envelope = self.multiplexers[1].get(block=True, timeout=10)
+        delivered_envelope = self.multiplexers[1].get(block=True, timeout=TIMEOUT)
 
         assert delivered_envelope is not None
         delivered_envelope.to = sender
         delivered_envelope.sender = to
 
         self.multiplexers[1].put(delivered_envelope)
-        echoed_envelope = self.multiplexers[0].get(block=True, timeout=5)
+        echoed_envelope = self.multiplexers[0].get(block=True, timeout=TIMEOUT)
 
         assert echoed_envelope is not None
         assert self.sent_is_echoed_envelope(envelope, echoed_envelope)
@@ -164,7 +145,7 @@ class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
         for u, v in permutations(nodes, 2):
             envelope = self.enveloped_default_message(to=addrs[v], sender=addrs[u])
             self.multiplexers[u].put(envelope)
-            delivered_envelope = self.multiplexers[v].get(block=True, timeout=10)
+            delivered_envelope = self.multiplexers[v].get(block=True, timeout=TIMEOUT)
             assert delivered_envelope is not None
             assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
@@ -196,7 +177,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
         envelope = self.enveloped_default_message(to=to, sender=sender)
 
         self.multiplexers[1].put(envelope)
-        delivered_envelope = self.multiplexers[2].get(block=True, timeout=20)
+        delivered_envelope = self.multiplexers[2].get(block=True, timeout=TIMEOUT)
 
         assert delivered_envelope is not None
         assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
@@ -209,14 +190,14 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
         envelope = self.enveloped_default_message(to=to, sender=sender)
 
         self.multiplexers[1].put(envelope)
-        delivered_envelope = self.multiplexers[2].get(block=True, timeout=10)
+        delivered_envelope = self.multiplexers[2].get(block=True, timeout=TIMEOUT)
 
         assert delivered_envelope is not None
         delivered_envelope.to = sender
         delivered_envelope.sender = to
 
         self.multiplexers[2].put(delivered_envelope)
-        echoed_envelope = self.multiplexers[1].get(block=True, timeout=5)
+        echoed_envelope = self.multiplexers[1].get(block=True, timeout=TIMEOUT)
 
         assert echoed_envelope is not None
         self.sent_is_echoed_envelope(envelope, echoed_envelope)
@@ -224,7 +205,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
 
 @libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
-    """Test that libp2p DHT network will reliably route envelopes from relay/non-relay to relay/non-relay nodes"""
+    """Test DHT network routing of envelopes from relay/non-relay to relay/non-relay nodes"""
 
     @classmethod
     def setup_class(cls):
@@ -252,16 +233,9 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
         for u, v in permutations(nodes, 2):
             envelope = self.enveloped_default_message(to=addrs[v], sender=addrs[u])
             self.multiplexers[u].put(envelope)
-            delivered_envelope = self.multiplexers[v].get(block=True, timeout=10)
+            delivered_envelope = self.multiplexers[v].get(block=True, timeout=TIMEOUT)
             assert delivered_envelope is not None
             assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
-
-
-def test_libp2pconnection_uri():
-    """Test uri."""
-    uri = Uri(host="127.0.0.1")
-    uri = Uri(host="127.0.0.1", port=10000)
-    assert uri.host == "127.0.0.1" and uri.port == 10000
 
 
 @pytest.mark.asyncio
@@ -269,9 +243,11 @@ class TestP2PLibp2pNodeRestart(BaseP2PLibp2pTest):
     """Test node restart."""
 
     @pytest.mark.asyncio
-    async def test_node_restart(self):
+    @pytest.mark.parametrize("crypto", BaseP2PLibp2pTest._cryptos)
+    async def test_node_restart(self, crypto):
         """Test node restart works."""
-        connection = _make_libp2p_connection()
+
+        connection = _make_libp2p_connection(agent_key=crypto)
         try:
             await connection.node.start()
             pipe = connection.node.pipe
@@ -293,13 +269,11 @@ class BaseTestP2PLibp2p(BaseP2PLibp2pTest):
         """Set the test up"""
         super().setup_class()
 
-        aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
-        aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
-
-        cls.connection1 = cls.make_connection(agent_key=aea_ledger_fetchai)
+        cls.connection1 = cls.make_connection(agent_key=cls.libp2p_crypto)
         genesis_peer = cls.connection1.node.multiaddrs[0]
         cls.connection2 = cls.make_connection(
-            entry_peers=[genesis_peer], agent_key=aea_ledger_ethereum
+            entry_peers=[genesis_peer],
+            agent_key=cls.default_crypto,
         )
 
 
@@ -318,7 +292,7 @@ class TestP2PLibp2PSendEnvelope(BaseTestP2PLibp2p):
         to = self.connection1.address
         envelope = self.enveloped_default_message(to=to, sender=sender)
 
-        # make failure on send
+        # cause failure on send
         # note: we don't mock the genesis peer.
         with mock.patch.object(
             self.connection2.logger, "exception"
@@ -400,7 +374,7 @@ class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
 
 
 @pytest.mark.asyncio
-async def test_nodeclient_pipe_connect():
+async def test_node_client_pipe_connect():
     """Test pipe.connect called on NodeClient.connect."""
     f = asyncio.Future()
     f.set_result(None)

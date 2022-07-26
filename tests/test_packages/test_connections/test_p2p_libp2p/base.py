@@ -19,6 +19,7 @@
 
 """Constants, utility functions and base classes for ACN p2p_libp2p tests"""
 
+import asyncio
 import atexit
 import functools
 import inspect
@@ -62,9 +63,16 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
 )
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import DEFAULT_HOST, DEFAULT_LEDGER, remove_test_directory
+from tests.conftest import (
+    CosmosCrypto,
+    DEFAULT_HOST,
+    DEFAULT_LEDGER,
+    EthereumCrypto,
+    remove_test_directory,
+)
 
 
+TIMEOUT = 20
 TEMP_LIBP2P_TEST_DIR = os.path.join(tempfile.gettempdir(), "tmp_libp2p_tests")
 ports = itertools.count(10234)
 
@@ -129,13 +137,13 @@ def make_cert_request(
     """Make cert request for ACN proof of representation (POR)"""
 
     cert_request = CertRequest(
-        public_key,
-        POR_DEFAULT_SERVICE_ID,
-        ledger_id,
-        LIBP2P_CERT_NOT_BEFORE,
-        LIBP2P_CERT_NOT_AFTER,
-        "{public_key}",
-        f"./{path_prefix}_cert.txt",
+        public_key=public_key,
+        identifier=POR_DEFAULT_SERVICE_ID,
+        ledger_id=ledger_id,
+        not_before=LIBP2P_CERT_NOT_BEFORE,
+        not_after=LIBP2P_CERT_NOT_AFTER,
+        message_format="{public_key}",
+        save_path=f"./{path_prefix}_cert.txt",
     )
 
     return cert_request
@@ -331,10 +339,13 @@ class BaseP2PLibp2pTest:
     multiplexers: List[Multiplexer] = []
     capture_log = True
 
+    libp2p_crypto = cosmos_crypto = make_crypto(CosmosCrypto.identifier)
+    default_crypto = ethereum_crypto = make_crypto(EthereumCrypto.identifier)
+    _cryptos = (None, cosmos_crypto, ethereum_crypto)
+
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-
         atexit.register(cls.teardown_class)
         cls.cwd, cls.tmp = os.getcwd(), TEMP_LIBP2P_TEST_DIR
         if Path(cls.tmp).exists():
@@ -345,10 +356,8 @@ class BaseP2PLibp2pTest:
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-
         logging.debug(f"Cleaning up {cls.__name__}")
-        cls.disconnect()
-        wait_for_condition(lambda: cls.all_disconnected, timeout=10)
+        cls._disconnect()
         cls.multiplexers.clear()
         cls.log_files.clear()
         os.chdir(cls.cwd)
@@ -357,18 +366,15 @@ class BaseP2PLibp2pTest:
         logging.debug(f"Teardown of {cls.__name__} completed")
 
     @classmethod
-    def disconnect(cls):
+    def _disconnect(cls):
         """Disconnect multiplexers and their connections"""
-
         for mux in cls.multiplexers:
-            for con in mux.connections:
-                con.disconnect()
             mux.disconnect()
+        wait_for_condition(lambda: cls.all_disconnected, timeout=TIMEOUT)
 
     @classmethod
     def remove_temp_test_dir(cls) -> None:
         """Attempt to remove the temporary directory used during tests"""
-
         success = remove_test_directory(cls.tmp)
         if not success:
             logging.debug(f"{cls.tmp} could NOT be deleted")
@@ -394,26 +400,26 @@ class BaseP2PLibp2pTest:
         return envelope
 
     @property
+    def _all_connections(self):
+        return [c for m in self.multiplexers for c in m.connections]
+
+    @property
     def all_connected(self) -> bool:
         """Check if all connection of all multiplexers are connected"""
-
-        return all(c.is_connected for m in self.multiplexers for c in m.connections)
+        return all(c.is_connected for c in self._all_connections)
 
     @property
     def all_disconnected(self) -> bool:
         """Check if all connection of all multiplexers are disconnected"""
-
-        return all(c.is_disconnected for m in self.multiplexers for c in m.connections)
+        return all(c.is_disconnected for c in self._all_connections)
 
     def sent_is_delivered_envelope(self, sent: Envelope, delivered: Envelope) -> bool:
         """Check if attributes on sent match those on delivered envelope"""
-
         attrs = ["to", "sender", "protocol_specification_id", "message_bytes"]
         return all(getattr(sent, attr) == getattr(delivered, attr) for attr in attrs)
 
     def sent_is_echoed_envelope(self, sent: Envelope, echoed: Envelope) -> bool:
         """Check if attributes on sent match those on echoed envelope"""
-
         attrs = ["protocol_specification_id", "message_bytes"]
         items = {"to": "sender", "sender": "to"}.items()
         attrs_are_identical = (getattr(sent, a) == getattr(echoed, a) for a in attrs)
@@ -426,6 +432,7 @@ class BaseP2PLibp2pTest:
         multiplexer = Multiplexer([connection], protocols=[MockDefaultMessageProtocol])
         cls.multiplexers.append(multiplexer)
         multiplexer.connect()
+        wait_for_condition(lambda: connection.is_connected is True, TIMEOUT)
         return connection
 
     @classmethod
@@ -444,3 +451,35 @@ class BaseP2PLibp2pTest:
     def make_mailbox_connection(cls, **kwargs) -> P2PLibp2pMailboxConnection:
         """Make ACN mailbox connection, auto multiplexer for teardown"""
         return cls._multiplex_it(_make_libp2p_mailbox_connection(**kwargs))
+
+    @property
+    def node_connections(self) -> List[P2PLibp2pConnection]:
+        """Connections"""
+        return [c for c in self._all_connections if isinstance(c, P2PLibp2pConnection)]
+
+    @property
+    def client_connections(self) -> List[P2PLibp2pClientConnection]:
+        """Client connections"""
+        return [c for c in self._all_connections if isinstance(c, P2PLibp2pClientConnection)]
+
+    @property
+    def mailbox_connections(self) -> List[P2PLibp2pMailboxConnection]:
+        """Mailbox connections"""
+        return [c for c in self._all_connections if isinstance(c, P2PLibp2pMailboxConnection)]
+
+    @property
+    def node_multiplexers(self) -> List[Multiplexer]:
+        """Connections"""
+        return [m for m in self.multiplexers if all(isinstance(c, P2PLibp2pConnection) for c in m.connections)]
+
+    @property
+    def client_multiplexers(self) -> List[Multiplexer]:
+        """Client connections"""
+        return [m for m in self.multiplexers if all(isinstance(c, P2PLibp2pClientConnection) for c in m.connections)]
+
+    @property
+    def mailbox_multiplexers(self) -> List[Multiplexer]:
+        """Mailbox connections"""
+        return [m for m in self.multiplexers if all(isinstance(c, P2PLibp2pMailboxConnection) for c in m.connections)]
+
+
