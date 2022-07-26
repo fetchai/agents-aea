@@ -29,7 +29,7 @@ import pytest
 
 from aea.mail.base import Empty
 
-from packages.valory.connections.p2p_libp2p.connection import NodeClient, Uri
+from packages.valory.connections.p2p_libp2p.connection import NodeClient
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,

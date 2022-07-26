@@ -32,7 +32,6 @@ from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
@@ -259,7 +258,10 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
         # generate certificates for connection
         self.nested_set_config(
             p2p_libp2p_client_path + ".cert_requests",
-            [make_cert_request(k, agent_ledger_id, f"./cli_test_{k}") for k in public_keys],
+            [
+                make_cert_request(k, agent_ledger_id, f"./cli_test_{k}")
+                for k in public_keys
+            ],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 

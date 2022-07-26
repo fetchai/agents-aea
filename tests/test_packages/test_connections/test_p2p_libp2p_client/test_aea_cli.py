@@ -32,8 +32,8 @@ from tests.conftest import DEFAULT_LEDGER, LOCAL_HOST
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
-    ports,
     make_cert_request,
+    ports,
 )
 
 
@@ -66,7 +66,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         cls.node_multiplexer.connect()
         node = {"uri": cls.uri, "public_key": cls.node_connection.node.pub}
         cls.nodes = {"nodes": [node]}
-        cls.expected = (f"Successfully connected to libp2p node {cls.uri}", )
+        cls.expected = (f"Successfully connected to libp2p node {cls.uri}",)
 
     def test_node(self):
         """Test the node is connected."""
@@ -85,7 +85,11 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         # generate certificates for connection
         self.nested_set_config(
             self.conn_path + ".cert_requests",
-            [make_cert_request(self.node_connection.node.pub, ledger_id, f"./cli_test")]
+            [
+                make_cert_request(
+                    self.node_connection.node.pub, ledger_id, f"./cli_test"
+                )
+            ],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 

@@ -27,20 +27,17 @@ import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 
-from aea.mail.base import Empty, Envelope
-from aea.multiplexer import Multiplexer
+from aea.mail.base import Empty
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
-from tests.common.utils import wait_for_condition
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
+    TIMEOUT,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     libp2p_log_on_failure_all,
     ports,
-    TIMEOUT,
 )
 
 
@@ -207,7 +204,6 @@ class TestLibp2pClientConnectionRouting(BaseP2PLibp2pTest):
             mailbox=True,
         )
 
-        cls.connections = [cls.connection_node_1, cls.connection_node_2]
         cls.addresses = [
             cls.connection_node_1.address,
             cls.connection_node_2.address,
@@ -222,7 +218,6 @@ class TestLibp2pClientConnectionRouting(BaseP2PLibp2pTest):
                 peer_public_key=peer_public_key,
                 node_port=port,
             )
-            cls.connections.append(conn)
             cls.addresses.append(conn.address)
 
     def test_connection_is_established(self):
@@ -254,77 +249,23 @@ class BaseTestLibp2pClientSamePeer(BaseP2PLibp2pTest):
         cls.delegate_port = next(ports)
         cls.mailbox_port = next(ports)
 
-        cls.connection_node = _make_libp2p_connection(
+        cls.connection_node = cls.make_connection(
             delegate=True,
             delegate_port=cls.delegate_port,
             mailbox=True,
             mailbox_port=cls.mailbox_port,
         )
-        cls.multiplexer_node = Multiplexer(
-            [cls.connection_node], protocols=[MockDefaultMessageProtocol]
+
+        cls.connection_client_1 = cls.make_mailbox_connection(
+            peer_public_key=cls.connection_node.node.pub,
+            ledger_api_id=CosmosCrypto.identifier,
+            node_port=cls.mailbox_port,
         )
-        cls.log_files.append(cls.connection_node.node.log_file)
-        cls.multiplexer_node.connect()
-
-        try:
-            cls.connection_client_1 = _make_libp2p_mailbox_connection(
-                peer_public_key=cls.connection_node.node.pub,
-                ledger_api_id=CosmosCrypto.identifier,
-                node_port=cls.mailbox_port,
-            )
-            cls.multiplexer_client_1 = Multiplexer(
-                [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.multiplexer_client_1.connect()
-
-            cls.connection_client_2 = _make_libp2p_mailbox_connection(
-                peer_public_key=cls.connection_node.node.pub,
-                ledger_api_id=EthereumCrypto.identifier,
-                node_port=cls.mailbox_port,
-            )
-            cls.multiplexer_client_2 = Multiplexer(
-                [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.multiplexer_client_2.connect()
-            wait_for_condition(lambda: cls.multiplexer_client_2.is_connected, 20)
-            wait_for_condition(lambda: cls.multiplexer_client_1.is_connected, 20)
-            wait_for_condition(lambda: cls.connection_client_2.is_connected, 20)
-            wait_for_condition(lambda: cls.connection_client_1.is_connected, 20)
-            wait_for_condition(lambda: cls.connection_node.is_connected, 20)
-        except Exception:
-            cls.multiplexer_node.disconnect()
-            raise
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.multiplexer_client_1.disconnect()
-        cls.multiplexer_client_2.disconnect()
-        cls.multiplexer_node.disconnect()
-        super().teardown_class()
-
-    def _make_envelope(
-        self,
-        sender_address: str,
-        receiver_address: str,
-        message_id: int = 1,
-        target: int = 0,
-    ):
-        """Make an envelope for testing purposes."""
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=message_id,
-            target=target,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
+        cls.connection_client_2 = cls.make_mailbox_connection(
+            peer_public_key=cls.connection_node.node.pub,
+            ledger_api_id=EthereumCrypto.identifier,
+            node_port=cls.mailbox_port,
         )
-        envelope = Envelope(
-            to=receiver_address,
-            sender=sender_address,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
-        return envelope
 
 
 @libp2p_log_on_failure_all
@@ -335,30 +276,25 @@ class TestLibp2pClientEnvelopeOrderSamePeer(BaseTestLibp2pClientSamePeer):
 
     def test_burst_order(self):
         """Test order of envelope burst is guaranteed on receiving end."""
-        addr_1 = self.connection_client_1.address
-        addr_2 = self.connection_client_2.address
 
+        sender = self.connection_client_1.address
+        to = self.connection_client_2.address
         sent_envelopes = [
-            self._make_envelope(addr_1, addr_2, i + 1, i)
-            for i in range(self.NB_ENVELOPES)
+            self.enveloped_default_message(to, sender) for _ in range(self.NB_ENVELOPES)
         ]
         for envelope in sent_envelopes:
-            self.multiplexer_client_1.put(envelope)
+            envelope.message = envelope.message_bytes  # encode
+            self.multiplexers[1].put(envelope)
 
         received_envelopes = []
         for _ in range(self.NB_ENVELOPES):
-            envelope = self.multiplexer_client_2.get(block=True, timeout=20)
+            envelope = self.multiplexers[2].get(block=True, timeout=20)
             received_envelopes.append(envelope)
 
         # test no new message is "created"
         with pytest.raises(Empty):
-            self.multiplexer_client_2.get(block=True, timeout=1)
+            self.multiplexers[2].get(block=True, timeout=1)
 
-        assert len(sent_envelopes) == len(
-            received_envelopes
-        ), f"expected number of envelopes {len(sent_envelopes)}, got {len(received_envelopes)}"
+        assert len(sent_envelopes) == len(received_envelopes)
         for expected, actual in zip(sent_envelopes, received_envelopes):
-            assert expected.message == actual.message, (
-                "message content differ; probably a wrong message "
-                "ordering on the receiving end"
-            )
+            assert expected.message == actual.message

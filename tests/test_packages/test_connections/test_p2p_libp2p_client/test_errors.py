@@ -39,10 +39,10 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,
-    libp2p_log_on_failure_all,
-    ports,
     create_identity,
+    libp2p_log_on_failure_all,
     make_cert_request,
+    ports,
 )
 
 
@@ -86,7 +86,10 @@ class TestLibp2pClientConnectionFailureNodeNotConnected(BaseP2PLibp2pTest):
         exception_future.set_exception(ConnectionError("oops"))
         result = Future()
         result.set_result(None)
-        self.connection._node_client.read_envelope.side_effect = [exception_future, result]
+        self.connection._node_client.read_envelope.side_effect = [
+            exception_future,
+            result,
+        ]
 
         with patch.object(
             self.connection, "_perform_connection_to_node", return_value=DONE_FUTURE
@@ -104,7 +107,9 @@ class TestLibp2pClientConnectionFailureNodeNotConnected(BaseP2PLibp2pTest):
         self.connection._node_client.send_envelope.side_effect = Exception("oops")
         with patch.object(
             self.connection, "_perform_connection_to_node", return_value=DONE_FUTURE
-        ) as connect_mock, patch.object(self.connection, "_ensure_valid_envelope_for_external_comms"):
+        ) as connect_mock, patch.object(
+            self.connection, "_ensure_valid_envelope_for_external_comms"
+        ):
             with pytest.raises(Exception, match="oops"):
                 await self.connection._send_envelope_with_node_client(Mock())
             connect_mock.assert_called()
@@ -148,7 +153,9 @@ class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
         crypto.dump(cls.key_file)
         cls.public_key = cls.default_crypto.public_key
         ledger = cls.default_crypto.identifier
-        cls.cert_request = make_cert_request(cls.public_key, ledger, f"./{crypto.address}")
+        cls.cert_request = make_cert_request(
+            cls.public_key, ledger, f"./{crypto.address}"
+        )
         _process_cert(crypto, cls.cert_request, cls.tmp)
 
     def test_empty_nodes(self):
@@ -236,7 +243,9 @@ class TestLibp2pClientConnectionCheckSignature(BaseP2PLibp2pTest):
         self.connection.connect_retries = 1
         try:
             self.connection.node_por._representative_public_key = key.public_key
-            expected = ".*Invalid TLS session key signature: Signature verification failed.*"
+            expected = (
+                ".*Invalid TLS session key signature: Signature verification failed.*"
+            )
             with pytest.raises(ValueError, match=expected):
                 await self.connection.connect()
             assert self.connection.is_connected is False

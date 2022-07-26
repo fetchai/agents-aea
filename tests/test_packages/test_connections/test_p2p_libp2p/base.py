@@ -19,7 +19,6 @@
 
 """Constants, utility functions and base classes for ACN p2p_libp2p tests"""
 
-import asyncio
 import atexit
 import functools
 import inspect
@@ -34,6 +33,7 @@ from unittest import mock
 import yaml
 
 from aea.configurations.base import ConnectionConfig
+from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
@@ -400,18 +400,18 @@ class BaseP2PLibp2pTest:
         return envelope
 
     @property
-    def _all_connections(self):
+    def _connections(self):
         return [c for m in self.multiplexers for c in m.connections]
 
     @property
     def all_connected(self) -> bool:
         """Check if all connection of all multiplexers are connected"""
-        return all(c.is_connected for c in self._all_connections)
+        return all(c.is_connected for c in self._connections)
 
     @property
     def all_disconnected(self) -> bool:
         """Check if all connection of all multiplexers are disconnected"""
-        return all(c.is_disconnected for c in self._all_connections)
+        return all(c.is_disconnected for c in self._connections)
 
     def sent_is_delivered_envelope(self, sent: Envelope, delivered: Envelope) -> bool:
         """Check if attributes on sent match those on delivered envelope"""
@@ -452,34 +452,41 @@ class BaseP2PLibp2pTest:
         """Make ACN mailbox connection, auto multiplexer for teardown"""
         return cls._multiplex_it(_make_libp2p_mailbox_connection(**kwargs))
 
-    @property
-    def node_connections(self) -> List[P2PLibp2pConnection]:
-        """Connections"""
-        return [c for c in self._all_connections if isinstance(c, P2PLibp2pConnection)]
+    def _connections_by_type(self, cls):
+        """Filter connections by type"""
+        return [c for c in self._connections if isinstance(c, cls)]
 
     @property
-    def client_connections(self) -> List[P2PLibp2pClientConnection]:
+    def node_connections(self) -> List[Connection]:
+        """Node connections"""
+        return self._connections_by_type(P2PLibp2pConnection)
+
+    @property
+    def client_connections(self) -> List[Connection]:
         """Client connections"""
-        return [c for c in self._all_connections if isinstance(c, P2PLibp2pClientConnection)]
+        return self._connections_by_type(P2PLibp2pClientConnection)
 
     @property
-    def mailbox_connections(self) -> List[P2PLibp2pMailboxConnection]:
+    def mailbox_connections(self) -> List[Connection]:
         """Mailbox connections"""
-        return [c for c in self._all_connections if isinstance(c, P2PLibp2pMailboxConnection)]
+        return self._connections_by_type(P2PLibp2pMailboxConnection)
+
+    def _multiplexers_by_connection_type(self, cls):
+        """Filter multiplexers by connection type"""
+        mux = self.multiplexers
+        return [m for m in mux if all(isinstance(c, cls) for c in m.connections)]
 
     @property
     def node_multiplexers(self) -> List[Multiplexer]:
-        """Connections"""
-        return [m for m in self.multiplexers if all(isinstance(c, P2PLibp2pConnection) for c in m.connections)]
+        """Node multiplexers"""
+        return self._multiplexers_by_connection_type(P2PLibp2pConnection)
 
     @property
     def client_multiplexers(self) -> List[Multiplexer]:
-        """Client connections"""
-        return [m for m in self.multiplexers if all(isinstance(c, P2PLibp2pClientConnection) for c in m.connections)]
+        """Client multiplexers"""
+        return self._multiplexers_by_connection_type(P2PLibp2pClientConnection)
 
     @property
     def mailbox_multiplexers(self) -> List[Multiplexer]:
-        """Mailbox connections"""
-        return [m for m in self.multiplexers if all(isinstance(c, P2PLibp2pMailboxConnection) for c in m.connections)]
-
-
+        """Mailbox multiplexers"""
+        return self._multiplexers_by_connection_type(P2PLibp2pMailboxConnection)
