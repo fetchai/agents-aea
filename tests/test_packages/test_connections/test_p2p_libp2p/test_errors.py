@@ -61,7 +61,7 @@ class TestP2PLibp2pConnectionFailureGolangRun(BaseP2PLibp2pTest):
         """Test the wrong path."""
         log_file_desc = open("log", "a", 1)
         wrong_path = tempfile.mkdtemp()
-        with pytest.raises(FileNotFoundError, match="No such file or directory"):
+        with pytest.raises(FileNotFoundError):  # match differs based on OS
             _golang_module_run(wrong_path, LIBP2P_NODE_MODULE_NAME, [], log_file_desc)
 
     def test_timeout(self):
