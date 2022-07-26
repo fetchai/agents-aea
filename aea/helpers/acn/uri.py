@@ -20,8 +20,11 @@
 
 """This module contains types and helpers for libp2p connections Uris."""
 
-from random import randint
+from itertools import count
 from typing import Optional
+
+
+ports = count(5000)
 
 
 class Uri:
@@ -45,15 +48,15 @@ class Uri:
             self._port = port
         else:
             self._host = "127.0.0.1"
-            self._port = randint(5000, 10000)  # nosec
+            self._port = next(ports)
 
     def __str__(self) -> str:
         """Get string representation."""
-        return "{}:{}".format(self._host, self._port)
+        return f"{self.host}:{self.port}"
 
     def __repr__(self) -> str:  # pragma: no cover
         """Get object representation."""
-        return self.__str__()
+        return str(self)
 
     @property
     def host(self) -> str:
