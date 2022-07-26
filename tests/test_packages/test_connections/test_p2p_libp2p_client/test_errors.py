@@ -28,212 +28,91 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.crypto.registries import make_crypto
-from aea.helpers.base import CertRequest
-from aea.identity.base import Identity
-from aea.multiplexer import Multiplexer
 
-from packages.valory.connections.p2p_libp2p.consts import (
-    LIBP2P_CERT_NOT_AFTER,
-    LIBP2P_CERT_NOT_BEFORE,
-)
 from packages.valory.connections.p2p_libp2p_client.connection import (
     NodeClient,
     P2PLibp2pClientConnection,
-    POR_DEFAULT_SERVICE_ID,
 )
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    LIBP2P_LEDGER,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,
     libp2p_log_on_failure_all,
     ports,
+    create_identity,
+    make_cert_request,
 )
 
 
+DONE_FUTURE: asyncio.Future = asyncio.Future()
+DONE_FUTURE.set_result(None)
+
+
 @pytest.mark.asyncio
-class TestLibp2pClientConnectionFailureNodeNotConnected:
+class TestLibp2pClientConnectionFailureNodeNotConnected(BaseP2PLibp2pTest):
     """Test that connection fails when node not running"""
+
+    public_key = BaseP2PLibp2pTest.default_crypto.public_key
+    connection = _make_libp2p_client_connection(peer_public_key=public_key)
 
     @pytest.mark.asyncio
     async def test_node_not_running(self):
         """Test the node is not running."""
-        conn = _make_libp2p_client_connection(
-            peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
-        )
         with pytest.raises(Exception):
-            await conn.connect()
+            await self.connection.connect()
 
+    @pytest.mark.asyncio
+    async def test_connect_attempts(self):
+        """Test connect attempts."""
 
-@libp2p_log_on_failure_all
-class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
-    """Test that connection fails when setup incorrectly"""
+        self.connection.connect_retries = 2
+        with patch(
+            "aea.helpers.pipe.TCPSocketChannelClient.connect",
+            side_effect=Exception("test exception on connect"),
+        ) as open_connection_mock:
+            with pytest.raises(Exception, match="test exception on connect"):
+                await self.connection.connect()
+            assert open_connection_mock.call_count == self.connection.connect_retries
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        super().setup_class()
+    @pytest.mark.asyncio
+    async def test_reconnect_on_receive_fail(self):
+        """Test reconnect on receive fails."""
 
-        crypto = make_crypto(DEFAULT_LEDGER)
-        cls.node_host = "localhost"
-        cls.node_port = "11234"
-        cls.identity = Identity(
-            "identity", address=crypto.address, public_key=crypto.public_key
-        )
+        self.connection._in_queue = Mock()
+        self.connection._node_client = Mock()
+        exception_future = Future()
+        exception_future.set_exception(ConnectionError("oops"))
+        result = Future()
+        result.set_result(None)
+        self.connection._node_client.read_envelope.side_effect = [exception_future, result]
 
-        cls.key_file = os.path.join(cls.tmp, "keyfile")
-        crypto.dump(cls.key_file)
+        with patch.object(
+            self.connection, "_perform_connection_to_node", return_value=DONE_FUTURE
+        ) as connect_mock:
+            assert await self.connection._read_envelope_from_node() is None
+            connect_mock.assert_called()
 
-        cls.peer_crypto = make_crypto(DEFAULT_LEDGER)
-        cls.cert_request = CertRequest(
-            cls.peer_crypto.public_key,
-            POR_DEFAULT_SERVICE_ID,
-            DEFAULT_LEDGER,
-            LIBP2P_CERT_NOT_BEFORE,
-            LIBP2P_CERT_NOT_AFTER,
-            "{public_key}",
-            f"./{crypto.address}_cert.txt",
-        )
-        _process_cert(crypto, cls.cert_request, cls.tmp)
+    @pytest.mark.asyncio
+    async def test_reconnect_on_send_fail(self):
+        """Test reconnect on send fails."""
 
-    def test_empty_nodes(self):
-        """Test empty nodes."""
-        configuration = ConnectionConfig(
-            tcp_key_file=self.key_file,
-            nodes=[
-                {
-                    "uri": "{}:{}".format(self.node_host, self.node_port),
-                    "public_key": self.peer_crypto.public_key,
-                }
-            ],
-            connection_id=P2PLibp2pClientConnection.connection_id,
-            cert_requests=[self.cert_request],
-        )
-        P2PLibp2pClientConnection(
-            configuration=configuration, data_dir=self.tmp, identity=self.identity
-        )
-
-        configuration = ConnectionConfig(
-            tcp_key_file=self.key_file,
-            nodes=None,
-            connection_id=P2PLibp2pClientConnection.connection_id,
-        )
-        with pytest.raises(Exception):
-            P2PLibp2pClientConnection(
-                configuration=configuration,
-                data_dir=self.tmp,
-                identity=self.identity,
-            )
-
-
-@libp2p_log_on_failure_all
-class TestLibp2pClientConnectionNodeDisconnected(BaseP2PLibp2pTest):
-    """Test that connection will properly handle node disconnecting"""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        super().setup_class()
-
-        cls.delegate_port = next(ports)
-
-        try:
-            cls.connection_node = _make_libp2p_connection(
-                delegate=True,
-                delegate_port=cls.delegate_port,
-            )
-            cls.multiplexer_node = Multiplexer([cls.connection_node])
-            cls.log_files.append(cls.connection_node.node.log_file)
-            cls.multiplexer_node.connect()
-            cls.multiplexers.append(cls.multiplexer_node)
-
-            cls.connection_client = _make_libp2p_client_connection(
-                peer_public_key=cls.connection_node.node.pub,
-                node_port=cls.delegate_port,
-            )
-            cls.multiplexer_client = Multiplexer([cls.connection_client])
-            cls.multiplexer_client.connect()
-            cls.multiplexers.append(cls.multiplexer_client)
-        except Exception:
-            cls.teardown_class()
-            raise
-
-    def test_node_disconnected(self):
-        """Test node disconnected."""
-        assert self.connection_client.is_connected is True
-        self.multiplexer_client.disconnect()
-        self.multiplexer_node.disconnect()
-
-
-done_future: asyncio.Future = asyncio.Future()
-done_future.set_result(None)
-
-
-@pytest.mark.asyncio
-async def test_connect_attempts():
-    """Test connect attempts."""
-    # test connects
-    con = _make_libp2p_client_connection(
-        peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
-    )
-    con.connect_retries = 2
-    with patch(
-        "aea.helpers.pipe.TCPSocketChannelClient.connect",
-        side_effect=Exception("test exception on connect"),
-    ) as open_connection_mock:
-        with pytest.raises(Exception, match="test exception on connect"):
-            await con.connect()
-        assert open_connection_mock.call_count == con.connect_retries
-
-
-@pytest.mark.asyncio
-async def test_reconnect_on_receive_fail():
-    """Test reconnect on receive fails."""
-
-    con = _make_libp2p_client_connection(
-        peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
-    )
-    con._in_queue = Mock()
-    con._node_client = Mock()
-    exception_future = Future()
-    exception_future.set_exception(ConnectionError("oops"))
-    result = Future()
-    result.set_result(None)
-    con._node_client.read_envelope.side_effect = [exception_future, result]
-
-    with patch.object(
-        con, "_perform_connection_to_node", return_value=done_future
-    ) as connect_mock:
-        assert await con._read_envelope_from_node() is None
-        connect_mock.assert_called()
-
-
-@pytest.mark.asyncio
-async def test_reconnect_on_send_fail():
-    """Test reconnect on send fails."""
-    con = _make_libp2p_client_connection(
-        peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
-    )
-    con._node_client = Mock()
-    f = Future()
-    f.set_exception(Exception("oops"))
-    con._node_client.send_envelope.side_effect = Exception("oops")
-    # test reconnect on send fails
-    with patch.object(
-        con, "_perform_connection_to_node", return_value=done_future
-    ) as connect_mock, patch.object(con, "_ensure_valid_envelope_for_external_comms"):
-        with pytest.raises(Exception, match="oops"):
-            await con._send_envelope_with_node_client(Mock())
-        connect_mock.assert_called()
+        self.connection._node_client = Mock()
+        f = Future()
+        f.set_exception(Exception("oops"))
+        self.connection._node_client.send_envelope.side_effect = Exception("oops")
+        with patch.object(
+            self.connection, "_perform_connection_to_node", return_value=DONE_FUTURE
+        ) as connect_mock, patch.object(self.connection, "_ensure_valid_envelope_for_external_comms"):
+            with pytest.raises(Exception, match="oops"):
+                await self.connection._send_envelope_with_node_client(Mock())
+            connect_mock.assert_called()
 
 
 @pytest.mark.asyncio
 async def test_acn_decode_error_on_read():
-    """Test nodeclient send fails on read."""
+    """Test node client send fails on read."""
     f = Future()
     f.set_result(b"some_data")
     pipe = Mock()
@@ -248,6 +127,83 @@ async def test_acn_decode_error_on_read():
         await node_client.read_envelope()
 
     mocked_write_acn_status_error.assert_called_once()
+
+
+@libp2p_log_on_failure_all
+class TestLibp2pClientConnectionFailureConnectionSetup(BaseP2PLibp2pTest):
+    """Test that connection fails when setup incorrectly"""
+
+    connection_cls = P2PLibp2pClientConnection
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        BaseP2PLibp2pTest.setup_class()
+
+        crypto = cls.ethereum_crypto
+        cls.node_host = "localhost"
+        cls.node_port = next(ports)
+        cls.identity = create_identity(crypto)
+        cls.key_file = os.path.join(cls.tmp, "keyfile")
+        crypto.dump(cls.key_file)
+        cls.public_key = cls.default_crypto.public_key
+        ledger = cls.default_crypto.identifier
+        cls.cert_request = make_cert_request(cls.public_key, ledger, f"./{crypto.address}")
+        _process_cert(crypto, cls.cert_request, cls.tmp)
+
+    def test_empty_nodes(self):
+        """Test empty nodes."""
+
+        uri = f"{self.node_host}:{self.node_port}"
+        node = {"uri": uri, "public_key": self.public_key}
+        configuration = ConnectionConfig(
+            tcp_key_file=self.key_file,
+            nodes=[node],
+            connection_id=self.connection_cls.connection_id,
+            cert_requests=[self.cert_request],
+        )
+        self.connection_cls(
+            configuration=configuration, data_dir=self.tmp, identity=self.identity
+        )
+
+        configuration = ConnectionConfig(
+            tcp_key_file=self.key_file,
+            nodes=None,
+            connection_id=self.connection_cls.connection_id,
+        )
+        with pytest.raises(Exception):
+            self.connection_cls(
+                configuration=configuration,
+                data_dir=self.tmp,
+                identity=self.identity,
+            )
+
+
+@libp2p_log_on_failure_all
+class TestLibp2pClientConnectionNodeDisconnected(BaseP2PLibp2pTest):
+    """Test that connection will properly handle node disconnecting"""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        BaseP2PLibp2pTest.setup_class()
+
+        delegate_port = next(ports)
+        cls.connection_node = cls.make_connection(
+            delegate=True,
+            delegate_port=delegate_port,
+        )
+        cls.connection_client = cls.make_client_connection(
+            peer_public_key=cls.connection_node.node.pub,
+            node_port=delegate_port,
+        )
+
+    def test_node_disconnected(self):
+        """Test node disconnected."""
+        assert self.all_connected
+        self.multiplexers[1].disconnect()
+        self.multiplexers[0].disconnect()
+        assert self.all_disconnected
 
 
 @pytest.mark.asyncio
@@ -273,17 +229,15 @@ class TestLibp2pClientConnectionCheckSignature(BaseP2PLibp2pTest):
     @pytest.mark.asyncio
     async def test_signature_check_fail(self):
         """Test signature check failed."""
-        key = make_crypto(LIBP2P_LEDGER)
 
+        key = self.libp2p_crypto
         assert self.connection.is_connected is False
         await self.connection_node.connect()
         self.connection.connect_retries = 1
         try:
             self.connection.node_por._representative_public_key = key.public_key
-            with pytest.raises(
-                ValueError,
-                match=".*Invalid TLS session key signature: Signature verification failed.*",
-            ):
+            expected = ".*Invalid TLS session key signature: Signature verification failed.*"
+            with pytest.raises(ValueError, match=expected):
                 await self.connection.connect()
             assert self.connection.is_connected is False
         finally:
