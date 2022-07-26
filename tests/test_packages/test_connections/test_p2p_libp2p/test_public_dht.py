@@ -80,15 +80,18 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
 
     maddrs = PUBLIC_DHT_MADDRS
 
-    @classmethod
-    def setup_class(cls):
-        """Set up test"""
-        super().setup_class()
+    def setup(self):
+        """Setup test"""
+        assert len(self.maddrs) > 1, "Test requires at least 2 public DHT node"
+        for maddr in self.maddrs:
+            for _ in range(2):  # make pairs
+                self.make_connection(relay=False, entry_peers=[maddr])
 
-        assert len(cls.maddrs) > 1, "Test requires at least 2 public DHT node"
-        for maddr in cls.maddrs:  # make pairs
-            for _ in range(2):
-                cls.make_connection(relay=False, entry_peers=[maddr])
+    def teardown(self):
+        """Teardown after test method"""
+        self._disconnect()
+        self.multiplexers.clear()
+        self.log_files.clear()
 
     @property
     def pairs_with_same_entry_peers(self):
@@ -133,16 +136,13 @@ class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
     uris = PUBLIC_DHT_DELEGATE_URIS
     public_keys = PUBLIC_DHT_PUBLIC_KEYS
 
-    @classmethod
-    def setup_class(cls):  # overwrite the setup_class, reuse the tests
+    def setup(self):  # overwrite the setup, reuse the rest
         """Set up test"""
-        BaseP2PLibp2pTest.setup_class()
-
-        assert len(cls.uris) == len(cls.public_keys)
-        assert len(cls.uris) > 1 and len(cls.public_keys) > 1
-        for uri, public_keys in zip(cls.uris, cls.public_keys):
+        assert len(self.uris) == len(self.public_keys)
+        assert len(self.uris) > 1 and len(self.public_keys) > 1
+        for uri, public_keys in zip(self.uris, self.public_keys):
             for _ in range(2):
-                cls.make_client_connection(uri=uri, peer_public_key=public_keys)
+                self.make_client_connection(uri=uri, peer_public_key=public_keys)
 
 
 @pytest.mark.integration
