@@ -27,9 +27,16 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import yaml
+from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
 
-AEA_COMMAND_REGEX = r"(?P<full_cmd>(?P<cli>aea|autonomy) (?P<cmd>fetch|add .*) (?:(?P<vendor>.*)\/(?P<package>.[^:]*):(?P<version>\d+\.\d+\.\d+)?:?)?(?P<hash>Q[A-Za-z0-9]+))"
+CLI_REGEX = r"(?P<cli>aea|autonomy)"
+CMD_REGEX = r"(?P<cmd>.*)"
+VENDOR_REGEX = fr"(?P<vendor>{SIMPLE_ID_REGEX})"
+PACKAGE_REGEX = fr"(?P<package>{SIMPLE_ID_REGEX})"
+VERSION_REGEX = r"(?P<version>\d+\.\d+\.\d+)"
+
+AEA_COMMAND_REGEX = fr"(?P<full_cmd>{CLI_REGEX} {CMD_REGEX} (?:{VENDOR_REGEX}\/{PACKAGE_REGEX}:{VERSION_REGEX}?:?)?(?P<hash>{IPFS_HASH_REGEX}))"
 
 ROOT_DIR = Path(__file__).parent.parent
 
@@ -90,13 +97,12 @@ class Package:  # pylint: disable=too-few-public-methods
                     self.last_version = resource["version"]
                     break
 
-    def get_command(self) -> str:
-        """Get the add command"""
-        if self.type == "agent":
-            return (
-                f"aea fetch {self.vendor}/{self.name}:{self.last_version}:{self.hash}"
-            )
-        return f"aea add {self.type} {self.vendor}/{self.name}:{self.last_version}:{self.hash}"
+    def get_command(self, cmd, include_version=True) -> str:
+        """Get the corresponding command"""
+        version = (
+            ":" + self.last_version if include_version and self.last_version else ""
+        )
+        return f"autonomy {cmd} {self.vendor}/{self.name}{version}:{self.hash}"
 
 
 class PackageHashManager:
@@ -114,6 +120,7 @@ class PackageHashManager:
             self.package_tree.setdefault(p.vendor, {})
             self.package_tree[p.vendor].setdefault(p.type, {})
             self.package_tree[p.vendor][p.type].setdefault(p.name, p)
+            assert re.match(IPFS_HASH_REGEX, p.hash)  # detect wrong regexes
 
     def get_package_by_hash(self, package_hash: str) -> Optional[Package]:
         """Get a package given its hash"""
@@ -143,6 +150,7 @@ class PackageHashManager:
             d = m.groupdict()
 
             # Underspecified commands that only use the hash
+            # In this case we cannot infer the package type, just check whether or not the hash exists in hashes.csv
             if not d["vendor"] and not d["package"]:
                 package = self.get_package_by_hash(d["hash"])
 
@@ -157,7 +165,18 @@ class PackageHashManager:
                 return None
 
             # Complete command, succesfully retrieved
-            package_type = "agent" if d["cmd"] == "fetch" else d["cmd"].split(" ")[-1]
+            package_type = None
+            if "deployment" in d["cmd"]:
+                package_type = "service"
+            if d["cmd"] == "fetch":
+                package_type = "agent"
+            if d["cmd"].startswith("add"):
+                package_type = d["cmd"].split(" ")[-1]  # i.e.: aea add connection
+            if not package_type:
+                raise ValueError(
+                    f"Docs [{md_file}]: could not infer the package type for line '{package_line}'"
+                )
+
             return self.package_tree[d["vendor"]][package_type][d["package"]].hash
 
         # Otherwise log the error
@@ -168,19 +187,6 @@ class PackageHashManager:
             return None
 
 
-def update_test_files(old_to_new_hashes: Dict[str, str]) -> None:
-    """Update IPFS hashes in test md files"""
-    all_test_files = Path("tests", "test_docs", "test_bash_yaml", "md_files").rglob(
-        "*.md"
-    )
-    for md_file in all_test_files:
-        content = read_file(str(md_file))
-        for old_hash, new_hash in old_to_new_hashes.items():
-            content = content.replace(old_hash, new_hash)
-        with open(str(md_file), "w", encoding="utf-8") as qs_file:
-            qs_file.write(content)
-
-
 def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-locals
     """Fix ipfs hashes in the docs"""
 
@@ -189,11 +195,14 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
     hash_mismatches = False
     old_to_new_hashes = {}
     package_manager = PackageHashManager()
+    matches = 0
 
     for md_file in all_md_files:
         content = read_file(str(md_file))
         for match in re.findall(AEA_COMMAND_REGEX, content):
+            matches += 1
             doc_full_cmd = match[0]
+            doc_cmd = match[2]
             doc_hash = match[-1]
             expected_hash = package_manager.get_hash_by_package_line(
                 doc_full_cmd, str(md_file)
@@ -206,7 +215,7 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
                 errors = True
                 continue
 
-            new_command = expected_package.get_command()
+            new_command = expected_package.get_command(doc_cmd)
 
             # Overwrite with new hash
             if doc_hash == expected_hash:
@@ -226,9 +235,6 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
                     f"IPFS hash mismatch on doc file {md_file}. Expected {expected_hash}, got {doc_hash}:\n    {doc_full_cmd}"
                 )
 
-    if fix:
-        update_test_files(old_to_new_hashes)
-
     if fix and errors:
         raise ValueError(
             "There were some errors while processing the docs. Check the logs."
@@ -236,6 +242,12 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
 
     if not fix and (hash_mismatches or errors):
         print("There are mismatching IPFS hashes in the docs.")
+        sys.exit(1)
+
+    if matches == 0:
+        print(
+            "No commands were found in the docs. The command regex is probably outdated."
+        )
         sys.exit(1)
 
     print("OK")
