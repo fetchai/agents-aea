@@ -25,14 +25,9 @@ import itertools
 import pytest
 
 from aea.helpers.acn.uri import Uri
-from aea.multiplexer import Multiplexer
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    MockDefaultMessageProtocol,
-    _make_libp2p_client_connection,
-    _make_libp2p_connection,
-    _make_libp2p_mailbox_connection,
     libp2p_log_on_failure_all,
 )
 
@@ -46,96 +41,55 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
     """Test mix of relay/delegate agents and client connections work together"""
 
     @classmethod
-    def _multiplex_it(cls, conn):
-        multiplexer = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-        cls.multiplexers.append(multiplexer)
-        multiplexer.connect()
-
-    @classmethod
     def setup_class(cls):
         """Set the test up"""
         super().setup_class()
 
         # relays
-        main_relay = _make_libp2p_connection(relay=True)
-        cls.log_files.append(main_relay.node.log_file)
-        cls._multiplex_it(main_relay)
+        main_relay = cls.make_connection()
         main_relay_peer = main_relay.node.multiaddrs[0]
-
-        relay_2 = _make_libp2p_connection(entry_peers=[main_relay_peer], relay=True)
-        cls.log_files.append(relay_2.node.log_file)
-        cls._multiplex_it(relay_2)
+        relay_2 = cls.make_connection(entry_peers=[main_relay_peer])
         relay_peer_2 = relay_2.node.multiaddrs[0]
 
         # delegates
-        delegate_1 = _make_libp2p_connection(
-            entry_peers=[main_relay_peer],
-            relay=True,
-            delegate=True,
-            mailbox=True,
+        delegate_1 = cls.make_connection(
+            entry_peers=[main_relay_peer], delegate=True, mailbox=True
         )
-        cls.log_files.append(delegate_1.node.log_file)
-        cls._multiplex_it(delegate_1)
-
-        delegate_2 = _make_libp2p_connection(
-            entry_peers=[relay_peer_2],
-            relay=True,
-            delegate=True,
-            mailbox=True,
+        delegate_2 = cls.make_connection(
+            entry_peers=[relay_peer_2], delegate=True, mailbox=True
         )
-        cls.log_files.append(delegate_2.node.log_file)
-        cls._multiplex_it(delegate_2)
 
         # agents
-        agent_connection_1 = _make_libp2p_connection(
-            entry_peers=[main_relay_peer],
-            relay=False,
-            delegate=False,
-        )
-        cls.log_files.append(agent_connection_1.node.log_file)
-        cls._multiplex_it(agent_connection_1)
-
-        agent_connection_2 = _make_libp2p_connection(
-            entry_peers=[relay_peer_2],
-            relay=False,
-            delegate=False,
-        )
-        cls.log_files.append(agent_connection_2.node.log_file)
-        cls._multiplex_it(agent_connection_2)
+        cls.make_connection(entry_peers=[main_relay_peer], relay=False)
+        cls.make_connection(entry_peers=[relay_peer_2], relay=False)
 
         # clients
-        client_connection_1 = _make_libp2p_client_connection(
+        cls.make_client_connection(
             peer_public_key=delegate_1.node.pub,
             node_host=delegate_1.node.delegate_uri.host,
             node_port=delegate_1.node.delegate_uri.port,
         )
-        cls._multiplex_it(client_connection_1)
-
-        client_connection_2 = _make_libp2p_client_connection(
+        cls.make_client_connection(
             peer_public_key=delegate_2.node.pub,
             node_host=delegate_2.node.delegate_uri.host,
             node_port=delegate_2.node.delegate_uri.port,
         )
-        cls._multiplex_it(client_connection_2)
 
         # mailboxes
-        mailbox_connection_1 = _make_libp2p_mailbox_connection(
+        cls.make_mailbox_connection(
             peer_public_key=delegate_1.node.pub,
             node_host=Uri(delegate_1.node.mailbox_uri).host,
             node_port=Uri(delegate_1.node.mailbox_uri).port,
         )
-        cls._multiplex_it(mailbox_connection_1)
-
-        mailbox_connection_2 = _make_libp2p_mailbox_connection(
+        cls.make_mailbox_connection(
             peer_public_key=delegate_2.node.pub,
             node_host=Uri(delegate_2.node.mailbox_uri).host,
             node_port=Uri(delegate_2.node.mailbox_uri).port,
         )
-        cls._multiplex_it(mailbox_connection_2)
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.all_multiplexer_connections_connected
+        assert self.all_connected
 
     def test_send_and_receive(self):
         """Test envelope send/received by every pair of connection."""

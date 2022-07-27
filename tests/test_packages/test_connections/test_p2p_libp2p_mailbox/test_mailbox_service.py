@@ -27,19 +27,14 @@ import pytest
 import requests
 
 from aea.mail.base import Envelope
-from aea.multiplexer import Multiplexer
 
-from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p_mailbox.connection import NodeClient
 from packages.valory.protocols.acn import acn_pb2
 from packages.valory.protocols.acn.message import AcnMessage
 
-from tests.common.utils import wait_for_condition
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    _make_libp2p_client_connection,
-    _make_libp2p_connection,
     ports,
 )
 
@@ -63,26 +58,17 @@ class TestMailboxAPI(BaseP2PLibp2pTest):
         cls.delegate_port = next(ports)
         cls.mailbox_port = next(ports)
 
-        cls.connection_node = _make_libp2p_connection(
+        cls.connection_node = cls.make_connection(
             delegate=True,
             delegate_port=cls.delegate_port,
             mailbox=True,
             mailbox_port=cls.mailbox_port,
         )
 
-        cls.connection1 = _make_libp2p_client_connection(
+        cls.connection_client = cls.make_client_connection(
             peer_public_key=cls.connection_node.node.pub,
             node_port=cls.delegate_port,
         )
-
-        cls.connection2 = _make_libp2p_client_connection(
-            peer_public_key=cls.connection_node.node.pub,
-            node_port=cls.delegate_port,
-        )
-        cls.multiplexer1 = Multiplexer([cls.connection_node])
-        cls.multiplexer1.connect()
-
-        wait_for_condition(lambda: cls.connection_node.is_connected is True, 10)
 
     @pytest.mark.asyncio
     async def test_message_delivery(self):  # nosec
@@ -92,7 +78,7 @@ class TestMailboxAPI(BaseP2PLibp2pTest):
         r = requests.get(f"{url}/ssl_signature", verify=False)  # nosec
         assert r.status_code == 200, r.text
 
-        node_client = NodeClient(Mock(), self.connection2.node_por)
+        node_client = NodeClient(Mock(), self.connection_client.node_por)
         agent_record = node_client.make_agent_record()
         addr = agent_record.address
         performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
@@ -108,7 +94,7 @@ class TestMailboxAPI(BaseP2PLibp2pTest):
         ), r.text  # pylint: disable=no-member
         session_id = r.text
 
-        envelope = self.make_envelope(addr, addr)
+        envelope = self.enveloped_default_message(to=addr, sender=addr)
         r = requests.post(
             f"{url}/send_envelope",
             data=envelope.encode(),
@@ -126,14 +112,7 @@ class TestMailboxAPI(BaseP2PLibp2pTest):
         assert r.content, "no envelope"
 
         delivered_envelope = Envelope.decode(r.content)
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message == envelope.message
+        self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
         # no new envelopes
         r = requests.get(
@@ -160,26 +139,3 @@ class TestMailboxAPI(BaseP2PLibp2pTest):
         )
         assert r.status_code == 400, r.text
         assert "session_id" in r.text
-
-    def make_envelope(self, from_: str, to_: str) -> Envelope:
-        """Make sample envelope."""
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=to_,
-            sender=from_,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
-        return envelope
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.multiplexer1.disconnect()
-        super().teardown_class()

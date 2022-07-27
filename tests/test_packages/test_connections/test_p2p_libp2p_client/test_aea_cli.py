@@ -19,28 +19,24 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
+
 import json
 
-from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.valory.connections import p2p_libp2p_client
-from packages.valory.connections.p2p_libp2p.consts import (
-    LIBP2P_CERT_NOT_AFTER,
-    LIBP2P_CERT_NOT_BEFORE,
-)
 from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
 from tests.conftest import DEFAULT_LEDGER, LOCAL_HOST
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
+    make_cert_request,
     ports,
 )
 
 
-p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 DEFAULT_HOST = LOCAL_HOST.hostname
 DEFAULT_CLIENTS_PER_NODE = 4
 DEFAULT_LAUNCH_TIMEOUT = 10
@@ -48,23 +44,29 @@ DEFAULT_LAUNCH_TIMEOUT = 10
 
 @libp2p_log_on_failure_all
 class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
-    """Test AEA with p2p_libp2p_client connection is correctly run"""
+    """Test AEA with client connection is correctly run"""
+
+    conn_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
+    public_id = str(PUBLIC_ID)
+    port = next(ports)
+    uri = f"{DEFAULT_HOST}:{port}"
+    kwargs = dict(
+        delegate_host=DEFAULT_HOST,
+        delegate_port=port,
+        delegate=True,
+    )
 
     @classmethod
     def setup_class(cls):
         """Set up the test class."""
         super().setup_class()
-
-        cls.delegate_port = next(ports)
-        cls.node_connection = _make_libp2p_connection(
-            delegate_host=DEFAULT_HOST,
-            delegate_port=cls.delegate_port,
-            delegate=True,
-        )
+        cls.node_connection = _make_libp2p_connection(**cls.kwargs)
         cls.node_multiplexer = Multiplexer([cls.node_connection])
         cls.log_files = [cls.node_connection.node.log_file]
-
         cls.node_multiplexer.connect()
+        node = {"uri": cls.uri, "public_key": cls.node_connection.node.pub}
+        cls.nodes = {"nodes": [node]}
+        cls.expected = (f"Successfully connected to libp2p node {cls.uri}",)
 
     def test_node(self):
         """Test the node is connected."""
@@ -77,32 +79,15 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         self.add_private_key(ledger_id, f"{ledger_id}_private_key.txt")
         self.set_config("agent.default_ledger", ledger_id)
         self.set_config("agent.required_ledgers", json.dumps([ledger_id]), "list")
-        self.add_item("connection", str(PUBLIC_ID))
-        conn_path = p2p_libp2p_client_path
-        self.nested_set_config(
-            conn_path + ".config",
-            {
-                "nodes": [
-                    {
-                        "uri": "{}:{}".format(DEFAULT_HOST, self.delegate_port),
-                        "public_key": self.node_connection.node.pub,
-                    }
-                ]
-            },
-        )
+        self.add_item("connection", self.public_id)
+        self.nested_set_config(self.conn_path + ".config", self.nodes)
 
         # generate certificates for connection
         self.nested_set_config(
-            conn_path + ".cert_requests",
+            self.conn_path + ".cert_requests",
             [
-                CertRequest(
-                    identifier="acn",
-                    ledger_id=ledger_id,
-                    not_before=LIBP2P_CERT_NOT_BEFORE,
-                    not_after=LIBP2P_CERT_NOT_AFTER,
-                    public_key=self.node_connection.node.pub,
-                    message_format="{public_key}",
-                    save_path="./cli_test_cert.txt",
+                make_cert_request(
+                    self.node_connection.node.pub, ledger_id, f"./cli_test"
                 )
             ],
         )
@@ -111,19 +96,10 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         process = self.run_agent()
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
-
-        check_strings = "Successfully connected to libp2p node {}:{}".format(
-            DEFAULT_HOST, self.delegate_port
-        )
-        missing_strings = self.missing_from_output(process, check_strings)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
-
+        missing_strings = self.missing_from_output(process, self.expected)
+        assert not missing_strings
         self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
+        assert self.is_successfully_terminated(process)
 
     @classmethod
     def teardown_class(cls):

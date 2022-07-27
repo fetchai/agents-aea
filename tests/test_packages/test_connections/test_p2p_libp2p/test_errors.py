@@ -32,8 +32,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.registries import make_crypto
-from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.valory.connections.p2p_libp2p.connection import (
@@ -47,15 +45,11 @@ from packages.valory.protocols.acn.message import AcnMessage
 
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
-    DEFAULT_LEDGER,
     _make_libp2p_connection,
+    create_identity,
     ports,
 )
 
-
-check_node_built = (
-    f"{P2PLibp2pConnection.__module__}.{P2PLibp2pConnection.__name__}._check_node_built"
-)
 
 DEFAULT_NET_SIZE = 4
 
@@ -63,45 +57,21 @@ DEFAULT_NET_SIZE = 4
 class TestP2PLibp2pConnectionFailureGolangRun(BaseP2PLibp2pTest):
     """Test that golang run fails if wrong path or timeout"""
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        super().setup_class()
-        cls.connection = _make_libp2p_connection()
-        cls.wrong_path = tempfile.mkdtemp()
-
     def test_wrong_path(self):
         """Test the wrong path."""
         log_file_desc = open("log", "a", 1)
-        with pytest.raises(Exception):
-            _golang_module_run(
-                self.wrong_path, LIBP2P_NODE_MODULE_NAME, [], log_file_desc
-            )
+        wrong_path = tempfile.mkdtemp()
+        with pytest.raises(FileNotFoundError):  # match differs based on OS
+            _golang_module_run(wrong_path, LIBP2P_NODE_MODULE_NAME, [], log_file_desc)
 
     def test_timeout(self):
         """Test the timeout."""
-        self.connection.node._connection_timeout = 0
-        muxer = Multiplexer([self.connection])
-        with pytest.raises(Exception):
+
+        connection = _make_libp2p_connection()
+        connection.node._connection_timeout = 0
+        muxer = Multiplexer([connection])
+        with pytest.raises(Exception, match="Couldn't connect to libp2p process"):
             muxer.connect()
-        muxer.disconnect()
-
-
-class TestP2PLibp2pConnectionFailureNodeDisconnect(BaseP2PLibp2pTest):
-    """Test that connection handles node disconnecting properly"""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        super().setup_class()
-        cls.connection = _make_libp2p_connection()
-
-    def test_node_disconnect(self):
-        """Test node disconnect."""
-        muxer = Multiplexer([self.connection])
-        muxer.connect()
-        self.connection.node.proc.terminate()
-        self.connection.node.proc.wait()
         muxer.disconnect()
 
 
@@ -113,19 +83,18 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
     @classmethod
     def setup_class(cls):
         """Set the test up"""
+
         super().setup_class()
-        crypto = make_crypto(DEFAULT_LEDGER)
-        cls.identity = Identity(
-            "identity", address=crypto.address, public_key=crypto.public_key
-        )
+        crypto = cls.default_crypto
+        cls.identity = create_identity(crypto)
         cls.host = "localhost"
         cls.port = next(ports)
-
-        cls.key_file = os.path.join(cls.t, "keyfile")
+        cls.key_file = os.path.join(cls.tmp, "keyfile")
         crypto.dump(cls.key_file)
 
     def test_entry_peers_when_no_public_uri_provided(self):
         """Test entry peers when no public uri provided."""
+
         configuration = ConnectionConfig(
             libp2p_key_file=None,
             local_uri=f"{self.host}:{self.port}",
@@ -133,30 +102,31 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=self.t,
+            build_directory=self.tmp,
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Couldn't find connection key"):
             P2PLibp2pConnection(
-                configuration=configuration, data_dir=self.t, identity=self.identity
+                configuration=configuration, data_dir=self.tmp, identity=self.identity
             )
 
     def test_local_uri_provided_when_public_uri_provided(self):
         """Test local uri provided when public uri provided."""
+
         configuration = ConnectionConfig(
             node_key_file=self.key_file,
             public_uri=f"{self.host}:{self.port}",
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
-            build_directory=self.t,
+            build_directory=self.tmp,
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Couldn't find connection key"):
             P2PLibp2pConnection(
-                configuration=configuration, data_dir=self.t, identity=self.identity
+                configuration=configuration, data_dir=self.tmp, identity=self.identity
             )
 
 
-def test_libp2pconnection_mixed_ip_address():
+def test_libp2p_connection_mixed_ip_address():
     """Test correct public uri ip and entry peers ips configuration."""
     assert _ip_all_private_or_all_public([]) is True
     assert _ip_all_private_or_all_public(["127.0.0.1", "127.0.0.1"]) is True
@@ -167,10 +137,10 @@ def test_libp2pconnection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
 
 
-def test_libp2pconnection_node_config_registration_delay():
+def test_libp2p_connection_node_config_registration_delay():
     """Test node registration delay configuration"""
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must be a float number in seconds"):
         _make_libp2p_connection(peer_registration_delay="must_be_float")
 
 
@@ -194,8 +164,8 @@ def test_build_dir_not_set():
 @pytest.mark.asyncio
 async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
-    with patch(check_node_built, return_value="./"):
-        con = _make_libp2p_connection()
+
+    con = _make_libp2p_connection()
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
     node.pipe = Mock()
@@ -340,7 +310,8 @@ async def test_send_acn_confirm_failed():
 
 @pytest.mark.asyncio
 async def test_send_acn_confirm_timeout():
-    """Test nodeclient send fails on timeout."""
+    """Test node client send fails on timeout."""
+
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     f = Future()
     f.set_result(None)
@@ -360,7 +331,8 @@ async def test_send_acn_confirm_timeout():
 
 @pytest.mark.asyncio
 async def test_acn_decode_error_on_read():
-    """Test nodeclient send fails on read."""
+    """Test ACN decode error on read."""
+
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     f = Future()
     f.set_result(b"some_data")
@@ -382,7 +354,8 @@ async def test_acn_decode_error_on_read():
 
 @pytest.mark.asyncio
 async def test_write_acn_error():
-    """Test nodeclient write acn error."""
+    """Test write ACN error."""
+
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     f = Future()
     f.set_result(b"some_data")

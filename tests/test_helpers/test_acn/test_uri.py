@@ -30,3 +30,12 @@ def test_uri():
     assert uri.host == "localhost"
     assert uri.port == 9000
     Uri()
+
+
+def test_uri2():
+    """Test the uri."""
+    Uri(host="127.0.0.1")
+    uri = Uri(host="127.0.0.1", port=10000)
+    assert str(uri) == "127.0.0.1:10000"
+    assert uri.host == "127.0.0.1"
+    assert uri.port == 10000
