@@ -19,7 +19,7 @@
 
 """This module contains the tools for checking that all packages have been pushed to the ipfs registry."""
 
-import subprocess
+import subprocess  # nosec
 import sys
 from typing import Optional
 
@@ -41,7 +41,7 @@ def check_ipfs_hash_pushed(ipfs_hash: str) -> bool:
 
 def get_latest_git_tag() -> str:
     """Get the latest git tag"""
-    res = subprocess.run(
+    res = subprocess.run(  # nosec
         [
             "git",
             "tag",
@@ -60,7 +60,7 @@ def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
     """Get a specific file version from the commit history given a tag/commit"""
     latest_tag = latest_tag or get_latest_git_tag()
     print(f"Checking hashes for tag {latest_tag}")
-    res = subprocess.run(
+    res = subprocess.run(  # nosec
         ["git", "show", f"{latest_tag}:{file_path}"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
