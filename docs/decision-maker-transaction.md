@@ -6,7 +6,7 @@ First, get the packages directory from IPFS:
 mkdir packages
 aea create my_aea
 cd my_aea
-aea add protocol open_aea/signing:1.0.0:bafybeievkw5bnmrssxwckf7leszpw2eyull6b5avithgrhd2sdd5izfjku --remote
+autonomy add protocol open_aea/signing:1.0.0:bafybeigf4hdi4yiiieaafftztcmommbxdzslpsvwm6trmvlizipcr7b6bm --remote
 aea push protocol open_aea/signing --local
 cd ..
 aea delete my_aea
