@@ -27,16 +27,17 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import yaml
+
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
 
 CLI_REGEX = r"(?P<cli>aea)"
 CMD_REGEX = r"(?P<cmd>.*)"
-VENDOR_REGEX = fr"(?P<vendor>{SIMPLE_ID_REGEX})"
-PACKAGE_REGEX = fr"(?P<package>{SIMPLE_ID_REGEX})"
+VENDOR_REGEX = rf"(?P<vendor>{SIMPLE_ID_REGEX})"
+PACKAGE_REGEX = rf"(?P<package>{SIMPLE_ID_REGEX})"
 VERSION_REGEX = r"(?P<version>\d+\.\d+\.\d+)"
 
-AEA_COMMAND_REGEX = fr"(?P<full_cmd>{CLI_REGEX} {CMD_REGEX} (?:{VENDOR_REGEX}\/{PACKAGE_REGEX}:{VERSION_REGEX}?:?)?(?P<hash>{IPFS_HASH_REGEX}))"
+AEA_COMMAND_REGEX = rf"(?P<full_cmd>{CLI_REGEX} {CMD_REGEX} (?:{VENDOR_REGEX}\/{PACKAGE_REGEX}:{VERSION_REGEX}?:?)?(?P<hash>{IPFS_HASH_REGEX}))"
 
 ROOT_DIR = Path(__file__).parent.parent
 
