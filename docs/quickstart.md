@@ -6,10 +6,11 @@ The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`. There a
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 ​GCC installation is required:
-* Ubuntu: `apt-get install gcc`
-* Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
+
+- Ubuntu: `apt-get install gcc`
+- Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
  installed): `choco install mingw`
-* MacOS X (with home brew): `brew install gcc`
+- MacOS X (with home brew): `brew install gcc`
 
 ### Option 1: Manual system preparation
 
@@ -123,14 +124,22 @@ touch Pipfile && pipenv --python 3.8 && pipenv shell
 
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
+First, check which shell you are using:
 ``` bash
-pip install open-aea[all]
+echo "$SHELL"
 ```
 
-If you are using `zsh` rather than `bash` type
+For bash:
+``` bash
+pip install open-aea[all]
+pip3 install open-aea-cli-ipfs
+```
+
+If you are using `zsh` (default shell in modern MacOS installations) rather than `bash` type
 ``` zsh
 pip install 'open-aea[all]'
 pip install 'open-aea-ledger-ethereum'
+pip3 install 'open-aea-cli-ipfs'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
