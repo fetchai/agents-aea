@@ -102,7 +102,7 @@ class Package:  # pylint: disable=too-few-public-methods
         version = (
             ":" + self.last_version if include_version and self.last_version else ""
         )
-        return f"autonomy {cmd} {self.vendor}/{self.name}{version}:{self.hash}"
+        return f"aea {cmd} {self.vendor}/{self.name}{version}:{self.hash}"
 
 
 class PackageHashManager:

@@ -13,7 +13,7 @@ aea create my_aea  # create an agent
 cd my_aea
 aea add connection fetchai/stub:0.21.0:bafybeihby6suvjc4kiw7wwm6ul6wggcvrj3sizars6le4rerqdgetuzdvu --remote  # get a connection from the remote registry
 aea push connection fetchai/stub --local  # push to local registry
-autonomy add protocol fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny --remote
+aea add protocol fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea  # delete the agent

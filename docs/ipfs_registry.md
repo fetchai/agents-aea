@@ -42,7 +42,7 @@ Add the signing protocol using
 
 Or
 
-`autonomy add protocol open_aea/signing:1.0.0:bafybeigf4hdi4yiiieaafftztcmommbxdzslpsvwm6trmvlizipcr7b6bm --remote`
+`aea add protocol open_aea/signing:1.0.0:bafybeigf4hdi4yiiieaafftztcmommbxdzslpsvwm6trmvlizipcr7b6bm --remote`
 
 ## Publishing agents
 
