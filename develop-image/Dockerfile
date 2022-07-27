@@ -49,6 +49,12 @@ ENV LANG C.UTF-8
 RUN sudo apt-get install -y tox
 RUN python3 -m pip install -U pipenv
 
+# fix ssl issue.
+COPY develop-image/openssl.cnf /etc/ssl
+
+# ensure golang is present
+RUN apt-get install golang-go -y
+
 RUN sudo mkdir /build
 WORKDIR /build
 COPY . /build
