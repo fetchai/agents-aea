@@ -30,7 +30,7 @@ import yaml
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
 
-CLI_REGEX = r"(?P<cli>aea|autonomy)"
+CLI_REGEX = r"(?P<cli>aea)"
 CMD_REGEX = r"(?P<cmd>.*)"
 VENDOR_REGEX = fr"(?P<vendor>{SIMPLE_ID_REGEX})"
 PACKAGE_REGEX = fr"(?P<package>{SIMPLE_ID_REGEX})"
