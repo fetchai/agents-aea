@@ -191,7 +191,9 @@ class PackageHashManager:
 def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-locals
     """Fix ipfs hashes in the docs"""
 
-    all_md_files = Path("docs").rglob("*.md")
+    all_md_files_docs = Path("docs").rglob("*.md")
+    all_md_files_tests = Path("tests/test_docs/test_bash_yaml/md_files").rglob("*.md")
+    all_md_files = [*all_md_files_docs] + [*all_md_files_tests]
     errors = False
     hash_mismatches = False
     old_to_new_hashes = {}
