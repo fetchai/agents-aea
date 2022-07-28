@@ -38,7 +38,7 @@ echo "$SHELL"
 ```
 ``` bash
 pip install open-aea[all]
-pip3 install open-aea-cli-ipfs
+pip install open-aea-cli-ipfs
 ```
 ```
 svn checkout https://github.com/valory-xyz/open-aea/tags/v1.13.0/packages packages

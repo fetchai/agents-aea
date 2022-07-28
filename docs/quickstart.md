@@ -132,14 +132,14 @@ echo "$SHELL"
 For bash:
 ``` bash
 pip install open-aea[all]
-pip3 install open-aea-cli-ipfs
+pip install open-aea-cli-ipfs
 ```
 
 If you are using `zsh` (default shell in modern MacOS installations) rather than `bash` type
 ``` zsh
 pip install 'open-aea[all]'
 pip install 'open-aea-ledger-ethereum'
-pip3 install 'open-aea-cli-ipfs'
+pip install 'open-aea-cli-ipfs'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
