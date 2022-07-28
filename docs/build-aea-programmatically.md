@@ -9,7 +9,7 @@ Get the needed packages from IPFS:
 mkdir packages
 aea create my_aea
 cd my_aea
-aea add protocol fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu --remote
+aea add protocol fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea

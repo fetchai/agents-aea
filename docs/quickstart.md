@@ -6,10 +6,11 @@ The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`. There a
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 ​GCC installation is required:
-* Ubuntu: `apt-get install gcc`
-* Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
+
+- Ubuntu: `apt-get install gcc`
+- Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
  installed): `choco install mingw`
-* MacOS X (with home brew): `brew install gcc`
+- MacOS X (with home brew): `brew install gcc`
 
 ### Option 1: Manual system preparation
 
@@ -74,19 +75,19 @@ To use the image you will first have to pull it and than run it with your curren
 To pull:
 
 ``` bash
-docker pull fetchai/aea-user:latest
+docker pull valory/open-aea-user:latest
 ```
 
 To run the image on Linux and MacOs:
 
 ``` bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v $(pwd):/agents --workdir=/agents valory/open-aea-user:latest
 ```
 
 And on Windows:
 
 ``` bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v %cd%:/agents --workdir=/agents valory/open-aea-user:latest
 ```
 
 Once successfully logged into the docker container,
@@ -123,14 +124,22 @@ touch Pipfile && pipenv --python 3.8 && pipenv shell
 
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
+First, check which shell you are using:
 ``` bash
-pip install open-aea[all]
+echo "$SHELL"
 ```
 
-If you are using `zsh` rather than `bash` type
+For bash:
+``` bash
+pip install open-aea[all]
+pip install open-aea-cli-ipfs
+```
+
+If you are using `zsh` (default shell in modern MacOS installations) rather than `bash` type
 ``` zsh
 pip install 'open-aea[all]'
 pip install 'open-aea-ledger-ethereum'
+pip install 'open-aea-cli-ipfs'
 ```
 
 If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
@@ -140,7 +149,7 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 To configure the aea with an author.
 
 ``` bash
-aea init --local
+aea init --remote
 ```
 
 
@@ -159,7 +168,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeigtbuptokzdtugbef5omnkxsv3ir6zbd7odrfg57xrwkmmen2plzy --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeiei4ydbroigwn37qrmuqko3qu7bkotc2gqn7ndozqkem5rl5f4cre --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -262,7 +271,7 @@ aea add connection fetchai/stub:0.21.0:bafybeihby6suvjc4kiw7wwm6ul6wggcvrj3sizar
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.19.0:bafybeic6bju74eupc6vrpeizwvldcxpi2e7a73gllepj3ifmjwx23slcx4 --remote
+aea add skill fetchai/echo:0.19.0:bafybeigxdesrwwkytn7kjm2hf3ksanozwbvlvafrkkf62cdovlmbt2txdu --remote
 ```
 This copies the <code>fetchai/echo:0.19.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.19.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
@@ -319,7 +328,7 @@ First, get the needed packages directory from IPFS (execute from the working dir
 ```bash
 mkdir packages
 cd my_first_aea
-aea add protocol fetchai/default:1.0.0:bafybeihno7fiu4r57vo5hjw4g676rjvwhholffugm2m5f7txcmczjwzlzu --remote
+aea add protocol fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea

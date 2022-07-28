@@ -22,7 +22,7 @@ Successfully added protocol 'open_aea/signing:1.0.0'.
 Once we have an agent, we can add individual components to the agent as so;
 
 ```
-aea add skill fetchai/echo:0.19.0:bafybeic6bju74eupc6vrpeizwvldcxpi2e7a73gllepj3ifmjwx23slcx4 --remote
+aea add skill fetchai/echo:0.19.0:bafybeigxdesrwwkytn7kjm2hf3ksanozwbvlvafrkkf62cdovlmbt2txdu --remote
 Registry path not provided and local registry `packages` not found in current (.) and parent directory.
 Trying remote registry (`--remote`).
 Adding skill 'fetchai/echo:latest'...
