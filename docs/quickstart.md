@@ -149,7 +149,7 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 To configure the aea with an author.
 
 ``` bash
-aea init --local
+aea init --remote
 ```
 
 
