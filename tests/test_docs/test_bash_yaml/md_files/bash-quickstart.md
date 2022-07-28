@@ -10,7 +10,7 @@ chmod +x install.sh
 ./install.sh
 ```
 ```bash
-docker pull fetchai/aea-user:latest
+docker pull valory/open-aea-user:latest
 ```
 ```bash
 docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
@@ -34,7 +34,11 @@ svn export https://github.com/valory-xyz/open-aea.git/trunk/scripts
 svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 ``` bash
+echo "$SHELL"
+```
+``` bash
 pip install open-aea[all]
+pip3 install open-aea-cli-ipfs
 ```
 ```
 svn checkout https://github.com/valory-xyz/open-aea/tags/v1.13.0/packages packages
