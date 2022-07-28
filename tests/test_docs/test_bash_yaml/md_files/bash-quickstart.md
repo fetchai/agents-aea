@@ -13,10 +13,10 @@ chmod +x install.sh
 docker pull valory/open-aea-user:latest
 ```
 ```bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v $(pwd):/agents --workdir=/agents valory/open-aea-user:latest
 ```
 ```bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v %cd%:/agents --workdir=/agents valory/open-aea-user:latest
 ```
 ``` bash
 mkdir my_aea_projects/

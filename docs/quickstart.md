@@ -81,13 +81,13 @@ docker pull valory/open-aea-user:latest
 To run the image on Linux and MacOs:
 
 ``` bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v $(pwd):/agents --workdir=/agents valory/open-aea-user:latest
 ```
 
 And on Windows:
 
 ``` bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v %cd%:/agents --workdir=/agents valory/open-aea-user:latest
 ```
 
 Once successfully logged into the docker container,
