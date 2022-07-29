@@ -1,4 +1,4 @@
-apiVersion: skaffold/v2beta6
+apiVersion: skaffold/v2beta29
 kind: Config
 metadata:
   name: open-aea
@@ -14,7 +14,6 @@ build:
   - image: valory/open-aea-user
     docker:
       dockerfile: user-image/Dockerfile
-
   - image: valory/open-aea-deploy
     context: deploy-image
     docker:
@@ -30,3 +29,4 @@ profiles:
       - image: valory/open-aea-docs
         docker:
           dockerfile: docs-image/Dockerfile
+          noCache: true
