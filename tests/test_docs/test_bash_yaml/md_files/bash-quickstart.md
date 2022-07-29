@@ -23,6 +23,9 @@ mkdir my_aea_projects/
 cd my_aea_projects/
 ```
 ``` bash
+mkdir my_aea_projects/ && cd my_aea_projects/
+```
+``` bash
 which pipenv
 ```
 ``` bash
