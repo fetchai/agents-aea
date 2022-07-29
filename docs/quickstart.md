@@ -97,11 +97,9 @@ you can follow the rest of the guide the same way as if not using docker.
 
 ## Getting Started
 
-Ensure, you are in a clean working directory:
+Ensure, you are in a clean working directory. Create it manually running:
 
-- Create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
-
-At this point, when typing `ls` you should see a single folder called `packages` in your working environment. This will act as your local registry for AEA components.
+`mkdir my_aea_projects/ && cd my_aea_projects/`
 
 Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
