@@ -10,14 +10,18 @@ build:
   - image: valory/open-aea-develop
     docker:
       dockerfile: develop-image/Dockerfile
+      noCache: true
 
   - image: valory/open-aea-user
     docker:
       dockerfile: user-image/Dockerfile
+      noCache: true
+
   - image: valory/open-aea-deploy
     context: deploy-image
     docker:
       dockerfile: Dockerfile
+      noCache: true
 
 profiles:
   - name: docs
