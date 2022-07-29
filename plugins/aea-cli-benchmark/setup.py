@@ -27,7 +27,7 @@ from setuptools import setup  # type: ignore
 setup(
     name="open-aea-cli-benchmark",
     version="1.14.0",
-    author="Fetch.AI Limited",
+    author="Valory AG",
     license="Apache-2.0",
     description="CLI extension for AEA framework benchmarking.",
     packages=find_packages(
