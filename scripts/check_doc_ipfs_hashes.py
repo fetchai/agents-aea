@@ -22,7 +22,7 @@
 
 import argparse
 import re
-import subprocess
+import subprocess  # nosec
 import sys
 from pathlib import Path
 from typing import Dict, Optional
