@@ -27,9 +27,9 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import yaml
-
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
+from scripts.check_ipfs_hashes_pushed import get_file_from_tag  # type: ignore
 
 CLI_REGEX = r"(?P<cli>aea)"
 CMD_REGEX = r"(?P<cmd>.*)"
@@ -109,12 +109,17 @@ class Package:  # pylint: disable=too-few-public-methods
 class PackageHashManager:
     """Class that represents the packages in hashes.csv"""
 
-    def __init__(self) -> None:
+    def __init__(self, hashes_content: Optional[str] = None) -> None:
         """Constructor"""
-        hashes_file = Path("packages", "hashes.csv").relative_to(".")
-        with open(hashes_file, "r", encoding="utf-8") as file_:
-            self.packages = [Package(line) for line in file_.readlines()]
-            self.packages = [p for p in self.packages if p.name != "scaffold"]
+        # Read from the working tree if no hash content have been provided
+        if not hashes_content:
+            hashes_file = Path("packages", "hashes.csv").relative_to(".")
+            hashes_content = read_file(str(hashes_file))
+
+        self.packages = [
+            Package(line.strip()) for line in hashes_content.split("\n") if line
+        ]
+        self.packages = [p for p in self.packages if p.name != "scaffold"]
 
         self.package_tree: Dict = {}
         for p in self.packages:
@@ -197,7 +202,10 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
     errors = False
     hash_mismatches = False
     old_to_new_hashes = {}
-    package_manager = PackageHashManager()
+    hashes_content = get_file_from_tag(
+        "packages/hashes.csv"
+    )  # Get the hashes from the latest tag
+    package_manager = PackageHashManager(hashes_content)
     matches = 0
 
     for md_file in all_md_files:
