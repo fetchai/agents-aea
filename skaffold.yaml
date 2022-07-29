@@ -25,7 +25,7 @@ profiles:
     build:
       tagPolicy:
         envTemplate:
-          template: "{{.VERSION}}"
+          template: "1.14.0"
       artifacts:
       - image: valory/open-aea-docs
         docker:
@@ -44,3 +44,23 @@ profiles:
         docker:
           dockerfile: Dockerfile
           noCache: true
+
+  - name: release-latest
+    build:
+      tagPolicy:
+        envTemplate:
+          template: "latest"
+      artifacts:
+      - image: valory/open-aea-docs
+        docker:
+          dockerfile: docs-image/Dockerfile
+      - image: valory/open-aea-develop
+        docker:
+          dockerfile: develop-image/Dockerfile
+      - image: valory/open-aea-user
+        docker:
+          dockerfile: user-image/Dockerfile
+      - image: valory/open-aea-deploy
+        context: deploy-image
+        docker:
+          dockerfile: Dockerfile

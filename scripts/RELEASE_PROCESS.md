@@ -40,6 +40,9 @@
 
 18. Publish the latest packages to the IPFS registry using `aea push-all`. If necessary, run it several times until all packages are updated.
 
-19. Build the latest images using `skaffold build`  and `skaffold build -p docs` which will also publish them on docker.
+19. Build the release images using `skaffold build -p release` which will also publish them on docker. This builds with no cache so to ensure replicatable builds.
+
+20. Tag the latest images using `skaffold build -p release-latest` which will also publish them on docker.
+
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
