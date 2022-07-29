@@ -31,9 +31,9 @@ aea create my_aea
 cd my_aea
 aea add connection fetchai/http_server:0.22.0:bafybeihvncr2inhj2i6lki6qsa2z64bmxa6hononcf5nuvojsygsgqycma --remote
 aea push connection fetchai/http_server --local
-aea add protocol fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny --remote
+aea add protocol fetchai/default:1.0.0:bafybeicqyilg4a45ezogmfancp7dc2j7lyaevw6vqcsxs76f7f53qpp4ii --remote
 aea push protocol fetchai/default --local
-aea add protocol fetchai/http:1.0.0:bafybeihpthltayuvcx2ja3wy45qiao4z3bgszgz4gvebycbfx7qokznqpu --remote
+aea add protocol fetchai/http:1.0.0:bafybeif6axlnlm37vqtlthra2evrbhaenxn7qyayi4ajgnany6ajsr256q --remote
 aea push protocol fetchai/http --local
 cd ..
 aea delete my_aea

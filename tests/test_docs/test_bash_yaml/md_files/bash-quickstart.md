@@ -72,7 +72,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeiei4ydbroigwn37qrmuqko3qu7bkotc2gqn7ndozqkem5rl5f4cre --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeicyirm7y2ygptr5rybwznwof2k6b7fvlsvebsz4pa6cfjijva3rdu --remote
 cd my_first_aea
 ```
 ``` bash
@@ -158,19 +158,19 @@ aea delete my_first_aea
 
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeiei4ydbroigwn37qrmuqko3qu7bkotc2gqn7ndozqkem5rl5f4cre --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeicyirm7y2ygptr5rybwznwof2k6b7fvlsvebsz4pa6cfjijva3rdu --remote
 cd my_first_aea
 ```
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeiei4ydbroigwn37qrmuqko3qu7bkotc2gqn7ndozqkem5rl5f4cre --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeicyirm7y2ygptr5rybwznwof2k6b7fvlsvebsz4pa6cfjijva3rdu --remote
 cd my_first_aea
 ```
 
 ```bash
 mkdir packages
 cd my_first_aea
-aea add protocol fetchai/default:1.0.0:bafybeic72ebyh7j4sqfa4fltvf7hm5taq2gtb43rnko3recmbr4b4vzcny --remote
+aea add protocol fetchai/default:1.0.0:bafybeicqyilg4a45ezogmfancp7dc2j7lyaevw6vqcsxs76f7f53qpp4ii --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea
