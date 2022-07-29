@@ -73,7 +73,7 @@ from tests.conftest import (
 
 
 TIMEOUT = 20
-TEMP_LIBP2P_TEST_DIR = os.path.join(tempfile.gettempdir(), "tmp_libp2p_tests")
+TEMP_LIBP2P_TEST_DIR = tempfile.mkdtemp()
 ports = itertools.count(10234)
 
 MockDefaultMessageProtocol = mock.Mock()
@@ -111,11 +111,10 @@ LIBP2P_LEDGER = load_client_connection_yaml_config()["ledger_id"]
 
 def create_data_dir() -> str:
     """Create data directory in temporary libp2p test directory"""
-
     subdir = Path(tempfile.mkdtemp()).parts[-1]
-    data_dir = os.path.join(TEMP_LIBP2P_TEST_DIR, subdir)
+    data_dir = Path(TEMP_LIBP2P_TEST_DIR) / subdir
     Path(data_dir).mkdir(parents=True, exist_ok=False)
-    return data_dir
+    return str(data_dir)
 
 
 def create_identity(crypto) -> Identity:
