@@ -27,19 +27,17 @@
 
 12. Tag version on main.
 
-13. Publish the latest packages to the IPFS registry using `aea push-all`.
+13. Pull main, make a clean environment (`pipenv --rm` and `pipenv --python 3.10` and `pipenv shell`) and create distributions: `make dist`.
 
-14. Pull main, make a clean environment (`pipenv --rm` and `pipenv --python 3.10` and `pipenv shell`) and create distributions: `make dist`.
-
-15. Publish to PyPI with twine: `pip install twine` and `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
+14. Publish to PyPI with twine: `pip install twine` and `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
-16. Repeat 14. & 15. for each plugin (use `python setup.py sdist bdist_wheel` instead of `make dist`).
+15. Repeat 14. & 15. for each plugin (use `python setup.py sdist bdist_wheel` instead of `make dist`).
 
-17. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
+16. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
-18. [CURRENTLY SKIPPED] Release packages into registry: `python scripts/deploy_to_registry.py`. If necessary, run it several times until all packages are updated.
+17. Publish the latest packages to the IPFS registry using `aea push-all`. If necessary, run it several times until all packages are updated.
 
-19. Build the latest images using `skaffold build`  and `skaffold build -p docs` which will also publish them on docker.
+18. Build the latest images using `skaffold build`  and `skaffold build -p docs` which will also publish them on docker.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
