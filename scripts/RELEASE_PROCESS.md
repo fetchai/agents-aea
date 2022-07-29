@@ -1,9 +1,9 @@
 
 # Release Process from develop to main
 
-1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit). Make sure you have a clean develop virtual environment. 
-   
-2. Determine the next AEA version 
+1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit). Make sure you have a clean develop virtual environment.
+
+2. Determine the next AEA version
    Create new release branch named "feature/release-{new-version}, switch to this branch"
    Run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
 
@@ -17,17 +17,17 @@
 
 7. Check the package upgrades are correct by running `python -m aea.cli check-packages` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 
-8. Publish the latest packages to the IPFS registry using `aea push-all`.
+8. Check the docs are up-to-date by running `python scripts/generate_api_docs.py`, `python scripts/check_doc_ipfs_hashes.py --fix` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
 
-9. Check the docs are up-to-date by running `python scripts/generate_api_docs.py` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
+9. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
 
-10. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
+10. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
 
-11. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
+11. Open PRs and merge into develop. Then open develop to main PR and merge it.
 
-12. Open PRs and merge into develop. Then open develop to main PR and merge it.
+12. Tag version on main.
 
-13. Tag version on main.
+13. Publish the latest packages to the IPFS registry using `aea push-all`.
 
 14. Pull main, make a clean environment (`pipenv --rm` and `pipenv --python 3.10` and `pipenv shell`) and create distributions: `make dist`.
 
