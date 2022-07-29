@@ -19,25 +19,27 @@
 
 8. Check the docs are up-to-date by running `python scripts/generate_api_docs.py`, `python scripts/check_doc_ipfs_hashes.py --fix` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
 
-9. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
+9. Ensure the signing protocol hash in open-aea is updated: `tests/test_configurations/test_constants.py::test_signing_protocol_hash`
 
-10. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
+10. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
 
-11. Open PRs and merge into develop. Then open develop to main PR and merge it.
+11. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
 
-12. Tag version on main.
+12. Open PRs and merge into develop. Then open develop to main PR and merge it.
 
-13. Pull main, make a clean environment (`pipenv --rm` and `pipenv --python 3.10` and `pipenv shell`) and create distributions: `make dist`.
+13. Tag version on main.
 
-14. Publish to PyPI with twine: `pip install twine` and `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
+14. Pull main, make a clean environment (`pipenv --rm` and `pipenv --python 3.10` and `pipenv shell`) and create distributions: `make dist`.
+
+15. Publish to PyPI with twine: `pip install twine` and `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
-15. Repeat 14. & 15. for each plugin (use `python setup.py sdist bdist_wheel` instead of `make dist`).
+16. Repeat 14. & 15. for each plugin (use `python setup.py sdist bdist_wheel` instead of `make dist`).
 
-16. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
+17. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
-17. Publish the latest packages to the IPFS registry using `aea push-all`. If necessary, run it several times until all packages are updated.
+18. Publish the latest packages to the IPFS registry using `aea push-all`. If necessary, run it several times until all packages are updated.
 
-18. Build the latest images using `skaffold build`  and `skaffold build -p docs` which will also publish them on docker.
+19. Build the latest images using `skaffold build`  and `skaffold build -p docs` which will also publish them on docker.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
