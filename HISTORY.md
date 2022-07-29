@@ -1,5 +1,16 @@
 # Release History - open AEA
 
+## 1.14.0 (2022-07-29)
+
+AEA:
+- Adds property to determine if skill is abstract in context
+- Fixes ACN process termination
+- Refactors ACN tests and adds auto multiplex
+- Randomizes libp2p test directories
+- Resolves an SSL issue
+
+Chore:
+- Updates the consistency-check script to verify that packages have been pushed to IPFS
 
 ## 1.13.0 (2022-07-14)
 
@@ -29,11 +40,11 @@ Plugins:
 
 Docs:
 - Updates the default font family
-- Updates documentation to use IPFS hashes to work with the components 
+- Updates documentation to use IPFS hashes to work with the components
 
 Chore:
 - Fixes resolution issues for `packaging` dependency
-- Introduces script to check IPFS hash consistency in the documentation 
+- Introduces script to check IPFS hash consistency in the documentation
 
 ## 1.11.0 (2022-06-22)
 
@@ -42,7 +53,7 @@ AEA:
 
 Plugins:
 - Adds `Proof Of Authority` chain support on ethereum plugin
-- Adds gas pricing mechanism for `Polygon` chain on ethereum plugin 
+- Adds gas pricing mechanism for `Polygon` chain on ethereum plugin
 
 Docs:
 - Updates docs to use IPFS hashes to work with the packages
@@ -98,7 +109,7 @@ AEA:
 - Introduces support for usage of hashes as a part of the `PublicId`
 - Adds support for IPFS based registry
 - Introduces dialogue cleanup
-- Adds support for removing the temporal `None` values in the dialogue label 
+- Adds support for removing the temporal `None` values in the dialogue label
 - Updated the profiler to
   - Removing the unwanted variables in profiling
   - Set counters also in the destructor
@@ -134,7 +145,7 @@ Plugins:
 - Adds support for lazy imports on cosmos plugin.
 
 Packages:
-- Adds protocol package for tendermint. 
+- Adds protocol package for tendermint.
 
 Docs:
 - Adds docs for newly introduced ACN modules and packages.
@@ -173,7 +184,7 @@ Packages:
 - Ports `acn` packages from fetchai repo
 - Bumps protobuf compiler version and updates protocols
 
-Docs: 
+Docs:
 - Adds demo of http connections and skills
 - Adds demo of environment variable usage
 - Adds miscellaneous updates to documentation based on developer feedback
@@ -199,7 +210,7 @@ Plugins:
 - Adds support for transaction preparation and log retrieval into the ethereum plugin.
 - Adds support for retrieving the revert reason when transaction is not verified in ethereum plugin.
 
-Docs: 
+Docs:
 - Simplifies documentation further and updates with latest features
 
 ## Plugins patch (2022-01-15)
@@ -214,7 +225,7 @@ Plugins:
 - Improves daemon availability check in `IPFSDaemon` on `open-aea-cli-ipfs`
 - Bumps `open-aea-cli-ipfs` and open-aea-ethereum-ledger to `1.3.1`
 
-Docs: 
+Docs:
 - Removes reference to fetch.ai.
 
 ## 1.3.0 (2021-12-31)
@@ -229,7 +240,7 @@ Plugins:
 - Adds support for package hashing and local IPFS registry on `aea-cli-ipfs`.
 - Bumps `aea-ledger-ethereum` and `aea-cli-ipfs` to `1.3.0`.
 
-Docs: 
+Docs:
 - Applies new styling
 - Simplifies documentation and updates with latest features
 
@@ -305,7 +316,7 @@ AEA:
 - Fixes IPFS hash calculation for large files
 - Fixes protobuf dictionary serializer's uncovered cases and makes it deterministic
 - Fixes scaffolding of error and decision maker handlers
-- Fixes pywin32 problem when checking dependency 
+- Fixes pywin32 problem when checking dependency
 - Improves existing testing tools
 
 Benchmarks:
@@ -314,7 +325,7 @@ Benchmarks:
 Plugins:
 - Upgrades fetchai plugin to use CosmPy instead of CLI calls
 - Upgrades cosmos plugin to use CosmPy instead of CLI calls
-- Upgrades fetchai plugin to use StargateWorld 
+- Upgrades fetchai plugin to use StargateWorld
 - Upgrades cosmos plugin to Stargate
 - Sets the correct maximum Gas for fetch.ai plugin
 
@@ -322,10 +333,10 @@ Packages:
 - Adds support for Tac to be run against fetchai StargateWorld test-net
 - Adds more informative error messages to CosmWasm ERC1155 contract
 - Adds support for atomic swap to CosmWasm ERC1155 contract
-- Adds an ACN protocol that formalises ACN communication using the framework's protocol language 
+- Adds an ACN protocol that formalises ACN communication using the framework's protocol language
 - Adds `cosm_trade` protocol for preparing atomic swap transactions for cosmos-based networks
 - Adds https support for server connection
-- Adds parametrising of http(s) in soef connection 
+- Adds parametrising of http(s) in soef connection
 - Fixes http server content length response problem
 - Updates Oracle contract to 0.14
 - Implements the full ACN spec throughout the ACN packages
@@ -438,7 +449,7 @@ Docs:
 - Multiple additional docs updates
 
 Examples:
-- Adds TAC deployment example 
+- Adds TAC deployment example
 
 ## 1.0.0 (2021-03-30)
 
@@ -936,7 +947,7 @@ Examples:
 - Updates connection loading mechanism
 - Updates all connections for compatibility with new loading mechanism
 - Extracts multiplexer into its own module
-- Implements list all CLI command 
+- Implements list all CLI command
 - Updates wallet to split into several crypto stores
 - Refactors component registry and resources
 - Extends soef connection functionality

@@ -7,6 +7,12 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.13.0` to `v1.14.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.12.0` to `v1.13.0`
 
 This releases introduces the usage of CID v1 IPFS hashes. We still support CID v0 hashes, but it is advisable to switch to CID v1 hashes.
@@ -189,7 +195,7 @@ No backwards incompatible changes for skill and connection development.
 
 ## `v0.9.2` to `v0.10.0`
 
-Skill development sees no backward incompatible changes. 
+Skill development sees no backward incompatible changes.
 
 Connection development requires updating the keyword arguments of the constructor: the new `data_dir` argument must be defined.
 
