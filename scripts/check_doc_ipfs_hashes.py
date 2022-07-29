@@ -22,7 +22,6 @@
 
 import argparse
 import re
-import subprocess  # nosec
 import sys
 from pathlib import Path
 from typing import Dict, Optional
@@ -48,36 +47,6 @@ def read_file(filepath: str) -> str:
     with open(filepath, "r", encoding="utf-8") as file_:
         file_str = file_.read()
     return file_str
-
-
-def get_latest_git_tag() -> str:
-    """Get the latest git tag"""
-    res = subprocess.run(  # nosec
-        [
-            "git",
-            "tag",
-            "--sort=-committerdate",
-        ],  # sort by commit date in descending order
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=True,
-    )
-
-    stdout = res.stdout.decode("utf-8")
-    return stdout.split("\n")[0].strip()
-
-
-def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
-    """Get a specific file version from the commit history given a tag/commit"""
-    latest_tag = latest_tag or get_latest_git_tag()
-    print(f"Checking hashes for tag {latest_tag}")
-    res = subprocess.run(  # nosec
-        ["git", "show", f"{latest_tag}:{file_path}"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=True,
-    )
-    return res.stdout.decode("utf-8")
 
 
 class Package:  # pylint: disable=too-few-public-methods
@@ -140,17 +109,12 @@ class Package:  # pylint: disable=too-few-public-methods
 class PackageHashManager:
     """Class that represents the packages in hashes.csv"""
 
-    def __init__(self, hashes_content: Optional[str] = None) -> None:
+    def __init__(self) -> None:
         """Constructor"""
-        # Read from the working tree if no hash content have been provided
-        if not hashes_content:
-            hashes_file = Path("packages", "hashes.csv").relative_to(".")
-            hashes_content = read_file(str(hashes_file))
-
-        self.packages = [
-            Package(line.strip()) for line in hashes_content.split("\n") if line
-        ]
-        self.packages = [p for p in self.packages if p.name != "scaffold"]
+        hashes_file = Path("packages", "hashes.csv").relative_to(".")
+        with open(hashes_file, "r", encoding="utf-8") as file_:
+            self.packages = [Package(line) for line in file_.readlines()]
+            self.packages = [p for p in self.packages if p.name != "scaffold"]
 
         self.package_tree: Dict = {}
         for p in self.packages:
@@ -233,10 +197,7 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
     errors = False
     hash_mismatches = False
     old_to_new_hashes = {}
-    hashes_content = get_file_from_tag(
-        "packages/hashes.csv"
-    )  # Get the hashes from the latest tag
-    package_manager = PackageHashManager(hashes_content)
+    package_manager = PackageHashManager()
     matches = 0
 
     for md_file in all_md_files:
