@@ -113,7 +113,7 @@ You can have more control on the installed dependencies by leveraging the setupt
 - Install Skaffold to manage containers & tagging:
 
 ```bash
-curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.33.0/skaffold-linux-amd64 && \
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.39.0/skaffold-linux-amd64 && \
 sudo install skaffold /usr/local/bin/
 ```
 ## Documentation
