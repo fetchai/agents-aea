@@ -22,14 +22,15 @@
 
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, Optional
 
 import yaml
+
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
-from scripts.check_ipfs_hashes_pushed import get_file_from_tag  # type: ignore
 
 CLI_REGEX = r"(?P<cli>aea)"
 CMD_REGEX = r"(?P<cmd>.*)"
@@ -47,6 +48,36 @@ def read_file(filepath: str) -> str:
     with open(filepath, "r", encoding="utf-8") as file_:
         file_str = file_.read()
     return file_str
+
+
+def get_latest_git_tag() -> str:
+    """Get the latest git tag"""
+    res = subprocess.run(  # nosec
+        [
+            "git",
+            "tag",
+            "--sort=-committerdate",
+        ],  # sort by commit date in descending order
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+
+    stdout = res.stdout.decode("utf-8")
+    return stdout.split("\n")[0].strip()
+
+
+def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
+    """Get a specific file version from the commit history given a tag/commit"""
+    latest_tag = latest_tag or get_latest_git_tag()
+    print(f"Checking hashes for tag {latest_tag}")
+    res = subprocess.run(  # nosec
+        ["git", "show", f"{latest_tag}:{file_path}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+    return res.stdout.decode("utf-8")
 
 
 class Package:  # pylint: disable=too-few-public-methods
