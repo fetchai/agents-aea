@@ -99,7 +99,9 @@ you can follow the rest of the guide the same way as if not using docker.
 
 Ensure, you are in a clean working directory. Create it manually running:
 
-`mkdir my_aea_projects/ && cd my_aea_projects/`
+``` bash
+mkdir my_aea_projects/ && cd my_aea_projects/
+```
 
 Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
