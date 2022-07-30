@@ -20,6 +20,9 @@
 
 """This module contains the tests of the messages module."""
 
+import os
+from pathlib import Path
+from types import ModuleType
 from typing import Type
 from unittest import mock
 from unittest.mock import patch
@@ -30,7 +33,9 @@ from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
+from libs.go.aealite.protocols.acn import v1_0_0 as aealite_acn  # type: ignore
 
+from packages.valory.protocols import acn as package_acn
 from packages.valory.protocols.acn.dialogues import AcnDialogue as BaseAcnDialogue
 from packages.valory.protocols.acn.dialogues import AcnDialogues as BaseAcnDialogues
 from packages.valory.protocols.acn.message import AcnMessage
@@ -256,3 +261,20 @@ class AcnDialogues(BaseAcnDialogues):
             role_from_first_message=role_from_first_message,
             dialogue_class=AcnDialogue,
         )
+
+
+def test_aealite_protocol_matching():
+    """Ensure ACN protocol files are identical on aealite"""
+
+    def get_path(module: ModuleType) -> Path:
+        return Path(os.path.sep.join(module.__package__.split(".")))  # type: ignore
+
+    acn_path, aealite_path = map(get_path, (package_acn, aealite_acn))
+
+    readme = (acn_path / "README.md").read_text()
+    yaml = (aealite_path / "acn.yaml").read_text()
+    assert yaml in readme
+
+    go_package = """option go_package = "libp2p_node/protocols/acn/v1_0_0";\n\n"""
+    acn, aealite = ((p / "acn.proto").read_text() for p in (acn_path, aealite_path))
+    assert acn == aealite.replace(go_package, "")
