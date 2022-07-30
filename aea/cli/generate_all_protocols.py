@@ -472,4 +472,8 @@ def generate_all_protocols(
     if check_clean:
         is_clean = check_working_tree_is_dirty()
         if not is_clean:
+            print(
+                "You should bump PROTOCOL_GENERATOR_VERSION in aea/protocols/__init__.py "
+                "and rerun the protocol generation"
+            )
             sys.exit(1)
