@@ -85,11 +85,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         # generate certificates for connection
         self.nested_set_config(
             self.conn_path + ".cert_requests",
-            [
-                make_cert_request(
-                    self.node_connection.node.pub, ledger_id, f"./cli_test"
-                )
-            ],
+            [make_cert_request(self.node_connection.node.pub, ledger_id, "./cli_test")],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
