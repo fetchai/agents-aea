@@ -219,4 +219,6 @@ if __name__ == "__main__":
     generate_api_docs()
 
     if arguments.check_clean:
-        check_working_tree_is_dirty()
+        is_clean = check_working_tree_is_dirty()
+        if not is_clean:
+            sys.exit(1)

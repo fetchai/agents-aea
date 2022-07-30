@@ -20,11 +20,14 @@
 
 import shutil
 import subprocess  # nosec
-import sys
 
 
-def check_working_tree_is_dirty() -> None:
-    """Check if the current Git working tree is dirty."""
+def check_working_tree_is_dirty() -> bool:
+    """
+    Check if the current Git working tree is dirty.
+
+    :return: True if the working tree is not dirty, False otherwise
+    """
     print("Checking whether the Git working tree is dirty...")
     result = subprocess.check_output(  # nosec
         [str(shutil.which("git")), "diff", "--stat"]
@@ -32,6 +35,6 @@ def check_working_tree_is_dirty() -> None:
     if len(result) > 0:
         print("Git working tree is dirty:")
         print(result.decode("utf-8"))
-        sys.exit(1)
-    else:
-        print("All good!")
+        return False
+    print("All good!")
+    return True
