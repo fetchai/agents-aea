@@ -6,17 +6,17 @@ description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVgyK1CoqvZ3veizsasgiBxA8Se2RzrkYn4XQgQ1twKTH
-  __init__.py: QmVdEbfzEyGcS59ypmWaMNHGv9N3CDV7s2tdwnH7Xhmq4q
-  base.py: QmcL1H7V5VqbDShrmTA1yTjS6PW4bjCVTgGwWVTiTGeSfe
-  connection.py: QmPKDQZtcKRxxvuJxBKED49t8SkJKajkY3rGQRdCuLGmxM
-  contract_dispatcher.py: QmcKmopEkMWXeafGWFPQ843v7BngrwQWAZJM9tEfaXXA7w
-  ledger_dispatcher.py: QmToxXbRXxw7SCJEj5gokTyHo5LYHrgyySAHMPhhRaPyE4
+  README.md: bafybeidngz2sschz53n2zrj3fbifoxtnanmgskth2buroghhydniulxblq
+  __init__.py: bafybeidmifvya6yjc6h7xppntnwqji2crm5o74xrwhmkutycdo4cqdryhy
+  base.py: bafybeigp3ffs5gafbwlvle5cxr34srejdwpkm5q45oyalzg3x4r6ycaopu
+  connection.py: bafybeiaopv7sdzqibxnbo3epvu7ufdnwdliml2lzssxuaer337xzgiheqi
+  contract_dispatcher.py: bafybeigpzih7porhorupuu5zlrg7ho6fswf4qc65xq22wypgqzwxowqlay
+  ledger_dispatcher.py: bafybeicrjfb2f4ngb3lvwgfbxf3r3ukk7pgm3oaour4htmnuqqn44ltmku
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:1.0.0:QmdJq6EqSouBuCwwpbYUppFSxSgRoKHiRvy1571AU85SuF
-- fetchai/ledger_api:1.0.0:Qmdy72BMaubPyppiQMerrrnPxXA4XYxgxhADCbG6Mw1bNf
+- fetchai/contract_api:1.0.0:bafybeiejyng6ckv6bpctgoysg6lljlpnzcwmgfwpuzyr6g2ujtm3mb6bqq
+- fetchai/ledger_api:1.0.0:bafybeidjpzwpiqnfnr65gh2hvcwpzmyexts2yarjasohnqvzabftvmvfl4
 class_name: LedgerConnection
 config:
   ledger_apis:

@@ -46,7 +46,7 @@ jobs:
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3

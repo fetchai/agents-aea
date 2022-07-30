@@ -6,16 +6,16 @@ description: The erc1155 contract implements an ERC1155 contract package.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmbM3Jrh5fFuRR3rfyF3FxiriwGGJ2Q6Bob7LrVQWcHscu
-  __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
-  build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE
-  build/erc1155.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
-  build/erc1155.wasm: QmSedaqcsLJHVyfBYJ71PZpVH4j8qWzAmBeaPkHR3fz7gi
-  contract.py: QmamM5yHBeKpdaxScWcEgZKcUNADiPqiLGLJd1aJ6NJv24
-  contracts/Migrations.sol: QmbW34mYrj3uLteyHf3S46pnp9bnwovtCXHbdBHfzMkSZx
-  contracts/erc1155.vy: QmXwob8G1uX7fDvtuuKW139LALWtQmGw2vvaTRBVAWRxTx
-  migrations/1_initial_migration.js: QmcxaWKQ2yPkQBmnpXmcuxPZQUMuUudmPmX3We8Z9vtAf7
-  migrations/2_deploy_contracts.js: QmeLraUZBgtJK5KAhsf4Bb5S9amcYugfMJsjbhZgfmEfuP
+  README.md: bafybeigbif52kdfcgx4h2f57xtcwuxkt6hlbyrsceyqoxnoh4pd24pxuxi
+  __init__.py: bafybeidlszdrxy5blev2tyvajau443hsh4v2y65rsey2gsfet3c7syggqa
+  build/Migrations.json: bafybeih3i7gw7wekpsw7eylufug26dqphxara7acclv45mgkwy2bsookye
+  build/erc1155.json: bafybeifopttvhbk7gsi3iqwewwfhtytrld6o4ooeb7xjmlons3v6m25zna
+  build/erc1155.wasm: bafybeicabhxaz2syhzmoobrmbi5gt47txtvhkavs5mum2fxcgo2nb2vxl4
+  contract.py: bafybeifyt7leblaiclunhfpfr4zyyrvjzqbfzn647cq4fxik5zxmhdrmre
+  contracts/Migrations.sol: bafybeigdr5xyir4mhnqk4vp6hpivu2m2kq4jnlq7orwb7wqtgjzfihw2cm
+  contracts/erc1155.vy: bafybeieoxkgqprmmgvl2xdqtch4payvxzpw3c76thmtrl7vbmc6zxzl2a4
+  migrations/1_initial_migration.js: bafybeigzg7dadlq7sepncquzoo5hgs7q2pwvbhzilolgkjkr3jacb2owvy
+  migrations/2_deploy_contracts.js: bafybeihnzburnurq4gvp4rj36b57uzrlgif5y73ggyu3rfc3iot4e5zppy
 fingerprint_ignore_patterns: []
 class_name: ERC1155Contract
 contract_interface_paths:

@@ -63,10 +63,15 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
-IPFS_HASH_LENGTH_LIMIT = 46
 SIMPLE_ID_REGEX = rf"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
-IPFS_HASH_REGEX = rf"[a-zA-Z_][a-zA-Z0-9]{{{IPFS_HASH_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
+
+IPFS_HASH_LENGTH_LIMIT_V0 = 46
+IPFS_HASH_LENGTH_LIMIT_V1 = 59
+IPFS_HASH_REGEX_V0 = rf"Qm[a-zA-Z0-9]{{{IPFS_HASH_LENGTH_LIMIT_V0 - 2}}}"
+IPFS_HASH_REGEX_v1 = rf"ba[a-zA-Z0-9]{{{IPFS_HASH_LENGTH_LIMIT_V1 - 2}}}"
+IPFS_HASH_REGEX = f"(({IPFS_HASH_REGEX_V0})|({IPFS_HASH_REGEX_v1}))"
+
 
 _default_logger = logging.getLogger(__name__)
 

@@ -299,3 +299,22 @@ the tx logs
 
 #### get`_`method`_`data
 
+```python
+@classmethod
+def get_method_data(cls, ledger_api: LedgerApi, contract_address: str,
+                    method_name: str, **kwargs: Any) -> Optional[JSONLike]
+```
+
+Get a contract call encoded data.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `contract_address`: the contract address.
+- `method_name`: the contract method name
+- `kwargs`: the contract method args
+
+**Returns**:
+
+the tx  # noqa: DAR202
+

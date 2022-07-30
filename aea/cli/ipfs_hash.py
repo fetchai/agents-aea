@@ -43,6 +43,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import load_configuration_object
+from aea.helpers.cid import DEFAULT_ENCODING, to_v0, to_v1
 from aea.helpers.dependency_tree import DependecyTree, dump_yaml, load_yaml, to_plural
 from aea.helpers.fingerprint import check_fingerprint, update_fingerprint
 from aea.helpers.io import from_csv, to_csv
@@ -146,6 +147,7 @@ def hash_package(
     package_hash = IPFSHashOnly.hash_directory(
         str(configuration.directory), wrap=(not no_wrap)
     )
+
     return key, package_hash
 
 
@@ -365,3 +367,26 @@ def hash_file(path: str, no_wrap: bool) -> None:
 
     click.echo(f"Path : {path}")
     click.echo(f"Hash : {IPFSHashOnly.get(path, wrap=not no_wrap)}")
+
+
+@hash_group.command(name="to-v0")
+@click.argument("hash_string")
+def to_v0_string(hash_string: str) -> None:
+    """Convert hash to CID v0."""
+    try:
+        v0_hash = to_v0(hash_string)
+        click.echo(v0_hash)
+    except Exception as e:  # pylint: disable=broad-except
+        raise click.ClickException(str(e)) from e
+
+
+@hash_group.command(name="to-v1")
+@click.argument("hash_string")
+@click.option("--encoding", type=str, default=DEFAULT_ENCODING)
+def to_v1_string(hash_string: str, encoding: str) -> None:
+    """Convert hash to CID v1."""
+    try:
+        v1_hash = to_v1(hash_string, encoding)
+        click.echo(v1_hash)
+    except Exception as e:  # pylint: disable=broad-except
+        raise click.ClickException(str(e)) from e

@@ -10,17 +10,20 @@ chmod +x install.sh
 ./install.sh
 ```
 ```bash
-docker pull fetchai/aea-user:latest
+docker pull valory/open-aea-user:latest
 ```
 ```bash
-docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v $(pwd):/agents --workdir=/agents valory/open-aea-user:latest
 ```
 ```bash
-docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest
+docker run -it -v %cd%:/agents --workdir=/agents valory/open-aea-user:latest
 ```
 ``` bash
 mkdir my_aea_projects/
 cd my_aea_projects/
+```
+``` bash
+mkdir my_aea_projects/ && cd my_aea_projects/
 ```
 ``` bash
 which pipenv
@@ -34,17 +37,21 @@ svn export https://github.com/valory-xyz/open-aea.git/trunk/scripts
 svn export https://github.com/valory-xyz/open-aea.git/trunk/packages
 ```
 ``` bash
+echo "$SHELL"
+```
+``` bash
 pip install open-aea[all]
+pip install open-aea-cli-ipfs
 ```
 ```
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.12.0/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.14.0/packages packages
 ```
 
 ``` bash
 sudo apt-get install python3.7-dev
 ```
 ``` bash
-aea init --local
+aea init --remote
 ```
 ``` bash
 Do you have a Registry account? [y/N]: n
@@ -65,7 +72,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmZgZRnT8VJoE5RKDNoJTeaaj4PDzaHAbggSXxcWuRjxkq --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeicyirm7y2ygptr5rybwznwof2k6b7fvlsvebsz4pa6cfjijva3rdu --remote
 cd my_first_aea
 ```
 ``` bash
@@ -151,19 +158,19 @@ aea delete my_first_aea
 
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmZgZRnT8VJoE5RKDNoJTeaaj4PDzaHAbggSXxcWuRjxkq --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeicyirm7y2ygptr5rybwznwof2k6b7fvlsvebsz4pa6cfjijva3rdu --remote
 cd my_first_aea
 ```
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:QmZgZRnT8VJoE5RKDNoJTeaaj4PDzaHAbggSXxcWuRjxkq --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeicyirm7y2ygptr5rybwznwof2k6b7fvlsvebsz4pa6cfjijva3rdu --remote
 cd my_first_aea
 ```
 
 ```bash
 mkdir packages
 cd my_first_aea
-aea add protocol fetchai/default:1.0.0:QmWoiXYAKqwyqXDQ4gC1b11uRAxKRBiicWWuqthqeNWyEw --remote
+aea add protocol fetchai/default:1.0.0:bafybeicqyilg4a45ezogmfancp7dc2j7lyaevw6vqcsxs76f7f53qpp4ii --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea

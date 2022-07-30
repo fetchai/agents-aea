@@ -6,10 +6,10 @@ description: Raise an exception, at some point.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
-  behaviours.py: QmaA79S7q3FiySHbL8fg5S8xJvKe9UsJYqbMF2jazgyGgf
-  handlers.py: Qmf8XuXNDzqHNdo7Q18y9wCFujrtk6Tx1zaADsQ5MuzNRg
-  tasks.py: QmPhW9JNVyNzPi9KK4K2mQo4aavMDziXAWuVsZ3J3xAUso
+  __init__.py: bafybeihzxbatbkqownjp3rt57esindxsi5l7loxi55qymuorlnyadw6l5m
+  behaviours.py: bafybeifptc7qwbgwdseqr6ckiitxz6t6rtnujzdjxk66kbnema6tj6gjfa
+  handlers.py: bafybeihzpqcaj7qsdsrl7ejlksfgtdkdbgigjgmkcvfdly3wodkhebtuwm
+  tasks.py: bafybeiaugmzoahx6aikop25jp6v477ucss4hbmxmh4celpxp7abq6hrguy
 fingerprint_ignore_patterns: []
 build_entrypoint: path/to/script.py
 contracts: []

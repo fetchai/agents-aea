@@ -7,14 +7,14 @@ description: A protocol for testing purposes.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmNtd4dk2YSc9xN8KGT1uM5VQL8bFJmfTfetipRisw1Cgp
-  __init__.py: QmV17bkRtopdy2FyiVfYCxUrQvpCYpy1tD2JyZ4CJjUdE2
-  custom_types.py: QmU95xh629dyewpvHvZaCJVX1JDGoSxVUNy3c7hGpnefYr
-  dialogues.py: QmT8tB8RTXPsVvHHjPWGPgAEWtWA9WgFbTx39aspi7xZ32
-  message.py: QmeyVWQLk8e4k4PoJim7KLZN5W3Grbb83RtkMPyEWj7gvS
-  serialization.py: QmUQbHJ5zeANS5ZVopjExphghLU9mdWqmUL8XwofWKJ9QN
-  t_protocol.proto: QmedX13Z6cNgbTJ8L9LyYG3HtSKhkY8ntq6uVdtepmt2cg
-  t_protocol_pb2.py: QmdNqU6rGihaNUTcPeWX8nPrahcKNKJ2BBqEWqAd2yW1TQ
+  README.md: bafybeiaigc4yhuesn7hiud5egmqhgwbo5vgi7hcmk5cq4etzcqhctvs5oe
+  __init__.py: bafybeigg3y3bwb3qix6w6pjrgtvu3nos6pkbywk444hzbccoly3yip4t5e
+  custom_types.py: bafybeicwf62cvvnn3izbkvbkag7clz45kw6ihvg7lh3cwgckwfw24gtui4
+  dialogues.py: bafybeichi2yny2utfyada7dgddsrik3qaqtbumzylnduagr4utx63e5mju
+  message.py: bafybeihxfmjymu56pgegposajtpfmbm3frbhlsmdjenz7da6atb5tmiaq4
+  serialization.py: bafybeic2fci2s2ojkjn23licj2pzshbsg7zgjihvnjgiyt6fwq77gih72m
+  t_protocol.proto: bafybeihsbutc6dfokbgn5zuub6qnm3gqrivvaymt3gp42fbfnamebrfvce
+  t_protocol_pb2.py: bafybeig7n2qvngwpdjpuqewgoklii42bkfxyfkzq24gnkzrb32o5e4kdem
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

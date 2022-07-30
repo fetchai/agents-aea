@@ -7,24 +7,24 @@ description: The ERC1155 deploy skill has the ability to deploy and interact wit
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
-  __init__.py: QmXT2fFD2y4hXNU7WLtaGnMJ74GG3UDuWeYXufDBdnXWcv
-  behaviours.py: QmatnZhzx8k5Gdw1o9huKyN67VVQB2UiGTzddButBVW9Ke
-  dialogues.py: QmT9ytEAKc6Gqdc7AxtB2on61uVyGne7wpsFAoHESDPMrb
-  handlers.py: QmbfRjCm7C2aB5fMeDUJBmYfQxMwmrkdaBQzYyX1Yhwq4s
-  strategy.py: Qmb4yHRtGYwZFdKHdKZS7NLyFhFbnipvGh3SznVDbZRpGd
+  README.md: bafybeiae7b2hjkzsd7z2yjft37hrqt5rfct6ocrox4pna7u4ypunz7rmw4
+  __init__.py: bafybeiehln6kky4ih7d2737tb4h4ofoffixbefhmjzlpzhzpkhlpg7dww4
+  behaviours.py: bafybeif2q62726tef2senpzwbjfsowep3v462xogzxo2j7jdfo6ndsjuue
+  dialogues.py: bafybeichr247l7yyggfsul2d2b42365cvxvuidovsfx5xvybabi7gfbudq
+  handlers.py: bafybeigf65e2hhzropscpyyvksxrtnkopofmbdhqfb6jty3vcdsippmz6a
+  strategy.py: bafybeif5eor26xfagaoy3xafmwraw74btlw3o7jv2a6hpon46x5flzt6ey
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:QmQRDgY6es4XmiPMoB37viQRyFJqVDjVJek7QpLszLYqMX
+- fetchai/ledger:0.19.0:bafybeihlkrdflocnottwlo6jqti7mtldi27ijpaiff4e67d2grzlukzgty
 contracts:
-- fetchai/erc1155:0.22.0:QmcWju76BLXDzeH6po8nHhkZL7BgSEq4KqgvTgP1Y1ZUQ2
+- fetchai/erc1155:0.22.0:bafybeidt3wg6cmdd6xjw6appgnb2umx2ixdwwaubdvkle2bcd6gxcx2wue
 protocols:
-- fetchai/contract_api:1.0.0:QmdJq6EqSouBuCwwpbYUppFSxSgRoKHiRvy1571AU85SuF
-- fetchai/default:1.0.0:QmWoiXYAKqwyqXDQ4gC1b11uRAxKRBiicWWuqthqeNWyEw
-- fetchai/fipa:1.0.0:QmcBRxvzfCTCCNCbAnEJ5wEvHQPHk81eVAuXGPR5d6cR5V
-- fetchai/ledger_api:1.0.0:Qmdy72BMaubPyppiQMerrrnPxXA4XYxgxhADCbG6Mw1bNf
-- fetchai/oef_search:1.0.0:QmbAQhRUkcQmBYY3yUcLUjzsNjUUB1iWALweg1vmzDoYym
-- open_aea/signing:1.0.0:QmX5gZL9j8y1z8HYkNJmMkcdTBH4ENiJBAFfYYuJgYcHSH
+- fetchai/contract_api:1.0.0:bafybeiejyng6ckv6bpctgoysg6lljlpnzcwmgfwpuzyr6g2ujtm3mb6bqq
+- fetchai/default:1.0.0:bafybeicqyilg4a45ezogmfancp7dc2j7lyaevw6vqcsxs76f7f53qpp4ii
+- fetchai/fipa:1.0.0:bafybeicdqi6aetlg7rlvypswinus7l2maldm5xrp4uybetreccaafoac7a
+- fetchai/ledger_api:1.0.0:bafybeidjpzwpiqnfnr65gh2hvcwpzmyexts2yarjasohnqvzabftvmvfl4
+- fetchai/oef_search:1.0.0:bafybeie7viye2avqlggl4no4reju3c767hputh2y43h6jiuj3okcc676fe
+- open_aea/signing:1.0.0:bafybeighegkzpoz3byppiermawxzbbzsqrx2ama4kpf4zhvwazsrimlkmu
 skills: []
 behaviours:
   service_registration:

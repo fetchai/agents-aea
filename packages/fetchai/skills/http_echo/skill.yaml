@@ -7,16 +7,16 @@ description: The http echo skill prints out the content of received http message
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmYC2Y95Mg327LyHzQ3WbxZA8g1NfSHasmDTRcvrGCXmiR
-  __init__.py: QmbzzcpZFLNPNSMWJxPoJo225KdN3sdF1iCpo9P7g8ZnsH
-  dialogues.py: QmQhYUN61trwX9juEwgyBeYHmEUyTZQ7voMMZM4RXrcoyU
-  handlers.py: QmWPorow1KQLFcHkyX7FMziF2ugyDQ9NiUzUvKYpMsNaHo
+  README.md: bafybeiesl5jlvvu4enydib32bpyfqphlkdulxy3oqid3t32cjxya5qykci
+  __init__.py: bafybeigk7kbqmfrjjhyv6dvaacogp24qsv7czeb24zupvcgjqluxmlhlba
+  dialogues.py: bafybeibdcgcmvl3g7gp7rvndrhih7fpj4qbeihdqodgqndjuaqsq3g27bm
+  handlers.py: bafybeidxvskxngwlhdnxs2xwr54vch2wjks2l5gqtgr5t5bc2izpjfr3ti
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.22.0:QmbJ2Bcv156rY4ikSc7RB6Z4EwsXeZW1MqvdYcjw4kKY9z
+- fetchai/http_server:0.22.0:bafybeifpu6bxwhmc7rtcyi4u6pgkzmn57qielr5d4ygvyhuyb44pfkqf3i
 contracts: []
 protocols:
-- fetchai/http:1.0.0:Qmdz2FD7P9VXzUMZpLUh3DV5YtgWZwJKDxxw78heeaHv4M
+- fetchai/http:1.0.0:bafybeif6axlnlm37vqtlthra2evrbhaenxn7qyayi4ajgnany6ajsr256q
 skills: []
 behaviours: {}
 handlers:

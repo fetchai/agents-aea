@@ -17,139 +17,53 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains tests for P2PLibp2p connection."""
-import os
-import shutil
-import tempfile
-from unittest.mock import Mock
 
 import pytest
 
-from aea.mail.base import Envelope
-from aea.multiplexer import Multiplexer
-
-from packages.fetchai.protocols.default.message import DefaultMessage
-
 from tests.common.utils import wait_for_condition
-from tests.conftest import (
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
     _make_libp2p_connection,
-    libp2p_log_on_failure,
     libp2p_log_on_failure_all,
 )
 
 
-MockDefaultMessageProtocol = Mock()
-MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
-MockDefaultMessageProtocol.protocol_specification_id = (
-    DefaultMessage.protocol_specification_id
-)
-
-
 @libp2p_log_on_failure_all
-class TestSlowQueue:
+class TestSlowQueue(BaseP2PLibp2pTest):
     """Test that libp2p node uses slow queue in case of long DHT lookups."""
 
     @classmethod
-    @libp2p_log_on_failure
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
 
-        cls.log_files = []
-        cls.multiplexers = []
+        connection_genesis = cls.make_connection()
+        genesis_peer = connection_genesis.node.multiaddrs[0]
 
-        try:
-            temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
-            os.mkdir(temp_dir_gen)
-            cls.bad_address = _make_libp2p_connection(
-                data_dir=temp_dir_gen
-            ).node.address
-            cls.connection_genesis = _make_libp2p_connection(data_dir=temp_dir_gen)
-            cls.multiplexer_genesis = Multiplexer(
-                [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
-            )
-            cls.log_files.append(cls.connection_genesis.node.log_file)
-            cls.multiplexer_genesis.connect()
-            cls.multiplexers.append(cls.multiplexer_genesis)
+        cls.conn = cls.make_connection(entry_peers=[genesis_peer])
+        for _ in range(2):
+            cls.make_connection(entry_peers=[genesis_peer])
 
-            genesis_peer = cls.connection_genesis.node.multiaddrs[0]
-
-            cls.connections = [cls.connection_genesis]
-
-            temp_dir = os.path.join(cls.t, "temp_dir_100")
-            os.mkdir(temp_dir)
-
-            cls.conn = _make_libp2p_connection(
-                data_dir=temp_dir, entry_peers=[genesis_peer]
-            )
-
-            for i in range(2):
-                temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
-                os.mkdir(temp_dir)
-                conn = _make_libp2p_connection(
-                    data_dir=temp_dir, entry_peers=[genesis_peer]
-                )
-                mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
-
-                cls.connections.append(conn)
-                cls.log_files.append(conn.node.log_file)
-                mux.connect()
-                cls.multiplexers.append(mux)
-
-            for conn in cls.connections:
-                assert conn.is_connected is True
-        except Exception as e:
-            cls.teardown_class()
-            raise e
+    def test_connection_is_established(self):
+        """Test connection established."""
+        assert self.all_connected
 
     @pytest.mark.asyncio
     async def test_slow_queue(self):
         """Test slow queue."""
-        con2 = self.connections[-1]
-        await self.conn.connect()
 
-        def _make_envelope(addr):
-            msg = DefaultMessage(
-                dialogue_reference=("", ""),
-                message_id=1,
-                target=0,
-                performative=DefaultMessage.Performative.BYTES,
-                content=b"hello",
-            )
+        bad_address = _make_libp2p_connection().address
+        good_address = self.multiplexers[-1].connections[-1].address
 
-            envelope = Envelope(
-                to=addr,
-                sender=self.conn.node.address,
-                message=msg,
-            )
-            return envelope
+        for to in [good_address, bad_address]:
+            sender = self.conn.address
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            await self.conn._node_client.send_envelope(envelope)
 
-        try:
-            for _ in range(50):
-                for addr in [con2.node.address, self.bad_address]:
-                    await self.conn._node_client.send_envelope(_make_envelope(addr))
+        def _check():
+            with open(self.conn.node.log_file) as f:
+                return "while sending slow envelope:" in f.read()
 
-            for _ in range(2):
-                for addr in [self.bad_address, con2.node.address]:
-                    await self.conn._node_client.send_envelope(_make_envelope(addr))
-
-            def _check():
-                with open(self.conn.node.log_file) as f:
-                    return "while sending slow envelope:" in f.read()
-
-            wait_for_condition(_check, timeout=30, period=1)
-        finally:
-            await self.conn.disconnect()
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        wait_for_condition(_check, timeout=30, period=1)

@@ -17,30 +17,25 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains tests for P2PLibp2p connection."""
-import os
+
 import re
-import shutil
-import tempfile
 from unittest.mock import Mock
 
 import pytest
 import requests
 
 from aea.mail.base import Envelope
-from aea.multiplexer import Multiplexer
 
-from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p_mailbox.connection import NodeClient
 from packages.valory.protocols.acn import acn_pb2
 from packages.valory.protocols.acn.message import AcnMessage
 
-from tests.common.utils import wait_for_condition
-from tests.conftest import (
-    _make_libp2p_client_connection,
-    _make_libp2p_connection,
-    default_ports,
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
+    ports,
 )
 
 
@@ -52,46 +47,28 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 
 
 @pytest.mark.asyncio
-class TestMailboxAPI:
+class TestMailboxAPI(BaseP2PLibp2pTest):
     """Test that connection is established and torn down correctly"""
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        cls.delegate_port = next(default_ports)
-        cls.mailbox_port = next(default_ports)
-        os.chdir(cls.t)
+        super().setup_class()
 
-        cls.temp_dir = os.path.join(cls.t, "temp_dir_node")
-        os.mkdir(cls.temp_dir)
-        cls.connection_node = _make_libp2p_connection(
-            data_dir=cls.temp_dir,
+        cls.delegate_port = next(ports)
+        cls.mailbox_port = next(ports)
+
+        cls.connection_node = cls.make_connection(
             delegate=True,
             delegate_port=cls.delegate_port,
             mailbox=True,
             mailbox_port=cls.mailbox_port,
         )
-        temp_dir_client1 = os.path.join(cls.t, "temp_dir_client")
-        os.mkdir(temp_dir_client1)
-        temp_dir_client2 = os.path.join(cls.t, "temp_dir_client2")
-        os.mkdir(temp_dir_client2)
-        cls.connection1 = _make_libp2p_client_connection(
-            data_dir=temp_dir_client1,
+
+        cls.connection_client = cls.make_client_connection(
             peer_public_key=cls.connection_node.node.pub,
             node_port=cls.delegate_port,
         )
-
-        cls.connection2 = _make_libp2p_client_connection(
-            data_dir=temp_dir_client2,
-            peer_public_key=cls.connection_node.node.pub,
-            node_port=cls.delegate_port,
-        )
-        cls.multiplexer1 = Multiplexer([cls.connection_node])
-        cls.multiplexer1.connect()
-
-        wait_for_condition(lambda: cls.connection_node.is_connected is True, 10)
 
     @pytest.mark.asyncio
     async def test_message_delivery(self):  # nosec
@@ -101,7 +78,7 @@ class TestMailboxAPI:
         r = requests.get(f"{url}/ssl_signature", verify=False)  # nosec
         assert r.status_code == 200, r.text
 
-        node_client = NodeClient(Mock(), self.connection2.node_por)
+        node_client = NodeClient(Mock(), self.connection_client.node_por)
         agent_record = node_client.make_agent_record()
         addr = agent_record.address
         performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
@@ -117,7 +94,7 @@ class TestMailboxAPI:
         ), r.text  # pylint: disable=no-member
         session_id = r.text
 
-        envelope = self.make_envelope(addr, addr)
+        envelope = self.enveloped_default_message(to=addr, sender=addr)
         r = requests.post(
             f"{url}/send_envelope",
             data=envelope.encode(),
@@ -135,14 +112,7 @@ class TestMailboxAPI:
         assert r.content, "no envelope"
 
         delivered_envelope = Envelope.decode(r.content)
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message == envelope.message
+        self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
         # no new envelopes
         r = requests.get(
@@ -169,30 +139,3 @@ class TestMailboxAPI:
         )
         assert r.status_code == 400, r.text
         assert "session_id" in r.text
-
-    def make_envelope(self, from_: str, to_: str) -> Envelope:
-        """Make sample envelope."""
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=to_,
-            sender=from_,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
-        return envelope
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.multiplexer1.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass

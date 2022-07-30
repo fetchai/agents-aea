@@ -60,6 +60,7 @@ from aea.configurations.constants import (
     PROTOCOLS,
     SKILLS,
 )
+from aea.helpers.cid import to_v0, to_v1
 
 
 try:
@@ -200,7 +201,7 @@ class IPFSRegistry(BaseRegistry):
 
     def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
         """Check if item is pinned on the node."""
-        if not self.ipfs_tool.is_a_package(public_id.hash):
+        if not self.ipfs_tool.is_a_package(to_v0(public_id.hash)):
             raise click.ClickException(
                 f"Dependency {public_id} is missing from registry.\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically."
             )
@@ -221,6 +222,8 @@ class IPFSRegistry(BaseRegistry):
             )
 
         _, package_hash, _ = self.ipfs_tool.add(component_path)
+        package_hash = to_v1(package_hash)
+
         click.echo("Pushed missing package with:")
         click.echo(f"\tPublicId: {public_id}")
         click.echo(f"\tPackage hash: {package_hash}")
@@ -412,6 +415,7 @@ def _publish_agent_ipfs(ctx: Context, push_missing: bool) -> None:
             readme_file_target_path = os.path.join(package_dir, DEFAULT_README_FILE)
             shutil.copy(readme_source_path, readme_file_target_path)
         _, package_hash, _ = registry.ipfs_tool.add(package_dir)
+        package_hash = to_v1(package_hash)
 
     click.echo(
         f"Successfully published agent {name} to the Registry with.\n\tPublic ID: {ctx.agent_config.public_id}\n\tPackage hash: {package_hash}"

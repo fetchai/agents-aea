@@ -7,14 +7,14 @@ description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmfZxjMzApLKdff7s77G6RKqsmXLdc18yLoMLpDsoV2C8c
-  __init__.py: QmQDHGkhfcLWN64KFNZr3gUed2x17bCBWT7KpF7TYPNAN9
-  custom_types.py: Qmf72KRbkNsxxAHwMtkmJc5TRL23fU7AuzJAdSTftckwJQ
-  dialogues.py: QmRvjJDEbGyhTh1cF6kSbzf45F7bEXFpWMnTw4Yf2TBymL
-  fipa.proto: QmS7aXZ2JoG3oyMHWiPYoP9RJ7iChsoTC9KQLsj6vi3ejR
-  fipa_pb2.py: QmT6CxDiwyz3ucsNxZSxtNZXE9NThshV68zvXEYtiWjEUP
-  message.py: QmSHn574QE8rgZhky2PaTUjRx8HgXWzh1vX57hfv38S8Rr
-  serialization.py: QmaT2ufYcRQE2naPPQHtj97XNDLd6aRZcA3Q2oWqqNQUhw
+  README.md: bafybeih776npzene2jytmixiwgq7xmla7yicp5qzqohbk74eewv6c5banu
+  __init__.py: bafybeidk6rt35tuwcrhpd4essdbm5ivijsmyvqa3yha6crsvjmd5jtcswa
+  custom_types.py: bafybeihzdd5m6h7y6xghpyzp54ddd6b2id7mj5qeafnnrg23tim45g6b2e
+  dialogues.py: bafybeibvjx7pqyffzyea4jz7ffwigeqowthqxwrq6z327x7jo5rfcez2xm
+  fipa.proto: bafybeibycv37qg5eesvmptehsg2uydyxh34fa2xiqgtjfqevhn2fg622ca
+  fipa_pb2.py: bafybeicgs4xb5aggw7pv5szdcp7jjdvii3hec3savyt2amsjkfjkd4ywja
+  message.py: bafybeib2wjkf5ku5oomvti2mxved4qceqsw4e2p3hb4vlafz6zvfvgseou
+  serialization.py: bafybeift53kcwwj77jkpk2tqfqg3wkwyo7ok3ceywrevg76mpbstxq4gpi
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

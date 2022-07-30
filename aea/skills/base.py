@@ -87,6 +87,13 @@ class SkillContext:
         self._logger: Optional[Logger] = None
 
     @property
+    def is_abstract_component(self) -> bool:
+        """Get if the skill is abstract."""
+        if self._skill is None:
+            raise ValueError("Skill not set yet.")  # pragma: nocover
+        return self._skill.configuration.is_abstract_component
+
+    @property
     def logger(self) -> Logger:
         """Get the logger."""
         if self._logger is None:

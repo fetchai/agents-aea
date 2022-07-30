@@ -18,533 +18,208 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains resilience and fault tolerance tests for P2PLibp2p connection."""
-import os
-import shutil
-import tempfile
-import time
 
 import pytest
 
-from aea.crypto.registries import make_crypto
-from aea.mail.base import Envelope
-from aea.multiplexer import Multiplexer
+from aea.multiplexer import Empty, Multiplexer
 
-from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.default.serialization import DefaultSerializer
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import (
-    MAX_FLAKY_RERUNS_INTEGRATION,
-    _make_libp2p_connection,
-    libp2p_log_on_failure,
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+    BaseP2PLibp2pTest,
     libp2p_log_on_failure_all,
 )
 
 
-DEFAULT_PORT = 10234
+TIMEOUT = 10
 
 
-@pytest.mark.skip
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
-class BaseTestLibp2pRelay:
+class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
     """Base test class for libp2p connection relay."""
 
-    @libp2p_log_on_failure
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Set the test up"""
-        self.cwd = os.getcwd()
-        self.t = tempfile.mkdtemp()
-        os.chdir(self.t)
-        build_node(self.t)
-        self.log_files = []
-        self.multiplexers = []
+        super().setup_class()
+        build_node(cls.tmp)
 
     def change_state_and_wait(
         self,
         multiplexer: Multiplexer,
         expected_is_connected: bool = False,
-        timeout: int = 10,
+        timeout: int = TIMEOUT,
     ) -> None:
-        """
-        Change state of a multiplexer (either connect or disconnect) and wait.
-
-        :param multiplexer: the multiplexer to connect/disconnect.
-        :param expected_is_connected: whether it should be connected or disconnected.
-        :param timeout: the maximum number seconds to wait.
-        :return: None
-        """
+        """Change state of a multiplexer (either connect or disconnect) and wait."""
         wait_for_condition(
             lambda: multiplexer.is_connected == expected_is_connected, timeout=timeout
         )
 
-    def teardown(self):
-        """Tear down the test"""
-        for mux in self.multiplexers:
-            mux.disconnect()
-        os.chdir(self.cwd)
-        try:
-            shutil.rmtree(self.t)
-        except (OSError, IOError):
-            pass
 
-
-@pytest.mark.skip
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay):
-    """Test that connection will reliably receive envelopes after its relay node restarted"""
+class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
+    """Test that connection will reliably forward envelopes after its relay node restarted"""
 
-    @libp2p_log_on_failure
     def setup(self):
-        """Set the test up"""
-        super().setup()
-        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
-        os.mkdir(temp_dir_gen)
-        self.genesis = _make_libp2p_connection(
-            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=self.t
-        )
+        """Set up the individual test method"""
 
-        self.multiplexer_genesis = Multiplexer(
-            [self.genesis], protocols=[DefaultMessage]
-        )
-        self.multiplexer_genesis.connect()
-        self.log_files.append(self.genesis.node.log_file)
-        self.multiplexers.append(self.multiplexer_genesis)
-
+        self.genesis = self.make_connection()
         genesis_peer = self.genesis.node.multiaddrs[0]
-
-        file = "node_key"
-        make_crypto("fetchai").dump(file)
-        self.relay_key_path = file
-
-        temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
-        os.mkdir(temp_dir_rel)
-        self.relay = _make_libp2p_connection(
-            data_dir=temp_dir_rel,
-            entry_peers=[genesis_peer],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
-        )
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
-        self.multiplexer_relay.connect()
-        self.log_files.append(self.relay.node.log_file)
-        self.multiplexers.append(self.multiplexer_relay)
-
+        self.relay = self.make_connection(entry_peers=[genesis_peer])
         relay_peer = self.relay.node.multiaddrs[0]
+        self.connection1 = self.make_connection(relay=False, entry_peers=[relay_peer])
+        self.connection2 = self.make_connection(relay=False, entry_peers=[relay_peer])
 
-        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
-        os.mkdir(temp_dir_1)
-        self.connection = _make_libp2p_connection(
-            data_dir=temp_dir_1,
-            relay=False,
-            entry_peers=[relay_peer],
-            build_directory=self.t,
-        )
-        self.multiplexer = Multiplexer([self.connection], protocols=[DefaultMessage])
-        self.multiplexer.connect()
-        self.log_files.append(self.connection.node.log_file)
-        self.multiplexers.append(self.multiplexer)
+        # create references for disconnecting and reconnecting
+        self.multiplexer_genesis = self.multiplexers[0]
+        self.multiplexer_relay = self.multiplexers[1]
+        self.multiplexer1 = self.multiplexers[2]
+        self.multiplexer2 = self.multiplexers[3]
 
-        temp_dir_2 = os.path.join(self.t, "temp_dir_2")
-        os.mkdir(temp_dir_2)
-        self.connection2 = _make_libp2p_connection(
-            data_dir=temp_dir_2,
-            relay=False,
-            entry_peers=[relay_peer],
-            build_directory=self.t,
-        )
-        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
-        self.multiplexer2.connect()
-        self.log_files.append(self.connection2.node.log_file)
-        self.multiplexers.append(self.multiplexer2)
+    def teardown(self):
+        """Teardown"""
+        self._disconnect()
+        self.multiplexers.clear()
 
     def test_connection_is_established(self):
         """Test connection established."""
-        assert self.relay.is_connected is True
-        assert self.connection.is_connected is True
-        assert self.connection2.is_connected is True
+        assert self.all_connected
 
     def test_envelope_routed_from_peer_after_relay_restart(self):
         """Test envelope routed from third peer after relay restart."""
-        addr_1 = self.genesis.address
-        addr_2 = self.connection.address
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
+        to = self.connection1.address
+        sender = self.genesis.address
 
-        self.multiplexer_genesis.put(envelope)
-        delivered_envelope = self.multiplexer.get(block=True, timeout=20)
+        def attempt_sending():
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            self.multiplexer_genesis.put(envelope)
+            delivered_envelope = self.multiplexer1.get(block=True, timeout=TIMEOUT)
+            assert delivered_envelope is not None
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        assert self.multiplexer_relay.is_connected
+        attempt_sending()
 
         self.multiplexer_relay.disconnect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=False)
+        assert not self.multiplexer_relay.is_connected
 
-        # currently, multiplexer cannot be restarted
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
+        with pytest.raises(Empty):
+            attempt_sending()
+
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
-        self.multiplexers.append(self.multiplexer_relay)
-
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"helloAfterRestart",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
-
-        time.sleep(10)
-        self.multiplexer_genesis.put(envelope)
-
-        delivered_envelope = self.multiplexer.get(block=True, timeout=20)
-
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        assert self.multiplexer_relay.is_connected
+        attempt_sending()
 
     def test_envelope_routed_from_client_after_relay_restart(self):
         """Test envelope routed from third relay client after relay restart."""
-        addr_1 = self.connection.address
-        addr_2 = self.connection2.address
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=addr_1,
-            sender=addr_2,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
+        to = self.connection1.address
+        sender = self.connection2.address
 
-        self.multiplexer2.put(envelope)
-        delivered_envelope = self.multiplexer.get(block=True, timeout=20)
+        def attempt_sending():
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            self.multiplexer2.put(envelope)
+            delivered_envelope = self.multiplexer1.get(block=True, timeout=TIMEOUT)
+            assert delivered_envelope is not None
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        assert self.multiplexer_relay.is_connected
+        attempt_sending()
 
         self.multiplexer_relay.disconnect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=False)
+        assert not self.multiplexer_relay.is_connected
 
-        # currently, multiplexer cannot be restarted
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
+        with pytest.raises(Empty):
+            attempt_sending()
+
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
-        self.multiplexers.append(self.multiplexer_relay)
-
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"helloAfterRestart",
-        )
-
-        envelope = Envelope(
-            to=addr_1,
-            sender=addr_2,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
-
-        time.sleep(10)
-        self.multiplexer2.put(envelope)
-        delivered_envelope = self.multiplexer.get(block=True, timeout=20)
-
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
-
-
-@pytest.mark.skip
-@libp2p_log_on_failure_all
-class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay):
-    """Test that connection will reliably route envelope to destination in case of relay node restart within timeout"""
-
-    @libp2p_log_on_failure
-    def setup(self):
-        """Set the test up"""
-        super().setup()
-        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
-        os.mkdir(temp_dir_gen)
-        self.genesis = _make_libp2p_connection(
-            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=self.t
-        )
-
-        self.multiplexer_genesis = Multiplexer(
-            [self.genesis], protocols=[DefaultMessage]
-        )
-        self.multiplexer_genesis.connect()
-        self.log_files.append(self.genesis.node.log_file)
-        self.multiplexers.append(self.multiplexer_genesis)
-
-        genesis_peer = self.genesis.node.multiaddrs[0]
-
-        file = "node_key"
-        make_crypto("fetchai").dump(file)
-        self.relay_key_path = file
-
-        temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
-        os.mkdir(temp_dir_rel)
-        self.relay = _make_libp2p_connection(
-            data_dir=temp_dir_rel,
-            entry_peers=[genesis_peer],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
-        )
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
-        self.multiplexer_relay.connect()
-        self.log_files.append(self.relay.node.log_file)
-        self.multiplexers.append(self.multiplexer_relay)
-
-        relay_peer = self.relay.node.multiaddrs[0]
-
-        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
-        os.mkdir(temp_dir_1)
-        self.connection = _make_libp2p_connection(
-            data_dir=temp_dir_1,
-            relay=False,
-            entry_peers=[relay_peer],
-            build_directory=self.t,
-        )
-        self.multiplexer = Multiplexer([self.connection], protocols=[DefaultMessage])
-        self.multiplexer.connect()
-        self.log_files.append(self.connection.node.log_file)
-        self.multiplexers.append(self.multiplexer)
-
-    def test_connection_is_established(self):
-        """Test connection established."""
-        assert self.relay.is_connected is True
-        assert self.connection.is_connected is True
+        assert self.multiplexer_relay.is_connected
+        attempt_sending()
 
     def test_envelope_routed_after_relay_restart(self):
         """Test envelope routed after relay restart."""
-        addr_1 = self.connection.address
-        addr_2 = self.genesis.address
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
+        sender = self.connection1.address
+        to = self.genesis.address
 
-        self.multiplexer.put(envelope)
-        delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
+        def attempt_sending():
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            self.multiplexer1.put(envelope)
+            delivered_envelope = self.multiplexer_genesis.get(
+                block=True, timeout=TIMEOUT
+            )
+            assert delivered_envelope is not None
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        assert self.multiplexer_relay.is_connected
+        attempt_sending()
 
         self.multiplexer_relay.disconnect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=False)
+        assert not self.multiplexer_relay.is_connected
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"helloAfterRestart",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
+        with pytest.raises(Empty):
+            attempt_sending()
 
-        time.sleep(10)
-        self.multiplexer.put(envelope)
-
-        # currently, multiplexer cannot be restarted
-        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
-        self.multiplexers.append(self.multiplexer_relay)
-
-        delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
-
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        assert self.multiplexer_relay.is_connected
+        attempt_sending()
 
 
-@pytest.mark.skip
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
     """Test that connection will correctly route envelope to destination that changed its peer"""
 
-    @libp2p_log_on_failure
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Set the test up"""
-        super().setup()
-        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
-        os.mkdir(temp_dir_gen)
-        self.genesis = _make_libp2p_connection(data_dir=temp_dir_gen, port=DEFAULT_PORT)
+        super().setup_class()
 
-        self.multiplexer_genesis = Multiplexer(
-            [self.genesis], protocols=[DefaultMessage]
-        )
-        self.log_files.append(self.genesis.node.log_file)
-        self.multiplexer_genesis.connect()
-        self.multiplexers.append(self.multiplexer_genesis)
-
-        genesis_peer = self.genesis.node.multiaddrs[0]
-
-        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
-        os.mkdir(temp_dir_1)
-        self.connection1 = _make_libp2p_connection(
-            data_dir=temp_dir_1, entry_peers=[genesis_peer]
-        )
-        self.multiplexer1 = Multiplexer([self.connection1], protocols=[DefaultMessage])
-        self.log_files.append(self.connection1.node.log_file)
-        self.multiplexer1.connect()
-        self.multiplexers.append(self.multiplexer1)
-
-        self.connection_key = make_crypto("fetchai")
-        temp_dir_2 = os.path.join(self.t, "temp_dir_2")
-        os.mkdir(temp_dir_2)
-        self.connection2 = _make_libp2p_connection(
-            data_dir=temp_dir_2,
+        cls.genesis = cls.make_connection()
+        genesis_peer = cls.genesis.node.multiaddrs[0]
+        cls.connection1 = cls.make_connection(entry_peers=[genesis_peer])
+        cls.connection2 = cls.make_connection(
             entry_peers=[genesis_peer],
-            agent_key=self.connection_key,
+            agent_key=cls.default_crypto,
         )
-        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
-        self.log_files.append(self.connection2.node.log_file)
-        self.multiplexer2.connect()
-        self.multiplexers.append(self.multiplexer2)
 
-    def test_connection_is_established(self):
-        """Test connection established."""
-        assert self.connection1.is_connected is True
-        assert self.connection2.is_connected is True
+        cls.multiplexer_genesis = cls.multiplexers[0]
+        cls.multiplexer1 = cls.multiplexers[1]
+        cls.multiplexer2 = cls.multiplexers[2]
 
     def test_envelope_routed_after_peer_changed(self):
         """Test envelope routed after peer changed."""
-        addr_1 = self.connection1.address
-        addr_2 = self.connection2.address
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"hello",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
-            message=DefaultSerializer().encode(msg),
-        )
+        sender = self.connection1.address
+        to = self.connection2.address
 
-        self.multiplexer1.put(envelope)
-        delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
+        def attempt_sending():
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            self.multiplexer1.put(envelope)
+            delivered_envelope = self.multiplexer2.get(block=True, timeout=TIMEOUT)
+            assert delivered_envelope is not None
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        assert self.multiplexer2.is_connected
+        attempt_sending()
 
         self.multiplexer2.disconnect()
         self.change_state_and_wait(self.multiplexer2, expected_is_connected=False)
+        assert not self.multiplexer2.is_connected
 
-        # currently, multiplexer cannot be restarted
-        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
+        with pytest.raises(Empty):
+            attempt_sending()
+
         self.multiplexer2.connect()
         self.change_state_and_wait(self.multiplexer2, expected_is_connected=True)
-        self.multiplexers.append(self.multiplexer2)
 
-        msg = DefaultMessage(
-            dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"helloAfterChangingPeer",
-        )
-        envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_specification_id=msg.protocol_specification_id,
-            message=msg.encode(),
-        )
-
-        time.sleep(10)
-        self.multiplexer1.put(envelope)
-
-        delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
-
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert (
-            delivered_envelope.protocol_specification_id
-            == envelope.protocol_specification_id
-        )
-        assert delivered_envelope.message_bytes == envelope.message_bytes
+        self.multiplexer2.connect()
+        self.change_state_and_wait(self.multiplexer2, expected_is_connected=True)
+        assert self.multiplexer2.is_connected
+        attempt_sending()

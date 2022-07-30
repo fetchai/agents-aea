@@ -7,13 +7,13 @@ description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmXUyoQ3NTF9EBSSk7ENNRbCANwABKJvfbrKi2Pmoc2JkT
-  __init__.py: QmPcZUeXHLik2qxWDLk5JAbviM66S7zXzGXK3nfxnHt2b4
-  dialogues.py: QmPKGuXmBsC62b4WGojPrYNH1cXSWj4ir5oAS9v3xfZvKa
-  message.py: QmP9uR4AvQv1A1Fx41bVC3cbQj4veRuEY1yERCdV8HvcQj
-  serialization.py: QmZTJMieof5uL3zDQXRMnZso8Fs1CqgNn4Tua7DqihkFdk
-  state_update.proto: QmPqvqnUQtcE475C3kCctNUsmi46JkMFGYE3rqMmqvbyEz
-  state_update_pb2.py: QmdhbG4QDykNBKXY2opbFUgaX37j4D1gVcPQCF499mm5Fv
+  README.md: bafybeieh3nvfgvwdybc7dz44ac3qhleeleaojmwo32o3nticdw24ltdekq
+  __init__.py: bafybeiap53zeovhz4blwfedkcpb2j4tpwdzrxrahi2w4i4m7kltuxvs7ga
+  dialogues.py: bafybeiaoqf2a6s2pxdlc4fzzhlypc52lnvat3272kmau3ndv24vmxiswne
+  message.py: bafybeiamdlwrs7y63tsel5upsbsp42jfrghs3xitaitgwaiyxngwu6i36q
+  serialization.py: bafybeiffesod4s4s6hxrgrh4ylbo7jxos752ix5khlzodwujahk34ouaem
+  state_update.proto: bafybeiawlpcxmdojiwekzptaonfkubyxlwpblcgvkrzgle4lihs5ykmnvm
+  state_update_pb2.py: bafybeihehsm5uvve3i63igdk5efg3t6aao65jftllrgm5l5gdkr7sj34ce
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

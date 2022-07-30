@@ -22,6 +22,7 @@
 
 import json
 import os
+from typing import List
 
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
@@ -32,14 +33,15 @@ from packages.valory.connections import p2p_libp2p
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.valory.connections.p2p_libp2p.consts import (
+
+from tests.conftest import DEFAULT_LEDGER, LOCAL_HOST
+from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
+    LIBP2P_LEDGER,
+    libp2p_log_on_failure_all,
+    ports,
 )
-
-from tests.conftest import DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
-from tests.conftest import default_ports as ports
-from tests.conftest import libp2p_log_on_failure
 
 
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
@@ -47,20 +49,59 @@ DEFAULT_NET_SIZE = 4
 LIBP2P_LAUNCH_TIMEOUT = 20  # may downloads up to ~66Mb
 
 
-class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
-    """Test AEA with p2p_libp2p connection is correctly run"""
+class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
+    """Base class for AEA CLI tests"""
+
+    log_files: List[str] = []
+    capture_log = True
 
     @classmethod
     def setup_class(cls):
         """Set the test up"""
-        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).setup_class()
+        super().setup_class()
         cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
 
-    @libp2p_log_on_failure
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.terminate_agents()
+        cls.log_files.clear()
+        super().teardown_class()
+
+    def set_logging(self) -> None:
+        """Set logging"""
+
+        config_path = f"{p2p_libp2p_path}.config"
+        log_file = f"libp2p_node_{self.agent_name}.log"
+        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
+        self.set_config(f"{config_path}.log_file", log_file)
+        self.log_files.append(log_file)
+
+    def run_aea_cli_test(self) -> None:
+        """Run the agent, check strings and terminate"""
+
+        process = self.run_agent()
+        is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
+        assert is_running, "AEA not running within timeout!"
+
+        check_strings = "Peer running in "
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert not missing_strings
+
+        self.terminate_agents(process)
+        assert self.is_successfully_terminated(process)
+
+
+@libp2p_log_on_failure_all
+class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(
+    BaseP2PLibp2pConnectionAEATest
+):
+    """Test AEA with p2p_libp2p connection is correctly run"""
+
     def test_agent(self):
         """Test with aea."""
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
         # set config
         self.set_config("agent.default_ledger", agent_ledger_id)
         self.set_config(
@@ -80,48 +121,18 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         # add connection and build
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
-        # for logging
-        config_path = f"{p2p_libp2p_path}.config"
-        log_file = "libp2p_node_{}.log".format(self.agent_name)
-        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
-        self.set_config("{}.log_file".format(config_path), log_file)
-        TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
-
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
-        process = self.run_agent()
-        is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
-        assert is_running, "AEA not running within timeout!"
-
-        check_strings = "Peer running in "
-        missing_strings = self.missing_from_output(process, check_strings)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
-
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.terminate_agents()
-        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
+        self.set_logging()
+        self.run_aea_cli_test()
 
 
-class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
+@libp2p_log_on_failure_all
+class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
+    BaseP2PLibp2pConnectionAEATest
+):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        super(TestP2PLibp2pConnectionAEARunningEthereumConfigNode, cls).setup_class()
-        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
-        cls.log_files = []
-
-    @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
         key_path = "ethereum_private_key.txt"
@@ -147,12 +158,6 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         )
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
-        # for logging
-        config_path = f"{p2p_libp2p_path}.config"
-        log_file = "libp2p_node_{}.log".format(self.agent_name)
-        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
-        self.set_config("{}.log_file".format(config_path), log_file)
-        self.log_files.append(log_file)
         setting_path = f"{p2p_libp2p_path}.cert_requests"
         settings = json.dumps(
             [
@@ -170,45 +175,17 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         self.set_config(setting_path, settings, type_="list")
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
-        process = self.run_agent()
-        is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
-        assert is_running, "AEA not running within timeout!"
-
-        check_strings = "Peer running in "
-        missing_strings = self.missing_from_output(process, check_strings)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
-
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.terminate_agents()
-
-        super(TestP2PLibp2pConnectionAEARunningEthereumConfigNode, cls).teardown_class()
+        self.set_logging()
+        self.run_aea_cli_test()
 
 
-class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
+@libp2p_log_on_failure_all
+class TestP2PLibp2pConnectionAEARunningFullNode(BaseP2PLibp2pConnectionAEATest):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    capture_log = True
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        super(TestP2PLibp2pConnectionAEARunningFullNode, cls).setup_class()
-        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
-        cls.log_files = []
-
-    @libp2p_log_on_failure
     def test_agent(self):
         """Test with aea."""
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, DEFAULT_LEDGER_LIBP2P_NODE
+        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
         # set config
         self.set_config("agent.default_ledger", agent_ledger_id)
         self.set_config(
@@ -227,38 +204,15 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         # add connection and build
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
+
         # setup a full node: with public uri, relay service, and delegate service
         config_path = f"{p2p_libp2p_path}.config"
-        self.set_config(f"{config_path}.local_uri", f"127.0.0.1:{next(ports)}")
-        self.set_config(f"{config_path}.public_uri", f"127.0.0.1:{next(ports)}")
-        self.set_config(f"{config_path}.delegate_uri", f"127.0.0.1:{next(ports)}")
-
-        # for logging
-        log_file = "libp2p_node_{}.log".format(self.agent_name)
-        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
-        self.set_config("{}.log_file".format(config_path), log_file)
-        TestP2PLibp2pConnectionAEARunningFullNode.log_files.append(log_file)
+        hostname = LOCAL_HOST.hostname
+        self.set_config(f"{config_path}.local_uri", f"{hostname}:{next(ports)}")
+        self.set_config(f"{config_path}.public_uri", f"{hostname}:{next(ports)}")
+        self.set_config(f"{config_path}.delegate_uri", f"{hostname}:{next(ports)}")
 
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
-        process = self.run_agent()
-
-        is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
-        assert is_running, "AEA not running within timeout!"
-
-        check_strings = "Peer running in "
-        missing_strings = self.missing_from_output(process, check_strings, timeout=30)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
-
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(
-            process
-        ), "AEA wasn't successfully terminated."
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.terminate_agents()
-        super(TestP2PLibp2pConnectionAEARunningFullNode, cls).teardown_class()
+        self.set_logging()
+        self.run_aea_cli_test()

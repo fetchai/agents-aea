@@ -8,56 +8,56 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZP7GPu67Ag2Fw8zgZnzpQPqaYJvr7w8Zy5VhQ8Jpekkg
-  __init__.py: QmRo1DRePomRccoY2tB3GnKV2rUoNFaaE26WDRKp4ATs33
-  check_dependencies.py: QmQCTSKYKcB5nj3x4esNHQkkW6u39grQ2j5KJ9g3nNnJzx
-  connection.py: Qmagjyj3QrcmU3q7LGvSiHLzQFfLkzvux2mxaWFVCbij2D
-  consts.py: QmcWL5iosNdNFGxupotnzvfWGf87Nd18SE1QijN7F7t65o
-  libp2p_node/Makefile: QmYMR8evkEV166HXTxjaAYEBiQ9HFh2whKQ7uotXvr88TU
-  libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
-  libp2p_node/acn/utils.go: QmNiWQ87SvY6qdqExFiZWcG734SocG8bZtVVj9z8A2ECM4
-  libp2p_node/aea/api.go: QmSGxHYYdbz9KZtJWcyGTLb4iP1Zik27dmSwnYuuL1rTzj
-  libp2p_node/aea/envelope.pb.go: QmPcUAgMWWsnB9Jem2yHd8J3CiYDoAW93eCt7oTzBefA1X
-  libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
-  libp2p_node/aea/pipe.go: QmV3EzagcaE3roByErDNYYwzWgF6gAjtgLX7737u5eyMnt
-  libp2p_node/aea/utils.go: QmUoDfXZZ3WK44889nDJcKfsqatfNhUR9DoZkviTfV8zUz
-  libp2p_node/common/common.go: QmeGr6xMzqkBVJMnWzCTcXJVQj2A8RK64mhTSewZJKpiJa
-  libp2p_node/dht/common/handlers.go: QmccEaF9eHencHfpXg8xscojuyvqz911Uv9HwP2pYQSFbw
-  libp2p_node/dht/dhtclient/dhtclient.go: QmdgH72sPF4zVsFxDdW6fUq2azkKEfunCu7gBYauTARdCE
-  libp2p_node/dht/dhtclient/dhtclient_test.go: QmQfUGR6DAUenK3CnBzCMYHgLQRPBxHU6Hr383ekrfTuxa
-  libp2p_node/dht/dhtclient/options.go: QmZkiNXskZqgqsgm32J5etjHXYFNN6oTuLD3q4yjLPfkWc
-  libp2p_node/dht/dhtnode/dhtnode.go: QmfYx33eCLKLz7cVGrj3wTRF9oLjeS8yXR7kSKmQSfHPP8
-  libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  libp2p_node/dht/dhtnode/utils.go: QmUwnEBV96LNgNXs48miN4PfVUaP5M9uJw7ha1XutBQS5k
-  libp2p_node/dht/dhtpeer/benchmarks_test.go: QmeXZbWBxwGY33oRRogFPv61qJu28ufmoprGkmZVrQ9kEV
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmcxnL4DCKs31yhniVA3C2AqEw6XuiECekidzU1LavfNod
-  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmT9SyDFBgDQKPLxtNn2qw3kwLzctCh4MrQWJ1HnERMPu9
-  libp2p_node/dht/dhtpeer/mailbox.go: QmUd5NjuuRxBnwbWKLAh5vms9FT2N2Np2YBTcMHrezhGQd
-  libp2p_node/dht/dhtpeer/notifee.go: Qmes2KPbWecKZu6Bh3mThEsPs74W3LwD6y3Mzrai1fV7zi
-  libp2p_node/dht/dhtpeer/options.go: QmZCQLNyw5f422q6DgrDQVbRkE69siML36XSBtPET7dpW1
-  libp2p_node/dht/dhtpeer/utils.go: QmdQYjyCJq7PJVTQ8xrRLV1TD7ACb1dDo6mURtmSWiksHv
-  libp2p_node/dht/dhttests/dhttests.go: QmSe8XsEhMJAWuokeWtPLXP4m9G5rDEAXrrQWBcma8t71c
-  libp2p_node/dht/monitoring/file.go: QmZwH59RcraRfgYjugVafVojakv1oEcgBUKuMdFAoeZBhS
-  libp2p_node/dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
-  libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
-  libp2p_node/go.mod: QmREU96KzTa75gqHeTLtBzHnhHNPcEN6sW1zp59LgDLCBA
-  libp2p_node/go.sum: QmY81CXMuRFgtJMDs4371QHp6PMGgvZPoZJM1CttuN4cKN
-  libp2p_node/libp2p_node.go: QmVaU9eLnjSNnc6yos3GcmB87etbgtc3DnwCEJG2mC1ty9
-  libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
-  libp2p_node/mocks/mock_host.go: QmfH83dhq7DV8Sy7y8AMRTdgCxYeRyanYYHxd1E97LCN5o
-  libp2p_node/mocks/mock_net.go: QmeDAYbKoV1dDz5Z2zvPtZ7BWf1p5xyr5ZnZJLwN6wgfPJ
-  libp2p_node/mocks/mock_network.go: Qmbm9SnYb2zF8xvqD2qs2Q6CGfSCbCL4kZcQpjpLdEgWTN
-  libp2p_node/mocks/mock_peerstore.go: QmeH1TucFNbbv9yrLFWHSMDMnsmUmZQbzJYfo25JLyFoYf
-  libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmQzgkNR3B5BEBL8LBnqPL4aro764gxdXnsYd5UVMVabVP
-  libp2p_node/protocols/acn/v1_0_0/acn.proto: QmcguMcKttJfsuPYrUVWFJ1Trr1VxrSSfan94Z3yNAxNEW
-  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUxjEyzwQP7TWad5RfCefS2qfpbhJgVFjaEN4LUoA3ys5
-  libp2p_node/utils/utils.go: QmdVRRhcoWZE5tt9aD1zYapAcbs5hfJh7z8p4AwgnkT4i2
-  libp2p_node/utils/utils_test.go: Qmd2tbXhEDQELjkyKHyCqmcBitECK9mrVENyPWaev5HF63
+  README.md: bafybeifecg7n3shhpaz7icimzm5r63aduk2cob73rg6ycihpwnt5du6jre
+  __init__.py: bafybeibtknmpggpj77fflwndllcqvvbolpds7doymdp4fjd277metq6oxy
+  check_dependencies.py: bafybeia3tx5v2mvoahoyz5hrrbczxh3zklll6xd57cainnucmtrxmzuu7u
+  connection.py: bafybeieaaded4isp73enodwlmgb3wnaogzs7a3zpjvrpc43o7lnaji4mxe
+  consts.py: bafybeigspzopex53xtzn3l4x5frllkb6acy6qd7eot7aw6qk3rkn2k6x4i
+  libp2p_node/Makefile: bafybeieuy4mut3oz2aqhtgt3dtky23do7g7tjg6fni4e256i3zg2onzmim
+  libp2p_node/README.md: bafybeibke3cczx7lh4cmu4w6ofggrkm32mdzj6isjq4xo7isjproqg3y4y
+  libp2p_node/acn/utils.go: bafybeiaftfq27ykd5kc3qauchb3vmnt6pt5jxzmsfykes4b4wptojtdhb4
+  libp2p_node/aea/api.go: bafybeib2prgf3acpzi2zwyjh6v5xoyexkv6zmdzexgudycyze6aico2xiq
+  libp2p_node/aea/envelope.pb.go: bafybeias5ehwnx7neqgxxl5ptt2kapvtknwqdadb337aw6peq4xuvywhei
+  libp2p_node/aea/envelope.proto: bafybeidqraaogak5eh7ew2syzou4dh6xwq4owxh7vtilfpvbkzk3njrbm4
+  libp2p_node/aea/pipe.go: bafybeiddrqphqhua4tvallg2vcdv4rn3zig3ajtlv3n4etzzqampsos5yu
+  libp2p_node/aea/utils.go: bafybeic76r6eymbeg5a5wet3hyc2g5olxxxe3ubaibhblvusamcdkgvb6m
+  libp2p_node/common/common.go: bafybeihmyggp45opu6scnojnre24az45ovbulde3gcnmupyvt5grddl424
+  libp2p_node/dht/common/handlers.go: bafybeiguagpkrk7yfdqr2ftn45t6qqioxhleh2t27n4ntlz2vgyc7kzk3i
+  libp2p_node/dht/dhtclient/dhtclient.go: bafybeihd4z65lzhxlqvqgf3y5vfehxtnllr5i2stmlhqddaodib7pibfvm
+  libp2p_node/dht/dhtclient/dhtclient_test.go: bafybeibcrgm7e5xr6gdnl3jqdwz6d4p3ddolljxd2b7nawdqxp2o4g4ng4
+  libp2p_node/dht/dhtclient/options.go: bafybeifjtkrqpyfac3vtrke5ad6wb2ktxyurv2ha24k6rmkcow7yejpfoe
+  libp2p_node/dht/dhtnode/dhtnode.go: bafybeih7xu6rpzgvqf5l4wr3vwapbumjb7wzsjgr6gyoqet2yyjdhbhllm
+  libp2p_node/dht/dhtnode/streams.go: bafybeiglkbzmp7imgcg544cb3kr4xq3hopoockqoaxbgveeszclvtq4pni
+  libp2p_node/dht/dhtnode/utils.go: bafybeidcexzxxx32dffxz7qaw4c6uwp2lf5ielnoskvisz5upgj37qr6v4
+  libp2p_node/dht/dhtpeer/benchmarks_test.go: bafybeihqq2mpj22vsqbhdaemgdtcoq5k7c6co2cd65holtjfoxrppidwni
+  libp2p_node/dht/dhtpeer/dhtpeer.go: bafybeigziusfa6gkzox66k6ysu3fqvqrxjor4uo2smiyj7mlx6odbnmceq
+  libp2p_node/dht/dhtpeer/dhtpeer_test.go: bafybeichnpczexoov7frcwoa33fdc5mgcym7fnb3rggk6wgcps43unvb5a
+  libp2p_node/dht/dhtpeer/mailbox.go: bafybeic5lng7ozhxw6cwibwh5s3lqcyyhurovsl2qy77om6ctir6qctnuy
+  libp2p_node/dht/dhtpeer/notifee.go: bafybeihvqlmqivddw6oi5bmcyd23ogolgbve54v42b7f525ba7lcqjz6nm
+  libp2p_node/dht/dhtpeer/options.go: bafybeifbkouahfffwu277bhcyh7ohhrziy435eloj2wim7fd42dawfervy
+  libp2p_node/dht/dhtpeer/utils.go: bafybeig733qrkn5io6usih7chm5ranptao6xao4cihyfgpjps3gt5hbnqu
+  libp2p_node/dht/dhttests/dhttests.go: bafybeib75ekn7p2sd5shi53nb4tfjcgotiwxsiteg3kj2yha2n632gf4qm
+  libp2p_node/dht/monitoring/file.go: bafybeifmj5vvaacy4potovdkiqvektaymntsbun6i4niaehj5af3nhu64e
+  libp2p_node/dht/monitoring/prometheus.go: bafybeibgmu5h7hl2ygzfw3lvg4eaihzrnyqacc4zvjxzpk2b6xb7c3yrrq
+  libp2p_node/dht/monitoring/service.go: bafybeicgbzqxi4jpae3w4es4owhdt63rd4limt4o46gbdanaia2buxddhy
+  libp2p_node/go.mod: bafybeibk7wqbfkt6xmdcx3mq7fvh2zbabw7ggqxcb6pwslj3jub2ijouwe
+  libp2p_node/go.sum: bafybeierk56j77i6lgyenskt6dacluxmar22otruqbtr6e2k4j2vxpaotu
+  libp2p_node/libp2p_node.go: bafybeidlrp77xdocjddey6mbnqpsvdtughhvi7wq3dbducbe4cetkoze2q
+  libp2p_node/link: bafybeiemszyz76pa3qgojhmyayx6yttlk2i5dqwx74b2bmzmmpo5mwaxlm
+  libp2p_node/mocks/mock_host.go: bafybeih3v5b2dlqdto2irk3g6gi4giqg2a5ulfjte2cmoeb33bqyz7f5gi
+  libp2p_node/mocks/mock_net.go: bafybeihl2akhtn4jzae622k7map4j5niuh4vsocujl6o5puvr5qaq4qrhu
+  libp2p_node/mocks/mock_network.go: bafybeighnzohofi3v435uertgtoi3insn5pes2xm6xfgvkm7jop7dnr3wu
+  libp2p_node/mocks/mock_peerstore.go: bafybeihmzqrlhxxht5zmgym2kbqd3g7fo6k2cl3ziv3oc5zcvvxd2qmjoq
+  libp2p_node/protocols/acn/v1_0_0/acn.pb.go: bafybeibhoxaaq6mnc654gaguljypkj2qwhd3epi6d3zc4t5x24bdvfnvdy
+  libp2p_node/protocols/acn/v1_0_0/acn.proto: bafybeigvgpfuxg67fymghnd5pfi7lvjf7ntkagkl2tlr3dzbwhxb5ekkjm
+  libp2p_node/protocols/acn/v1_0_0/acn.yaml: bafybeidcmqt4wad37njvr5rzqlx2rlqjiviq6dpepkvbvhf2xwqcnl4jda
+  libp2p_node/utils/utils.go: bafybeihbd2br74nm3pupy4qkijm2tnuyl7pbq3uwasidmql5znhbr575k4
+  libp2p_node/utils/utils_test.go: bafybeig2kkgqy7miml66w2byomeqjp4czzv45gb4jas76cxildo3lxi4xq
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
 protocols:
-- valory/acn:1.1.0:Qmb5oWjLDDx8WrjKHFAXPRnMiGN6YvTCfqk8n8o1YhtWUW
+- valory/acn:1.1.0:bafybeihka6ribmdd3glvubxbvobghe3v63lmqnujw3342x6ujsy536vt6y
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
