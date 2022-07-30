@@ -311,7 +311,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
                     with open(log_file, "r") as f:
                         print(f.read())
                 except FileNotFoundError:
-                    print(f"FileNotFoundError")
+                    print("FileNotFoundError")
                 print("=======================================")
             raise
 

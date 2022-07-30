@@ -19,3 +19,5 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the protocol modules."""
+
+PROTOCOL_GENERATOR_VERSION = "1.0.0"

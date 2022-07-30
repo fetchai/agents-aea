@@ -223,7 +223,9 @@ def print_table(rows: Sequence) -> None:
 
     def _format_row(row: Tuple) -> str:
         """Format row."""
-        cols = [s + (" " * (max(0, l - len(s)))) for l, s in zip(col_lengths, row)]
+        cols = [
+            s + (" " * (max(0, line - len(s)))) for line, s in zip(col_lengths, row)
+        ]
         return "| " + " | ".join(cols) + " |"
 
     table_length = len(_format_row(head))
