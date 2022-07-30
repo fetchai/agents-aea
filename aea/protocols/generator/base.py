@@ -28,13 +28,13 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 # pylint: skip-file
-from aea.__version__ import __version__ as __aea_version__
 from aea.configurations.base import ProtocolSpecificationParseError
 from aea.configurations.constants import (
     PROTOCOL_LANGUAGE_PYTHON,
     SUPPORTED_PROTOCOL_LANGUAGES,
 )
 from aea.configurations.data_types import PublicId
+from aea.protocols import PROTOCOL_GENERATOR_VERSION
 from aea.protocols.generator.common import (
     CUSTOM_TYPES_DOT_PY_FILE_NAME,
     DIALOGUE_DOT_PY_FILE_NAME,
@@ -1984,8 +1984,10 @@ class ProtocolGenerator:
         """
         init_str = _copyright_header_str(self.protocol_specification.author)
         init_str += "\n"
-        init_str += '"""\nThis module contains the support resources for the {} protocol.\n\nIt was created with protocol buffer compiler version `{}` and aea version `{}`.\n"""\n\n'.format(
-            self.protocol_specification.name, self.protoc_version, __aea_version__
+        init_str += '"""\nThis module contains the support resources for the {} protocol.\n\nIt was created with protocol buffer compiler version `{}` and aea protocol generator version `{}`.\n"""\n\n'.format(
+            self.protocol_specification.name,
+            self.protoc_version,
+            PROTOCOL_GENERATOR_VERSION,
         )
         init_str += "from {}.message import {}Message\n".format(
             self.dotted_path_to_protocol_package,
