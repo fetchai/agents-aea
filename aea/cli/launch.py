@@ -76,7 +76,7 @@ def _launch_agents(
 
     try:
         """
-        run in threaded mode and wait for thread finished cause issue with python 3.6/3.7 on windows
+        run in threaded mode and wait for thread finished cause issue with python 3.7 on windows
         probably keyboard interrupt exception gets lost in executor pool or in asyncio module
         """
         launcher.start(threaded=True)

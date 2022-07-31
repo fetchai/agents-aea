@@ -44,15 +44,6 @@ from typing import (
 )
 
 
-try:
-    from asyncio import create_task  # pylint: disable=ungrouped-imports,unused-import
-except ImportError:  # pragma: no cover
-    # for python3.6!
-    from asyncio import (  # type: ignore # noqa: F401 # pylint: disable=ungrouped-imports,unused-import
-        ensure_future as create_task,
-    )
-
-
 _default_logger = logging.getLogger(__file__)
 
 

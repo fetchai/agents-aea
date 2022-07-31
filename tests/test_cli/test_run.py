@@ -176,9 +176,6 @@ def test_run(password_or_none):
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # flaky on Windows
-@pytest.mark.skip(
-    reason="cannot run on 3.6 as AttributeError: 'functools._lru_list_elem' object has no attribute '__class__'",
-)
 def test_run_with_profiling():
     """Test profiling data showed."""
     runner = CliRunner()

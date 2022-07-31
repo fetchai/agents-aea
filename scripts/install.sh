@@ -27,9 +27,9 @@ function is_python_version_ok() {
 	if which python3 2>&1 >/dev/null;
 	then
 		version=`python3 -V 2>/dev/null`
-		if [[ -z `echo $version|grep -E 'Python 3\.[(6789]\.[0-9]+'` ]];
+		if [[ -z `echo $version|grep -E 'Python 3\.[(78910]\.[0-9]+'` ]];
 		then
-			echo "Python3 version: ${version} is not supported. Supported versions are 3.6, 3.7, 3.8."
+			echo "Python3 version: ${version} is not supported. Supported versions are 3.7, 3.8, 3.9, 3.10."
 			return 1
 		fi
 		return 0

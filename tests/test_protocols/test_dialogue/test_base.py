@@ -19,14 +19,11 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the dialogue/base.py module."""
 import re
-import sys
 from typing import FrozenSet, Tuple, Type, cast
-from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
 
-import aea
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError
@@ -142,12 +139,8 @@ class Dialogues(BaseDialogues):
         )
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 7),
-    reason="This part of code is only defined for python version >= 3.7",
-)
-def test_dialogue_message_python_3_7():
-    """Test DiallogueMessage if python is 3.7"""
+def test_dialogue_message_python():
+    """Test DiallogueMessage."""
     dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
     assert isinstance(dialogue_message.performative, Message.Performative)
 
@@ -155,24 +148,6 @@ def test_dialogue_message_python_3_7():
     assert dialogue_message.contents == {}
     assert dialogue_message.is_incoming is None
     assert dialogue_message.target is None
-
-
-@pytest.mark.skipif(
-    sys.version_info >= (3, 7),
-    reason="This part of code is only defined for python version < 3.7",
-)
-def test_dialogue_message_python_3_6():
-    """Test DiallogueMessage if python is 3.6"""
-    with mock.patch.object(
-        aea.protocols.dialogue.base.sys, "version_info", return_value=(3, 6)
-    ):
-        dialogue_message = DialogueMessage(DefaultMessage.Performative.BYTES)
-        assert isinstance(dialogue_message.performative, Message.Performative)
-
-        assert dialogue_message.performative == DefaultMessage.Performative.BYTES
-        assert dialogue_message.contents == {}
-        assert dialogue_message.is_incoming is None
-        assert dialogue_message.target is None
 
 
 class TestDialogueLabel:
