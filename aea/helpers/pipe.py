@@ -325,10 +325,7 @@ class TCPSocketProtocol:
             self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
-        wait_closed = getattr(self._writer, "wait_closed", None)
-        if wait_closed:
-            # in py3.6 writer does not have the coroutine
-            await wait_closed()  # pragma: nocover
+        self._writer.wait_closed()
 
 
 class TCPSocketChannel(IPCChannel):

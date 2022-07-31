@@ -3,7 +3,7 @@
 
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`. There are a number of base requirements to be installed prior to usage.
 
-You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.7</a> or higher as well as <a href="https://go.dev/dl/" target="_blank">Go 1.14.2</a> or higher installed.
 
 ​GCC installation is required:
 
@@ -35,9 +35,9 @@ python3 --version
 
 <li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
-  E.g. for Python 3.8:
+  E.g. for Python 3.10:
 ``` bash
-sudo apt-get install python3.8-dev
+sudo apt-get install python3.10-dev
 ```
 </li>
 
@@ -113,10 +113,10 @@ which pipenv
 
 If you don't have it, install it. Instructions are <a href="https://pypi.org/project/pipenv/" target="_blank">here</a>.
 
-Once installed, create a new environment and open it (here we use Python 3.8 but the AEA framework supports any Python >= 3.6).
+Once installed, create a new environment and open it (here we use Python 3.10 but the AEA framework supports any Python >= 3.7).
 
 ``` bash
-touch Pipfile && pipenv --python 3.8 && pipenv shell
+touch Pipfile && pipenv --python 3.10 && pipenv shell
 ```
 
 

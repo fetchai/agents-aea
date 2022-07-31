@@ -48,9 +48,9 @@ This is a fork of <a href="https://github.com/fetchai/agents-aea">the original A
 
 ## Get started developing AEAs
 
-1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
+1. Create and launch a clean virtual environment with Python 3.10 (any Python `>=` 3.7 works):
 
-       pipenv --python 3.7 && pipenv shell
+       pipenv --python 3.10 && pipenv shell
 
 2. Install the package from [PyPI](https://pypi.org/project/open-aea/):
 
@@ -96,9 +96,9 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 ### Preliminaries
 
-- Create and launch a virtual environment with Python 3.7 (any Python `>=` 3.6 works):
+- Create and launch a virtual environment with Python 3.10 (any Python `>=` 3.7 works):
 
-      pipenv --python 3.7 && pipenv shell
+      pipenv --python 3.10 && pipenv shell
 
 - Install the package from source:
 

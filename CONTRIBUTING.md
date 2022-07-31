@@ -45,7 +45,7 @@ If you want to contribute, start working through the codebase, navigate to the G
 
 First, setup your environment by either using the `develop-image` or by following these steps:
 
-- The simplest way to get setup for development on the framework is to install Python `>=3.6` and `pipenv`, then run the following:
+- The simplest way to get setup for development on the framework is to install Python `>=3.7` and `pipenv`, then run the following:
 
       make new_env
       pipenv shell
