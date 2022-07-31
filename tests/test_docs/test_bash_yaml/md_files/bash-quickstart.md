@@ -29,7 +29,7 @@ mkdir my_aea_projects/ && cd my_aea_projects/
 which pipenv
 ```
 ``` bash
-touch Pipfile && pipenv --python 3.8 && pipenv shell
+touch Pipfile && pipenv --python 3.10 && pipenv shell
 ```
 ``` bash
 svn export https://github.com/valory-xyz/open-aea.git/trunk/examples
@@ -48,7 +48,7 @@ svn checkout https://github.com/valory-xyz/open-aea/tags/v1.14.0/packages packag
 ```
 
 ``` bash
-sudo apt-get install python3.7-dev
+sudo apt-get install python3.10-dev
 ```
 ``` bash
 aea init --remote
