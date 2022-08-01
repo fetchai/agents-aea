@@ -283,6 +283,7 @@ io
 v1
 v0
 ipfsdaemon
+py3.6
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
