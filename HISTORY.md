@@ -1,5 +1,15 @@
 # Release History - open AEA
 
+## 1.15.0 (2022-08-01)
+
+AEA:
+- Updates the protocol generator to use `protocol generator version` as a header rather than using framework version
+
+Chore:
+- Cleans up remnants of py3.6
+- Updated the release process
+- Adds skaffold profiles for releases
+
 ## 1.14.0 (2022-07-29)
 
 AEA:

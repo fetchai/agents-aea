@@ -84,6 +84,6 @@ if __name__ == "__main__":
             errors.append(h)
 
     if errors:
-        print("The following hashes were not found in IPFS registry: {errors}")
+        print(f"The following hashes were not found in IPFS registry: {errors}")
         sys.exit(1)
     print("OK")
