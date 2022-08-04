@@ -60,7 +60,7 @@ NOT_PERMITTED_AUTHORS = [
 DEFAULT_CLI_CONFIG = {
     "author": "default_author",
     "registry_config": {
-        "default": REGISTRY_REMOTE,
+        "default": REGISTRY_LOCAL,
         "settings": {
             REGISTRY_REMOTE: {
                 REMOTE_HTTP: {
