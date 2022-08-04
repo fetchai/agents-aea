@@ -325,7 +325,7 @@ class TCPSocketProtocol:
             self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
-        self._writer.wait_closed()
+        await self._writer.wait_closed()
 
 
 class TCPSocketChannel(IPCChannel):
