@@ -76,7 +76,7 @@ def test_config_validator() -> None:
         jsonschema.exceptions.ValidationError,
         match=re.escape("None is not of type 'string'"),
     ):
-        config["author"] = None
+        config["author"] = None  # type: ignore
         validate_cli_config(config)
 
     with pytest.raises(
