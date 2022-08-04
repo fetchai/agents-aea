@@ -58,9 +58,9 @@ NOT_PERMITTED_AUTHORS = [
     "aea",
 ]
 DEFAULT_CLI_CONFIG = {
-    "author": None,
+    "author": "default_author",
     "registry_config": {
-        "default": None,
+        "default": REGISTRY_REMOTE,
         "settings": {
             REGISTRY_REMOTE: {
                 REMOTE_HTTP: {

@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "description": "Schema for the CLI config file.",
+    "type": "object",
+    "required": [
+        "author",
+        "registry_config"
+    ],
+    "properties": {
+        "author": {
+            "type": "string"
+        },
+        "registry_config": {
+            "type": "object",
+            "required": [
+                "default",
+                "settings"
+            ],
+            "properties": {
+                "default": {
+                    "type": "string"
+                },
+                "settings": {
+                    "type": "object",
+                    "required": [
+                        "remote",
+                        "local"
+                    ]
+                }
+            }
+        }
+    }
+}
