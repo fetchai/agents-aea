@@ -20,10 +20,14 @@
 
 """This test module contains the tests for aea.cli.utils.config module."""
 
-
+import re
 from unittest import TestCase, mock
 
-from aea.cli.utils.config import validate_item_config
+import jsonschema
+import pytest
+
+from aea.cli.utils.config import validate_cli_config, validate_item_config
+from aea.cli.utils.constants import DEFAULT_CLI_CONFIG
 from aea.cli.utils.exceptions import AEAConfigException
 
 from tests.test_cli.tools_for_testing import (
@@ -60,3 +64,24 @@ class ValidateItemConfigTestCase(TestCase):
         """Test validate_item_config for negative result."""
         with self.assertRaises(AEAConfigException):
             validate_item_config(item_type="agent", package_path="file/path")
+
+
+def test_config_validator() -> None:
+    """Test config schema validation."""
+
+    config = DEFAULT_CLI_CONFIG.copy()
+    validate_cli_config(config)
+
+    with pytest.raises(
+        jsonschema.exceptions.ValidationError,
+        match=re.escape("None is not of type 'string'"),
+    ):
+        config["author"] = None
+        validate_cli_config(config)
+
+    with pytest.raises(
+        jsonschema.exceptions.ValidationError,
+        match=re.escape("'author' is a required property"),
+    ):
+        del config["author"]
+        validate_cli_config(config)
