@@ -13,3 +13,6 @@ race_test:
 	go test -gcflags=-l -p 1 -timeout 0 -count 1 -race -v ./...
 build_in_docker:
 	DOCKER_BUILDKIT=1 docker build  --output . .
+test_better:
+	go install gotest.tools/gotestsum@latest
+	gotestsum --format testname -- -gcflags=-l -p 1 -timeout 0 -count 1 -covermode=atomic -coverprofile=coverage.txt  -v ./...
