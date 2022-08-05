@@ -184,16 +184,18 @@ class InitConfigFolderTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config")
-@mock.patch("aea.cli.utils.generic.yaml.dump")
-@mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
+@mock.patch("aea.cli.utils.config.validate_cli_config")
+@mock.patch("yaml.dump")
+@mock.patch("aea.cli.utils.config.open_file", mock.mock_open())
 class UpdateCLIConfigTestCase(TestCase):
     """Test case for update_cli_config method."""
 
-    def testupdate_cli_config_positive(self, dump_mock, icf_mock):
+    def testupdate_cli_config_positive(self, icf_mock, validate_mock, yaml_dump):
         """Test for update_cli_config method positive result."""
         update_cli_config({"some": "config"})
         icf_mock.assert_called_once()
-        dump_mock.assert_called_once()
+        validate_mock.assert_called_once()
+        yaml_dump.assert_called_once()
 
 
 def _raise_yamlerror(*args):
@@ -205,18 +207,20 @@ def _raise_file_not_found_error(*args):
 
 
 @mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
+@mock.patch("aea.cli.utils.config.validate_cli_config")
 class GetOrCreateCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
 
     @mock.patch(
         "aea.cli.utils.generic.yaml.safe_load", return_value={"correct": "output"}
     )
-    def testget_or_create_cli_config_positive(self, safe_load_mock):
+    def testget_or_create_cli_config_positive(self, safe_load_mock, validate_mock):
         """Test for get_or_create_cli_config method positive result."""
         result = get_or_create_cli_config()
         expected_result = {"correct": "output"}
         self.assertEqual(result, expected_result)
         safe_load_mock.assert_called_once()
+        validate_mock.assert_called_once()
 
     @mock.patch("aea.cli.utils.generic.yaml.safe_load", _raise_yamlerror)
     def testget_or_create_cli_config_bad_yaml(self):
