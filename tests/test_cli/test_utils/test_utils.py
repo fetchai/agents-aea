@@ -223,7 +223,7 @@ class GetOrCreateCLIConfigTestCase(TestCase):
         validate_mock.assert_called_once()
 
     @mock.patch("aea.cli.utils.generic.yaml.safe_load", _raise_yamlerror)
-    def testget_or_create_cli_config_bad_yaml(self):
+    def testget_or_create_cli_config_bad_yaml(self, validate_mock):
         """Test for rget_or_create_cli_config method bad yaml behavior."""
         with self.assertRaises(ClickException):
             get_or_create_cli_config()
