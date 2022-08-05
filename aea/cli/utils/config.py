@@ -36,6 +36,7 @@
 #
 # ------------------------------------------------------------------------------
 """A module with config tools of the aea cli."""
+import json
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
@@ -62,7 +63,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
-from aea.configurations.validation import ExtraPropertiesError
+from aea.configurations.validation import ExtraPropertiesError, _SCHEMAS_DIR
 from aea.exceptions import AEAEnforceError, AEAValidationError
 from aea.helpers.io import open_file
 
@@ -107,6 +108,15 @@ def try_to_load_agent_config(
         raise click.ClickException(str(e))  # pragma: nocover
 
 
+def validate_cli_config(config: Dict) -> None:
+    """Validate CLI config using config schema."""
+    with open_file(Path(_SCHEMAS_DIR, "cli_config.json")) as fp:
+        schema = json.load(fp)
+
+    validator = jsonschema.Draft4Validator(schema=schema)
+    validator.validate(config)
+
+
 def _init_cli_config() -> None:
     """Create cli config folder and file."""
     conf_dir = os.path.dirname(CLI_CONFIG_PATH)
@@ -124,6 +134,9 @@ def update_cli_config(dict_conf: Dict) -> None:
     """
     config = get_or_create_cli_config()
     config.update(dict_conf)
+
+    validate_cli_config(config)
+
     with open_file(CLI_CONFIG_PATH, "w") as f:
         yaml.dump(config, f, default_flow_style=False)
 
@@ -135,10 +148,13 @@ def get_or_create_cli_config() -> Dict:
     :return: dict CLI config.
     """
     try:
-        return load_yaml(CLI_CONFIG_PATH)
+        config = load_yaml(CLI_CONFIG_PATH)
     except FileNotFoundError:
         _init_cli_config()
-    return load_yaml(CLI_CONFIG_PATH)
+        config = load_yaml(CLI_CONFIG_PATH)
+
+    validate_cli_config(config)
+    return config
 
 
 def set_cli_author(click_context: click.Context) -> None:
