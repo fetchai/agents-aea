@@ -19,7 +19,7 @@
 """This module contains the code to generate dependency trees from registries."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, cast
+from typing import Dict, List, Optional, Set, Tuple
 
 import yaml
 
@@ -38,6 +38,7 @@ from aea.configurations.constants import (
     SKILL,
 )
 from aea.configurations.data_types import PackageId, PublicId
+from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.yaml_utils import _AEAYamlDumper, _AEAYamlLoader
 
 
@@ -117,18 +118,61 @@ class DependecyTree:
         )
 
     @classmethod
-    def resolve_tree(
-        cls, dependency_list: Dict[PackageId, List[PackageId]], tree: Dict
-    ) -> None:
-        """Resolve dependency tree"""
+    def resolve_tree(cls, dependency_list: Dict[PackageId, List[PackageId]]) -> Dict:
+        """
+        Resolve dependency tree.
 
+        :param dependency_list: the adjacency list of the dependency graph
+        :return: the dependency tree
+        """
+        tree: Dict[PackageId, Dict] = {root_node: {} for root_node in dependency_list}
+        # auxiliary variables to keep track during recursive calls :
+        #  visited: a set for fast checking of already visited nodes in the current path of DFS
+        #  stack:   the current stack of nodes in the depth-first visiting of nodes
+        visited: Set[PackageId] = set()
+        stack: List[PackageId] = []
+        cls._resolve_tree_aux(dependency_list, tree, visited, stack)
+
+        # _resolve_tree_aux did side-effect on the 'tree' object
+        return tree
+
+    @classmethod
+    def _resolve_tree_aux(
+        cls,
+        dependency_list: Dict[PackageId, List[PackageId]],
+        tree: Dict,
+        visited: Set[PackageId],
+        stack: List[PackageId],
+    ) -> None:
+        """
+        Resolve dependency tree (auxiliary method of resolve_tree).
+
+        IMPORTANT: This method does side-effect on the parameter 'tree', 'visited' and 'stack'.
+
+        :param dependency_list: the adjacency list of hte dependency graph
+        :param tree: the dependency tree
+        :param visited: the set of visited nodes in the current path
+        :param stack: the current path stored in a LIFO data structure
+        """
         for root_package in tree:
+            if root_package in visited:
+                # cycle found; raise error
+                cls._raise_circular_dependency_error(root_package, stack)
+                return
+
+            # add current package to the stack - needed to check if there are circular dependencies
+            visited.add(root_package)
+            stack.append(root_package)
+
+            # build the root of the subtree according to the dependency list
             root_dependencies: List[PackageId] = dependency_list.get(root_package, [])
-            for package in root_dependencies:
-                tree[root_package][package] = {
-                    p: {} for p in cast(list, dependency_list.get(package))
-                }
-                cls.resolve_tree(dependency_list, tree[root_package][package])
+            tree[root_package] = {p: {} for p in root_dependencies}
+            # do a recursive call on the newly created subtree
+            cls._resolve_tree_aux(dependency_list, tree[root_package], visited, stack)
+
+            # the current search node can be removed from the stack
+            visited.discard(root_package)
+            stack.pop()
 
     @classmethod
     def flatten_tree(
@@ -158,14 +202,11 @@ class DependecyTree:
                     to_package_id(str(public_id), component_type)
                 ] = cls.get_all_dependencies(item_config)
 
-        dep_tree: Dict[PackageId, Dict] = {
-            root_node: {} for root_node in package_to_dependency_mappings
-        }
         flat_tree: List[List[PackageId]] = []
         flat_tree_dirty: List[List[PackageId]] = []
         dirty_packages: List[PackageId] = []
 
-        cls.resolve_tree(package_to_dependency_mappings, dep_tree)
+        dep_tree = cls.resolve_tree(package_to_dependency_mappings)
         cls.flatten_tree(dep_tree, flat_tree_dirty, 0)
 
         for tree_level in reversed(flat_tree_dirty[:-1]):
@@ -177,3 +218,20 @@ class DependecyTree:
             dirty_packages += tree_level
 
         return flat_tree
+
+    @classmethod
+    def _raise_circular_dependency_error(
+        cls, package: PackageId, stack: List[PackageId]
+    ) -> None:
+        # find first occurrence of the package in the stack:
+        start = stack.index(package)
+        start_node = stack[start]
+        cycle = stack[start:]
+        if len(cycle) == 1:
+            raise AEAPackageLoadingError(
+                f"Found a self-loop dependency while resolving dependency tree in package {cycle[0]}"
+            )
+        raise AEAPackageLoadingError(
+            "Found a circular dependency while resolving dependency tree: "
+            + " -> ".join(map(str, cycle + [start_node]))
+        )
