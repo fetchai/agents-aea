@@ -25,14 +25,14 @@ import pytest
 
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.exceptions import AEAPackageLoadingError
-from aea.helpers.dependency_tree import DependecyTree
+from aea.helpers.dependency_tree import DependencyTree
 
 from tests.conftest import PACKAGES_DIR
 
 
 def test_generation_of_dependency_tree_of_repo_packages() -> None:
     """Test we can generate the dependency tree of the package directory of the repository."""
-    dependency_tree = DependecyTree.generate(Path(PACKAGES_DIR))
+    dependency_tree = DependencyTree.generate(Path(PACKAGES_DIR))
     assert len(dependency_tree) > 0
 
 
@@ -49,7 +49,7 @@ def test_case_when_dependency_tree_has_a_self_loop() -> None:
             f"Found a self-loop dependency while resolving dependency tree in package {dummy_package_id}"
         ),
     ):
-        DependecyTree.resolve_tree(dependency_list)
+        DependencyTree.resolve_tree(dependency_list)
 
 
 def test_case_when_dependency_tree_has_a_cycle() -> None:
@@ -75,4 +75,4 @@ def test_case_when_dependency_tree_has_a_cycle() -> None:
             f"Found a circular dependency while resolving dependency tree: {package_a_id} -> {package_b_id} -> {package_c_id} -> {package_a_id}"
         ),
     ):
-        DependecyTree.resolve_tree(dependency_list)
+        DependencyTree.resolve_tree(dependency_list)

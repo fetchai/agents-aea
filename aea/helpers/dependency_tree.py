@@ -97,7 +97,7 @@ def to_package_id(public_id: str, package_type: str) -> PackageId:
     return PackageId(package_type, PublicId.from_str(public_id)).without_hash()
 
 
-class DependecyTree:
+class DependencyTree:
     """This class represents the dependency tree for a registry."""
 
     @staticmethod
