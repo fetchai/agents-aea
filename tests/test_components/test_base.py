@@ -19,15 +19,20 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea/components/base.py"""
+import re
 import sys
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
 
+from aea.aea_builder import AEABuilder
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ConnectionConfig, ProtocolConfig
-
-from tests.conftest import ROOT_DIR
+from aea.exceptions import AEAPackageLoadingError
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import AEATestCase
+from tests.conftest import CUR_PATH, ROOT_DIR
 
 
 class TestComponentProperties:
@@ -113,3 +118,85 @@ def test_load_aea_package_twice():
     from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 
     assert BaseHTTPCLientConnection is HTTPClientConnection
+
+
+class TestLoadingErrorWithUndeclaredDependency(AEATestCase):
+    """Test that an error is raised when not declared dependencies are detected in import statements of modules."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    matching_content = re.escape(
+        dedent(
+            """        aea.exceptions.AEAPackageLoadingError: found the following packages that are imported by some module but not declared as dependencies of package (skill, dummy_author/dummy:0.1.0):
+
+        - connection some_author/some_connection used in:
+            - dummy_subpackage/__init__.py
+        - protocol some_author/some_protocol used in:
+            - dummy_subpackage/__init__.py
+        """
+        )
+    )
+
+    def _add_undeclared_dependency_in_dummy_skill_imports(self):
+        """
+        Set up the dummy skill for the test.
+
+        Add package import statements, in some module of the dummy skill, of packages
+        that are not declared as dependencies of the dummy skill.
+        """
+        cwd = self._get_cwd()
+        module_path = Path(cwd, "skills", "dummy", "dummy_subpackage", "__init__.py")
+        module_content = module_path.read_text()
+        module_content += "\nimport packages.some_author.connections.some_connection"
+        module_content += "\nfrom packages.some_author.protocols.some_protocol"
+        module_path.write_text(module_content)
+        self.run_cli_command("fingerprint", "by-path", "skills/dummy", cwd=cwd)
+
+    def test_run(self):
+        """Run the test."""
+        self._add_undeclared_dependency_in_dummy_skill_imports()
+        with cd(self._get_cwd()):
+            builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+            with pytest.raises(AEAPackageLoadingError, match=self.matching_content):
+                builder.build()
+
+
+class TestLoadingErrorWithUnusedDependency(AEATestCase):
+    """Test that an error is raised when not used dependencies are detected in import statements of modules."""
+
+    path_to_aea = Path(CUR_PATH) / "data" / "dummy_aea"
+
+    matching_content = re.escape(
+        dedent(
+            """        aea.exceptions.AEAPackageLoadingError: The following dependencies are not used in any Python module of the package (skill, dummy_author/dummy:0.1.0):
+        - connection fetchai/local
+        - protocol fetchai/fipa
+"""
+        )
+    )
+
+    def _add_unused_dependency_in_dummy_skill_imports(self):
+        """
+        Set up the dummy skill for the test.
+
+        Add a dummy dependency that is not used in the skill.
+        """
+        cwd = self._get_cwd()
+        configuration_path = Path(cwd, "skills", "dummy", "skill.yaml")
+        configuration_content = configuration_path.read_text()
+        configuration_content = configuration_content.replace(
+            "protocols:", "protocols:\n- fetchai/fipa:1.0.0"
+        )
+        configuration_content = configuration_content.replace(
+            "connections: []", "connections:\n- fetchai/local:0.20.0"
+        )
+        configuration_path.write_text(configuration_content)
+        self.run_cli_command("fingerprint", "by-path", "skills/dummy", cwd=cwd)
+
+    def test_run(self):
+        """Run the test."""
+        self._add_unused_dependency_in_dummy_skill_imports()
+        with cd(self._get_cwd()):
+            builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+            with pytest.raises(AEAPackageLoadingError, match=self.matching_content):
+                builder.build()

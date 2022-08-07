@@ -20,12 +20,15 @@
 """This module contains definitions of agent components."""
 import importlib.util
 import logging
+import re
 import sys
 import types
 from abc import ABC
+from collections import defaultdict
 from importlib.machinery import ModuleSpec
 from pathlib import Path
-from typing import Any, Optional, cast
+from textwrap import indent
+from typing import Any, Dict, Optional, Set, cast
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -34,7 +37,8 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import PACKAGES
-from aea.exceptions import AEAEnforceError
+from aea.configurations.data_types import PackageIdPrefix, PackageType
+from aea.exceptions import AEAEnforceError, AEAPackageLoadingError, enforce
 from aea.helpers.logging import WithLogger
 
 
@@ -130,7 +134,182 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     author = configuration.author
     package_type_plural = configuration.component_type.to_plural()
     package_name = configuration.name
+    _CheckUsedDependencies(configuration).run_check()
     perform_load_aea_package(dir_, author, package_type_plural, package_name)
+
+
+class _CheckUsedDependencies:
+    """Auxiliary class to keep track of used packages in import statements of package modules."""
+
+    package_type_plural_regex = (
+        rf"({PackageType.AGENT.to_plural()}|"
+        rf"{PackageType.PROTOCOL.to_plural()}|"
+        rf"{PackageType.SKILL.to_plural()}|"
+        rf"{PackageType.CONNECTION.to_plural()}|"
+        rf"{PackageType.CONTRACT.to_plural()}|"
+        rf"{PackageType.SERVICE.to_plural()})"
+    )
+
+    def __init__(self, configuration: ComponentConfiguration) -> None:
+        """Initialize the instance."""
+        self.configuration = configuration
+        enforce(
+            configuration.directory is not None,
+            "input configuration must be associated to a directory",
+            exception_class=ValueError,
+        )
+        self.directory = configuration.directory
+
+    @classmethod
+    def _extract_imported_packages_as_ids(
+        cls, module_content: str
+    ) -> Set[PackageIdPrefix]:
+        """
+        Given a Python module file in form of string, extract all packages being imported.
+
+        E.g. consider an AEA package Python module:
+
+            import packages.open_aea.protocols.signing
+            from packages.fetchai.connections.ledger.connection import LedgerConnection
+
+        This function should return the set of package id prefixes:
+
+            {('protocol', 'open_aea', 'signing'), ('connection', 'fetchai', 'ledger')}
+
+        :param module_content: the content of the Python module to analyze.
+        :return: the package ids corresponding to the import statements of AEA package modules
+        """
+        # find all import statements of the form:
+        #
+        #   from packages.{author}.{type_plural}.{name}
+        #   import packages.{author}.{type_plural}.{name}
+        #
+        import_statements = re.findall(
+            rf"^(from|import) ({PACKAGES}\.[A-Za-z0-9_]+\.{cls.package_type_plural_regex}\.[A-Za-z0-9_]+)",
+            module_content,
+            flags=re.MULTILINE,
+        )
+
+        # get all AEA package modules in form of import dotted path, excluding the prefix 'packages.'
+        imported_packages_parts = set(
+            tuple(package_dotted_path.split(".")[1:])
+            for _from_or_import, package_dotted_path, _package_type in import_statements
+        )
+
+        # get the list of package ids extracted from the import dotted path
+        # for part[0], need to remove the trailing 's' of component type plural, e.g. protocols -> protocol
+        package_ids = set(
+            (ComponentType(parts[1][:-1]), parts[0], parts[2])
+            for parts in imported_packages_parts
+        )
+
+        return package_ids
+
+    @classmethod
+    def _find_all_used_packages(
+        cls, configuration: ComponentConfiguration
+    ) -> Dict[PackageIdPrefix, Set[Path]]:
+        """
+        Find all AEA packages used by some AEA package Python module.
+
+        :param configuration: the configuration object of the AEA package
+        :return: a dictionary from component id to a set of paths where some modules
+                 of the component with that id are imported.
+        """
+        aea_package_root_dir = cast(Path, configuration.directory)
+        package_id_prefix = (
+            configuration.component_type,
+            configuration.author,
+            configuration.name,
+        )
+
+        used_packages: Dict[PackageIdPrefix, Set[Path]] = defaultdict(set)
+        for python_module in aea_package_root_dir.rglob("*.py"):
+            module_content = python_module.read_text()
+            module_package_id_prefixes = cls._extract_imported_packages_as_ids(
+                module_content
+            )
+            for module_package_id_prefix in module_package_id_prefixes:
+                # only add to the result packages different from current package
+                if module_package_id_prefix != package_id_prefix:
+                    used_packages[module_package_id_prefix].add(python_module)
+        return used_packages
+
+    def run_check(self) -> None:
+        """Run the check."""
+        used_packages_to_module_paths = self._find_all_used_packages(self.configuration)
+        dependencies = set(
+            d.component_prefix for d in self.configuration.package_dependencies
+        )
+        used_packages = set(used_packages_to_module_paths.keys())
+
+        used_packages_not_dependencies = used_packages - dependencies
+        dependencies_not_used_packages = dependencies - used_packages
+
+        if len(used_packages_not_dependencies) > 0:
+            self._raise_used_packages_not_dependencies(
+                used_packages_not_dependencies,
+                used_packages_to_module_paths,
+                self.configuration,
+            )
+        if len(dependencies_not_used_packages) > 0:
+            self._raise_dependency_not_used_package(
+                dependencies_not_used_packages, self.configuration
+            )
+
+    @classmethod
+    def _raise_used_packages_not_dependencies(
+        cls,
+        used_packages_not_dependencies: Set[PackageIdPrefix],
+        used_packages_to_module_paths: Dict[PackageIdPrefix, Set[Path]],
+        configuration: ComponentConfiguration,
+    ) -> None:
+        """Raise AEAPackageLoadingError when some used package is not declared as dependency."""
+        config_dir = cast(Path, configuration.directory)
+        error_message = (
+            f"found the following packages that are imported by some module but not declared as "
+            f"dependencies of package {configuration.package_id}:\n\n"
+        )
+        for package_id_prefix in sorted(
+            used_packages_not_dependencies, key=cls.package_id_prefix_to_str
+        ):
+            paths = used_packages_to_module_paths[package_id_prefix]
+            paths_error_message = "\n".join(
+                [indent(f"- {path.relative_to(config_dir)}", " " * 4) for path in paths]
+            )
+            prefix_to_str = cls.package_id_prefix_to_str(package_id_prefix)
+            single_package_error_message = (
+                f"- {prefix_to_str} used in:\n{paths_error_message}\n"
+            )
+            error_message += single_package_error_message
+        raise AEAPackageLoadingError(error_message)
+
+    @classmethod
+    def _raise_dependency_not_used_package(
+        cls,
+        dependencies_not_used_packages: Set[PackageIdPrefix],
+        configuration: ComponentConfiguration,
+    ) -> None:
+        """Raise AEAPackageLoadingError when some dependency is not used in any AEA package Python module."""
+        raise AEAPackageLoadingError(
+            f"The following dependencies are not used in any Python module of the package {configuration.package_id}:\n"
+            + "\n".join(
+                [
+                    f"- {cls.package_id_prefix_to_str(package_id)}"
+                    for package_id in sorted(
+                        dependencies_not_used_packages, key=cls.package_id_prefix_to_str
+                    )
+                ]
+            )
+        )
+
+    @classmethod
+    def package_id_prefix_to_str(cls, package_id_prefix: PackageIdPrefix) -> str:
+        """Get string from package id prefix."""
+        component_type = str(package_id_prefix[0])
+        author = package_id_prefix[1]
+        name = package_id_prefix[2]
+        return f"{component_type} {author}/{name}"
 
 
 def perform_load_aea_package(
@@ -140,6 +319,10 @@ def perform_load_aea_package(
     Load the AEA package from values provided.
 
     It adds all the __init__.py modules into `sys.modules`.
+
+    This function also checks that:
+     - all packages declared as dependencies are used in package modules;
+     - all imports correspond to a package declared as dependency.
 
     :param dir_: path of the component.
     :param author: str
