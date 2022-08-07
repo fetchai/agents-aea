@@ -234,5 +234,9 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
 
             proc = PexpectWrapper.aea_cli(["run"], cwd=self._get_cwd())
             proc.expect_all(
-                ["No AEA package found with author name", "not_exist_protocol"]
+                [
+                    " found the following packages that are imported by some module but not declared as dependencies of package (skill, fetchai/echo",
+                    "protocol fetchai/not_exist_protocol used in:",
+                    "handlers.py",
+                ]
             )

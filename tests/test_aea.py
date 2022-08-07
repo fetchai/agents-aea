@@ -178,13 +178,14 @@ def test_react():
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
+        builder.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        )
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
-        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
-        builder.add_component(ComponentType.PROTOCOL, protocol)
         protocol = os.path.join(
             ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
         )
@@ -241,13 +242,14 @@ def test_handle():
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
+        builder.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        )
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
-        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
-        builder.add_component(ComponentType.PROTOCOL, protocol)
         protocol = os.path.join(
             ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
         )
@@ -356,13 +358,14 @@ def test_initialize_aea_programmatically():
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "oef_search")
         )
+        builder.add_protocol(
+            Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
+        )
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
-        protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
-        builder.add_component(ComponentType.PROTOCOL, protocol)
         protocol = os.path.join(
             ROOT_DIR, "packages", "fetchai", "protocols", "state_update"
         )
