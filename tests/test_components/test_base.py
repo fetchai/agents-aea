@@ -19,8 +19,11 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea/components/base.py"""
+import itertools
+import os
 import re
 import sys
+from itertools import zip_longest
 from pathlib import Path
 from textwrap import dedent
 
@@ -28,11 +31,26 @@ import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component, load_aea_package
-from aea.configurations.base import ConnectionConfig, ProtocolConfig
+from aea.configurations.base import (
+    ConnectionConfig,
+    PACKAGE_TYPE_TO_CONFIG_CLASS,
+    ProtocolConfig,
+)
+from aea.configurations.data_types import PackageType
+from aea.configurations.loader import ConfigLoader
 from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.base import cd
+from aea.helpers.io import open_file
 from aea.test_tools.test_cases import AEATestCase
-from tests.conftest import CUR_PATH, ROOT_DIR
+
+from tests.conftest import (
+    CUR_PATH,
+    ROOT_DIR,
+    connection_config_files,
+    contract_config_files,
+    protocol_config_files,
+    skill_config_files,
+)
 
 
 class TestComponentProperties:
@@ -200,3 +218,39 @@ class TestLoadingErrorWithUnusedDependency(AEATestCase):
             builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
             with pytest.raises(AEAPackageLoadingError, match=self.matching_content):
                 builder.build()
+
+
+@pytest.mark.parametrize(
+    "component_type,config_file_path",
+    itertools.chain.from_iterable(
+        [
+            zip_longest([], files, fillvalue=component_type)
+            for files, component_type in [
+                (protocol_config_files, PackageType.PROTOCOL),
+                (contract_config_files, PackageType.CONTRACT),
+                (connection_config_files, PackageType.CONNECTION),
+                (skill_config_files, PackageType.SKILL),
+            ]
+        ]
+    ),
+)
+def test_load_all_aea_protocol_packages(
+    component_type: PackageType, config_file_path: str
+) -> None:
+    """Load all AEA component packages."""
+
+    to_be_skipped = {os.path.join(CUR_PATH, "data", "gym-connection.yaml")}
+
+    if config_file_path in to_be_skipped:
+        pytest.skip(
+            f"test not supported for configurations outside package: {config_file_path}"
+        )
+
+    configuration_loader = ConfigLoader.from_configuration_type(
+        component_type, PACKAGE_TYPE_TO_CONFIG_CLASS
+    )
+    with open_file(config_file_path) as fp:
+        configuration_object = configuration_loader.load(fp)
+        directory = Path(config_file_path).parent
+        configuration_object.directory = directory
+        load_aea_package(configuration_object)
