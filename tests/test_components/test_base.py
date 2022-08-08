@@ -149,12 +149,12 @@ class TestLoadingErrorWithUndeclaredDependency(AEATestCase):
 
     matching_content = re.escape(
         dedent(
-            """        aea.exceptions.AEAPackageLoadingError: found the following packages that are imported by some module but not declared as dependencies of package (skill, dummy_author/dummy:0.1.0):
+            f"""        aea.exceptions.AEAPackageLoadingError: found the following packages that are imported by some module but not declared as dependencies of package (skill, dummy_author/dummy:0.1.0):
 
         - connection some_author/some_connection used in:
-            - dummy_subpackage/__init__.py
+            - dummy_subpackage{os.path.sep}__init__.py
         - protocol some_author/some_protocol used in:
-            - dummy_subpackage/__init__.py
+            - dummy_subpackage{os.path.sep}__init__.py
         """
         )
     )
