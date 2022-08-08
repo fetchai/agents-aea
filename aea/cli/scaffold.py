@@ -22,9 +22,10 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import cast
+from typing import Optional, cast
 
 import click
+import yaml
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
@@ -91,10 +92,15 @@ def connection(ctx: Context, connection_name: str) -> None:
 
 @scaffold.command()
 @click.argument("contract_name", type=str, required=True)
+@click.argument("contract_abi", type=str, required=False)
 @pass_ctx
-def contract(ctx: Context, contract_name: str) -> None:
+def contract(
+    ctx: Context, contract_name: str, contract_abi: Optional[str] = None
+) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
     scaffold_item(ctx, CONTRACT, contract_name)
+    if contract_abi:
+        add_contract_abi(ctx, contract_name, contract_abi)
 
 
 @scaffold.command()
@@ -313,3 +319,47 @@ def _scaffold_non_package_item(
     except Exception as e:
         os.remove(dest)
         raise click.ClickException(str(e))
+
+
+def add_contract_abi(ctx: Context, contract_name: str, contract_abi: str) -> None:
+    """
+    Add the contract ABI to a contract scaffold.
+
+    :param ctx: the CLI context.
+    :param contract_name: the contract name.
+    :param contract_abi: the contract ABI path.
+    """
+
+    # Get some data from the context
+    to_local_registry = ctx.config.get("to_local_registry")
+    author_name = ctx.agent_config.author
+
+    # Create the build directory and copy the ABI file
+    src = Path(contract_abi)
+
+    contract_dir_root = (
+        Path(str(ctx.agent_config.directory)) if to_local_registry else Path()
+    )
+    contract_dir = contract_dir_root / Path("contracts") / Path(contract_name)
+    abi_dest = contract_dir / Path("build") / Path(src.name)
+
+    click.echo(f"Updating contract scaffold '{contract_name}' to include ABI...")
+
+    os.makedirs(os.path.dirname(abi_dest), exist_ok=True)
+    shutil.copyfile(src, abi_dest)
+
+    # Update contract.yaml
+    with open(contract_dir / Path("contract.yaml"), "r") as contract_yaml:
+        content = yaml.full_load(contract_yaml)
+
+    content["contract_interface_paths"] = {"ethereum": f"build/{src.name}"}
+
+    with open(contract_dir / Path("contract.yaml"), "w") as contract_yaml:
+        yaml.dump(content, contract_yaml, sort_keys=False)
+
+    # Fingerprint again
+    new_public_id = PublicId(author_name, contract_name, DEFAULT_VERSION)
+
+    if to_local_registry:
+        ctx.cwd = str(ctx.agent_config.directory)
+    fingerprint_item(ctx, CONTRACT, new_public_id)
