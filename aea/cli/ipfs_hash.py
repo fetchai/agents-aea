@@ -44,7 +44,7 @@ from aea.configurations.constants import (
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import load_configuration_object
 from aea.helpers.cid import DEFAULT_ENCODING, to_v0, to_v1
-from aea.helpers.dependency_tree import DependecyTree, dump_yaml, load_yaml, to_plural
+from aea.helpers.dependency_tree import DependencyTree, dump_yaml, load_yaml, to_plural
 from aea.helpers.fingerprint import check_fingerprint, update_fingerprint
 from aea.helpers.io import from_csv, to_csv
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -214,7 +214,7 @@ def update_hashes(
 
     try:
         public_id_to_hash_mappings: Dict = {}
-        dependency_tree = DependecyTree.generate(packages_dir)
+        dependency_tree = DependencyTree.generate(packages_dir)
         packages = [
             [package_id_and_path(package_id, packages_dir) for package_id in tree_level]
             for tree_level in dependency_tree
