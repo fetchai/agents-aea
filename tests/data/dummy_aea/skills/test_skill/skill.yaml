@@ -1,0 +1,34 @@
+name: test_skill
+author: dummy_author
+version: 0.1.0
+type: skill
+description: The scaffold skill is a scaffold for your own skill implementation.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeiaaw5nx6bzzayghel6x2qlimx2w7sfzbj5elmggzp7722qdxzucxu
+  behaviours.py: bafybeigvoskmq3cx6vyry7u6wnvrllnxco4ilwbrvflhua6xrbusqfrwi4
+  handlers.py: bafybeih4cdyqerm6jji253tvqof3mgjnsb3eammnab6c2oekt4pfxy2qqe
+  my_model.py: bafybeih447pl7wbcnrhjfbpt2cplyfs7jo4c37ocq3rd6yowc645arf5sm
+fingerprint_ignore_patterns: []
+connections: []
+contracts: []
+protocols: []
+skills: []
+behaviours:
+  scaffold:
+    args:
+      foo: bar
+    class_name: MyScaffoldBehaviour
+handlers:
+  scaffold:
+    args:
+      foo: bar
+    class_name: MyScaffoldHandler
+models:
+  scaffold:
+    args:
+      foo: bar
+    class_name: MyModel
+dependencies: {}
+is_abstract: false
