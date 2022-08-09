@@ -22,8 +22,11 @@
 
 import logging
 import os
+import shutil
 from pathlib import Path
+from tempfile import mkdtemp
 from typing import cast
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
@@ -31,7 +34,11 @@ import web3
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
+from aea.cli.scaffold import add_contract_abi, scaffold_item
 from aea.configurations.base import ComponentType, ContractConfig
+from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
+    CONTRACT,
+)
 from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
 from aea.contracts.base import Contract
@@ -41,6 +48,7 @@ from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
 from tests.conftest import ETHEREUM_TESTNET_CONFIG, ROOT_DIR, make_uri
+from tests.test_cli.tools_for_testing import ContextMock
 
 
 logger = logging.getLogger(__name__)
@@ -197,6 +205,78 @@ def test_scaffold():
         scaffold.get_raw_message("ledger_api", "contract_address", **kwargs)
     with pytest.raises(NotImplementedError):
         scaffold.get_state("ledger_api", "contract_address", **kwargs)
+
+
+@mock.patch("aea.cli.utils.decorators._cast_ctx")
+def test_scaffolded_contract_method_call():
+    """Tests a contract method call."""
+
+    # Mock the CLI context
+    td = mkdtemp()
+
+    ctx = ContextMock()
+    ctx.agent_config.author = "dummy_author"
+    ctx.config["to_local_registry"] = True
+    ctx.agent_config.directory = td
+
+    contract_name = "IUniswapV2ERC20"
+    contract_abi = "./IUniswapV2ERC20.json"
+
+    try:
+        # Scaffold a new contract
+        scaffold_item(ctx, CONTRACT, contract_name)
+        add_contract_abi(ctx, contract_name, contract_abi)
+
+        # Load the new contract
+        contract = Contract.from_dir(td)
+        ledger_api = ledger_apis_registry.make(
+            EthereumCrypto.identifier,
+            address=ETHEREUM_DEFAULT_ADDRESS,
+        )
+
+        # Call a contract method: allowance
+        CHAIN_ID = 1
+        CONTRACT_ADDRESS = "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2"
+        SPENDER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
+        SENDER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
+        APPROVAL_VALUE = 100
+        GAS = 100
+        GAS_PRICE = 100
+        NONCE = 0
+        VALUE = 0
+
+        res = contract.build_transaction(
+            ledger_api,
+            "allowance",
+            method_args={
+                "spender": SPENDER_ADDRESS,
+                "value": APPROVAL_VALUE,
+            },
+            tx_args={
+                "sender_address": SENDER_ADDRESS,
+                "gas": GAS,
+                "gasPrice": GAS_PRICE,
+            },
+        )
+
+        data = contract.get_instance(ledger_api, CONTRACT_ADDRESS).encodeABI(
+            fn_name="approve", args=[SPENDER_ADDRESS, APPROVAL_VALUE]
+        )
+
+        expected_result = {
+            "chainId": CHAIN_ID,
+            "data": data,
+            "gas": GAS,
+            "gasPrice": GAS_PRICE,
+            "nonce": NONCE,
+            "to": CONTRACT_ADDRESS,
+            "value": VALUE,
+        }
+
+        assert res == expected_result
+
+    finally:
+        shutil.rmtree(td)
 
 
 def test_contract_method_call():
