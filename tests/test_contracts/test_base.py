@@ -207,7 +207,6 @@ def test_scaffold():
         scaffold.get_state("ledger_api", "contract_address", **kwargs)
 
 
-@mock.patch("aea.cli.utils.decorators._cast_ctx")
 def test_scaffolded_contract_method_call():
     """Tests a contract method call."""
 
