@@ -22,6 +22,7 @@
 
 from typing import Optional
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -30,7 +31,7 @@ from aea.skills.base import Handler
 class MyScaffoldHandler(Handler):
     """This class scaffolds a handler."""
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
+    SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
 
     def setup(self) -> None:
         """Implement the setup."""
