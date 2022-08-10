@@ -20,12 +20,10 @@
 
 """This package contains a scaffold of a handler."""
 
-from typing import Optional
-
-from packages.fetchai.protocols.default.message import DefaultMessage
-from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 class MyScaffoldHandler(Handler):

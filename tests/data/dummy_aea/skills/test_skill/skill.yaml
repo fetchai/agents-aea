@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeighod47zbq3emz4mwcayqqzbgf73ivlkxsarqncmmeprzyijdgqzi
   behaviours.py: bafybeigvoskmq3cx6vyry7u6wnvrllnxco4ilwbrvflhua6xrbusqfrwi4
-  handlers.py: bafybeihtoyq7z3zxcaq2cgekj5i6bpap6wmwxv33dwvlcied77u5ndfrmm
+  handlers.py: bafybeidjgsb7tf7netzemmndpr7r4wjtqdb7fi2m5fvdazuvbhuznj7l2e
   my_model.py: bafybeih447pl7wbcnrhjfbpt2cplyfs7jo4c37ocq3rd6yowc645arf5sm
 fingerprint_ignore_patterns: []
 connections: []
