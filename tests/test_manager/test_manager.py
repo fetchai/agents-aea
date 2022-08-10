@@ -148,6 +148,7 @@ class TestMultiAgentManagerDependencies(BaseCase):
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
+@patch("aea.aea_builder.AEABuilder.check_project_dependencies")
 class BaseTestMultiAgentManager(BaseCase):
     """Base test class for multi-agent manager"""
 

@@ -1669,7 +1669,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         missing_dependencies_from_config = dep_tree - available_components
         enforce(
             len(missing_dependencies_from_config) == 0,
-            f"Following dependencies are present in the project but missing from the aea-config.yaml; {missing_dependencies_from_config}; Project dir: {project_path}",
+            f"Following dependencies are present in the project but missing from the aea-config.yaml; {missing_dependencies_from_config}",
         )
 
     @classmethod
