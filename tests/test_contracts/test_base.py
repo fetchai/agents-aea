@@ -19,10 +19,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea.contracts.base."""
-
 import logging
 import os
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 from tempfile import mkdtemp
 from typing import cast
@@ -35,6 +35,7 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli.scaffold import add_contract_abi, scaffold_item
+from aea.cli.utils.context import Context
 from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
     CONTRACT,
@@ -48,7 +49,6 @@ from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
 from tests.conftest import ETHEREUM_TESTNET_CONFIG, ROOT_DIR, make_uri
-from tests.test_cli.tools_for_testing import ContextMock
 
 
 logger = logging.getLogger(__name__)
@@ -213,66 +213,45 @@ def test_scaffolded_contract_method_call():
     # Mock the CLI context
     td = mkdtemp()
 
-    ctx = ContextMock()
-    ctx.agent_config.author = "dummy_author"
+    @dataclass
+    class AgentConfig:
+        author = "dummy_author"
+        contracts = ()
+        agent_name = "dummy_agent"
+
+    ctx = Context(cwd=td, verbosity="DEBUG", registry_path=td)
+    ctx.agent_config = AgentConfig()
     ctx.config["to_local_registry"] = True
     ctx.agent_config.directory = td
 
     contract_name = "IUniswapV2ERC20"
-    contract_abi = "./IUniswapV2ERC20.json"
+    contract_abi_path = "tests/test_contracts/IUniswapV2ERC20.json"
 
     try:
         # Scaffold a new contract
         scaffold_item(ctx, CONTRACT, contract_name)
-        add_contract_abi(ctx, contract_name, contract_abi)
+        add_contract_abi(ctx, contract_name, contract_abi_path)
 
         # Load the new contract
-        contract = Contract.from_dir(td)
+        contract = Contract.from_dir(td + "/contracts/" + contract_name)
         ledger_api = ledger_apis_registry.make(
             EthereumCrypto.identifier,
             address=ETHEREUM_DEFAULT_ADDRESS,
         )
 
         # Call a contract method: allowance
-        CHAIN_ID = 1
-        CONTRACT_ADDRESS = "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2"
         SPENDER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
-        SENDER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
-        APPROVAL_VALUE = 100
-        GAS = 100
-        GAS_PRICE = 100
-        NONCE = 0
-        VALUE = 0
+        OWNER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 
-        res = contract.build_transaction(
-            ledger_api,
-            "allowance",
-            method_args={
-                "spender": SPENDER_ADDRESS,
-                "value": APPROVAL_VALUE,
-            },
-            tx_args={
-                "sender_address": SENDER_ADDRESS,
-                "gas": GAS,
-                "gasPrice": GAS_PRICE,
-            },
-        )
+        with mock.patch("web3.contract.ContractFunction.call", return_value=0):
+            res = contract.contract_method_call(
+                ledger_api=ledger_api,
+                method_name="allowance",
+                owner=OWNER_ADDRESS,
+                spender=SPENDER_ADDRESS,
+            )
 
-        data = contract.get_instance(ledger_api, CONTRACT_ADDRESS).encodeABI(
-            fn_name="approve", args=[SPENDER_ADDRESS, APPROVAL_VALUE]
-        )
-
-        expected_result = {
-            "chainId": CHAIN_ID,
-            "data": data,
-            "gas": GAS,
-            "gasPrice": GAS_PRICE,
-            "nonce": NONCE,
-            "to": CONTRACT_ADDRESS,
-            "value": VALUE,
-        }
-
-        assert res == expected_result
+        assert res == 0
 
     finally:
         shutil.rmtree(td)
