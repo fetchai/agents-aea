@@ -92,15 +92,15 @@ def connection(ctx: Context, connection_name: str) -> None:
 
 @scaffold.command()
 @click.argument("contract_name", type=str, required=True)
-@click.argument("contract_abi", type=str, required=False)
+@click.argument("contract_abi_path", type=str, required=False)
 @pass_ctx
 def contract(
-    ctx: Context, contract_name: str, contract_abi: Optional[str] = None
+    ctx: Context, contract_name: str, contract_abi_path: Optional[str] = None
 ) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
     scaffold_item(ctx, CONTRACT, contract_name)
-    if contract_abi:
-        add_contract_abi(ctx, contract_name, contract_abi)
+    if contract_abi_path:
+        add_contract_abi(ctx, contract_name, contract_abi_path)
 
 
 @scaffold.command()
@@ -321,13 +321,13 @@ def _scaffold_non_package_item(
         raise click.ClickException(str(e))
 
 
-def add_contract_abi(ctx: Context, contract_name: str, contract_abi: str) -> None:
+def add_contract_abi(ctx: Context, contract_name: str, contract_abi_path: str) -> None:
     """
     Add the contract ABI to a contract scaffold.
 
     :param ctx: the CLI context.
     :param contract_name: the contract name.
-    :param contract_abi: the contract ABI path.
+    :param contract_abi_path: the contract ABI path.
     """
 
     # Get some data from the context
@@ -335,7 +335,7 @@ def add_contract_abi(ctx: Context, contract_name: str, contract_abi: str) -> Non
     author_name = ctx.agent_config.author
 
     # Create the build directory and copy the ABI file
-    src = Path(contract_abi)
+    src = Path(contract_abi_path)
 
     contract_dir_root = (
         Path(str(ctx.agent_config.directory)) if to_local_registry else Path()
