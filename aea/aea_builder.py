@@ -1652,7 +1652,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """Check project config for missing dependencies."""
 
         dep_tree: Set[ComponentId] = set()
-        for level in DependencyTree.generate(project_path):
+        for level in DependencyTree.generate(project_path, from_project=True):
             dep_tree.update(
                 {
                     ComponentId(package.package_type.value, package.public_id)
