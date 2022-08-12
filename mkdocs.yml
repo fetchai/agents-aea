@@ -3,6 +3,7 @@ site_url: https://open-aea.docs.autonolas.tech/
 site_description: Everything you need to know about (open) AEAs.
 repo_url: https://github.com/valory-xyz/open-aea
 site_author: developer@fetch.ai,info@valory.xyz
+edit_uri: edit/main/docs/
 
 theme:
   name: 'material'
