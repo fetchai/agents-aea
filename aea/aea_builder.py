@@ -1667,12 +1667,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         }
 
         missing_dependencies_from_config = dep_tree - available_components
-        available_packages = "\n".join(
-            [str(config.parent) for config in project_path.glob("**/*.yaml")]
-        )
         enforce(
             len(missing_dependencies_from_config) == 0,
-            f"Following dependencies are present in the project but missing from the aea-config.yaml; {missing_dependencies_from_config}, Available packages; {available_packages}",
+            f"Following dependencies are present in the project but missing from the aea-config.yaml; {missing_dependencies_from_config}",
         )
 
     @classmethod

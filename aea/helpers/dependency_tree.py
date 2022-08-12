@@ -198,6 +198,8 @@ class DependencyTree:
                     "name", item_config.get("agent_name")
                 )
                 public_id = PublicId.from_json(item_config)
+                if public_id.name == "scaffold":
+                    continue
                 package_to_dependency_mappings[
                     to_package_id(str(public_id), component_type)
                 ] = cls.get_all_dependencies(item_config)
