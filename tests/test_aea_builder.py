@@ -1057,15 +1057,16 @@ def test_dependency_tree_check():
     )
     aea_config_file.write_text(missing_dependencies)
 
-    with pytest.raises(
-        AEAEnforceError,
-        match=re.escape(
-            "Following dependencies are present in the project but missing from the aea-config.yaml; {PackageId(skill, dummy_author/test_skill:0.1.0)}"
-        ),
-    ):
-        AEABuilder.from_aea_project(dummy_aea_path)
-
-    aea_config_file.write_text(original_content)
+    try:
+        with pytest.raises(
+            AEAEnforceError,
+            match=re.escape(
+                "Following dependencies are present in the project but missing from the aea-config.yaml; {PackageId(skill, dummy_author/test_skill:0.1.0)}"
+            ),
+        ):
+            AEABuilder.from_aea_project(dummy_aea_path)
+    finally:
+        aea_config_file.write_text(original_content)
 
 
 class TestApplyEnvironmentVariables(AEATestCaseEmpty, CleanDirectoryClass):
