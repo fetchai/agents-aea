@@ -33,6 +33,7 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SERVICE_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    PACKAGE_TYPE_TO_CONFIG_FILE,
     PROTOCOL,
     SERVICE,
     SKILL,
@@ -188,29 +189,63 @@ class DependencyTree:
             flat_tree[level].append(package)
             cls.flatten_tree(dependencies, flat_tree, level + 1)
 
+    @staticmethod
+    def find_packages_in_a_project(
+        project_dir: Path,
+    ) -> List[Tuple[str, Path]]:
+        """Find packages in an AEA project."""
+
+        packages = []
+        for package_type, config_file in COMPONENTS:
+            _packages = [
+                *Path(project_dir, VENDOR).glob(f"*/{package_type}s/*/{config_file}"),
+                *Path(project_dir, f"{package_type}s").glob(f"*/{config_file}"),
+            ]
+            packages += [
+                (package_type, package_path.parent) for package_path in _packages
+            ]
+
+        return packages
+
+    @staticmethod
+    def find_packages_in_a_local_repository(
+        packages_dir: Path,
+    ) -> List[Tuple[str, Path]]:
+        """Find packages in a local repository."""
+
+        packages = []
+        for package_type, config_file in COMPONENTS:
+            packages += [
+                (package_type, package_path.parent)
+                for package_path in Path(packages_dir).glob(
+                    f"*/{package_type}s/*/{config_file}"
+                )
+            ]
+
+        return packages
+
     @classmethod
-    def generate(cls, packages_dir: Path) -> List[List[PackageId]]:
+    def generate(
+        cls, packages_dir: Path, from_project: bool = False
+    ) -> List[List[PackageId]]:
         """Returns PublicId to hash mapping."""
         package_to_dependency_mappings = {}
-        for component_type, component_file in COMPONENTS:
-            packages_list = []
-            if (packages_dir / VENDOR).exists():
-                packages_list = [
-                    *Path(".", VENDOR).glob(f"**/{component_file}"),
-                    *Path(".", f"{component_type}s").glob(f"**/{component_file}"),
-                ]
-            else:
-                packages_list = list(packages_dir.glob(f"**/{component_file}"))
+        packages_list = []
 
-            for file_path in packages_list:
-                item_config, _ = load_yaml(file_path)
-                item_config["name"] = item_config.get(
-                    "name", item_config.get("agent_name")
-                )
-                public_id = PublicId.from_json(item_config)
-                package_to_dependency_mappings[
-                    to_package_id(str(public_id), component_type)
-                ] = cls.get_all_dependencies(item_config)
+        if from_project or (packages_dir / VENDOR).exists():
+            packages_list = cls.find_packages_in_a_project(packages_dir)
+        else:
+            packages_list = cls.find_packages_in_a_local_repository(packages_dir)
+
+        for package_type, package_path in packages_list:
+            item_config, _ = load_yaml(
+                package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_type]
+            )
+            item_config["name"] = item_config.get("name", item_config.get("agent_name"))
+            public_id = PublicId.from_json(item_config)
+            package_to_dependency_mappings[
+                to_package_id(str(public_id), package_type)
+            ] = cls.get_all_dependencies(item_config)
 
         flat_tree: List[List[PackageId]] = []
         flat_tree_dirty: List[List[PackageId]] = []
