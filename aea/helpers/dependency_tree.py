@@ -36,6 +36,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SERVICE,
     SKILL,
+    VENDOR,
 )
 from aea.configurations.data_types import PackageId, PublicId
 from aea.exceptions import AEAPackageLoadingError
@@ -192,14 +193,21 @@ class DependencyTree:
         """Returns PublicId to hash mapping."""
         package_to_dependency_mappings = {}
         for component_type, component_file in COMPONENTS:
-            for file_path in packages_dir.glob(f"**/{component_file}"):
+            packages_list = []
+            if (packages_dir / VENDOR).exists():
+                packages_list = [
+                    *Path(".", VENDOR).glob(f"**/{component_file}"),
+                    *Path(".", f"{component_type}s").glob(f"**/{component_file}"),
+                ]
+            else:
+                packages_list = list(packages_dir.glob(f"**/{component_file}"))
+
+            for file_path in packages_list:
                 item_config, _ = load_yaml(file_path)
                 item_config["name"] = item_config.get(
                     "name", item_config.get("agent_name")
                 )
                 public_id = PublicId.from_json(item_config)
-                if public_id.name == "scaffold":
-                    continue
                 package_to_dependency_mappings[
                     to_package_id(str(public_id), component_type)
                 ] = cls.get_all_dependencies(item_config)
