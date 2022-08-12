@@ -1047,6 +1047,28 @@ def test_builder_pypi_dependencies():
     }
 
 
+def test_dependency_tree_check():
+    """Test getter for PyPI dependencies."""
+    dummy_aea_path = Path(CUR_PATH, "data", "dummy_aea")
+    aea_config_file = dummy_aea_path / DEFAULT_AEA_CONFIG_FILE
+    original_content = aea_config_file.read_text()
+    missing_dependencies = original_content.replace(
+        "- dummy_author/test_skill:0.1.0\n", ""
+    )
+    aea_config_file.write_text(missing_dependencies)
+
+    try:
+        with pytest.raises(
+            AEAEnforceError,
+            match=re.escape(
+                "Following dependencies are present in the project but missing from the aea-config.yaml; {PackageId(skill, dummy_author/test_skill:0.1.0)}"
+            ),
+        ):
+            AEABuilder.from_aea_project(dummy_aea_path)
+    finally:
+        aea_config_file.write_text(original_content)
+
+
 class TestApplyEnvironmentVariables(AEATestCaseEmpty, CleanDirectoryClass):
     """Test builder set from project dir, to make a skill 'abstract'."""
 

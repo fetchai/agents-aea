@@ -119,13 +119,38 @@ def flatten_tree(cls, dependency_tree: Dict, flat_tree: List[List[PackageId]],
 
 Flatten tree.
 
+<a id="aea.helpers.dependency_tree.DependencyTree.find_packages_in_a_project"></a>
+
+#### find`_`packages`_`in`_`a`_`project
+
+```python
+@staticmethod
+def find_packages_in_a_project(project_dir: Path) -> List[Tuple[str, Path]]
+```
+
+Find packages in an AEA project.
+
+<a id="aea.helpers.dependency_tree.DependencyTree.find_packages_in_a_local_repository"></a>
+
+#### find`_`packages`_`in`_`a`_`local`_`repository
+
+```python
+@staticmethod
+def find_packages_in_a_local_repository(
+        packages_dir: Path) -> List[Tuple[str, Path]]
+```
+
+Find packages in a local repository.
+
 <a id="aea.helpers.dependency_tree.DependencyTree.generate"></a>
 
 #### generate
 
 ```python
 @classmethod
-def generate(cls, packages_dir: Path) -> List[List[PackageId]]
+def generate(cls,
+             packages_dir: Path,
+             from_project: bool = False) -> List[List[PackageId]]
 ```
 
 Returns PublicId to hash mapping.
