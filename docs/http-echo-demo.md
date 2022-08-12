@@ -19,6 +19,7 @@ pipenv shell
 aea fetch open_aea/http_echo:0.1.0:bafybeicpwv6wpgc6qmzekrmddunfnjaziiksf6wbfyqzqyazons2vtrph4 --remote
 cd http_echo
 aea generate-key ethereum; aea add-key ethereum
+aea install
 aea run --aev
 Adding protocol 'open_aea/signing:1.0.0'...
 Successfully added protocol 'open_aea/signing:1.0.0'.
