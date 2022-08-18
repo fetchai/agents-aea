@@ -1,5 +1,21 @@
 # Release History - open AEA
 
+## 1.16.0 (2022-08-18)
+
+AEA:
+- Adds schema validation for global CLI config file
+- Improves the dependency resolver
+- Adds check to prevent circular package dependencies
+- Adds check to make sure all the packages in an AEA project are being used
+- Adds check to make sure all the packages in an AEA project are listed in the `aea-config.yaml`
+- Fixes a bug related to async function call on `TCPSocketProtocol`
+
+Docs:
+- Adds missing command on the `http-echo-demo.md` doc.
+
+Chore:
+- Add the gitleaks scan job
+
 ## 1.15.0 (2022-08-01)
 
 AEA:
