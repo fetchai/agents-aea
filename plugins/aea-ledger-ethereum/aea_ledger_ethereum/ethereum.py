@@ -1408,6 +1408,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_params = {
             "nonce": nonce,
             "value": tx_args["value"] if "value" in tx_args else 0,
+            "gas": 1,  # set this as a placeholder to avoid estimation on buildTransaction()
         }
 
         # Parameter camel-casing due to contract api requirements
@@ -1431,6 +1432,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
         tx = tx.buildTransaction(tx_params)
+        tx = self.update_with_gas_estimate(tx)
         return tx
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
