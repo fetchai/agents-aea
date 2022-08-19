@@ -1848,6 +1848,14 @@ class ContractConfig(ComponentConfiguration):
 
         return instance
 
+    @property
+    def package_dependencies(self) -> Set[ComponentId]:
+        """Get the contract dependencies."""
+        return {
+            ComponentId(ComponentType.CONTRACT, contract_id)
+            for contract_id in self.contracts
+        }
+
 
 """The following functions are called from aea.cli.utils."""
 

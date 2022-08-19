@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,16 +28,26 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
+try:
+    from tests.data.packages.default_author.contracts.stub_0.contract import (  # type: ignore # noqa: F401
+        MyScaffoldContract as MC,
+    )
+except ModuleNotFoundError:
+    from packages.default_author.contracts.stub_0.contract import (  # type: ignore # noqa: F401
+        MyScaffoldContract as MC,
+    )
+
+
 class MyScaffoldContract(Contract):
     """The scaffold contract class for a smart contract."""
 
-    contract_id = PublicId.from_str("open_aea/scaffold:0.1.0")
+    contract_id = PublicId.from_str("default_author/stub_1:0.1.0")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Init contract."""
         super().__init__(*args, **kwargs)
         print("Contract stub_1 initialized.")
-        raise Exception()
+        raise Exception("Raised on purpose!")
 
     @classmethod
     def get_raw_transaction(
