@@ -27,9 +27,15 @@ from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
-from packages.default_author.contracts.stub_0.contract import (  # type: ignore # noqa: F401
-    MyScaffoldContract as MC,
-)
+
+try:
+    from tests.data.packages.default_author.contracts.stub_0.contract import (  # type: ignore # noqa: F401
+        MyScaffoldContract as MC,
+    )
+except ModuleNotFoundError:
+    from packages.default_author.contracts.stub_0.contract import (  # type: ignore # noqa: F401
+        MyScaffoldContract as MC,
+    )
 
 
 class MyScaffoldContract(Contract):
@@ -41,7 +47,7 @@ class MyScaffoldContract(Contract):
         """Init contract."""
         super().__init__(*args, **kwargs)
         print("Contract stub_1 initialized.")
-        raise Exception()
+        raise Exception("Raised on purpose!")
 
     @classmethod
     def get_raw_transaction(

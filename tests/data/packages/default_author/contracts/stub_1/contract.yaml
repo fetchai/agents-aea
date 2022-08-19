@@ -7,7 +7,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: bafybeiajra74lxu4xlg4qcvqlhj7yndibsorbu24zgqgv7p3s2arjdhsdu
-  contract.py: bafybeig4v5lt7ln6r3dyyf6v3hak5gnvzfzdh4bdkuter3b4526lwxcnzm
+  contract.py: bafybeihxbf5fw25u6kqis446cbkptg7pj2n5o7xfmrbcnunttywyktknj4
 fingerprint_ignore_patterns: []
 class_name: MyScaffoldContract
 contract_interface_paths: {}

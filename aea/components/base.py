@@ -185,7 +185,7 @@ class _CheckUsedDependencies:
         #   import packages.{author}.{type_plural}.{name}
         #
         import_statements = re.findall(
-            rf"^(from|import) ({PACKAGES}\.[A-Za-z0-9_]+\.{cls.package_type_plural_regex}\.[A-Za-z0-9_]+)",
+            rf"^(    from|from|    import|import) ({PACKAGES}\.[A-Za-z0-9_]+\.{cls.package_type_plural_regex}\.[A-Za-z0-9_]+)",
             module_content,
             flags=re.MULTILINE,
         )
