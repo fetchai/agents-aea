@@ -27,7 +27,7 @@ from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
-from packages.default_author.contracts.stub_0.contract import (  # noqa: F401
+from packages.default_author.contracts.stub_0.contract import (  # noqa: F401 # type: ignore
     MyScaffoldContract as MC,
 )
 
