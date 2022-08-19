@@ -24,6 +24,7 @@ import logging
 import math
 import threading
 import warnings
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 from uuid import uuid4
@@ -42,10 +43,10 @@ from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from requests import HTTPError
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
-from web3.exceptions import SolidityError, TransactionNotFound
+from web3.exceptions import ContractLogicError, SolidityError, TransactionNotFound
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.middleware import geth_poa_middleware
-from web3.types import TxData, TxParams, TxReceipt, Wei
+from web3.types import LatestBlockParam, TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -95,7 +96,6 @@ FALLBACK_ESTIMATE = {
 
 PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
 
-
 DEFAULT_EIP1559_STRATEGY = {
     "max_gas_fast": MAX_GAS_FAST,
     "fee_history_blocks": FEE_HISTORY_BLOCKS,
@@ -106,13 +106,11 @@ DEFAULT_EIP1559_STRATEGY = {
     "priority_fee_increase_boundary": PRIORITY_FEE_INCREASE_BOUNDARY,
 }
 
-
 DEFAULT_EIP1559_STRATEGY_POLYGON = {
     "gas_endpoint": POLYGON_GAS_ENDPOINT,
     "speed": SPEED_FAST,
     "fallback_estimate": FALLBACK_ESTIMATE,
 }
-
 
 DEFAULT_GAS_STATION_STRATEGY = {"gas_price_api_key": "", "gas_price_strategy": "fast"}
 
@@ -1094,9 +1092,31 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator("Unable to retrieve gas estimate: {}", logger_method="warning")
     def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
         """Try get the gas estimate."""
-        gas_estimate = self._api.eth.estimate_gas(  # pylint: disable=no-member
-            transaction=cast(TxParams, AttributeDictTranslator.from_dict(transaction))
-        )
+        gas_estimate: Optional[int] = None
+        transaction = deepcopy(transaction)
+        del transaction["gas"]
+        try:
+            gas_estimate = self._api.eth.estimate_gas(  # pylint: disable=no-member
+                transaction=cast(
+                    TxParams, AttributeDictTranslator.from_dict(transaction)
+                )
+            )
+        except (ContractLogicError, ValueError) as e:
+            _default_logger.warning(
+                f"Unable to estimate gas with default safe , "
+                f"{type(e).__name__()}: {e.__str__()}"
+            )
+            # gas estimation might fail when repricing txs
+            # to avoid effects of pending txs when estimating gas
+            # we can set the block identifier to "latest" block
+            # this might fail if the node doesn't support the `block_identifier` param
+            gas_estimate = self._api.eth.estimate_gas(  # pylint: disable=no-member
+                transaction=cast(
+                    TxParams, AttributeDictTranslator.from_dict(transaction)
+                ),
+                block_identifier=LatestBlockParam,
+            )
+
         return gas_estimate
 
     def send_signed_transaction(
@@ -1408,6 +1428,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_params = {
             "nonce": nonce,
             "value": tx_args["value"] if "value" in tx_args else 0,
+            "gas": 1,  # set this as a placeholder to avoid estimation on buildTransaction()
         }
 
         # Parameter camel-casing due to contract api requirements
@@ -1430,7 +1451,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
+
         tx = tx.buildTransaction(tx_params)
+        if self._is_gas_estimation_enabled:
+            tx = self.update_with_gas_estimate(tx)
+
         return tx
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
