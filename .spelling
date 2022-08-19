@@ -284,6 +284,7 @@ v1
 v0
 ipfsdaemon
 py3.6
+async
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -343,4 +344,5 @@ packages.fetchai.skills.my_search.dialogues
 my_first_aea
 output_file
  - HISTORY.md
+gitleaks
 aea-cli-ipfs

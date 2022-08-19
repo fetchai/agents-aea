@@ -1103,7 +1103,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
         except (ContractLogicError, ValueError) as e:
             _default_logger.warning(
-                f"Unable to estimate gas with default safe , "
+                f"Unable to estimate gas with default state , "
                 f"{type(e).__name__()}: {e.__str__()}"
             )
             # gas estimation might fail when repricing txs
