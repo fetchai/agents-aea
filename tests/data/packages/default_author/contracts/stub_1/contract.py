@@ -27,11 +27,15 @@ from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
+from packages.default_author.contracts.stub_0.contract import (  # noqa: F401
+    MyScaffoldContract as MC,
+)
+
 
 class MyScaffoldContract(Contract):
     """The scaffold contract class for a smart contract."""
 
-    contract_id = PublicId.from_str("open_aea/scaffold:0.1.0")
+    contract_id = PublicId.from_str("default_author/stub_1:0.1.0")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Init contract."""
