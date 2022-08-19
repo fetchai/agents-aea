@@ -1431,8 +1431,11 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
             if gas_data:
                 tx_params.update(gas_data)  # pragma: nocover
+
         tx = tx.buildTransaction(tx_params)
-        tx = self.update_with_gas_estimate(tx)
+        if self._is_gas_estimation_enabled:
+            tx = self.update_with_gas_estimate(tx)
+
         return tx
 
     def get_transaction_transfer_logs(  # pylint: disable=too-many-arguments,too-many-locals
