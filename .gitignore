@@ -139,6 +139,10 @@ packages/fetchai/connections/p2p_libp2p/libp2p_node/libp2p_node
 !plugins/aea-ledger-fetchai/tests/data/dummy_contract/build
 
 deploy-image/.env
+deploy-image/packages/valory
+deploy-image/packages/open_aea
+deploy-image/packages/fetchai
+deploy-image/packages/hashes.csv
 
 libs/go/aealite/aealite
 libs/go/libp2p_node/libp2p_node
