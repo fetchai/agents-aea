@@ -18,13 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea add' subcommand."""
-import os
 from pathlib import Path
 from typing import Dict, Optional, Union, cast
 
 import click
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import (
+    PublicIdParameter,
+    determine_package_type_for_directory,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.configurations.base import (
@@ -135,35 +137,6 @@ def fingerprint_package_by_path(
     fingerprint_package(
         package_dir, package_type, package_type_config_class=package_type_config_class
     )
-
-
-def determine_package_type_for_directory(package_dir: Path) -> PackageType:
-    """
-    Find package type for the package directory by checking config file names.
-
-    :param package_dir: package dir to determine package type:
-
-    :return: PackageType
-    """
-    config_files = list(
-        set(os.listdir(str(package_dir))).intersection(
-            set(CONFIG_FILE_TO_PACKAGE_TYPE.keys())
-        )
-    )
-
-    if len(config_files) > 1:
-        raise ValueError(
-            f"Too many config files in the directory, only one has to present!: {', '.join(config_files)}"
-        )
-    if len(config_files) == 0:
-        raise ValueError(
-            f"No package config file found in `{str(package_dir)}`. Incorrect directory?"
-        )
-
-    config_file = config_files[0]
-    package_type = PackageType(CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
-
-    return package_type
 
 
 def fingerprint_package(

@@ -36,13 +36,14 @@ from aea.cli.registry.settings import (
 from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.configurations.constants import (
+    CONFIG_FILE_TO_PACKAGE_TYPE,
     CONNECTION,
     CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import PackageType, PublicId
 from aea.helpers.io import open_file
 
 
@@ -331,3 +332,32 @@ def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  #
         )  # type: ignore
 
     return wrap
+
+
+def determine_package_type_for_directory(package_dir: Path) -> PackageType:
+    """
+    Find package type for the package directory by checking config file names.
+
+    :param package_dir: package dir to determine package type:
+
+    :return: PackageType
+    """
+    config_files = list(
+        set(os.listdir(str(package_dir))).intersection(
+            set(CONFIG_FILE_TO_PACKAGE_TYPE.keys())
+        )
+    )
+
+    if len(config_files) > 1:
+        raise ValueError(
+            f"Too many config files in the directory, only one has to present!: {', '.join(config_files)}"
+        )
+    if len(config_files) == 0:
+        raise ValueError(
+            f"No package config file found in `{str(package_dir)}`. Incorrect directory?"
+        )
+
+    config_file = config_files[0]
+    package_type = PackageType(CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
+
+    return package_type
