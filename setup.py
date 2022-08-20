@@ -36,6 +36,7 @@ def get_all_extras() -> Dict:
         "pyyaml>=4.2b1,<6.0",
         "jsonschema>=3.0.0,<4.0.0",
         "packaging>=20.3,<22.0",
+        "pytest>=7.0.0,<7.2.0",
         "semver>=2.9.1,<3.0.0",
     ]
 

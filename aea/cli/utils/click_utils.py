@@ -22,7 +22,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Sequence, Union, cast
 
 import click
 from click import argument, option
@@ -81,6 +81,18 @@ class ConnectionsOption(click.Option):
             return list(result.keys())
         except Exception:  # pragma: no cover
             raise click.BadParameter(value)
+
+
+class PytestArgs(click.Option):
+    """Custom Click option for parsing Pytest arguments."""
+
+    def type_cast_value(self, ctx: click.Context, value: str) -> Sequence[str]:
+        """Cast a string value to a sequence of Pytest arguments."""
+        try:
+            return value.split(" ")
+        except Exception:
+            error_message = f"cannot split '{value}' into pytest arguments"
+            raise click.BadParameter(error_message)
 
 
 class PublicIdOrPathParameter(click.ParamType):
