@@ -47,14 +47,12 @@ from aea.helpers.base import cd
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@check_aea_project
 @pytest_args
 def test(click_context: click.Context, args: Sequence[str]) -> None:
     """Run tests of an AEA project."""
-    click.echo("Executing tests of the AEA project...")
     ctx = cast(Context, click_context.obj)
     if click_context.invoked_subcommand is None:
-        test_package_by_path(Path(ctx.cwd), args)
+        test_aea_project(Path(ctx.cwd), args)
 
 
 @test.command()
@@ -166,3 +164,10 @@ def test_package_by_path(package_dir: Path, pytest_arguments: Sequence[str]) -> 
     with cd(package_dir):
         exit_code = pytest.main([AEA_TEST_DIRNAME] + list(pytest_arguments))
         sys.exit(exit_code)
+
+
+@check_aea_project
+def test_aea_project(aea_project_dirpath: Path, args: Sequence[str]) -> None:
+    """Run tests of an AEA project."""
+    click.echo("Executing tests of the AEA project...")
+    test_package_by_path(aea_project_dirpath, args)
