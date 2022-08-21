@@ -9,7 +9,9 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ## `v1.15.0` to `v1.16.0`
 
-No backwards incompatible changes.
+No backwards incompatible changes, except a typo change:
+`from aea.helpers.dependency_tree import DependencyTree`
+rather than `from aea.helpers.dependency_tree import DependecyTree`.
 
 Plugins from previous versions are not compatible anymore.
 
