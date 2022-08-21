@@ -33,7 +33,13 @@ from aea.cli.utils.click_utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx, pytest_args
 from aea.cli.utils.package_utils import get_package_path
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.configurations.constants import (
+    AEA_TEST_DIRNAME,
+    CONNECTION,
+    CONTRACT,
+    PROTOCOL,
+    SKILL,
+)
 from aea.configurations.data_types import PublicId
 from aea.exceptions import enforce
 from aea.helpers.base import cd
@@ -150,6 +156,13 @@ def test_package_by_path(package_dir: Path, pytest_arguments: Sequence[str]) -> 
     """
     # check the path points to a valid AEA package
     determine_package_type_for_directory(package_dir)
+
+    test_package_dir = package_dir / AEA_TEST_DIRNAME
+    enforce(
+        test_package_dir.exists(),
+        f"tests directory in {package_dir} not found",
+        click.ClickException,
+    )
     with cd(package_dir):
-        exit_code = pytest.main(list(pytest_arguments))
+        exit_code = pytest.main([AEA_TEST_DIRNAME] + list(pytest_arguments))
         sys.exit(exit_code)

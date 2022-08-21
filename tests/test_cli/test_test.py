@@ -31,6 +31,7 @@ from _pytest.config import ExitCode  # type: ignore
 
 from aea.cli import cli
 from aea.cli.utils.package_utils import get_package_path
+from aea.configurations.constants import AEA_TEST_DIRNAME
 from aea.configurations.data_types import ComponentType, PublicId
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty, CLI_LOG_OPTION
@@ -109,7 +110,7 @@ class BaseAEATestCommand(AEATestCaseEmpty):
 
     def get_test_aea_dirpath(self) -> Path:
         """Get the test AEA directory path."""
-        return self.get_aea_dirpath() / "tests"
+        return self.get_aea_dirpath() / AEA_TEST_DIRNAME
 
     def dummy_package_dirpath(
         self, package_type: ComponentType, item_name: str
@@ -140,7 +141,7 @@ class BaseAEATestCommand(AEATestCaseEmpty):
         :param item_name: the name of the item
         :return: path to the AEA package
         """
-        return self.dummy_package_dirpath(package_type, item_name) / "tests"
+        return self.dummy_package_dirpath(package_type, item_name) / AEA_TEST_DIRNAME
 
     @classmethod
     def write_dummy_test_module(cls, path_to_module: Path) -> None:
@@ -161,9 +162,11 @@ class BaseAEATestCommand(AEATestCaseEmpty):
 
     def _scaffold_item(self, package_type: ComponentType) -> None:
         """Scaffold an item for testing."""
-        self.scaffold_item(
-            str(package_type.value), self._get_dummy_package_name(package_type)
-        )
+        item_name = self._get_dummy_package_name(package_type)
+        self.scaffold_item(str(package_type.value), item_name)
+        package_dirpath = self.dummy_package_dirpath(package_type, item_name)
+        # initialize tests folder
+        (package_dirpath / AEA_TEST_DIRNAME).mkdir(exist_ok=False)
 
     def _public_id(self, package_type: ComponentType) -> PublicId:
         """Return the PublicId of the dummy package."""
@@ -176,7 +179,6 @@ class BaseAEATestCommand(AEATestCaseEmpty):
         test_package_dirpath = self.get_test_package_dirpath(
             package_type, test_package_name
         )
-        test_package_dirpath.mkdir(exist_ok=False)
         test_module_filepath = (
             test_package_dirpath / f"test_{package_type.value}_module.py"
         )
@@ -215,6 +217,7 @@ class TestAgentTestEmptySuite(BaseAEATestCommand):
 
     def test_run(self):
         """Assert that the exit code is equal to 5 (i.e. pytest succeeds without collecting tests)."""
+        (self.get_aea_dirpath() / AEA_TEST_DIRNAME).mkdir(exist_ok=False)
         result = self.run_test_command()
         assert result.exit_code == NO_TESTS_COLLECTED_PYTEST_EXIT_CODE
 
