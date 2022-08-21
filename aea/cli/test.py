@@ -138,4 +138,5 @@ def test_package_by_path(package_dir: Path, pytest_arguments: Sequence[str]) -> 
     # check the path points to a valid AEA package
     determine_package_type_for_directory(package_dir)
     with cd(package_dir):
-        sys.exit(pytest.main(list(pytest_arguments)))
+        exit_code = pytest.main(list(pytest_arguments))
+        sys.exit(exit_code)
