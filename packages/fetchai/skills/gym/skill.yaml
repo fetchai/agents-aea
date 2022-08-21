@@ -15,7 +15,7 @@ fingerprint:
   tasks.py: bafybeifvuancp2y57rjgwuzxgrzxiqkc4gzzbskgwch3uze5vlbvptlswm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:bafybeidmle66kgh7h6kdqevtmqm2fu2c5h5vhp7tb5wfthbwnwbql46d5y
+- fetchai/gym:0.19.0:bafybeibaxegsznh2yt7nynyqzsm3icaupwbvozgcazoqnuvvepyjya6kk4
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeibvtmpfzlig3ngtz6x2omc2rlx5knltnunbmg37tih5wlxnrfszvm
