@@ -32,8 +32,10 @@ from aea.cli.utils.click_utils import (
 )
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx, pytest_args
+from aea.cli.utils.package_utils import get_package_path
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 from aea.configurations.data_types import PublicId
+from aea.exceptions import enforce
 from aea.helpers.base import cd
 
 
@@ -118,13 +120,24 @@ def test_item(
     :param item_public_id: the item public id.
     :param pytest_arguments: arguments to forward to Pytest
     """
-    item_type_plural = item_type + "s"
     click.echo(
         "Executing tests of component of type {}, {}' ...".format(
             item_type, item_public_id
         )
     )
-    package_dirpath = Path(ctx.cwd, item_type_plural, item_public_id.name)
+    package_dirpath = Path(
+        get_package_path(ctx.cwd, item_type, item_public_id, is_vendor=False)
+    )
+    if not package_dirpath.exists():
+        # check if it is a vendor package
+        package_dirpath = Path(
+            get_package_path(ctx.cwd, item_type, item_public_id, is_vendor=True)
+        )
+        enforce(
+            package_dirpath.exists(),
+            exception_text=f"package {item_public_id} of type {item_type} not found",
+            exception_class=click.ClickException,
+        )
     test_package_by_path(package_dirpath, pytest_arguments)
 
 
