@@ -193,7 +193,11 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
 
     all_md_files_docs = Path("docs").rglob("*.md")
     all_md_files_tests = Path("tests/test_docs/test_bash_yaml/md_files").rglob("*.md")
-    all_md_files = [*all_md_files_docs] + [*all_md_files_tests]
+    all_md_files = [
+        *all_md_files_docs,
+        *all_md_files_tests,
+        Path("deploy-image/build.sh"),
+    ]
     errors = False
     hash_mismatches = False
     old_to_new_hashes = {}
