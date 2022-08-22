@@ -9,7 +9,7 @@ RUN adduser --disabled-password --gecos '' ubuntu
 RUN adduser ubuntu sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-RUN apt install -y python3 python3-pip
+RUN apt install -y python3.10 python3.10-dev python3-pip
 RUN pip3 install --upgrade pip
 RUN pip3 install pipenv
 
@@ -29,9 +29,11 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN echo 'PATH="$(python3.8 -m site --user-base)/bin:${PATH}"' >> ~/.bashrc
+COPY user-image/openssl.cnf /etc/ssl
+
+RUN echo 'PATH="$(python3.10 -m site --user-base)/bin:${PATH}"' >> ~/.bashrc
 RUN echo "alias pip=pip3" >> ~/.bashrc
-RUN echo "alias python=python3" >> ~/.bashrc
+RUN echo "alias python=python3.10" >> ~/.bashrc
+
 
 ENTRYPOINT [ "/bin/bash"]
-

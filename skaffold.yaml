@@ -16,9 +16,8 @@ build:
       dockerfile: user-image/Dockerfile
 
   - image: valory/open-aea-deploy
-    context: deploy-image
     docker:
-      dockerfile: Dockerfile
+      dockerfile: deploy-image/Dockerfile
 
 profiles:
   - name: release
@@ -40,9 +39,8 @@ profiles:
           dockerfile: user-image/Dockerfile
           noCache: true
       - image: valory/open-aea-deploy
-        context: deploy-image
         docker:
-          dockerfile: Dockerfile
+          dockerfile: deploy-image/Dockerfile
           noCache: true
 
   - name: release-latest
@@ -61,6 +59,5 @@ profiles:
         docker:
           dockerfile: user-image/Dockerfile
       - image: valory/open-aea-deploy
-        context: deploy-image
         docker:
-          dockerfile: Dockerfile
+          dockerfile: deploy-image/Dockerfile
