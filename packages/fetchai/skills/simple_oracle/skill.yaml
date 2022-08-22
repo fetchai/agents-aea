@@ -1,26 +1,26 @@
 name: simple_oracle
 author: fetchai
-version: 0.16.0
+version: 0.16.1
 type: skill
 description: This skill deploys a Fetch oracle contract
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
-  __init__.py: QmReQqp5iycqRhiSuHpdzVPWbfajqhmSyxoig8u71Rcy9c
-  behaviours.py: QmbyTxeyYTqq5ZouvoAYF4qFSKm98PVg1HecLL5tqoFqQA
+  __init__.py: QmbJfFuivf8xHH5n5m6ifQPG5k3BV95pfUEzPZgGZTDsVR
+  behaviours.py: QmPBeA3inwVs4DWBdaUVA23uQUbq5rrXgLxvvKiokUywCm
   dialogues.py: Qme9GGuPFfGMNPiwtnXDK8rUuGEN7PHgKnhoZU2ehfipq2
-  handlers.py: QmY2UzGhykdQoJS32JgyFZGkdawe6qsrrh2Ey7PnXmzGHA
-  strategy.py: QmeTVA5VYSwZyMrKM9uZDqadtcXmFpfSrQcTvPU5NL3yc6
+  handlers.py: QmYBdKPjBj4K7UUhsQr4fcEzkFukmWR3vC2Cy9rnRkFp1o
+  strategy.py: QmbgMqaB3nqy3RQS5acEVi6iJTeMaCSyYLZfvTQ2qPP3cZ
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/oracle:0.12.0
+- fetchai/oracle:0.12.1
 protocols:
-- fetchai/contract_api:1.1.1
-- fetchai/default:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/prometheus:1.1.1
-- fetchai/signing:1.1.1
+- fetchai/contract_api:1.1.2
+- fetchai/default:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/prometheus:1.1.2
+- fetchai/signing:1.1.2
 skills: []
 behaviours:
   simple_oracle_behaviour:
@@ -67,10 +67,12 @@ models:
     args:
       contract_address: null
       contract_address_file: null
-      default_gas_deploy: 1500000
-      default_gas_grant_role: 1500000
-      default_gas_update: 1500000
       erc20_address: '0x0000000000000000000000000000000000000000'
+      gas_limit_deploy: 1500000
+      gas_limit_grant_role: 1500000
+      gas_limit_instantiate: 500000
+      gas_limit_update: 1500000
+      gas_price: 1000000000
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
       ledger_id: null

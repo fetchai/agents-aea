@@ -49,6 +49,7 @@ from packages.fetchai.skills.tac_negotiation.strategy import (
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     CONTRACT_ID,
+    DEFAULT_TX_FEE_PROPOSAL,
     Strategy,
 )
 
@@ -508,7 +509,7 @@ class TestStrategy(BaseSkillTestCase):
                 actual_proposals[index].values["price"]
                 == expected_proposed_prices[index]
             )
-            assert actual_proposals[index].values["fee"] == 0
+            assert actual_proposals[index].values["fee"] == DEFAULT_TX_FEE_PROPOSAL
             assert actual_proposals[index].values["nonce"] == str(index + 1)
 
     def test_generate_candidate_proposals_ii(self):
@@ -516,16 +517,16 @@ class TestStrategy(BaseSkillTestCase):
         # setup
         expected_proposed_prices = [457, 406, 1561, 577, 1088, 1231, 1220, 2004, 971]
         is_searching_for_sellers = False
-
         # operation
         with patch.object(
             self.skill.skill_context.transactions,
             "ownership_state_after_locks",
             return_value=self.mocked_ownership_state,
         ) as mock_ownership:
-            actual_proposals = self.strategy._generate_candidate_proposals(
-                is_searching_for_sellers
-            )
+            with patch.object(self.strategy, "_tx_fee_proposal", 0):
+                actual_proposals = self.strategy._generate_candidate_proposals(
+                    is_searching_for_sellers
+                )
 
         # after
         mock_ownership.assert_any_call(is_seller=is_searching_for_sellers)
@@ -552,7 +553,7 @@ class TestStrategy(BaseSkillTestCase):
                 actual_proposals[index].values["price"]
                 == expected_proposed_prices[index]
             )
-            assert actual_proposals[index].values["fee"] == 0
+            assert actual_proposals[index].values["fee"] == 0  # empty fee is ok here
             assert actual_proposals[index].values["nonce"] == str(index + 1)
 
     def test_generate_candidate_proposals_iii(self):
@@ -595,7 +596,7 @@ class TestStrategy(BaseSkillTestCase):
         assert actual_proposal.values["currency_id"] == self.mocked_currency_id
         assert actual_proposal.values["ledger_id"] == self.ledger_id
         assert actual_proposal.values["price"] == expected_proposed_price
-        assert actual_proposal.values["fee"] == 0
+        assert actual_proposal.values["fee"] == DEFAULT_TX_FEE_PROPOSAL
         assert actual_proposal.values["nonce"] == "1"
 
     def test_generate_candidate_proposals_iv(self):
@@ -826,6 +827,7 @@ class TestStrategy(BaseSkillTestCase):
             "value": 0,
             "trade_nonce": 125,
             "signature": self.signature,
+            "tx_fee": 1,
         }
 
         actual_kwargs = self.strategy.kwargs_from_terms(
@@ -843,6 +845,7 @@ class TestStrategy(BaseSkillTestCase):
             "value": 0,
             "trade_nonce": 125,
             "signature": self.signature,
+            "tx_fee": 1,
         }
         actual_kwargs = self.strategy.kwargs_from_terms(
             terms, self.signature, is_from_terms_sender=False
@@ -874,6 +877,7 @@ class TestStrategy(BaseSkillTestCase):
             "trade_nonce": 125,
             "from_pubkey": self.sender_pk,
             "to_pubkey": self.counterparty_pk,
+            "tx_fee": 1,
         }
 
         actual_kwargs = self.strategy.kwargs_from_terms(

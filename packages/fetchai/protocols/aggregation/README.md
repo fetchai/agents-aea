@@ -10,11 +10,11 @@ This is an aggregation protocol for aggregating observations.
 ---
 name: aggregation
 author: fetchai
-version: 0.2.1
+version: 0.2.2
 description: A protocol for agents to aggregate individual observations
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-protocol_specification_id: fetchai/aggregation:0.2.1
+protocol_specification_id: fetchai/aggregation:0.2.2
 speech_acts:
   observation:
     value: pt:int

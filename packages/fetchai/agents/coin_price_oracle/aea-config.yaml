@@ -1,51 +1,47 @@
 agent_name: coin_price_oracle
 author: fetchai
-version: 0.17.0
+version: 0.17.2
 license: Apache-2.0
 description: An AEA providing a coin price oracle service.
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.1
-- fetchai/ledger:0.21.0
-- fetchai/p2p_libp2p:0.27.0
-- fetchai/prometheus:0.9.1
+- fetchai/http_client:0.24.2
+- fetchai/ledger:0.21.1
+- fetchai/prometheus:0.9.2
 contracts:
-- fetchai/oracle:0.12.0
+- fetchai/oracle:0.12.1
 protocols:
-- fetchai/contract_api:1.1.1
-- fetchai/default:1.1.1
-- fetchai/http:1.1.1
-- fetchai/ledger_api:1.1.1
-- fetchai/prometheus:1.1.1
-- fetchai/signing:1.1.1
-- fetchai/state_update:1.1.1
+- fetchai/contract_api:1.1.2
+- fetchai/default:1.1.2
+- fetchai/http:1.1.2
+- fetchai/ledger_api:1.1.2
+- fetchai/prometheus:1.1.2
+- fetchai/signing:1.1.2
+- fetchai/state_update:1.1.2
 skills:
-- fetchai/advanced_data_request:0.7.1
-- fetchai/simple_oracle:0.16.0
-default_connection: fetchai/p2p_libp2p:0.27.0
-default_ledger: ethereum
+- fetchai/advanced_data_request:0.7.2
+- fetchai/simple_oracle:0.16.1
+default_connection: fetchai/ledger:0.21.1
+default_ledger: fetchai
 required_ledgers:
 - fetchai
-- ethereum
 default_routing:
-  fetchai/contract_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/http:1.1.1: fetchai/http_client:0.24.1
-  fetchai/ledger_api:1.1.1: fetchai/ledger:0.21.0
-  fetchai/prometheus:1.1.1: fetchai/prometheus:0.9.1
+  fetchai/contract_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/http:1.1.2: fetchai/http_client:0.24.2
+  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
+  fetchai/prometheus:1.1.2: fetchai/prometheus:0.9.2
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
 dependencies:
-  aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/advanced_data_request:0.7.1
+public_id: fetchai/advanced_data_request:0.7.2
 type: skill
 models:
   advanced_data_request_model:
@@ -55,22 +51,11 @@ models:
       - name: price
         json_path: fetch-ai.usd
 ---
-public_id: fetchai/simple_oracle:0.16.0
+public_id: fetchai/simple_oracle:0.16.1
 type: skill
 models:
   strategy:
     args:
-      ledger_id: ethereum
+      ledger_id: fetchai
       oracle_value_name: price
-      update_function: updateOracleValue
----
-public_id: fetchai/p2p_libp2p:0.27.0
-type: connection
-cert_requests:
-- identifier: acn
-  ledger_id: ethereum
-  not_after: '2022-01-01'
-  not_before: '2021-01-01'
-  public_key: fetchai
-  message_format: '{public_key}'
-  save_path: .certs/conn_cert.txt
+      update_function: update_oracle_value

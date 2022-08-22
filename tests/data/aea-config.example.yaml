@@ -7,16 +7,16 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/oef:0.22.1
+- fetchai/oef:0.22.2
 contracts: []
 protocols:
-- fetchai/oef_search:1.1.1
-- fetchai/default:1.1.1
-- fetchai/tac:1.1.1
-- fetchai/fipa:1.1.1
+- fetchai/oef_search:1.1.2
+- fetchai/default:1.1.2
+- fetchai/tac:1.1.2
+- fetchai/fipa:1.1.2
 skills:
-- fetchai/echo:0.20.1
-default_connection: fetchai/oef:0.22.1
+- fetchai/echo:0.20.2
+default_connection: fetchai/oef:0.22.2
 default_ledger: cosmos
 required_ledgers:
 - cosmos

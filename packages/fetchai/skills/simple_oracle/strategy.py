@@ -47,9 +47,11 @@ class Strategy(Model):
         self._update_function = kwargs.pop("update_function", None)
         self._is_oracle_role_granted = kwargs.pop("is_oracle_role_granted", False)
         self._initial_fee_deploy = kwargs.pop("initial_fee_deploy", 0)
-        self._default_gas_deploy = kwargs.pop("default_gas_deploy", 0)
-        self._default_gas_grant_role = kwargs.pop("default_gas_grant_role", 0)
-        self._default_gas_update = kwargs.pop("default_gas_update", 0)
+        self._gas_limit_deploy = kwargs.pop("gas_limit_deploy", 0)
+        self._gas_limit_instantiate = kwargs.pop("gas_limit_instantiate", 0)
+        self._gas_limit_grant_role = kwargs.pop("gas_limit_grant_role", 0)
+        self._gas_limit_update = kwargs.pop("gas_limit_update", 0)
+        self._gas_price = kwargs.pop("gas_price", 0)
         self._oracle_value_name = kwargs.pop(
             "oracle_value_name", DEFAULT_ORACLE_VALUE_NAME
         )
@@ -71,24 +73,34 @@ class Strategy(Model):
         return self._update_function
 
     @property
-    def initial_fee_deploy(self) -> str:
+    def initial_fee_deploy(self) -> int:
         """Get the initial for contract deployment."""
         return self._initial_fee_deploy
 
     @property
-    def default_gas_deploy(self) -> str:
-        """Get the default gas for deploying a contract."""
-        return self._default_gas_deploy
+    def gas_limit_deploy(self) -> int:
+        """Get the gas limit for deploying a contract."""
+        return self._gas_limit_deploy
 
     @property
-    def default_gas_grant_role(self) -> str:
-        """Get the default gas for role granting."""
-        return self._default_gas_grant_role
+    def gas_limit_instantiate(self) -> int:
+        """Get the default gas for instantiating a contract."""
+        return self._gas_limit_instantiate
 
     @property
-    def default_gas_update(self) -> str:
-        """Get the default gas for updating value."""
-        return self._default_gas_update
+    def gas_limit_grant_role(self) -> int:
+        """Get the gas limit for role granting."""
+        return self._gas_limit_grant_role
+
+    @property
+    def gas_limit_update(self) -> int:
+        """Get the gas limit for updating a value."""
+        return self._gas_limit_update
+
+    @property
+    def gas_price(self) -> int:
+        """Get the gas price."""
+        return self._gas_price
 
     @property
     def oracle_value_name(self) -> str:
@@ -224,7 +236,7 @@ class Strategy(Model):
             kwargs = Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "gas": self.default_gas_deploy,
+                    "gas": self.gas_limit_deploy,
                     "ERC20Address": self.erc20_address,
                     "initialFee": self.initial_fee_deploy,
                 }
@@ -233,7 +245,8 @@ class Strategy(Model):
             kwargs = Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "gas": self.default_gas_deploy,
+                    "gas": self.gas_limit_deploy,
+                    "tx_fee": self.gas_price * self.gas_limit_deploy,
                 }
             )
         return kwargs

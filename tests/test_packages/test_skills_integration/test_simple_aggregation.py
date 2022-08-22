@@ -71,17 +71,17 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
         for (i, agent) in enumerate(agents):
             # add packages for agent
             self.set_agent_context(agent)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.27.0")
-            self.add_item("connection", "fetchai/http_client:0.24.1")
-            self.add_item("connection", "fetchai/http_server:0.23.1")
-            self.add_item("connection", "fetchai/soef:0.27.1")
-            self.add_item("connection", "fetchai/prometheus:0.9.1")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.27.1")
+            self.add_item("connection", "fetchai/http_client:0.24.2")
+            self.add_item("connection", "fetchai/http_server:0.23.2")
+            self.add_item("connection", "fetchai/soef:0.27.2")
+            self.add_item("connection", "fetchai/prometheus:0.9.2")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
             )
-            self.add_item("skill", "fetchai/advanced_data_request:0.7.1")
-            self.add_item("skill", "fetchai/simple_aggregation:0.3.1")
+            self.add_item("skill", "fetchai/advanced_data_request:0.7.2")
+            self.add_item("skill", "fetchai/simple_aggregation:0.3.2")
 
             self.set_config(
                 "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals",
@@ -96,7 +96,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
             setting_path = (
                 "vendor.fetchai.connections.http_server.config.target_skill_id"
             )
-            self.set_config(setting_path, "fetchai/advanced_data_request:0.7.1")
+            self.set_config(setting_path, "fetchai/advanced_data_request:0.7.2")
             self.set_config(
                 "vendor.fetchai.skills.simple_aggregation.models.strategy.args.quantity_name",
                 "price",
@@ -133,8 +133,8 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
                     {
                         "identifier": "acn",
                         "ledger_id": FetchAICrypto.identifier,
-                        "not_after": "2022-01-01",
-                        "not_before": "2021-01-01",
+                        "not_after": "2023-01-01",
+                        "not_before": "2022-01-01",
                         "public_key": FetchAICrypto.identifier,
                         "message_format": "{public_key}",
                         "save_path": ".certs/conn_cert.txt",
@@ -145,7 +145,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
 
             if i == 0:
                 diff = self.difference_to_fetched_agent(
-                    "fetchai/simple_aggregator:0.5.0", agent
+                    "fetchai/simple_aggregator:0.5.1", agent
                 )
                 assert (
                     diff == []

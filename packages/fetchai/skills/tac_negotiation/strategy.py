@@ -63,6 +63,7 @@ DEFAULT_SEARCH_QUERY = {
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "tac.participant"}
 DEFAULT_SEARCH_RADIUS = 5.0
+DEFAULT_TX_FEE_PROPOSAL = 1500000000000000
 
 
 class Strategy(Model):
@@ -120,6 +121,7 @@ class Strategy(Model):
         self._remove_service_data = {"key": self.service_key}
         self._simple_service_data = {self.service_key: self._register_as.value}
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+        self._tx_fee_proposal = kwargs.pop("tx_fee_proposal", DEFAULT_TX_FEE_PROPOSAL)
 
         self._contract_id = str(CONTRACT_ID)
 
@@ -414,7 +416,9 @@ class Strategy(Model):
             good_id: 0 for good_id in good_id_to_quantities.keys()
         }  # type: Dict[str, int]
         proposals = []
-        fee_by_currency_id = self.context.shared_state.get("tx_fee", {"FET": 0})
+        fee_by_currency_id = self.context.shared_state.get(
+            "tx_fee", {"FET": self._tx_fee_proposal}
+        )
         buyer_tx_fee = next(iter(fee_by_currency_id.values()))
         ownership_state = cast(
             OwnershipState, self.context.decision_maker_handler_context.ownership_state
@@ -595,6 +599,7 @@ class Strategy(Model):
             "to_supplies": to_supplies,
             "value": 0,
             "trade_nonce": int(terms.nonce),
+            "tx_fee": list(terms.fee_by_currency_id.values())[0],
         }
         enforce(
             sender_public_key is not None

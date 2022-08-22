@@ -41,7 +41,7 @@ DEFAULT_BODY_SIZE = 4
 class MlTradeMessage(Message):
     """A protocol for trading data for training and prediction purposes."""
 
-    protocol_id = PublicId.from_str("fetchai/ml_trade:1.1.1")
+    protocol_id = PublicId.from_str("fetchai/ml_trade:1.1.2")
     protocol_specification_id = PublicId.from_str("fetchai/ml_trade:1.0.0")
 
     Description = CustomDescription

@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class YotiMessage(Message):
     """A protocol for communication between yoti skills and yoti connection."""
 
-    protocol_id = PublicId.from_str("fetchai/yoti:1.1.1")
+    protocol_id = PublicId.from_str("fetchai/yoti:1.1.2")
     protocol_specification_id = PublicId.from_str("fetchai/yoti:1.0.0")
 
     class Performative(Message.Performative):

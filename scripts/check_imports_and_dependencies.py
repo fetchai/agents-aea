@@ -28,8 +28,6 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
-from pip._internal.commands.show import search_packages_info  # type: ignore
-
 
 AEA_ROOT_DIR = Path(__file__).parent.parent
 
@@ -40,7 +38,7 @@ from aea.crypto.registries import (  # noqa # pylint: disable=wrong-import-posit
 )
 
 
-IGNORE: Set[str] = {"pkg_resources"}
+IGNORE: Set[str] = {"pkg_resources", "distutils.dir_util"}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 
@@ -60,6 +58,10 @@ class DependenciesTool:
     @staticmethod
     def get_package_files(package_name: str) -> List[Path]:
         """Get package files list."""
+        from pip._internal.commands.show import (  # type: ignore  # noqa  # pylint: disable=import-outside-toplevel
+            search_packages_info,
+        )
+
         packages_info = list(search_packages_info([package_name]))
         if len(packages_info) == 0:
             raise Exception(f"package {package_name} not found")

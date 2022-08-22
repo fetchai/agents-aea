@@ -1,5 +1,21 @@
 # Release History
 
+## 1.2.1 (2022-07-12)
+
+AEA:
+
+- Protocol generator uses int64 instead of int32
+- Dependencies versions updates
+
+Plugins:
+
+- Upgrades fetchai plugin to use cosmpy>=0.5.0
+- Upgrades cosmos plugin to use cosmpy>=0.5.0
+
+Packages:
+
+- Fixes for skills to work with dorado testnet (tx fee adjusted)
+
 ## 1.2.0 (2022-05-05)
 
 AEA:

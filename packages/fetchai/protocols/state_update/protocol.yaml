@@ -1,19 +1,19 @@
 name: state_update
 author: fetchai
-version: 1.1.1
+version: 1.1.2
 protocol_specification_id: fetchai/state_update:1.0.0
 type: protocol
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVC534sY2ds55wRQaHwauZHv2LyXP9gHT8Qrg5vY7ZNUW
-  __init__.py: QmcigbEsWFvQKbFDceMheemkPrrdmCcGA5eXTpsXLK9QPP
+  README.md: QmbatP52KFzU2aaHtpipErzd3MVSWC8s71gWE3gQSQARK5
+  __init__.py: QmR7dtYLy4GBQ5cg6z6mNQ9p2t9CA9uevkLnwUqShx8bGn
   dialogues.py: Qme4PWFyruwQHTnw3v7sVuvxQYDBhAVxGE2svd9vcWQRht
-  message.py: QmP8MxDF9Pxc5P7kdFgmzfmcHmLULULoaGCrKyA2tU42Mm
+  message.py: Qmf2fwXX97uUkYLZaQRf4C4rBzquEWaFrzGnW54JmVMqs2
   serialization.py: QmNv9xW4jStebRqVEyhfEMcbDBA4wajBDMtNJfsKe6GtQ7
-  state_update.proto: QmPqvqnUQtcE475C3kCctNUsmi46JkMFGYE3rqMmqvbyEz
-  state_update_pb2.py: QmNQesScq6QBFtf1A6aRXBoawrLoTGr1TrfatHWx6wdujL
+  state_update.proto: QmdLQpu2jpJUuUFhF34hBeh64Gfv5V1JxLTKCTgY93qduR
+  state_update_pb2.py: QmcAtuQptov3QdmGwr2zv1VnuR2BATSVF6UvpiKcVVhGGr
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
