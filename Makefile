@@ -11,6 +11,8 @@ clean-build:
 	find . -name '*.egg' -exec rm -fr {} +
 	find . -type d -name __pycache__ -exec rm -rv {} +
 	rm -fr Pipfile.lock
+	rm -rf plugins/*/build
+	rm -rf plugins/*/dist
 
 .PHONY: clean-docs
 clean-docs:
@@ -105,7 +107,7 @@ release:
 v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: all-checks
-all-checks: clean formatters code-checks common-checks security
+all-checks: clean formatters code-checks common-checks-1 common-checks-2 security
 
 .PHONY: new_env
 new_env: clean
@@ -168,6 +170,7 @@ generators:
 	python -m aea.cli hash all
 	python -m aea.cli hash all --packages-dir=./tests/data/packages
 	tox -e generate-api-documentation
+	tox -e fix-doc-hashes
 
 .PHONY: common-checks-1
 common-checks:
