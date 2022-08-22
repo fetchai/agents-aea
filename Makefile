@@ -1,5 +1,5 @@
 .PHONY: clean
-clean: clean-build clean-pyc clean-test clean-docs
+clean: clean-test clean-build clean-pyc clean-docs
 
 .PHONY: clean-build
 clean-build:
@@ -9,9 +9,8 @@ clean-build:
 	rm -fr pip-wheel-metadata
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
+	find . -type d -name __pycache__ -exec rm -rv {} +
 	rm -fr Pipfile.lock
-	rm -rf plugins/*/build
-	rm -rf plugins/*/dist
 
 .PHONY: clean-docs
 clean-docs:
@@ -35,41 +34,19 @@ clean-test:
 	rm -fr .hypothesis
 	rm -fr .pytest_cache
 	rm -fr .mypy_cache/
-	rm -fr input_file
-	rm -fr output_file
+	rm -fr .hypothesis/
 	find . -name 'log.txt' -exec rm -fr {} +
 	find . -name 'log.*.txt' -exec rm -fr {} +
 
-.PHONY: lint
-lint:
-	black aea benchmark examples packages plugins scripts tests
-	isort aea benchmark examples packages plugins scripts tests
-	flake8 aea benchmark examples packages plugins scripts tests
-	vulture aea scripts/whitelist.py --exclude "*_pb2.py"
-	darglint aea benchmark examples libs packages plugins scripts
-
-.PHONY: pylint
-pylint:
-	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs examples/*
-
-.PHONY: static
-static:
-	mypy aea benchmark examples --disallow-untyped-defs
-	mypy packages tests plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs
-
-.PHONY: package_checks
+.PHONY: package-checks
 package_checks:
-	python -m aea.cli hash all --check
-	python -m aea.cli hash all --packages-dir=./tests/data/packages --check
-	python scripts/check_package_versions_in_docs.py
-	python -m aea.cli check-packages
+	tox -e hash-check
+	tox -e package-version-checks
+	tox -e package-dependencies-checks
 
 .PHONY: docs
 docs:
 	mkdocs build --clean
-
-.PHONY: common_checks
-common_checks: security misc_checks lint static docs
 
 .PHONY: test
 test:
@@ -128,12 +105,7 @@ release:
 v := $(shell pip -V | grep virtualenvs)
 
 .PHONY: all-checks
-all-checks:
-	make clean \
-	&& make formatters \
-	&& make code-checks \
-	&& make common-checks \
-	&& make security \
+all-checks: clean formatters code-checks common-checks security
 
 .PHONY: new_env
 new_env: clean
@@ -190,26 +162,18 @@ security:
 # update copyright headers
 .PHONY: generators
 generators:
+	tox -e fix-copyright
 	python -m aea.cli generate-all-protocols
 	python -m aea.cli generate-all-protocols tests/data/packages
 	python -m aea.cli hash all
 	python -m aea.cli hash all --packages-dir=./tests/data/packages
-	python scripts/generate_api_docs.py
-	python scripts/check_copyright_notice.py
-	python scripts/check_doc_ipfs_hashes.py --fix
+	tox -e generate-api-documentation
 
-.PHONY: common-checks
+.PHONY: common-checks-1
 common-checks:
-	tox -p -e check-copyright -e hash_check -e package_dependencies_checks
+	tox -p -e check-copyright -e hash_check -e package-dependencies-checks
 
-.PHONY: doc-checks
-doc-checks:
-	tox -e check_doc_links_hashes -e check_api_docs
-
-.PHONY: copyright
-copyright:
-	python scripts/check_copyright_notice.py
-
-.PHONY: check-copyright
-check-copyright:
-	tox -e check-copyright
+.PHONY: common-checks-2
+common-checks-2:
+	tox -e check-api-docs
+	tox -e check-doc-links-hashes

@@ -10,7 +10,7 @@ AEA:
 - Adds check to make sure all the packages in an AEA project are listed in the `aea-config.yaml`
 - Fixes a bug related to async function call on `TCPSocketProtocol`
 - Updates transaction building to handle gas estimation properly
-- Update `ContractConfig` class to include contract dependencies in the depedency list
+- Update `ContractConfig` class to include contract dependencies in the dependency list
 
 Docs:
 - Adds missing command on the `http-echo-demo.md` doc.
