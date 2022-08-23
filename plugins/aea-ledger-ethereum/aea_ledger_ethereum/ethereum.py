@@ -1419,7 +1419,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         result = method(**method_args).call()
         return result
 
-    def build_transaction(  # pylint: disable=too-many-arguments  # type: ignore
+    def build_transaction(  # pylint: disable=too-many-arguments
         self,
         contract_instance: Any,
         method_name: str,
