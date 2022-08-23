@@ -1305,27 +1305,27 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
 
         # value to send to contract (in Wei)
-        value: int = kwargs.pop("value", 0)
+        value: int = kwargs.get("value", 0)
 
         # the gas to be used (in Wei)
-        gas: Optional[int] = kwargs.pop("gas")
+        gas: Optional[int] = kwargs.get("gas")
 
         # maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and
         # `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and
         # `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
-        max_fee_per_gas: Optional[int] = kwargs.pop("max_fee_per_gas")
+        max_fee_per_gas: Optional[int] = kwargs.get("max_fee_per_gas")
 
         # the part of the fee that goes to the miner (in Wei).
-        max_priority_fee_per_gas: Optional[str] = kwargs.pop("max_priority_fee_per_gas")
+        max_priority_fee_per_gas: Optional[str] = kwargs.get("max_priority_fee_per_gas")
 
         # the gas price (in Wei)
-        gas_price: Optional[str] = kwargs.pop("gas_price")
+        gas_price: Optional[str] = kwargs.get("gas_price")
 
         # the gas price strategy to be used.
-        gas_price_strategy: Optional[str] = kwargs.pop("gas_price_strategy")
+        gas_price_strategy: Optional[str] = kwargs.get("gas_price_strategy")
 
         # extra config for gas price strategy.
-        gas_price_strategy_extra_config: Optional[Dict] = kwargs.pop(
+        gas_price_strategy_extra_config: Optional[Dict] = kwargs.get(
             "gas_price_strategy_extra_config"
         )
 
