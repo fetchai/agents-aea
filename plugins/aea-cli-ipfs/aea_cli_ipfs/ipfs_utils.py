@@ -163,6 +163,10 @@ class IPFSDaemon:
             env=os.environ.copy(),
         )
         empty_outputs = 0
+
+        if self.process.stdout is None:
+            raise RuntimeError("Could not start IPFS daemon.")
+
         for stdout_line in iter(cast(IO[bytes], self.process.stdout).readline, ""):
             if b"Daemon is ready" in stdout_line:
                 break
@@ -175,7 +179,10 @@ class IPFSDaemon:
         """Terminate the ipfs daemon if it was started internally."""
         if self.process is None:
             return
-        cast(IO[bytes], self.process.stdout).close()
+
+        if self.process.stdout is not None:
+            self.process.stdout.close()
+
         self.process.send_signal(signal.SIGTERM)
         self.process.wait(timeout=30)
         poll = self.process.poll()
