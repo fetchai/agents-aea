@@ -1287,7 +1287,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
         return instance
 
-    def get_deploy_transaction(  # pylint: disable=arguments-differ  # type: ignore
+    def get_deploy_transaction(  # pylint: disable=arguments-differ
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
