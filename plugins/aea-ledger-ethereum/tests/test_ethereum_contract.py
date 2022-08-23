@@ -93,7 +93,7 @@ def test_gas_station_strategy(ethereum_testnet_config, ganache):
     )
 
 
-# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_eip1559_strategy(ethereum_testnet_config, ganache):
