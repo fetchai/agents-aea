@@ -94,6 +94,10 @@ All python specific framework dependencies are specified in `setup.py` and insta
 
 You can have more control on the installed dependencies by leveraging the setuptools' extras mechanism.
 
+### Requirements for Framework Developers
+
+- [Gitleaks](https://github.com/zricethezav/gitleaks/releases/latest)
+
 ### Preliminaries
 
 - Create and launch a virtual environment with Python 3.10 (any Python `>=` 3.7 works):
