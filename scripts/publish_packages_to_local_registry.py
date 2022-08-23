@@ -55,7 +55,9 @@ def main() -> None:
     ipfs_tool = IPFSTool(addr="/ip4/127.0.0.1/tcp/5001/http")
     with IPFSDaemon():
         for package_path in packages:
-            register_package(ipfs_tool=ipfs_tool, dir_path=package_path, no_pin=False)
+            register_package(
+                ipfs_tool=ipfs_tool, dir_path=str(package_path), no_pin=False
+            )
     print("Done!")
 
 
