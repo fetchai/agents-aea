@@ -41,14 +41,14 @@ def test_get_contract_instance(ethereum_testnet_config, ganache):
     tx = ethereum_api.get_deploy_transaction(
         contract_interface,
         ec.address,
-        0,
+        value=0,
         max_priority_fee_per_gas=1000000000,
         max_fee_per_gas=1000000000,
     )
     tx = ethereum_api.get_deploy_transaction(
         contract_interface,
         ec.address,
-        0,
+        value=0,
         gas=1000000,
         max_priority_fee_per_gas=1000000000,
         max_fee_per_gas=1000000000,
@@ -83,7 +83,7 @@ def test_gas_station_strategy(ethereum_testnet_config, ganache):
     full_path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
     contract_interface = ethereum_api.load_contract_interface(full_path)
     tx = ethereum_api.get_deploy_transaction(
-        contract_interface, ec.address, 0, gas_price_strategy="gas_station"
+        contract_interface, ec.address, value=0, gas_price_strategy="gas_station"
     )
     assert all(
         [
@@ -93,7 +93,7 @@ def test_gas_station_strategy(ethereum_testnet_config, ganache):
     )
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_eip1559_strategy(ethereum_testnet_config, ganache):
@@ -104,7 +104,7 @@ def test_eip1559_strategy(ethereum_testnet_config, ganache):
     full_path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
     contract_interface = ethereum_api.load_contract_interface(full_path)
     tx = ethereum_api.get_deploy_transaction(
-        contract_interface, ec.address, 0, gas_price_strategy="eip1559"
+        contract_interface, ec.address, value=0, gas_price_strategy="eip1559"
     )
     logging.info(tx.keys())
     assert all(

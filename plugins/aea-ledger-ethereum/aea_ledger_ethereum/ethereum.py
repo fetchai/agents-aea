@@ -262,6 +262,7 @@ def get_gas_price_strategy_eip1559(
         return {
             "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
             "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
+            "baseFee": None,
         }
 
     return eip1559_price_strategy
@@ -1305,28 +1306,30 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
 
         # value to send to contract (in Wei)
-        value: int = kwargs.get("value", 0)
+        value: int = kwargs.pop("value", 0)
 
         # the gas to be used (in Wei)
-        gas: Optional[int] = kwargs.get("gas")
+        gas: Optional[int] = kwargs.pop("gas", None)
 
         # maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and
         # `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and
         # `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
-        max_fee_per_gas: Optional[int] = kwargs.get("max_fee_per_gas")
+        max_fee_per_gas: Optional[int] = kwargs.pop("max_fee_per_gas", None)
 
         # the part of the fee that goes to the miner (in Wei).
-        max_priority_fee_per_gas: Optional[str] = kwargs.get("max_priority_fee_per_gas")
+        max_priority_fee_per_gas: Optional[str] = kwargs.pop(
+            "max_priority_fee_per_gas", None
+        )
 
         # the gas price (in Wei)
-        gas_price: Optional[str] = kwargs.get("gas_price")
+        gas_price: Optional[str] = kwargs.pop("gas_price", None)
 
         # the gas price strategy to be used.
-        gas_price_strategy: Optional[str] = kwargs.get("gas_price_strategy")
+        gas_price_strategy: Optional[str] = kwargs.pop("gas_price_strategy", None)
 
         # extra config for gas price strategy.
-        gas_price_strategy_extra_config: Optional[Dict] = kwargs.get(
-            "gas_price_strategy_extra_config"
+        gas_price_strategy_extra_config: Optional[Dict] = kwargs.pop(
+            "gas_price_strategy_extra_config", None
         )
 
         transaction: Optional[JSONLike] = None
