@@ -23,6 +23,7 @@ import hashlib
 import logging
 import math
 import random
+import re
 import tempfile
 import time
 from pathlib import Path
@@ -668,6 +669,25 @@ def test_build_transaction(ethereum_testnet_config):
     contract_instance.functions.dummy_method = method_mock
 
     eth_api = EthereumApi(**ethereum_testnet_config)
+
+    with pytest.raises(
+        ValueError, match=re.escape("Argument 'method_args' cannot be 'None'.")
+    ):
+        eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args=None,
+            tx_args={},
+        )
+    with pytest.raises(
+        ValueError, match=re.escape("Argument 'tx_args' cannot be 'None'.")
+    ):
+        eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args={},
+            tx_args=None,
+        )
 
     with mock.patch(
         "web3.eth.Eth.get_transaction_count",

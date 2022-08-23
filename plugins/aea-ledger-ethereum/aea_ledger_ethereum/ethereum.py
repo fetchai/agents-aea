@@ -998,9 +998,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
             return None
 
         _default_logger.debug(f"Using strategy: {gas_price_strategy}")
-        gas_price_strategy_getter = cast(
-            Callable, self._gas_price_strategy_callables.get(gas_price_strategy)
-        )
+        gas_price_strategy_getter = self._gas_price_strategy_callables[
+            gas_price_strategy
+        ]
 
         parameters = cast(dict, DEFAULT_GAS_PRICE_STRATEGIES.get(gas_price_strategy))
         parameters.update(self._gas_price_strategies.get(gas_price_strategy, {}))
@@ -1434,8 +1434,16 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param raise_on_try: whether the method will raise or log on error
         :return: the transaction
         """
+
+        if method_args is None:
+            raise ValueError("Argument 'method_args' cannot be 'None'.")
+
         method = getattr(contract_instance.functions, method_name)
         tx = method(**cast(Dict, method_args))
+
+        if tx_args is None:
+            raise ValueError("Argument 'tx_args' cannot be 'None'.")
+
         tx_args = cast(Dict, tx_args)
 
         nonce = self.api.eth.get_transaction_count(tx_args["sender_address"])
