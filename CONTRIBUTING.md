@@ -52,6 +52,8 @@ First, setup your environment by either using the `develop-image` or by followin
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
+- To check for key leaks, the project also uses [Gitleaks](https://github.com/zricethezav/gitleaks/releases/latest).
+
 ##  For a clean workflow run checks in the following order before pushing the code on a PR
 
 - make clean
