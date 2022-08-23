@@ -485,7 +485,6 @@ def test_gas_price_strategy_eip1559() -> None:
     with get_block_mock:
         with fee_history_mock:
             gas_stregy = callable_(web3, "tx_params")
-            gas_stregy.pop("baseFee")
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
     assert all([value > 1e8 for value in gas_stregy.values()])
@@ -518,8 +517,6 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
-    assert gas_stregy["baseFee"] is None
-
 
 def test_gas_price_strategy_eip1559_fallback() -> None:
     """Test eip1559 based gas price strategy."""
@@ -549,8 +546,6 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
                 gas_stregy = callable_(web3, "tx_params")
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
-
-    assert gas_stregy["baseFee"] is None
 
 
 def test_gas_price_strategy_eth_gasstation():
@@ -818,7 +813,6 @@ def test_try_get_gas_pricing(
 
     # test gas pricing
     gas_price = ethereum_api.try_get_gas_pricing(gas_price_strategy=strategy["name"])
-    gas_price.pop("baseFee", None)
     assert set(strategy["params"]) == set(gas_price.keys())
     assert all(
         gas_price[param] > 0 and isinstance(gas_price[param], int)
@@ -829,7 +823,6 @@ def test_try_get_gas_pricing(
     gas_reprice = ethereum_api.try_get_gas_pricing(
         gas_price_strategy=strategy["name"], old_price=gas_price
     )
-    gas_reprice.pop("baseFee", None)
     assert all(
         gas_reprice[param] > 0 and isinstance(gas_reprice[param], int)
         for param in strategy["params"]

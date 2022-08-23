@@ -91,7 +91,6 @@ DEFAULT_PRIORITY_FEE = 3
 FALLBACK_ESTIMATE = {
     "maxFeePerGas": to_wei(20, "gwei"),
     "maxPriorityFeePerGas": to_wei(DEFAULT_PRIORITY_FEE, "gwei"),
-    "baseFee": None,
 }
 
 PRIORITY_FEE_INCREASE_BOUNDARY = 200  # percentage
@@ -262,7 +261,6 @@ def get_gas_price_strategy_eip1559(
         return {
             "maxFeePerGas": round_to_whole_gwei(max_fee_per_gas),
             "maxPriorityFeePerGas": round_to_whole_gwei(max_priority_fee_per_gas),
-            "baseFee": None,
         }
 
     return eip1559_price_strategy

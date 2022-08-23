@@ -117,7 +117,6 @@ def test_eip1559_strategy(ethereum_testnet_config, ganache):
                 "nonce",
                 "maxFeePerGas",
                 "maxPriorityFeePerGas",
-                "baseFee",
                 "data",
                 "from",
             ]
