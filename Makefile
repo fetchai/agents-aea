@@ -158,6 +158,7 @@ code-checks:
 .PHONY: security
 security:
 	tox -p -e safety -e bandit
+	gitleaks detect --report-format json --report-path leak_report
 
 # generate latest hashes for updated packages
 # generate docs for updated packages
