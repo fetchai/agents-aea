@@ -39,12 +39,11 @@ Returns multiplier value.
 #### estimate`_`priority`_`fee
 
 ```python
-def estimate_priority_fee(web3_object: Web3, base_fee_gwei: int,
-                          block_number: int,
-                          priority_fee_estimation_trigger: int,
-                          default_priority_fee: int, fee_history_blocks: int,
-                          fee_history_percentile: int,
-                          priority_fee_increase_boundary: int) -> int
+def estimate_priority_fee(
+        web3_object: Web3, base_fee_gwei: int, block_number: int,
+        priority_fee_estimation_trigger: int, default_priority_fee: int,
+        fee_history_blocks: int, fee_history_percentile: int,
+        priority_fee_increase_boundary: int) -> Optional[int]
 ```
 
 Estimate priority fee from base fee.
@@ -72,7 +71,8 @@ Get the gas price strategy.
 def get_gas_price_strategy_eip1559_polygon(
         gas_endpoint: str,
         fallback_estimate: Dict[str, Optional[int]],
-        speed: Optional[str] = SPEED_FAST) -> Callable[[], Dict[str, Wei]]
+        speed: Optional[str] = SPEED_FAST
+) -> Callable[[Any, Any], Dict[str, Wei]]
 ```
 
 Get the gas price strategy.
@@ -793,18 +793,10 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
-def get_deploy_transaction(
-        contract_interface: Dict[str, str],
-        deployer_address: Address,
-        value: int = 0,
-        gas: Optional[int] = None,
-        max_fee_per_gas: Optional[int] = None,
-        max_priority_fee_per_gas: Optional[str] = None,
-        gas_price: Optional[str] = None,
-        gas_price_strategy: Optional[str] = None,
-        gas_price_strategy_extra_config: Optional[Dict] = None,
-        raise_on_try: bool = False,
-        **kwargs: Any) -> Optional[JSONLike]
+def get_deploy_transaction(contract_interface: Dict[str, str],
+                           deployer_address: Address,
+                           raise_on_try: bool = False,
+                           **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -813,13 +805,6 @@ Get the transaction to deploy the smart contract.
 
 - `contract_interface`: the contract interface.
 - `deployer_address`: The address that will deploy the contract.
-- `value`: value to send to contract (in Wei)
-- `gas`: the gas to be used (in Wei)
-- `max_fee_per_gas`: maximum amount you’re willing to pay, inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`. The difference between `maxFeePerGas` and `baseFeePerGas + maxPriorityFeePerGas` is refunded  (in Wei).
-- `max_priority_fee_per_gas`: the part of the fee that goes to the miner (in Wei).
-- `gas_price`: the gas price (in Wei)
-- `gas_price_strategy`: the gas price strategy to be used.
-- `gas_price_strategy_extra_config`: extra config for gas price strategy.
 - `raise_on_try`: whether the method will raise or log on error
 - `kwargs`: keyword arguments
 
@@ -875,8 +860,8 @@ the call result
 ```python
 def build_transaction(contract_instance: Any,
                       method_name: str,
-                      method_args: Dict,
-                      tx_args: Dict,
+                      method_args: Optional[Dict[Any, Any]],
+                      tx_args: Optional[Dict[Any, Any]],
                       raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 

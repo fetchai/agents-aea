@@ -285,6 +285,11 @@ v0
 ipfsdaemon
 py3.6
 async
+gnosis
+abci
+metaclass
+api
+gitleaks
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

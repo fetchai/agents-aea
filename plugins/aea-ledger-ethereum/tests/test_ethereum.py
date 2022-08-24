@@ -23,6 +23,7 @@ import hashlib
 import logging
 import math
 import random
+import re
 import tempfile
 import time
 from pathlib import Path
@@ -487,7 +488,6 @@ def test_gas_price_strategy_eip1559() -> None:
             gas_stregy = callable_(web3, "tx_params")
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
-
     assert all([value > 1e8 for value in gas_stregy.values()])
 
 
@@ -518,8 +518,6 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
-    assert gas_stregy["baseFee"] is None
-
 
 def test_gas_price_strategy_eip1559_fallback() -> None:
     """Test eip1559 based gas price strategy."""
@@ -549,8 +547,6 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
                 gas_stregy = callable_(web3, "tx_params")
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
-
-    assert gas_stregy["baseFee"] is None
 
 
 def test_gas_price_strategy_eth_gasstation():
@@ -673,6 +669,25 @@ def test_build_transaction(ethereum_testnet_config):
     contract_instance.functions.dummy_method = method_mock
 
     eth_api = EthereumApi(**ethereum_testnet_config)
+
+    with pytest.raises(
+        ValueError, match=re.escape("Argument 'method_args' cannot be 'None'.")
+    ):
+        eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args=None,
+            tx_args={},
+        )
+    with pytest.raises(
+        ValueError, match=re.escape("Argument 'tx_args' cannot be 'None'.")
+    ):
+        eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args={},
+            tx_args=None,
+        )
 
     with mock.patch(
         "web3.eth.Eth.get_transaction_count",
