@@ -1052,9 +1052,7 @@ def test_dependency_tree_check():
     dummy_aea_path = Path(CUR_PATH, "data", "dummy_aea")
     aea_config_file = dummy_aea_path / DEFAULT_AEA_CONFIG_FILE
     original_content = aea_config_file.read_text()
-    missing_dependencies = original_content.replace(
-        "- dummy_author/dummy:0.1.0\n", ""
-    )
+    missing_dependencies = original_content.replace("- dummy_author/dummy:0.1.0\n", "")
     aea_config_file.write_text(missing_dependencies)
 
     try:
