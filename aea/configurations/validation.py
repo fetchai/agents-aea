@@ -310,21 +310,23 @@ def validate_data_with_pattern(
                 return True
         return False
 
+    def is_a_dict_override(path: Tuple[str, ...]) -> bool:
+        """Check if an override is a dict override."""
+        flag = False
+        while len(path) > 0:
+            path = path[:-1]
+            if path in pattern_path_value:
+                pattern_value = pattern_path_value[path]
+                flag = isinstance(pattern_value, OrderedDict)
+                break
+        return flag
+
     for path, new_value in data_path_value.items():
         if check_excludes(path):
             continue
 
         if path not in pattern_path_value:
-            is_a_dict_override = False
-            path_ = deepcopy(path)
-            while len(path_) > 0:
-                path_ = path_[:-1]
-                if path_ not in pattern_path_value:
-                    continue
-                pattern_value = pattern_path_value[path_]
-                is_a_dict_override = isinstance(pattern_value, OrderedDict)
-
-            if not is_a_dict_override:
+            if not is_a_dict_override(path=(*path,)):
                 errors.append(
                     f"Attribute `{'.'.join(path)}` is not allowed to be updated!"
                 )
