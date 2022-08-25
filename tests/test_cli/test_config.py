@@ -676,8 +676,6 @@ class TestConfigNestedGetSet:
     def test_set_get_correct_path(self):
         """Test component value updated in agent config not in component config."""
         agent_config = self.load_agent_config()
-        assert not agent_config.component_configurations
-
         config_value = self.get_component_config_value()
         assert config_value == self.INITIAL_VALUE
 

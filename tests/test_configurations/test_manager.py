@@ -21,6 +21,7 @@
 import os
 from copy import deepcopy
 from pathlib import Path
+from typing import Dict, cast
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -40,9 +41,7 @@ from tests.conftest import ROOT_DIR
 
 
 DUMMY_AEA = Path(ROOT_DIR) / "tests" / "data" / "dummy_aea"
-
-agent_config_data = yaml.safe_load(
-    """
+DUMMY_AEA_CONFIG = """
 agent_name: Agent0
 author: dummy_author
 version: 1.0.0
@@ -72,12 +71,23 @@ connection_private_key_paths:
   ethereum: ethereum_private_key.txt
 default_routing: {}
 """
-)
+
+DUMMY_SKILL_OVERRIDE = """
+public_id: dummy_author/test_skill:0.1.0
+type: skill
+models:
+  scaffold:
+    args:
+      recursive:
+        hello: world
+"""
+
+AGENT_CONFIG_DATA = yaml.safe_load(DUMMY_AEA_CONFIG)
 
 
 def test_envvars_applied():
     """Test env vars replaced with values."""
-    dct = deepcopy(agent_config_data)
+    dct = deepcopy(AGENT_CONFIG_DATA)
     with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
         os.environ["DISABLE_LOGS"] = "true"
         agent_config_manager = AgentConfigManager.load(".", substitude_env_vars=True)
@@ -129,7 +139,7 @@ def test_envvars_applied():
             )
 
     # not applied
-    dct = deepcopy(agent_config_data)
+    dct = deepcopy(AGENT_CONFIG_DATA)
     with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
         os.environ["DISABLE_LOGS"] = "true"
         agent_config_manager = AgentConfigManager.load(".", substitude_env_vars=False)
@@ -142,7 +152,7 @@ def test_envvars_applied():
 @patch.object(AgentConfigManager, "get_overridables", return_value=[{}, {}])
 def test_envvars_preserved(*mocks):
     """Test env vars not modified on config update."""
-    dct = deepcopy(agent_config_data)
+    dct = deepcopy(AGENT_CONFIG_DATA)
     new_cosmos_key_value = "cosmons_key_updated"
 
     with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
@@ -176,7 +186,7 @@ def test_envvars_preserved(*mocks):
 
 def test_agent_attribute_get_set():
     """Test agent config manager  get set variables."""
-    dct = deepcopy(agent_config_data)
+    dct = deepcopy(AGENT_CONFIG_DATA)
     with patch.object(AgentConfigManager, "_load_config_data", return_value=[dct]):
         os.environ["DISABLE_LOGS"] = "true"
         agent_config_manager = AgentConfigManager.load(
@@ -233,6 +243,35 @@ def test_agent_attribute_get_set():
 
     agent_config_manager.validate_current_config()
     agent_config_manager.verify_private_keys(DUMMY_AEA, lambda x, y, z: None)
+
+
+def test_recursive_updates() -> None:
+    """Test recursive updates."""
+    agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=True)
+    agent_config_manager.set_variable(
+        "skills.test_skill.models.scaffold.args.recursive", {"foo": "bar"}
+    )
+    value = cast(
+        Dict,
+        agent_config_manager.get_variable(
+            "skills.test_skill.models.scaffold.args.recursive"
+        ),
+    )
+
+    assert value == {"foo": "bar"}
+
+    agent_config_manager.set_variable(
+        "skills.test_skill.models.scaffold.args.recursive",
+        {"foo": "bar", "hello": "world"},
+    )
+    value = cast(
+        Dict,
+        agent_config_manager.get_variable(
+            "skills.test_skill.models.scaffold.args.recursive"
+        ),
+    )
+
+    assert value == {"foo": "bar", "hello": "world"}
 
 
 def test_agent_attribute_get_overridables():

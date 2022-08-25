@@ -30,6 +30,7 @@ models:
   scaffold:
     args:
       foo: bar
+      recursive: {}
     class_name: MyModel
 dependencies: {}
 is_abstract: false
