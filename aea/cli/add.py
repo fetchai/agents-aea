@@ -208,7 +208,7 @@ def fetch_item_remote(
 
     if get_default_remote_registry() == REMOTE_IPFS:
         try:
-            return fetch_ipfs(item_type, item_public_id, dest_path)
+            return cast(Path, fetch_ipfs(item_type, item_public_id, dest_path))
         except HashNotProvided:
             click.echo(f"Hash was not provided for: {item_public_id}")
             click.echo("Will try with http repository.")

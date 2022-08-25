@@ -164,7 +164,7 @@ def fetch_ipfs(
         ipfs_tool = IPFSTool(addr=DEFAULT_IPFS_URL_LOCAL)
 
     try:
-        package_hash = public_id.hash
+        package_hash: Optional[str] = public_id.hash
     except ValueError:
         package_hash = (
             None if remote else get_ipfs_hash_from_public_id(item_type, public_id)
