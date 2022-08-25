@@ -244,7 +244,9 @@ def handle_dotted_path(
         )
 
         # find path to the resource directory
-        path_to_resource_directory = Path(".") / resource_type_plural / resource_name
+        path_to_resource_directory = (
+            aea_project_path / resource_type_plural / resource_name
+        )
         path_to_resource_configuration = (
             path_to_resource_directory
             / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
