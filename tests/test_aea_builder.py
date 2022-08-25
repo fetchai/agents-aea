@@ -1053,7 +1053,7 @@ def test_dependency_tree_check():
     aea_config_file = dummy_aea_path / DEFAULT_AEA_CONFIG_FILE
     original_content = aea_config_file.read_text()
     missing_dependencies = original_content.replace(
-        "- dummy_author/test_skill:0.1.0\n", ""
+        "- dummy_author/dummy:0.1.0\n", ""
     )
     aea_config_file.write_text(missing_dependencies)
 
@@ -1061,7 +1061,7 @@ def test_dependency_tree_check():
         with pytest.raises(
             AEAEnforceError,
             match=re.escape(
-                "Following dependencies are present in the project but missing from the aea-config.yaml; {PackageId(skill, dummy_author/test_skill:0.1.0)}"
+                "Following dependencies are present in the project but missing from the aea-config.yaml; {PackageId(skill, dummy_author/dummy:0.1.0)}"
             ),
         ):
             AEABuilder.from_aea_project(dummy_aea_path)

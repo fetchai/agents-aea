@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -262,7 +262,7 @@ def test_recursive_updates() -> None:
 
     agent_config_manager.set_variable(
         "skills.test_skill.models.scaffold.args.recursive",
-        {"foo": "bar", "hello": "world"},
+        {"hello": "world"},
     )
     value = cast(
         Dict,
