@@ -16,7 +16,7 @@ Plugins from previous versions are not compatible anymore.
 ## `v1.15.0` to `v1.16.0`
 
 - A typo change, now import `from aea.helpers.dependency_tree import DependencyTree` rather than `from aea.helpers.dependency_tree import DependecyTree`.
-- The global configuration file for the `aea`/`autonomy` CLI has a breaking change. Please remove `~/.aea/cli_config.yaml` and rerun `autonomy init --remote`.
+- The global configuration file for the `aea` CLI has a breaking change. Please remove `~/.aea/cli_config.yaml` and rerun `autonomy init --remote`.
 
 Plugins from previous versions are not compatible anymore.
 
