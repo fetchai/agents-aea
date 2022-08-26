@@ -290,6 +290,8 @@ abci
 metaclass
 api
 gitleaks
+mistune
+dependabot
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
