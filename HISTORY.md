@@ -9,10 +9,10 @@ AEA:
 - Improves handling for variables with potential none values
 
 Chore:
-- Bumps mistune to a secure version
-- Bumps protobuf dependencies to address dependabot security warning
+- Bumps `mistune` to a secure version
+- Bumps `protobuf` dependencies to address `dependabot` security warning
 - Improves command regex on `scripts/check_doc_ipfs_hashes.py`
-- Updates tox definitions and Makefile targets to align with the latest changes
+- Updates `tox` definitions and `Makefile` targets to align with the latest changes
 
 ## 1.16.0 (2022-08-18)
 
