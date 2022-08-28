@@ -20,6 +20,8 @@
 """This test module contains the tests for CLI test command."""
 import shutil
 import subprocess  # nosec
+import sys
+from copy import copy
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Sequence, Type
@@ -80,6 +82,14 @@ def mock_pytest_main() -> Any:
         return result
 
     return mock.patch("aea.cli.test.pytest.main", side_effect=fun)
+
+
+@pytest.fixture(scope="function")
+def mock_sys_modules() -> None:
+    """Store previous content of sys.modules and restore it after test execution."""
+    old_sys_modules = copy(sys.modules)
+    yield
+    sys.modules = old_sys_modules
 
 
 class BaseAEATestCommand(AEATestCaseEmpty):
@@ -215,7 +225,7 @@ class BaseAEATestCommand(AEATestCaseEmpty):
 class TestAgentTestEmptySuite(BaseAEATestCommand):
     """Test that the command 'aea test' works as expected (with an empty test suite)."""
 
-    def test_run(self):
+    def test_run(self, mock_sys_modules):
         """Assert that the exit code is equal to 5 (i.e. pytest succeeds without collecting tests)."""
         (self.get_aea_dirpath() / AEA_TEST_DIRNAME).mkdir(exist_ok=False)
         result = self.run_test_command()
@@ -225,7 +235,7 @@ class TestAgentTestEmptySuite(BaseAEATestCommand):
 class TestAgentTestSingleTest(BaseAEATestCommand):
     """Test that the command 'aea test' works as expected (with a non-empty test suite)."""
 
-    def test_run(self) -> None:
+    def test_run(self, mock_sys_modules) -> None:
         """Assert that the exit code is equal to 0 (tests are run successfully)."""
         # write dummy test module in test/ folder
         self.get_test_aea_dirpath().mkdir(exist_ok=False)
@@ -240,7 +250,7 @@ class TestPackageTestByTypeEmptyTestSuite(BaseAEATestCommand):
     """Test that the command 'aea test item_type public_id' works as expected (with an empty test suite)."""
 
     @pytest.mark.parametrize("package_type", list(ComponentType))
-    def test_run(self, package_type: ComponentType) -> None:
+    def test_run(self, package_type: ComponentType, mock_sys_modules) -> None:
         """Assert that the exit code is equal to 5 (empty test suite)."""
         self._scaffold_item(package_type)
         public_id = self._public_id(package_type)
@@ -253,7 +263,9 @@ class TestPackageTestByType(BaseAEATestCommand):
     """Test that the command 'aea test item_type public_id' works as expected (with a non-empty test suite)."""
 
     @pytest.mark.parametrize("package_type", list(ComponentType))
-    def test_run(self, package_type: ComponentType, *_mocks: Any) -> None:
+    def test_run(
+        self, package_type: ComponentType, mock_sys_modules, *_mocks: Any
+    ) -> None:
         """Assert that the exit code is equal to 0 (tests are run successfully)."""
         self._configure_package_for_testing(package_type)
         public_id = self._public_id(package_type)
@@ -267,7 +279,7 @@ class TestVendorPackageTestByTypeEmptyTestSuite(BaseAEATestCommand):
     """Test that the command 'aea test item_type public_id' for vendor packages works as expected (with an empty test suite)."""
 
     @pytest.mark.parametrize("package_type", list(ComponentType))
-    def test_run(self, package_type: ComponentType) -> None:
+    def test_run(self, package_type: ComponentType, mock_sys_modules) -> None:
         """Assert that the exit code is equal to 5 (empty test suite)."""
         self._scaffold_item(package_type)
         public_id = self._public_id(package_type)
@@ -281,7 +293,9 @@ class TestVendorPackageTestByType(BaseAEATestCommand):
     """Test that the command 'aea test item_type public_id' for vendor packages works as expected (with a non-empty test suite)."""
 
     @pytest.mark.parametrize("package_type", list(ComponentType))
-    def test_run(self, package_type: ComponentType, *_mocks: Any) -> None:
+    def test_run(
+        self, package_type: ComponentType, mock_sys_modules, *_mocks: Any
+    ) -> None:
         """Assert that the exit code is equal to 0 (tests are run successfully)."""
         self._configure_package_for_testing(package_type)
         public_id = self._public_id(package_type)
@@ -289,6 +303,11 @@ class TestVendorPackageTestByType(BaseAEATestCommand):
         with mock_pytest_main():
             result = self.run_test_command(str(package_type.value), str(public_id))
             assert result.exit_code == OK_PYTEST_EXIT_CODE
+            # assert the module packages have been loaded
+            assert (
+                f"packages.default_author.{package_type.to_plural()}.dummy_{package_type.value}"
+                in sys.modules
+            )
 
 
 @_parametrize_class
@@ -296,7 +315,7 @@ class TestPackageTestByPathEmptyTestSuite(BaseAEATestCommand):
     """Test that the command 'aea test by-path path-to-package' works as expected (empty test suite)."""
 
     @pytest.mark.parametrize("package_type", list(ComponentType))
-    def test_run(self, package_type: ComponentType) -> None:
+    def test_run(self, package_type: ComponentType, mock_sys_modules) -> None:
         """Assert that the exit code is equal to 0 (tests are run successfully)."""
         self._scaffold_item(package_type)
         test_package_name = self._get_dummy_package_name(package_type)
@@ -311,7 +330,9 @@ class TestPackageTestByPath(BaseAEATestCommand):
     """Test that the command 'aea test by-path path-to-package' works as expected (non-empty test suite)."""
 
     @pytest.mark.parametrize("package_type", list(ComponentType))
-    def test_run(self, package_type: ComponentType, *_mocks: Any) -> None:
+    def test_run(
+        self, package_type: ComponentType, mock_sys_modules, *_mocks: Any
+    ) -> None:
         """Assert that the exit code is equal to 0 (tests are run successfully)."""
         self._configure_package_for_testing(package_type)
         test_package_name = self._get_dummy_package_name(package_type)

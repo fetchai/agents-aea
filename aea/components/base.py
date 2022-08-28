@@ -38,6 +38,8 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageIdPrefix, PackageType
+from aea.configurations.loader import load_component_configuration
+from aea.configurations.manager import find_component_directory_from_component_id
 from aea.exceptions import AEAEnforceError, AEAPackageLoadingError, enforce
 from aea.helpers.logging import WithLogger
 
@@ -366,3 +368,34 @@ def perform_load_aea_package(
         sys.modules[import_path] = module
         _default_logger.debug(f"loading {import_path}: {module}")
         spec.loader.exec_module(module)  # type: ignore
+
+
+def load_aea_packages_recursively(
+    aea_project_path: Path,
+    config: ComponentConfiguration,
+    already_loaded: Optional[Set[ComponentId]] = None,
+) -> None:
+    """
+    Load all AEA packages recursively.
+
+    It works like 'load_aea_package', but recursively imports all dependencies.
+
+    :param aea_project_path: the path to the AEA project
+    :param config: the component configuration
+    :param already_loaded: the already loaded component ids
+    """
+    already_loaded = already_loaded if already_loaded else set()
+    for dependency_id in config.package_dependencies:
+        # TODO: load packages in topological order? Should not matter as at the moment we are not
+        #       actually running the modules, just populating sys.modules
+        dependency_path = find_component_directory_from_component_id(
+            aea_project_path, dependency_id
+        )
+        dependency_configuration = load_component_configuration(
+            dependency_id.component_type, dependency_path
+        )
+        load_aea_packages_recursively(
+            aea_project_path, dependency_configuration, already_loaded
+        )
+    load_aea_package(config)
+    already_loaded.add(config.component_id)

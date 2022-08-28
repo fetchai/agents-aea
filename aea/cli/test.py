@@ -33,6 +33,7 @@ from aea.cli.utils.click_utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx, pytest_args
 from aea.cli.utils.package_utils import get_package_path
+from aea.components.base import load_aea_packages_recursively
 from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
     CONNECTION,
@@ -40,7 +41,8 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import ComponentType, PublicId
+from aea.configurations.loader import load_component_configuration
 from aea.exceptions import enforce
 from aea.helpers.base import cd
 
@@ -142,6 +144,12 @@ def test_item(
             exception_text=f"package {item_public_id} of type {item_type} not found",
             exception_class=click.ClickException,
         )
+
+    configuration = load_component_configuration(
+        ComponentType(item_type), package_dirpath
+    )
+    configuration.directory = package_dirpath
+    load_aea_packages_recursively(Path(ctx.cwd), configuration)
     test_package_by_path(package_dirpath, pytest_arguments)
 
 
