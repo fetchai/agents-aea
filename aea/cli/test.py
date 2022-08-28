@@ -21,7 +21,7 @@
 """Implementation of the 'aea test' command."""
 import sys
 from pathlib import Path
-from typing import Sequence, cast
+from typing import Callable, Optional, Sequence, Set, cast
 
 import click
 import pytest
@@ -33,7 +33,8 @@ from aea.cli.utils.click_utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, pass_ctx, pytest_args
 from aea.cli.utils.package_utils import get_package_path
-from aea.components.base import load_aea_packages_recursively
+from aea.components.base import load_aea_package
+from aea.configurations.base import ComponentConfiguration
 from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
     CONNECTION,
@@ -41,8 +42,14 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import ComponentType, PackageType, PublicId
+from aea.configurations.data_types import (
+    ComponentId,
+    ComponentType,
+    PackageType,
+    PublicId,
+)
 from aea.configurations.loader import load_component_configuration
+from aea.configurations.manager import find_component_directory_from_component_id
 from aea.exceptions import enforce
 from aea.helpers.base import cd
 
@@ -116,7 +123,7 @@ def by_path(
     click.echo(f"Executing tests of package at {path}'...")
     full_path = Path(ctx.cwd) / Path(path)
     registry_path = Path(registry_path)
-    test_package_by_path(full_path, registry_path, args)
+    test_package_by_path(full_path, args, packages_dir=registry_path)
 
 
 def test_item(
@@ -152,19 +159,37 @@ def test_item(
             exception_class=click.ClickException,
         )
     # for a package in an AEA project, the "packages" dir is the AEA project dir
-    test_package_by_path(package_dirpath, Path(ctx.cwd), pytest_arguments)
+    aea_project_path = Path(ctx.cwd)
+    test_package_by_path(
+        package_dirpath, pytest_arguments, aea_project_path=aea_project_path
+    )
 
 
 def test_package_by_path(
-    package_dir: Path, packages_dir: Path, pytest_arguments: Sequence[str]
+    package_dir: Path,
+    pytest_arguments: Sequence[str],
+    aea_project_path: Optional[Path] = None,
+    packages_dir: Optional[Path] = None,
 ) -> None:
     """
     Fingerprint package placed in package_dir.
 
     :param package_dir: directory of the package
-    :param packages_dir: directory of the packages to import from
     :param pytest_arguments: arguments to forward to Pytest
+    :param aea_project_path: directory to the AEA project
+    :param packages_dir: directory of the packages to import from
     """
+    enforce(
+        (aea_project_path is None) != (packages_dir is None),
+        "one of either aea_project_path or packages_dir must be specified",
+    )
+    root_packages = aea_project_path if aea_project_path else packages_dir
+    package_path_finder = (
+        find_component_directory_from_component_id
+        if aea_project_path
+        else find_component_directory_from_component_id_in_registry
+    )
+
     # check the path points to a valid AEA package
     package_type = determine_package_type_for_directory(package_dir)
 
@@ -179,7 +204,7 @@ def test_package_by_path(
         component_type = ComponentType(package_type.value)
         configuration = load_component_configuration(component_type, package_dir)
         configuration.directory = package_dir
-        load_aea_packages_recursively(packages_dir, configuration)
+        load_aea_packages_recursively(configuration, package_path_finder, root_packages)
 
     with cd(package_dir):
         exit_code = pytest.main([AEA_TEST_DIRNAME] + list(pytest_arguments))
@@ -194,4 +219,52 @@ def test_aea_project(
     click.echo("Executing tests of the AEA project...")
     ctx = cast(Context, click_context.obj)
     # in case of an AEA project, the 'packages' directory is the AEA project path itself
-    test_package_by_path(aea_project_dirpath, Path(ctx.cwd), args)
+    test_package_by_path(aea_project_dirpath, args, aea_project_path=Path(ctx.cwd))
+
+
+def load_aea_packages_recursively(
+    config: ComponentConfiguration,
+    package_path_finder: Callable[[Path, ComponentId], Path],
+    root_packages: Path,
+    already_loaded: Optional[Set[ComponentId]] = None,
+) -> None:
+    """
+    Load all AEA packages recursively.
+
+    It works like 'load_aea_package', but recursively imports all dependencies.
+
+    :param config: the component configuration
+    :param package_path_finder: a function that find packages from the packages dir
+    :param root_packages: the path to the root of packages dir
+    :param already_loaded: the already loaded component ids
+    """
+    already_loaded = already_loaded if already_loaded else set()
+    for dependency_id in config.package_dependencies:
+        # TODO: load packages in topological order? Should not matter as at the moment we are not
+        #       actually running the modules, just populating sys.modules
+        dependency_path = package_path_finder(root_packages, dependency_id)
+        dependency_configuration = load_component_configuration(
+            dependency_id.component_type, dependency_path
+        )
+        dependency_configuration.directory = dependency_path
+        load_aea_packages_recursively(
+            dependency_configuration, package_path_finder, root_packages, already_loaded
+        )
+    load_aea_package(config)
+    already_loaded.add(config.component_id)
+
+
+def find_component_directory_from_component_id_in_registry(
+    registry_path: Path, component_id: ComponentId
+) -> Path:
+    """Find a component directory from component id in a registry."""
+    package_path = (
+        registry_path
+        / component_id.author
+        / component_id.component_type.to_plural()
+        / component_id.public_id.name
+    )
+    if package_path.exists() and package_path.is_dir():
+        return package_path
+
+    raise ValueError("Package {} not found.".format(component_id))
