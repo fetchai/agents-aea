@@ -20,8 +20,6 @@
 
 """This module contains the tests of the contract_api protocol package."""
 
-import logging
-import sys
 from typing import Type
 from unittest import mock
 
@@ -43,12 +41,6 @@ from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.contract_api.message import (
     _default_logger as contract_api_message_logger,
 )
-
-from tests.conftest import ROOT_DIR
-
-
-logger = logging.getLogger(__name__)
-sys.path.append(ROOT_DIR)
 
 
 def test_get_deploy_transaction_serialization():
@@ -481,8 +473,7 @@ class AgentDialogue(ContractApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the class of a message type of the contract api protocol
         """
         ContractApiDialogue.__init__(
             self,
@@ -500,7 +491,7 @@ class AgentDialogues(ContractApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the self-address
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -538,8 +529,7 @@ class LedgerDialogue(ContractApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the class of a message type of the contract api protocol
         """
         ContractApiDialogue.__init__(
             self,
@@ -557,7 +547,7 @@ class LedgerDialogues(ContractApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the self-address
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
