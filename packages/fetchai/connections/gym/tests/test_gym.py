@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the gym connection module."""
 import asyncio
+import inspect
 import logging
 import os
 from typing import cast
@@ -29,6 +30,7 @@ import pytest
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig
+from aea.configurations.data_types import PublicId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -38,20 +40,24 @@ from packages.fetchai.protocols.gym.dialogues import GymDialogue
 from packages.fetchai.protocols.gym.dialogues import GymDialogues as BaseGymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 
-from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
-
 
 logger = logging.getLogger(__name__)
+
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+ROOT_DIR = os.path.join(CUR_PATH, "..", "..", "..", "..", "..")
+
+UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 
 
 class GymDialogues(BaseGymDialogues):
     """The dialogues class keeps track of all gym dialogues."""
 
-    def __init__(self, self_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **_kwargs) -> None:
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the self address
+        :param _kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
