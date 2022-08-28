@@ -52,7 +52,7 @@ def test(click_context: click.Context, args: Sequence[str]) -> None:
     """Run tests of an AEA project."""
     ctx = cast(Context, click_context.obj)
     if click_context.invoked_subcommand is None:
-        test_aea_project(Path(ctx.cwd), args)
+        test_aea_project(click_context, Path(ctx.cwd), args)
 
 
 @test.command()
@@ -167,7 +167,9 @@ def test_package_by_path(package_dir: Path, pytest_arguments: Sequence[str]) -> 
 
 
 @check_aea_project
-def test_aea_project(aea_project_dirpath: Path, args: Sequence[str]) -> None:
+def test_aea_project(
+    _click_context: click.Context, aea_project_dirpath: Path, args: Sequence[str]
+) -> None:
     """Run tests of an AEA project."""
     click.echo("Executing tests of the AEA project...")
     test_package_by_path(aea_project_dirpath, args)
