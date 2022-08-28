@@ -339,14 +339,21 @@ def perform_load_aea_package(
 
     prefix_root_module = types.ModuleType(prefix_root)
     prefix_root_module.__path__ = None  # type: ignore
-    sys.modules[prefix_root] = sys.modules.get(prefix_root, prefix_root_module)
+    actual_prefix_root_module = sys.modules.get(prefix_root, prefix_root_module)
+    sys.modules[prefix_root] = actual_prefix_root_module
     author_module = types.ModuleType(prefix_author)
     author_module.__path__ = None  # type: ignore
-    sys.modules[prefix_author] = sys.modules.get(prefix_author, author_module)
+    actual_prefix_author_module = sys.modules.get(prefix_author, author_module)
+    sys.modules[prefix_author] = actual_prefix_author_module
+    setattr(actual_prefix_root_module, author, actual_prefix_author_module)
     prefix_pkg_type_module = types.ModuleType(prefix_pkg_type)
     prefix_pkg_type_module.__path__ = None  # type: ignore
-    sys.modules[prefix_pkg_type] = sys.modules.get(
+    actual_prefix_pkg_type_module = sys.modules.get(
         prefix_pkg_type, prefix_pkg_type_module
+    )
+    sys.modules[prefix_pkg_type] = actual_prefix_pkg_type_module
+    setattr(
+        actual_prefix_author_module, package_type_plural, actual_prefix_pkg_type_module
     )
 
     prefix_pkg = prefix_pkg_type + f".{package_name}"
@@ -366,3 +373,10 @@ def perform_load_aea_package(
         sys.modules[import_path] = module
         _default_logger.debug(f"loading {import_path}: {module}")
         spec.loader.exec_module(module)  # type: ignore
+
+        # attach child module to parent module
+        import_path_parts = import_path.split(".")
+        parent_module_import_path = ".".join(import_path_parts[:-1])
+        module_name = import_path_parts[-1]
+        parent_module = sys.modules[parent_module_import_path]
+        setattr(parent_module, module_name, module)
