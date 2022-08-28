@@ -321,7 +321,12 @@ class TestPackageTestByPathEmptyTestSuite(BaseAEATestCommand):
         test_package_name = self._get_dummy_package_name(package_type)
         package_dirpath = self.dummy_package_dirpath(package_type, test_package_name)
         with mock_pytest_main():
-            result = self.run_test_command("by-path", str(package_dirpath))
+            result = self.run_test_command(
+                "by-path",
+                str(package_dirpath),
+                "--registry-path",
+                str(self.t / self.packages_dir_path),
+            )
             assert result.exit_code == NO_TESTS_COLLECTED_PYTEST_EXIT_CODE
 
 
@@ -338,5 +343,10 @@ class TestPackageTestByPath(BaseAEATestCommand):
         test_package_name = self._get_dummy_package_name(package_type)
         package_dirpath = self.dummy_package_dirpath(package_type, test_package_name)
         with mock_pytest_main():
-            result = self.run_test_command("by-path", str(package_dirpath))
+            result = self.run_test_command(
+                "by-path",
+                str(package_dirpath),
+                "--registry-path",
+                str(self.t / self.packages_dir_path),
+            )
             assert result.exit_code == OK_PYTEST_EXIT_CODE
