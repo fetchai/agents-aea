@@ -1614,13 +1614,13 @@ class AgentConfig(PackageConfiguration):
                     allow_new_values=True,
                 )
 
-            # if dict_overrides is not None and component_id in dict_overrides:
-            #     perform_dict_override(
-            #         component_id,
-            #         dict_overrides,
-            #         updated_component_configurations,
-            #         new_component_configurations,
-            #     )
+            if dict_overrides is not None and component_id in dict_overrides:
+                perform_dict_override(
+                    component_id,
+                    dict_overrides,
+                    updated_component_configurations,
+                    new_component_configurations,
+                )
 
         self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)
         super().update(data, env_vars_friendly=env_vars_friendly)
