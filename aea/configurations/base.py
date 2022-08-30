@@ -1606,19 +1606,21 @@ class AgentConfig(PackageConfiguration):
         for component_id, obj in new_component_configurations.items():
             if component_id not in updated_component_configurations:
                 updated_component_configurations[component_id] = obj
-            elif dict_overrides is not None and component_id in dict_overrides:
-                perform_dict_override(
-                    component_id,
-                    dict_overrides,
-                    updated_component_configurations,
-                    new_component_configurations,
-                )
+
             else:
                 recursive_update(
                     updated_component_configurations[component_id],
                     obj,
                     allow_new_values=True,
                 )
+
+            # if dict_overrides is not None and component_id in dict_overrides:
+            #     perform_dict_override(
+            #         component_id,
+            #         dict_overrides,
+            #         updated_component_configurations,
+            #         new_component_configurations,
+            #     )
 
         self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)
         super().update(data, env_vars_friendly=env_vars_friendly)
