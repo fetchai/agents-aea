@@ -20,6 +20,7 @@
 """Implementation of the AgentConfigManager."""
 import json
 import os
+from collections import OrderedDict
 from copy import deepcopy
 from pathlib import Path
 from typing import Callable, Dict, List, NewType, Optional, Set, Tuple, Union, cast
@@ -383,7 +384,15 @@ class AgentConfigManager:
             # agent
             overrides.update(data)
 
-        self.update_config(overrides)
+        dict_overrides: Optional[Dict] = None
+        if isinstance(value, (dict, OrderedDict)):
+            dict_overrides = {
+                component_id: [
+                    json_path,
+                ]
+            }
+
+        self.update_config(overrides, dict_overrides=dict_overrides)
 
     @staticmethod
     def _make_dict_for_path_and_value(json_path: JsonPath, value: JSON_TYPES) -> Dict:
@@ -486,7 +495,11 @@ class AgentConfigManager:
             )
         return component_id, json_path
 
-    def update_config(self, overrides: Dict) -> None:
+    def update_config(
+        self,
+        overrides: Dict,
+        dict_overrides: Optional[Dict] = None,
+    ) -> None:
         """
         Apply overrides for agent config.
 
@@ -494,6 +507,7 @@ class AgentConfigManager:
         Does not save it on the disc!
 
         :param overrides: overridden values dictionary
+        :param dict_overrides: A dictionary containing mapping for Component ID -> List of paths
 
         :return: None
         """
@@ -512,7 +526,11 @@ class AgentConfigManager:
                 obj, env_vars_friendly=self.env_vars_friendly
             )
 
-        self.agent_config.update(overrides, env_vars_friendly=self.env_vars_friendly)
+        self.agent_config.update(
+            overrides,
+            env_vars_friendly=self.env_vars_friendly,
+            dict_overrides=dict_overrides,
+        )
 
     def _filter_overrides(self, overrides: Dict) -> Dict:
         """Stay only updated values for agent config."""
