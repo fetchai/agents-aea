@@ -271,7 +271,20 @@ def test_recursive_updates() -> None:
         ),
     )
 
-    assert value == {"foo": "bar", "hello": "world"}
+    assert value == {"hello": "world"}
+
+    agent_config_manager.set_variable(
+        "skills.test_skill.models.scaffold.args.recursive.hello",
+        "world_0",
+    )
+    value = cast(
+        Dict,
+        agent_config_manager.get_variable(
+            "skills.test_skill.models.scaffold.args.recursive"
+        ),
+    )
+
+    assert value == {"hello": "world_0"}
 
 
 def test_agent_attribute_get_overridables():
