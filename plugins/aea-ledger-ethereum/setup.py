@@ -34,7 +34,7 @@ setup(
         "aea>=1.0.0, <2.0.0",
         "web3==5.12.0",
         "ipfshttpclient==0.6.1",
-        "eth-account==0.5.2",
+        "eth-account==0.5.9",
     ],
     tests_require=["pytest"],
     entry_points={
