@@ -19,9 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the gym connection module."""
 import asyncio
-import inspect
 import logging
-import os
 from typing import cast
 from unittest.mock import MagicMock, patch
 
@@ -42,9 +40,6 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 
 logger = logging.getLogger(__name__)
-
-CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
-ROOT_DIR = os.path.join(CUR_PATH, "..", "..", "..", "..", "..")
 
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 
@@ -263,23 +258,3 @@ class TestGymConnection:
         """Test receive connection error and Cancel Error."""
         with pytest.raises(ConnectionError):
             await self.gym_con.receive()
-
-    def test_gym_env_load(self):
-        """Load gym env from file."""
-        curdir = os.getcwd()
-        os.chdir(os.path.join(ROOT_DIR, "examples", "gym_ex"))
-        gym_env_path = "gyms.env.BanditNArmedRandom"
-        configuration = ConnectionConfig(
-            connection_id=GymConnection.connection_id, env=gym_env_path
-        )
-        identity = Identity(
-            "name", address=self.agent_address, public_key=self.agent_public_key
-        )
-        gym_con = GymConnection(
-            gym_env=None,
-            identity=identity,
-            configuration=configuration,
-            data_dir=MagicMock(),
-        )
-        assert gym_con.channel.gym_env is not None
-        os.chdir(curdir)
