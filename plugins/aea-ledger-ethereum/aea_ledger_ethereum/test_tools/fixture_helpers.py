@@ -34,10 +34,10 @@ from aea_ledger_ethereum.test_tools.constants import (
 )
 
 from aea.test_tools.docker_image import GanacheDockerImage, launch_image
+from aea.test_tools.network import LOCALHOST
 
 
-LOCAL_HOST = urlparse("http://127.0.0.1")
-DEFAULT_GANACHE_ADDR = LOCAL_HOST.geturl()
+DEFAULT_GANACHE_ADDR = LOCALHOST.geturl()
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 DEFAULT_AMOUNT = 1000000000000000000000
