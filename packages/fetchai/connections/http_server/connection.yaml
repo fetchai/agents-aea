@@ -10,6 +10,12 @@ fingerprint:
   README.md: bafybeihkuhhsdfw5qqtz2jwpfppub6yvsehzmvmaqjlxnal4v76x47mcrq
   __init__.py: bafybeif5pkr5oarwd7yagdgn46miolmdmvgdyxv4kadgws2bf3iwshom24
   connection.py: bafybeicqhb5zrdmjt6vtb253luc7nfr4p4vrxkmniigqsokgatrsoeptoa
+  tests/__init__.py: bafybeiewlnh2eycgprywqi54fy766qorufe4qpjip4son4zvebwtut3p2m
+  tests/data/certs/server.crt: bafybeiev5i3xxkvn36wflf633gkumuxexsw4y2bubwbvl7edrz4igfgv34
+  tests/data/certs/server.csr: bafybeicvp7xdl5w3o4bzikkudpduitss3bpp6xqfwlxbw6kabdangohy5u
+  tests/data/certs/server.key: bafybeiabvpkpqr4fctrbssfal6pviv5otgmu32qyrfpyhcql5wgmlzjtoe
+  tests/data/petstore_sim.yaml: bafybeiaekkfxljlv57uviz4ug6isdqbzsnuxpsgy3dvhzh22daql3xh2i4
+  tests/test_http_server.py: bafybeic5pemoh6utlnhjo6e2dytloxzhzirogzidexvowqq3uxlqz7slym
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
