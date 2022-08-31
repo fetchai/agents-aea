@@ -15,9 +15,9 @@ fingerprint:
   strategy.py: bafybeif5eor26xfagaoy3xafmwraw74btlw3o7jv2a6hpon46x5flzt6ey
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeigj6eetvrlddivbdebzanpyblkqarrhsc4et7exrglbxso74lzmeq
+- fetchai/ledger:0.19.0:bafybeihg36exkl37ulpydkm2nfwzghomjnnbrvdgapjzlkm5biisitzbxa
 contracts:
-- fetchai/erc1155:0.22.0:bafybeid2fsfivifcpe3uij3h7xcpz7juivj2vlmnlfhf4ei7petdtlhhp4
+- fetchai/erc1155:0.22.0:bafybeidd7ynxij7husk7klenprf37mgdq34sfuuhujhof3bnkm7vflkaeu
 protocols:
 - fetchai/contract_api:1.0.0:bafybeihoyoowp5uycaqea2h67hckoclmazlnojcy46eu3hv4apznyaqym4
 - fetchai/default:1.0.0:bafybeibvtmpfzlig3ngtz6x2omc2rlx5knltnunbmg37tih5wlxnrfszvm
