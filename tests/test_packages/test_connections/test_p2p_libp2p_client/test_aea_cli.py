@@ -28,7 +28,7 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 from packages.valory.connections import p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
-from tests.conftest import DEFAULT_LEDGER, LOCAL_HOST
+from tests.conftest import DEFAULT_LEDGER, LOCALHOST
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     _make_libp2p_connection,
     libp2p_log_on_failure_all,
@@ -37,7 +37,7 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
 )
 
 
-DEFAULT_HOST = LOCAL_HOST.hostname
+DEFAULT_HOST = LOCALHOST.hostname
 DEFAULT_CLIENTS_PER_NODE = 4
 DEFAULT_LAUNCH_TIMEOUT = 10
 
