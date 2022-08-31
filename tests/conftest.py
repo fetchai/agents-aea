@@ -47,9 +47,19 @@ from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_ethereum.ethereum import (
+from aea_ledger_ethereum.test_tools.constants import (
     DEFAULT_EIP1559_STRATEGY,
     DEFAULT_GAS_STATION_STRATEGY,
+    ETHEREUM_ADDRESS_ONE,
+    ETHEREUM_ADDRESS_TWO,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    ETHEREUM_PRIVATE_KEY_TWO_FILE,
+    ETHEREUM_PRIVATE_KEY_TWO_PATH,
+    ETHEREUM_TESTNET_CONFIG,
+    FUNDED_ETH_PRIVATE_KEY_1,
+    FUNDED_ETH_PRIVATE_KEY_2,
+    FUNDED_ETH_PRIVATE_KEY_3,
 )
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 from cosmpy.aerial.client import LedgerClient, NetworkConfig
@@ -76,8 +86,6 @@ from aea.contracts.base import Contract, contract_registry
 from aea.crypto.ledger_apis import (
     COSMOS_DEFAULT_ADDRESS,
     DEFAULT_LEDGER_CONFIGS,
-    ETHEREUM_DEFAULT_ADDRESS,
-    ETHEREUM_DEFAULT_CHAIN_ID,
     ETHEREUM_DEFAULT_CURRENCY_DENOM,
     FETCHAI_DEFAULT_ADDRESS,
 )
@@ -158,10 +166,8 @@ COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 
 COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
-ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier)
 FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 
-ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
 
 DEFAULT_AMOUNT = 1000000000000000000000
 GAS_PRICE_API_KEY = ""
@@ -170,25 +176,11 @@ GAS_PRICE_API_KEY = ""
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
 )
-ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
-)
-ETHEREUM_PRIVATE_KEY_TWO_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_TWO_FILE
-)
 FETCHAI_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
 )
 DEFAULT_PRIVATE_KEY_PATH = COSMOS_PRIVATE_KEY_PATH
-FUNDED_ETH_PRIVATE_KEY_1 = (
-    "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
-)
-FUNDED_ETH_PRIVATE_KEY_2 = (
-    "0x04b4cecf78288f2ab09d1b4c60219556928f86220f0fb2dcfc05e6a1c1149dbf"
-)
-FUNDED_ETH_PRIVATE_KEY_3 = (
-    "0x6F611408F7EF304947621C51A4B7D84A13A2B9786E9F984DA790A096E8260C64"
-)
+
 NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
 )
@@ -205,8 +197,6 @@ FUNDED_FETCHAI_PRIVATE_KEY_2 = (
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
 COSMOS_ADDRESS_TWO = "cosmos1gssy8pmjdx8v4reg7lswvfktsaucp0w95nk78m"
-ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
-ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
 FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
 FUNDED_FETCHAI_ADDRESS_ONE = "fetch1k9dns2fd74644g0q9mfpsmfeqg0h2ym2cm6wdh"
@@ -234,15 +224,6 @@ NON_GENESIS_CONFIG_TWO = {
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
-ETHEREUM_TESTNET_CONFIG = {
-    "address": ETHEREUM_DEFAULT_ADDRESS,
-    "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
-    "default_gas_price_strategy": "gas_station",
-    "gas_price_strategies": {
-        "gas_station": DEFAULT_GAS_STATION_STRATEGY,
-        "eip1559": DEFAULT_EIP1559_STRATEGY,
-    },
-}
 FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 
 # common public ids used in the tests
