@@ -39,6 +39,7 @@ from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
     CONNECTION,
     CONTRACT,
+    PACKAGES,
     PROTOCOL,
     SKILL,
 )
@@ -109,20 +110,19 @@ def skill(ctx: Context, skill_public_id: PublicId, args: Sequence[str]) -> None:
 @click.option(
     "--registry-path",
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    required=True,
 )
 @pytest_args
 @pass_ctx
 def by_path(
     ctx: Context,
     path: str,
-    registry_path: str,
+    registry_path: Optional[str],
     args: Sequence[str],
 ) -> None:
     """Executes a test suite of a package specified by a path."""
     click.echo(f"Executing tests of package at {path}'...")
     full_path = Path(ctx.cwd) / Path(path)
-    registry_path = Path(registry_path)
+    registry_path = Path(registry_path or Path.cwd() / PACKAGES)
     test_package_by_path(full_path, args, packages_dir=registry_path)
 
 
