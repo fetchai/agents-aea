@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour class of the echo skill."""
 
+import os
+import inspect
 import logging
 from pathlib import Path
 from typing import cast
@@ -28,13 +30,12 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.echo.behaviours import EchoBehaviour
 
-from tests.conftest import ROOT_DIR
-
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 
 class TestEchoBehaviour(BaseSkillTestCase):
     """Test EchoBehaviour behaviour of echo."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "echo")
+    path_to_skill = Path(CUR_PATH, "..")
     is_agent_to_agent_messages = False
 
     @classmethod

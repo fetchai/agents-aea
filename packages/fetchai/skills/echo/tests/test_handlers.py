@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler class of the echo skill."""
 
+import os
+import inspect
 import logging
 from pathlib import Path
 from typing import cast
@@ -31,13 +33,13 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo.dialogues import DefaultDialogues
 from packages.fetchai.skills.echo.handlers import EchoHandler
 
-from tests.conftest import ROOT_DIR
 
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 
 class TestEchoHandler(BaseSkillTestCase):
     """Test EchoHandler of echo."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "echo")
+    path_to_skill = Path(CUR_PATH, "..")
 
     @classmethod
     def setup(cls):

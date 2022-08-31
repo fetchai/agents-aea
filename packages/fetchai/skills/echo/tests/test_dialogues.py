@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the echo skill."""
 
+import os
+import inspect
 from pathlib import Path
 from typing import cast
 
@@ -27,13 +29,13 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo.dialogues import DefaultDialogue, DefaultDialogues
 
-from tests.conftest import ROOT_DIR
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 
 
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue class of echo."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "echo")
+    path_to_skill = Path(CUR_PATH, "..")
 
     @classmethod
     def setup(cls):
