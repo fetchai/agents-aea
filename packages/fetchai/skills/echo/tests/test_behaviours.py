@@ -19,9 +19,9 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour class of the echo skill."""
 
-import os
 import inspect
 import logging
+import os
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
@@ -30,7 +30,9 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.echo.behaviours import EchoBehaviour
 
+
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+
 
 class TestEchoBehaviour(BaseSkillTestCase):
     """Test EchoBehaviour behaviour of echo."""
