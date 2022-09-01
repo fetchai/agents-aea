@@ -7,7 +7,7 @@ This demo assumes you have followed the setup guide.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeibnjfr3sdg57ggyxbcfkh42yqkj6a3gftp55l26aaw2z2jvvc3tny --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeigzotit7mipzrcp35j76m7ciq32z3n5jw3243eraeeglxm7wz4kju --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies

@@ -27,8 +27,8 @@ from unittest.mock import call
 import pytest
 
 from aea.mail.base import Empty
+from aea.test_tools.mocks import RegexComparator
 
-from tests.common.mocks import RegexComparator
 from tests.conftest import DEFAULT_LEDGER
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,

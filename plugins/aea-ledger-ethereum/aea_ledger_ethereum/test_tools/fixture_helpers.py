@@ -22,9 +22,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict
-from urllib.parse import urlparse
 
-import docker
 import pytest
 from aea_ledger_ethereum.test_tools.constants import (
     ETHEREUM_PRIVATE_KEY_PATH,
@@ -32,8 +30,9 @@ from aea_ledger_ethereum.test_tools.constants import (
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
 )
+from aea_ledger_ethereum.test_tools.docker_images import GanacheDockerImage
 
-from aea.test_tools.docker_image import GanacheDockerImage, launch_image
+from aea.test_tools.docker_image import launch_image
 from aea.test_tools.network import LOCALHOST
 
 
@@ -60,6 +59,8 @@ def _ganache_context(
     timeout: float = 2.0,
     max_attempts: int = 10,
 ):
+    import docker  # pylint: disable=import-outside-toplevel,import-error
+
     client = docker.from_env()
     image = GanacheDockerImage(
         client, ganache_addr, ganache_port, config=ganache_configuration

@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the rl_agent module of the gym skill."""
+# pylint: skip-file
 
 import copy
 from unittest.mock import patch

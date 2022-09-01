@@ -38,7 +38,6 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple, cast
 from unittest.mock import MagicMock, patch
-from urllib.parse import urlparse
 
 import docker as docker
 import gym
@@ -55,6 +54,7 @@ from aea_ledger_ethereum.test_tools.constants import (
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
 )
+from aea_ledger_ethereum.test_tools.docker_images import GanacheDockerImage
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 from aea_ledger_fetchai.test_tools.constants import (
     FETCHAI_P2P_ADDRESS,
@@ -63,6 +63,7 @@ from aea_ledger_fetchai.test_tools.constants import (
     FUNDED_FETCHAI_ADDRESS_TWO,
     FUNDED_FETCHAI_PRIVATE_KEY_1,
 )
+from aea_ledger_fetchai.test_tools.docker_images import FetchLedgerDockerImage
 from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from cosmpy.aerial.wallet import LocalWallet
 from cosmpy.crypto.address import Address as CosmpyAddress
@@ -96,17 +97,13 @@ from aea.helpers.base import cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
+from aea.test_tools.docker_image import DockerImage
 from aea.test_tools.network import LOCALHOST
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
 
-from tests.common.docker_image import (
-    DockerImage,
-    FetchLedgerDockerImage,
-    GanacheDockerImage,
-)
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
 

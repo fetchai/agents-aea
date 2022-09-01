@@ -8,7 +8,7 @@ fingerprint:
   README.md: bafybeig75bdp2xp2k44ohxt277etnzeqhwdkwsjfciz7upwgymawmfo2vm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0:bafybeifng4ks6c4itpu5jolij3q72valp3hbhvutnbnu3vvwbggfbbpajy
+- fetchai/stub:0.21.0:bafybeieyoxxddnyqn7mibgeeld3bdkk32bspahqob7gfpqh4cbjopwh5jy
 contracts: []
 protocols: []
 skills:

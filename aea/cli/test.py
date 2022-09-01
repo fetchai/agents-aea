@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea test' command."""
-import os
 import sys
 import tempfile
 import time
@@ -283,6 +282,8 @@ def load_package(
     package_type = determine_package_type_for_directory(package_dir)
 
     if package_type != PackageType.AGENT:
+        if root_packages is None:
+            raise ValueError("Packages dir not set!")
         component_type = ComponentType(package_type.value)
         configuration = load_component_configuration(component_type, package_dir)
         configuration.directory = package_dir
@@ -373,7 +374,7 @@ def load_aea_packages_recursively(
     """
     already_loaded = already_loaded if already_loaded else set()
     for dependency_id in config.package_dependencies:
-        # TODO: load packages in topological order? Should not matter as at the moment we are not
+        # TODO: load packages in topological order? Should not matter as at the moment we are not  # pylint: disable=fixme
         #       actually running the modules, just populating sys.modules
         dependency_path = package_path_finder(root_packages, dependency_id)
         dependency_configuration = load_component_configuration(

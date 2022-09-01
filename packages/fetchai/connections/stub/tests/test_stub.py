@@ -18,6 +18,9 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the stub connection."""
+# type: ignore # noqa: E800
+# pylint: skip-file
+
 import asyncio
 import base64
 import os

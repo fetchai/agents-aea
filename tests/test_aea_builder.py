@@ -60,6 +60,7 @@ from aea.helpers.install_dependency import call_pip
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+from aea.test_tools.mocks import RegexComparator
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections.http_server.connection import (
@@ -69,7 +70,6 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 
-from tests.common.mocks import RegexComparator
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,

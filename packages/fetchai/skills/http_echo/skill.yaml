@@ -12,14 +12,14 @@ fingerprint:
   dialogues.py: bafybeibdcgcmvl3g7gp7rvndrhih7fpj4qbeihdqodgqndjuaqsq3g27bm
   handlers.py: bafybeidxvskxngwlhdnxs2xwr54vch2wjks2l5gqtgr5t5bc2izpjfr3ti
   tests/__init__.py: bafybeigqjv34vhfwcxmri75l5opezgu66jsyjj7metj7lgk2jbx4rqztyy
-  tests/test_dialogues.py: bafybeib4xlhm5wttmtysti4dl7alfzbu44yepckdvzlaymhqvbh33mphc4
-  tests/test_handlers.py: bafybeiczxf7u22cqzghdpw3uttl3h5g2n3hp4pbv5oien6kxhduoqnm3bi
+  tests/test_dialogues.py: bafybeidcprz5p7lnkx6rwscsud4wbggarxekkglbvbmjflpvo3gtja36m4
+  tests/test_handlers.py: bafybeidvwci67koqhmuw27baj6ocgvyd46w5tqpecsxcl3xnmx742bduxy
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/http:1.0.0:bafybeifwvshtgjo2lol4h7en2xggefko5p2wjikotopjwf7rqzi5szx5na
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e
 skills: []
 behaviours: {}
 handlers:

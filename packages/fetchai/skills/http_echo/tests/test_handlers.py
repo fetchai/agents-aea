@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler class of the http_echo skill."""
+# pylint: skip-file
 
 import json
 import logging

@@ -10,14 +10,14 @@ fingerprint:
   README.md: bafybeiht3qtxpf2meyrveoghidjtdsz433wguz4wlxhzsiixpafkrjv7yy
   __init__.py: bafybeihw7l7zie5dxycptwwiynqgnqfesnhr3epali5e4tmzhy54lxjnbq
   connection.py: bafybeicjrtpc2pwf2fwvqwr74tkzztjee2rmd7zkkzs2ctdgua2n5omgl4
-  input_file: bafybeiftu27piztiu5bfxbvhqsbppgtseykyfot6wtlrrzeuzya6zrgpky
-  tests/__init__.py: bafybeihodqbifehez7r4zalztsn5ildne4rxc6rvdhykl7vscghxi4v45i
-  tests/test_stub.py: bafybeickhyxxbaygqa234xk4afjqklj46455rgghyhfcnbfb76e6lm3hpe
-fingerprint_ignore_patterns: []
+  tests/__init__.py: bafybeiadaetciszcob7cchexib74l7vecczthsx2pzaan7sp7csrkgjxce
+  tests/test_stub.py: bafybeihu2smaadptjzzbrkrv4bae2l4bmd6ozidetlwrmnas2az7tgbqy4
+fingerprint_ignore_patterns:
+- ./input_file
 connections: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/oef_search:1.0.0:bafybeibx572iczmr26bp3zqzorytl5ixu5dnsvbnxgsadzz6jbo346v354
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/oef_search:1.0.0:bafybeihdy3p7hjlh2vjkehfer5gfgjvqb666faupv4e7hgnxpgz2r7rwai
 class_name: StubConnection
 config:
   input_file: ./input_file

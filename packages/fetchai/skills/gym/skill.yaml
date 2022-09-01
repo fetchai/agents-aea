@@ -15,19 +15,19 @@ fingerprint:
   tasks.py: bafybeifvuancp2y57rjgwuzxgrzxiqkc4gzzbskgwch3uze5vlbvptlswm
   tests/__init__.py: bafybeihojk75sixkhbsmwxbrzdaqwouq6dh2oo6u7zk2clqcgxqrhklhny
   tests/helpers.py: bafybeifbvlf5ahttwz7uddixxp5ggw3uu3sby65ya4xr2gy3gfb5xouj5i
-  tests/intermediate_class.py: bafybeidvnxpidgj6kzd2kxwnexwh4tvxcgqvtoknruiw4jus5x6l4gxppy
-  tests/test_dialogues.py: bafybeibdkfgu2kx7rwppvhopy6idqvjhguzzfkedrzp7hpdj6lnhcc4bnq
-  tests/test_handlers.py: bafybeidri56t3alb4zivn6kqcf3aieeshbady4e3osunxw6u6gmpzjhx3i
-  tests/test_helpers.py: bafybeifi723zjei7bhlj3svkaj2uhz2labkf6esbaxpelluv4o3h6ch7gu
-  tests/test_rl_agent.py: bafybeiez422xh773yzym43raqurellfutra3ewdl4pjry7zkhnlv4ddjoi
-  tests/test_task.py: bafybeifwk6oi2ilsbm435ncjynli5iskvuwgwilivzugz67njryotz5kum
+  tests/intermediate_class.py: bafybeicnzyg7jkyc2xtyij7fj42aammx3xmrvvvnjen6vjxzisqqzipvie
+  tests/test_dialogues.py: bafybeihigzfcuycwtpj5no6owcfxlo7kwsvh7bh2ohdx7u7tphea23xuwy
+  tests/test_handlers.py: bafybeih6ktdgopxcpcn4n7a7wgem42wzzanjw6inwdqp67pb6lzgvxhrpy
+  tests/test_helpers.py: bafybeigoayt5pabnwi72kcxpoyan7r44igjizeycw7lqjnxy52alwnez44
+  tests/test_rl_agent.py: bafybeia2s7ft7za4tyzsofmguny6vit7iwfp4gx6nemk4bekx7ytbrc4ze
+  tests/test_task.py: bafybeic4y7wulvlx2eparks3wyftfsx5ya2xsufoaohxfqhxrabm7zt7pi
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:bafybeihg2sxumbq4cdihopj2y7v3rfadnnoygnvdywzqgquivtw625dy7q
+- fetchai/gym:0.19.0:bafybeibenubxl7lamgct2kqlkjbqfpjdvmgsen5jjj6cxaeullesxacxay
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/gym:1.0.0:bafybeicuwoic4ubxjmap7g25k3zld3pzwgvbi3yfwbkv6xclrlcmitcsha
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/gym:1.0.0:bafybeid7qvjuxpojaehi74krfilwq2gvu2uuqxlxypxudwbee3kbtayip4
 skills: []
 behaviours: {}
 handlers:

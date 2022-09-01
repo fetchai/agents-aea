@@ -26,14 +26,16 @@ from typing import List
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_FILE
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 
 from aea.cli.utils.config import dump_item_config
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
-from tests.conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE
+from tests.conftest import CUR_PATH
 from tests.data.dummy_connection.connection import DummyConnection
 
 

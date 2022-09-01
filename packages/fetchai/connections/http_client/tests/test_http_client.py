@@ -18,6 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client connection and channel."""
+# pylint: skip-file
+
 import asyncio
 import logging
 from asyncio import CancelledError
@@ -68,7 +70,8 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: self address
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

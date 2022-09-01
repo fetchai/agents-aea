@@ -223,8 +223,7 @@ class AgentDialogue(HttpDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         HttpDialogue.__init__(
             self,
@@ -242,7 +241,7 @@ class AgentDialogues(HttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogue is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -280,8 +279,7 @@ class ServerDialogue(HttpDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         HttpDialogue.__init__(
             self,
@@ -299,7 +297,7 @@ class ServerDialogues(HttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogue is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

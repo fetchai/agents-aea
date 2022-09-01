@@ -27,7 +27,9 @@ from unittest import TestCase, mock
 import pytest
 import yaml
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_FILE
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 from click.exceptions import BadParameter
 
 import aea
@@ -36,15 +38,7 @@ from aea.cli.add_key import _try_add_key
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import (
-    AUTHOR,
-    CLI_LOG_OPTION,
-    CUR_PATH,
-    CliRunner,
-    ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE,
-    ROOT_DIR,
-)
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner, ROOT_DIR
 from tests.test_cli.tools_for_testing import ContextMock
 
 

@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the echo skill."""
+# pylint: skip-file
 
 import inspect
 import os

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,7 @@ from aea.mail.base_pb2 import DialogueMessage as Pb2DialogueMessage
 from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Protocol, Serializer
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel
+from aea.test_tools.constants import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue,
@@ -53,7 +54,7 @@ from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues,
 )
 
-from tests.conftest import ROOT_DIR, UNKNOWN_PROTOCOL_PUBLIC_ID
+from tests.conftest import ROOT_DIR
 
 
 def role_from_first_message_dd(

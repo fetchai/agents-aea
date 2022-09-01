@@ -26,7 +26,7 @@ from urllib.parse import urlparse
 LOCALHOST = urlparse("http://127.0.0.1")
 
 
-def get_unused_tcp_port():
+def get_unused_tcp_port() -> int:
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((LOCALHOST.hostname, 0))
@@ -36,14 +36,14 @@ def get_unused_tcp_port():
     return port
 
 
-def get_host():
+def get_host() -> str:
     """Get the host."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
         s.connect(("10.255.255.255", 1))
         IP = s.getsockname()[0]
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         IP = LOCALHOST.hostname
     finally:
         s.close()

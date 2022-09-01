@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the erc1155_deploy skill."""
+# pylint: skip-file
 
 import logging
 from typing import cast

@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers module of the gym skill."""
+# pylint: skip-file
 
 from typing import cast
 from unittest.mock import patch

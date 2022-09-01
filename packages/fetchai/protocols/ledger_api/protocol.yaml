@@ -15,7 +15,7 @@ fingerprint:
   ledger_api_pb2.py: bafybeigshvrwgmug3c6dhqxzxkuzyaxjizaogvb7zo2nzqfqiw4mgvq6by
   message.py: bafybeicl3lsm2c7o4yxvm3k3jhi6nksjr3b7kvrrdpp2hbndxh5rxebjyq
   serialization.py: bafybeicwffv5vih2hzs5d6vws5j6egofycidmi4gos2brnmgn3ohydaxvq
-  tests/test_ledger_api.py: bafybeianpyemsw6ra2sp7gdgpl557lxgncsdi4kv3lliuozdlpwszz5364
+  tests/test_ledger_api.py: bafybeiafg34w7th5bk6zp4gkjryfjgtmgx6goc6vpazxq5omprgtxcczzi
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

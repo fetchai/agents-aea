@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+# pylint: skip-file
+
 from typing import Type
 from unittest.mock import patch
 
@@ -196,8 +198,7 @@ class SigningDialogue(BaseSigningDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseSigningDialogue.__init__(
             self,
@@ -215,7 +216,7 @@ class SigningDialogues(BaseSigningDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogues is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

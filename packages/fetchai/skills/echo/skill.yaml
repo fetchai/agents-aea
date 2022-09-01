@@ -12,14 +12,14 @@ fingerprint:
   dialogues.py: bafybeici4rlde6qdpjtftn4xgelrrphpwzzymvhjrgua7frx7qvyw32gue
   handlers.py: bafybeihjjglefhpwbprqu6anjpmhj3nn7p53nsci3kmueab7hnhchfcmsi
   tests/__init__.py: bafybeidedsb72is3z5jndaoh232r7y5qvqb3acotjm6xi4pea3bmkoq6le
-  tests/test_behaviours.py: bafybeibea56daw5pjldrwx5dfv4w3tbmln5umzfz5ztt3p6jjaziiwczri
-  tests/test_dialogues.py: bafybeiafp2au3qo6xiobtdxyrviict5ssx7jygp5qbml66cthchaceismq
-  tests/test_handlers.py: bafybeid6xknzidjyrhooczkgolmxdesxriahb72q3be2jtk6iybfgaxbui
+  tests/test_behaviours.py: bafybeicfbfgoqishdrxvfy77qqmkztpkmceanhmheq6h5odyun5i23vwoe
+  tests/test_dialogues.py: bafybeiap6rqpxu46po5vgwv5xcupv7tnlzzlwuwzp35xolel6cgtrbp5vi
+  tests/test_handlers.py: bafybeienyvkpjil76o7bvkx3b2dqv3y7ouaha5mcaeyxgfettt3q4xsasa
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
 skills: []
 behaviours:
   echo:

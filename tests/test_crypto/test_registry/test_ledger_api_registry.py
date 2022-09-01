@@ -24,16 +24,17 @@ import logging
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto
-
-import aea.crypto
-
-from tests.conftest import (
+from aea_ledger_ethereum.test_tools.constants import (
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_TESTNET_CONFIG,
+)
+from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import (
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
 )
+
+import aea.crypto
 
 
 logger = logging.getLogger(__name__)

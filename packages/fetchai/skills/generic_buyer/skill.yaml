@@ -13,20 +13,20 @@ fingerprint:
   handlers.py: bafybeifdytrtxifnxuzcml4plgqttkuknwlavmskc6gyy3xt4vujwwxjg4
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
   tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
-  tests/test_behaviours.py: bafybeicmdo2lscp3eyimvlz6r36oizdkifphzkjxs3d65hii6hcesybb5i
-  tests/test_dialogues.py: bafybeicw26dbb5bsdrhryymxr2lge2n3m6dmkeperkdd6imlxaclrfjpge
-  tests/test_handlers.py: bafybeicssmw63jx3rrni37egleirg2yratrfcbxmxlefhaenrqdzov2roi
-  tests/test_models.py: bafybeia3a3wtmmjxqn4qspbrluaypql262xne3n4t7qdyjsn3bkfsq4cxq
+  tests/test_behaviours.py: bafybeifk7zdbtv6hocho62uhsshs66rqfpkjmyq6sdvcncu7old5jnmpmy
+  tests/test_dialogues.py: bafybeicabpwlrm2ppqllol5fhuyzujsbakwbnwagrtllfv2jve5jotgbqq
+  tests/test_handlers.py: bafybeiez7vth2e45mg6gza4d2tmhwawtt5wqx7fbvjnr2afcavj7mgl324
+  tests/test_models.py: bafybeibc5tdfcizkxi7mannv22m7svbw2q5eytkxw726nswomzt7gucyzm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeig36ducctgofrrhd56l24u2uhimkbp5xn74pxoazflypeez5smwrq
+- fetchai/ledger:0.19.0:bafybeiamp4dvkpiuz46zz4p57fwkhzzkhmxqyrb3zpqamr6u4ydv2kpyeu
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/fipa:1.0.0:bafybeiel7a374f3wzub6rdwh6r7z7zbz4ubvoagybxqlts2d5e4z7qdo5y
-- fetchai/ledger_api:1.0.0:bafybeiaqpqwx575lwjat6z2puxliqhl2l2u52mpgwcwhg555dz6fu7qwhe
-- fetchai/oef_search:1.0.0:bafybeibx572iczmr26bp3zqzorytl5ixu5dnsvbnxgsadzz6jbo346v354
-- open_aea/signing:1.0.0:bafybeigubfrcyxrg3x6iohndfmiynhhx44qj6nhogv5uzkhmjgljnbguyi
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/fipa:1.0.0:bafybeib7mzgyjcfr7c4gcx24aeral7ldoqjb23qvsd266gnp66anftqt5q
+- fetchai/ledger_api:1.0.0:bafybeiftily2ogosdp3gkbvlq2wahn66svkpaxdyu2a2br36uu7jkemd4i
+- fetchai/oef_search:1.0.0:bafybeihdy3p7hjlh2vjkehfer5gfgjvqb666faupv4e7hgnxpgz2r7rwai
+- open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
 skills: []
 behaviours:
   search:

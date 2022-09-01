@@ -29,6 +29,7 @@ from unittest.case import TestCase
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_PATH
 
 import aea  # noqa: F401
 from aea.aea import AEA
@@ -45,6 +46,7 @@ from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.runtime import RuntimeStates
 from aea.skills.base import Skill, SkillContext
+from aea.test_tools.constants import UNKNOWN_PROTOCOL_PUBLIC_ID
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -59,13 +61,7 @@ from tests.common.utils import (
     timeit_context,
     wait_for_condition,
 )
-from tests.conftest import (
-    CUR_PATH,
-    FETCHAI_PRIVATE_KEY_PATH,
-    ROOT_DIR,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    _make_local_connection,
-)
+from tests.conftest import CUR_PATH, ROOT_DIR, _make_local_connection
 from tests.data.dummy_aea.skills.dummy.tasks import DummyTask  # type: ignore
 from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 from tests.data.dummy_skill.behaviours import DummyBehaviour  # type: ignore

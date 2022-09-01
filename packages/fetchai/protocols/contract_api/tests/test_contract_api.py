@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the contract_api protocol package."""
+# pylint: skip-file
 
 from typing import Type
 from unittest import mock

@@ -26,13 +26,15 @@ from unittest import mock
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_ADDRESS_ONE
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_ADDRESS_ONE
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAEnforceError
 
-from tests.conftest import COSMOS_ADDRESS_ONE, ETHEREUM_ADDRESS_ONE, FETCHAI_ADDRESS_ONE
+from tests.conftest import COSMOS_ADDRESS_ONE
 
 
 logger = logging.getLogger(__name__)

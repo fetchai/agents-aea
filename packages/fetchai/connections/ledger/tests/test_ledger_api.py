@@ -18,8 +18,9 @@
 #
 # ------------------------------------------------------------------------------
 
-
 """This module contains the tests of the ledger API connection module."""
+# pylint: skip-file
+
 import asyncio
 import logging
 from typing import cast
@@ -59,7 +60,9 @@ from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
-from packages.fetchai.connections.ledger.tests.conftest import ledger_apis_connection
+from packages.fetchai.connections.ledger.tests.conftest import (  # noqa: F401
+    ledger_apis_connection,
+)
 from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.fetchai.protocols.ledger_api.dialogues import (
@@ -111,7 +114,8 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: self address
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -139,7 +143,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 async def test_get_balance(
     ledger_id,
     address,
-    ledger_apis_connection: Connection,
+    ledger_apis_connection: Connection,  # noqa: F811
     update_default_ethereum_ledger_api,
     ethereum_testnet_config,
     ganache,
@@ -188,7 +192,7 @@ async def test_get_balance(
 async def test_get_state(
     ledger_id,
     address,
-    ledger_apis_connection: Connection,
+    ledger_apis_connection: Connection,  # noqa: F811
     update_default_ethereum_ledger_api,
     ethereum_testnet_config,
     ganache,
@@ -249,7 +253,7 @@ async def test_get_state(
 @gas_strategies
 async def test_send_signed_transaction_ethereum(
     gas_strategies,
-    ledger_apis_connection: Connection,
+    ledger_apis_connection: Connection,  # noqa: F811
     update_default_ethereum_ledger_api,
     ganache,
 ):
@@ -382,7 +386,9 @@ async def test_send_signed_transaction_ethereum(
 
 
 @pytest.mark.asyncio
-async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
+async def test_unsupported_protocol(
+    ledger_apis_connection: LedgerConnection,  # noqa: F811
+):
     """Test fail on protocol not supported."""
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
@@ -395,7 +401,9 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
 
 
 @pytest.mark.asyncio
-async def test_new_message_wait_flag(ledger_apis_connection: LedgerConnection):
+async def test_new_message_wait_flag(
+    ledger_apis_connection: LedgerConnection,  # noqa: F811
+):
     """Test wait for new message."""
     task = asyncio.ensure_future(ledger_apis_connection.receive())
     await asyncio.sleep(0.1)

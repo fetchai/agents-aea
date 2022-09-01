@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module."""
+# pylint: skip-file
+
 import logging
 from pathlib import Path
 from typing import cast
@@ -29,7 +31,6 @@ from aea_ledger_ethereum.test_tools.fixture_helpers import (
     DEFAULT_GANACHE_ADDR,
     DEFAULT_GANACHE_CHAIN_ID,
     DEFAULT_GANACHE_PORT,
-    ganache,
 )
 
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -38,7 +39,7 @@ from aea.crypto.ledger_apis import (
     DEFAULT_LEDGER_CONFIGS,
     ETHEREUM_DEFAULT_CURRENCY_DENOM,
 )
-from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
+from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 
@@ -67,7 +68,9 @@ def ethereum_testnet_config():
 
 
 @pytest.fixture(scope="function")
-def update_default_ethereum_ledger_api(ethereum_testnet_config):
+def update_default_ethereum_ledger_api(
+    ethereum_testnet_config,
+):  # pylint: disable=redefined-outer-name
     """Change temporarily default Ethereum ledger api configurations to interact with local Ganache."""
     old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumCrypto.identifier, None)
     DEFAULT_LEDGER_CONFIGS[EthereumCrypto.identifier] = ethereum_testnet_config
@@ -77,7 +80,9 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
 
 
 @pytest.fixture()
-async def ledger_apis_connection(request, ethereum_testnet_config):
+async def ledger_apis_connection(
+    request, ethereum_testnet_config
+):  # pylint: disable=redefined-outer-name,unused-argument
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("name", crypto.address, crypto.public_key)
@@ -86,7 +91,9 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
         PACKAGE_DIR, data_dir=MagicMock(), identity=identity, crypto_store=crypto_store
     )
     connection = cast(Connection, connection)
-    connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
+    connection._logger = logging.getLogger(
+        "aea.packages.fetchai.connections.ledger"
+    )  # pylint: disable=protected-access
 
     # use testnet config
     connection.configuration.config.get("ledger_apis", {})[

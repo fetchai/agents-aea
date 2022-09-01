@@ -14,19 +14,19 @@ fingerprint:
   handlers.py: bafybeigz7pthvel63y4o3xq77icym2thcw4jy53hcj4a7t56eebqzdbgay
   strategy.py: bafybeia5mjxph7ui2iav5uxutwnr6q2uf4otxdge5vuk7g5ycaso3jldkm
   tests/__init__.py: bafybeihqxdniovyormfdxlfyxosmbstbriacfo4si7gofld5fx66jwmp5a
-  tests/test_behaviours.py: bafybeigyvkntknutwipnurwnxq2iiqcqhocvdpgvpaixoakqzxd4fckdxa
-  tests/test_dialogues.py: bafybeifcnehrjfzfrnu4lshzhocxzxvnummroiz7svwi7jjh7c32qbkzyi
-  tests/test_handlers.py: bafybeie6u2sfzm5hkneiapqlvelcokkb34vwiwhwmdzvmr6yjl6e7a37by
-  tests/test_models.py: bafybeicea7y22x23k77afs5qe4iokhxfnzw6fakhhlxcrvrbw2pnmrzimq
+  tests/test_behaviours.py: bafybeihd2ngqekfjqxlowzy2p3cy3tfu4ajtyewfvwb3ghwt4o4724xrui
+  tests/test_dialogues.py: bafybeidk3ypb3meyc3o3vevlxo5yszb7e6ivi6f7a7tse2raahzsoavncu
+  tests/test_handlers.py: bafybeihnolj6umzigr4fyu7zyfny5td3qpwfarlhixklt5asgh5mcdtbdi
+  tests/test_models.py: bafybeigymvfralqr63dpybfiqc4x4glcwmxmsweqycrmd75exi3gdz4oo4
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeig36ducctgofrrhd56l24u2uhimkbp5xn74pxoazflypeez5smwrq
+- fetchai/ledger:0.19.0:bafybeiamp4dvkpiuz46zz4p57fwkhzzkhmxqyrb3zpqamr6u4ydv2kpyeu
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/fipa:1.0.0:bafybeiel7a374f3wzub6rdwh6r7z7zbz4ubvoagybxqlts2d5e4z7qdo5y
-- fetchai/ledger_api:1.0.0:bafybeiaqpqwx575lwjat6z2puxliqhl2l2u52mpgwcwhg555dz6fu7qwhe
-- fetchai/oef_search:1.0.0:bafybeibx572iczmr26bp3zqzorytl5ixu5dnsvbnxgsadzz6jbo346v354
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/fipa:1.0.0:bafybeib7mzgyjcfr7c4gcx24aeral7ldoqjb23qvsd266gnp66anftqt5q
+- fetchai/ledger_api:1.0.0:bafybeiftily2ogosdp3gkbvlq2wahn66svkpaxdyu2a2br36uu7jkemd4i
+- fetchai/oef_search:1.0.0:bafybeihdy3p7hjlh2vjkehfer5gfgjvqb666faupv4e7hgnxpgz2r7rwai
 skills: []
 behaviours:
   service_registration:
