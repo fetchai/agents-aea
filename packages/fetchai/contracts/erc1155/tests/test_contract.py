@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
+# type: ignore # noqa: E800
+# pylint: skip-file
 
 import re
 import time
@@ -28,7 +30,18 @@ from unittest import mock
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import (
+    ETHEREUM_ADDRESS_ONE,
+    ETHEREUM_ADDRESS_TWO,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    ETHEREUM_PRIVATE_KEY_TWO_PATH,
+    ETHEREUM_TESTNET_CONFIG,
+)
+from aea_ledger_ethereum.test_tools.fixture_helpers import (  # noqa  # pylint: disable=unsed-import
+    ganache,
+)
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_TESTNET_CONFIG
 
 from aea.configurations.loader import (
     ComponentType,
@@ -38,28 +51,22 @@ from aea.configurations.loader import (
 from aea.contracts.base import Contract, contract_registry
 from aea.test_tools.test_contract import BaseContractTestCase
 
-from tests.conftest import (
-    ETHEREUM_ADDRESS_ONE,
-    ETHEREUM_ADDRESS_TWO,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    ETHEREUM_PRIVATE_KEY_TWO_PATH,
-    ETHEREUM_TESTNET_CONFIG,
-    FETCHAI_TESTNET_CONFIG,
-    MAX_FLAKY_RERUNS,
-    ROOT_DIR,
-    UseGanache,
-)
+
+PACKAGE_DIR = Path(__file__).parent.parent
+MAX_FLAKY_RERUNS = 3
 
 
 @pytest.mark.ledger
-class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
+@pytest.mark.integration
+@pytest.mark.usefixtures("ganache")
+class TestERC1155ContractEthereum(BaseContractTestCase):
     """Test the ERC1155 contract on Ethereum."""
 
     ledger_identifier = EthereumCrypto.identifier
-    path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+    path_to_contract = PACKAGE_DIR
 
     @classmethod
-    def setup(cls):
+    def setup(cls) -> None:
         """Setup."""
         super().setup(
             ledger_config=ETHEREUM_TESTNET_CONFIG,
@@ -98,7 +105,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
 
         return contract_address
 
-    def test_generate_token_ids(self):
+    def test_generate_token_ids(self) -> None:
         """Test the generate_token_ids method of the ERC1155 contract."""
         # setup
         nft_token_type = 1
@@ -114,7 +121,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         # after
         assert actual_toke_ids == expected_toke_ids
 
-    def test_generate_id(self):
+    def test_generate_id(self) -> None:
         """Test the _generate_id method of the ERC1155 contract."""
         # setup
         ft_token_type = 2
@@ -127,7 +134,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         # after
         assert actual_toke_id == expected_toke_id
 
-    def test_get_create_batch_transaction(self):
+    def test_get_create_batch_transaction(self) -> None:
         """Test the get_create_batch_transaction method of the ERC1155 contract."""
         # operation
         tx = self.contract.get_create_batch_transaction(
@@ -147,7 +154,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
-    def test_get_create_single_transaction(self):
+    def test_get_create_single_transaction(self) -> None:
         """Test the get_create_single_transaction method of the ERC1155 contract."""
         # operation
         tx = self.contract.get_create_single_transaction(
@@ -167,7 +174,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
-    def test_get_mint_batch_transaction(self):
+    def test_get_mint_batch_transaction(self) -> None:
         """Test the get_mint_batch_transaction method of the ERC1155 contract."""
         # operation
         tx = self.contract.get_mint_batch_transaction(
@@ -189,7 +196,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
-    def test_validate_mint_quantities(self):
+    def test_validate_mint_quantities(self) -> None:
         """Test the validate_mint_quantities method of the ERC1155 contract."""
         # Valid NFTs
         self.contract.validate_mint_quantities(
@@ -233,7 +240,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
                 mint_quantities=[mint_quantity],
             )
 
-    def test_decode_id(self):
+    def test_decode_id(self) -> None:
         """Test the decode_id method of the ERC1155 contract."""
         # FT
         expected_token_type = 2
@@ -247,7 +254,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         actual_token_type = self.contract.decode_id(token_id)
         assert actual_token_type == expected_token_type
 
-    def test_get_mint_single_transaction(self):
+    def test_get_mint_single_transaction(self) -> None:
         """Test the get_mint_single_transaction method of the ERC1155 contract."""
         # operation
         tx = self.contract.get_mint_single_transaction(
@@ -269,7 +276,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             tx, self.ledger_api, [self.deployer_crypto]
         )
 
-    def test_get_balance(self):
+    def test_get_balance(self) -> None:
         """Test the get_balance method of the ERC1155 contract."""
         # operation
         result = self.contract.get_balance(
@@ -283,7 +290,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert "balance" in result
         assert result["balance"][self.token_id_b] == 0
 
-    def test_get_balances(self):
+    def test_get_balances(self) -> None:
         """Test the get_balances method of the ERC1155 contract."""
         # operation
         result = self.contract.get_balances(
@@ -297,7 +304,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert "balances" in result
         assert all(result["balances"][token_id] == 0 for token_id in self.token_ids_a)
 
-    def test_get_hash_single(self):
+    def test_get_hash_single(self) -> None:
         """Test the get_hash_single method of the ERC1155 contract."""
         # operation
         result = self.contract.get_hash_single(
@@ -315,7 +322,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         # after
         assert isinstance(result, bytes)
 
-    def test_get_hash_batch(self):
+    def test_get_hash_batch(self) -> None:
         """Test the get_hash_batch method of the ERC1155 contract."""
         # operation
         result = self.contract.get_hash_batch(
@@ -333,7 +340,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         # after
         assert isinstance(result, bytes)
 
-    def test_generate_trade_nonce(self):
+    def test_generate_trade_nonce(self) -> None:
         """Test the generate_trade_nonce method of the ERC1155 contract."""
         # operation
         result = self.contract.generate_trade_nonce(
@@ -347,7 +354,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         assert isinstance(result["trade_nonce"], int)
 
     @pytest.mark.integration
-    def test_helper_methods_and_get_transactions(self):
+    def test_helper_methods_and_get_transactions(self) -> None:
         """Test helper methods and get transactions."""
         expected_a = [
             340282366920938463463374607431768211456,
@@ -446,7 +453,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ), "Error, found: {}".format(tx)
 
     @pytest.mark.integration
-    def test_get_single_atomic_swap(self):
+    def test_get_single_atomic_swap(self) -> None:
         """Test get single atomic swap."""
         from_address = ETHEREUM_ADDRESS_ONE
         to_address = ETHEREUM_ADDRESS_TWO
@@ -499,7 +506,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ), "Error, found: {}".format(tx)
 
     @pytest.mark.integration
-    def test_get_batch_atomic_swap(self):
+    def test_get_batch_atomic_swap(self) -> None:
         """Test get batch atomic swap."""
         from_address = ETHEREUM_ADDRESS_ONE
         to_address = ETHEREUM_ADDRESS_TWO
@@ -552,7 +559,7 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         ), "Error, found: {}".format(tx)
 
     @pytest.mark.integration
-    def test_full(self):
+    def test_full(self) -> None:
         """Setup."""
         # Test tokens IDs
         token_ids = self.contract.generate_token_ids(token_type=2, nb_tokens=10)
@@ -645,11 +652,11 @@ class TestCosmWasmContract(BaseContractTestCase):
     """Test the cosmwasm contract."""
 
     ledger_identifier = FetchAICrypto.identifier
-    path_to_contract = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+    path_to_contract = PACKAGE_DIR
     fund_from_faucet = True
 
     @classmethod
-    def setup(cls):
+    def setup(cls) -> None:
         """Setup."""
         # Test tokens IDs
         super().setup(ledger_config=FETCHAI_TESTNET_CONFIG)
@@ -710,7 +717,7 @@ class TestCosmWasmContract(BaseContractTestCase):
     @pytest.mark.integration
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_create_and_mint_and_balances(self):
+    def test_create_and_mint_and_balances(self) -> None:
         """Test cosmwasm contract create, mint and balances functionalities."""
         # Create single token
         tx = self.contract.get_create_single_transaction(
@@ -787,7 +794,7 @@ class TestCosmWasmContract(BaseContractTestCase):
     @pytest.mark.integration
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_cosmwasm_single_atomic_swap(self):
+    def test_cosmwasm_single_atomic_swap(self) -> None:
         """Test single atomic swap."""
         # Create batch of tokens
         tx = self.contract.get_create_batch_transaction(
@@ -911,7 +918,7 @@ class TestCosmWasmContract(BaseContractTestCase):
     @pytest.mark.integration
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_cosmwasm_batch_atomic_swap(self):
+    def test_cosmwasm_batch_atomic_swap(self) -> None:
         """Test batch atomic swap."""
 
         # Create batch of tokens
@@ -1013,13 +1020,11 @@ class TestContractCommon:
     """Other tests for the contract."""
 
     @classmethod
-    def setup(cls):
+    def setup(cls) -> None:
         """Setup."""
 
         # Register smart contract used for testing
-        cls.path_to_contract = Path(
-            ROOT_DIR, "packages", "fetchai", "contracts", "erc1155"
-        )
+        cls.path_to_contract = PACKAGE_DIR
 
         # register contract
         configuration = cast(
@@ -1044,7 +1049,7 @@ class TestContractCommon:
         cls.ledger_api.configure_mock(**attrs)
 
     @pytest.mark.ledger
-    def test_get_create_batch_transaction_wrong_identifier(self):
+    def test_get_create_batch_transaction_wrong_identifier(self) -> None:
         """Test if get_create_batch_transaction with wrong api identifier fails."""
 
         # Test if function is not implemented for unknown ledger
@@ -1057,7 +1062,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_create_single_transaction_wrong_identifier(self):
+    def test_get_create_single_transaction_wrong_identifier(self) -> None:
         """Test if get_create_single_transaction with wrong api identifier fails."""
 
         # Test if function is not implemented for unknown ledger
@@ -1070,7 +1075,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_mint_batch_transaction_wrong_identifier(self):
+    def test_get_mint_batch_transaction_wrong_identifier(self) -> None:
         """Test if get_mint_batch_transaction with wrong api identifier fails."""
 
         # Test if function is not implemented for unknown ledger
@@ -1085,7 +1090,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_mint_single_transaction_wrong_identifier(self):
+    def test_get_mint_single_transaction_wrong_identifier(self) -> None:
         """Test if get_mint_single_transaction with wrong api identifier fails."""
 
         # Test if function is not implemented for unknown ledger
@@ -1100,7 +1105,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_balance_wrong_identifier(self):
+    def test_get_balance_wrong_identifier(self) -> None:
         """Test if get_balance with wrong api identifier fails."""
 
         # Test if function is not implemented for unknown ledger
@@ -1113,7 +1118,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_balance_wrong_query_res(self):
+    def test_get_balance_wrong_query_res(self) -> None:
         """Test if get_balance with wrong api identifier fails."""
 
         # Create mock fetchai ledger that returns None on execute_contract_query
@@ -1130,7 +1135,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_balances_wrong_query_res(self):
+    def test_get_balances_wrong_query_res(self) -> None:
         """Test if get_balances with wrong api identifier fails."""
 
         # Create mock fetchai ledger that returns None on execute_contract_query
@@ -1147,7 +1152,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_hash_batch_not_same(self):
+    def test_get_hash_batch_not_same(self) -> None:
         """Test if get_hash_batch returns ValueError when on-chain hash is not same as computed hash."""
 
         self.ledger_api.identifier = "ethereum"
@@ -1168,7 +1173,7 @@ class TestContractCommon:
                 )
 
     @pytest.mark.ledger
-    def test_generate_trade_nonce_if_exist(self):
+    def test_generate_trade_nonce_if_exist(self) -> None:
         """Test if generate_trade_nonce retries when nonce already exist."""
 
         # Etherem ledger api mock
@@ -1202,7 +1207,7 @@ class TestContractCommon:
         assert is_nonce_used_mock.call.call_count == 2
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_eth_no_signature(self):
+    def test_get_atomic_swap_single_transaction_eth_no_signature(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError if signature not present on Ethereum case."""
 
         self.ledger_api.identifier = "ethereum"
@@ -1222,7 +1227,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_eth_pubkeys(self):
+    def test_get_atomic_swap_single_transaction_eth_pubkeys(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError if pubkeys are present on Ethereum case."""
 
         self.ledger_api.identifier = "ethereum"
@@ -1245,7 +1250,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_cosmos_signature(self):
+    def test_get_atomic_swap_single_transaction_cosmos_signature(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1268,7 +1273,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_valid(self):
+    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_valid(self) -> None:
         """Test if get_atomic_swap_single_transaction allows one pubkey in case of only one direction of transfers."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1289,7 +1294,7 @@ class TestContractCommon:
         assert tx is not None
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_invalid(self):
+    def test_get_atomic_swap_single_transaction_cosmos_one_pubkey_invalid(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError with missing from_pubkey."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1310,7 +1315,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_cosmos_to_pubkey_missing(self):
+    def test_get_atomic_swap_single_transaction_cosmos_to_pubkey_missing(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError with missing to_pubkey."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1331,7 +1336,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_eth_pubkeys(self):
+    def test_get_atomic_swap_batch_transaction_eth_pubkeys(self) -> None:
         """Test if get_atomic_swap_batch_transaction returns RuntimeError if pubkeys are present on Ethereum case."""
 
         self.ledger_api.identifier = "ethereum"
@@ -1353,7 +1358,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_cosmos_signature(self):
+    def test_get_atomic_swap_batch_transaction_cosmos_signature(self) -> None:
         """Test if get_atomic_swap_batch_transaction returns RuntimeError if signature is present on Cosmos/Fetch case."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1376,7 +1381,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_valid(self):
+    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_valid(self) -> None:
         """Test if get_atomic_swap_batch_transaction allows one pubkey in case of only one direction of transfers."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1397,7 +1402,7 @@ class TestContractCommon:
         assert tx is not None
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_invalid(self):
+    def test_get_atomic_swap_batch_transaction_cosmos_one_pubkey_invalid(self) -> None:
         """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing from_pubkey."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1418,7 +1423,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_ba_transaction_eth_no_signature(self):
+    def test_get_atomic_swap_ba_transaction_eth_no_signature(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError if signature not present on Ethereum case."""
 
         self.ledger_api.identifier = "ethereum"
@@ -1438,7 +1443,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_cosmos_to_pubkey_missing(self):
+    def test_get_atomic_swap_batch_transaction_cosmos_to_pubkey_missing(self) -> None:
         """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing to_pubkey."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1503,7 +1508,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_cosmos_from_pubkey_only(self):
+    def test_get_atomic_swap_batch_transaction_cosmos_from_pubkey_only(self) -> None:
         """Test if get_atomic_swap_batch_transaction returns Tx in case with only from_pubkey."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1524,7 +1529,7 @@ class TestContractCommon:
         assert res is not None
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_amounts_missing(self):
+    def test_get_atomic_swap_single_transaction_amounts_missing(self) -> None:
         """Test if get_atomic_swap_single_transaction returns RuntimeError with missing amounts."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1545,7 +1550,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_batch_transaction_amounts_missing(self):
+    def test_get_atomic_swap_batch_transaction_amounts_missing(self) -> None:
         """Test if get_atomic_swap_batch_transaction returns RuntimeError with missing amounts."""
 
         self.ledger_api.identifier = "fetchai"
@@ -1610,7 +1615,7 @@ class TestContractCommon:
             )
 
     @pytest.mark.ledger
-    def test_get_atomic_swap_single_transaction_cosmos_from_pubkey_only(self):
+    def test_get_atomic_swap_single_transaction_cosmos_from_pubkey_only(self) -> None:
         """Test if get_atomic_swap_single_transaction returns Tx in case with only from_pubkey."""
 
         self.ledger_api.identifier = "fetchai"

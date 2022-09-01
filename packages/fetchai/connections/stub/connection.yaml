@@ -10,9 +10,14 @@ fingerprint:
   README.md: bafybeiht3qtxpf2meyrveoghidjtdsz433wguz4wlxhzsiixpafkrjv7yy
   __init__.py: bafybeihw7l7zie5dxycptwwiynqgnqfesnhr3epali5e4tmzhy54lxjnbq
   connection.py: bafybeicjrtpc2pwf2fwvqwr74tkzztjee2rmd7zkkzs2ctdgua2n5omgl4
-fingerprint_ignore_patterns: []
+  tests/__init__.py: bafybeiadaetciszcob7cchexib74l7vecczthsx2pzaan7sp7csrkgjxce
+  tests/test_stub.py: bafybeihu2smaadptjzzbrkrv4bae2l4bmd6ozidetlwrmnas2az7tgbqy4
+fingerprint_ignore_patterns:
+- ./input_file
 connections: []
-protocols: []
+protocols:
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/oef_search:1.0.0:bafybeig5crswgwck6be5iutp6b5rscjtbc233w4m6at4vy5cgs2l6roipq
 class_name: StubConnection
 config:
   input_file: ./input_file

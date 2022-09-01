@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_ADDRESS_ONE
 
 from aea.common import Address
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
@@ -44,8 +45,6 @@ from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
-
-from tests.conftest import ETHEREUM_ADDRESS_ONE
 
 
 SOME_SKILL_ID = "some/skill:0.1.0"

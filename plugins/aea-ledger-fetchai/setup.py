@@ -36,6 +36,12 @@ setup(
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
     packages=find_packages(include=["aea_ledger_fetchai*"]),
+    package_data={
+        "aea_ledger_fetchai": [
+            "py.typed",
+            "test_tools/data/*",
+        ]
+    },
     install_requires=[
         "open-aea>=1.0.0, <2.0.0",
         "ecdsa>=0.15,<0.17.0",

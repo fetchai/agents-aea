@@ -18,10 +18,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler class of the echo skill."""
+# pylint: skip-file
 
-import os
 import inspect
 import logging
+import os
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
@@ -35,6 +36,7 @@ from packages.fetchai.skills.echo.handlers import EchoHandler
 
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+
 
 class TestEchoHandler(BaseSkillTestCase):
     """Test EchoHandler of echo."""

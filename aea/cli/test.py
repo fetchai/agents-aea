@@ -106,24 +106,17 @@ def skill(ctx: Context, skill_public_id: PublicId, args: Sequence[str]) -> None:
 @click.argument(
     "path", type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True
 )
-@click.option(
-    "--registry-path",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    required=True,
-)
 @pytest_args
 @pass_ctx
 def by_path(
     ctx: Context,
     path: str,
-    registry_path: str,
     args: Sequence[str],
 ) -> None:
     """Executes a test suite of a package specified by a path."""
     click.echo(f"Executing tests of package at {path}'...")
     full_path = Path(ctx.cwd) / Path(path)
-    registry_path = Path(registry_path)
-    test_package_by_path(full_path, args, packages_dir=registry_path)
+    test_package_by_path(full_path, args, packages_dir=Path(ctx.registry_path))
 
 
 def test_item(
@@ -184,6 +177,7 @@ def test_package_by_path(
         "one of either aea_project_path or packages_dir must be specified",
     )
     root_packages = aea_project_path if aea_project_path else packages_dir
+
     package_path_finder = (
         find_component_directory_from_component_id
         if aea_project_path
@@ -201,6 +195,8 @@ def test_package_by_path(
     )
 
     if package_type != PackageType.AGENT:
+        if root_packages is None:
+            raise ValueError("Packages dir not set!")
         component_type = ComponentType(package_type.value)
         configuration = load_component_configuration(component_type, package_dir)
         configuration.directory = package_dir
@@ -240,7 +236,7 @@ def load_aea_packages_recursively(
     """
     already_loaded = already_loaded if already_loaded else set()
     for dependency_id in config.package_dependencies:
-        # TODO: load packages in topological order? Should not matter as at the moment we are not
+        # TODO: load packages in topological order? Should not matter as at the moment we are not  # pylint: disable=fixme
         #       actually running the modules, just populating sys.modules
         dependency_path = package_path_finder(root_packages, dependency_id)
         dependency_configuration = load_component_configuration(

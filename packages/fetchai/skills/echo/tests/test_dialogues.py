@@ -18,9 +18,10 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the echo skill."""
+# pylint: skip-file
 
-import os
 import inspect
+import os
 from pathlib import Path
 from typing import cast
 
@@ -28,6 +29,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo.dialogues import DefaultDialogue, DefaultDialogues
+
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 

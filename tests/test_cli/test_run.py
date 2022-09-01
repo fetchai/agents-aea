@@ -32,6 +32,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 from click import ClickException
 from pexpect.exceptions import EOF  # type: ignore
 
@@ -54,14 +55,7 @@ from packages.fetchai.connections.stub.connection import (
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import (
-    AUTHOR,
-    CLI_LOG_OPTION,
-    CliRunner,
-    FETCHAI_PRIVATE_KEY_FILE,
-    MAX_FLAKY_RERUNS,
-    ROOT_DIR,
-)
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

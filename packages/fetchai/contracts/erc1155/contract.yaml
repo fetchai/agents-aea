@@ -16,8 +16,8 @@ fingerprint:
   contracts/erc1155.vy: bafybeieoxkgqprmmgvl2xdqtch4payvxzpw3c76thmtrl7vbmc6zxzl2a4
   migrations/1_initial_migration.js: bafybeigzg7dadlq7sepncquzoo5hgs7q2pwvbhzilolgkjkr3jacb2owvy
   migrations/2_deploy_contracts.js: bafybeihnzburnurq4gvp4rj36b57uzrlgif5y73ggyu3rfc3iot4e5zppy
-  tests/__init__.py: bafybeidgqgy32gwubf3eu7ijc7ddq4bm675oxyfqevm5j2ew2zcu4p6tm4
-  tests/test_contract.py: bafybeienxes6xv3lqkfrrzirrrfxxvop2yk5ab3iy2zqnpkw47wzlmny4q
+  tests/__init__.py: bafybeig4dvxi35qewu667l3hktdygp33p5r6hzsz4abqzkgggptl3d4vje
+  tests/test_contract.py: bafybeifpwwwzr6tomoubi7f5dvfzbwdnn4jught26uda2i4mexqkpqplwm
 fingerprint_ignore_patterns: []
 class_name: ERC1155Contract
 contract_interface_paths:
