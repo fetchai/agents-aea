@@ -37,7 +37,6 @@ def get_all_extras() -> Dict:
         "jsonschema>=3.0.0,<4.0.0",
         "packaging>=20.3,<22.0",
         "pytest>=7.0.0,<7.2.0",
-        "pytest-cov==3.0.0",
         "semver>=2.9.1,<3.0.0",
     ]
 

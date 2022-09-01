@@ -168,7 +168,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeidr6ucplhpd27vof5qpmo7iekl277i3tprts22iyeprbmjlsuuaga --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeieosuwomgx5mviv2jposmwf7xaau33mjrllgvasnipyvsw2eok3yu --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
