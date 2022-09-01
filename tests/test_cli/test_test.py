@@ -24,7 +24,7 @@ import sys
 from copy import copy
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Sequence, Type
+from typing import Any, Generator, Sequence, Type
 from unittest import mock
 
 import click.testing
@@ -85,7 +85,7 @@ def mock_pytest_main() -> Any:
 
 
 @pytest.fixture(scope="function")
-def mock_sys_modules() -> None:
+def mock_sys_modules() -> Generator:
     """Store previous content of sys.modules and restore it after test execution."""
     old_sys_modules = copy(sys.modules)
     yield

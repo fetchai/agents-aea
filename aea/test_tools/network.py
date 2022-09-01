@@ -43,7 +43,7 @@ def get_host() -> str:
         # doesn't even have to be reachable
         s.connect(("10.255.255.255", 1))
         IP = s.getsockname()[0]
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         IP = LOCALHOST.hostname
     finally:
         s.close()

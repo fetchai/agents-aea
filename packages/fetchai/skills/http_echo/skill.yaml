@@ -13,13 +13,13 @@ fingerprint:
   handlers.py: bafybeidxvskxngwlhdnxs2xwr54vch2wjks2l5gqtgr5t5bc2izpjfr3ti
   tests/__init__.py: bafybeigqjv34vhfwcxmri75l5opezgu66jsyjj7metj7lgk2jbx4rqztyy
   tests/test_dialogues.py: bafybeib4xlhm5wttmtysti4dl7alfzbu44yepckdvzlaymhqvbh33mphc4
-  tests/test_handlers.py: bafybeih6js2bmvbv3pfnfpsf5bzayzje33gveti43nfsgdzqil46qazfkq
+  tests/test_handlers.py: bafybeiczxf7u22cqzghdpw3uttl3h5g2n3hp4pbv5oien6kxhduoqnm3bi
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/http:1.0.0:bafybeihcrvzou3ycxtj6aybd5mcnp3qwowxirh4srwmohfmnddwmgzymky
+- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
+- fetchai/http:1.0.0:bafybeidqqu3vjnf76slzz434ieo7qzkkilsjpstzxh7fcvn6ffvpkffgqq
 skills: []
 behaviours: {}
 handlers:

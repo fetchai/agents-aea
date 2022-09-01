@@ -236,7 +236,7 @@ def load_aea_packages_recursively(
     """
     already_loaded = already_loaded if already_loaded else set()
     for dependency_id in config.package_dependencies:
-        # TODO: load packages in topological order? Should not matter as at the moment we are not
+        # TODO: load packages in topological order? Should not matter as at the moment we are not  # pylint: disable=fixme
         #       actually running the modules, just populating sys.modules
         dependency_path = package_path_finder(root_packages, dependency_id)
         dependency_configuration = load_component_configuration(

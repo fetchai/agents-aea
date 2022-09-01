@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the HTTP Server connection module."""
-# type: ignore # noqa: E800
 # pylint: skip-file
 
 import asyncio
@@ -64,7 +63,8 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: self address
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -95,7 +95,7 @@ class TestHTTPServer:
 
         :param method: HTTP method: GET, POST etc
         :param path: path to request on server. full url constructed automatically
-
+        :param kwargs: keyword arguments
         :return: http response
         """
         try:
@@ -504,7 +504,7 @@ class TestHTTPSServer:
 
         :param method: HTTP method: GET, POST etc
         :param path: path to request on server. full url constructed automatically
-
+        :param kwargs: keyword arguments
         :return: http response
         """
         try:

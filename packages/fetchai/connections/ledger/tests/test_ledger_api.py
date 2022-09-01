@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ledger API connection module."""
-# type: ignore # noqa: E800
 # pylint: skip-file
 
 import asyncio
@@ -115,7 +114,8 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: self address
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

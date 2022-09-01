@@ -22,6 +22,7 @@ import time
 from unittest.mock import call, patch
 
 import pytest
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_PATH
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -32,7 +33,6 @@ from aea.runner import AEARunner
 from aea.skills.base import Skill, SkillContext
 
 from tests.common.utils import make_behaviour_cls_from_funcion, wait_for_condition
-from tests.conftest import FETCHAI_PRIVATE_KEY_PATH
 
 
 class TestThreadedRunner:

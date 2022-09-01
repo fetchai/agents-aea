@@ -25,16 +25,14 @@ from unittest import TestCase
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_PATH
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_PATH
 
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
 
-from tests.conftest import (
-    COSMOS_PRIVATE_KEY_PATH,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI_PRIVATE_KEY_PATH,
-)
+from tests.conftest import COSMOS_PRIVATE_KEY_PATH
 
 
 def test_wallet_initialisation_error():

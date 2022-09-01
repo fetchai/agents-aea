@@ -64,7 +64,7 @@ class DockerImage(ABC):
         if result is None:
             pytest.skip("Docker not in the OS Path; skipping the test")
 
-        proc_result = subprocess.run(  # nosec
+        proc_result = subprocess.run(  # pylint: disable=subprocess-run-check # nosec
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         if proc_result.returncode != 0:
@@ -78,6 +78,7 @@ class DockerImage(ABC):
         )
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
+            return
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(
@@ -91,7 +92,7 @@ class DockerImage(ABC):
 
     def stop_if_already_running(self) -> None:
         """Stop the running images with the same tag, if any."""
-        import docker
+        import docker  # pylint: disable=import-outside-toplevel,import-error
 
         client = docker.from_env()
         for container in client.containers.list():

@@ -59,7 +59,7 @@ def ctx_mock_Popen() -> Generator:
 
     Act as context manager.
 
-    :return: mock object.
+    :yield: mock generator.
     """
     return_value = MagicMock()
     return_value.communicate.return_value = (MagicMock(), MagicMock())

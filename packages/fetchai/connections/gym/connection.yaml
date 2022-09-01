@@ -10,11 +10,11 @@ fingerprint:
   __init__.py: bafybeiacpcxqwod5ppgwckp36jj3ax2ymzkrv4tlalzcatxrx4tblbvfvq
   connection.py: bafybeiacf4utttdtrp2zb5wjrksatswb7dtlgnzafxiofuvzxot53oqdd4
   tests/__init__.py: bafybeielwxjlvbzufqr3wgv4jrzbi6kquzelxbczla4cvpoiuz2no5eqp4
-  tests/test_gym.py: bafybeihbednroqhfubwok367pbttg6wo6o22jpwocdmfsvo7lsf363ke2u
+  tests/test_gym.py: bafybeigyry6mxho2kww5ih5hat5e2ppfqmkgqky4xfdsmu2sxeowarg6si
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/gym:1.0.0:bafybeid3peikgfjhkd3yj62ldakrkt5v5jhcbw3fdgfwzmaomo3jzqhw6a
+- fetchai/gym:1.0.0:bafybeifft3rinvv5ai2snys3rmwyx3swfmgdvl26e7mq3olpz4cjjb3hoi
 class_name: GymConnection
 config:
   env: ''

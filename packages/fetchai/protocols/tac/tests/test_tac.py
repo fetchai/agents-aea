@@ -475,8 +475,7 @@ class AgentDialogue(TacDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         TacDialogue.__init__(
             self,
@@ -494,7 +493,7 @@ class AgentDialogues(TacDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogues
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -532,8 +531,7 @@ class ControllerDialogue(TacDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         TacDialogue.__init__(
             self,
@@ -551,7 +549,7 @@ class ControllerDialogues(TacDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogues is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

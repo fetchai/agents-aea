@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client connection and channel."""
-# type: ignore # noqa: E800
 # pylint: skip-file
 
 import asyncio
@@ -71,7 +70,8 @@ class HttpDialogues(BaseHttpDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: self address
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

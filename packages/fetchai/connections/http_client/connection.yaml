@@ -11,11 +11,11 @@ fingerprint:
   __init__.py: bafybeiateb3vma46yihntj5gbai3eqcy3fkx55lkrwye6tbr4cuo5xktdm
   connection.py: bafybeihlwvleotrr5cgzokgcia7wek36c7pcflbuaminiqgvdrt2iuihoe
   tests/__init__.py: bafybeic5mqiqjs46dbrhwepcsgm6wkq5az5lzzi2gtavcyskn4cbe2yuvi
-  tests/test_http_client.py: bafybeiclx3iqqx3fo54puqaen22avlpofwzprqeebbza2pgjpvddexvppm
+  tests/test_http_client.py: bafybeid5zspv56oacfrxqlint5jkkendg7az2t7ohxzfien2yqy2rjif6i
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeihcrvzou3ycxtj6aybd5mcnp3qwowxirh4srwmohfmnddwmgzymky
+- fetchai/http:1.0.0:bafybeidqqu3vjnf76slzz434ieo7qzkkilsjpstzxh7fcvn6ffvpkffgqq
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1

@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the local OEF node implementation."""
-# type: ignore # noqa: E800
 # pylint: skip-file
 
 import asyncio

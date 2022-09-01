@@ -61,6 +61,7 @@ class FetchLedgerDockerImage(DockerImage):
         :param client: the Docker client.
         :param addr: the address.
         :param port: the port.
+        :param tag: the tag
         :param config: optional configuration to command line.
         """
         super().__init__(client)

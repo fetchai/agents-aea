@@ -762,8 +762,7 @@ class BuyerDialogue(FipaDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         FipaDialogue.__init__(
             self,
@@ -781,7 +780,7 @@ class BuyerDialogues(FipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogues is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
@@ -821,8 +820,7 @@ class SellerDialogue(FipaDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         FipaDialogue.__init__(
             self,
@@ -841,7 +839,7 @@ class SellerDialogues(FipaDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity for whom this dialogues is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument

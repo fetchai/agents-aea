@@ -18,7 +18,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
-# type: ignore # noqa: E800
 # pylint: skip-file
 
 import unittest.mock
@@ -68,7 +67,8 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: self address
+        :param kwargs: keyword arguments
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
