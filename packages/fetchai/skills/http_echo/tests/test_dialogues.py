@@ -33,13 +33,14 @@ from packages.fetchai.skills.http_echo.dialogues import (
     HttpDialogues,
 )
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_DIR = Path(__file__).parent.parent
 
 
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue class of http_echo."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "http_echo")
+    path_to_skill = PACKAGE_DIR
 
     @classmethod
     def setup(cls):

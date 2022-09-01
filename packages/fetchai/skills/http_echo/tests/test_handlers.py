@@ -33,13 +33,14 @@ from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.http_echo.dialogues import HttpDialogues
 from packages.fetchai.skills.http_echo.handlers import HttpHandler
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_DIR = Path(__file__).parent.parent
 
 
 class TestHttpHandler(BaseSkillTestCase):
     """Test HttpHandler of http_echo."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "http_echo")
+    path_to_skill = PACKAGE_DIR
 
     @classmethod
     def setup(cls):
