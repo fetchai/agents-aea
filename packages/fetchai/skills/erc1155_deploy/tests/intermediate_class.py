@@ -68,13 +68,14 @@ from packages.fetchai.skills.erc1155_deploy.handlers import (
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 from packages.open_aea.protocols.signing.message import SigningMessage
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class ERC1155DeployTestCase(BaseSkillTestCase):
     """Sets the erc1155_deploy class up for testing."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "erc1155_deploy")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):

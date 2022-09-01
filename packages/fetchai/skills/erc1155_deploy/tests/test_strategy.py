@@ -36,8 +36,7 @@ from packages.fetchai.skills.erc1155_deploy.strategy import (
     SIMPLE_SERVICE_MODEL,
     Strategy,
 )
-
-from tests.test_packages.test_skills.test_erc1155_deploy.intermediate_class import (
+from packages.fetchai.skills.erc1155_deploy.tests.intermediate_class import (
     ERC1155DeployTestCase,
 )
 

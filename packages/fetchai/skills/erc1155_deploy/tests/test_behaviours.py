@@ -28,8 +28,7 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_deploy.behaviours import LEDGER_API_ADDRESS
 from packages.fetchai.skills.erc1155_deploy.dialogues import ContractApiDialogue
-
-from tests.test_packages.test_skills.test_erc1155_deploy.intermediate_class import (
+from packages.fetchai.skills.erc1155_deploy.tests.intermediate_class import (
     ERC1155DeployTestCase,
 )
 

@@ -41,11 +41,10 @@ from packages.fetchai.skills.erc1155_deploy.dialogues import (
     SigningDialogue,
 )
 from packages.fetchai.skills.erc1155_deploy.handlers import LEDGER_API_ADDRESS
-from packages.open_aea.protocols.signing.message import SigningMessage
-
-from tests.test_packages.test_skills.test_erc1155_deploy.intermediate_class import (
+from packages.fetchai.skills.erc1155_deploy.tests.intermediate_class import (
     ERC1155DeployTestCase,
 )
+from packages.open_aea.protocols.signing.message import SigningMessage
 
 
 class TestFipaHandler(ERC1155DeployTestCase):
