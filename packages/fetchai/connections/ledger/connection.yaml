@@ -18,8 +18,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:1.0.0:bafybeihoyoowp5uycaqea2h67hckoclmazlnojcy46eu3hv4apznyaqym4
-- fetchai/ledger_api:1.0.0:bafybeihn3eyguhzg6do56yuphnvd5s3c2w6i7hpucoief4gbiktthhof2u
+- fetchai/contract_api:1.0.0:bafybeifdu4tshh3xfqpgbmfuu6zmpqugwpcqizmauhowybssygebafrjey
+- fetchai/ledger_api:1.0.0:bafybeiaqpqwx575lwjat6z2puxliqhl2l2u52mpgwcwhg555dz6fu7qwhe
 class_name: LedgerConnection
 config:
   ledger_apis:

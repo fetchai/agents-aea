@@ -17,7 +17,7 @@ fingerprint_ignore_patterns: []
 connections: []
 protocols:
 - fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
-- fetchai/oef_search:1.0.0:bafybeiejahlo2jekhz4wqppag6wzawq54bpc3wjumlzz4rmuri4aga7cjy
+- fetchai/oef_search:1.0.0:bafybeibx572iczmr26bp3zqzorytl5ixu5dnsvbnxgsadzz6jbo346v354
 class_name: StubConnection
 config:
   input_file: ./input_file

@@ -8,12 +8,12 @@ fingerprint:
   README.md: bafybeiftiqiqpxn7ghrurhepquzqzk3su3x6wanlnolt2uj772fzgz574m
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0:bafybeigqjxaetz7uhnki4xjlhqfwowokdn263exkaaagonub6pzh62x6gy
+- fetchai/stub:0.21.0:bafybeifng4ks6c4itpu5jolij3q72valp3hbhvutnbnu3vvwbggfbbpajy
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeifa7gnanyzkmb76y2xdyiinhygwvcdht7hmirfurx6gp4jx5xeshy
 - fetchai/state_update:1.0.0:bafybeicd7te4idd5rudfwwaj3x4itwxa3lwa55zt7xpjdum62qv24uxz3m
-- open_aea/signing:1.0.0:bafybeighvx4vpsyspffggewidvkfq3lqbse6ap4tdewd6j5bs73ifnuaui
+- open_aea/signing:1.0.0:bafybeigubfrcyxrg3x6iohndfmiynhhx44qj6nhogv5uzkhmjgljnbguyi
 skills:
 - fetchai/echo:0.19.0:bafybeib2a7mbwntuhjanuwslfolfl3usjlvpfesawxnmkvuu4mamlthbre
 default_connection: fetchai/stub:0.21.0

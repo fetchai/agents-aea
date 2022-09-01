@@ -32,7 +32,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-import packages
+from packages.fetchai.protocols.gym import message
 from packages.fetchai.protocols.gym.dialogues import GymDialogue, GymDialogues
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.protocols.gym.message import _default_logger as gym_message_logger
@@ -258,7 +258,7 @@ def test_decoding_unknown_performative():
 
 
 @mock.patch.object(
-    packages.fetchai.protocols.gym.message,
+    message,
     "enforce",
     side_effect=AEAEnforceError("some error"),
 )

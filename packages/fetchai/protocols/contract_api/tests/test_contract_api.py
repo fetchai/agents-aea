@@ -32,7 +32,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-import packages
+from packages.fetchai.protocols.contract_api import message
 from packages.fetchai.protocols.contract_api.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
@@ -400,7 +400,7 @@ def test_decoding_unknown_performative():
 
 
 @mock.patch.object(
-    packages.fetchai.protocols.contract_api.message,
+    message,
     "enforce",
     side_effect=AEAEnforceError("some error"),
 )

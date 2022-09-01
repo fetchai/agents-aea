@@ -20,7 +20,6 @@
 
 """This module contains the tests of the http protocol package."""
 
-import sys
 from typing import Type
 from unittest import mock
 
@@ -33,7 +32,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-import packages
+from packages.fetchai.protocols.http import message
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.http.message import (
@@ -157,7 +156,7 @@ def test_decoding_unknown_performative():
 
 
 @mock.patch.object(
-    packages.fetchai.protocols.http.message,
+    message,
     "enforce",
     side_effect=AEAEnforceError("some error"),
 )
