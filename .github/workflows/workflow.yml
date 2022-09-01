@@ -134,13 +134,13 @@ jobs:
       - name: License Check
         run: tox -e liccheck
       - name: AEA Package Hashes Check
-        run: tox -e hash_check -- --timeout 60.0
+        run: tox -e hash-check
       - name: Check package versions in documentation
-        run: tox -e package_version_checks
+        run: tox -e package-version-checks
       - name: Check package dependencies
-        run: tox -e package_dependencies_checks
+        run: tox -e package-dependencies-checks
       # - name: Check generate protocols
-      #   run: tox -e check_generate_all_protocols
+      #   run: tox -e check-generate-all-protocols
       - name: Generate Documentation
         run: tox -e docs
 
@@ -189,11 +189,11 @@ jobs:
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links and IPFS hashes
-        run: tox -e check_doc_links_hashes
+        run: tox -e check-doc-links-hashes
       - name: Check API Docs updated
-        run: tox -e check_api_docs
+        run: tox -e check-api-docs
       - name: Check spelling
-        run: tox -e spell_check
+        run: tox -e spell-check
 
   scan:
     name: gitleaks
@@ -235,7 +235,7 @@ jobs:
           pip install -e .[all]
       - name: Check aea dependenices and imports
         run: |
-          tox -e dependencies_check
+          tox -e dependencies-check
 
   plugins_install_check:
     continue-on-error: False

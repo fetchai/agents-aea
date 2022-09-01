@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -676,8 +676,6 @@ class TestConfigNestedGetSet:
     def test_set_get_correct_path(self):
         """Test component value updated in agent config not in component config."""
         agent_config = self.load_agent_config()
-        assert not agent_config.component_configurations
-
         config_value = self.get_component_config_value()
         assert config_value == self.INITIAL_VALUE
 

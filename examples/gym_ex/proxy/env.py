@@ -139,7 +139,7 @@ class ProxyEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode="human") -> None:
+    def render(self, mode: str = "human") -> None:
         """
         Render the environment.
 
@@ -177,7 +177,7 @@ class ProxyEnv(gym.Env):
 
         self._disconnect()
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Connect to this proxy environment. It starts a proxy agent that can interact with the framework."""
         if cast(Thread, self._agent_thread).is_alive():
             raise ValueError("Agent already running.")
@@ -186,7 +186,7 @@ class ProxyEnv(gym.Env):
         while not self._agent.runtime.is_running:  # check agent completely running
             time.sleep(0.01)
 
-    def _disconnect(self):
+    def _disconnect(self) -> None:
         """Disconnect from this proxy environment. It stops the proxy agent and kills its thread."""
         self._agent.stop()
         cast(Thread, self._agent_thread).join()

@@ -263,7 +263,7 @@ class CosmosHelper(Helper):
         """
         return {
             i["key"]: i["value"]
-            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])
+            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])  # type: ignore
         }
 
     @classmethod
@@ -1307,7 +1307,7 @@ class _CosmosApi(LedgerApi):
             )
 
         # Get account and signer info for each sender
-        signer_infos: List[SignerInfo] = []
+        signer_infos: List[SignerInfo] = []  # type: ignore
         sign_data: JSONLike = {}
         for from_address, pub_key, sequence, account_number in zip(
             from_addresses, pub_keys, sequences, account_numbers

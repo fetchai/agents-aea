@@ -342,6 +342,25 @@ It does side-effects to the first dictionary.
 - `new_values`: the dictionary of new values to replace.
 - `allow_new_values`: whether or not to allow new values.
 
+<a id="aea.helpers.base.perform_dict_override"></a>
+
+#### perform`_`dict`_`override
+
+```python
+def perform_dict_override(component_id: Any, overrides: Dict,
+                          updated_configuration: Dict,
+                          new_configuration: Dict) -> None
+```
+
+Perform recursive dict override.
+
+**Arguments**:
+
+- `component_id`: Component ID for which the updated will be performed
+- `overrides`: A dictionary containing mapping for Component ID -> List of paths
+- `updated_configuration`: Configuration which needs to be updated
+- `new_configuration`: Configuration from which the method will perform the update
+
 <a id="aea.helpers.base.find_topological_order"></a>
 
 #### find`_`topological`_`order

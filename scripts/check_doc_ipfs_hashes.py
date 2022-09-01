@@ -32,7 +32,7 @@ from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
 
 CLI_REGEX = r"(?P<cli>aea)"
-CMD_REGEX = r"(?P<cmd>.*)"
+CMD_REGEX = r"(?P<cmd>(?!-)\S+(\s--\S+)*)"
 VENDOR_REGEX = rf"(?P<vendor>{SIMPLE_ID_REGEX})"
 PACKAGE_REGEX = rf"(?P<package>{SIMPLE_ID_REGEX})"
 VERSION_REGEX = r"(?P<version>\d+\.\d+\.\d+)"
@@ -193,7 +193,11 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
 
     all_md_files_docs = Path("docs").rglob("*.md")
     all_md_files_tests = Path("tests/test_docs/test_bash_yaml/md_files").rglob("*.md")
-    all_md_files = [*all_md_files_docs] + [*all_md_files_tests]
+    all_md_files = [
+        *all_md_files_docs,
+        *all_md_files_tests,
+        Path("deploy-image/build.sh"),
+    ]
     errors = False
     hash_mismatches = False
     old_to_new_hashes = {}

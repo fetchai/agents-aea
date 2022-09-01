@@ -1,5 +1,19 @@
 # Release History - open AEA
 
+
+## 1.17.0
+
+AEA:
+- Updates the deploy image Dockerfile to use Python 3.10
+- Updates the deploy image Dockerfile to utilize remote registry when fetching components
+- Improves handling for variables with potential none values
+
+Chore:
+- Bumps `mistune` to a secure version
+- Bumps `protobuf` dependencies to address `dependabot` security warning
+- Improves command regex on `scripts/check_doc_ipfs_hashes.py`
+- Updates `tox` definitions and `Makefile` targets to align with the latest changes
+
 ## 1.16.0 (2022-08-18)
 
 AEA:
@@ -10,7 +24,7 @@ AEA:
 - Adds check to make sure all the packages in an AEA project are listed in the `aea-config.yaml`
 - Fixes a bug related to async function call on `TCPSocketProtocol`
 - Updates transaction building to handle gas estimation properly
-- Update `ContractConfig` class to include contract dependencies in the depedency list
+- Update `ContractConfig` class to include contract dependencies in the dependency list
 
 Docs:
 - Adds missing command on the `http-echo-demo.md` doc.

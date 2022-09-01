@@ -1,4 +1,4 @@
-The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.ml" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
+The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://github.com/openai/gym" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
 ### Discussion
 
