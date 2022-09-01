@@ -19,18 +19,20 @@
 
 """Constants."""
 import logging
-import re
-import shutil
-import subprocess
 import time
-from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-import docker
-import pytest
 import requests
-from docker import DockerClient
-from docker.models.containers import Container
+
+from aea.test_tools.docker_image import DockerImage
+
+
+try:
+    from docker import DockerClient
+    from docker.models.containers import Container
+except ImportError:
+    DockerClient = Any
+    Container = Any
 
 from aea.exceptions import enforce
 

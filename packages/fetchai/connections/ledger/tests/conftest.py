@@ -29,7 +29,6 @@ from aea_ledger_ethereum.test_tools.fixture_helpers import (
     DEFAULT_GANACHE_ADDR,
     DEFAULT_GANACHE_CHAIN_ID,
     DEFAULT_GANACHE_PORT,
-    ganache,
 )
 
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -38,7 +37,7 @@ from aea.crypto.ledger_apis import (
     DEFAULT_LEDGER_CONFIGS,
     ETHEREUM_DEFAULT_CURRENCY_DENOM,
 )
-from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
+from aea.crypto.registries import make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.identity.base import Identity
 

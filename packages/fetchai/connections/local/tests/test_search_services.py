@@ -18,6 +18,9 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the search feature of the local OEF node."""
+# type: ignore # noqa: E800
+# pylint: skip-file
+
 import unittest.mock
 from typing import cast
 

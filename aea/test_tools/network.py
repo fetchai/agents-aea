@@ -26,7 +26,7 @@ from urllib.parse import urlparse
 LOCALHOST = urlparse("http://127.0.0.1")
 
 
-def get_unused_tcp_port():
+def get_unused_tcp_port() -> int:
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((LOCALHOST.hostname, 0))
@@ -36,7 +36,7 @@ def get_unused_tcp_port():
     return port
 
 
-def get_host():
+def get_host() -> str:
     """Get the host."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:

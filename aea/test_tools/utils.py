@@ -20,9 +20,15 @@
 """Helpful utilities."""
 
 import time
+from typing import Callable
 
 
-def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout", period=0.001):
+def wait_for_condition(
+    condition_checker: Callable,
+    timeout: int = 2,
+    error_msg: str = "Timeout",
+    period: float = 0.001,
+) -> None:
     """Wait for condition to occur in selected timeout."""
 
     start_time = time.time()

@@ -20,7 +20,6 @@
 
 """This module contains the tests of the messages module."""
 
-import sys
 from typing import Type
 from unittest import mock
 

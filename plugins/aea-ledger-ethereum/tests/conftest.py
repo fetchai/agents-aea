@@ -30,7 +30,6 @@ from functools import wraps
 from pathlib import Path
 from typing import Callable, Generator
 
-import docker
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.ethereum import (
@@ -236,6 +235,8 @@ def ganache(
     max_attempts: int = 10,
 ):
     """Launch the Ganache image."""
+    import docker
+
     client = docker.from_env()
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration

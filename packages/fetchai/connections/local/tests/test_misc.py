@@ -19,6 +19,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the local OEF node implementation."""
+# type: ignore # noqa: E800
+# pylint: skip-file
+
 import asyncio
 import unittest.mock
 
@@ -44,6 +47,7 @@ def make_local_connection(
     restricted_to_protocols=None,
     excluded_protocols=None,
 ) -> Connection:
+    """Create a local connection."""
     configuration = ConnectionConfig(
         restricted_to_protocols=restricted_to_protocols,
         excluded_protocols=excluded_protocols,

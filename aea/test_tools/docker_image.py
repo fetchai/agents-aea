@@ -20,14 +20,12 @@
 
 """This module contains testing utilities."""
 import logging
-import os
 import re
 import shutil
 import subprocess  # nosec
-import tempfile
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Generator
 
 import pytest
 
@@ -38,9 +36,6 @@ try:
 except ImportError:
     DockerClient = Any
     Container = Any
-
-from aea.exceptions import enforce
-from aea.helpers import http_requests as requests
 
 
 logger = logging.getLogger(__name__)
@@ -69,22 +64,24 @@ class DockerImage(ABC):
         if result is None:
             pytest.skip("Docker not in the OS Path; skipping the test")
 
-        result = subprocess.run(  # nosec
+        proc_result = subprocess.run(  # nosec
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
-        if result.returncode != 0:
-            pytest.skip(f"'docker --version' failed with exit code {result.returncode}")
+        if proc_result.returncode != 0:
+            pytest.skip(
+                f"'docker --version' failed with exit code {proc_result.returncode}"
+            )
 
         match = re.search(
             r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
-            result.stdout.decode("utf-8"),
+            proc_result.stdout.decode("utf-8"),
         )
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(
-                f"expected Docker version to be at least {'.'.join(self.MINIMUM_DOCKER_VERSION)}, found {'.'.join(version)}"
+                f"expected Docker version to be at least {'.'.join([str(item) for item in self.MINIMUM_DOCKER_VERSION])}, found {'.'.join([str(item) for item in version])}"
             )
 
     @property
@@ -118,7 +115,9 @@ class DockerImage(ABC):
         return True
 
 
-def launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10):
+def launch_image(
+    image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
+) -> Generator:
     """Launch image."""
 
     image.check_skip()

@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
+# type: ignore # noqa: E800
+# pylint: skip-file
 
 import re
 import time

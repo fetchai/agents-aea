@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea test' command."""
-import os
 import sys
 from pathlib import Path
 from typing import Callable, Optional, Sequence, Set, cast
@@ -40,7 +39,6 @@ from aea.configurations.constants import (
     AEA_TEST_DIRNAME,
     CONNECTION,
     CONTRACT,
-    PACKAGES,
     PROTOCOL,
     SKILL,
 )
@@ -197,6 +195,8 @@ def test_package_by_path(
     )
 
     if package_type != PackageType.AGENT:
+        if root_packages is None:
+            raise ValueError("Packages dir not set!")
         component_type = ComponentType(package_type.value)
         configuration = load_component_configuration(component_type, package_dir)
         configuration.directory = package_dir

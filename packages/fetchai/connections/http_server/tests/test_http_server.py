@@ -18,6 +18,9 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the HTTP Server connection module."""
+# type: ignore # noqa: E800
+# pylint: skip-file
+
 import asyncio
 import logging
 import os

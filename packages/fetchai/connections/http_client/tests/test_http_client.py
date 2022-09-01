@@ -18,6 +18,9 @@
 #
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client connection and channel."""
+# type: ignore # noqa: E800
+# pylint: skip-file
+
 import asyncio
 import logging
 from asyncio import CancelledError

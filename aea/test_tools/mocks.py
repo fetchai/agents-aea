@@ -22,7 +22,7 @@
 import re
 import unittest
 from contextlib import contextmanager
-from typing import Generator
+from typing import Any, Generator
 from unittest.mock import MagicMock
 
 
@@ -33,7 +33,7 @@ class AnyStringWith(str):
     It will use string inclusion as equality comparator.
     """
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return self in other
 
@@ -45,7 +45,7 @@ class RegexComparator(str):
     It will use regex matching as equality comparator.
     """
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         regex = re.compile(str(self), re.MULTILINE | re.DOTALL)
         s = str(other)
