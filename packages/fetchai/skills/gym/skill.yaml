@@ -23,7 +23,7 @@ fingerprint:
   tests/test_task.py: bafybeic4y7wulvlx2eparks3wyftfsx5ya2xsufoaohxfqhxrabm7zt7pi
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/gym:0.19.0:bafybeic64c2sblm64o7l7zqjgmuqrns2t7bpwlo5unycdvrudd65qnyjmm
+- fetchai/gym:0.19.0:bafybeihwcra7defbz4yo2lgwy22a7bzy2f7mojra2q7h5yee6czyzhe3oe
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
