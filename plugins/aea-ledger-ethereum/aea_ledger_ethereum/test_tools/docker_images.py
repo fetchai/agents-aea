@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from aea.exceptions import enforce
 from aea.test_tools.docker_image import DockerImage
 
 
@@ -33,8 +34,6 @@ try:
 except ImportError:
     DockerClient = Any
     Container = Any
-
-from aea.exceptions import enforce
 
 
 logger = logging.getLogger(__name__)
@@ -101,7 +100,7 @@ class GanacheDockerImage(DockerImage):
                 response = requests.post(f"{self._addr}:{self._port}", json=request)
                 enforce(response.status_code == 200, "")
                 return True
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 logger.info(
                     "Attempt %s failed. Retrying in %s seconds...", i, sleep_rate
                 )

@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the http_echo skill."""
+# pylint: skip-file
 
 from pathlib import Path
 from typing import cast

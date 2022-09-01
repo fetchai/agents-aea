@@ -14,23 +14,23 @@ fingerprint:
   handlers.py: bafybeifaqwn3tweuawo65yn3ek6mfun2zu54qtoa2sqyndyvmsk7rkdi7i
   strategy.py: bafybeifudijy3opr6srw5kik3x3rmv6f75dts2pcqtlhjwkkzcafpad4em
   tests/__init__.py: bafybeiagjee55nf2csbyob2o5u3au6r76elv4b6o6qoxnrupinam2brfia
-  tests/intermediate_class.py: bafybeic6rlkj625jfphxumr4iorf4vngr5brtopesj5i2s6juut2zckyuu
-  tests/test_behaviours.py: bafybeifubppsuvjavl4a4rag7oacvinnwmbb2e2xyk2nzz2edmdlkiw32m
-  tests/test_dialogues.py: bafybeihs577t65wjqeas4whesp2ikgqmd7ezj4wa2pdifnjbuknp3nmknq
-  tests/test_handlers.py: bafybeia6cj2jrqbzafhirmqvgrh7pumhabmdvwkoobu6gft6dvlj2eesv4
-  tests/test_strategy.py: bafybeic3zyvuaaqtfpdsgkfqlkyn2ftzlkmxs2cgfw5ub4qylnbguk7rbq
+  tests/intermediate_class.py: bafybeieoglop7efuq2etrenty2rq66lfkct46tvyjktwkqylojx2qr45by
+  tests/test_behaviours.py: bafybeigxo3uasrhzvhwjbqnqpvqjxqh3xagikqduygw2bbf6rjy7nlpxea
+  tests/test_dialogues.py: bafybeigmimeopcrjvgaq3e6ap3w3aqxyjfjacbtay6i2pcvx4nhzdmbtzi
+  tests/test_handlers.py: bafybeifgqbvf56uhyosydl3xoloc244uefo4f5nlelpaxfesrgdlmu24wu
+  tests/test_strategy.py: bafybeicbxie3v6vue3gcnru6vsvggcgy3shxwrldis5gppizbuhooslcqa
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeiahhceeicxpaoejed277kj7dyycca3hg4kbrdqdvoni44ypiqiryu
+- fetchai/ledger:0.19.0:bafybeia5p7pa7z2wwgwbr5z6ag6x6b3zmcjyerdt476ddg2zbm2pz64xjq
 contracts:
-- fetchai/erc1155:0.22.0:bafybeihdibjr5tthaamqlmgjnslshcy4nhjp7oonjfbi6dwzc2oj5qkguy
+- fetchai/erc1155:0.22.0:bafybeidw2vhsh3ifmg5sxnbxhpu4ygosov5jtzjhilsfkdhoanvwiu7dyi
 protocols:
-- fetchai/contract_api:1.0.0:bafybeihoyoowp5uycaqea2h67hckoclmazlnojcy46eu3hv4apznyaqym4
+- fetchai/contract_api:1.0.0:bafybeiepagnggutqgxps5lwdxqfikwac5xz3wmv3ffsbjw5vzfuzvogxk4
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
 - fetchai/fipa:1.0.0:bafybeiftyy2usf3d6cqfitr44fu3facgajt2kse7tmpl7d3aph3qq4gtca
 - fetchai/ledger_api:1.0.0:bafybeihdaudx3xyxvgvvnp47sp53ocukalmtblwl3vpkgh3rcs5qkeboj4
 - fetchai/oef_search:1.0.0:bafybeig5crswgwck6be5iutp6b5rscjtbc233w4m6at4vy5cgs2l6roipq
-- open_aea/signing:1.0.0:bafybeieeg23kk6eqqsp3dlm72lbwub3qbvttgbn3yq7y2ccam7mdvgi7re
+- open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
 skills: []
 behaviours:
   search:

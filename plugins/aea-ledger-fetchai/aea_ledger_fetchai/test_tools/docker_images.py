@@ -130,7 +130,7 @@ class FetchLedgerDockerImage(DockerImage):
                 response = requests.get(url)
                 enforce(response.status_code == 200, "")
                 return True
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 logger.info(
                     "Attempt %s failed. Retrying in %s seconds...", i, sleep_rate
                 )

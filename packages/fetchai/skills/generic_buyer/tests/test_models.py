@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the strategy class of the generic buyer skill."""
+# pylint: skip-file
 
 from pathlib import Path
 

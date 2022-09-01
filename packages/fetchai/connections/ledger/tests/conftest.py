@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """Conftest module."""
+# pylint: skip-file
+
 import logging
 from pathlib import Path
 from typing import cast

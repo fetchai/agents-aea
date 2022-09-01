@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module sets up test environment for gym skill."""
+# pylint: skip-file
 
 from pathlib import Path
 from typing import cast

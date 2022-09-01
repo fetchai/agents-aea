@@ -18,6 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler classes of the gym skill."""
+# pylint: skip-file
+
 import logging
 from multiprocessing.pool import ApplyResult
 from typing import cast

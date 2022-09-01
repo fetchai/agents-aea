@@ -13,20 +13,20 @@ fingerprint:
   handlers.py: bafybeifdytrtxifnxuzcml4plgqttkuknwlavmskc6gyy3xt4vujwwxjg4
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
   tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
-  tests/test_behaviours.py: bafybeicmdo2lscp3eyimvlz6r36oizdkifphzkjxs3d65hii6hcesybb5i
-  tests/test_dialogues.py: bafybeicw26dbb5bsdrhryymxr2lge2n3m6dmkeperkdd6imlxaclrfjpge
-  tests/test_handlers.py: bafybeicssmw63jx3rrni37egleirg2yratrfcbxmxlefhaenrqdzov2roi
-  tests/test_models.py: bafybeia3a3wtmmjxqn4qspbrluaypql262xne3n4t7qdyjsn3bkfsq4cxq
+  tests/test_behaviours.py: bafybeifk7zdbtv6hocho62uhsshs66rqfpkjmyq6sdvcncu7old5jnmpmy
+  tests/test_dialogues.py: bafybeicabpwlrm2ppqllol5fhuyzujsbakwbnwagrtllfv2jve5jotgbqq
+  tests/test_handlers.py: bafybeiez7vth2e45mg6gza4d2tmhwawtt5wqx7fbvjnr2afcavj7mgl324
+  tests/test_models.py: bafybeibc5tdfcizkxi7mannv22m7svbw2q5eytkxw726nswomzt7gucyzm
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeiahhceeicxpaoejed277kj7dyycca3hg4kbrdqdvoni44ypiqiryu
+- fetchai/ledger:0.19.0:bafybeia5p7pa7z2wwgwbr5z6ag6x6b3zmcjyerdt476ddg2zbm2pz64xjq
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
 - fetchai/fipa:1.0.0:bafybeiftyy2usf3d6cqfitr44fu3facgajt2kse7tmpl7d3aph3qq4gtca
 - fetchai/ledger_api:1.0.0:bafybeihdaudx3xyxvgvvnp47sp53ocukalmtblwl3vpkgh3rcs5qkeboj4
 - fetchai/oef_search:1.0.0:bafybeig5crswgwck6be5iutp6b5rscjtbc233w4m6at4vy5cgs2l6roipq
-- open_aea/signing:1.0.0:bafybeieeg23kk6eqqsp3dlm72lbwub3qbvttgbn3yq7y2ccam7mdvgi7re
+- open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
 skills: []
 behaviours:
   search:

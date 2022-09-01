@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the strategy class of the erc1155_client skill."""
+# pylint: skip-file
 
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 

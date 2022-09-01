@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the task class of the gym skill."""
+# pylint: skip-file
 
 from unittest.mock import patch
 

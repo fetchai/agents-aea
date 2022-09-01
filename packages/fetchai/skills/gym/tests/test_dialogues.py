@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the dialogue classes of the ml_train skill."""
+# pylint: skip-file
 
 from aea.test_tools.test_skill import COUNTERPARTY_AGENT_ADDRESS
 

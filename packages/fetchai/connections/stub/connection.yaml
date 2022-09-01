@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: bafybeihw7l7zie5dxycptwwiynqgnqfesnhr3epali5e4tmzhy54lxjnbq
   connection.py: bafybeicjrtpc2pwf2fwvqwr74tkzztjee2rmd7zkkzs2ctdgua2n5omgl4
   input_file: bafybeiftu27piztiu5bfxbvhqsbppgtseykyfot6wtlrrzeuzya6zrgpky
-  tests/__init__.py: bafybeihodqbifehez7r4zalztsn5ildne4rxc6rvdhykl7vscghxi4v45i
+  tests/__init__.py: bafybeiadaetciszcob7cchexib74l7vecczthsx2pzaan7sp7csrkgjxce
   tests/test_stub.py: bafybeihu2smaadptjzzbrkrv4bae2l4bmd6ozidetlwrmnas2az7tgbqy4
 fingerprint_ignore_patterns: []
 connections: []

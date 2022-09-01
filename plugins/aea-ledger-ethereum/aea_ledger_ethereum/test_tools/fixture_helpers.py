@@ -59,7 +59,7 @@ def _ganache_context(
     timeout: float = 2.0,
     max_attempts: int = 10,
 ):
-    import docker
+    import docker  # pylint: disable=import-outside-toplevel,import-error
 
     client = docker.from_env()
     image = GanacheDockerImage(
