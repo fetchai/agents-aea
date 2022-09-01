@@ -11,7 +11,7 @@ First, use an empty agent to get the stub connection and default protocol.
 mkdir packages  # packages folder will contain the local package repository
 aea create my_aea  # create an agent
 cd my_aea
-aea add connection fetchai/stub:0.21.0:bafybeihcojrfjfrwvkpbnujjs5hh7ettcb4zv2n7akrkpjnql7ie2oacju --remote  # get a connection from the remote registry
+aea add connection fetchai/stub:0.21.0:bafybeiayeaqz3zqg2o7gmjx4cx5xvadpvw42exm36uaynqryrmxdlsamta --remote  # get a connection from the remote registry
 aea push connection fetchai/stub --local  # push to local registry
 aea add protocol fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy --remote
 aea push protocol fetchai/default --local

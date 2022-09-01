@@ -264,7 +264,7 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.21.0:bafybeihcojrfjfrwvkpbnujjs5hh7ettcb4zv2n7akrkpjnql7ie2oacju --remote
+aea add connection fetchai/stub:0.21.0:bafybeiayeaqz3zqg2o7gmjx4cx5xvadpvw42exm36uaynqryrmxdlsamta --remote
 ```
 <br>
 <b>Add the echo skill</b>
