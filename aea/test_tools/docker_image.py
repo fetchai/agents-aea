@@ -193,12 +193,12 @@ def launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 1
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
-    else:
-        try:
-            logger.info("Done!")
-            time.sleep(timeout)
-            yield
-        finally:
-            logger.info(f"Stopping the image {image.tag}...")
-            container.stop()
-            container.remove()
+
+    try:
+        logger.info("Done!")
+        time.sleep(timeout)
+        yield
+    finally:
+        logger.info(f"Stopping the image {image.tag}...")
+        container.stop()
+        container.remove()

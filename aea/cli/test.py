@@ -180,8 +180,6 @@ def test_package_by_path(
     )
     root_packages = aea_project_path if aea_project_path else packages_dir
 
-    os.environ["PACKAGES_DIR"] = str(root_packages)
-
     package_path_finder = (
         find_component_directory_from_component_id
         if aea_project_path
