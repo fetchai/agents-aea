@@ -24,8 +24,7 @@ from unittest.mock import patch
 
 from packages.fetchai.skills.gym.helpers import ProxyEnv
 from packages.fetchai.skills.gym.rl_agent import GoodPriceModel
-
-from tests.test_packages.test_skills.test_gym.intermediate_class import GymTestCase
+from packages.fetchai.skills.gym.tests.intermediate_class import GymTestCase
 
 
 class TestPriceBandit(GymTestCase):

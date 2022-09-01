@@ -21,7 +21,7 @@
 
 from unittest.mock import patch
 
-from tests.test_packages.test_skills.test_gym.intermediate_class import GymTestCase
+from packages.fetchai.skills.gym.tests.intermediate_class import GymTestCase
 
 
 class TestTask(GymTestCase):

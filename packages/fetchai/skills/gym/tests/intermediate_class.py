@@ -38,13 +38,14 @@ from packages.fetchai.skills.gym.helpers import ProxyEnv
 from packages.fetchai.skills.gym.rl_agent import GoodPriceModel, MyRLAgent, PriceBandit
 from packages.fetchai.skills.gym.tasks import GymTask
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class GymTestCase(BaseSkillTestCase):
     """Sets the gym class up for testing."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "gym")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):

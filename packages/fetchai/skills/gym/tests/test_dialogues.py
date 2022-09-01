@@ -24,8 +24,7 @@ from aea.test_tools.test_skill import COUNTERPARTY_AGENT_ADDRESS
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.dialogues import DefaultDialogue, GymDialogue
-
-from tests.test_packages.test_skills.test_gym.intermediate_class import GymTestCase
+from packages.fetchai.skills.gym.tests.intermediate_class import GymTestCase
 
 
 class TestDialogues(GymTestCase):

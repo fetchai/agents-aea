@@ -26,8 +26,7 @@ import pytest
 
 from packages.fetchai.protocols.gym.message import GymMessage
 from packages.fetchai.skills.gym.dialogues import GymDialogue
-
-from tests.test_packages.test_skills.test_gym.intermediate_class import GymTestCase
+from packages.fetchai.skills.gym.tests.intermediate_class import GymTestCase
 
 
 class TestProxyEnv(GymTestCase):
