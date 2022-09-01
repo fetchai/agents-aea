@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea test' command."""
+import os
 import sys
 import tempfile
 import time
@@ -153,7 +154,7 @@ def by_path(
 @pass_ctx
 def packages(
     ctx: Context,
-    args: Sequence[str],
+    args: Sequence[str],  # pylint: disable=unused-argument
 ) -> None:
     """Executes a test suite of a package specified by a path."""
     packages_dir = Path(ctx.registry_path)
@@ -187,7 +188,7 @@ def packages(
                     [
                         package_dir / AEA_TEST_DIRNAME,
                         f"--cov={package_dir.absolute()}",
-                        f"--doctest-modules",
+                        "--doctest-modules",
                         str(package_dir.absolute()),
                         f"--cov-config={covrc_file}",
                         "--cov-report=term",
@@ -210,7 +211,7 @@ def packages(
         coverage(argv=["html", f"--rcfile={covrc_file}"])
         coverage(argv=["xml", f"--rcfile={covrc_file}"])
 
-    if len(failures):
+    if len(failures) > 0:
         click.echo("Failed tests")
         click.echo("Exit Code\tPackage")
         for exit_code, package in failures:
@@ -311,6 +312,7 @@ def test_package_by_path(
     :param pytest_arguments: arguments to forward to Pytest
     :param aea_project_path: directory to the AEA project
     :param packages_dir: directory of the packages to import from
+    :param cov: coverage capture indicator
     """
 
     load_package(package_dir, aea_project_path, packages_dir)
@@ -334,7 +336,7 @@ def run_pytest(
         runtime_args.extend(
             [
                 f"--cov={package_dir.absolute()}",
-                f"--doctest-modules",
+                "--doctest-modules",
                 str(package_dir.absolute()),
                 "--cov-report=term",
                 "--cov-report=term-missing",
