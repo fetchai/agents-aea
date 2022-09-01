@@ -15,6 +15,7 @@ fingerprint:
   dialogues.py: bafybeihzqqwczdvfzskslup72mpmzumic7irvgz274olbuqbdjm3hdnj4q
   message.py: bafybeigryznjuxefo5htam6xrrn7e6hfkki7h2sbaaxg22omcp4mhb7bf4
   serialization.py: bafybeiefqupq73s7eczkga2t5yd622owcm6elj7fa4fm5hq236j3avwhpy
+  tests/test_default.py: bafybeifczqdqn6zj5qci2dv4oukkoaak5cxux6jvo73td3tcnxnprjw4ry
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

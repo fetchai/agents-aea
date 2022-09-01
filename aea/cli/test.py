@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea test' command."""
+import os
 import sys
 from pathlib import Path
 from typing import Callable, Optional, Sequence, Set, cast
@@ -107,23 +108,17 @@ def skill(ctx: Context, skill_public_id: PublicId, args: Sequence[str]) -> None:
 @click.argument(
     "path", type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True
 )
-@click.option(
-    "--registry-path",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-)
 @pytest_args
 @pass_ctx
 def by_path(
     ctx: Context,
     path: str,
-    registry_path: Optional[str],
     args: Sequence[str],
 ) -> None:
     """Executes a test suite of a package specified by a path."""
     click.echo(f"Executing tests of package at {path}'...")
     full_path = Path(ctx.cwd) / Path(path)
-    registry_path = Path(registry_path or Path.cwd() / PACKAGES)
-    test_package_by_path(full_path, args, packages_dir=registry_path)
+    test_package_by_path(full_path, args, packages_dir=Path(ctx.registry_path))
 
 
 def test_item(
@@ -184,6 +179,9 @@ def test_package_by_path(
         "one of either aea_project_path or packages_dir must be specified",
     )
     root_packages = aea_project_path if aea_project_path else packages_dir
+
+    os.environ["PACKAGES_DIR"] = str(root_packages)
+
     package_path_finder = (
         find_component_directory_from_component_id
         if aea_project_path
