@@ -46,16 +46,15 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
-from tests.conftest import ROOT_DIR
-
 
 FETCHAI = "fetchai"
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class TestSearchBehaviour(BaseSkillTestCase):
     """Test Search behaviour of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):
@@ -161,7 +160,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
 class TestTransactionBehaviour(BaseSkillTestCase):
     """Test transaction behaviour of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):

@@ -31,13 +31,14 @@ from packages.fetchai.skills.generic_buyer.strategy import (
     SIMPLE_SERVICE_MODEL,
 )
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class TestGenericStrategy(BaseSkillTestCase):
     """Test GenericStrategy of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):

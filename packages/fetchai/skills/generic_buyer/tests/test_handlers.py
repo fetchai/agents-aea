@@ -62,13 +62,14 @@ from packages.fetchai.skills.generic_buyer.handlers import (
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 from packages.open_aea.protocols.signing.message import SigningMessage
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class TestGenericFipaHandler(BaseSkillTestCase):
     """Test fipa handler of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):
@@ -547,7 +548,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 class TestGenericOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -804,7 +805,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
 class TestGenericSigningHandler(BaseSkillTestCase):
     """Test signing handler of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -1086,7 +1087,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
     @classmethod

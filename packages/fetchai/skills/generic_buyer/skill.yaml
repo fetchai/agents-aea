@@ -12,6 +12,11 @@ fingerprint:
   dialogues.py: bafybeigyzu2uvp2dmj7wpjlcqlablr2wibnlkxhwyxzetizsaz5lifooea
   handlers.py: bafybeifdytrtxifnxuzcml4plgqttkuknwlavmskc6gyy3xt4vujwwxjg4
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
+  tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
+  tests/test_behaviours.py: bafybeicmdo2lscp3eyimvlz6r36oizdkifphzkjxs3d65hii6hcesybb5i
+  tests/test_dialogues.py: bafybeicw26dbb5bsdrhryymxr2lge2n3m6dmkeperkdd6imlxaclrfjpge
+  tests/test_handlers.py: bafybeicssmw63jx3rrni37egleirg2yratrfcbxmxlefhaenrqdzov2roi
+  tests/test_models.py: bafybeia3a3wtmmjxqn4qspbrluaypql262xne3n4t7qdyjsn3bkfsq4cxq
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.19.0:bafybeihomyc2roojykk7gycdiws66kxoltgw33qehamagonhy2bcln32je

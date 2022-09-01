@@ -47,13 +47,14 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
 )
 from packages.open_aea.protocols.signing.message import SigningMessage
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class TestDialogues(BaseSkillTestCase):
     """Test dialogue classes of generic buyer."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):
