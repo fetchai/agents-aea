@@ -175,7 +175,7 @@ generators:
 
 .PHONY: common-checks-1
 common-checks:
-	tox -p -e check-copyright -e hash_check -e package-dependencies-checks
+	tox -p -e check-copyright -e hash-check -e package-dependencies-checks
 
 .PHONY: common-checks-2
 common-checks-2:
