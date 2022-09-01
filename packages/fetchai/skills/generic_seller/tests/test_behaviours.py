@@ -35,13 +35,14 @@ from packages.fetchai.skills.generic_seller.behaviours import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class TestSkillBehaviour(BaseSkillTestCase):
     """Test behaviours of generic seller."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
+    path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
     @classmethod

@@ -54,13 +54,14 @@ from packages.fetchai.skills.generic_seller.handlers import (
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
-from tests.conftest import ROOT_DIR
+
+PACKAGE_ROOT = Path(__file__).parent.parent
 
 
 class TestGenericFipaHandler(BaseSkillTestCase):
     """Test fipa handler of generic seller."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
+    path_to_skill = PACKAGE_ROOT
 
     @classmethod
     def setup(cls):
@@ -546,7 +547,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic seller."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
+    path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -917,7 +918,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
 class TestGenericOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of generic seller."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
+    path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
     @classmethod
