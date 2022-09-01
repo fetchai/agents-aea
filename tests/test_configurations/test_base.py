@@ -366,7 +366,7 @@ class TestAgentConfigUpdate:
 
     def test_component_configurations_setter(self):
         """Test component configuration setter."""
-        assert self.aea_config.component_configurations == {}
+        assert len(self.aea_config.component_configurations) == 1
         new_component_configurations = {
             self.dummy_skill_component_id: self.new_dummy_skill_config
         }
@@ -374,7 +374,7 @@ class TestAgentConfigUpdate:
 
     def test_component_configurations_setter_negative(self):
         """Test component configuration setter with wrong configurations."""
-        assert self.aea_config.component_configurations == {}
+        assert len(self.aea_config.component_configurations) == 1
         new_component_configurations = {
             self.dummy_skill_component_id: {
                 "handlers": {"dummy": {"class_name": "SomeClass"}}

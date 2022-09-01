@@ -22,8 +22,6 @@ COPY Pipfile* /build
 
 RUN pipenv install --dev --skip-lock --system
 
-RUN ln -sf $(which python3) /build/docs/venv/bin/python3.8
-RUN ln -sf $(which python3) /build/docs/venv/bin/python3
 
 RUN mkdocs build
 

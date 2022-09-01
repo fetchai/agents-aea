@@ -154,7 +154,7 @@ This could be taken further, and a reduced spec version for <a href="https://mic
 
 #### Compiled AEA
 
-Python is not a compiled language. However, various projects attempt this, e.g. <a href="https://nuitka.net/doc/user-manual.html" target="_blank">Nuitka</a> and it would be desirable to explore how useful and practical this would be in the context of AEA.
+Python is not a compiled language. However, various projects attempt this, e.g. <a href="https://github.com/Nuitka/Nuitka" target="_blank">Nuitka</a> and it would be desirable to explore how useful and practical this would be in the context of AEA.
 
 #### DID integration
 
