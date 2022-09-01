@@ -90,7 +90,7 @@ class TestGymExt:
             pass
 
 
-def test_gym_env_load(self):
+def test_gym_env_load():
     """Load gym env from file."""
     try:
         curdir = os.getcwd()
@@ -100,7 +100,7 @@ def test_gym_env_load(self):
             connection_id=GymConnection.connection_id, env=gym_env_path
         )
         identity = Identity(
-            "name", address=self.agent_address, public_key=self.agent_public_key
+            "name", address="agent_address", public_key="agent_public_key"
         )
         gym_con = GymConnection(
             gym_env=None,

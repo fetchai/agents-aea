@@ -177,6 +177,7 @@ def test_react():
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
         )
+        builder.add_protocol(Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"))
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
@@ -357,6 +358,7 @@ def test_initialize_aea_programmatically():
         builder.add_protocol(
             Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")
         )
+        builder.add_protocol(Path(ROOT_DIR, "packages", "fetchai", "protocols", "fipa"))
         builder.add_connection(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "local")
         )
