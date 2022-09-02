@@ -951,7 +951,6 @@ class SkillConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
     schema = "skill-config_schema.json"
-    abstract_field_name = "is_abstract"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models", "is_abstract", "build_directory"]
