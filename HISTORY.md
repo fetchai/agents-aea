@@ -5,7 +5,7 @@
 AEA:
 - Fixed protocol header string regex
 - Adds `FIELDS_WITH_NESTED_FIELDS` and `NESTED_FIELDS_ALLOWED_TO_UPDATE` in the base config class
-- Introduces support for test
+- Introduces `aea test` command group
   - `aea test item_type public_id`: Run all tests of the AEA package specified by `item_type` and `public_id`
   - `aea test by-path package_dir`: Run all the tests of the AEA package located at `package_dir`
 
