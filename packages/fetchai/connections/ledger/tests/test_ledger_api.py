@@ -69,6 +69,7 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from aea_ledger_ethereum.test_tools.fixture_helpers import ganache  # noqa: F401
 
 
 DEFAULT_GANACHE_ADDR = LOCALHOST.geturl()
