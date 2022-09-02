@@ -164,7 +164,7 @@ def test_check_consistency_raises_exception_when_type_not_recognized():
     )
     # mock the __eq__ method such that any kind of matching is going to fail.
     with mock.patch.object(AcnMessage.Performative, "__eq__", return_value=False):
-        assert not message._is_consistent()
+        assert not message._is_consistent()  # pylint: disable=protected-access
 
 
 def test_acn_valid_performatives():
@@ -192,7 +192,7 @@ def test_serializer_performative_not_found():
 def test_dialogues():
     """Test intiaontiation of dialogues."""
     acn_dialogues = AcnDialogues("agent_addr")
-    msg, dialogue = acn_dialogues.create(
+    _, dialogue = acn_dialogues.create(
         counterparty="abc",
         performative=AcnMessage.Performative.LOOKUP_REQUEST,
         agent_address="address",
@@ -216,8 +216,7 @@ class AcnDialogue(BaseAcnDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
+        :param message_class: the message class
         """
         BaseAcnDialogue.__init__(
             self,
@@ -235,7 +234,7 @@ class AcnDialogues(BaseAcnDialogues):
         """
         Initialize dialogues.
 
-        :return: None
+        :param self_address: the address of the entity that this dialogues is maintained
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
