@@ -168,7 +168,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeieosuwomgx5mviv2jposmwf7xaau33mjrllgvasnipyvsw2eok3yu --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeia2h6uk25aktvzwle3nbdex7iqkf4nktgp2w2b6qbqqj3za7h7d24 --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -264,7 +264,7 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.21.0:bafybeiayeaqz3zqg2o7gmjx4cx5xvadpvw42exm36uaynqryrmxdlsamta --remote
+aea add connection fetchai/stub:0.21.0:bafybeieyoxxddnyqn7mibgeeld3bdkk32bspahqob7gfpqh4cbjopwh5jy --remote
 ```
 <br>
 <b>Add the echo skill</b>

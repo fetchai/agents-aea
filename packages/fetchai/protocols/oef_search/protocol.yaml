@@ -15,7 +15,7 @@ fingerprint:
   oef_search.proto: bafybeifvmxnxg4cuxkj64iqeifyv7jl4ihxgsope7p4j74yotedboai7jm
   oef_search_pb2.py: bafybeibzoqlyihqvgvvpz2bbjekf547n6j677ufw3hy2eqlyhedcuqqbjm
   serialization.py: bafybeiavvusik7aycfaqsuign5hpqfq5bgw5vwimpeqxtgymbuokvdd5f4
-  tests/test_oef_search.py: bafybeiamsakwbk3ktp3yg4tjarrklv2d54tfizul4v3qeytyglmr5xbq5y
+  tests/test_oef_search.py: bafybeianjuxe57ycirnzwuocbqnwtdad6wwqqhcqtdabqskzvoupkjtttm
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

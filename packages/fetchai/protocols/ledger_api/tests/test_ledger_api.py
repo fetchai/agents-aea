@@ -33,7 +33,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-import packages
+from packages.fetchai.protocols.ledger_api import message
 from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogue,
@@ -506,7 +506,7 @@ def test_decoding_unknown_performative():
 
 
 @mock.patch.object(
-    packages.fetchai.protocols.ledger_api.message,
+    message,
     "enforce",
     side_effect=AEAEnforceError("some error"),
 )

@@ -179,9 +179,6 @@ class TestReentrancy:
     @classmethod
     def setup_class(cls):
         """Set up the test."""
-        protocol_path = os.path.join(
-            ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
-        )
         connection_path = os.path.join(
             ROOT_DIR, "packages", "fetchai", "connections", "local"
         )
@@ -189,6 +186,13 @@ class TestReentrancy:
         builder = AEABuilder()
         builder.set_name("aea1")
         builder.add_private_key(DEFAULT_LEDGER)
+        protocol_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
+        )
+        builder.add_protocol(protocol_path)
+        protocol_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "fipa"
+        )
         builder.add_protocol(protocol_path)
         protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
         builder.add_component(ComponentType.PROTOCOL, protocol)

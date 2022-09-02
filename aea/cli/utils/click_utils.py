@@ -86,9 +86,13 @@ class ConnectionsOption(click.Option):
 class PytestArgs(click.Option):
     """Custom Click option for parsing Pytest arguments."""
 
-    def type_cast_value(self, ctx: click.Context, value: str) -> Sequence[str]:
+    def type_cast_value(
+        self, ctx: click.Context, value: Optional[str]
+    ) -> Sequence[str]:
         """Cast a string value to a sequence of Pytest arguments."""
         try:
+            if value is None:
+                return []
             return value.split(" ")
         except Exception:
             error_message = f"cannot split '{value}' into pytest arguments"

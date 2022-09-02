@@ -20,13 +20,13 @@ fingerprint:
   tests/test_models.py: bafybeigymvfralqr63dpybfiqc4x4glcwmxmsweqycrmd75exi3gdz4oo4
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeia5p7pa7z2wwgwbr5z6ag6x6b3zmcjyerdt476ddg2zbm2pz64xjq
+- fetchai/ledger:0.19.0:bafybeiaqwi7itsdle63qhl5f63mvw2qtbl3exouggisutlt6xe6cyjrloi
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
-- fetchai/fipa:1.0.0:bafybeiftyy2usf3d6cqfitr44fu3facgajt2kse7tmpl7d3aph3qq4gtca
-- fetchai/ledger_api:1.0.0:bafybeihdaudx3xyxvgvvnp47sp53ocukalmtblwl3vpkgh3rcs5qkeboj4
-- fetchai/oef_search:1.0.0:bafybeig5crswgwck6be5iutp6b5rscjtbc233w4m6at4vy5cgs2l6roipq
+- fetchai/fipa:1.0.0:bafybeib7mzgyjcfr7c4gcx24aeral7ldoqjb23qvsd266gnp66anftqt5q
+- fetchai/ledger_api:1.0.0:bafybeiftily2ogosdp3gkbvlq2wahn66svkpaxdyu2a2br36uu7jkemd4i
+- fetchai/oef_search:1.0.0:bafybeihdy3p7hjlh2vjkehfer5gfgjvqb666faupv4e7hgnxpgz2r7rwai
 skills: []
 behaviours:
   service_registration:

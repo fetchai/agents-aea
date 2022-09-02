@@ -15,7 +15,7 @@ fingerprint:
   fipa_pb2.py: bafybeicgs4xb5aggw7pv5szdcp7jjdvii3hec3savyt2amsjkfjkd4ywja
   message.py: bafybeib2wjkf5ku5oomvti2mxved4qceqsw4e2p3hb4vlafz6zvfvgseou
   serialization.py: bafybeift53kcwwj77jkpk2tqfqg3wkwyo7ok3ceywrevg76mpbstxq4gpi
-  tests/test_fipa.py: bafybeid2gffgppkxmttvruejcksfixmcpzdvr7m2j2ee2xyb5h7x6priv4
+  tests/test_fipa.py: bafybeibqub5htwh4ippkhrwt2pjzt3pbm35nyikroqa5jc2yz4talcndsq
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

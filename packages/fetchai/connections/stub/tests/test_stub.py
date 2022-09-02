@@ -46,7 +46,6 @@ from packages.fetchai.connections.stub.connection import (
     write_envelope,
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 
 SEPARATOR = ","
@@ -159,11 +158,11 @@ class TestStubConnectionReception:
 
     def test_reception_c(self):
         """Test that the connection receives what has been enqueued in the input file."""
-        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/oef_search:1.0.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
+        encoded_envelope = b"0x5E22777dD831A459535AA4306AceC9cb22eC4cB5,default_oef,fetchai/default:1.0.0,\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd,"
         expected_envelope = Envelope(
             to="0x5E22777dD831A459535AA4306AceC9cb22eC4cB5",
             sender="default_oef",
-            protocol_specification_id=OefSearchMessage.protocol_specification_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=b"\x08\x02\x12\x011\x1a\x011 \x01:,\n*0x32468dB8Ab79549B49C88DC991990E7910891dbd",
         )
         with open(self.input_file_path, "ab+") as f:
@@ -400,12 +399,16 @@ async def test_bad_envelope():
 @pytest.mark.asyncio
 async def test_load_from_dir():
     """Test stub connection can be loaded from dir."""
-    StubConnection.from_dir(
-        str(PACKAGE_DIR),
-        Identity("name", "address", "public_key"),
-        CryptoStore(),
-        os.getcwd(),
-    )
+    with mock.patch.object(
+        Path, "touch"
+    ) as touch_mock:  # to prevent this test from creating the input_file file
+        StubConnection.from_dir(
+            str(PACKAGE_DIR),
+            Identity("name", "address", "public_key"),
+            CryptoStore(),
+            os.getcwd(),
+        )
+        touch_mock.assert_any_call()
 
 
 class TestFileLock:

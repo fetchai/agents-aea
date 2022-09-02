@@ -324,8 +324,6 @@ class TestPackageTestByPathEmptyTestSuite(BaseAEATestCommand):
             result = self.run_test_command(
                 "by-path",
                 str(package_dirpath),
-                "--registry-path",
-                str(self.t / self.packages_dir_path),
             )
             assert result.exit_code == NO_TESTS_COLLECTED_PYTEST_EXIT_CODE
 
@@ -346,7 +344,5 @@ class TestPackageTestByPath(BaseAEATestCommand):
             result = self.run_test_command(
                 "by-path",
                 str(package_dirpath),
-                "--registry-path",
-                str(self.t / self.packages_dir_path),
             )
             assert result.exit_code == OK_PYTEST_EXIT_CODE

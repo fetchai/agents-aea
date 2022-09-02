@@ -19,7 +19,7 @@ connections: []
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
-- fetchai/http:1.0.0:bafybeidqqu3vjnf76slzz434ieo7qzkkilsjpstzxh7fcvn6ffvpkffgqq
+- fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e
 skills: []
 behaviours: {}
 handlers:

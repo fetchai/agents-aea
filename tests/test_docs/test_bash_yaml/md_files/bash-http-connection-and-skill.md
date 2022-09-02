@@ -3,7 +3,7 @@ aea create my_aea
 cd my_aea
 ```
 ``` bash
-aea add connection fetchai/http_server:0.22.0:bafybeihsxwd3cu2ahhugouz6hfxo2zspeaheh4hc3fftdrjxe75gao73vy --remote
+aea add connection fetchai/http_server:0.22.0:bafybeifpqp4uczojoczhjgl3yle3ojum7hzd7q6wwlmlagz2zpmuarjsmy --remote
 ```
 ``` bash
 aea config set agent.default_connection fetchai/http_server:0.22.0
@@ -48,11 +48,11 @@ models:
 mkdir packages
 aea create my_aea
 cd my_aea
-aea add connection fetchai/http_server:0.22.0:bafybeihsxwd3cu2ahhugouz6hfxo2zspeaheh4hc3fftdrjxe75gao73vy --remote
+aea add connection fetchai/http_server:0.22.0:bafybeifpqp4uczojoczhjgl3yle3ojum7hzd7q6wwlmlagz2zpmuarjsmy --remote
 aea push connection fetchai/http_server --local
 aea add protocol fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy --remote
 aea push protocol fetchai/default --local
-aea add protocol fetchai/http:1.0.0:bafybeidqqu3vjnf76slzz434ieo7qzkkilsjpstzxh7fcvn6ffvpkffgqq --remote
+aea add protocol fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e --remote
 aea push protocol fetchai/http --local
 cd ..
 aea delete my_aea

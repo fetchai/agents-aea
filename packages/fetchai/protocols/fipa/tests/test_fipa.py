@@ -21,7 +21,6 @@
 """This module contains the tests of the fipa protocol package."""
 
 import logging
-import sys
 from typing import Any, Optional, Type
 from unittest import mock
 
@@ -35,18 +34,15 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-import packages
+from packages.fetchai.protocols.fipa import message
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.fipa.message import (
     _default_logger as fipa_message_logger,
 )
 
-from tests.conftest import ROOT_DIR
-
 
 logger = logging.getLogger(__name__)
-sys.path.append(ROOT_DIR)
 
 
 def test_cfp_serialization():
@@ -401,7 +397,7 @@ def test_decoding_unknown_performative():
 
 
 @mock.patch.object(
-    packages.fetchai.protocols.fipa.message,
+    message,
     "enforce",
     side_effect=AEAEnforceError("some error"),
 )
