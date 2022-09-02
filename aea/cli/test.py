@@ -19,12 +19,12 @@
 # ------------------------------------------------------------------------------
 
 """Implementation of the 'aea test' command."""
+import contextlib
 import os
 import sys
 import tempfile
-import time
 from pathlib import Path
-from typing import Callable, Optional, Sequence, Set, cast
+from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, cast
 
 import click
 import pytest
@@ -35,7 +35,6 @@ from aea.cli.utils.click_utils import (
     determine_package_type_for_directory,
 )
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import check_aea_project, pass_ctx, pytest_args
 from aea.cli.utils.package_utils import get_package_path
 from aea.components.base import load_aea_package
 from aea.configurations.base import ComponentConfiguration
@@ -72,9 +71,7 @@ output = {root_dir}/coverage.xml
 """
 
 
-@click.group(
-    invoke_without_command=True,
-)
+@click.group()
 @click.pass_context
 @click.option(
     "--cov",
@@ -82,71 +79,108 @@ output = {root_dir}/coverage.xml
     default=False,
     help="Use this flag to enable code coverage checks.",
 )
-def test(click_context: click.Context, cov: bool) -> None:
+@click.option(
+    "--cov-output",
+    type=click.Path(exists=True, dir_okay=True, file_okay=False),
+    help="Directory to output codecov reports.",
+)
+def test(click_context: click.Context, cov: bool, cov_output: str) -> None:
     """Run tests of an AEA project."""
     ctx = cast(Context, click_context.obj)
     ctx.config["cov"] = cov
-    if click_context.invoked_subcommand is None:
-        test_aea_project(click_context, Path(ctx.cwd), args=[])
+    ctx.config["cov_output"] = cov_output
 
 
-@test.command()
+@test.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
-@pytest_args
-@pass_ctx
+@click.pass_context
 def connection(
-    ctx: Context, connection_public_id: PublicId, args: Sequence[str]
+    click_context: click.Context,
+    connection_public_id: PublicId,
 ) -> None:
     """Executes a test suite of a connection package dependency."""
-    test_item(ctx, CONNECTION, connection_public_id, args)
+    test_item(click_context.obj, CONNECTION, connection_public_id, click_context.args)
 
 
-@test.command()
+@test.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
-@pytest_args
-@pass_ctx
-def contract(ctx: Context, contract_public_id: PublicId, args: Sequence[str]) -> None:
+@click.pass_context
+def contract(
+    click_context: click.Context,
+    contract_public_id: PublicId,
+) -> None:
     """Executes a test suite of a contract package dependency."""
-    test_item(ctx, CONTRACT, contract_public_id, args)
+    test_item(click_context.obj, CONTRACT, contract_public_id, click_context.args)
 
 
-@test.command()
+@test.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
-@pytest_args
-@pass_ctx
-def protocol(ctx: Context, protocol_public_id: PublicId, args: Sequence[str]) -> None:
+@click.pass_context
+def protocol(
+    click_context: click.Context,
+    protocol_public_id: PublicId,
+) -> None:
     """Executes a test suite of a protocol package dependency."""
-    test_item(ctx, PROTOCOL, protocol_public_id, args)
+    test_item(click_context.obj, PROTOCOL, protocol_public_id, click_context.args)
 
 
-@test.command()
+@test.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
-@pytest_args
-@pass_ctx
-def skill(ctx: Context, skill_public_id: PublicId, args: Sequence[str]) -> None:
+@click.pass_context
+def skill(
+    click_context: click.Context,
+    skill_public_id: PublicId,
+) -> None:
     """Executes a test suite of a skill package dependency."""
-    test_item(ctx, SKILL, skill_public_id, args)
+    test_item(click_context.obj, SKILL, skill_public_id, click_context.args)
 
 
-@test.command()
+@test.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
 @click.argument(
     "path", type=click.Path(exists=True, file_okay=False, dir_okay=True), required=True
 )
-@pytest_args
-@pass_ctx
+@click.pass_context
 def by_path(
-    ctx: Context,
+    click_context: click.Context,
     path: str,
-    args: Sequence[str],
 ) -> None:
     """Executes a test suite of a package specified by a path."""
     click.echo(f"Executing tests of package at {path}'...")
+
+    ctx: Context = click_context.obj
     full_path = Path(ctx.cwd) / Path(path)
+
     test_package_by_path(
         full_path,
-        args,
+        click_context.args,
         packages_dir=Path(ctx.registry_path),
         cov=ctx.config.get("cov", False),
+        cov_output=ctx.config.get("cov_output"),
     )
 
 
@@ -158,69 +192,25 @@ def by_path(
 )
 @click.pass_context
 def packages(click_context: click.Context) -> None:
-    """Executes a test suite of a package specified by a path."""
+    """Executes a test suite for a collection of packages."""
     ctx: Context = click_context.obj
     packages_dir = Path(ctx.registry_path)
     available_packages = DependencyTree.find_packages_in_a_local_repository(
         packages_dir
     )
 
-    coverage_data = []
-    failures = []
-    start_time = time.perf_counter()
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        covrc_file = Path(temp_dir, COVERAGERC_FILE)
-        covrc_file.write_text(
-            COVERAGERC_CONFIG.format(root_dir=str(packages_dir.parent))
+    cov = ctx.config.get("cov", False)
+    cov_output = Path(ctx.config.get("cov_output") or Path.cwd()).resolve()
+    with CoveragercFile(root_dir=cov_output) as covrc_file:
+        coverage_data, failures = test_package_collection(
+            available_packages=available_packages,
+            packages_dir=packages_dir,
+            pytest_args=click_context.args,
+            cov=cov,
+            covrc_file=covrc_file,
         )
-
-        for package_type, package_dir in available_packages:
-            if package_type == PackageType.AGENT.value:
-                continue
-
-            test_dir = package_dir / AEA_TEST_DIRNAME
-            if not test_dir.exists():
-                continue
-
-            load_package(package_dir, packages_dir=packages_dir)
-            with cd(package_dir):
-                click.echo(
-                    f"Running tests for {package_dir.name} of type {package_type}"
-                )
-                exit_code = pytest.main(
-                    [
-                        package_dir / AEA_TEST_DIRNAME,
-                        f"--cov={package_dir.absolute()}",
-                        "--doctest-modules",
-                        str(package_dir.absolute()),
-                        f"--cov-config={covrc_file}",
-                        "--cov-report=term",
-                        *click_context.args,
-                    ]
-                )
-                if exit_code:
-                    if exit_code == pytest.ExitCode.NO_TESTS_COLLECTED:
-                        click.echo(
-                            f"Could not collect tests for for {package_dir.name} of type {package_type}"
-                        )
-                        continue
-
-                    click.echo(
-                        f"Running tests for for {package_dir.name} of type {package_type} failed"
-                    )
-                    failures.append(
-                        (exit_code, os.path.sep.join(package_dir.parts[-3:]))
-                    )
-            coverage_data.append(str(package_dir / ".coverage"))
-
-        total_time = (time.perf_counter() - start_time) // 60
-        click.echo(f"Time : {total_time}")
-
-        click.echo("Generating coverage reports.")
-        coverage(argv=["combine", f"--rcfile={covrc_file}", *coverage_data])
-        coverage(argv=["html", f"--rcfile={covrc_file}"])
-        coverage(argv=["xml", f"--rcfile={covrc_file}"])
+        if cov:
+            aggregate_coverage(coverage_data=coverage_data, covrc_file=covrc_file)
 
     if len(failures) > 0:
         click.echo("Failed tests")
@@ -315,6 +305,7 @@ def test_package_by_path(
     aea_project_path: Optional[Path] = None,
     packages_dir: Optional[Path] = None,
     cov: bool = False,
+    cov_output: Optional[Path] = None,
 ) -> None:
     """
     Fingerprint package placed in package_dir.
@@ -324,49 +315,71 @@ def test_package_by_path(
     :param aea_project_path: directory to the AEA project
     :param packages_dir: directory of the packages to import from
     :param cov: coverage capture indicator
+    :param cov_output: Path to coverage output directory
     """
-
+    cov_output = Path(cov_output or Path.cwd()).resolve()
     load_package(package_dir, aea_project_path, packages_dir)
-    exit_code = run_pytest(package_dir, pytest_arguments=pytest_arguments, cov=cov)
+    with CoveragercFile(root_dir=cov_output) as covrc_file:
+        with cd(package_dir):
+            runtime_args = [
+                *get_pytest_args(covrc_file=covrc_file, cov=cov),
+                *pytest_arguments,
+            ]
+            exit_code = pytest.main(runtime_args)
+            coverage_file = ".coverage"
+            coverage(
+                argv=["html", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
+            )
+            coverage(
+                argv=["xml", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
+            )
+            os.remove(coverage_file)
+
     sys.exit(exit_code)
 
 
-def run_pytest(
-    package_dir: Path,
-    pytest_arguments: Sequence[str],
-    cov: bool = False,
-) -> int:
-    """Run pytest."""
+def test_package_collection(
+    available_packages: List[Tuple[str, Path]],
+    packages_dir: Path,
+    pytest_args: List[str],
+    cov: bool,
+    covrc_file: Path,
+) -> Tuple[List[str], List[Tuple[int, str]]]:
+    """Test a collection of packages."""
 
-    runtime_args = [
-        AEA_TEST_DIRNAME,
-        *pytest_arguments,
-    ]
+    coverage_data = []
+    failures = []
 
-    if cov:
-        runtime_args.extend(
-            [
-                f"--cov={package_dir.absolute()}",
-                "--doctest-modules",
-                str(package_dir.absolute()),
-                "--cov-report=term",
-                "--cov-report=term-missing",
-            ]
-        )
+    for package_type, package_dir in available_packages:
+        test_dir = package_dir / AEA_TEST_DIRNAME
+        if package_type == PackageType.AGENT.value or not test_dir.exists():
+            continue
 
-    with cd(package_dir):
-        return pytest.main(runtime_args)
+        load_package(package_dir, packages_dir=packages_dir)
+        with cd(package_dir):
+            click.echo(f"Running tests for {package_dir.name} of type {package_type}")
+            exit_code = pytest.main(
+                [
+                    *get_pytest_args(covrc_file=covrc_file, cov=cov),
+                    *pytest_args,
+                ]
+            )
+            coverage_file = package_dir / ".coverage"
+            coverage_data.append(str(coverage_file))
 
+            if exit_code:
+                if exit_code == pytest.ExitCode.NO_TESTS_COLLECTED:
+                    click.echo(
+                        f"Could not collect tests for for {package_dir.name} of type {package_type}"
+                    )
+                    continue
 
-@check_aea_project
-def test_aea_project(
-    click_context: click.Context, aea_project_dirpath: Path, args: Sequence[str]
-) -> None:
-    """Run tests of an AEA project."""
-    click.echo("Executing tests of the AEA project...")
-    ctx = cast(Context, click_context.obj)
-    # in case of an AEA project, the 'packages' directory is the AEA project path itself
-    test_package_by_path(aea_project_dirpath, args, aea_project_path=Path(ctx.cwd))
+                click.echo(
+                    f"Running tests for for {package_dir.name} of type {package_type} failed"
+                )
+                failures.append((exit_code, os.path.sep.join(package_dir.parts[-3:])))
+
+    return coverage_data, failures
 
 
 def load_aea_packages_recursively(
@@ -415,3 +428,65 @@ def find_component_directory_from_component_id_in_registry(
         return package_path
 
     raise ValueError("Package {} not found.".format(component_id))
+
+
+def aggregate_coverage(coverage_data: List[str], covrc_file: Path) -> None:
+    """Aggregate coverage reports."""
+
+    click.echo("Generating coverage reports.")
+
+    coverage_data = [file for file in coverage_data if Path(file).exists()]
+    coverage(argv=["combine", f"--rcfile={covrc_file}", *coverage_data])
+    coverage(argv=["html", f"--rcfile={covrc_file}"])
+    coverage(argv=["xml", f"--rcfile={covrc_file}"])
+
+    # remove redundant coverage data
+    for file in coverage_data:
+        if Path(file).exists():
+            os.remove(file)
+
+
+def get_pytest_args(
+    covrc_file: Path,
+    cov: bool = False,
+) -> List:
+    """Get pytest args for coverage checks."""
+
+    if not cov:
+        return [
+            AEA_TEST_DIRNAME,
+        ]
+
+    return [
+        AEA_TEST_DIRNAME,
+        "--cov=.",
+        "--doctest-modules",
+        ".",
+        f"--cov-config={covrc_file}",
+        "--cov-report=term",
+    ]
+
+
+class CoveragercFile:
+    """Coveragerc file context"""
+
+    def __init__(self, root_dir: Path) -> None:
+        """Initialize object."""
+
+        self._t = tempfile.TemporaryDirectory()
+        self.file = Path(self._t.name, COVERAGERC_FILE)
+        self.root_dir = root_dir
+
+    def __enter__(
+        self,
+    ) -> Path:
+        """Enter context."""
+
+        self.file.write_text(COVERAGERC_CONFIG.format(root_dir=self.root_dir))
+        return self.file
+
+    def __exit__(self, *args: Any, **kwargs: Any) -> None:
+        """Exit context."""
+
+        with contextlib.suppress(OSError, PermissionError):
+            self._t.cleanup()
