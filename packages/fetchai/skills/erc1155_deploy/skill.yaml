@@ -7,6 +7,7 @@ description: The ERC1155 deploy skill has the ability to deploy and interact wit
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
+  .coverage: bafybeifs5jwh6xlogm4m6v5oknok7ib3nvnm2sgvygpjmgfv2ekuzjn5ay
   README.md: bafybeiae7b2hjkzsd7z2yjft37hrqt5rfct6ocrox4pna7u4ypunz7rmw4
   __init__.py: bafybeiehln6kky4ih7d2737tb4h4ofoffixbefhmjzlpzhzpkhlpg7dww4
   behaviours.py: bafybeif2q62726tef2senpzwbjfsowep3v462xogzxo2j7jdfo6ndsjuue
@@ -21,9 +22,9 @@ fingerprint:
   tests/test_strategy.py: bafybeigxtw2j2c7vl6xhdwos62jbtmx62xfgdyadptm5eewmkesmcooyea
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeigpzqx6cmxh5m5sakk6sit6w3h6ihi354vauuwb77kjc5etxo7duu
+- fetchai/ledger:0.19.0:bafybeiaqwi7itsdle63qhl5f63mvw2qtbl3exouggisutlt6xe6cyjrloi
 contracts:
-- fetchai/erc1155:0.22.0:bafybeidw2vhsh3ifmg5sxnbxhpu4ygosov5jtzjhilsfkdhoanvwiu7dyi
+- fetchai/erc1155:0.22.0:bafybeia33ee5rsl4fgnyoq5d5of4bjyocz2t4aadflh3vag3ir3d7go524
 protocols:
 - fetchai/contract_api:1.0.0:bafybeierqtg3fi2t4mn4dbz2xmwfqd4qeuz5rwxqp4ew6jzz24bxjbytpi
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy

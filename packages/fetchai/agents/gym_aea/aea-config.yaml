@@ -17,7 +17,7 @@ protocols:
 - fetchai/state_update:1.0.0:bafybeib736dqbkd43sz5hpb3yd4kviv2b4g2okirknn3vsdo5tlykuu4bu
 - open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
 skills:
-- fetchai/gym:0.20.0:bafybeif774uxl33jeg6lk5rov4bkmq5vn6ryvtochyah3czvo56rgvfnzu
+- fetchai/gym:0.20.0:bafybeigkk5pjfg3q7gn7livksku45vgcxfcy4rrcdvipxsb5grewpmdlkq
 default_connection: fetchai/gym:0.19.0
 default_ledger: fetchai
 required_ledgers:

@@ -7,6 +7,7 @@ description: The erc1155 client interacts with the erc1155 deployer to conduct a
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
+  .coverage: bafybeiaazchr6qx5oyyfps2rhbahuu5buafvvutd37hohgzmymsb2fsfii
   README.md: bafybeid73sgd24psits3e6ktrxrwwin7zd6xb7adxsplxi5bizlrxk5bom
   __init__.py: bafybeidi6meicrc6tyeokv42f5u7xymlgfy2eua5ueuxmqv272oouhqehu
   behaviours.py: bafybeicwzknkh5tpogbqe5vaz52wxkkwqnb54giktpydns6o7fkwrxcqme
@@ -21,9 +22,9 @@ fingerprint:
   tests/test_strategy.py: bafybeicbxie3v6vue3gcnru6vsvggcgy3shxwrldis5gppizbuhooslcqa
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeigpzqx6cmxh5m5sakk6sit6w3h6ihi354vauuwb77kjc5etxo7duu
+- fetchai/ledger:0.19.0:bafybeiaqwi7itsdle63qhl5f63mvw2qtbl3exouggisutlt6xe6cyjrloi
 contracts:
-- fetchai/erc1155:0.22.0:bafybeidw2vhsh3ifmg5sxnbxhpu4ygosov5jtzjhilsfkdhoanvwiu7dyi
+- fetchai/erc1155:0.22.0:bafybeia33ee5rsl4fgnyoq5d5of4bjyocz2t4aadflh3vag3ir3d7go524
 protocols:
 - fetchai/contract_api:1.0.0:bafybeierqtg3fi2t4mn4dbz2xmwfqd4qeuz5rwxqp4ew6jzz24bxjbytpi
 - fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy

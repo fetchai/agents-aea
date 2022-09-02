@@ -33,6 +33,7 @@ from aea_ledger_ethereum import (
     EthereumCrypto,
 )
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_PATH
+from aea_ledger_ethereum.test_tools.fixture_helpers import ganache  # noqa: F401
 from aea_ledger_fetchai import FetchAICrypto
 from aea_ledger_fetchai.test_tools.constants import (
     FETCHAI_ADDRESS_ONE,
@@ -69,7 +70,6 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from aea_ledger_ethereum.test_tools.fixture_helpers import ganache  # noqa: F401
 
 
 DEFAULT_GANACHE_ADDR = LOCALHOST.geturl()
@@ -147,7 +147,7 @@ async def test_get_balance(
     ledger_apis_connection: Connection,  # noqa: F811
     update_default_ethereum_ledger_api,
     ethereum_testnet_config,
-    ganache,
+    ganache,  # noqa: F811
 ):
     """Test get balance."""
     import aea  # noqa # to load registries
@@ -196,7 +196,7 @@ async def test_get_state(
     ledger_apis_connection: Connection,  # noqa: F811
     update_default_ethereum_ledger_api,
     ethereum_testnet_config,
-    ganache,
+    ganache,  # noqa: F811
 ):
     """Test get state."""
     import aea  # noqa # to load registries
@@ -256,7 +256,7 @@ async def test_send_signed_transaction_ethereum(
     gas_strategies,
     ledger_apis_connection: Connection,  # noqa: F811
     update_default_ethereum_ledger_api,
-    ganache,
+    ganache,  # noqa: F811
 ):
     """Test send signed transaction with Ethereum APIs."""
     import aea  # noqa # to load registries
