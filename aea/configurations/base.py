@@ -228,6 +228,8 @@ class PackageConfiguration(Configuration, ABC):
     package_type: PackageType
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset()
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
@@ -575,6 +577,7 @@ class ConnectionConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["config", "cert_requests", "is_abstract", "build_directory"]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["config"])
 
     __slots__ = (
         "class_name",
@@ -951,10 +954,15 @@ class SkillConfig(ComponentConfiguration):
     default_configuration_filename = DEFAULT_SKILL_CONFIG_FILE
     package_type = PackageType.SKILL
     schema = "skill-config_schema.json"
+    abstract_field_name = "is_abstract"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models", "is_abstract", "build_directory"]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
+        ["behaviours", "handlers", "models"]
+    )
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
 
     __slots__ = (
         "connections",
@@ -1131,6 +1139,27 @@ class SkillConfig(ComponentConfiguration):
 
         return instance
 
+    def get_overridable(self) -> dict:
+        """Get overridable configuration data."""
+        result = {}
+        current_config_data = self.json
+        if self.abstract_field_name in current_config_data:
+            result[self.abstract_field_name] = current_config_data[
+                self.abstract_field_name
+            ]
+
+        for field in self.FIELDS_WITH_NESTED_FIELDS:
+            if not current_config_data.get(field, {}):
+                continue
+            result[field] = {}
+            for name in current_config_data[field].keys():
+                result[field][name] = {}
+                for nested_field in self.NESTED_FIELDS_ALLOWED_TO_UPDATE:
+                    result[field][name][nested_field] = current_config_data[field][
+                        name
+                    ][nested_field]
+        return result
+
 
 class AgentConfig(PackageConfiguration):
     """Class to represent the agent configuration file."""
@@ -1161,6 +1190,7 @@ class AgentConfig(PackageConfiguration):
             "storage_uri",
         ]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["logging_config"])
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
