@@ -98,40 +98,18 @@ def test(click_context: click.Context, cov: bool, cov_output: str) -> None:
     ctx.config["cov_output"] = cov_output
 
     if click_context.invoked_subcommand is None:
-        test_aea_project(click_context)
+        test_aea_project(click_context, Path(ctx.cwd), args=[])
 
 
 @check_aea_project
-def test_aea_project(click_context: click.Context) -> None:
-    """Test AEA project."""
-
+def test_aea_project(
+    click_context: click.Context, aea_project_dirpath: Path, args: Sequence[str]
+) -> None:
+    """Run tests of an AEA project."""
     click.echo("Executing tests of the AEA project...")
-
     ctx = cast(Context, click_context.obj)
-
-    aea_project_dir = Path(ctx.cwd)
-    packages_dir = Path(ctx.registry_path)
-    cov = ctx.config.get("cov", False)
-    cov_output = Path(ctx.config.get("cov_output") or Path.cwd()).resolve()
-
     # in case of an AEA project, the 'packages' directory is the AEA project path itself
-    load_package(aea_project_dir, aea_project_dir, packages_dir)
-    with CoveragercFile(root_dir=cov_output) as covrc_file:
-        with cd(aea_project_dir):
-            runtime_args = [
-                *get_pytest_args(covrc_file=covrc_file, cov=cov),
-            ]
-            exit_code = pytest.main(runtime_args)
-            coverage_file = ".coverage"
-            coverage(
-                argv=["html", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
-            )
-            coverage(
-                argv=["xml", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
-            )
-            os.remove(coverage_file)
-
-    sys.exit(exit_code)
+    test_package_by_path(aea_project_dirpath, args, aea_project_path=Path(ctx.cwd))
 
 
 @test.command(
