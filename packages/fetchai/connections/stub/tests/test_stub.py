@@ -399,12 +399,16 @@ async def test_bad_envelope():
 @pytest.mark.asyncio
 async def test_load_from_dir():
     """Test stub connection can be loaded from dir."""
-    StubConnection.from_dir(
-        str(PACKAGE_DIR),
-        Identity("name", "address", "public_key"),
-        CryptoStore(),
-        os.getcwd(),
-    )
+    with mock.patch.object(
+        Path, "touch"
+    ) as touch_mock:  # to prevent this test from creating the input_file file
+        StubConnection.from_dir(
+            str(PACKAGE_DIR),
+            Identity("name", "address", "public_key"),
+            CryptoStore(),
+            os.getcwd(),
+        )
+        touch_mock.assert_any_call()
 
 
 class TestFileLock:
