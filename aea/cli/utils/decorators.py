@@ -253,4 +253,4 @@ def clean_after(func: Callable) -> Callable:
     return wrapper
 
 
-pytest_args = click.option("--args", "-a", cls=PytestArgs, default="")
+pytest_args = click.option("--args", "-a", cls=PytestArgs)

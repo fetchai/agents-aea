@@ -72,7 +72,9 @@ output = {root_dir}/coverage.xml
 """
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True,
+)
 @click.pass_context
 @click.option(
     "--cov",
@@ -80,13 +82,12 @@ output = {root_dir}/coverage.xml
     default=False,
     help="Use this flag to enable code coverage checks.",
 )
-@pytest_args
-def test(click_context: click.Context, cov: bool, args: Sequence[str]) -> None:
+def test(click_context: click.Context, cov: bool) -> None:
     """Run tests of an AEA project."""
     ctx = cast(Context, click_context.obj)
     ctx.config["cov"] = cov
     if click_context.invoked_subcommand is None:
-        test_aea_project(click_context, Path(ctx.cwd), args)
+        test_aea_project(click_context, Path(ctx.cwd), args=[])
 
 
 @test.command()
@@ -149,14 +150,16 @@ def by_path(
     )
 
 
-@test.command()
-@pytest_args
-@pass_ctx
-def packages(
-    ctx: Context,
-    args: Sequence[str],  # pylint: disable=unused-argument
-) -> None:
+@test.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
+@click.pass_context
+def packages(click_context: click.Context) -> None:
     """Executes a test suite of a package specified by a path."""
+    ctx: Context = click_context.obj
     packages_dir = Path(ctx.registry_path)
     available_packages = DependencyTree.find_packages_in_a_local_repository(
         packages_dir
@@ -171,7 +174,8 @@ def packages(
         covrc_file.write_text(
             COVERAGERC_CONFIG.format(root_dir=str(packages_dir.parent))
         )
-        for package_type, package_dir in available_packages[:20]:
+
+        for package_type, package_dir in available_packages:
             if package_type == PackageType.AGENT.value:
                 continue
 
@@ -192,9 +196,16 @@ def packages(
                         str(package_dir.absolute()),
                         f"--cov-config={covrc_file}",
                         "--cov-report=term",
+                        *click_context.args,
                     ]
                 )
                 if exit_code:
+                    if exit_code == pytest.ExitCode.NO_TESTS_COLLECTED:
+                        click.echo(
+                            f"Could not collect tests for for {package_dir.name} of type {package_type}"
+                        )
+                        continue
+
                     click.echo(
                         f"Running tests for for {package_dir.name} of type {package_type} failed"
                     )
@@ -202,11 +213,11 @@ def packages(
                         (exit_code, os.path.sep.join(package_dir.parts[-3:]))
                     )
             coverage_data.append(str(package_dir / ".coverage"))
+
         total_time = (time.perf_counter() - start_time) // 60
-
         click.echo(f"Time : {total_time}")
-        click.echo("Generating coverage reports.")
 
+        click.echo("Generating coverage reports.")
         coverage(argv=["combine", f"--rcfile={covrc_file}", *coverage_data])
         coverage(argv=["html", f"--rcfile={covrc_file}"])
         coverage(argv=["xml", f"--rcfile={covrc_file}"])
