@@ -369,14 +369,23 @@ def test_package_by_path(
                 *pytest_arguments,
             ]
             exit_code = pytest.main(runtime_args)
-            coverage_file = ".coverage"
-            coverage(
-                argv=["html", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
-            )
-            coverage(
-                argv=["xml", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
-            )
-            os.remove(coverage_file)
+            if cov:
+                coverage_file = ".coverage"
+                coverage(
+                    argv=[
+                        "html",
+                        f"--rcfile={covrc_file}",
+                        f"--data-file={coverage_file}",
+                    ]
+                )
+                coverage(
+                    argv=[
+                        "xml",
+                        f"--rcfile={covrc_file}",
+                        f"--data-file={coverage_file}",
+                    ]
+                )
+                os.remove(coverage_file)
 
     sys.exit(exit_code)
 
