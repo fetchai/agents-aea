@@ -485,6 +485,33 @@ def recursive_update(
             to_update[key] = value
 
 
+def perform_dict_override(
+    component_id: Any,
+    overrides: Dict,
+    updated_configuration: Dict,
+    new_configuration: Dict,
+) -> None:
+    """
+    Perform recursive dict override.
+
+    :param component_id: Component ID for which the updated will be performed
+    :param overrides: A dictionary containing mapping for Component ID -> List of paths
+    :param updated_configuration: Configuration which needs to be updated
+    :param new_configuration: Configuration from which the method will perform the update
+    """
+    for path in overrides[component_id]:
+
+        will_be_updated = updated_configuration[component_id]
+        update = new_configuration[component_id]
+
+        *params, update_param = path
+        for param in params:
+            will_be_updated = will_be_updated[param]
+            update = update[param]
+
+        will_be_updated[update_param] = update[update_param]
+
+
 def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
     """
     Get the logger name prefix.

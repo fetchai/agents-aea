@@ -173,7 +173,8 @@ json friendly value.
 #### update`_`config
 
 ```python
-def update_config(overrides: Dict) -> None
+def update_config(overrides: Dict,
+                  dict_overrides: Optional[Dict] = None) -> None
 ```
 
 Apply overrides for agent config.
@@ -184,6 +185,7 @@ Does not save it on the disc!
 **Arguments**:
 
 - `overrides`: overridden values dictionary
+- `dict_overrides`: A dictionary containing mapping for Component ID -> List of paths
 
 **Returns**:
 

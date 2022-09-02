@@ -81,6 +81,7 @@ from aea.helpers.base import (
     SimpleId,
     SimpleIdOrStr,
     load_module,
+    perform_dict_override,
     recursive_update,
 )
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -1585,7 +1586,12 @@ class AgentConfig(PackageConfiguration):
 
         return result
 
-    def update(self, data: Dict, env_vars_friendly: bool = False) -> None:
+    def update(  # pylint: disable=arguments-differ
+        self,
+        data: Dict,
+        env_vars_friendly: bool = False,
+        dict_overrides: Optional[Dict] = None,
+    ) -> None:
         """
         Update configuration with other data.
 
@@ -1594,6 +1600,7 @@ class AgentConfig(PackageConfiguration):
 
         :param data: the data to replace.
         :param env_vars_friendly: whether or not it is env vars friendly.
+        :param dict_overrides: A dictionary containing mapping for Component ID -> List of paths
         """
         data = copy(data)
         # update component parts
@@ -1604,11 +1611,20 @@ class AgentConfig(PackageConfiguration):
         for component_id, obj in new_component_configurations.items():
             if component_id not in updated_component_configurations:
                 updated_component_configurations[component_id] = obj
+
             else:
                 recursive_update(
                     updated_component_configurations[component_id],
                     obj,
                     allow_new_values=True,
+                )
+
+            if dict_overrides is not None and component_id in dict_overrides:
+                perform_dict_override(
+                    component_id,
+                    dict_overrides,
+                    updated_component_configurations,
+                    new_component_configurations,
                 )
 
         self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)

@@ -21,6 +21,7 @@
 import inspect
 import json
 import os
+from collections import OrderedDict
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Tuple
@@ -309,12 +310,27 @@ def validate_data_with_pattern(
                 return True
         return False
 
+    def is_a_dict_override(path: Tuple[str, ...]) -> bool:
+        """Check if an override is a dict override."""
+        flag = False
+        while len(path) > 0:
+            path = path[:-1]
+            if path in pattern_path_value:
+                pattern_value = pattern_path_value[path]
+                flag = isinstance(pattern_value, OrderedDict)
+                break
+        return flag
+
     for path, new_value in data_path_value.items():
         if check_excludes(path):
             continue
 
         if path not in pattern_path_value:
-            errors.append(f"Attribute `{'.'.join(path)}` is not allowed to be updated!")
+            if not is_a_dict_override(path=(*path,)):
+                errors.append(
+                    f"Attribute `{'.'.join(path)}` is not allowed to be updated!"
+                )
+
             continue
 
         pattern_value = pattern_path_value[path]
@@ -328,6 +344,9 @@ def validate_data_with_pattern(
             is_env_variable(pattern_value) or is_env_variable(new_value)
         ):
             # one of the values is env variable: skip data type check
+            continue
+
+        if isinstance(pattern_value, OrderedDict) and isinstance(new_value, dict):
             continue
 
         if (
