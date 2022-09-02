@@ -229,7 +229,6 @@ class PackageConfiguration(Configuration, ABC):
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
     FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset()
-    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
@@ -962,7 +961,6 @@ class SkillConfig(ComponentConfiguration):
     FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models"]
     )
-    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
 
     __slots__ = (
         "connections",
@@ -1147,17 +1145,10 @@ class SkillConfig(ComponentConfiguration):
             result[self.abstract_field_name] = current_config_data[
                 self.abstract_field_name
             ]
-
         for field in self.FIELDS_WITH_NESTED_FIELDS:
             if not current_config_data.get(field, {}):
                 continue
-            result[field] = {}
-            for name in current_config_data[field].keys():
-                result[field][name] = {}
-                for nested_field in self.NESTED_FIELDS_ALLOWED_TO_UPDATE:
-                    result[field][name][nested_field] = current_config_data[field][
-                        name
-                    ][nested_field]
+            result[field] = current_config_data[field]
         return result
 
 
