@@ -226,7 +226,11 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
+
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset()
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
+
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
 
@@ -573,6 +577,7 @@ class ConnectionConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["config", "cert_requests", "is_abstract", "build_directory"]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["config"])
 
     __slots__ = (
         "class_name",
@@ -1185,6 +1190,7 @@ class AgentConfig(PackageConfiguration):
             "storage_uri",
         ]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["logging_config"])
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
