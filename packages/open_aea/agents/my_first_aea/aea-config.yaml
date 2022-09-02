@@ -15,7 +15,7 @@ protocols:
 - fetchai/state_update:1.0.0:bafybeib736dqbkd43sz5hpb3yd4kviv2b4g2okirknn3vsdo5tlykuu4bu
 - open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
 skills:
-- fetchai/echo:0.19.0:bafybeibivdh6ywmhme3o2pgycwg2447hozkbnm47hnna2ftul2sk2xm7ru
+- fetchai/echo:0.19.0:bafybeice3v5erl4rdm3fjtakyfckm4wjq3accn5ajzkhjnyhbtfqm2cana
 default_connection: fetchai/stub:0.21.0
 default_ledger: ethereum
 required_ledgers:

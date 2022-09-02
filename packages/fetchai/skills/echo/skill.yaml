@@ -6,7 +6,6 @@ description: The echo skill implements simple echo functionality.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  .coverage: bafybeifppigpkg6g43kkiqsz66z52qbekik5gjl53acu5yhknrdh3kg3da
   README.md: bafybeiecz4czxtvzwfsfal5rtcjo4gma3ojxu3yxd7phgcfi6vfhnm622y
   __init__.py: bafybeigqsnja54qqvj6bmxkpj27v4ejqydklqhapdui44v4qj4e3nqyw24
   behaviours.py: bafybeigwlodaanmbtfszhvsnqwozur4dynt2q3qw6dhoyajjsnjklb2hmi

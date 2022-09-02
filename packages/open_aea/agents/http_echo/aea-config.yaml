@@ -15,7 +15,7 @@ protocols:
 - fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e
 - open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
 skills:
-- fetchai/http_echo:0.20.0:bafybeidkutctiaqyhfypygyzwnkdgofpe5hg54wrb6x5rcc7rmamhipvhu
+- fetchai/http_echo:0.20.0:bafybeiaas4srdjqrnnz5yxfwvcu53i6cli6vrzbqakvml35s3pouqzwv7e
 default_ledger: ethereum
 required_ledgers:
 - ethereum

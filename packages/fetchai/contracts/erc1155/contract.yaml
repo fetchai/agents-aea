@@ -6,7 +6,6 @@ description: The erc1155 contract implements an ERC1155 contract package.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  .coverage: bafybeideg2k6arzx7fzbkl7bdl2f3x4w3ocu7sbalesjtivtxvu43obyxu
   README.md: bafybeigbif52kdfcgx4h2f57xtcwuxkt6hlbyrsceyqoxnoh4pd24pxuxi
   __init__.py: bafybeidlszdrxy5blev2tyvajau443hsh4v2y65rsey2gsfet3c7syggqa
   build/Migrations.json: bafybeih3i7gw7wekpsw7eylufug26dqphxara7acclv45mgkwy2bsookye
