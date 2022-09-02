@@ -117,10 +117,7 @@ def _nested_set(
         return _dic
 
     root_key = keys[0]
-    if (
-        isinstance(configuration_obj, SkillConfig)
-        and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
-    ):
+    if isinstance(configuration_obj, SkillConfig):
         root_attr = getattr(configuration_obj, root_key)
         length = len(keys)
         if length < 3:
