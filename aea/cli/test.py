@@ -35,6 +35,7 @@ from aea.cli.utils.click_utils import (
     determine_package_type_for_directory,
 )
 from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_package_path
 from aea.components.base import load_aea_package
 from aea.configurations.base import ComponentConfiguration
@@ -71,7 +72,13 @@ output = {root_dir}/coverage.xml
 """
 
 
-@click.group()
+@click.group(
+    invoke_without_command=True,
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ),
+)
 @click.pass_context
 @click.option(
     "--cov",
@@ -89,6 +96,42 @@ def test(click_context: click.Context, cov: bool, cov_output: str) -> None:
     ctx = cast(Context, click_context.obj)
     ctx.config["cov"] = cov
     ctx.config["cov_output"] = cov_output
+
+    if click_context.invoked_subcommand is None:
+        test_aea_project(click_context)
+
+
+@check_aea_project
+def test_aea_project(click_context: click.Context) -> None:
+    """Test AEA project."""
+
+    click.echo("Executing tests of the AEA project...")
+
+    ctx = cast(Context, click_context.obj)
+
+    aea_project_dir = Path(ctx.cwd)
+    packages_dir = Path(ctx.registry_path)
+    cov = ctx.config.get("cov", False)
+    cov_output = Path(ctx.config.get("cov_output") or Path.cwd()).resolve()
+
+    # in case of an AEA project, the 'packages' directory is the AEA project path itself
+    load_package(aea_project_dir, aea_project_dir, packages_dir)
+    with CoveragercFile(root_dir=cov_output) as covrc_file:
+        with cd(aea_project_dir):
+            runtime_args = [
+                *get_pytest_args(covrc_file=covrc_file, cov=cov),
+            ]
+            exit_code = pytest.main(runtime_args)
+            coverage_file = ".coverage"
+            coverage(
+                argv=["html", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
+            )
+            coverage(
+                argv=["xml", f"--rcfile={covrc_file}", f"--data-file={coverage_file}"]
+            )
+            os.remove(coverage_file)
+
+    sys.exit(exit_code)
 
 
 @test.command(
