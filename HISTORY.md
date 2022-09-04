@@ -1,16 +1,17 @@
 # Release History - open AEA
 
-## 1.18.0 (2022-08-26)
+## 1.18.0 (2022-09-04)
 
 AEA:
-- Fixed protocol header string regex
-- Adds `FIELDS_WITH_NESTED_FIELDS` and `NESTED_FIELDS_ALLOWED_TO_UPDATE` in the base config class
-- Introduces `aea test` command group
+- Fixes protocol header string regex.
+- Adds `FIELDS_WITH_NESTED_FIELDS` and `NESTED_FIELDS_ALLOWED_TO_UPDATE` in the base config class.
+- Introduces `aea test` command group:
   - `aea test item_type public_id`: Run all tests of the AEA package specified by `item_type` and `public_id`
   - `aea test by-path package_dir`: Run all the tests of the AEA package located at `package_dir`
+  - `aea test packages`: Runs all tests in the `packages` (local registry) folder.
 
 Tests:
-- Ports tests for following packages into there respective package folders
+- Ports tests for the following packages into their respective package folders
   - `packages/valory/protocols/acn`
   - `packages/valory/protocols/tendermint`
   - `packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhttests`
