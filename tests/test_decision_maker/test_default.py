@@ -23,7 +23,12 @@
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_PATH
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import (
+    FETCHAI_PRIVATE_KEY_PATH,
+    FETCHAI_TESTNET_CONFIG,
+)
 
 from aea.configurations.base import PublicId
 from aea.crypto.registries import make_crypto, make_ledger_api
@@ -48,9 +53,6 @@ from packages.open_aea.protocols.signing.message import SigningMessage
 
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_PATH,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI_PRIVATE_KEY_PATH,
-    FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
     get_wealth_if_needed,
 )

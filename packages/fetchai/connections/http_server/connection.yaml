@@ -10,10 +10,16 @@ fingerprint:
   README.md: bafybeihkuhhsdfw5qqtz2jwpfppub6yvsehzmvmaqjlxnal4v76x47mcrq
   __init__.py: bafybeif5pkr5oarwd7yagdgn46miolmdmvgdyxv4kadgws2bf3iwshom24
   connection.py: bafybeicqhb5zrdmjt6vtb253luc7nfr4p4vrxkmniigqsokgatrsoeptoa
+  tests/__init__.py: bafybeidpthyhnhsvpixejrud77klcfkb3titlmyrssovfzt4a76dn3wnpm
+  tests/data/certs/server.crt: bafybeiev5i3xxkvn36wflf633gkumuxexsw4y2bubwbvl7edrz4igfgv34
+  tests/data/certs/server.csr: bafybeicvp7xdl5w3o4bzikkudpduitss3bpp6xqfwlxbw6kabdangohy5u
+  tests/data/certs/server.key: bafybeiabvpkpqr4fctrbssfal6pviv5otgmu32qyrfpyhcql5wgmlzjtoe
+  tests/data/petstore_sim.yaml: bafybeiaekkfxljlv57uviz4ug6isdqbzsnuxpsgy3dvhzh22daql3xh2i4
+  tests/test_http_server.py: bafybeicvrmyqeywuc6qparw5yui2mkvhybrch6zpnhjgouhf6bj2zvk2me
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeie2gaufz5ydmxiucqoqnlxfs2psqds6ewmk6kv6zsm5bg67d6sgyq
+- fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e
 class_name: HTTPServerConnection
 config:
   api_spec_path: null

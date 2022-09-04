@@ -12,11 +12,14 @@ fingerprint:
   connection.py: bafybeiaopv7sdzqibxnbo3epvu7ufdnwdliml2lzssxuaer337xzgiheqi
   contract_dispatcher.py: bafybeigpzih7porhorupuu5zlrg7ho6fswf4qc65xq22wypgqzwxowqlay
   ledger_dispatcher.py: bafybeicrjfb2f4ngb3lvwgfbxf3r3ukk7pgm3oaour4htmnuqqn44ltmku
+  tests/__init__.py: bafybeibx5zdcpx3u6sglbpp7yflnr7uaz557e6wqltawtzclubhhvaiw5e
+  tests/conftest.py: bafybeiehywp4w4pddrqew4yt2i43rjdi74ple4nkwgasbrcvxjs536mvee
+  tests/test_ledger_api.py: bafybeicymzwngble5fwcti6fmtoyddcrof2ioeqewjjpd3dflw6jx3qoxi
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:1.0.0:bafybeibtegb5bkxjh45a2mpjmymdgyoljt4bdimpspskmpvon3bu6gwzcm
-- fetchai/ledger_api:1.0.0:bafybeiardigq2zupq2zmyv4i4wjydflzwyz7bl6xhxxcwtiesevqss5fae
+- fetchai/contract_api:1.0.0:bafybeierqtg3fi2t4mn4dbz2xmwfqd4qeuz5rwxqp4ew6jzz24bxjbytpi
+- fetchai/ledger_api:1.0.0:bafybeiftily2ogosdp3gkbvlq2wahn66svkpaxdyu2a2br36uu7jkemd4i
 class_name: LedgerConnection
 config:
   ledger_apis:

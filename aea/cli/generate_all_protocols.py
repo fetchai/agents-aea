@@ -49,6 +49,7 @@ from aea.cli.registry.utils import download_file, extract, request_api
 from aea.common import JSONLike
 from aea.configurations.base import ComponentType, ProtocolConfig
 from aea.configurations.constants import (
+    AEA_TEST_DIRNAME,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_README_FILE,
     PROTOCOLS,
@@ -157,9 +158,9 @@ def _fix_generated_protocol(package_path: Path) -> None:
 
     :param package_path: path to the protocol package. Used also to recover the protocol name.
     """
-    log(f"Restore original custom types in {package_path}")
     custom_types_module = package_path / CUSTOM_TYPE_MODULE_NAME
     if custom_types_module.exists():
+        log(f"Restore original custom types in {package_path}")
         file_to_replace = Path(PROTOCOLS, package_path.name, CUSTOM_TYPE_MODULE_NAME)
         file_to_replace.write_text(custom_types_module.read_text())
 
@@ -169,6 +170,13 @@ def _fix_generated_protocol(package_path: Path) -> None:
         shutil.copyfile(
             package_readme_file,
             Path(PROTOCOLS, package_path.name, DEFAULT_README_FILE),
+        )
+
+    tests_module = package_path / AEA_TEST_DIRNAME
+    if tests_module.is_dir():
+        log(f"Restore original `tests` directory in {package_path}")
+        shutil.copytree(
+            tests_module, Path(PROTOCOLS, package_path.name, AEA_TEST_DIRNAME)
         )
 
 

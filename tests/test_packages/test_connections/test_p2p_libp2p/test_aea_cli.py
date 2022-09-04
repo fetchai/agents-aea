@@ -34,7 +34,7 @@ from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 
-from tests.conftest import DEFAULT_LEDGER, LOCAL_HOST
+from tests.conftest import DEFAULT_LEDGER, LOCALHOST
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
@@ -207,7 +207,7 @@ class TestP2PLibp2pConnectionAEARunningFullNode(BaseP2PLibp2pConnectionAEATest):
 
         # setup a full node: with public uri, relay service, and delegate service
         config_path = f"{p2p_libp2p_path}.config"
-        hostname = LOCAL_HOST.hostname
+        hostname = LOCALHOST.hostname
         self.set_config(f"{config_path}.local_uri", f"{hostname}:{next(ports)}")
         self.set_config(f"{config_path}.public_uri", f"{hostname}:{next(ports)}")
         self.set_config(f"{config_path}.delegate_uri", f"{hostname}:{next(ports)}")

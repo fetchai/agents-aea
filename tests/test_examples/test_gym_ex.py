@@ -24,6 +24,12 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
+
+from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
+
+from packages.fetchai.connections.gym.connection import GymConnection
 
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import ROOT_DIR, env_path_separator
@@ -82,3 +88,26 @@ class TestGymExt:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+def test_gym_env_load():
+    """Load gym env from file."""
+    try:
+        curdir = os.getcwd()
+        os.chdir(os.path.join(ROOT_DIR, "examples", "gym_ex"))
+        gym_env_path = "gyms.env.BanditNArmedRandom"
+        configuration = ConnectionConfig(
+            connection_id=GymConnection.connection_id, env=gym_env_path
+        )
+        identity = Identity(
+            "name", address="agent_address", public_key="agent_public_key"
+        )
+        gym_con = GymConnection(
+            gym_env=None,
+            identity=identity,
+            configuration=configuration,
+            data_dir=MagicMock(),
+        )
+        assert gym_con.channel.gym_env is not None
+    finally:
+        os.chdir(curdir)

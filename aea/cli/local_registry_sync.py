@@ -26,9 +26,9 @@ from typing import Generator, Tuple, Union, cast
 
 import click
 
-from aea.cli.fingerprint import determine_package_type_for_directory
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.utils import get_package_meta
+from aea.cli.utils.click_utils import determine_package_type_for_directory
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.cli.utils.loggers import logger

@@ -165,17 +165,18 @@ security:
 # update copyright headers
 .PHONY: generators
 generators:
+	rm -rf packages/fetchai/connections/stub/input_file
 	tox -e fix-copyright
-	python -m aea.cli generate-all-protocols
-	python -m aea.cli generate-all-protocols tests/data/packages
 	python -m aea.cli hash all
 	python -m aea.cli hash all --packages-dir=./tests/data/packages
+	python -m aea.cli generate-all-protocols
+	python -m aea.cli generate-all-protocols tests/data/packages
 	tox -e generate-api-documentation
 	tox -e fix-doc-hashes
 
 .PHONY: common-checks-1
 common-checks:
-	tox -p -e check-copyright -e hash_check -e package-dependencies-checks
+	tox -p -e check-copyright -e hash-check -e package-dependencies-checks
 
 .PHONY: common-checks-2
 common-checks-2:

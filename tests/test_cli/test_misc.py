@@ -99,6 +99,7 @@ Commands:
   run                     Run the agent.
   scaffold                Scaffold a package for the agent.
   search                  Search for packages in the registry.
+  test                    Run tests of an AEA project.
   transfer                Transfer wealth associated with a private key of...
   upgrade                 Upgrade the packages of the agent.
 """

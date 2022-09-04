@@ -44,7 +44,7 @@ pip install open-aea[all]
 pip install open-aea-cli-ipfs
 ```
 ```
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.17.0/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.18.0/packages packages
 ```
 
 ``` bash
@@ -72,7 +72,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeibnjfr3sdg57ggyxbcfkh42yqkj6a3gftp55l26aaw2z2jvvc3tny --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeia2h6uk25aktvzwle3nbdex7iqkf4nktgp2w2b6qbqqj3za7h7d24 --remote
 cd my_first_aea
 ```
 ``` bash
@@ -158,19 +158,19 @@ aea delete my_first_aea
 
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeibnjfr3sdg57ggyxbcfkh42yqkj6a3gftp55l26aaw2z2jvvc3tny --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeia2h6uk25aktvzwle3nbdex7iqkf4nktgp2w2b6qbqqj3za7h7d24 --remote
 cd my_first_aea
 ```
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeibnjfr3sdg57ggyxbcfkh42yqkj6a3gftp55l26aaw2z2jvvc3tny --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeia2h6uk25aktvzwle3nbdex7iqkf4nktgp2w2b6qbqqj3za7h7d24 --remote
 cd my_first_aea
 ```
 
 ```bash
 mkdir packages
 cd my_first_aea
-aea add protocol fetchai/default:1.0.0:bafybeibvtmpfzlig3ngtz6x2omc2rlx5knltnunbmg37tih5wlxnrfszvm --remote
+aea add protocol fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy --remote
 aea push protocol fetchai/default --local
 cd ..
 aea delete my_aea
