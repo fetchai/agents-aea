@@ -9,6 +9,7 @@ AEA:
   - `aea test item_type public_id`: Run all tests of the AEA package specified by `item_type` and `public_id`
   - `aea test by-path package_dir`: Run all the tests of the AEA package located at `package_dir`
   - `aea test packages`: Runs all tests in the `packages` (local registry) folder.
+  - `aea test`: Runs tests in the `tests` folder, if present in the agent folder.
 
 Tests:
 - Ports tests for the following packages into their respective package folders

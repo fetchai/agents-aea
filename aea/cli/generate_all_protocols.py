@@ -52,6 +52,7 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_README_FILE,
     PROTOCOLS,
+    AEA_TEST_DIRNAME,
 )
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
@@ -64,7 +65,6 @@ from aea.manager.helpers import AEAProject
 SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
 LIBPROTOC_VERSION = "libprotoc 3.19.4"
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
-TESTS_DIRECTORY_NAME = "tests"
 PROTOCOL_GENERATOR_DOCSTRING_REGEX = "It was created with protocol buffer compiler version `libprotoc .*` and aea protocol generator version `.*`."
 
 logging.basicConfig(format="[%(asctime)s][%(levelname)s] %(message)s")
@@ -172,11 +172,11 @@ def _fix_generated_protocol(package_path: Path) -> None:
             Path(PROTOCOLS, package_path.name, DEFAULT_README_FILE),
         )
 
-    tests_module = package_path / TESTS_DIRECTORY_NAME
+    tests_module = package_path / AEA_TEST_DIRNAME
     if tests_module.is_dir():
         log(f"Restore original `tests` directory in {package_path}")
         shutil.copytree(
-            tests_module, Path(PROTOCOLS, package_path.name, TESTS_DIRECTORY_NAME)
+            tests_module, Path(PROTOCOLS, package_path.name, AEA_TEST_DIRNAME)
         )
 
 
