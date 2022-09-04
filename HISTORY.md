@@ -1,7 +1,46 @@
 # Release History - open AEA
 
+## 1.18.0 (2022-09-04)
 
-## 1.17.0
+AEA:
+- Fixes protocol header string regex.
+- Adds `FIELDS_WITH_NESTED_FIELDS` and `NESTED_FIELDS_ALLOWED_TO_UPDATE` in the base config class.
+- Introduces `aea test` command group:
+  - `aea test item_type public_id`: Run all tests of the AEA package specified by `item_type` and `public_id`
+  - `aea test by-path package_dir`: Run all the tests of the AEA package located at `package_dir`
+  - `aea test packages`: Runs all tests in the `packages` (local registry) folder.
+
+Tests:
+- Ports tests for the following packages into their respective package folders
+  - `packages/valory/protocols/acn`
+  - `packages/valory/protocols/tendermint`
+  - `packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhttests`
+  - `packages/open_aea/protocols/signing`
+  - `packages/fetchai/skills/generic_seller`
+  - `packages/fetchai/skills/http_echo`
+  - `packages/fetchai/skills/echo`
+  - `packages/fetchai/skills/erc1155_client`
+  - `packages/fetchai/skills/gym`
+  - `packages/fetchai/skills/erc1155_deploy`
+  - `packages/fetchai/skills/generic_buyer`
+  - `packages/fetchai/protocols/http`
+  - `packages/fetchai/protocols/fipa`
+  - `packages/fetchai/protocols/default`
+  - `packages/fetchai/protocols/state_update`
+  - `packages/fetchai/protocols/ledger_api`
+  - `packages/fetchai/protocols/oef_search`
+  - `packages/fetchai/protocols/contract_api`
+  - `packages/fetchai/protocols/gym`
+  - `packages/fetchai/protocols/tac`
+  - `packages/fetchai/connections/ledger`
+  - `packages/fetchai/connections/http_server`
+  - `packages/fetchai/connections/local`
+  - `packages/fetchai/connections/stub`
+  - `packages/fetchai/connections/gym`
+  - `packages/fetchai/connections/http_client`
+  - `packages/fetchai/contracts/erc1155`
+
+## 1.17.0 (2022-08-26)
 
 AEA:
 - Updates the deploy image Dockerfile to use Python 3.10
