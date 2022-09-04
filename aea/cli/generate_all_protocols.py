@@ -49,10 +49,10 @@ from aea.cli.registry.utils import download_file, extract, request_api
 from aea.common import JSONLike
 from aea.configurations.base import ComponentType, ProtocolConfig
 from aea.configurations.constants import (
+    AEA_TEST_DIRNAME,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_README_FILE,
     PROTOCOLS,
-    AEA_TEST_DIRNAME,
 )
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
