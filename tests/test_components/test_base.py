@@ -23,6 +23,7 @@ import itertools
 import os
 import re
 import sys
+from copy import copy
 from itertools import zip_longest
 from pathlib import Path
 from textwrap import dedent
@@ -129,12 +130,17 @@ def test_load_aea_package_twice(mock_sys_modules):
     config.directory = (
         Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
     )
+    first_sys_modules = copy(sys.modules)
+    # ensure package not in `sys.modules`
     sys.modules.pop("packages.fetchai.connections.http_client.connection", None)
     load_aea_package(config)
     assert "packages.fetchai.connections.http_client.connection" not in sys.modules
     from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 
-    assert "packages.fetchai.connections.http_client.connection" in sys.modules
+    second_sys_modules = copy(sys.modules)
+    diff = second_sys_modules.keys() - first_sys_modules.keys()
+    print(diff)
+    assert "packages.fetchai.connections.http_client.connection" in sys.modules, diff
     BaseHTTPCLientConnection = HTTPClientConnection
     load_aea_package(config)
     from packages.fetchai.connections.http_client.connection import HTTPClientConnection
