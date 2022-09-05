@@ -19,7 +19,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e
+- fetchai/http:1.0.0:bafybeiaowkfcekw5x6osp7onx6nebzgbsoiymduo5if26twkhlohk4vtu4
 class_name: HTTPServerConnection
 config:
   api_spec_path: null

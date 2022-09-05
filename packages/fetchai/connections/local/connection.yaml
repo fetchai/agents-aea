@@ -15,9 +15,9 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
-- fetchai/fipa:1.0.0:bafybeib7mzgyjcfr7c4gcx24aeral7ldoqjb23qvsd266gnp66anftqt5q
-- fetchai/oef_search:1.0.0:bafybeihdy3p7hjlh2vjkehfer5gfgjvqb666faupv4e7hgnxpgz2r7rwai
+- fetchai/default:1.0.0:bafybeiesgnhjkaskh2ggxigfg7hz5gfkw2jc5cljkrx7vgygysvowzd4py
+- fetchai/fipa:1.0.0:bafybeihzt7lwoppgygyiobqt2lrxihycbkpqqdb6lqwfw6ptaee6rxodvy
+- fetchai/oef_search:1.0.0:bafybeiaefgxnbm7kcijmqor44jnonyaygl6afcuhmprpiwooclfirlec6a
 class_name: OEFLocalConnection
 config: {}
 excluded_protocols: []

@@ -24,7 +24,6 @@ import itertools
 import os
 import re
 import sys
-from copy import copy
 from itertools import zip_longest
 from pathlib import Path
 from textwrap import dedent
@@ -131,7 +130,6 @@ def test_load_aea_package_twice():
     config.directory = (
         Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
     )
-    first_sys_modules = copy(sys.modules)
     # It doesn't matter if the package is already loaded.
     # We cannot safely remove it as references to other modules
     # would persist and get stale.
