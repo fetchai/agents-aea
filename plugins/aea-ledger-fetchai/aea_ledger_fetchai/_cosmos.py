@@ -41,6 +41,7 @@ from cosmpy.auth.rest_client import AuthRestClient
 from cosmpy.bank.rest_client import BankRestClient, QueryBalanceRequest
 from cosmpy.common.rest_client import RestClient
 from cosmpy.cosmwasm.rest_client import CosmWasmRestClient
+from cosmpy.crypto.hashfuncs import ripemd160
 from cosmpy.protos.cosmos.auth.v1beta1.auth_pb2 import BaseAccount
 from cosmpy.protos.cosmos.auth.v1beta1.query_pb2 import QueryAccountRequest
 from cosmpy.protos.cosmos.bank.v1beta1.tx_pb2 import MsgSend
@@ -328,7 +329,7 @@ class CosmosHelper(Helper):
         """
         public_key_bytes = bytes.fromhex(public_key)
         s = hashlib.new("sha256", public_key_bytes).digest()
-        r = hashlib.new("ripemd160", s).digest()
+        r = ripemd160(s)
         five_bit_r = convertbits(r, 8, 5)
         if five_bit_r is None:  # pragma: nocover
             raise AEAEnforceError("Unsuccessful bech32.convertbits call")
