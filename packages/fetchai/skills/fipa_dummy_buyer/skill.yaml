@@ -15,7 +15,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/fipa:1.0.0:bafybeihzt7lwoppgygyiobqt2lrxihycbkpqqdb6lqwfw6ptaee6rxodvy
+- fetchai/fipa:1.0.0:bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei
 skills: []
 behaviours:
   initializer:

@@ -8,14 +8,14 @@ fingerprint:
   README.md: bafybeibkr6ecv5efx3hwxvxposvpmr76ugrj6kydeasb7bppo3ibynnjcu
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_server:0.22.0:bafybeidjaeve6h6jrc2pytlprcuyz6ep56ha7fgv5kmbun7unj3maouztm
+- fetchai/http_server:0.22.0:bafybeidc3y4h5tmlrc26ssgb7jsnkkiymg47vwx2wxjgzkejbpw7hayh5m
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeiesgnhjkaskh2ggxigfg7hz5gfkw2jc5cljkrx7vgygysvowzd4py
-- fetchai/http:1.0.0:bafybeiaowkfcekw5x6osp7onx6nebzgbsoiymduo5if26twkhlohk4vtu4
+- fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
+- fetchai/http:1.0.0:bafybeib3f4rgld3v2r7ubb4qlfaev7y4azm6ndw4x2of4lp73nfmmiabeu
 - open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
 skills:
-- fetchai/http_echo:0.20.0:bafybeie5ojvxo2rjbh7stahd7twbsdkbotmic3pqp6k3h5rlsj26inobsa
+- fetchai/http_echo:0.20.0:bafybeiaks3horwicjhxukygnvv74zt56uevkgasqbpxxj3sgskrk63xssu
 default_ledger: ethereum
 required_ledgers:
 - ethereum

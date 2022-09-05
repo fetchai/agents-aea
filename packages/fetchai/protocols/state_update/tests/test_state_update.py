@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for transaction."""
+# pylint: skip-file
+
 from typing import Type
 from unittest.mock import patch
 
