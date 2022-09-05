@@ -25,7 +25,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/tls"
-	"fmt"
 	"log"
 	"math/rand"
 	"net"
@@ -1937,7 +1936,7 @@ func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
 		}
 		message, _ := strconv.Atoi(string(envel.Message))
 		if message != counter {
-			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))
+			log.Fatalf("Expected counter %d received counter %d", counter, message)
 		}
 	case <-timeout:
 		t.Error("Failed to receive envelope before timeout")
