@@ -121,8 +121,7 @@ def test_load_aea_package():
     load_aea_package(config)
 
 
-@pytest.mark.skip("Problem in CI")
-def test_load_aea_package_twice():
+def test_load_aea_package_twice(mock_sys_modules):
     """Test aea package load twice and ensure python objects stay the same."""
     config = ConnectionConfig(
         "http_client", "fetchai", "0.5.0", protocols={PublicId("fetchai", "http")}

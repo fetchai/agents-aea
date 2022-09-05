@@ -23,6 +23,7 @@ import re
 import shutil
 import sys
 import tempfile
+from copy import copy
 from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
@@ -907,6 +908,7 @@ class TestExtraDeps(AEATestCaseEmpty):
 
     def test_install_dependency(self):
         """Test dependencies installed."""
+        old_sys_modules = copy(sys.modules)
         package_name = "async_generator"
         dependency = Dependency(package_name, "==1.10")
         sys.modules.pop(package_name, None)
@@ -935,6 +937,7 @@ class TestExtraDeps(AEATestCaseEmpty):
             raise Exception("should not be raised")
         except ModuleNotFoundError:
             pass
+        sys.modules = old_sys_modules
 
 
 class TestBuildEntrypoint(AEATestCaseEmpty, CleanDirectoryClass):

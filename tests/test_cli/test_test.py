@@ -21,10 +21,9 @@
 import shutil
 import subprocess  # nosec
 import sys
-from copy import copy
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Generator, Sequence, Type
+from typing import Any, Sequence, Type
 from unittest import mock
 
 import click.testing
@@ -82,14 +81,6 @@ def mock_pytest_main() -> Any:
         return result
 
     return mock.patch("aea.cli.test.pytest.main", side_effect=fun)
-
-
-@pytest.fixture(scope="function")
-def mock_sys_modules() -> Generator:
-    """Store previous content of sys.modules and restore it after test execution."""
-    old_sys_modules = copy(sys.modules)
-    yield
-    sys.modules = old_sys_modules
 
 
 class BaseAEATestCommand(AEATestCaseEmpty):
