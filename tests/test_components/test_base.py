@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea/components/base.py"""
+import inspect
 import itertools
 import os
 import re
@@ -122,7 +123,7 @@ def test_load_aea_package():
     load_aea_package(config)
 
 
-def test_load_aea_package_twice(mock_sys_modules):
+def test_load_aea_package_twice():
     """Test aea package load twice and ensure python objects stay the same."""
     config = ConnectionConfig(
         "http_client", "fetchai", "0.5.0", protocols={PublicId("fetchai", "http")}
@@ -131,17 +132,27 @@ def test_load_aea_package_twice(mock_sys_modules):
         Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
     )
     first_sys_modules = copy(sys.modules)
-    # ensure package not in `sys.modules`
-    sys.modules.pop("packages.fetchai.connections.http_client.connection", None)
-    load_aea_package(config)
-    assert "packages.fetchai.connections.http_client.connection" not in sys.modules
-    from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+    # It doesn't matter if the package is already loaded.
+    # We cannot safely remove it as references to other modules
+    # would persist and get stale.
+    if "packages.fetchai.connections.http_client.connection" not in sys.modules:
+        load_aea_package(config)
+        assert "packages.fetchai.connections.http_client.connection" not in sys.modules
+        from packages.fetchai.connections.http_client.connection import (
+            HTTPClientConnection,
+        )
 
-    second_sys_modules = copy(sys.modules)
-    diff = second_sys_modules.keys() - first_sys_modules.keys()
-    print(diff)
-    assert "packages.fetchai.connections.http_client.connection" in sys.modules, diff
-    BaseHTTPCLientConnection = HTTPClientConnection
+        assert "packages.fetchai.connections.http_client.connection" in sys.modules
+        BaseHTTPCLientConnection = HTTPClientConnection
+    else:
+        members = inspect.getmembers(
+            sys.modules["packages.fetchai.connections.http_client.connection"],
+            inspect.isclass,
+        )
+        BaseHTTPCLientConnection = [
+            pairs[1] for pairs in members if pairs[0] == "HTTPClientConnection"
+        ]
+    # second time
     load_aea_package(config)
     from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 
