@@ -26,6 +26,7 @@ import re
 import time
 from contextlib import suppress
 from copy import copy
+from multiprocessing.popen_spawn_posix import _DupFd  # type: ignore # noqa: F401
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory

@@ -46,22 +46,27 @@ lock = threading.Lock()
 _default_logger = logging.getLogger(__file__)
 
 if platform.system() == "Windows":  # pragma: nocover
-    import win32process  # type: ignore  # pylint: disable=import-error
 
     WIN32_PROCESS_TIMES_TICKS_PER_SECOND = 1e7
 
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
+        import win32process  # type: ignore  # pylint: disable=import-error
+
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
         return float(d["WorkingSetSize"]) * BYTES_TO_MBYTES
 
     def get_peak_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
+        import win32process  # type: ignore  # pylint: disable=import-error
+
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
         return float(d["PeakWorkingSetSize"]) * BYTES_TO_MBYTES
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
+        import win32process  # type: ignore  # pylint: disable=import-error
+
         d = win32process.GetProcessTimes(win32process.GetCurrentProcess())  # type: ignore
         return d["UserTime"] / WIN32_PROCESS_TIMES_TICKS_PER_SECOND
 
