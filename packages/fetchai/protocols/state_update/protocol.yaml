@@ -14,7 +14,8 @@ fingerprint:
   serialization.py: bafybeiffesod4s4s6hxrgrh4ylbo7jxos752ix5khlzodwujahk34ouaem
   state_update.proto: bafybeiawlpcxmdojiwekzptaonfkubyxlwpblcgvkrzgle4lihs5ykmnvm
   state_update_pb2.py: bafybeihehsm5uvve3i63igdk5efg3t6aao65jftllrgm5l5gdkr7sj34ce
-  tests/test_state_update.py: bafybeidyzncjdg6br3765cl4b4svgdt4hja7vlbtoqj4b6j7tjvlqyzaxy
+  tests/__init__.py: bafybeicf4p3m6qv3qkvd3ahxemeslvkrzjegetayjwrvjoch4ajoqezgpq
+  tests/test_state_update.py: bafybeicjeibmkt2tsq2qqdmk7xqtkslrk7yavcr3vm7jnytgiog4he5feq
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

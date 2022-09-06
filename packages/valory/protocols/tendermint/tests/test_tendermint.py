@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for the register protocol."""
+# pylint: skip-file
 
 from itertools import product
 from unittest import mock

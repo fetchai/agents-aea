@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the fipa protocol package."""
+# pylint: skip-file
 
 import logging
 from typing import Any, Optional, Type

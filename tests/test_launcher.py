@@ -21,6 +21,7 @@
 import shutil
 import time
 from multiprocessing import Event
+from multiprocessing.managers import DictProxy  # type: ignore # noqa: F401
 from pathlib import Path
 from threading import Thread
 from unittest.mock import patch

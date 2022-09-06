@@ -16,7 +16,8 @@ fingerprint:
   serialization.py: bafybeifv24cywhafg5db6mmqxc3fz3jmt7bjg4jsaioeivqkvv2ra7rimq
   tac.proto: bafybeicqiktmsp2ud7zbddsovubo4cd6jtgqwdpm3dwegvf7xhlc3culmq
   tac_pb2.py: bafybeiduhujxst63ocjj4nh2pddbxqyqbpibmcvrx2xkqubo3dj247gqoa
-  tests/test_tac.py: bafybeiggwid7zlqwo53aefsdnddyqvdcia7ndtcuapqpxtssvbor7fnou4
+  tests/__init__.py: bafybeigio4dcbzdb4zxbycaredo4l4a72z4rk6wt5bbvubhu6fdj73t6oe
+  tests/test_tac.py: bafybeicwgqy3xhgaad3m7zlbk5yytoch45lvysf4l4g62hoyvb7lhzqobq
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

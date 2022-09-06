@@ -15,7 +15,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e
+- fetchai/http:1.0.0:bafybeib3f4rgld3v2r7ubb4qlfaev7y4azm6ndw4x2of4lp73nfmmiabeu
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1

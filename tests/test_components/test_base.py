@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea/components/base.py"""
+import inspect
 import itertools
 import os
 import re
@@ -121,7 +122,6 @@ def test_load_aea_package():
     load_aea_package(config)
 
 
-@pytest.mark.skip("Problem in CI")
 def test_load_aea_package_twice():
     """Test aea package load twice and ensure python objects stay the same."""
     config = ConnectionConfig(
@@ -130,13 +130,27 @@ def test_load_aea_package_twice():
     config.directory = (
         Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
     )
-    sys.modules.pop("packages.fetchai.connections.http_client.connection", None)
-    load_aea_package(config)
-    assert "packages.fetchai.connections.http_client.connection" not in sys.modules
-    from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+    # It doesn't matter if the package is already loaded.
+    # We cannot safely remove it as references to other modules
+    # would persist and get stale.
+    if "packages.fetchai.connections.http_client.connection" not in sys.modules:
+        load_aea_package(config)
+        assert "packages.fetchai.connections.http_client.connection" not in sys.modules
+        from packages.fetchai.connections.http_client.connection import (
+            HTTPClientConnection,
+        )
 
-    assert "packages.fetchai.connections.http_client.connection" in sys.modules
-    BaseHTTPCLientConnection = HTTPClientConnection
+        assert "packages.fetchai.connections.http_client.connection" in sys.modules
+        BaseHTTPCLientConnection = HTTPClientConnection
+    else:
+        members = inspect.getmembers(
+            sys.modules["packages.fetchai.connections.http_client.connection"],
+            inspect.isclass,
+        )
+        BaseHTTPCLientConnection = [
+            pairs[1] for pairs in members if pairs[0] == "HTTPClientConnection"
+        ][0]
+    # second time
     load_aea_package(config)
     from packages.fetchai.connections.http_client.connection import HTTPClientConnection
 

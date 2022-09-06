@@ -15,7 +15,8 @@ fingerprint:
   gym_pb2.py: bafybeihpz5o5kus64bsz7rextgizhqhaqidtxgnq7ijhhta5hnyfvlh6re
   message.py: bafybeidutr4rssoui26znxgbhkxsjpqx7mrdiryvjpnbm7ls6vtrbz3jim
   serialization.py: bafybeiabjo2b3y7jy6jlo4qt7fhhnkz2ge7bjvej4mfapxgfyehjp6pera
-  tests/test_gym.py: bafybeih3ue2jrrzqemwjqgjpmskj3esate5geqnmn3clfr3dn5erbkvo5a
+  tests/__init__.py: bafybeidoxwwkwljoz2xsmv7pif3tksdyhl7tgf4s4aao5ypjg4o4hefk7e
+  tests/test_gym.py: bafybeih7jqhs3exvqfbo5et55pdksp6q44q2tq6edjx7mnesm44mgzmnrq
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

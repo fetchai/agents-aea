@@ -1,5 +1,16 @@
 # Release History - open AEA
 
+## 1.18.0.post1 (2022-09-06)
+
+AEA:
+- Reverts a problematic package loading logic introduced in `1.18.0`
+
+Tests:
+- Fixes flaky tests
+
+Chores:
+- Restructures CI to avoid environment cross-effects between the package and framework tests
+
 ## 1.18.0 (2022-09-04)
 
 AEA:

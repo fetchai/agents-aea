@@ -8,14 +8,14 @@ fingerprint:
   README.md: bafybeiftiqiqpxn7ghrurhepquzqzk3su3x6wanlnolt2uj772fzgz574m
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.21.0:bafybeidrjbyak3nfgch3acwjvvjbpetjhqtxvcoecmvz7zlvghzycc37dq
+- fetchai/stub:0.21.0:bafybeieqlozydyvdxmjxhqygwq27djecpiftoqwlcpcr4qpotomwnh66yy
 contracts: []
 protocols:
-- fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy
-- fetchai/state_update:1.0.0:bafybeib736dqbkd43sz5hpb3yd4kviv2b4g2okirknn3vsdo5tlykuu4bu
-- open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi
+- fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
+- fetchai/state_update:1.0.0:bafybeidtndlmppst6l6iughpflqbbbkzditixo2fy2dncxfkb5apkx5y4m
+- open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
 skills:
-- fetchai/echo:0.19.0:bafybeice3v5erl4rdm3fjtakyfckm4wjq3accn5ajzkhjnyhbtfqm2cana
+- fetchai/echo:0.19.0:bafybeibd4jkjml3vpqt3in7adk34ijoge5ufzquobpb4ugaxxo6c7nq55e
 default_connection: fetchai/stub:0.21.0
 default_ledger: ethereum
 required_ledgers:

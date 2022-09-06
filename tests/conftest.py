@@ -34,6 +34,7 @@ import tempfile
 import threading
 import time
 from contextlib import contextmanager
+from copy import copy
 from functools import wraps
 from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple, cast
@@ -1230,3 +1231,11 @@ def use_ipfs_daemon() -> Generator:
 
     yield
     ipfs_daemon.stop()
+
+
+@pytest.fixture(scope="function")
+def mock_sys_modules() -> Generator:
+    """Store previous content of sys.modules and restore it after test execution."""
+    old_sys_modules = copy(sys.modules)
+    yield
+    sys.modules = old_sys_modules
