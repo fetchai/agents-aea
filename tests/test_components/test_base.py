@@ -149,7 +149,7 @@ def test_load_aea_package_twice():
         )
         BaseHTTPCLientConnection = [
             pairs[1] for pairs in members if pairs[0] == "HTTPClientConnection"
-        ]
+        ][0]
     # second time
     load_aea_package(config)
     from packages.fetchai.connections.http_client.connection import HTTPClientConnection
