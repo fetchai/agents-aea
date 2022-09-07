@@ -567,30 +567,32 @@ def bump_version_in_yaml(
 
 
 class Updater:
-    """PAckage versions updter tool."""
+    """Package versions updter tool."""
 
-    def __init__(self, new_version, replace_by_default, context):
+    def __init__(
+        self, new_version: str, replace_by_default: bool, context: int
+    ) -> None:
         """Init updater."""
         self.option_new_version = new_version
         self.option_replace_by_default = replace_by_default
         self.option_context = context
 
     @staticmethod
-    def check_if_svn_installed():
+    def check_if_svn_installed() -> None:
         """Check svn tool installed."""
         res = shutil.which("svn")
         if res is None:
             raise Exception("Install svn first!")
 
     @staticmethod
-    def run_hashing():
+    def run_hashing() -> None:
         """Run hashes update."""
         hashing_call = update_hashes()
         if hashing_call == 1:
             raise Exception("Problem when running IPFS script!")
 
     @staticmethod
-    def check_if_running_allowed():
+    def check_if_running_allowed() -> None:
         """
         Check if we can run the script.
 
@@ -602,17 +604,17 @@ class Updater:
         if len(stdout) > 0:
             raise Exception("Cannot run script in unclean git state.")
 
-    def _checks(self):
+    def _checks(self) -> None:
         self.check_if_svn_installed()
         self.run_hashing()
         self.check_if_running_allowed()
 
-    def run(self):
+    def run(self) -> None:
         """Run package versions update process."""
         self._checks()
         self._run_hashing()
 
-    def _run_once(self):
+    def _run_once(self) -> bool:
         """Run the upgrade logic once."""
         all_package_ids_to_update = get_public_ids_to_update()
         if len(all_package_ids_to_update) == 0:
@@ -733,7 +735,7 @@ class Updater:
 
         bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)
 
-    def _run_hashing(self):
+    def _run_hashing(self) -> None:
         while self._run_once():
             self._run_hashing()
 

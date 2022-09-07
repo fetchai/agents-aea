@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: QmV4V7MxSHQaAsN3MA3ybQkfZ8WYgoymqQkf6byz1GkiBe
   game.py: QmSFZKLLqSjcoWqF9skD8zjd1SwDvUwNro77zk4QWEY49J
   handlers.py: QmXoh3h5Xj2A3iFC4ur3CQethP3EYphG2x2U7AzWHvjQBy
-  helpers.py: QmS7SVagLtusYtL5b6cWRGq34V6AuSLyeqFb9Fz6BCrfzr
+  helpers.py: QmSQfQYuP4ThE7SeFSCg1Km725PjHPdu6GTDpJzasdEZ3E
   parameters.py: QmQDgHpapxWQgLRza1dNgi79z5dBxhWsnTgnznTf1zmjPR
 fingerprint_ignore_patterns: []
 connections:
