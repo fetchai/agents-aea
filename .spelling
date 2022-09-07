@@ -350,4 +350,5 @@ my_first_aea
 output_file
  - HISTORY.md
 gitleaks
+1.18.0.post1
 aea-cli-ipfs
