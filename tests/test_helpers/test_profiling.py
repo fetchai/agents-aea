@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helpers/profiling module."""
+import platform
 import re
 from typing import Dict, List, Optional
 
@@ -28,6 +29,13 @@ from aea.protocols.base import Message
 
 from tests.common.utils import wait_for_condition
 
+
+if platform.system() == "Windows":  # pragma: nocover
+    import win32timezone  # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import
+
+    _ = win32timezone
+
+    import win32process  # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import # noqa: F401
 
 MESSAGE_NUMBER = 10
 
