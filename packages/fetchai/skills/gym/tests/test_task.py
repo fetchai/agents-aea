@@ -42,7 +42,7 @@ class TestTask(GymTestCase):
         """Test the setup method of the GymTask class."""
         # operation
         with patch.object(self.logger, "info") as mock_logger:
-            self.task.setup()
+            self.task.setup_class()
 
         # after
         mock_logger.assert_any_call("Gym task: setup method called.")

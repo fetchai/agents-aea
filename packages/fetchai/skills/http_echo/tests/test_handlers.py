@@ -43,40 +43,41 @@ class TestHttpHandler(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_DIR
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.http_handler = cast(
-            HttpHandler, self._skill.skill_context.handlers.http_handler
+        super().setup_class()
+        cls.http_handler = cast(
+            HttpHandler, cls._skill.skill_context.handlers.http_handler
         )
-        self.logger = self._skill.skill_context.logger
+        cls.logger = cls._skill.skill_context.logger
 
-        self.http_dialogues = cast(
-            HttpDialogues, self._skill.skill_context.http_dialogues
+        cls.http_dialogues = cast(
+            HttpDialogues, cls._skill.skill_context.http_dialogues
         )
 
-        self.get_method = "get"
-        self.post_method = "post"
-        self.url = "some_url"
-        self.version = "some_version"
-        self.headers = "some_headers"
-        self.body = b"some_body"
-        self.sender = "fetchai/some_skill:0.1.0"
-        self.skill_id = str(self._skill.skill_context.skill_id)
+        cls.get_method = "get"
+        cls.post_method = "post"
+        cls.url = "some_url"
+        cls.version = "some_version"
+        cls.headers = "some_headers"
+        cls.body = b"some_body"
+        cls.sender = "fetchai/some_skill:0.1.0"
+        cls.skill_id = str(cls._skill.skill_context.skill_id)
 
-        self.status_code = 100
-        self.status_text = "some_status_text"
+        cls.status_code = 100
+        cls.status_text = "some_status_text"
 
-        self.content = b"some_content"
-        self.list_of_messages = (
+        cls.content = b"some_content"
+        cls.list_of_messages = (
             DialogueMessage(
                 HttpMessage.Performative.REQUEST,
                 {
-                    "method": self.get_method,
-                    "url": self.url,
-                    "version": self.version,
-                    "headers": self.headers,
-                    "body": self.body,
+                    "method": cls.get_method,
+                    "url": cls.url,
+                    "version": cls.version,
+                    "headers": cls.headers,
+                    "body": cls.body,
                 },
             ),
         )

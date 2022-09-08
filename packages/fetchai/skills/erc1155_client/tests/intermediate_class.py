@@ -68,91 +68,92 @@ class ERC1155ClientTestCase(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_DIR
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        self.location = {"longitude": 0.1270, "latitude": 51.5194}
-        self.search_query = {
+        cls.location = {"longitude": 0.1270, "latitude": 51.5194}
+        cls.search_query = {
             "search_key": "seller_service",
             "search_value": "erc1155_contract",
             "constraint_type": "==",
         }
-        self.search_radius = 5.0
+        cls.search_radius = 5.0
         config_overrides = {
             "models": {
                 "strategy": {
                     "args": {
-                        "location": self.location,
-                        "search_query": self.search_query,
-                        "search_radius": self.search_radius,
+                        "location": cls.location,
+                        "search_query": cls.search_query,
+                        "search_radius": cls.search_radius,
                     }
                 }
             },
         }
 
-        super().setup(config_overrides=config_overrides)
+        super().setup_class(config_overrides=config_overrides)
 
         # behaviours
-        self.search_behaviour = cast(
-            SearchBehaviour, self._skill.skill_context.behaviours.search
+        cls.search_behaviour = cast(
+            SearchBehaviour, cls._skill.skill_context.behaviours.search
         )
 
         # dialogues
-        self.contract_api_dialogues = cast(
-            ContractApiDialogues, self._skill.skill_context.contract_api_dialogues
+        cls.contract_api_dialogues = cast(
+            ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
         )
-        self.default_dialogues = cast(
-            DefaultDialogues, self._skill.skill_context.default_dialogues
+        cls.default_dialogues = cast(
+            DefaultDialogues, cls._skill.skill_context.default_dialogues
         )
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
-        self.ledger_api_dialogues = cast(
-            LedgerApiDialogues, self._skill.skill_context.ledger_api_dialogues
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
-        self.oef_search_dialogues = cast(
-            OefSearchDialogues, self._skill.skill_context.oef_search_dialogues
+        cls.oef_search_dialogues = cast(
+            OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
-        self.signing_dialogues = cast(
-            SigningDialogues, self._skill.skill_context.signing_dialogues
+        cls.signing_dialogues = cast(
+            SigningDialogues, cls._skill.skill_context.signing_dialogues
         )
 
         # handlers
-        self.fipa_handler = cast(FipaHandler, self._skill.skill_context.handlers.fipa)
-        self.oef_search_handler = cast(
-            OefSearchHandler, self._skill.skill_context.handlers.oef_search
+        cls.fipa_handler = cast(FipaHandler, cls._skill.skill_context.handlers.fipa)
+        cls.oef_search_handler = cast(
+            OefSearchHandler, cls._skill.skill_context.handlers.oef_search
         )
-        self.contract_api_handler = cast(
-            ContractApiHandler, self._skill.skill_context.handlers.contract_api
+        cls.contract_api_handler = cast(
+            ContractApiHandler, cls._skill.skill_context.handlers.contract_api
         )
-        self.signing_handler = cast(
-            SigningHandler, self._skill.skill_context.handlers.signing
+        cls.signing_handler = cast(
+            SigningHandler, cls._skill.skill_context.handlers.signing
         )
-        self.ledger_api_handler = cast(
-            LedgerApiHandler, self._skill.skill_context.handlers.ledger_api
+        cls.ledger_api_handler = cast(
+            LedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
 
         # models
-        self.strategy = cast(Strategy, self._skill.skill_context.strategy)
+        cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
 
-        self.logger = self._skill.skill_context.logger
+        cls.logger = cls._skill.skill_context.logger
 
         # mocked objects
-        self.ledger_id = "some_ledger_id"
-        self.contract_id = "some_contract_id"
-        self.contract_address = "some_contract_address"
-        self.callable = "some_callable"
-        self.body = {"some_key": "some_value"}
-        self.kwargs = Kwargs(self.body)
-        self.address = "some_address"
-        self.mocked_terms = Terms(
-            self.ledger_id,
-            self._skill.skill_context.agent_address,
+        cls.ledger_id = "some_ledger_id"
+        cls.contract_id = "some_contract_id"
+        cls.contract_address = "some_contract_address"
+        cls.callable = "some_callable"
+        cls.body = {"some_key": "some_value"}
+        cls.kwargs = Kwargs(cls.body)
+        cls.address = "some_address"
+        cls.mocked_terms = Terms(
+            cls.ledger_id,
+            cls._skill.skill_context.agent_address,
             "counterprty",
             {"currency_id": 50},
             {"good_id": -10},
             "some_nonce",
         )
-        self.mocked_query = Query(
+        cls.mocked_query = Query(
             [Constraint("some_attribute_name", ConstraintType("==", "some_value"))],
             DataModel(
                 "some_data_model_name",
@@ -166,7 +167,7 @@ class ERC1155ClientTestCase(BaseSkillTestCase):
                 ],
             ),
         )
-        self.mocked_proposal = Description(
+        cls.mocked_proposal = Description(
             {
                 "contract_address": "some_contract_address",
                 "token_id": "123456",
@@ -176,45 +177,43 @@ class ERC1155ClientTestCase(BaseSkillTestCase):
                 "value": "67",
             }
         )
-        self.mocked_raw_tx = (
-            RawTransaction(self.ledger_id, {"some_key": "some_value"}),
-        )
-        self.mocked_raw_msg = RawMessage(self.ledger_id, b"some_body")
+        cls.mocked_raw_tx = (RawTransaction(cls.ledger_id, {"some_key": "some_value"}),)
+        cls.mocked_raw_msg = RawMessage(cls.ledger_id, b"some_body")
 
         # list of messages
-        self.list_of_fipa_messages = (
-            DialogueMessage(FipaMessage.Performative.CFP, {"query": self.mocked_query}),
+        cls.list_of_fipa_messages = (
+            DialogueMessage(FipaMessage.Performative.CFP, {"query": cls.mocked_query}),
             DialogueMessage(
-                FipaMessage.Performative.PROPOSE, {"proposal": self.mocked_proposal}
+                FipaMessage.Performative.PROPOSE, {"proposal": cls.mocked_proposal}
             ),
         )
-        self.list_of_oef_search_messages = (
+        cls.list_of_oef_search_messages = (
             DialogueMessage(
                 OefSearchMessage.Performative.SEARCH_SERVICES,
-                {"query": self.mocked_query},
+                {"query": cls.mocked_query},
             ),
         )
-        self.list_of_contract_api_messages = (
+        cls.list_of_contract_api_messages = (
             DialogueMessage(
                 ContractApiMessage.Performative.GET_RAW_MESSAGE,
                 {
-                    "ledger_id": self.ledger_id,
-                    "contract_id": self.contract_id,
-                    "contract_address": self.contract_address,
-                    "callable": self.callable,
-                    "kwargs": self.kwargs,
+                    "ledger_id": cls.ledger_id,
+                    "contract_id": cls.contract_id,
+                    "contract_address": cls.contract_address,
+                    "callable": cls.callable,
+                    "kwargs": cls.kwargs,
                 },
             ),
         )
-        self.list_of_signing_messages = (
+        cls.list_of_signing_messages = (
             DialogueMessage(
                 SigningMessage.Performative.SIGN_MESSAGE,
-                {"terms": self.mocked_terms, "raw_message": self.mocked_raw_msg},
+                {"terms": cls.mocked_terms, "raw_message": cls.mocked_raw_msg},
             ),
         )
-        self.list_of_ledger_api_messages = (
+        cls.list_of_ledger_api_messages = (
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_BALANCE,
-                {"ledger_id": self.ledger_id, "address": "some_address"},
+                {"ledger_id": cls.ledger_id, "address": "some_address"},
             ),
         )

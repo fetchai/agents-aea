@@ -57,19 +57,19 @@ class TestSearchBehaviour(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.search_behaviour = cast(
-            GenericSearchBehaviour, self._skill.skill_context.behaviours.search
+        super().setup_class()
+        cls.search_behaviour = cast(
+            GenericSearchBehaviour, cls._skill.skill_context.behaviours.search
         )
-        self.tx_behaviour = cast(
-            GenericTransactionBehaviour,
-            self._skill.skill_context.behaviours.transaction,
+        cls.tx_behaviour = cast(
+            GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
-        self.logger = self._skill.skill_context.logger
+        cls.logger = cls._skill.skill_context.logger
 
     @pytest.mark.skip  # wrong ledger_id
     def test_setup_is_ledger_tx(self):
@@ -163,24 +163,24 @@ class TestTransactionBehaviour(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.transaction_behaviour = cast(
-            GenericTransactionBehaviour,
-            self._skill.skill_context.behaviours.transaction,
+        super().setup_class()
+        cls.transaction_behaviour = cast(
+            GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.logger = self._skill.skill_context.logger
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.logger = cls._skill.skill_context.logger
 
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
-        self.ledger_api_dialogues = cast(
-            LedgerApiDialogues, self._skill.skill_context.ledger_api_dialogues
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
 
-        self.list_of_messages = (
+        cls.list_of_messages = (
             DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
             DialogueMessage(
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}

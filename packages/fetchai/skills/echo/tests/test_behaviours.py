@@ -41,13 +41,14 @@ class TestEchoBehaviour(BaseSkillTestCase):
     path_to_skill = Path(CUR_PATH, "..")
     is_agent_to_agent_messages = False
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.echo_behaviour = cast(
-            EchoBehaviour, self._skill.skill_context.behaviours.echo
+        super().setup_class()
+        cls.echo_behaviour = cast(
+            EchoBehaviour, cls._skill.skill_context.behaviours.echo
         )
-        self.logger = self._skill.skill_context.logger
+        cls.logger = cls._skill.skill_context.logger
 
     def test_setup(self):
         """Test the setup method of the echo behaviour."""

@@ -44,20 +44,20 @@ class TestEchoHandler(BaseSkillTestCase):
     path_to_skill = Path(CUR_PATH, "..")
 
     @classmethod
-    def setup(self):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.echo_handler = cast(EchoHandler, self._skill.skill_context.handlers.echo)
-        self.logger = self._skill.skill_context.logger
+        super().setup_class()
+        cls.echo_handler = cast(EchoHandler, cls._skill.skill_context.handlers.echo)
+        cls.logger = cls._skill.skill_context.logger
 
-        self.default_dialogues = cast(
-            DefaultDialogues, self._skill.skill_context.default_dialogues
+        cls.default_dialogues = cast(
+            DefaultDialogues, cls._skill.skill_context.default_dialogues
         )
 
-        self.content = b"some_content"
-        self.list_of_messages = (
+        cls.content = b"some_content"
+        cls.list_of_messages = (
             DialogueMessage(
-                DefaultMessage.Performative.BYTES, {"content": self.content}
+                DefaultMessage.Performative.BYTES, {"content": cls.content}
             ),
         )
 

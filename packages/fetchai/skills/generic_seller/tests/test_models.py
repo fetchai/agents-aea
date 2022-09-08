@@ -54,33 +54,34 @@ class TestGenericStrategy(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.ledger_id = DEFAULT_LEDGER
-        self.is_ledger_tx = True
-        self.currency_id = "some_currency_id"
-        self.unit_price = 20
-        self.service_id = "some_service_id"
-        self.location = {
+        super().setup_class()
+        cls.ledger_id = DEFAULT_LEDGER
+        cls.is_ledger_tx = True
+        cls.currency_id = "some_currency_id"
+        cls.unit_price = 20
+        cls.service_id = "some_service_id"
+        cls.location = {
             "longitude": 0.127,
             "latitude": 51.5194,
         }
-        self.service_data = {"key": "seller_service", "value": "some_service"}
-        self.has_data_source = False
-        self.data_for_sale = {"some_data_type": "some_data"}
-        self.strategy = GenericStrategy(
-            ledger_id=self.ledger_id,
-            is_ledger_tx=self.is_ledger_tx,
-            currency_id=self.currency_id,
-            unit_price=self.unit_price,
-            service_id=self.service_id,
-            location=self.location,
-            service_data=self.service_data,
-            has_data_source=self.has_data_source,
-            data_for_sale=self.data_for_sale,
+        cls.service_data = {"key": "seller_service", "value": "some_service"}
+        cls.has_data_source = False
+        cls.data_for_sale = {"some_data_type": "some_data"}
+        cls.strategy = GenericStrategy(
+            ledger_id=cls.ledger_id,
+            is_ledger_tx=cls.is_ledger_tx,
+            currency_id=cls.currency_id,
+            unit_price=cls.unit_price,
+            service_id=cls.service_id,
+            location=cls.location,
+            service_data=cls.service_data,
+            has_data_source=cls.has_data_source,
+            data_for_sale=cls.data_for_sale,
             name="strategy",
-            skill_context=self._skill.skill_context,
+            skill_context=cls._skill.skill_context,
         )
 
     def test_properties(self):

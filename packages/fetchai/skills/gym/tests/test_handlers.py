@@ -47,7 +47,7 @@ class TestGymHandler(GymTestCase):
             self.task_manager, "enqueue_task", return_value=self.mocked_task_id
         ) as mocked_enqueue_task:
             with patch.object(self.logger, "log") as mock_logger:
-                assert self.gym_handler.setup() is None
+                assert self.gym_handler.setup_class() is None
 
         # after
         self.assert_quantity_in_outbox(0)

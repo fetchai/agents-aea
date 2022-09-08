@@ -48,87 +48,88 @@ class GymTestCase(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        self.nb_steps = 4000
+        cls.nb_steps = 4000
         config_overrides = {
-            "handlers": {"gym": {"args": {"nb_steps": self.nb_steps}}},
+            "handlers": {"gym": {"args": {"nb_steps": cls.nb_steps}}},
         }
 
-        super().setup(config_overrides=config_overrides)
+        super().setup_class(config_overrides=config_overrides)
 
         # dialogues
-        self.default_dialogues = cast(
-            DefaultDialogues, self._skill.skill_context.default_dialogues
+        cls.default_dialogues = cast(
+            DefaultDialogues, cls._skill.skill_context.default_dialogues
         )
-        self.gym_dialogues = cast(GymDialogues, self._skill.skill_context.gym_dialogues)
+        cls.gym_dialogues = cast(GymDialogues, cls._skill.skill_context.gym_dialogues)
 
         # handlers
-        self.gym_handler = cast(GymHandler, self._skill.skill_context.handlers.gym)
+        cls.gym_handler = cast(GymHandler, cls._skill.skill_context.handlers.gym)
 
         # models
-        self.task = GymTask(
-            skill_context=self._skill.skill_context,
-            nb_steps=self.nb_steps,
+        cls.task = GymTask(
+            skill_context=cls._skill.skill_context,
+            nb_steps=cls.nb_steps,
         )
 
-        self.task_manager = cast(TaskManager, self._skill.skill_context.task_manager)
-        self.task_manager.start()
+        cls.task_manager = cast(TaskManager, cls._skill.skill_context.task_manager)
+        cls.task_manager.start()
 
-        self.logger = self._skill.skill_context.logger
+        cls.logger = cls._skill.skill_context.logger
 
         # mocked objects
-        self.dict_str_str = {"some_key": "some_value"}
-        self.mocked_task_id = 1
-        self.content_bytes = b"some_contents"
-        self.mocked_status_content = {"reset": "success"}
-        self.mocked_action = AnyObject("some_action")
-        self.mocked_observation = AnyObject("some_observation")
-        self.mocked_info = AnyObject("some_info")
-        self.mocked_step_id = 123
-        self.mocked_reward = 3242.23423
+        cls.dict_str_str = {"some_key": "some_value"}
+        cls.mocked_task_id = 1
+        cls.content_bytes = b"some_contents"
+        cls.mocked_status_content = {"reset": "success"}
+        cls.mocked_action = AnyObject("some_action")
+        cls.mocked_observation = AnyObject("some_observation")
+        cls.mocked_info = AnyObject("some_info")
+        cls.mocked_step_id = 123
+        cls.mocked_reward = 3242.23423
 
-        self.mocked_price = 765.23
-        self.mocked_beta_a = 2.876
-        self.mocked_beta_b = 0.8
-        self.mocked_bound = 78
-        self.mocked_nb_goods = 10
+        cls.mocked_price = 765.23
+        cls.mocked_beta_a = 2.876
+        cls.mocked_beta_b = 0.8
+        cls.mocked_bound = 78
+        cls.mocked_nb_goods = 10
 
-        self.dummy_gym_dialogue = GymDialogue(
+        cls.dummy_gym_dialogue = GymDialogue(
             DialogueLabel(
                 ("", ""),
                 "some_counterparty_address",
-                self._skill.skill_context.agent_address,
+                cls._skill.skill_context.agent_address,
             ),
-            self._skill.skill_context.agent_address,
+            cls._skill.skill_context.agent_address,
             role=GymDialogue.Role.AGENT,
         )
 
-        self.price_bandit = PriceBandit(
-            self.mocked_price, self.mocked_beta_a, self.mocked_beta_b
+        cls.price_bandit = PriceBandit(
+            cls.mocked_price, cls.mocked_beta_a, cls.mocked_beta_b
         )
-        self.good_price_model = GoodPriceModel(self.mocked_bound)
-        self.my_rl_agent = MyRLAgent(self.mocked_nb_goods, self.logger)
-        self.proxy_env = ProxyEnv(self._skill.skill_context)
+        cls.good_price_model = GoodPriceModel(cls.mocked_bound)
+        cls.my_rl_agent = MyRLAgent(cls.mocked_nb_goods, cls.logger)
+        cls.proxy_env = ProxyEnv(cls._skill.skill_context)
 
         # list of messages
-        self.list_of_gym_messages = (
+        cls.list_of_gym_messages = (
             DialogueMessage(GymMessage.Performative.RESET, {}),
             DialogueMessage(
-                GymMessage.Performative.STATUS, {"content": self.mocked_status_content}
+                GymMessage.Performative.STATUS, {"content": cls.mocked_status_content}
             ),
             DialogueMessage(
                 GymMessage.Performative.ACT,
-                {"action": self.mocked_action, "step_id": self.mocked_step_id},
+                {"action": cls.mocked_action, "step_id": cls.mocked_step_id},
             ),
             DialogueMessage(
                 GymMessage.Performative.PERCEPT,
                 {
-                    "step_id": self.mocked_step_id,
-                    "observation": self.mocked_observation,
-                    "reward": self.mocked_reward,
+                    "step_id": cls.mocked_step_id,
+                    "observation": cls.mocked_observation,
+                    "reward": cls.mocked_reward,
                     "done": True,
-                    "info": self.mocked_info,
+                    "info": cls.mocked_info,
                 },
             ),
             DialogueMessage(GymMessage.Performative.CLOSE, {}),

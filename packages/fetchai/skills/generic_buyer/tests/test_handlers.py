@@ -72,17 +72,18 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.fipa_handler = cast(
-            GenericFipaHandler, self._skill.skill_context.handlers.fipa
+        super().setup_class()
+        cls.fipa_handler = cast(
+            GenericFipaHandler, cls._skill.skill_context.handlers.fipa
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
-        self.list_of_messages = (
+        cls.list_of_messages = (
             DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
             DialogueMessage(
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
@@ -551,17 +552,18 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.oef_search_handler = cast(
-            GenericOefSearchHandler, self._skill.skill_context.handlers.oef_search
+        super().setup_class()
+        cls.oef_search_handler = cast(
+            GenericOefSearchHandler, cls._skill.skill_context.handlers.oef_search
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.oef_dialogues = cast(
-            OefSearchDialogues, self._skill.skill_context.oef_search_dialogues
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.oef_dialogues = cast(
+            OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
-        self.list_of_messages = (
+        cls.list_of_messages = (
             DialogueMessage(
                 OefSearchMessage.Performative.SEARCH_SERVICES, {"query": "some_query"}
             ),
@@ -807,31 +809,32 @@ class TestGenericSigningHandler(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.signing_handler = cast(
-            GenericSigningHandler, self._skill.skill_context.handlers.signing
+        super().setup_class()
+        cls.signing_handler = cast(
+            GenericSigningHandler, cls._skill.skill_context.handlers.signing
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
-        self.ledger_api_dialogues = cast(
-            LedgerApiDialogues, self._skill.skill_context.ledger_api_dialogues
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
-        self.signing_dialogues = cast(
-            SigningDialogues, self._skill.skill_context.signing_dialogues
+        cls.signing_dialogues = cast(
+            SigningDialogues, cls._skill.skill_context.signing_dialogues
         )
-        self.terms = Terms(
+        cls.terms = Terms(
             "some_ledger_id",
-            self._skill.skill_context.agent_address,
+            cls._skill.skill_context.agent_address,
             "counterprty",
             {"currency_id": 50},
             {"good_id": -10},
             "some_nonce",
         )
-        self.list_of_fipa_messages = (
+        cls.list_of_fipa_messages = (
             DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
             DialogueMessage(
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
@@ -846,18 +849,18 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
-        self.list_of_signing_messages = (
+        cls.list_of_signing_messages = (
             DialogueMessage(
                 SigningMessage.Performative.SIGN_TRANSACTION,
                 {
-                    "terms": self.terms,
+                    "terms": cls.terms,
                     "raw_transaction": SigningMessage.RawTransaction(
                         "some_ledger_id", {"some_key": "some_value"}
                     ),
                 },
             ),
         )
-        self.list_of_ledger_api_messages = (
+        cls.list_of_ledger_api_messages = (
             DialogueMessage(LedgerApiMessage.Performative.GET_RAW_TRANSACTION, {}),
             DialogueMessage(LedgerApiMessage.Performative.RAW_TRANSACTION, {}),
             DialogueMessage(LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION, {}),
@@ -1088,35 +1091,35 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.ledger_api_handler = cast(
-            GenericLedgerApiHandler, self._skill.skill_context.handlers.ledger_api
+        super().setup_class()
+        cls.ledger_api_handler = cast(
+            GenericLedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
-        self.transaction_behaviour = cast(
-            GenericTransactionBehaviour,
-            self._skill.skill_context.behaviours.transaction,
+        cls.transaction_behaviour = cast(
+            GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.logger = self._skill.skill_context.logger
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.logger = cls._skill.skill_context.logger
 
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
-        self.ledger_api_dialogues = cast(
-            LedgerApiDialogues, self._skill.skill_context.ledger_api_dialogues
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
 
-        self.terms = Terms(
+        cls.terms = Terms(
             "some_ledger_id",
-            self._skill.skill_context.agent_address,
+            cls._skill.skill_context.agent_address,
             "counterprty",
             {"currency_id": 50},
             {"good_id": -10},
             "some_nonce",
         )
-        self.list_of_fipa_messages = (
+        cls.list_of_fipa_messages = (
             DialogueMessage(FipaMessage.Performative.CFP, {"query": "some_query"}),
             DialogueMessage(
                 FipaMessage.Performative.PROPOSE, {"proposal": "some_proposal"}
@@ -1131,41 +1134,41 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
-        self.raw_transaction = RawTransaction(
+        cls.raw_transaction = RawTransaction(
             "some_ledger_id", {"some_key": "some_value"}
         )
-        self.signed_transaction = SignedTransaction(
+        cls.signed_transaction = SignedTransaction(
             "some_ledger_id", {"some_key": "some_value"}
         )
-        self.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
-        self.transaction_receipt = TransactionReceipt(
+        cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
+        cls.transaction_receipt = TransactionReceipt(
             "some_ledger_id",
             {"receipt_key": "receipt_value"},
             {"transaction_key": "transaction_value"},
         )
-        self.list_of_ledger_api_messages = (
+        cls.list_of_ledger_api_messages = (
             DialogueMessage(
-                LedgerApiMessage.Performative.GET_RAW_TRANSACTION, {"terms": self.terms}
+                LedgerApiMessage.Performative.GET_RAW_TRANSACTION, {"terms": cls.terms}
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.RAW_TRANSACTION,
-                {"raw_transaction": self.raw_transaction},
+                {"raw_transaction": cls.raw_transaction},
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-                {"signed_transaction": self.signed_transaction},
+                {"signed_transaction": cls.signed_transaction},
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.TRANSACTION_DIGEST,
-                {"transaction_digest": self.transaction_digest},
+                {"transaction_digest": cls.transaction_digest},
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                {"transaction_digest": self.transaction_digest},
+                {"transaction_digest": cls.transaction_digest},
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                {"transaction_receipt": self.transaction_receipt},
+                {"transaction_receipt": cls.transaction_receipt},
             ),
         )
 

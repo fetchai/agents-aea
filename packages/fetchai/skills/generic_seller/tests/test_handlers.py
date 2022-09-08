@@ -64,18 +64,19 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.fipa_handler = cast(
-            GenericFipaHandler, self._skill.skill_context.handlers.fipa
+        super().setup_class()
+        cls.fipa_handler = cast(
+            GenericFipaHandler, cls._skill.skill_context.handlers.fipa
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
 
-        self.list_of_messages = (
+        cls.list_of_messages = (
             DialogueMessage(
                 FipaMessage.Performative.CFP, {"query": "some_query"}, True
             ),
@@ -550,28 +551,29 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.ledger_api_handler = cast(
-            GenericLedgerApiHandler, self._skill.skill_context.handlers.ledger_api
+        super().setup_class()
+        cls.ledger_api_handler = cast(
+            GenericLedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.fipa_dialogues = cast(
-            FipaDialogues, self._skill.skill_context.fipa_dialogues
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.fipa_dialogues = cast(
+            FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
-        self.ledger_api_dialogues = cast(
-            LedgerApiDialogues, self._skill.skill_context.ledger_api_dialogues
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
-        self.terms = Terms(
+        cls.terms = Terms(
             "some_ledger_id",
-            self._skill.skill_context.agent_address,
+            cls._skill.skill_context.agent_address,
             "counterprty",
             {"currency_id": 50},
             {"good_id": -10},
             "some_nonce",
         )
-        self.list_of_fipa_messages = (
+        cls.list_of_fipa_messages = (
             DialogueMessage(
                 FipaMessage.Performative.CFP, {"query": "some_query"}, True
             ),
@@ -588,18 +590,18 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
                 {"info": {"transaction_digest": "some_transaction_digest_body"}},
             ),
         )
-        self.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
-        self.transaction_receipt = TransactionReceipt(
+        cls.transaction_digest = TransactionDigest("some_ledger_id", "some_body")
+        cls.transaction_receipt = TransactionReceipt(
             "some_ledger_id", {"some_key": "some_value"}, {"some_key": "some_value"}
         )
-        self.list_of_ledger_api_messages = (
+        cls.list_of_ledger_api_messages = (
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                {"transaction_digest": self.transaction_digest},
+                {"transaction_digest": cls.transaction_digest},
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
-                {"transaction_receipt": self.transaction_receipt},
+                {"transaction_receipt": cls.transaction_receipt},
             ),
         )
 
@@ -920,103 +922,104 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
-        self.oef_search_handler = cast(
-            GenericOefSearchHandler, self._skill.skill_context.handlers.oef_search
+        super().setup_class()
+        cls.oef_search_handler = cast(
+            GenericOefSearchHandler, cls._skill.skill_context.handlers.oef_search
         )
-        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
-        self.oef_dialogues = cast(
-            OefSearchDialogues, self._skill.skill_context.oef_search_dialogues
+        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.oef_dialogues = cast(
+            OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
-        self.service_registration_behaviour = cast(
+        cls.service_registration_behaviour = cast(
             GenericServiceRegistrationBehaviour,
-            self._skill.skill_context.behaviours.service_registration,
+            cls._skill.skill_context.behaviours.service_registration,
         )
 
-        self.register_location_description = Description(
+        cls.register_location_description = Description(
             {"location": Location(51.5194, 0.1270)},
             data_model=DataModel(
                 "location_agent", [Attribute("location", Location, True)]
             ),
         )
-        self.list_of_messages_register_location = (
+        cls.list_of_messages_register_location = (
             DialogueMessage(
                 OefSearchMessage.Performative.REGISTER_SERVICE,
-                {"service_description": self.register_location_description},
+                {"service_description": cls.register_location_description},
                 is_incoming=False,
             ),
         )
 
-        self.register_service_description = Description(
+        cls.register_service_description = Description(
             {"key": "some_key", "value": "some_value"},
             data_model=DataModel(
                 "set_service_key",
                 [Attribute("key", str, True), Attribute("value", str, True)],
             ),
         )
-        self.list_of_messages_register_service = (
+        cls.list_of_messages_register_service = (
             DialogueMessage(
                 OefSearchMessage.Performative.REGISTER_SERVICE,
-                {"service_description": self.register_service_description},
+                {"service_description": cls.register_service_description},
                 is_incoming=False,
             ),
         )
 
-        self.register_genus_description = Description(
+        cls.register_genus_description = Description(
             {"piece": "genus", "value": "some_value"},
             data_model=DataModel(
                 "personality_agent",
                 [Attribute("piece", str, True), Attribute("value", str, True)],
             ),
         )
-        self.list_of_messages_register_genus = (
+        cls.list_of_messages_register_genus = (
             DialogueMessage(
                 OefSearchMessage.Performative.REGISTER_SERVICE,
-                {"service_description": self.register_genus_description},
+                {"service_description": cls.register_genus_description},
                 is_incoming=False,
             ),
         )
 
-        self.register_classification_description = Description(
+        cls.register_classification_description = Description(
             {"piece": "classification", "value": "some_value"},
             data_model=DataModel(
                 "personality_agent",
                 [Attribute("piece", str, True), Attribute("value", str, True)],
             ),
         )
-        self.list_of_messages_register_classification = (
+        cls.list_of_messages_register_classification = (
             DialogueMessage(
                 OefSearchMessage.Performative.REGISTER_SERVICE,
-                {"service_description": self.register_classification_description},
+                {"service_description": cls.register_classification_description},
                 is_incoming=False,
             ),
         )
 
-        self.register_invalid_description = Description(
+        cls.register_invalid_description = Description(
             {"piece": "classification", "value": "some_value"},
             data_model=DataModel(
                 "some_different_name",
                 [Attribute("piece", str, True), Attribute("value", str, True)],
             ),
         )
-        self.list_of_messages_register_invalid = (
+        cls.list_of_messages_register_invalid = (
             DialogueMessage(
                 OefSearchMessage.Performative.REGISTER_SERVICE,
-                {"service_description": self.register_invalid_description},
+                {"service_description": cls.register_invalid_description},
                 is_incoming=False,
             ),
         )
 
-        self.unregister_description = Description(
+        cls.unregister_description = Description(
             {"key": "seller_service"},
             data_model=DataModel("remove", [Attribute("key", str, True)]),
         )
-        self.list_of_messages_unregister = (
+        cls.list_of_messages_unregister = (
             DialogueMessage(
                 OefSearchMessage.Performative.UNREGISTER_SERVICE,
-                {"service_description": self.unregister_description},
+                {"service_description": cls.unregister_description},
                 is_incoming=False,
             ),
         )
