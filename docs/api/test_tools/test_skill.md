@@ -239,12 +239,13 @@ For every DialogueMessage (performative, contents, is_incoming, target):
 
 the created incoming message
 
-<a id="aea.test_tools.test_skill.BaseSkillTestCase.setup"></a>
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.setup_class"></a>
 
-#### setup
+#### setup`_`class
 
 ```python
-def setup(**kwargs: Any) -> None
+@classmethod
+def setup_class(cls, **kwargs: Any) -> None
 ```
 
 Set up the skill test case.
