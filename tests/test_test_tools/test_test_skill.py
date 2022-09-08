@@ -44,29 +44,28 @@ class TestSkillTestCase(BaseSkillTestCase):
 
     path_to_skill = Path(ROOT_DIR, "tests", "data", "dummy_skill")
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Setup the test class."""
-        cls.behaviour_arg_1 = 2
-        cls.behaviour_arg_2 = "3"
+        self.behaviour_arg_1 = 2
+        self.behaviour_arg_2 = "3"
 
         config_overrides = {
             "behaviours": {
                 "dummy": {
                     "args": {
-                        "behaviour_arg_1": cls.behaviour_arg_1,
-                        "behaviour_arg_2": cls.behaviour_arg_2,
+                        "behaviour_arg_1": self.behaviour_arg_1,
+                        "behaviour_arg_2": self.behaviour_arg_2,
                     }
                 }
             },
         }
-        cls.shared_state_key = "some_shared_state_key"
-        cls.shared_state_value = "some_shared_state_value"
-        cls.shared_state = {cls.shared_state_key: cls.shared_state_value}
+        self.shared_state_key = "some_shared_state_key"
+        self.shared_state_value = "some_shared_state_value"
+        self.shared_state = {self.shared_state_key: self.shared_state_value}
 
         super().setup(
             config_overrides=config_overrides,
-            shared_state=cls.shared_state,
+            shared_state=self.shared_state,
             dm_context_kwargs={},
         )
 

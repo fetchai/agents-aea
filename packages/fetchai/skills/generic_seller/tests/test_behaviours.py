@@ -46,26 +46,25 @@ class TestSkillBehaviour(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
     is_agent_to_agent_messages = False
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Setup the test class."""
         super().setup()
-        cls.service_registration = cast(
+        self.service_registration = cast(
             GenericServiceRegistrationBehaviour,
-            cls._skill.skill_context.behaviours.service_registration,
+            self._skill.skill_context.behaviours.service_registration,
         )
-        cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
-        cls.logger = cls._skill.skill_context.logger
+        self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
+        self.logger = self._skill.skill_context.logger
 
-        cls.registration_message = OefSearchMessage(
+        self.registration_message = OefSearchMessage(
             dialogue_reference=("", ""),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description="some_service_description",
         )
-        cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
-        cls.registration_message.to = cls._skill.skill_context.search_service_address
+        self.registration_message.sender = str(self._skill.skill_context.skill_id)
+        self.registration_message.to = self._skill.skill_context.search_service_address
 
-        cls.mocked_description = Description({"foo1": 1, "bar1": 2})
+        self.mocked_description = Description({"foo1": 1, "bar1": 2})
 
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""

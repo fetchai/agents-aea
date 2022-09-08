@@ -457,18 +457,17 @@ class BaseSkillTestCase:
 
         return dialogue
 
-    @classmethod
-    def setup(cls, **kwargs: Any) -> None:
+    def setup(self, **kwargs: Any) -> None:
         """Set up the skill test case."""
         identity = Identity(
             "test_agent_name", "test_agent_address", "test_agent_public_key"
         )
 
-        cls._multiplexer = AsyncMultiplexer()
-        cls._multiplexer._out_queue = (  # pylint: disable=protected-access
+        self._multiplexer = AsyncMultiplexer()
+        self._multiplexer._out_queue = (  # pylint: disable=protected-access
             asyncio.Queue()
         )
-        cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
+        self._outbox = OutBox(cast(Multiplexer, self._multiplexer))
         _shared_state = cast(Optional[Dict[str, Any]], kwargs.pop("shared_state", None))
         _skill_config_overrides = cast(
             Optional[Dict[str, Any]], kwargs.pop("config_overrides", None)
@@ -479,8 +478,8 @@ class BaseSkillTestCase:
 
         agent_context = AgentContext(
             identity=identity,
-            connection_status=cls._multiplexer.connection_status,
-            outbox=cls._outbox,
+            connection_status=self._multiplexer.connection_status,
+            outbox=self._outbox,
             decision_maker_message_queue=Queue(),
             decision_maker_handler_context=SimpleNamespace(**_dm_context_kwargs),
             task_manager=TaskManager(),
@@ -498,7 +497,7 @@ class BaseSkillTestCase:
             for key, value in _shared_state.items():
                 agent_context.shared_state[key] = value
 
-        skill_configuration_file_path: Path = Path(cls.path_to_skill, "skill.yaml")
+        skill_configuration_file_path: Path = Path(self.path_to_skill, "skill.yaml")
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
 
         with open_file(skill_configuration_file_path) as fp:
@@ -508,6 +507,6 @@ class BaseSkillTestCase:
         if _skill_config_overrides is not None:
             skill_config.update(_skill_config_overrides)
 
-        skill_config.directory = cls.path_to_skill
+        skill_config.directory = self.path_to_skill
 
-        cls._skill = Skill.from_config(skill_config, agent_context)
+        self._skill = Skill.from_config(skill_config, agent_context)

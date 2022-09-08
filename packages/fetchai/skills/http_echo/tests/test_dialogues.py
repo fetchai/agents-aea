@@ -43,15 +43,14 @@ class TestDialogues(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_DIR
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Setup the test class."""
         super().setup()
-        cls.default_dialogues = cast(
-            DefaultDialogues, cls._skill.skill_context.default_dialogues
+        self.default_dialogues = cast(
+            DefaultDialogues, self._skill.skill_context.default_dialogues
         )
-        cls.http_dialogues = cast(
-            HttpDialogues, cls._skill.skill_context.http_dialogues
+        self.http_dialogues = cast(
+            HttpDialogues, self._skill.skill_context.http_dialogues
         )
 
     def test_default_dialogues(self):

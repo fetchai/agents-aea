@@ -57,24 +57,23 @@ class TestDialogues(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    @classmethod
-    def setup(cls):
+    def setup(self):
         """Setup the test class."""
         super().setup()
-        cls.default_dialogues = cast(
-            DefaultDialogues, cls._skill.skill_context.default_dialogues
+        self.default_dialogues = cast(
+            DefaultDialogues, self._skill.skill_context.default_dialogues
         )
-        cls.fipa_dialogues = cast(
-            FipaDialogues, cls._skill.skill_context.fipa_dialogues
+        self.fipa_dialogues = cast(
+            FipaDialogues, self._skill.skill_context.fipa_dialogues
         )
-        cls.ledger_api_dialogues = cast(
-            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
+        self.ledger_api_dialogues = cast(
+            LedgerApiDialogues, self._skill.skill_context.ledger_api_dialogues
         )
-        cls.oef_search_dialogues = cast(
-            OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
+        self.oef_search_dialogues = cast(
+            OefSearchDialogues, self._skill.skill_context.oef_search_dialogues
         )
-        cls.signing_dialogues = cast(
-            SigningDialogues, cls._skill.skill_context.signing_dialogues
+        self.signing_dialogues = cast(
+            SigningDialogues, self._skill.skill_context.signing_dialogues
         )
 
     def test_default_dialogues(self):
