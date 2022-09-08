@@ -47,9 +47,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
     is_agent_to_agent_messages = False
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.service_registration = cast(
             GenericServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,

@@ -49,14 +49,14 @@ class GymTestCase(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
         cls.nb_steps = 4000
         config_overrides = {
             "handlers": {"gym": {"args": {"nb_steps": cls.nb_steps}}},
         }
 
-        super().setup(config_overrides=config_overrides)
+        super().setup_class(config_overrides=config_overrides)
 
         # dialogues
         cls.default_dialogues = cast(

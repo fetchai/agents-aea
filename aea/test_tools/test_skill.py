@@ -458,7 +458,7 @@ class BaseSkillTestCase:
         return dialogue
 
     @classmethod
-    def setup(cls, **kwargs: Any) -> None:
+    def setup_class(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
         identity = Identity(
             "test_agent_name", "test_agent_address", "test_agent_public_key"

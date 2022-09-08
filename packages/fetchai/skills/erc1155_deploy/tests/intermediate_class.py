@@ -79,7 +79,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
         cls.location = {"longitude": 0.1270, "latitude": 51.5194}
         cls.mint_quantities = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
@@ -108,7 +108,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
             },
         }
 
-        super().setup(config_overrides=config_overrides)
+        super().setup_class(config_overrides=config_overrides)
 
         # behaviours
         cls.registration_behaviour = cast(

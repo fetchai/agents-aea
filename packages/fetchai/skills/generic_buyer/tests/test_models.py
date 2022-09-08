@@ -42,9 +42,9 @@ class TestGenericStrategy(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.ledger_id = DEFAULT_LEDGER
         cls.is_ledger_tx = True
         cls.currency_id = "some_currency_id"

@@ -58,9 +58,9 @@ class TestSearchBehaviour(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.search_behaviour = cast(
             GenericSearchBehaviour, cls._skill.skill_context.behaviours.search
         )
@@ -164,9 +164,9 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.transaction_behaviour = cast(
             GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )

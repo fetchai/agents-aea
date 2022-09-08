@@ -53,7 +53,7 @@ class TestFipaHandler(ERC1155DeployTestCase):
 
     def test_setup(self):
         """Test the setup method of the fipa handler."""
-        assert self.fipa_handler.setup() is None
+        assert self.fipa_handler.setup_class() is None
         self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
@@ -314,7 +314,7 @@ class TestLedgerApiHandler(ERC1155DeployTestCase):
 
     def test_setup(self):
         """Test the setup method of the ledger_api handler."""
-        assert self.ledger_api_handler.setup() is None
+        assert self.ledger_api_handler.setup_class() is None
         self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
@@ -669,7 +669,7 @@ class TestContractApiHandler(ERC1155DeployTestCase):
 
     def test_setup(self):
         """Test the setup method of the contract_api handler."""
-        assert self.contract_api_handler.setup() is None
+        assert self.contract_api_handler.setup_class() is None
         self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
@@ -819,7 +819,7 @@ class TestSigningHandler(ERC1155DeployTestCase):
 
     def test_setup(self):
         """Test the setup method of the signing handler."""
-        assert self.signing_handler.setup() is None
+        assert self.signing_handler.setup_class() is None
         self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):
@@ -961,7 +961,7 @@ class TestOefSearchHandler(ERC1155DeployTestCase):
 
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
-        assert self.oef_search_handler.setup() is None
+        assert self.oef_search_handler.setup_class() is None
         self.assert_quantity_in_outbox(0)
 
     def test_handle_unidentified_dialogue(self):

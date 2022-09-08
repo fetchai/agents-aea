@@ -65,9 +65,9 @@ class TestGenericFipaHandler(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.fipa_handler = cast(
             GenericFipaHandler, cls._skill.skill_context.handlers.fipa
         )
@@ -552,9 +552,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     is_agent_to_agent_messages = False
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.ledger_api_handler = cast(
             GenericLedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
@@ -923,9 +923,9 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
     is_agent_to_agent_messages = False
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.oef_search_handler = cast(
             GenericOefSearchHandler, cls._skill.skill_context.handlers.oef_search
         )
