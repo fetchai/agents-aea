@@ -64,7 +64,8 @@ class TestSearchBehaviour(BaseSkillTestCase):
             GenericSearchBehaviour, self._skill.skill_context.behaviours.search
         )
         self.tx_behaviour = cast(
-            GenericTransactionBehaviour, self._skill.skill_context.behaviours.transaction
+            GenericTransactionBehaviour,
+            self._skill.skill_context.behaviours.transaction,
         )
         self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
 
@@ -166,7 +167,8 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         self.transaction_behaviour = cast(
-            GenericTransactionBehaviour, self._skill.skill_context.behaviours.transaction
+            GenericTransactionBehaviour,
+            self._skill.skill_context.behaviours.transaction,
         )
         self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
         self.logger = self._skill.skill_context.logger

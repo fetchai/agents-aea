@@ -244,8 +244,7 @@ the created incoming message
 #### setup
 
 ```python
-@classmethod
-def setup(cls, **kwargs: Any) -> None
+def setup(**kwargs: Any) -> None
 ```
 
 Set up the skill test case.

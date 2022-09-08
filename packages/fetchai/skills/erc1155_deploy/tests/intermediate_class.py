@@ -84,7 +84,10 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
         self.mint_quantities = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
         self.service_data = {"key": "seller_service", "value": "some_value"}
         self.personality_data = {"piece": "genus", "value": "some_personality"}
-        self.classification = {"piece": "classification", "value": "some_classification"}
+        self.classification = {
+            "piece": "classification",
+            "value": "some_classification",
+        }
         self.from_supply = 756
         self.to_supply = 12
         self.value = 87

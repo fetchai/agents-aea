@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch open_aea/gym_aea:0.1.0:bafybeigeyp52amdtgluqd4t3djdieawk7l4fyysfqdui6j4vsvfdxmdqwq --remote
+aea fetch open_aea/gym_aea:0.1.0:bafybeihi324gb5r4rkfp4fjpxgh3fusju5c46l64m5buzmislhyoqeawdi --remote
 cd gym_aea
 aea install
 ```

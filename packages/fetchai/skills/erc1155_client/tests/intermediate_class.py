@@ -176,7 +176,9 @@ class ERC1155ClientTestCase(BaseSkillTestCase):
                 "value": "67",
             }
         )
-        self.mocked_raw_tx = (RawTransaction(self.ledger_id, {"some_key": "some_value"}),)
+        self.mocked_raw_tx = (
+            RawTransaction(self.ledger_id, {"some_key": "some_value"}),
+        )
         self.mocked_raw_msg = RawMessage(self.ledger_id, b"some_body")
 
         # list of messages

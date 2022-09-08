@@ -1095,7 +1095,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             GenericLedgerApiHandler, self._skill.skill_context.handlers.ledger_api
         )
         self.transaction_behaviour = cast(
-            GenericTransactionBehaviour, self._skill.skill_context.behaviours.transaction
+            GenericTransactionBehaviour,
+            self._skill.skill_context.behaviours.transaction,
         )
         self.strategy = cast(GenericStrategy, self._skill.skill_context.strategy)
         self.logger = self._skill.skill_context.logger

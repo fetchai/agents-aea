@@ -13,10 +13,10 @@ fingerprint:
   handlers.py: bafybeifdytrtxifnxuzcml4plgqttkuknwlavmskc6gyy3xt4vujwwxjg4
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
   tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
-  tests/test_behaviours.py: bafybeifk7zdbtv6hocho62uhsshs66rqfpkjmyq6sdvcncu7old5jnmpmy
-  tests/test_dialogues.py: bafybeicabpwlrm2ppqllol5fhuyzujsbakwbnwagrtllfv2jve5jotgbqq
-  tests/test_handlers.py: bafybeiez7vth2e45mg6gza4d2tmhwawtt5wqx7fbvjnr2afcavj7mgl324
-  tests/test_models.py: bafybeibc5tdfcizkxi7mannv22m7svbw2q5eytkxw726nswomzt7gucyzm
+  tests/test_behaviours.py: bafybeieepharkcaecc2ntmgi72asb4lekliyzzdtp44oozy35cr5yxtd7y
+  tests/test_dialogues.py: bafybeic4c43su64zswsq2nmfojy7b7ztnpmdshbippmudf2fxmstyzuere
+  tests/test_handlers.py: bafybeiboee2b66wzr7mskqqdk5nobutlkzoyqcgjf4ozvwyccw6bz7m3cy
+  tests/test_models.py: bafybeigpesk56prcq3jr575ictyvppjc4ec7vo7gi2pzsqtbrokhyposle
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.19.0:bafybeiew6wsxz6bgm3c44hnk55avt2ftdgiwy2pvw67mkfz7fyhibeotku
