@@ -72,6 +72,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             GenericFipaHandler, cls._skill.skill_context.handlers.fipa
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls._init_strategy = cls.strategy.__dict__.copy()
         cls.fipa_dialogues = cast(
             FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
@@ -543,6 +544,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         """Test the teardown method of the fipa handler."""
         assert self.fipa_handler.teardown() is None
         self.assert_quantity_in_outbox(0)
+
+    def teardown(self):
+        self.reset_all_dialogues()
+        self.empty_message_queues()
+        self.strategy.__dict__.update(self._init_strategy)
 
 
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
@@ -1023,6 +1029,10 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
                 is_incoming=False,
             ),
         )
+
+    def teardown(self):
+        self.reset_all_dialogues()
+        self.empty_message_queues()
 
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
