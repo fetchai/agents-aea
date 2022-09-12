@@ -22,7 +22,7 @@
 
 import logging
 from pathlib import Path
-from typing import Tuple, cast
+from typing import cast
 from unittest.mock import patch
 
 import pytest
@@ -339,7 +339,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         # _timeout_processing
-        assert self.ledger_api_dialogue.dialogue_label in self.transaction_behaviour.timedout
+        assert (
+            self.ledger_api_dialogue.dialogue_label
+            in self.transaction_behaviour.timedout
+        )
         # below is overridden in _start_processing
         # assert self.fipa_dialogue in self.transaction_behaviour.waiting
         assert self.transaction_behaviour.processing_time == 0.0

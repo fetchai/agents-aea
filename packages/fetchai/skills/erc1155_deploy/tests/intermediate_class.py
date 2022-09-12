@@ -354,7 +354,8 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
         )
 
     def teardown(self):
-        # models
+        """Teardown"""
+
         self.registration_behaviour.__dict__.update(self._registration_kwargs)
         self.empty_message_queues()
         self.strategy.__dict__.update(self._init_strategy_kwargs)
