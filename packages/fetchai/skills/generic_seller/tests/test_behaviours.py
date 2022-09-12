@@ -76,7 +76,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.strategy.__dict__.update(self._strategy_kwargs)
         self.service_registration.__dict__.update(self._init_service_registration)
 
-
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""
         # setup

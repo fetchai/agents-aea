@@ -250,6 +250,16 @@ def setup_class(cls, **kwargs: Any) -> None
 
 Set up the skill test case.
 
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.teardown"></a>
+
+#### teardown
+
+```python
+def teardown() -> None
+```
+
+Teardown
+
 <a id="aea.test_tools.test_skill.BaseSkillTestCase.empty_message_queues"></a>
 
 #### empty`_`message`_`queues

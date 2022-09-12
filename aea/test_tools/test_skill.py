@@ -512,7 +512,7 @@ class BaseSkillTestCase:
 
         cls._skill = Skill.from_config(skill_config, agent_context)
 
-    def teardown(self):
+    def teardown(self) -> None:
         """Teardown"""
 
         self.empty_message_queues()
