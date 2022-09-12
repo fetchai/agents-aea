@@ -154,7 +154,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
 
         # models
         cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
-        cls._init_kwargs = cls.strategy.__dict__.copy()
+        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
 
         cls.logger = cls._skill.skill_context.logger
 
@@ -357,5 +357,5 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
         # models
         self.registration_behaviour.__dict__.update(self._registration_kwargs)
         self.empty_message_queues()
-        self.strategy.__dict__.update(self._init_kwargs)
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
         self.reset_all_dialogues()
