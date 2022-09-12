@@ -546,6 +546,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
     def teardown(self):
+        """Teardown"""
         self.reset_all_dialogues()
         self.empty_message_queues()
         self.strategy.__dict__.update(self._init_strategy)

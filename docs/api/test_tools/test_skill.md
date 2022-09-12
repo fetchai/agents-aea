@@ -250,3 +250,23 @@ def setup_class(cls, **kwargs: Any) -> None
 
 Set up the skill test case.
 
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.empty_message_queues"></a>
+
+#### empty`_`message`_`queues
+
+```python
+def empty_message_queues() -> None
+```
+
+Empty message queues
+
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.reset_all_dialogues"></a>
+
+#### reset`_`all`_`dialogues
+
+```python
+def reset_all_dialogues() -> None
+```
+
+Reset the state of all dialogues
+

@@ -513,7 +513,7 @@ class BaseSkillTestCase:
         cls._skill = Skill.from_config(skill_config, agent_context)
 
     # helpers for setup / teardown
-    def empty_message_queues(self):
+    def empty_message_queues(self) -> None:
         """Empty message queues"""
 
         while not self._outbox.empty():
@@ -521,7 +521,7 @@ class BaseSkillTestCase:
         while not self._skill.skill_context.decision_maker_message_queue.empty():
             self._skill.skill_context.decision_maker_message_queue.get_nowait()
 
-    def reset_all_dialogues(self):
+    def reset_all_dialogues(self) -> None:
         """Reset the state of all dialogues"""
 
         for handler in self._skill.handlers.values():
@@ -529,5 +529,7 @@ class BaseSkillTestCase:
             dialogues.teardown()
             dialogues.cleanup()
             stats = dialogues.dialogue_stats
+            # pylint: disable=protected-access
             stats._self_initiated = dict.fromkeys(stats._self_initiated, 0)
+            # pylint: disable=protected-access
             stats._other_initiated = dict.fromkeys(stats._other_initiated, 0)
