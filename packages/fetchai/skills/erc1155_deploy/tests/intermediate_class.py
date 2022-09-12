@@ -115,6 +115,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
             ServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,
         )
+        cls._registration_kwargs = cls.registration_behaviour.__dict__.copy()
 
         # dialogues
         cls.contract_api_dialogues = cast(
@@ -153,6 +154,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
 
         # models
         cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
+        cls._init_kwargs = cls.strategy.__dict__.copy()
 
         cls.logger = cls._skill.skill_context.logger
 
@@ -350,3 +352,10 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
                 is_incoming=False,
             ),
         )
+
+    def teardown(self):
+        # models
+        self.registration_behaviour.__dict__.update(self._registration_kwargs)
+        self.empty_message_queues()
+        self.strategy.__dict__.update(self._init_kwargs)
+        self.reset_all_dialogues()
