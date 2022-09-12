@@ -24,6 +24,7 @@ from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, Type, cast
+from warnings import warn
 
 from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
@@ -460,7 +461,11 @@ class BaseSkillTestCase:
     def setup(self, **kwargs: Any) -> None:
         """Setup calling setup_class for backwards compatibility"""
 
-        # warn("Use .setup_class or overwrite this method", DeprecationWarning, stacklevel=2)
+        warn(
+            "Use .setup_class or overwrite this method",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.setup_class(**kwargs)
 
     @classmethod

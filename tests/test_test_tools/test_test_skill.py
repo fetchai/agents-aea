@@ -710,7 +710,6 @@ class TestSkillTestCase(BaseSkillTestCase):
             self._skill.skill_context.decision_maker_message_queue.get_nowait()
 
 
-
 class FipaDialogues(BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
