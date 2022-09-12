@@ -943,6 +943,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             GenericServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,
         )
+        init_kwargs = cls.service_registration_behaviour.__dict__.copy()
+        cls._init_service_registration_behaviour_kwargs = init_kwargs
 
         cls.register_location_description = Description(
             {"location": Location(51.5194, 0.1270)},
@@ -1031,8 +1033,12 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         )
 
     def teardown(self):
+        """Teardown"""
+
         self.reset_all_dialogues()
         self.empty_message_queues()
+        init_kwargs = self._init_service_registration_behaviour_kwargs
+        self.service_registration_behaviour.__dict__.update(init_kwargs)
 
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
