@@ -511,3 +511,12 @@ class BaseSkillTestCase:
         skill_config.directory = cls.path_to_skill
 
         cls._skill = Skill.from_config(skill_config, agent_context)
+
+    # helpers for setup / teardown
+    def empty_message_queues(self):
+        """Empty message queues"""
+
+        while not self._outbox.empty():
+            self._multiplexer.out_queue.get_nowait()
+        while not self._skill.skill_context.decision_maker_message_queue.empty():
+            self._skill.skill_context.decision_maker_message_queue.get_nowait()
