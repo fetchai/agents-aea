@@ -54,7 +54,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
             GenericServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,
         )
+        cls._init_service_registration = cls.service_registration.__dict__.copy()
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls._strategy_kwargs = cls.strategy.__dict__.copy()
         cls.logger = cls._skill.skill_context.logger
 
         cls.registration_message = OefSearchMessage(
@@ -66,6 +68,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.registration_message.to = cls._skill.skill_context.search_service_address
 
         cls.mocked_description = Description({"foo1": 1, "bar1": 2})
+
+    def teardown(self):
+        """Teardowm"""
+        self.strategy.__dict__.update(self._strategy_kwargs)
+        self.service_registration.__dict__.update(self._init_service_registration)
+        self.empty_message_queues()
 
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""
