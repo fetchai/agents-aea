@@ -42,19 +42,15 @@ from aea.cli.utils.config import get_or_create_cli_config, update_cli_config
 from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
-from aea.cli.utils.package_utils import (
-    validate_author_name,
-    validate_registry_type,
-    validate_remote_registry_type,
-)
+from aea.cli.utils.package_utils import validate_author_name
 
 
 @click.command()
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
-@registry_flag(mark_default=False)
-@remote_registry_flag(mark_default=False)
+@registry_flag(mark_default=True)
+@remote_registry_flag(mark_default=True)
 @click.option(
     "--ipfs-node", type=str, default=DEFAULT_IPFS_URL, help="Multiaddr for IPFS node."
 )
@@ -64,8 +60,8 @@ def init(  # pylint: disable=unused-argument
     author: str,
     reset: bool,
     no_subscribe: bool,
-    registry: Optional[str],
-    remote_registry: Optional[str],
+    registry: str,
+    remote_registry: str,
     ipfs_node: Optional[str],
 ) -> None:
     """Initialize your AEA configurations."""
@@ -83,8 +79,8 @@ def do_init(
     author: str,
     reset: bool,
     no_subscribe: bool,
-    registry_type: Optional[str] = None,
-    default_remote_registry: Optional[str] = None,
+    registry_type: str = REGISTRY_LOCAL,
+    default_remote_registry: str = REMOTE_IPFS,
     ipfs_node: Optional[str] = None,
 ) -> None:
     """
@@ -100,17 +96,11 @@ def do_init(
     config = get_or_create_cli_config()
     if reset or config.get(AUTHOR_KEY, None) is None:
         author = validate_author_name(author)
-        registry_type = validate_registry_type(registry_type)
         update_cli_config({AUTHOR_KEY: author})
 
         if registry_type == REGISTRY_LOCAL:
-            if default_remote_registry is None:
-                default_remote_registry = REMOTE_IPFS
             _registry_init_local(default_remote_registry)
         else:
-            default_remote_registry = validate_remote_registry_type(
-                default_remote_registry
-            )
             _registry_init_remote(
                 default_remote_registry, author, no_subscribe, ipfs_node
             )
