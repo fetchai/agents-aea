@@ -75,8 +75,8 @@ class TestSearchBehaviour(BaseSkillTestCase):
     def teardown(self):
         """Teardown"""
 
+        super().teardown()
         self.strategy.__dict__.update(self._init_strategy_kwargs)
-        self.empty_message_queues()
         self.tx_behaviour.waiting.clear()
 
     @pytest.mark.skip  # wrong ledger_id
