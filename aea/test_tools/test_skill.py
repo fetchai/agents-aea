@@ -457,6 +457,12 @@ class BaseSkillTestCase:
 
         return dialogue
 
+    def setup(self, **kwargs: Any) -> None:
+        """Setup calling setup_class for backwards compatibility"""
+
+        # warn("Use .setup_class or overwrite this method", DeprecationWarning, stacklevel=2)
+        self.setup_class(**kwargs)
+
     @classmethod
     def setup_class(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
