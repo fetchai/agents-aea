@@ -49,8 +49,8 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
-@registry_flag(mark_default=True)
-@remote_registry_flag(mark_default=True)
+@registry_flag(mark_default=True, default_registry=REGISTRY_LOCAL)
+@remote_registry_flag(mark_default=True, default_registry=REMOTE_IPFS)
 @click.option(
     "--ipfs-node", type=str, default=DEFAULT_IPFS_URL, help="Multiaddr for IPFS node."
 )

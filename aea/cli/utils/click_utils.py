@@ -224,7 +224,7 @@ class AgentDirectory(click.Path):
 
 def registry_flag(
     mark_default: bool = True,
-    default_registry: str = REGISTRY_LOCAL,
+    default_registry: Optional[str] = None,
 ) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
@@ -256,7 +256,7 @@ def registry_flag(
 
 def remote_registry_flag(
     mark_default: bool = True,
-    default_registry: str = REMOTE_IPFS,
+    default_registry: Optional[str] = None,
 ) -> Callable:
     """Choice of one flag between: '--ipfs/--http'."""
 
