@@ -16,11 +16,11 @@
     <img alt="License" src="https://img.shields.io/pypi/l/open-aea">
   </a>
   <a href="https://pypi.org/project/open-aea/">
-    <img alt="License" src="https://img.shields.io/pypi/dm/open-aea">
+    <img alt="Downloads" src="https://img.shields.io/pypi/dm/open-aea">
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/valory-xyz/open-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
+  <a href="https://github.com/valory-xyz/open-aea/actions/workflows/workflow.yml">
     <img alt="AEA framework sanity checks and tests" src="https://github.com/valory-xyz/open-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
