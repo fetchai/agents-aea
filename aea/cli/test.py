@@ -382,9 +382,9 @@ def test_package_collection(
 
     for package_type, package_dir in available_packages:
         test_dir = package_dir / AEA_TEST_DIRNAME
-        if package_type == PackageType.AGENT.value or not test_dir.exists():
+        if not test_dir.exists():
             continue
-
+        
         load_package(package_dir, packages_dir=packages_dir)
         with cd(package_dir):
             click.echo(f"Running tests for {package_dir.name} of type {package_type}")
