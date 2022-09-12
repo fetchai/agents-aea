@@ -99,6 +99,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             ),
         )
 
+    def teardown(self) -> None:
+        """Teardown"""
+
+        self.reset_all_dialogues()
+
     def test_setup(self):
         """Test the setup method of the fipa handler."""
         assert self.fipa_handler.setup() is None
@@ -568,6 +573,11 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
                 OefSearchMessage.Performative.SEARCH_SERVICES, {"query": "some_query"}
             ),
         )
+
+    def teardown(self) -> None:
+        """Teardown"""
+        self.reset_all_dialogues()
+        self.empty_message_queues()
 
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
