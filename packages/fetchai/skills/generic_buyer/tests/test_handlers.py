@@ -565,6 +565,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             GenericOefSearchHandler, cls._skill.skill_context.handlers.oef_search
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
         cls.oef_dialogues = cast(
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
@@ -578,6 +579,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         """Teardown"""
         self.reset_all_dialogues()
         self.empty_message_queues()
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
 
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
