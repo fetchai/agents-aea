@@ -43,7 +43,7 @@ def __init__(agent_dir: Union[PathLike, str],
              password: Optional[str] = None) -> None
 ```
 
-Init aea config dir task.
+Init AEA config dir task.
 
 **Arguments**:
 
@@ -113,7 +113,7 @@ def __init__(agent_dir: Union[PathLike, str],
              password: Optional[str] = None) -> None
 ```
 
-Init aea config dir task.
+Init AEA config dir task.
 
 **Arguments**:
 

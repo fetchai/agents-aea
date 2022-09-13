@@ -41,7 +41,7 @@ class TestThreadedRunner:
     RUNNER_MODE = "threaded"
 
     def _builder(self, agent_name="agent1", act_func=None) -> AEABuilder:
-        """Build an aea instance."""
+        """Build an AEA instance."""
         builder = AEABuilder()
         builder.set_name(agent_name)
         builder.add_private_key(DEFAULT_LEDGER, FETCHAI_PRIVATE_KEY_PATH)
@@ -62,7 +62,7 @@ class TestThreadedRunner:
         return builder
 
     def setup(self):
-        """Set up aea instances."""
+        """Set up AEA instances."""
         self.aea1 = self._builder("agent1").build()
         self.aea2 = self._builder("agent2").build()
         self.failing_aea = self._builder(

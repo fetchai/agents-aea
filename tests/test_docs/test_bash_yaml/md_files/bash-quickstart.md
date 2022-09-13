@@ -119,10 +119,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ...
 ```
-``` bash
-cd my_first_aea
-aea interact
-```
+
 ``` bash
 info: Echo Behaviour: act method called.
 info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=my_first_aea_interact
@@ -145,9 +142,6 @@ info: Echo Behaviour: act method called.
 my_first_aea stopping ...
 info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
-```
-``` bash
-aea interact
 ```
 ``` bash
 pipenv run pytest test.py

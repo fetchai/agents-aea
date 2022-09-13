@@ -146,7 +146,7 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 ## Setup Open-AEA Author
 
-To configure the aea with an author.
+To configure the AEA with an author.
 
 ``` bash
 aea init --remote
@@ -231,7 +231,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
-Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the <code>aea interact</code> command.
+Note, due to the dialogue reference having to be incremented, you can only send the above envelope once!
 
 ### Stop the AEA
 

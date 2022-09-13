@@ -2,5 +2,5 @@
 
 # aea.common
 
-This module contains the common types and interfaces used in the aea framework.
+This module contains the common types and interfaces used in the AEA framework.
 
