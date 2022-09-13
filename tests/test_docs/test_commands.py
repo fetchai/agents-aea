@@ -139,31 +139,11 @@ def test_validate_doc_commands() -> None:
     validator = CommandValidator(aea_cli)
 
     COMMAND_REGEX = (
-        r"(?P<full_cmd>(?P<cli>aea) ((?!(&|'|\(|\[|\n|\.|`|\||#|</code>|=)).)*)"
+        r"""(^|\s)(?P<full_cmd>(?P<cli>aea) ((?!(&|'|\(|\[|\n|\.|`|\||#|<\/code>|=|")).)*)"""
     )
 
     skips = [
-        "aea root, run:",
-        "aea one",
-        "aea and its plugins in your Dockerfile to avoid the pypi versions being used instead of the local ones:",
-        "aea to use the IPFS registry",
-        "aea CLI tool, the private keys will be stored in plaintext",
-        'aea run",',
-        "aea interact",
-        "aea interrupted!",
-        "aea stopping",
-        "aea here as",
-        "aea with an author",
-        "aea scaffold connection/contract/protocol/skill",
-        "aea config dir task",
-        "aea instance task",
-        "aea framework",
-        "aea project path",
-        "aea validation flag",
-        "aea instance",
-        "aea exception policies",
         "aea packages/valory/protocols packages/valory/connections packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills tests/ --cov",
-        "aea --cov",
         "aea packages/valory/connections packages/valory/protocols packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_$",
         "aea packages/valory/connections packages/valory/protocols packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills tests/test_packages/test_$",
     ]
