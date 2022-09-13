@@ -28,8 +28,8 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import yaml
-from aea.configurations.data_types import PackageId
 
+from aea.configurations.data_types import PackageId
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
 
