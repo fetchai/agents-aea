@@ -21,18 +21,25 @@
 
 
 import json
+import logging
+import shutil
+import sys
+import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
+from typing import cast
 
 import click
 
-from aea.cli.utils.click_utils import component_flag
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
-from aea.configurations.data_types import PackageId, PublicId
+from aea.configurations.base import PackageConfiguration
+from aea.configurations.data_types import PackageId, PackageType
+from aea.configurations.loader import load_configuration_object
 from aea.helpers.dependency_tree import DependencyTree
+from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -57,7 +64,17 @@ def package_manager(
 
 @package_manager.command()
 @pass_ctx
-def sync(ctx: Context) -> None:
+@click.option(
+    "--update-packages",
+    is_flag=True,
+    help="Update packages if the calculated hash for a package does not match the one in the packages.json.",
+)
+@click.option(
+    "--update-hashes",
+    is_flag=True,
+    help="Update hashes in the packages.json if the calculated hash for a package does not match the one in the packages.json",
+)
+def sync(ctx: Context, update_packages: bool, update_hashes: bool) -> None:
     """Sync local packages."""
 
     if not IS_IPFS_PLUGIN_INSTALLED:
@@ -65,29 +82,58 @@ def sync(ctx: Context) -> None:
             "Please install ipfs plugin using `pip3 install open-aea-cli-ipfs`"
         )
 
+    if update_hashes and update_packages:
+        raise ValueError(
+            "You cannot use both `--update-hashes` and `--update-packages` at the same time."
+        )
+
     packages_dir = Path(ctx.registry_path)
-    manager = PackageManager.from_dir(packages_dir)
-    manager.sync()
+    PackageManager.from_dir(packages_dir).sync(
+        update_packages=update_packages,
+        update_hashes=update_hashes,
+    ).update_package_hashes().dump()
 
 
-@package_manager.command()
+@package_manager.command(name="lock")
+@click.option(
+    "--check",
+    is_flag=True,
+    help="Check packages.json",
+)
 @pass_ctx
-def init(ctx: Context) -> None:
-    """Initialize packages.json"""
+def lock_packages(ctx: Context, check: bool) -> None:
+    """Lock packages"""
 
     packages_dir = Path(ctx.registry_path)
-    PackageManager(packages_dir).init()
+
+    if check:
+        packages_dir = Path(ctx.registry_path)
+        click.echo("Verifying packages.json")
+        return_code = PackageManager.from_dir(packages_dir).verify()
+
+        if return_code:
+            click.echo("Verification failed.")
+        else:
+            click.echo("Verification successful")
+
+        sys.exit(return_code)
+
+    PackageManager(packages_dir).update_package_hashes().dump()
 
 
-@package_manager.command()
-@pass_ctx
-@component_flag(wrap_public_id=True)
-def add(ctx: Context, public_id: PublicId, component_type: str) -> None:
-    """Add a package."""
+def load_configuration(
+    package_type: PackageType, package_path: Path
+) -> PackageConfiguration:
+    """
+    Load a configuration, knowing the type and the path to the package root.
 
-    packages_dir = Path(ctx.registry_path)
-    PackageManager.from_dir(packages_dir)
-    click.echo((component_type, public_id))
+    :param package_type: the package type.
+    :param package_path: the path to the package root.
+    :return: the configuration object.
+    """
+    configuration_obj = load_configuration_object(package_type, package_path)
+    configuration_obj._directory = package_path  # pylint: disable=protected-access
+    return cast(PackageConfiguration, configuration_obj)
 
 
 class PackageManager:
@@ -105,31 +151,77 @@ class PackageManager:
         self._packages_file = path / PACKAGES_FILE
         self._packages = packages or OrderedDict()
 
+        self._logger = logging.getLogger(name="PackageManager")
+        self._logger.setLevel(logging.INFO)
+
+    @property
+    def packages(
+        self,
+    ) -> OrderedDictType[PackageId, str]:
+        """Returns mappings of package ids -> package hash"""
+
+        return self._packages
+
     def sync(
         self,
-    ) -> None:
-        """Sync local packages to the remote registry."""
+        update_packages: bool = False,
+        update_hashes: bool = False,
+    ) -> "PackageManager":
+        """
+        Sync local packages to the remote registry.
 
-        for package_id in self._packages:
-            package_path = (
-                self.path
-                / package_id.author
-                / package_id.package_type.to_plural()
-                / package_id.name
-            )
+        :param update_packages: Update packages if the calculated hash for a
+                                package does not match the one in the packages.json.
+        :param update_hashes: Update hashes in the packages.json if the calculated
+                              hash for a package does not match the one in the
+                              packages.json.
+        :return: PackageManager object
+        """
+
+        self._logger.info(f"Performing sync @ {self.path}")
+        sync_needed = False
+
+        for package_id in self.packages:
+            package_path = self.package_path_from_package_id(package_id)
 
             if package_path.exists():
-                continue
+                package_hash = IPFSHashOnly.get(str(package_path))
+                expected_hash = self.packages[package_id]
 
-            print(f"{package_id} not found locally, downloading...")
-            package_id_with_hash = package_id.with_hash(self._packages[package_id])
-            self.add(package_id=package_id_with_hash)
-        print("Sync complete.")
+                if package_hash == expected_hash:
+                    continue
 
-        print("Updating packages.json")
-        self.init()
+                if update_hashes:
+                    self._logger.info(f"Updating hash for {package_id}")
+                    self._packages[package_id] = package_hash
+                    continue
 
-    def add(self, package_id: PackageId) -> None:
+                if update_packages:
+                    sync_needed = True
+                    self._logger.info(
+                        f"Hash does not match for {package_id}, downloading package again..."
+                    )
+                    self.update_package(
+                        package_path, package_id.with_hash(expected_hash)
+                    )
+                    continue
+
+                raise PackageHashDoesNotMatch(
+                    f"Hashes for {package_id} does not match; Calculated hash: {package_hash}; Expected hash: {expected_hash}"
+                )
+
+            self._logger.info(f"{package_id} not found locally, downloading...")
+            package_id_with_hash = package_id.with_hash(self.packages[package_id])
+            self.add_package(package_id=package_id_with_hash)
+
+        if sync_needed:
+            self._logger.info("Sync complete")
+        else:
+            self._logger.info("No package was updated.")
+
+        return self
+
+    def add_package(self, package_id: PackageId) -> "PackageManager":
         """Add packages."""
 
         author_repo = self.path / package_id.author
@@ -147,25 +239,97 @@ class PackageManager:
             str(package_id.package_type), package_id.public_id, dest=str(download_path)
         )
 
-    def init(self, download_missing: bool = False) -> None:
-        """Initialize package.json file."""
+        return self
 
+    def update_package(
+        self,
+        package_path: Path,
+        package_id: PackageId,
+    ) -> "PackageManager":
+        """Update package."""
+
+        try:
+            shutil.rmtree(str(package_path))
+        except (OSError, PermissionError) as e:
+            raise PackageUpdateError(f"Cannot update {package_id}") from e
+
+        self.add_package(package_id)
+        return self
+
+    def get_available_package_hashes(
+        self,
+    ) -> OrderedDictType[PackageId, str]:
+        """Returns a mapping object between available packages and their hashes"""
+
+        _packages = OrderedDict()
         available_packages = DependencyTree.generate(self.path)
-        self._packages = OrderedDict()
         for _level in available_packages:
             for package in _level:
-                path = (
-                    self.path
-                    / package.author
-                    / package.package_type.to_plural()
-                    / package.name
-                )
-                if not path.exists() and not download_missing:
-                    raise DependencyNotFound(f"Missing dependency; {package}")
+                path = self.package_path_from_package_id(package)
                 package_hash = IPFSHashOnly.get(str(path))
-                self._packages[package] = package_hash
+                _packages[package] = package_hash
 
-        self.dump()
+        return _packages
+
+    def update_package_hashes(self) -> "PackageManager":
+        """Initialize package.json file."""
+        self._logger.info("Updating hashes")
+        self._packages.update(self.get_available_package_hashes())
+        return self
+
+    def package_path_from_package_id(self, package_id: PackageId) -> Path:
+        """Get package path from the package id."""
+        return (
+            self.path
+            / package_id.author
+            / package_id.package_type.to_plural()
+            / package_id.name
+        )
+
+    def verify(
+        self,
+        config_loader: Callable[
+            [PackageType, Path], PackageConfiguration
+        ] = load_configuration,
+    ) -> int:
+        """Verify fingerprints and outer hash of all available packages."""
+
+        failed = False
+        try:
+            available_packages = self.get_available_package_hashes()
+            for package_id in available_packages:
+                package_path = self.package_path_from_package_id(package_id)
+                configuration_obj = config_loader(
+                    package_id.package_type,
+                    package_path,
+                )
+
+                fingerprint_check = check_fingerprint(configuration_obj)
+                if not fingerprint_check:
+                    failed = True
+                    self._logger.info(
+                        f"Fingerprints does not match for {package_id} @ {package_path}"
+                    )
+                    continue
+
+                expected_hash = self.packages.get(package_id)
+                if expected_hash is None:
+                    failed = True
+                    self._logger.info(f"Cannot find hash for {package_id}")
+                    continue
+
+                calculated_hash = IPFSHashOnly.get(str(package_path))
+                if calculated_hash != expected_hash:
+                    failed = True
+                    self._logger.info(
+                        f"\nHash does not match for {package_id}\n\tCalculated hash: {calculated_hash}\n\tExpected hash:{expected_hash}"
+                    )
+
+        except Exception:  # pylint: disable=broad-except
+            traceback.print_exc()
+            failed = True
+
+        return int(failed)
 
     def dump(self, file: Optional[Path] = None) -> None:
         """Dump package data to file."""
@@ -200,3 +364,11 @@ class PackageManager:
 
 class DependencyNotFound(Exception):
     """Dependency not found error."""
+
+
+class PackageHashDoesNotMatch(Exception):
+    """Package hash does not match error."""
+
+
+class PackageUpdateError(Exception):
+    """Package update error."""
