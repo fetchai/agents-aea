@@ -74,7 +74,7 @@ Python dependencies of packages are specified in their respective configuration 
 
 ## Create a package
 
-If you want to create a package, you can use the <a href="../scaffolding/">CLI command</a> `aea scaffold connection/contract/protocol/skill [name]` and this will create the package and put it inside the respective folder based on the command for example if we `scaffold` skill with the name `my_skill`
+If you want to create a package, you can use the <a href="../scaffolding/">CLI command</a> `aea scaffold connection [name]` (also available for contracts, protocols, skills...) and this will create the package and put it inside the respective folder based on the command for example if we `scaffold` skill with the name `my_skill`
 it will be located inside the folder skills in the root directory of the agent (`my_aea/skills/my_skill`).
 
 ## Use published packages from the registry
