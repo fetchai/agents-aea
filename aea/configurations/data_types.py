@@ -498,6 +498,10 @@ class PublicId(JSONSerializable):
         """Returns a `PublicId` object with same parameters."""
         return PublicId(self.author, self.name, self.version)
 
+    def with_hash(self, package_hash: str) -> "PublicId":
+        """Returns a `PublicId` object with same parameters."""
+        return PublicId(self.author, self.name, self.version, package_hash)
+
     def __str__(self) -> str:
         """Get the string representation."""
         if self._package_hash is None:
@@ -620,6 +624,12 @@ class PackageId:
     ) -> "PackageId":
         """Returns PackageId object without hash"""
         return PackageId(self.package_type, self.public_id.without_hash())
+
+    def with_hash(self, package_hash: str) -> "PackageId":
+        """Returns PackageId object without hash"""
+        return PackageId(
+            self.package_type, self.public_id.with_hash(package_hash=package_hash)
+        )
 
     def __hash__(self) -> int:
         """Get the hash."""
