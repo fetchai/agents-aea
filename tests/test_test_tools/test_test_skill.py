@@ -70,6 +70,10 @@ class TestSkillTestCase(BaseSkillTestCase):
             dm_context_kwargs={},
         )
 
+    def teardown(self) -> None:
+        """Overwriting: no dialogues for DummyStateUpdateHandler"""
+        self.empty_message_queues()
+
     def test_setup(self):
         """Test the setup() class method."""
         assert self.skill.skill_context.agent_address == "test_agent_address"
