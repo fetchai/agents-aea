@@ -139,7 +139,7 @@ def test_validate_doc_commands() -> None:
     validator = CommandValidator(aea_cli)
 
     COMMAND_REGEX = (
-        r"""(^|\s)(?P<full_cmd>(?P<cli>aea) ((?!(&|'|\(|\[|\n|\.|`|\||#|<\/code>|=|")).)*)"""
+        r"""(^|\s|`|>)(?P<full_cmd>(?P<cli>aea) ((?!(&|'|\(|\[|\n|\.|`|\||#|<\/code>|=|")).)*)"""
     )
 
     skips = [
