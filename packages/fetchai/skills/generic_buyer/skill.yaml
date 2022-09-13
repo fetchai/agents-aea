@@ -13,10 +13,10 @@ fingerprint:
   handlers.py: bafybeifdytrtxifnxuzcml4plgqttkuknwlavmskc6gyy3xt4vujwwxjg4
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
   tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
-  tests/test_behaviours.py: bafybeigncjbqgw3reamdagb6ktmhxe3jgvcrbbgigc35tna5jacmfczcqi
+  tests/test_behaviours.py: bafybeihmr37ss6hsed6beqxzrg27zh3asxjbyvtzkn2cf4xmjf6zxnx5di
   tests/test_dialogues.py: bafybeiffzdtvbjeeblrqivfsxeochqd6ff5ioq7i2oiubu5lohxjuqg5ti
   tests/test_handlers.py: bafybeifg2vvucdfmn2bwdhps7mamw64anzbow7x6z55tcehhwmeivx66oe
-  tests/test_models.py: bafybeihfmnvir5u4t2v3osvccqy2hl5nemj4vs5iihfpnydzkrw2j6yuxa
+  tests/test_models.py: bafybeibh72j3n72yseqvmpppucpu5wtidf6ebxbxkfnmrnlh4zv5y5apei
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.19.0:bafybeiew6wsxz6bgm3c44hnk55avt2ftdgiwy2pvw67mkfz7fyhibeotku

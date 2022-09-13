@@ -235,10 +235,9 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def teardown(self):
         """Teardown"""
 
+        super().teardown()
         self.strategy.__dict__.update(self._init_strategy_kwargs)
         self.transaction_behaviour.teardown()
-        self.reset_all_dialogues()
-        self.empty_message_queues()
 
     def _check_start_processing_effects(self, fipa_dialogue, mock_logger) -> None:
         """Perform checks related to running _start_processing."""

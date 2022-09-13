@@ -41,40 +41,48 @@ class TestGenericStrategy(BaseSkillTestCase):
 
     path_to_skill = PACKAGE_ROOT
 
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         """Setup the test class."""
-
-        self.ledger_id = DEFAULT_LEDGER
-        self.is_ledger_tx = True
-        self.currency_id = "some_currency_id"
-        self.max_unit_price = 20
-        self.max_tx_fee = 1
-        self.service_id = "some_service_id"
-        self.search_query = {
+        super().setup_class()
+        cls.ledger_id = DEFAULT_LEDGER
+        cls.is_ledger_tx = True
+        cls.currency_id = "some_currency_id"
+        cls.max_unit_price = 20
+        cls.max_tx_fee = 1
+        cls.service_id = "some_service_id"
+        cls.search_query = {
             "constraint_type": "==",
             "search_key": "seller_service",
             "search_value": "some_search_value",
         }
-        self.location = {
+        cls.location = {
             "longitude": 0.127,
             "latitude": 51.5194,
         }
-        self.search_radius = 5.0
-        self.max_negotiations = 2
-        self.strategy = GenericStrategy(
-            ledger_id=self.ledger_id,
-            is_ledger_tx=self.is_ledger_tx,
-            currency_id=self.currency_id,
-            max_unit_price=self.max_unit_price,
-            max_tx_fee=self.max_tx_fee,
-            service_id=self.service_id,
-            search_query=self.search_query,
-            location=self.location,
-            search_radius=self.search_radius,
-            max_negotiations=self.max_negotiations,
+        cls.search_radius = 5.0
+        cls.max_negotiations = 2
+        cls.strategy = GenericStrategy(
+            ledger_id=cls.ledger_id,
+            is_ledger_tx=cls.is_ledger_tx,
+            currency_id=cls.currency_id,
+            max_unit_price=cls.max_unit_price,
+            max_tx_fee=cls.max_tx_fee,
+            service_id=cls.service_id,
+            search_query=cls.search_query,
+            location=cls.location,
+            search_radius=cls.search_radius,
+            max_negotiations=cls.max_negotiations,
             name="strategy",
-            skill_context=self._skill.skill_context,
+            skill_context=cls._skill.skill_context,
         )
+        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
+
+    def teardown(self) -> None:
+        """Teardown"""
+
+        super().teardown()
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
 
     def test_properties(self):
         """Test the properties of GenericStrategy class."""

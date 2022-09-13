@@ -61,10 +61,6 @@ class TestEchoHandler(BaseSkillTestCase):
             ),
         )
 
-    def teardown(self) -> None:
-        """Teardown"""
-        self.empty_message_queues()
-
     def test_setup(self):
         """Test the setup method of the echo handler."""
         with patch.object(self.logger, "log") as mock_logger:
