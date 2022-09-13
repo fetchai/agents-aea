@@ -89,6 +89,7 @@ Commands:
   local-registry-sync     Upgrade the local package registry.
   login                   Login to the registry account.
   logout                  Logout from the registry account.
+  packages                Local package manager.
   publish                 Publish the agent to the registry.
   push                    Push a non-vendor package of the agent to the...
   push-all                Push all available packages to a registry.
