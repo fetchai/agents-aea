@@ -83,15 +83,18 @@ def sync(ctx: Context, update_packages: bool, update_hashes: bool) -> None:
         )
 
     if update_hashes and update_packages:
-        raise ValueError(
+        raise click.ClickException(
             "You cannot use both `--update-hashes` and `--update-packages` at the same time."
         )
 
     packages_dir = Path(ctx.registry_path)
-    PackageManager.from_dir(packages_dir).sync(
-        update_packages=update_packages,
-        update_hashes=update_hashes,
-    ).update_package_hashes().dump()
+    try:
+        PackageManager.from_dir(packages_dir).sync(
+            update_packages=update_packages,
+            update_hashes=update_hashes,
+        ).update_package_hashes().dump()
+    except Exception as e:  # pylint: disable=broad-except
+        raise click.ClickException(str(e)) from e
 
 
 @package_manager.command(name="lock")
@@ -106,19 +109,22 @@ def lock_packages(ctx: Context, check: bool) -> None:
 
     packages_dir = Path(ctx.registry_path)
 
-    if check:
-        packages_dir = Path(ctx.registry_path)
-        click.echo("Verifying packages.json")
-        return_code = PackageManager.from_dir(packages_dir).verify()
+    try:
+        if check:
+            packages_dir = Path(ctx.registry_path)
+            click.echo("Verifying packages.json")
+            return_code = PackageManager.from_dir(packages_dir).verify()
 
-        if return_code:
-            click.echo("Verification failed.")
-        else:
-            click.echo("Verification successful")
+            if return_code:
+                click.echo("Verification failed.")
+            else:
+                click.echo("Verification successful")
 
-        sys.exit(return_code)
+            sys.exit(return_code)
 
-    PackageManager(packages_dir).update_package_hashes().dump()
+        PackageManager(packages_dir).update_package_hashes().dump()
+    except Exception as e:  # pylint: disable=broad-except
+        raise click.ClickException(str(e)) from e
 
 
 def load_configuration(
@@ -360,10 +366,6 @@ class PackageManager:
             packages[PackageId.from_uri_path(package_id)] = package_hash
 
         return cls(packages_dir, packages)
-
-
-class DependencyNotFound(Exception):
-    """Dependency not found error."""
 
 
 class PackageHashDoesNotMatch(Exception):

@@ -26,9 +26,10 @@ import re
 from typing import Any
 from unittest import mock
 
+import click
 import pytest
 
-from aea.cli.packages import PACKAGES_FILE, PackageHashDoesNotMatch, PackageManager
+from aea.cli.packages import PACKAGES_FILE, PackageManager
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
 from aea.test_tools.test_cases import BaseAEATestCase
@@ -88,7 +89,7 @@ class TestSyncCommand(BaseAEATestCase):
 
         with mock.patch.object(PackageManager, "packages", new=packages):
             with pytest.raises(
-                PackageHashDoesNotMatch,
+                click.ClickException,
                 match=re.escape(
                     "Hashes for (protocol, open_aea/signing:1.0.0) does not match;"
                 ),
