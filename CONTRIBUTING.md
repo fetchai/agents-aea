@@ -95,7 +95,7 @@ We have various commands which are helpful during development.
 
       make dir=cli tdir=cli test-sub
 
-- When making changes to one of the `packages`, then use `aea hash all` and `aea packages lock` to generate the latest hashes.
+- When making changes to one of the `packages`, then use `make hashes` to generate the latest hashes.
 
 ### Go Development
 

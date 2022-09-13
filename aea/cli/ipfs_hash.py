@@ -187,7 +187,7 @@ def update_hashes(
         [PackageType, Path], PackageConfiguration
     ] = load_configuration,
 ) -> int:
-    """Process all AEA packages, update fingerprint, and update hashes.csv files."""
+    """Process all AEA packages and update fingerprint."""
     return_code = 0
     package_hashes: Dict[str, str] = {}
 
