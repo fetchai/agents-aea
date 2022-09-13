@@ -769,6 +769,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def _read_out(
         cls, process: subprocess.Popen
     ) -> None:  # pragma: nocover # runs in thread!
+        if process.stdout is None:
+            raise Exception("Stdout of the process is None")
         for line in TextIOWrapper(process.stdout, encoding="utf-8"):
             cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line

@@ -171,7 +171,7 @@ class AEADirTask(AbstractExecutorTask):
             raise ValueError(
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
-        return loop.create_task(self._agent.runtime.start_and_wait_completed())
+        return loop.create_task(self._agent.runtime.start_and_wait_completed())  # type: ignore
 
 
 class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):

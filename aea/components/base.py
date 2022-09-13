@@ -177,6 +177,8 @@ def perform_load_aea_package(
             import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
 
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
+        if spec is None:
+            raise RuntimeError(f"Error load module from {subpackage_init_file}")
         module = importlib.util.module_from_spec(spec)
         sys.modules[import_path] = module
         _default_logger.debug(f"loading {import_path}: {module}")

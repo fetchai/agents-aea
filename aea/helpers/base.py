@@ -88,10 +88,14 @@ def locate(path: str) -> Any:
         module_location = os.path.join(file_location, "__init__.py")
         spec = importlib.util.spec_from_file_location(spec_name, module_location)
         _default_logger.debug("Trying to import {}".format(module_location))
+        if not spec:
+            raise RuntimeError(f"Error loading module by path {module_location}")
         nextmodule = _get_module(spec)
         if nextmodule is None:
             module_location = file_location + ".py"
             spec = importlib.util.spec_from_file_location(spec_name, module_location)
+            if not spec:
+                raise RuntimeError(f"Error loading module by path {module_location}")
             _default_logger.debug("Trying to import {}".format(module_location))
             nextmodule = _get_module(spec)
 
@@ -122,6 +126,8 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     :raises Exception: if the execution of the module raises exception.  # noqa: DAR402
     """
     spec = importlib.util.spec_from_file_location(dotted_path, str(filepath))
+    if not spec:
+        raise RuntimeError(f"Error loading module by path {filepath}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore
     return module
@@ -152,7 +158,7 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
     if os.name == "posix":
         process.send_signal(signal.SIGINT)  # pylint: disable=no-member
     elif os.name == "nt":
-        process.send_signal(signal.CTRL_C_EVENT)  # pylint: disable=no-member
+        process.send_signal(signal.CTRL_C_EVENT)  # type: ignore # pylint: disable=no-member
     else:
         raise ValueError("Other platforms not supported.")
 
@@ -189,7 +195,7 @@ def send_control_c(
     if platform.system() == "Windows":
         if process.stdin:  # cause ctrl-c event will be handled with stdin
             process.stdin.close()
-        os.kill(process.pid, signal.CTRL_C_EVENT)  # pylint: disable=no-member
+        os.kill(process.pid, signal.CTRL_C_EVENT)  # type: ignore  # pylint: disable=no-member
     elif kill_group:
         pgid = os.getpgid(process.pid)
         os.killpg(pgid, signal.SIGINT)
@@ -490,7 +496,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     # compute the topological order
     queue: Deque[T] = deque()
     order = []
-    queue.extendleft(sorted(roots))
+    queue.extendleft(sorted(roots))  # type: ignore
     while len(queue) > 0:
         current = queue.pop()
         order.append(current)

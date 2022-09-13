@@ -34,7 +34,9 @@ try:
         JSONDecodeError,
     )
 except ModuleNotFoundError:  # pragma: nocover
-    from json.decoder import JSONDecodeError  # noqa  # pylint: disable=unused-import
+    from json.decoder import (  # type: ignore # noqa  # pylint: disable=unused-import
+        JSONDecodeError,
+    )
 
 
 def add_default_timeout(fn: Callable, timeout: float) -> Callable:
