@@ -99,7 +99,7 @@ registry, and then from remote registry in case of failure).
 - `cli_verbosity`: the logging verbosity of the CLI
 - `registry_path`: the path to the registry locally
 - `skip_consistency_check`: consistency checks flag
-- `skip_aea_validation`: aea validation flag
+- `skip_aea_validation`: AEA validation flag
 
 **Returns**:
 
@@ -246,7 +246,7 @@ Get agent config json data.
 def get_aea_instance() -> AEA
 ```
 
-Build new aea instance.
+Build new AEA instance.
 
 <a id="aea.manager.project.AgentAlias.issue_certificates"></a>
 

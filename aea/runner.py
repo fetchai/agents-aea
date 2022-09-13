@@ -43,7 +43,7 @@ class AEAInstanceTask(AbstractExecutorTask):
 
     def __init__(self, agent: AEA) -> None:
         """
-        Init aea instance task.
+        Init AEA instance task.
 
         :param agent: AEA instance to run within task.
         """

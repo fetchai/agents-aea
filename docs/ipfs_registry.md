@@ -6,7 +6,7 @@ IPFS registry utilizes an updated version of the existing PublicId format. Previ
 
 So to utilize the newer PublicId format we have a script which extends all available packages with the new PublicId format.
 
-## Setup the aea to use the IPFS registry
+## Setup the AEA to use the IPFS registry
 
 Initialize AEA cli tool with default registry set to remote and default remote registry set to ipfs.
 

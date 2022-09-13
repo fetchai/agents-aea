@@ -146,7 +146,7 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 ## Setup Open-AEA Author
 
-To configure the aea with an author.
+To configure the AEA with an author.
 
 ``` bash
 aea init --remote

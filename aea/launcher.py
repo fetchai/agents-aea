@@ -142,7 +142,7 @@ class AEADirTask(AbstractExecutorTask):
         self, agent_dir: Union[PathLike, str], password: Optional[str] = None
     ) -> None:
         """
-        Init aea config dir task.
+        Init AEA config dir task.
 
         :param agent_dir: directory with aea config.
         :param password: the password to encrypt/decrypt the private key.
@@ -190,7 +190,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
         password: Optional[str] = None,
     ) -> None:
         """
-        Init aea config dir task.
+        Init AEA config dir task.
 
         :param agent_dir: directory with aea config.
         :param log_level: debug level applied for AEA in subprocess
