@@ -104,6 +104,15 @@ pymdown-extensions = "==9.1"
 pygments = "==2.7.4"
 
 
+[tool.poetry.group.mypy.dependencies]
+types-setuptools = "*"
+types-click = "*"
+types-requests = "*"
+types-PyYAML = "*"
+types-chardet = "*"
+types-simplejson = "*"
+
+
 [tool.poetry.group.packages.dependencies]
 yoti = "==2.14.0"
 tensorflow = [{ version = "^2.9.2", python = "<3.11" }]
