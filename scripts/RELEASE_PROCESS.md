@@ -13,7 +13,7 @@
 
 5. [CURRENTLY SKIPPED] Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
-6. Update the package and dependency hashes using `aea hash all`. And the same for the test packages using `aea hash all --packages-dir tests/data/packages/`. Commit if changes occurred.
+6. Update the package and dependency hashes using `aea hash all` and `aea packages lock`. Commit if changes occurred.
 
 7. Check the package upgrades are correct by running `python -m aea.cli check-packages` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 
