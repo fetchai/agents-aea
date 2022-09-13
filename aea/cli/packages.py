@@ -143,7 +143,9 @@ class PackageManager:
             (package_type_collection / "__init__.py").touch()
 
         download_path = package_type_collection / package_id.name
-        fetch_ipfs(package_id.package_type, package_id.public_id, dest=download_path)
+        fetch_ipfs(
+            str(package_id.package_type), package_id.public_id, dest=str(download_path)
+        )
 
     def init(self, download_missing: bool = False) -> None:
         """Initialize package.json file."""
