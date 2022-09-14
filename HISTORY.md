@@ -1,5 +1,21 @@
 # Release History - open AEA
 
+## v1.19.0 (2022-09-14)
+
+AEA:
+- Updates the `aea init` command to set the local as default registry and IPFS as default remote registry
+- Updates the `aea test packages` to include the agent tests
+- Introduces 
+  - `aea packages` command group to manage local packages repository
+  - `aea packages lock` command to lock all available packages and create `packages.json` file 
+  - `aea packages sync` command to synchronize the local packages repository
+
+Chores:
+- Fix README header link
+- Removes shebangs from non-script files
+- Adds a command validator for docs and Makefile
+- Deprecates the usage of `hashes.csv` to maintain packages consistency
+
 ## 1.18.0.post1 (2022-09-06)
 
 AEA:

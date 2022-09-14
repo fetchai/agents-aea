@@ -6,6 +6,15 @@ Below we describe the additional manual steps required to upgrade between differ
 
 
 # Open AEA
+
+## `v1.18.0` to `v1.19.0`
+
+- Deprecated the usage of `hashes.csv` and replaces it with `packages.json`
+- `--check` flag is deprecated from `aea hash all` 
+- When running `init` if no registry flags provided, `local` will be used as the default registry and `IPFS` as the default remote registry
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.17.0` to `v1.18.0`
 
 No backwards incompatible changes.
