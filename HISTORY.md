@@ -1,6 +1,6 @@
 # Release History - open AEA
 
-## v1.19.0 (2022-09-14)
+## 1.19.0 (2022-09-14)
 
 AEA:
 - Updates the `aea init` command to set the local as default registry and IPFS as default remote registry
@@ -12,7 +12,7 @@ AEA:
 
 Chores:
 - Fix README header link
-- Removes shebangs from non-script files
+- Removes `shebangs` from non-script files
 - Adds a command validator for docs and Makefile
 - Deprecates the usage of `hashes.csv` to maintain packages consistency
 
