@@ -33,7 +33,7 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 
 @mock.patch("aea.cli.packages.fetch_ipfs")
-class TestSyncCommand(BaseAEATestCase):
+class TestLockCommand(BaseAEATestCase):
     """Test sync command."""
 
     def test_lock(self, *args: Any) -> None:
