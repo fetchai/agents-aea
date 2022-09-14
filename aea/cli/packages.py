@@ -29,15 +29,14 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
-from typing import cast
 
 import click
 
+from aea.cli.ipfs_hash import load_configuration
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.configurations.base import PackageConfiguration
 from aea.configurations.data_types import PackageId, PackageType
-from aea.configurations.loader import load_configuration_object
 from aea.helpers.dependency_tree import DependencyTree
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
@@ -127,21 +126,6 @@ def lock_packages(ctx: Context, check: bool) -> None:
         raise click.ClickException(str(e)) from e
 
 
-def load_configuration(
-    package_type: PackageType, package_path: Path
-) -> PackageConfiguration:
-    """
-    Load a configuration, knowing the type and the path to the package root.
-
-    :param package_type: the package type.
-    :param package_path: the path to the package root.
-    :return: the configuration object.
-    """
-    configuration_obj = load_configuration_object(package_type, package_path)
-    configuration_obj._directory = package_path  # pylint: disable=protected-access
-    return cast(PackageConfiguration, configuration_obj)
-
-
 class PackageManager:
     """AEA package manager"""
 
@@ -184,6 +168,11 @@ class PackageManager:
         :return: PackageManager object
         """
 
+        if update_packages and update_hashes:
+            raise ValueError(
+                "Both `update_packages` and `update_hashes` cannot be set to `True`."
+            )
+
         self._logger.info(f"Performing sync @ {self.path}")
         sync_needed = False
 
@@ -216,6 +205,7 @@ class PackageManager:
                     f"Hashes for {package_id} does not match; Calculated hash: {package_hash}; Expected hash: {expected_hash}"
                 )
 
+            sync_needed = True
             self._logger.info(f"{package_id} not found locally, downloading...")
             package_id_with_hash = package_id.with_hash(self.packages[package_id])
             self.add_package(package_id=package_id_with_hash)
