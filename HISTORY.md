@@ -16,6 +16,9 @@ Chores:
 - Adds a command validator for docs and Makefile
 - Deprecates the usage of `hashes.csv` to maintain packages consistency
 
+Tests:
+- Fixes test failures introduced on `v1.18.0`
+
 ## 1.18.0.post1 (2022-09-06)
 
 AEA:
