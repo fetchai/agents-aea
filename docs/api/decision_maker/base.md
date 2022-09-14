@@ -250,7 +250,7 @@ ignored in that case).
 
 **Raises**:
 
-- `None`: ValueError, if the item is not an internal message
+- `ValueError`: if the item is not an internal message
 
 <a id="aea.decision_maker.base.ProtectedQueue.put_nowait"></a>
 
@@ -270,7 +270,7 @@ Equivalent to put(item, False).
 
 **Raises**:
 
-- `None`: ValueError, if the item is not an internal message
+- `ValueError`: if the item is not an internal message
 
 <a id="aea.decision_maker.base.ProtectedQueue.get"></a>
 
@@ -289,7 +289,7 @@ Inaccessible get method.
 
 **Raises**:
 
-- `None`: ValueError, access not permitted.
+- `ValueError`: access not permitted.
 
 <a id="aea.decision_maker.base.ProtectedQueue.get_nowait"></a>
 
@@ -303,7 +303,7 @@ Inaccessible get_nowait method.
 
 **Raises**:
 
-- `None`: ValueError, access not permitted.
+- `ValueError`: access not permitted.
 
 <a id="aea.decision_maker.base.ProtectedQueue.protected_get"></a>
 
@@ -325,7 +325,7 @@ Access protected get method.
 
 **Raises**:
 
-- `None`: ValueError, if caller is not permitted
+- `ValueError`: if caller is not permitted
 
 **Returns**:
 

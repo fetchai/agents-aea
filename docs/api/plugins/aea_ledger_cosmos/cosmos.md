@@ -794,7 +794,7 @@ Generate transaction with multiple messages
 
 **Raises**:
 
-- `None`: RuntimeError if number of pubkeys is not equal to number of from_addresses
+- `RuntimeError`: if number of pubkeys is not equal to number of from_addresses
 
 **Returns**:
 
@@ -893,10 +893,6 @@ Attempts to update the transaction with a gas estimate
 **Arguments**:
 
 - `transaction`: the transaction
-
-**Raises**:
-
-- `None`: NotImplementedError
 
 <a id="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.contract_method_call"></a>
 
@@ -1004,5 +1000,5 @@ Get wealth from the faucet for the provided address.
 
 **Raises**:
 
-- `None`: RuntimeError of explicit faucet failures
+- `RuntimeError`: of explicit faucet failures
 
