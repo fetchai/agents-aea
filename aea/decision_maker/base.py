@@ -175,7 +175,7 @@ class ProtectedQueue(Queue):
         :param internal_message: the internal message to put on the queue
         :param block: whether to block or not
         :param timeout: timeout on block
-        :raises: ValueError, if the item is not an internal message
+        :raises ValueError: if the item is not an internal message
         """
         if not (isinstance(internal_message, Message) or internal_message is None):
             raise ValueError("Only messages are allowed!")
@@ -190,7 +190,7 @@ class ProtectedQueue(Queue):
         Equivalent to put(item, False).
 
         :param internal_message: the internal message to put on the queue
-        :raises: ValueError, if the item is not an internal message
+        :raises ValueError: if the item is not an internal message
         """
         if not (isinstance(internal_message, Message) or internal_message is None):
             raise ValueError("Only messages are allowed!")
@@ -202,7 +202,7 @@ class ProtectedQueue(Queue):
 
         :param block: whether to block or not
         :param timeout: timeout on block
-        :raises: ValueError, access not permitted.
+        :raises ValueError: access not permitted.
         """
         raise ValueError("Access not permitted!")
 
@@ -210,7 +210,7 @@ class ProtectedQueue(Queue):
         """
         Inaccessible get_nowait method.
 
-        :raises: ValueError, access not permitted.
+        :raises ValueError: access not permitted.
         """
         raise ValueError("Access not permitted!")
 
@@ -223,7 +223,7 @@ class ProtectedQueue(Queue):
         :param access_code: the access code
         :param block: If optional args block is true and timeout is None (the default), block if necessary until an item is available.
         :param timeout: If timeout is a positive number, it blocks at most timeout seconds and raises the Empty exception if no item was available within that time.
-        :raises: ValueError, if caller is not permitted
+        :raises ValueError: if caller is not permitted
         :return: internal message
         """
         if self._access_code_hash != _hash(access_code):

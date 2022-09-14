@@ -1166,7 +1166,6 @@ class And(ConstraintExpr):
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
-        :return ``None``
         :raises ValueError: if the object does not satisfy some requirements.
         """
         if len(self.constraints) < 2:  # pragma: nocover
@@ -1242,7 +1241,6 @@ class Or(ConstraintExpr):
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
-        :return ``None``
         :raises ValueError: if the object does not satisfy some requirements.
         """
         if len(self.constraints) < 2:  # pragma: nocover
@@ -1550,7 +1548,6 @@ class Query:
         """
         Check whether the` object is valid.
 
-        :return ``None``
         :raises ValueError: if the query does not satisfy some sanity requirements.
         """
         if not isinstance(self.constraints, list):

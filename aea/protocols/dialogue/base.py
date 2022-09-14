@@ -240,7 +240,9 @@ class _DialogueMeta(type):
         return dialogue_cls
 
 
-class Dialogue(metaclass=_DialogueMeta):
+class Dialogue(
+    metaclass=_DialogueMeta,
+):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     STARTING_MESSAGE_ID = 1
@@ -611,7 +613,7 @@ class Dialogue(metaclass=_DialogueMeta):
         Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
 
         :param message: a message to be added
-        :raises: InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
+        :raises InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
         """
         if not message.has_sender:
             message.sender = self.self_address  # pragma: nocover

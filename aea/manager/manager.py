@@ -1050,7 +1050,6 @@ class MultiAgentManager:
         :param remote: whether or not to fetch from remote registry.
 
         :return: Tuple of bool indicating load success, settings of loaded, list of failed
-        :raises: ValueError if failed to load state.
         """
         if not os.path.exists(self._save_path):
             return False, {}, []
