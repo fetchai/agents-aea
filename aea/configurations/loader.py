@@ -265,7 +265,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """
         Load agent configuration from configuration json data.
 
-        :param configuration_json: list of dicts with aea configuration
+        :param configuration_json: list of dicts with agent configuration
         :param validate: whether or not to validate
 
         :return: AgentConfig instance
