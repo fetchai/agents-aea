@@ -52,6 +52,7 @@ IGNORE_PREFIXES = {
     Path("aea", "decision_maker", "scaffold.py"),
     Path("aea", "error_handler", "scaffold.py"),
     Path("aea", "test_tools", "click_testing.py"),
+    Path("aea", "protocols", "dialogue", "base.py"),
 }
 
 
