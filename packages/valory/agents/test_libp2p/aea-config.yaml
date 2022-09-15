@@ -18,8 +18,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections:
 - valory/p2p_libp2p:0.1.0:bafybeidti4xjarbc7zhsscyuxohw3442ppajfutxjmbtqxd4pudwfl322u
-- valory/p2p_libp2p_client:0.1.0:bafybeihtn3msd3wj6lw65ku5hsdccfq6uqfwdrqvxnm672nrq2w4rgg34q
-- valory/p2p_libp2p_mailbox:0.1.0:bafybeidgrj2s5wvjpzdwuak7j6nposdg74k4o2fl6r7apvzu67haegxdki
+- valory/p2p_libp2p_client:0.1.0:bafybeicetqdwj7xvi63xbyyyg4glib4ahsbyss7fxsvtc5ehx4xhuo52f4
+- valory/p2p_libp2p_mailbox:0.1.0:bafybeiglbtt2z6jfc2ikxvayj3avcmhelvw7wqg7pq5vpn3dtrwrgj6fta
 contracts: []
 protocols:
 - open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
