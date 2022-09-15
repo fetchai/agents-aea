@@ -23,6 +23,7 @@ import difflib
 import filecmp
 import logging
 import os
+from pathlib import Path
 import tempfile
 from collections import Counter, namedtuple
 from typing import Iterable, List
@@ -30,14 +31,14 @@ from typing import Iterable, List
 import git
 import pytest
 
-from tests.conftest import remove_test_directory
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
-    libp2p_log_on_failure_all,
-)
+from aea.test_tools.utils import remove_test_directory
+
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 PACKAGE = "packages.valory.connections.p2p_libp2p.libp2p_node"
-AEA_ROOT_DIR = os.path.join(*PACKAGE.split("."))
+PACKAGE_DIR = str(Path(__file__).parent.parent.absolute() / "libp2p_node")
+
 # if testing locally: tmp_dir = "../open-acn/"  # WARNING: will be `/` prefix missing still
 ACN_GITHUB_URL = "https://github.com/valory-xyz/open-acn/"
 
@@ -80,9 +81,9 @@ def go_file_paths(acn_repo_dir) -> FilePaths:
     """Get go file paths"""
 
     tmp_dir, acn_repo = acn_repo_dir
-    abs_aea = get_all_file_paths(AEA_ROOT_DIR, ".go")
+    abs_aea = get_all_file_paths(PACKAGE_DIR, ".go")
     abs_acn = get_all_file_paths(tmp_dir, ".go")
-    rel_aea = get_relative_file_paths(AEA_ROOT_DIR, *abs_aea)
+    rel_aea = get_relative_file_paths(PACKAGE_DIR, *abs_aea)
     rel_acn = get_relative_file_paths(tmp_dir, *abs_acn)
     return FilePaths(abs_aea, abs_acn, rel_aea, rel_acn)
 
@@ -124,6 +125,7 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
         aea_filepaths, acn_filepaths = map(set, relative_paths)
         missing_in_acn = aea_filepaths - acn_filepaths
         missing_in_aea = acn_filepaths - aea_filepaths
+
         assert not missing_in_acn and not missing_in_aea
 
     def test_content_equal(self, go_file_paths: FilePaths) -> None:

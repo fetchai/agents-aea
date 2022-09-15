@@ -1,0 +1,39 @@
+agent_name: test_libp2p
+author: valory
+version: 0.1.0
+license: Apache-2.0
+description: ''
+aea_version: '>=1.19.0, <2.0.0'
+fingerprint:
+  tests/__init__.py: bafybeiarz6mhky6pnkdihibcuqrfpx3qo55roygneoaoq2mndi5lzdlcj4
+  tests/base.py: bafybeiebutbqxrmtj43lsrjosgbkrkic5v4i7jt5gzndebsmzk3724e5ka
+  tests/test_aea_cli.py: bafybeiclfhax42ajami5hmrw4gbmxdoauwjtdxuyp27em2gtqhcb4rh2my
+  tests/test_certificate_dates.py: bafybeib4udu3czq6yjqp4ejzuyjr2vg6vit56yojxaumbhosnbzqa2aaua
+  tests/test_communication.py: bafybeihfoyzxr2hsdiwsczsic3up63tvmrkp4kybr3sg22sw2fg5ynopja
+  tests/test_errors.py: bafybeigrclkietdqb53mjdpazlapqm24gm3jeh636yes3ao3c7o27xtu5e
+  tests/test_fault_tolerance.py: bafybeiczc2jl2schxd2n3wakv4j3rcnqjnrrk7cirugxxkpk4unhbmrpv4
+  tests/test_integration.py: bafybeiamzw6qjzj5k2jv6fju3fev6z552wmfi7gpz7ht3noxoz5asbjw4q
+  tests/test_public_dht.py: bafybeidrst4o7vrxljn2bfiv3wlr2ikdsewdix5n5g5fdfd7svjvxhchwq
+  tests/test_slow_queue.py: bafybeihcbplvvlvbv5xumbs345movedziuq5sknn6jfhggjpfmy3jhfqfi
+fingerprint_ignore_patterns: []
+connections:
+- valory/p2p_libp2p:0.1.0:bafybeidti4xjarbc7zhsscyuxohw3442ppajfutxjmbtqxd4pudwfl322u
+- valory/p2p_libp2p_client:0.1.0:bafybeihtn3msd3wj6lw65ku5hsdccfq6uqfwdrqvxnm672nrq2w4rgg34q
+- valory/p2p_libp2p_mailbox:0.1.0:bafybeidgrj2s5wvjpzdwuak7j6nposdg74k4o2fl6r7apvzu67haegxdki
+contracts: []
+protocols:
+- open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
+- valory/acn:1.1.0:bafybeih5pz5re4kycou46xbzgguantxzj46aqtc575pgvej3m6bfg4xpfy
+skills: []
+default_ledger: ethereum
+required_ledgers:
+- ethereum
+default_routing: {}
+connection_private_key_paths: {}
+private_key_paths: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+dependencies:
+  open-aea-ledger-ethereum: {}
+default_connection: null
