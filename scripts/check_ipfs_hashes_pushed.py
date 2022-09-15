@@ -73,7 +73,6 @@ def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
 
 if __name__ == "__main__":
     # Get all hashes from the latest tag, excluding the scaffold ones (that are not pushed)
-    # need to fix this after the release
     hashes_file = get_file_from_tag("packages/packages.json")
     hashes = json.loads(hashes_file)
 
