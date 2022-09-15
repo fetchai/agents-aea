@@ -1267,7 +1267,8 @@ class _CosmosApi(LedgerApi):
         :param pub_keys: Public keys of each sender
 
         :raises RuntimeError: If pubkey is inserted during signing would make
-                second signer to change tx and make the first signature invalid
+                              second signer to change tx and make the first
+                              signature invalid
 
         :return: the transaction
         """
