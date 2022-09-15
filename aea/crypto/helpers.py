@@ -47,7 +47,6 @@ def try_validate_private_key_path(
     :param ledger_id: one of 'fetchai', 'ethereum'
     :param private_key_path: the path to the private key.
     :param password: the password to encrypt/decrypt the private key.
-    :raises: ValueError if the identifier is invalid.
     """
     try:
         # to validate the file, we just try to create a crypto object
@@ -76,7 +75,6 @@ def create_private_key(
     :param private_key_file: the private key file.
     :param password: the password to encrypt/decrypt the private key.
     :param extra_entropy: add extra randomness to whatever randomness your OS can provide
-    :raises: ValueError if the identifier is invalid.
     """
     crypto = make_crypto(ledger_id, extra_entropy=extra_entropy)
     crypto.dump(private_key_file, password)

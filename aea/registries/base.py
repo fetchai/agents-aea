@@ -60,7 +60,7 @@ class Registry(Generic[ItemId, Item], WithLogger, ABC):
         :param item: the item.
         :param is_dynamically_added: whether or not the item is dynamically added.
         :return: None
-        :raises: ValueError if an item is already registered with that item id.
+        :raises ValueError: if an item is already registered with that item id.
         """
 
     @abstractmethod
@@ -70,7 +70,7 @@ class Registry(Generic[ItemId, Item], WithLogger, ABC):
 
         :param item_id: the public id of the item.
         :return: the item
-        :raises: ValueError if no item registered with that item id.
+        :raises ValueError: if no item registered with that item id.
         """
 
     @abstractmethod
@@ -347,7 +347,7 @@ class ComponentRegistry(
         :param item_id: a pair (skill id, item name).
         :param item: the item to register.
         :param is_dynamically_added: whether or not the item is dynamically added.
-        :raises: ValueError if an item is already registered with that item id.
+        :raises ValueError: if an item is already registered with that item id.
         """
         skill_id = item_id[0]
         item_name = item_id[1]
@@ -373,7 +373,6 @@ class ComponentRegistry(
 
         :param item_id: a pair (skill id, item name).
         :return: skill component
-        :raises: ValueError if no item registered with that item id.
         """
         return self._unregister_from_main_index(item_id)
 
@@ -385,7 +384,7 @@ class ComponentRegistry(
 
         :param item_id: a pair (skill id, item name).
         :return: None
-        :raises: ValueError if no item registered with that item id.
+        :raises ValueError: if no item registered with that item id.
         """
         skill_id = item_id[0]
         item_name = item_id[1]
@@ -564,7 +563,6 @@ class HandlerRegistry(ComponentRegistry[Handler]):
 
         :param item_id: a pair (skill id, item name).
         :return: the unregistered handler
-        :raises: ValueError if no item is registered with that item id.
         """
         skill_id = item_id[0]
         handler = super()._unregister_from_main_index(item_id)

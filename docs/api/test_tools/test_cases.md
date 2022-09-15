@@ -541,10 +541,6 @@ Replace the private key in the provided file with the provided key.
 - `private_key`: the private key
 - `private_key_filepath`: the filepath to the private key file
 
-**Raises**:
-
-- `None`: exception if file does not exist
-
 <a id="aea.test_tools.test_cases.BaseAEATestCase.generate_wealth"></a>
 
 #### generate`_`wealth

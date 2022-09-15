@@ -308,11 +308,7 @@ class PackageConfiguration(Configuration, ABC):
         self._aea_version = new_aea_version
 
     def check_aea_version(self) -> None:
-        """
-        Check that the AEA version matches the specifier set.
-
-        :raises ValueError if the version of the aea framework falls within a specifier.
-        """
+        """Check that the AEA version matches the specifier set."""
         _check_aea_version(self)
 
     @property

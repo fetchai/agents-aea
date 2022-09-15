@@ -159,7 +159,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
         :param file_pointer: the file pointer to the configuration file
         :return: the configuration object.
-        :raises
+        :raises ValueError: If there are incorrect number of YAML documents provided
         """
         yaml_data = yaml.safe_load_all(file_pointer)
         yaml_documents = list(yaml_data)
@@ -265,7 +265,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """
         Load agent configuration from configuration json data.
 
-        :param configuration_json: list of dicts with aea configuration
+        :param configuration_json: list of dicts with agent configuration
         :param validate: whether or not to validate
 
         :return: AgentConfig instance

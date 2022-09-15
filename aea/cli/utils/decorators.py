@@ -208,7 +208,7 @@ def _cast_ctx(context: Union[Context, click.core.Context]) -> Context:
     :param context: Context or click.core.Context object.
 
     :return: context object.
-    :raises: AEAException if context is none of Context and click.core.Context types.
+    :raises AEAException: if context is none of Context and click.core.Context types.
     """
     if isinstance(context, Context):
         return context

@@ -592,7 +592,7 @@ def get_item_id_present(
     :param item_public_id: PublicId of an item.
 
     :return: boolean is item present.
-    :raises: AEAEnforceError
+    :raises AEAEnforceError: if `registered_item_public_id` is None
     """
     registered_item_public_id = get_item_public_id_by_author_name(
         agent_config, item_type, item_public_id.author, item_public_id.name
