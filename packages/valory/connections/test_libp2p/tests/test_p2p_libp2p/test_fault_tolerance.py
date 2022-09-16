@@ -24,9 +24,9 @@ import pytest
 from aea.multiplexer import Empty, Multiplexer
 from aea.test_tools.utils import wait_for_condition
 
-from packages.valory.agents.test_libp2p.tests.base import BaseP2PLibp2pTest
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import BaseP2PLibp2pTest
 
 
 TIMEOUT = 10

@@ -24,11 +24,11 @@ import pytest
 
 from aea.test_tools.utils import wait_for_condition
 
-from packages.valory.agents.test_libp2p.tests.base import (
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_connection,
 )
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 @libp2p_log_on_failure_all

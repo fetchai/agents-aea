@@ -23,19 +23,13 @@
 import itertools
 import json
 import os
+from pathlib import Path
 
 import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.test_tools.test_cases import AEATestCaseMany
 
-from packages.valory.agents.test_libp2p.tests.base import (
-    BaseP2PLibp2pTest,
-    LIBP2P_LEDGER,
-    load_client_connection_yaml_config,
-    make_cert_request,
-    ports,
-)
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
@@ -43,6 +37,13 @@ from packages.valory.connections.p2p_libp2p.connection import (
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
+)
+from packages.valory.connections.test_libp2p.tests.base import (
+    BaseP2PLibp2pTest,
+    LIBP2P_LEDGER,
+    load_client_connection_yaml_config,
+    make_cert_request,
+    ports,
 )
 
 
@@ -149,6 +150,10 @@ class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
 class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
+    package_registry_src_rel: Path = Path(
+        __file__
+    ).parent.parent.parent.parent.parent.parent
+
     @pytest.mark.parametrize("maddrs", [PUBLIC_DHT_MADDRS], indirect=True)
     def test_connectivity(self, maddrs):
         """Test connectivity."""
@@ -219,6 +224,10 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
+
+    package_registry_src_rel: Path = Path(
+        __file__
+    ).parent.parent.parent.parent.parent.parent
 
     @pytest.mark.parametrize(
         "delegate_uris_public_keys",

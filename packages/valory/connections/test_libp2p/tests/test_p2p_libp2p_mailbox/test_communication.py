@@ -32,14 +32,14 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea.mail.base import Empty
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.valory.agents.test_libp2p.tests.base import (
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     TIMEOUT,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
     ports,
 )
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 DEFAULT_CLIENTS_PER_NODE = 1

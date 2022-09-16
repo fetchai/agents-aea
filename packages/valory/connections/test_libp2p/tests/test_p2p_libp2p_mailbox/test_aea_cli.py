@@ -24,12 +24,12 @@
 
 from aea.test_tools.network import LOCALHOST
 
-from packages.valory.agents.test_libp2p.tests.test_p2p_libp2p_client.test_aea_cli import (
-    TestP2PLibp2pClientConnectionAEARunning as Base,
-)
 from packages.valory.connections import p2p_libp2p_mailbox
 from packages.valory.connections.p2p_libp2p.tests.base import ports
 from packages.valory.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
+from packages.valory.connections.test_libp2p.tests.test_p2p_libp2p_client.test_aea_cli import (
+    TestP2PLibp2pClientConnectionAEARunning as Base,
+)
 
 
 DEFAULT_HOST = LOCALHOST.hostname

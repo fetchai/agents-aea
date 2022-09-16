@@ -127,8 +127,9 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
 def load_client_connection_yaml_config() -> Dict[str, Any]:
     """Load libp2p client connection yaml configuration"""
 
-    module_path = os.path.sep.join(p2p_libp2p_client.__package__.split("."))
-    connection_yaml = Path(module_path).absolute() / "connection.yaml"
+    connection_yaml = (
+        Path(p2p_libp2p_client.__file__).absolute().parent / "connection.yaml"
+    )
     config = yaml.safe_load(connection_yaml.read_text())["config"]
     dns_template = "/dns4/{domain}/tcp/{port}/p2p/{peer_id}"
 
