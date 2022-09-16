@@ -7,18 +7,23 @@ aea_version: '>=1.19.0, <2.0.0'
 fingerprint:
   tests/__init__.py: bafybeiarz6mhky6pnkdihibcuqrfpx3qo55roygneoaoq2mndi5lzdlcj4
   tests/base.py: bafybeicagd755ooadsi5gwfxdwebium3seybucl4vasuuiipeedljivoim
-  tests/test_aea_cli.py: bafybeifqixljul3z5vb5lh5hjj6psjvkyq5ed3av7osi6vh5akk7k74vfe
-  tests/test_certificate_dates.py: bafybeia4ik2yf5wjkmzioay6cwzetnks3hyovdeipwwbwiwrsuenwrnfxi
-  tests/test_communication.py: bafybeie4q7jhedgiionzqqsvnvy7if6pvf2zkaspgurbn7fd6qceom3j5u
-  tests/test_errors.py: bafybeiaop2ddjalltkjdgiqv2e5d64hdyqdc4gs5jywje26vnze7sk56a4
-  tests/test_fault_tolerance.py: bafybeigobjxhhbbr7274kpk6b72e6yy4raevny7ynjk66deupet5xgnb4y
-  tests/test_integration.py: bafybeiho3lzdexsrbzaccplqg7f5tlryai45oklmxfue2p752a4b2bwxnq
-  tests/test_public_dht.py: bafybeiapzbatuj3gnilyo6qirdch2i4jc25wcc4ub2rxd2faeymgp2tyn4
-  tests/test_slow_queue.py: bafybeid6bzsjp7vhts6yppbjast77glqxwpaewmyyicdnlwhzip7cau5bm
+  tests/test_p2p_libp2p/__init__.py: bafybeig7f7s5ptqtscf74y25dtqvhp75joekcxi6qnuzxgxyzictpsp4dm
+  tests/test_p2p_libp2p/test_aea_cli.py: bafybeifqixljul3z5vb5lh5hjj6psjvkyq5ed3av7osi6vh5akk7k74vfe
+  tests/test_p2p_libp2p/test_certificate_dates.py: bafybeia4ik2yf5wjkmzioay6cwzetnks3hyovdeipwwbwiwrsuenwrnfxi
+  tests/test_p2p_libp2p/test_communication.py: bafybeie4q7jhedgiionzqqsvnvy7if6pvf2zkaspgurbn7fd6qceom3j5u
+  tests/test_p2p_libp2p/test_errors.py: bafybeiaop2ddjalltkjdgiqv2e5d64hdyqdc4gs5jywje26vnze7sk56a4
+  tests/test_p2p_libp2p/test_fault_tolerance.py: bafybeigobjxhhbbr7274kpk6b72e6yy4raevny7ynjk66deupet5xgnb4y
+  tests/test_p2p_libp2p/test_integration.py: bafybeiho3lzdexsrbzaccplqg7f5tlryai45oklmxfue2p752a4b2bwxnq
+  tests/test_p2p_libp2p/test_public_dht.py: bafybeiapzbatuj3gnilyo6qirdch2i4jc25wcc4ub2rxd2faeymgp2tyn4
+  tests/test_p2p_libp2p/test_slow_queue.py: bafybeid6bzsjp7vhts6yppbjast77glqxwpaewmyyicdnlwhzip7cau5bm
+  tests/test_p2p_libp2p_client/__init__.py: bafybeihjzl7ireo5rbnxcdbghbncykgcgcbh26m4mjjofsseeflauuf6sy
+  tests/test_p2p_libp2p_client/test_aea_cli.py: bafybeih55ubfelmngvhn4jzwsfrfodhdce4xfgfaboqhuya6257ke73rsu
+  tests/test_p2p_libp2p_client/test_communication.py: bafybeiavlb7m6scy6wiyxtcovyzrybhoizdkjsl2dszyfkobzcjoxmti6q
+  tests/test_p2p_libp2p_client/test_errors.py: bafybeids5hwfihpzzyh2o2wh7cplcilnb3h7xkmnjiiy6gvtrogcgsfwva
 fingerprint_ignore_patterns: []
 connections:
 - valory/p2p_libp2p:0.1.0:bafybeicas7m37tjikgx4g2ukmwb5eanauve3obddpj6mtckg7adre7zxom
-- valory/p2p_libp2p_client:0.1.0:bafybeicetqdwj7xvi63xbyyyg4glib4ahsbyss7fxsvtc5ehx4xhuo52f4
+- valory/p2p_libp2p_client:0.1.0:bafybeicxp7kgrkewdfq763gk5rtxii4k5dwhjbblym275m62vkbygfyuie
 - valory/p2p_libp2p_mailbox:0.1.0:bafybeiglbtt2z6jfc2ikxvayj3avcmhelvw7wqg7pq5vpn3dtrwrgj6fta
 contracts: []
 protocols:

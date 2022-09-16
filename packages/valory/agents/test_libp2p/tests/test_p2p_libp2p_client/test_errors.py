@@ -29,20 +29,19 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 
-from packages.valory.connections.p2p_libp2p_client.connection import (
-    NodeClient,
-    P2PLibp2pClientConnection,
-)
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.agents.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
     _process_cert,
     create_identity,
-    libp2p_log_on_failure_all,
     make_cert_request,
     ports,
+)
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.p2p_libp2p_client.connection import (
+    NodeClient,
+    P2PLibp2pClientConnection,
 )
 
 

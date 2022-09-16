@@ -20,21 +20,23 @@
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
 
+# pylint: skip-file
+
 import json
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.multiplexer import Multiplexer
+from aea.test_tools.network import LOCALHOST
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.valory.connections import p2p_libp2p_client
-from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
-
-from tests.conftest import DEFAULT_LEDGER, LOCALHOST
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.agents.test_libp2p.tests.base import (
     _make_libp2p_connection,
-    libp2p_log_on_failure_all,
     make_cert_request,
     ports,
 )
+from packages.valory.connections import p2p_libp2p_client
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.p2p_libp2p_client.connection import PUBLIC_ID
 
 
 DEFAULT_HOST = LOCALHOST.hostname

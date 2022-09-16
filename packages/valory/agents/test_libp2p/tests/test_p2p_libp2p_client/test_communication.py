@@ -20,28 +20,30 @@
 
 """This test module contains tests for Libp2p tcp client connection."""
 
+# pylint: skip-file
+
 import time
 from unittest import mock
 from unittest.mock import call
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.mail.base import Empty
 from aea.test_tools.mocks import RegexComparator
 
-from tests.conftest import DEFAULT_LEDGER
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.agents.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
     TIMEOUT,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
-    libp2p_log_on_failure_all,
     ports,
 )
-from tests.test_packages.test_connections.test_p2p_libp2p.test_communication import (
+from packages.valory.agents.test_libp2p.tests.test_p2p_libp2p.test_communication import (
     TestP2PLibp2pConnectionRouting,
 )
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 DEFAULT_CLIENTS_PER_NODE = 1
