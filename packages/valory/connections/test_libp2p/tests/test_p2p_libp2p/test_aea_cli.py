@@ -20,6 +20,8 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import json
 
 from aea.configurations.constants import DEFAULT_LEDGER

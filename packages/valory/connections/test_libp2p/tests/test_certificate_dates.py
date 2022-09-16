@@ -19,7 +19,8 @@
 
 """This test module ensures the dates on certificates are not outdated on issuance"""
 
-import os
+# pylint: skip-file
+
 from datetime import datetime
 from pathlib import Path
 from types import ModuleType

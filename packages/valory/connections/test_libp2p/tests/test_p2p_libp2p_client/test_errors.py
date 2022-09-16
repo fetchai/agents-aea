@@ -20,6 +20,8 @@
 
 """This test module contains negative tests for Libp2p tcp client connection."""
 
+# pylint: skip-file
+
 import asyncio
 import os
 from asyncio.futures import Future

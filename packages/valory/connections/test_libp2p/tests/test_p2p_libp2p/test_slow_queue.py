@@ -20,6 +20,8 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import pytest
 
 from aea.test_tools.utils import wait_for_condition

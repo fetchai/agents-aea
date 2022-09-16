@@ -19,6 +19,8 @@
 # ------------------------------------------------------------------------------
 """This test module contains resilience and fault tolerance tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import pytest
 
 from aea.multiplexer import Empty, Multiplexer

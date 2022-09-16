@@ -19,6 +19,8 @@
 
 """Test errors."""
 
+# pylint: skip-file
+
 import asyncio
 import os
 import platform

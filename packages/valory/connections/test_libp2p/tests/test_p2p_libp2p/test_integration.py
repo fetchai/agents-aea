@@ -20,6 +20,8 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import itertools
 
 import pytest

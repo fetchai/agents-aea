@@ -19,6 +19,8 @@
 
 """Base class."""
 
+# pylint: skip-file
+
 import atexit
 import functools
 import logging
