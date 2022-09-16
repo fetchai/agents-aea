@@ -138,7 +138,11 @@ def test_validate_doc_commands() -> None:
     # Get the validator
     validator = CommandValidator(aea_cli)
 
-    COMMAND_REGEX = r"""(^|\s|`|>)(?P<full_cmd>(?P<cli>aea) ((?!(&|'|\(|\[|\n|\.|`|\||#|<\/code>|=|")).)*)"""
+    # Regex conditions for a command:
+    # Either starts at the beginning of a line, or has one of the following characters before it: whitespace, ` or >
+    # Its first word is either aea or autonomy, followed by a whitespace
+    # Ends just before one of the following characters/strings: &, ', (, [, \n, ;,`, |, #, </code>, =, "
+    COMMAND_REGEX = r"""(^|\s|`|>)(?P<full_cmd>(?P<cli>aea) ((?!(&|'|\(|\[|\n|;|`|\||#|<\/code>|=|")).)*)"""
 
     skips = [
         "aea packages/valory/protocols packages/valory/connections packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills tests/ --cov",
