@@ -23,7 +23,7 @@ import os
 import shutil
 import stat
 import time
-from typing import Callable
+from typing import Any, Callable
 
 
 def wait_for_condition(
@@ -51,7 +51,7 @@ def remove_test_directory(directory: str, retries: int = 3) -> bool:
     :return: whether the directory was successfully deleted
     """
 
-    def readonly_handler(func, path, execinfo) -> None:
+    def readonly_handler(func: Any, path: Any, *args: Any, **kwargs: Any) -> None:
         """If permission is readonly, we change these and retry."""
         os.chmod(path, stat.S_IWRITE)
         func(path)

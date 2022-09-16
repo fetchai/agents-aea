@@ -26,10 +26,8 @@ import pytest
 
 from aea.helpers.acn.uri import Uri
 
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
-    BaseP2PLibp2pTest,
-    libp2p_log_on_failure_all,
-)
+from packages.valory.agents.test_libp2p.tests.base import BaseP2PLibp2pTest
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 DEFAULT_NET_SIZE = 4
@@ -41,7 +39,7 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
     """Test mix of relay/delegate agents and client connections work together"""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -87,11 +85,11 @@ class TestP2PLibp2pConnectionIntegrationTest(BaseP2PLibp2pTest):
             node_port=Uri(delegate_2.node.mailbox_uri).port,
         )
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_send_and_receive(self):
+    def test_send_and_receive(self) -> None:
         """Test envelope send/received by every pair of connection."""
 
         for sending, receiving in itertools.permutations(self.multiplexers, 2):

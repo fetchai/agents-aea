@@ -29,7 +29,10 @@ from packages.valory.agents.test_libp2p.tests.base import LIBP2P_LEDGER
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.p2p_libp2p.tests.base import (
+    libp2p_log_on_failure_all,
+    ports,
+)
 from packages.valory.connections.p2p_libp2p.tests.test_aea_cli import (
     BaseP2PLibp2pConnectionAEATest,
     p2p_libp2p_path,
@@ -42,7 +45,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(
 ):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    def test_agent(self):
+    def test_agent(self) -> None:
         """Test with aea."""
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
         # set config
@@ -74,7 +77,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(
 class TestP2PLibp2pConnectionAEARunningFullNode(BaseP2PLibp2pConnectionAEATest):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    def test_agent(self):
+    def test_agent(self) -> None:
         """Test with aea."""
         agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
         # set config

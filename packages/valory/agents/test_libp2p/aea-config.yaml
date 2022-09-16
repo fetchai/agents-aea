@@ -6,18 +6,18 @@ description: ''
 aea_version: '>=1.19.0, <2.0.0'
 fingerprint:
   tests/__init__.py: bafybeiarz6mhky6pnkdihibcuqrfpx3qo55roygneoaoq2mndi5lzdlcj4
-  tests/base.py: bafybeiebutbqxrmtj43lsrjosgbkrkic5v4i7jt5gzndebsmzk3724e5ka
-  tests/test_aea_cli.py: bafybeiclfhax42ajami5hmrw4gbmxdoauwjtdxuyp27em2gtqhcb4rh2my
-  tests/test_certificate_dates.py: bafybeib4udu3czq6yjqp4ejzuyjr2vg6vit56yojxaumbhosnbzqa2aaua
-  tests/test_communication.py: bafybeihfoyzxr2hsdiwsczsic3up63tvmrkp4kybr3sg22sw2fg5ynopja
-  tests/test_errors.py: bafybeigrclkietdqb53mjdpazlapqm24gm3jeh636yes3ao3c7o27xtu5e
-  tests/test_fault_tolerance.py: bafybeiczc2jl2schxd2n3wakv4j3rcnqjnrrk7cirugxxkpk4unhbmrpv4
-  tests/test_integration.py: bafybeiamzw6qjzj5k2jv6fju3fev6z552wmfi7gpz7ht3noxoz5asbjw4q
-  tests/test_public_dht.py: bafybeidrst4o7vrxljn2bfiv3wlr2ikdsewdix5n5g5fdfd7svjvxhchwq
-  tests/test_slow_queue.py: bafybeihcbplvvlvbv5xumbs345movedziuq5sknn6jfhggjpfmy3jhfqfi
+  tests/base.py: bafybeicagd755ooadsi5gwfxdwebium3seybucl4vasuuiipeedljivoim
+  tests/test_aea_cli.py: bafybeifqixljul3z5vb5lh5hjj6psjvkyq5ed3av7osi6vh5akk7k74vfe
+  tests/test_certificate_dates.py: bafybeia4ik2yf5wjkmzioay6cwzetnks3hyovdeipwwbwiwrsuenwrnfxi
+  tests/test_communication.py: bafybeie4q7jhedgiionzqqsvnvy7if6pvf2zkaspgurbn7fd6qceom3j5u
+  tests/test_errors.py: bafybeiaop2ddjalltkjdgiqv2e5d64hdyqdc4gs5jywje26vnze7sk56a4
+  tests/test_fault_tolerance.py: bafybeigobjxhhbbr7274kpk6b72e6yy4raevny7ynjk66deupet5xgnb4y
+  tests/test_integration.py: bafybeiho3lzdexsrbzaccplqg7f5tlryai45oklmxfue2p752a4b2bwxnq
+  tests/test_public_dht.py: bafybeiapzbatuj3gnilyo6qirdch2i4jc25wcc4ub2rxd2faeymgp2tyn4
+  tests/test_slow_queue.py: bafybeid6bzsjp7vhts6yppbjast77glqxwpaewmyyicdnlwhzip7cau5bm
 fingerprint_ignore_patterns: []
 connections:
-- valory/p2p_libp2p:0.1.0:bafybeidti4xjarbc7zhsscyuxohw3442ppajfutxjmbtqxd4pudwfl322u
+- valory/p2p_libp2p:0.1.0:bafybeicas7m37tjikgx4g2ukmwb5eanauve3obddpj6mtckg7adre7zxom
 - valory/p2p_libp2p_client:0.1.0:bafybeicetqdwj7xvi63xbyyyg4glib4ahsbyss7fxsvtc5ehx4xhuo52f4
 - valory/p2p_libp2p_mailbox:0.1.0:bafybeiglbtt2z6jfc2ikxvayj3avcmhelvw7wqg7pq5vpn3dtrwrgj6fta
 contracts: []

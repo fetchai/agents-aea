@@ -55,11 +55,11 @@ fingerprint:
   libp2p_node/utils/utils.go: bafybeihbd2br74nm3pupy4qkijm2tnuyl7pbq3uwasidmql5znhbr575k4
   libp2p_node/utils/utils_test.go: bafybeig2kkgqy7miml66w2byomeqjp4czzv45gb4jas76cxildo3lxi4xq
   tests/__init__.py: bafybeieftcbmxxpe7okvm3ycualpyec6xys4nx5tihcjii7lqxd3w5lx7e
-  tests/base.py: bafybeig74xjeutlhlgh2j3y6aapgtmm54ancom5rfqddwq5wlgky64nkzu
-  tests/test_aea_cli.py: bafybeick26kvlx72qhayo42salsnrjd5b7oiihfc2pouoxd4qalfl25l2i
-  tests/test_build.py: bafybeibym7xuidezyekqukjepfqsandjukzgsavd3bvudnlrc25ot5pm34
-  tests/test_errors.py: bafybeiga42lt5gb372k4qmvxcw4bui3hyg2up425lmapu26hlfrpnk2e5m
-  tests/test_go_code_matching_acn.py: bafybeihyfb5upmo4ifvbngx46h7h52ale5sahuxyx3ssftv7pfv4xodhwa
+  tests/base.py: bafybeib3hhkstntobhvqw4jsadlqmpp23vn3xiyusshm37alqrsn7dxige
+  tests/test_aea_cli.py: bafybeialoudz53r36xrz4oiva7hvj4zjox255y2rsd2zsmocmneq2d4tfi
+  tests/test_build.py: bafybeievrnqdmg5qa6kmgjsjzxqx47vgxkf7rrhtw4gkf5y4w76n34idmm
+  tests/test_errors.py: bafybeicedjioshdmjup5ntr4bsuo53yd7gqzdmtdjtp77t5337ls5ewhxi
+  tests/test_go_code_matching_acn.py: bafybeibdoqbd7xugnkyyv4ihtjoxql2qhtuqejq3mxnpiyyylp6otobsm4
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []

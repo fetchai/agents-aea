@@ -21,18 +21,18 @@
 
 import atexit
 import functools
-import inspect
-import itertools
 import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
-from unittest import mock
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import yaml
+from aea_ledger_cosmos.cosmos import CosmosCrypto
+from aea_ledger_ethereum.ethereum import EthereumCrypto
 
 from aea.configurations.base import ConnectionConfig
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
@@ -41,6 +41,8 @@ from aea.helpers.base import CertRequest, SimpleId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
+from aea.test_tools.network import LOCALHOST
+from aea.test_tools.utils import remove_test_directory, wait_for_condition
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections import p2p_libp2p_client
@@ -68,14 +70,8 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 
-from tests.common.utils import wait_for_condition
-from tests.conftest import (
-    CosmosCrypto,
-    DEFAULT_HOST,
-    DEFAULT_LEDGER,
-    EthereumCrypto,
-    remove_test_directory,
-)
+
+DEFAULT_HOST = LOCALHOST.hostname
 
 
 def create_identity(crypto) -> Identity:

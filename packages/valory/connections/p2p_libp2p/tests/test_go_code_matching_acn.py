@@ -23,10 +23,10 @@ import difflib
 import filecmp
 import logging
 import os
-from pathlib import Path
 import tempfile
 from collections import Counter, namedtuple
-from typing import Iterable, List
+from pathlib import Path
+from typing import Any, Iterable, List
 
 import git
 import pytest
@@ -37,7 +37,7 @@ from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_fail
 
 
 PACKAGE = "packages.valory.connections.p2p_libp2p.libp2p_node"
-PACKAGE_DIR = str(Path(__file__).parent.parent.absolute() / "libp2p_node")
+LIBP2P_NODE_DIRECTORY = str(Path(__file__).parent.parent.absolute() / "libp2p_node")
 
 # if testing locally: tmp_dir = "../open-acn/"  # WARNING: will be `/` prefix missing still
 ACN_GITHUB_URL = "https://github.com/valory-xyz/open-acn/"
@@ -60,14 +60,14 @@ def get_all_file_paths(directory: str, extension: str = "") -> List[str]:
     ]
 
 
-def get_relative_file_paths(root: str, *abs_paths) -> List[str]:
+def get_relative_file_paths(root: str, *abs_paths: Any) -> List[str]:
     """Remove the root directory from the absolute paths"""
 
     return [abs_path.split(root).pop() for abs_path in abs_paths]
 
 
 @pytest.fixture(scope="class")
-def acn_repo_dir():
+def acn_repo_dir() -> Any:
     """We keep the ACN repo around for all tests."""
 
     tmp_dir = tempfile.mkdtemp()
@@ -77,13 +77,13 @@ def acn_repo_dir():
 
 
 @pytest.fixture(scope="class")
-def go_file_paths(acn_repo_dir) -> FilePaths:
+def go_file_paths(acn_repo_dir: Any) -> FilePaths:
     """Get go file paths"""
 
     tmp_dir, acn_repo = acn_repo_dir
-    abs_aea = get_all_file_paths(PACKAGE_DIR, ".go")
+    abs_aea = get_all_file_paths(LIBP2P_NODE_DIRECTORY, ".go")
     abs_acn = get_all_file_paths(tmp_dir, ".go")
-    rel_aea = get_relative_file_paths(PACKAGE_DIR, *abs_aea)
+    rel_aea = get_relative_file_paths(LIBP2P_NODE_DIRECTORY, *abs_aea)
     rel_acn = get_relative_file_paths(tmp_dir, *abs_acn)
     return FilePaths(abs_aea, abs_acn, rel_aea, rel_acn)
 
@@ -100,16 +100,16 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
     """
 
     @classmethod
-    def setup(cls):  # I don't take extra args :)
+    def setup(cls) -> Any:  # I don't take extra args :)
         """Set the test up"""
 
-    def test_repo_not_bare(self, acn_repo_dir):
+    def test_repo_not_bare(self, acn_repo_dir: Any) -> Any:
         """Check that the repo isn't bare"""
 
         _, acn_repo = acn_repo_dir
         assert not acn_repo.bare
 
-    def test_unique_relative_path_assumption(self, go_file_paths: FilePaths):
+    def test_unique_relative_path_assumption(self, go_file_paths: FilePaths) -> Any:
         """Check assumption of unique relative paths."""
 
         def has_duplicates(items: Iterable) -> bool:
@@ -118,7 +118,7 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
         relative_paths = (go_file_paths.rel_aea, go_file_paths.rel_acn)
         assert not any(map(has_duplicates, relative_paths))
 
-    def test_file_presence(self, go_file_paths: FilePaths):
+    def test_file_presence(self, go_file_paths: FilePaths) -> Any:
         """Compare both ways to detect missing files."""
 
         relative_paths = (go_file_paths.rel_aea, go_file_paths.rel_acn)
@@ -128,7 +128,7 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
 
         assert not missing_in_acn and not missing_in_aea
 
-    def test_content_equal(self, go_file_paths: FilePaths) -> None:
+    def test_content_equal(self, go_file_paths: FilePaths) -> Any:
         """Compare file content, report differences."""
 
         differences = {}
@@ -142,7 +142,7 @@ class TestP2PLibp2pGoCodeMatchingOpenACN:
             aea_content = open(aea_file).readlines()
             acn_content = open(acn_file).readlines()
             detected = difflib.unified_diff(aea_content, acn_content)
-            file_name = aea_file.split(AEA_ROOT_DIR).pop()
+            file_name = aea_file.split(LIBP2P_NODE_DIRECTORY).pop()
             differences[file_name] = "".join(detected)
 
         if differences:

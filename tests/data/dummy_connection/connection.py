@@ -22,7 +22,7 @@
 
 import asyncio
 from concurrent.futures._base import CancelledError
-from typing import Optional
+from typing import Any, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
@@ -34,29 +34,29 @@ class DummyConnection(Connection):
 
     connection_id = PublicId.from_str("fetchai/dummy:0.1.0")
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
         super().__init__(**kwargs)
         self.state = ConnectionStates.disconnected
         self._queue = None
 
-    async def connect(self, *args, **kwargs):
+    async def connect(self, *args: Any, **kwargs: Any) -> None:
         """Connect."""
         self._queue = asyncio.Queue()
         self.state = ConnectionStates.connected
 
-    async def disconnect(self, *args, **kwargs):
+    async def disconnect(self, *args: Any, **kwargs: Any) -> None:
         """Disconnect."""
         assert self._queue is not None
         await self._queue.put(None)
         self.state = ConnectionStates.disconnected
 
-    async def send(self, envelope: "Envelope"):
+    async def send(self, envelope: "Envelope") -> None:
         """Send an envelope."""
         assert self._queue is not None
         self._queue.put_nowait(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Receive an envelope."""
         try:
             assert self._queue is not None
@@ -70,7 +70,7 @@ class DummyConnection(Connection):
             print(str(e))
             return None
 
-    def put(self, envelope: Envelope):
+    def put(self, envelope: Envelope) -> None:
         """Put an envelope in the queue."""
         assert self._queue is not None
         self._queue.put_nowait(envelope)

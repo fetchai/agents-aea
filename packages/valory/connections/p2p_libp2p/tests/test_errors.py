@@ -34,7 +34,7 @@ DEFAULT_NET_SIZE = 4
 
 
 @pytest.mark.asyncio
-async def test_max_restarts():
+async def test_max_restarts() -> None:
     """Test node max restarts exception."""
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp", max_restarts=0)
     with pytest.raises(ValueError, match="Max restarts attempts reached:"):
@@ -42,7 +42,7 @@ async def test_max_restarts():
 
 
 @pytest.mark.asyncio
-async def test_send_acn_confirm_failed():
+async def test_send_acn_confirm_failed() -> None:
     """Test nodeclient send fails on confirmation from other point ."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
@@ -68,7 +68,7 @@ async def test_send_acn_confirm_failed():
 
 
 @pytest.mark.asyncio
-async def test_send_acn_confirm_timeout():
+async def test_send_acn_confirm_timeout() -> None:
     """Test node client send fails on timeout."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
@@ -89,7 +89,7 @@ async def test_send_acn_confirm_timeout():
 
 
 @pytest.mark.asyncio
-async def test_acn_decode_error_on_read():
+async def test_acn_decode_error_on_read() -> None:
     """Test ACN decode error on read."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
@@ -112,7 +112,7 @@ async def test_acn_decode_error_on_read():
 
 
 @pytest.mark.asyncio
-async def test_write_acn_error():
+async def test_write_acn_error() -> None:
     """Test write ACN error."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")

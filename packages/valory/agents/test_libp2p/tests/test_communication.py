@@ -29,14 +29,13 @@ import pytest
 
 from aea.mail.base import Empty
 
-from packages.valory.connections.p2p_libp2p.connection import NodeClient
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.agents.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     TIMEOUT,
     _make_libp2p_connection,
-    libp2p_log_on_failure_all,
 )
+from packages.valory.connections.p2p_libp2p.connection import NodeClient
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 DEFAULT_NET_SIZE = 4
@@ -49,7 +48,7 @@ class TestP2PLibp2pConnectionConnectDisconnect(BaseP2PLibp2pTest):
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("crypto", BaseP2PLibp2pTest._cryptos)
-    async def test_p2p_libp2p_connection_connect_disconnect(self, crypto):
+    async def test_p2p_libp2p_connection_connect_disconnect(self, crypto) -> None:
         """Test connect then disconnect."""
 
         connection = _make_libp2p_connection(agent_key=crypto)
@@ -70,7 +69,7 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
     """Test that connection will route envelope to destination"""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -81,11 +80,11 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
             agent_key=cls.default_crypto,
         )
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_envelope_routed(self):
+    def test_envelope_routed(self) -> None:
         """Test envelope routed."""
 
         sender = self.connection1.address
@@ -98,7 +97,7 @@ class TestP2PLibp2pConnectionEchoEnvelope(BaseP2PLibp2pTest):
         assert delivered_envelope is not None
         assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-    def test_envelope_echoed_back(self):
+    def test_envelope_echoed_back(self) -> None:
         """Test envelope echoed back."""
 
         sender = self.connection1.address
@@ -124,7 +123,7 @@ class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
     """Test that libp2p node will reliably route envelopes in a local network"""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -133,11 +132,11 @@ class TestP2PLibp2pConnectionRouting(BaseP2PLibp2pTest):
         for _ in range(DEFAULT_NET_SIZE):
             cls.make_connection(entry_peers=[genesis_peer])
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_star_routing_connectivity(self):
+    def test_star_routing_connectivity(self) -> None:
         """Test star routing connectivity."""
 
         addrs = [c.address for m in self.multiplexers for c in m.connections]
@@ -155,7 +154,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
     """Test that connection will route envelope to destination using the same relay node"""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -165,11 +164,11 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
         cls.connection1 = cls.make_connection(relay=False, entry_peers=[relay_peer])
         cls.connection2 = cls.make_connection(entry_peers=[relay_peer])
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_envelope_routed(self):
+    def test_envelope_routed(self) -> None:
         """Test envelope routed."""
 
         sender = self.connection1.address
@@ -182,7 +181,7 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode(BaseP2PLibp2pTest):
         assert delivered_envelope is not None
         assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
-    def test_envelope_echoed_back(self):
+    def test_envelope_echoed_back(self) -> None:
         """Test envelope echoed back."""
 
         sender = self.connection1.address
@@ -208,7 +207,7 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
     """Test DHT network routing of envelopes from relay/non-relay to relay/non-relay nodes"""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -221,11 +220,11 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes(BaseP2PLibp2pTest):
             cls.make_connection(entry_peers=[relay_peer_1])
             cls.make_connection(entry_peers=[relay_peer_2])
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_star_routing_connectivity(self):
+    def test_star_routing_connectivity(self) -> None:
         """Test star routing connectivity."""
 
         addrs = [c.address for m in self.multiplexers for c in m.connections]
@@ -244,7 +243,7 @@ class TestP2PLibp2pNodeRestart(BaseP2PLibp2pTest):
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("crypto", BaseP2PLibp2pTest._cryptos)
-    async def test_node_restart(self, crypto):
+    async def test_node_restart(self, crypto) -> None:
         """Test node restart works."""
 
         connection = _make_libp2p_connection(agent_key=crypto)
@@ -265,7 +264,7 @@ class BaseTestP2PLibp2p(BaseP2PLibp2pTest):
     """Base test class for p2p libp2p tests with two peers."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -281,11 +280,11 @@ class BaseTestP2PLibp2p(BaseP2PLibp2pTest):
 class TestP2PLibp2PSendEnvelope(BaseTestP2PLibp2p):
     """Test that connection will send envelope with error, and that reconnection fixes it."""
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_envelope_routed(self):
+    def test_envelope_routed(self) -> None:
         """Test envelope routed."""
 
         sender = self.connection2.address
@@ -313,7 +312,7 @@ class TestP2PLibp2PSendEnvelope(BaseTestP2PLibp2p):
 class TestP2PLibp2PReceiveEnvelope(BaseTestP2PLibp2p):
     """Test that connection will receive envelope with error, and that reconnection fixes it."""
 
-    def test_envelope_routed(self):
+    def test_envelope_routed(self) -> None:
         """Test envelope routed."""
 
         sender = self.connection1.address
@@ -346,7 +345,7 @@ class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
 
     NB_ENVELOPES = 1000
 
-    def test_burst_order(self):
+    def test_burst_order(self) -> None:
         """Test order of envelope burst is guaranteed on receiving end."""
 
         sender = self.connection1.address
@@ -374,7 +373,7 @@ class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
 
 
 @pytest.mark.asyncio
-async def test_node_client_pipe_connect():
+async def test_node_client_pipe_connect() -> None:
     """Test pipe.connect called on NodeClient.connect."""
     f = asyncio.Future()
     f.set_result(None)
@@ -386,7 +385,7 @@ async def test_node_client_pipe_connect():
 
 
 @pytest.mark.asyncio
-async def test_write_acn_error():
+async def test_write_acn_error() -> None:
     """Test pipe.connect called on NodeClient.connect."""
     f = asyncio.Future()
     f.set_result(None)

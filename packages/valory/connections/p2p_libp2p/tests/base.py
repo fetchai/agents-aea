@@ -24,7 +24,7 @@ import functools
 import inspect
 import itertools
 import tempfile
-from typing import Callable, Type
+from typing import Any, Callable, Type
 from unittest import mock
 
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -45,7 +45,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
     """Decorate a method running a libp2p node to print its logs in case test fails."""
 
     @functools.wraps(fn)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args: Any, **kwargs: Any) -> None:
         try:
             return fn(self, *args, **kwargs)
         except Exception:

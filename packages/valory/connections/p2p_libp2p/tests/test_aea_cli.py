@@ -55,14 +55,14 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
     package_registry_src_rel = Path(__file__).parent.parent.parent.parent.parent
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
         cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Tear down the test"""
         cls.terminate_agents()
         cls.log_files.clear()
@@ -98,7 +98,7 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
 ):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    def test_agent(self):
+    def test_agent(self) -> None:
         """Test with aea."""
         key_path = "ethereum_private_key.txt"
         self.generate_private_key(

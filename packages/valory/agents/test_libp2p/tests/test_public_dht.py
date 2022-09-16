@@ -26,24 +26,23 @@ import os
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.test_tools.test_cases import AEATestCaseMany
 
+from packages.valory.agents.test_libp2p.tests.base import (
+    BaseP2PLibp2pTest,
+    LIBP2P_LEDGER,
+    load_client_connection_yaml_config,
+    make_cert_request,
+    ports,
+)
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
-)
-
-from tests.conftest import DEFAULT_LEDGER
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
-    BaseP2PLibp2pTest,
-    LIBP2P_LEDGER,
-    libp2p_log_on_failure_all,
-    load_client_connection_yaml_config,
-    make_cert_request,
-    ports,
 )
 
 

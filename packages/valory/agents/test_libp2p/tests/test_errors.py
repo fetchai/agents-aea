@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2022 Valory AG
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""Test errors."""
+
 import asyncio
 import os
 import platform
@@ -31,14 +52,14 @@ from packages.valory.protocols.acn.message import AcnMessage
 class TestP2PLibp2pConnectionFailureGolangRun(BaseP2PLibp2pTest):
     """Test that golang run fails if wrong path or timeout"""
 
-    def test_wrong_path(self):
+    def test_wrong_path(self) -> None:
         """Test the wrong path."""
         log_file_desc = open("log", "a", 1)
         wrong_path = tempfile.mkdtemp()
         with pytest.raises(FileNotFoundError):  # match differs based on OS
             _golang_module_run(wrong_path, LIBP2P_NODE_MODULE_NAME, [], log_file_desc)
 
-    def test_timeout(self):
+    def test_timeout(self) -> None:
         """Test the timeout."""
 
         connection = _make_libp2p_connection()
@@ -55,7 +76,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
     key_file: str
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
 
         super().setup_class()
@@ -66,7 +87,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
         cls.key_file = os.path.join(cls.tmp, "keyfile")
         crypto.dump(cls.key_file)
 
-    def test_entry_peers_when_no_public_uri_provided(self):
+    def test_entry_peers_when_no_public_uri_provided(self) -> None:
         """Test entry peers when no public uri provided."""
 
         configuration = ConnectionConfig(
@@ -83,7 +104,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
                 configuration=configuration, data_dir=self.tmp, identity=self.identity
             )
 
-    def test_local_uri_provided_when_public_uri_provided(self):
+    def test_local_uri_provided_when_public_uri_provided(self) -> None:
         """Test local uri provided when public uri provided."""
 
         configuration = ConnectionConfig(
@@ -100,7 +121,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             )
 
 
-def test_libp2p_connection_mixed_ip_address():
+def test_libp2p_connection_mixed_ip_address() -> None:
     """Test correct public uri ip and entry peers ips configuration."""
     assert _ip_all_private_or_all_public([]) is True
     assert _ip_all_private_or_all_public(["127.0.0.1", "127.0.0.1"]) is True
@@ -111,14 +132,14 @@ def test_libp2p_connection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
 
 
-def test_libp2p_connection_node_config_registration_delay():
+def test_libp2p_connection_node_config_registration_delay() -> None:
     """Test node registration delay configuration"""
 
     with pytest.raises(ValueError, match="must be a float number in seconds"):
         _make_libp2p_connection(peer_registration_delay="must_be_float")
 
 
-def test_build_dir_not_set():
+def test_build_dir_not_set() -> None:
     """Test build dir not set."""
 
     with tempfile.TemporaryDirectory() as data_dir:
@@ -136,7 +157,7 @@ def test_build_dir_not_set():
 
 
 @pytest.mark.asyncio
-async def test_reconnect_on_write_failed():
+async def test_reconnect_on_write_failed() -> None:
     """Test node restart on write fail."""
 
     con = _make_libp2p_connection()
@@ -163,7 +184,7 @@ async def test_reconnect_on_write_failed():
 
 
 @pytest.mark.asyncio
-async def test_reconnect_on_write_failed_reconnect_pipe():
+async def test_reconnect_on_write_failed_reconnect_pipe() -> None:
     """Test node restart on write fail."""
 
     con = _make_libp2p_connection()
@@ -196,7 +217,7 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
 
 
 @pytest.mark.asyncio
-async def test_reconnect_on_read_failed():
+async def test_reconnect_on_read_failed() -> None:
     """Test node restart on read fail."""
 
     con = _make_libp2p_connection()
@@ -220,7 +241,7 @@ async def test_reconnect_on_read_failed():
 
 
 @pytest.mark.asyncio
-async def test_node_stopped_callback():
+async def test_node_stopped_callback() -> None:
     """Test node stopped callback called."""
 
     if not (

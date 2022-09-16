@@ -42,7 +42,7 @@ P2P_LIBP2P_MODULES = (p2p_libp2p, p2p_libp2p_client, p2p_libp2p_mailbox)
 
 
 @pytest.mark.parametrize("p2p_libp2p_module", P2P_LIBP2P_MODULES)
-def test_certificate_dates(p2p_libp2p_module: ModuleType):
+def test_certificate_dates(p2p_libp2p_module: ModuleType) -> None:
     """Test certificate dates not outdated"""
 
     def to_datetime(time: str) -> datetime:
