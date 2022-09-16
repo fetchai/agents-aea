@@ -20,6 +20,8 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import re
 from unittest.mock import Mock
 
@@ -29,14 +31,10 @@ import requests
 from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.valory.agents.test_libp2p.tests.base import BaseP2PLibp2pTest, ports
 from packages.valory.connections.p2p_libp2p_mailbox.connection import NodeClient
 from packages.valory.protocols.acn import acn_pb2
 from packages.valory.protocols.acn.message import AcnMessage
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
-    BaseP2PLibp2pTest,
-    ports,
-)
 
 
 MockDefaultMessageProtocol = Mock()

@@ -20,21 +20,22 @@
 
 """This test module contains negative tests for Libp2p tcp client connection."""
 
+# pylint: skip-file
+
 import pytest
 
-from packages.valory.connections.p2p_libp2p_mailbox.connection import (
-    P2PLibp2pMailboxConnection,
-)
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.agents.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_mailbox_connection,
 )
-from tests.test_packages.test_connections.test_p2p_libp2p_client.test_errors import (
+from packages.valory.agents.test_libp2p.tests.test_p2p_libp2p_client.test_errors import (
     TestLibp2pClientConnectionFailureConnectionSetup as BaseFailureConnectionSetup,
 )
-from tests.test_packages.test_connections.test_p2p_libp2p_client.test_errors import (
+from packages.valory.agents.test_libp2p.tests.test_p2p_libp2p_client.test_errors import (
     TestLibp2pClientConnectionFailureNodeNotConnected as BaseFailureNodeNotConnected,
+)
+from packages.valory.connections.p2p_libp2p_mailbox.connection import (
+    P2PLibp2pMailboxConnection,
 )
 
 

@@ -20,14 +20,19 @@
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
 
-from packages.valory.connections import p2p_libp2p_mailbox
-from packages.valory.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
+# pylint: skip-file
 
-from tests.conftest import DEFAULT_HOST
-from tests.test_packages.test_connections.test_p2p_libp2p.base import ports
-from tests.test_packages.test_connections.test_p2p_libp2p_client.test_aea_cli import (
+from aea.test_tools.network import LOCALHOST
+
+from packages.valory.agents.test_libp2p.tests.test_p2p_libp2p_client.test_aea_cli import (
     TestP2PLibp2pClientConnectionAEARunning as Base,
 )
+from packages.valory.connections import p2p_libp2p_mailbox
+from packages.valory.connections.p2p_libp2p.tests.base import ports
+from packages.valory.connections.p2p_libp2p_mailbox.connection import PUBLIC_ID
+
+
+DEFAULT_HOST = LOCALHOST.hostname
 
 
 class TestP2PLibp2pMailboxConnectionAEARunning(Base):
