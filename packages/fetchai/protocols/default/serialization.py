@@ -35,7 +35,19 @@ class DefaultSerializer(Serializer):
     """Serialization for the 'default' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_ErrorCode(value: ErrorCode) -> default_pb2.DefaultMessage.ErrorCode:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = default_pb2.DefaultMessage.ErrorCode()
+        ErrorCode.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Default' message into bytes.
 

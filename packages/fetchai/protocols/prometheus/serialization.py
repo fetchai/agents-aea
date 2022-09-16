@@ -33,8 +33,8 @@ from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 class PrometheusSerializer(Serializer):
     """Serialization for the 'prometheus' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Prometheus' message into bytes.
 

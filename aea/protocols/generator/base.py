@@ -1359,6 +1359,13 @@ class ProtocolGenerator:
             encoding_str += self.indent + "{} = msg.{}\n".format(
                 content_name, content_name
             )
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            sub_type = sub_types[0]
+            if _includes_custom_type(sub_type):
+                encoding_str += (
+                    self.indent
+                    + f"{content_name} = [cls._encode_{sub_type}(i) for i in {content_name}]\n"
+                )
             encoding_str += self.indent + "performative.{}.extend({})\n".format(
                 content_name, content_name
             )
@@ -1366,9 +1373,22 @@ class ProtocolGenerator:
             encoding_str += self.indent + "{} = msg.{}\n".format(
                 content_name, content_name
             )
-            encoding_str += self.indent + "performative.{}.update({})\n".format(
-                content_name, content_name
-            )
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            sub_type = sub_types[1]
+            if _includes_custom_type(sub_type):
+
+                encoding_str += self.indent + f"for k,v in {content_name}.items():\n"
+                self._change_indent(1)
+                encoding_str += (
+                    self.indent
+                    + f"performative.{content_name}[k].CopyFrom(cls._encode_{sub_type}(v)) \n"
+                )
+                self._change_indent(-1)
+
+            else:
+                encoding_str += self.indent + "performative.{}.update({})\n".format(
+                    content_name, content_name
+                )
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             for sub_type in sub_types:
@@ -1450,9 +1470,20 @@ class ProtocolGenerator:
                 performative,
                 content_name,
             )
-            decoding_str += self.indent + "{}_frozenset = frozenset({})\n".format(
-                content_name, content_name
-            )
+
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            sub_type = sub_types[0]
+
+            if _includes_custom_type(sub_type):
+                decoding_str += (
+                    self.indent
+                    + f"{content_name}_frozenset = tuple(({sub_type}.decode(i) for i in {content_name}))\n"
+                )
+            else:
+                decoding_str += self.indent + "{}_frozenset = frozenset({})\n".format(
+                    content_name, content_name
+                )
+
             decoding_str += (
                 self.indent
                 + 'performative_content["{}"] = {}_frozenset\n'.format(
@@ -1466,9 +1497,19 @@ class ProtocolGenerator:
                 performative,
                 content_name,
             )
-            decoding_str += self.indent + "{}_tuple = tuple({})\n".format(
-                content_name, content_name
-            )
+
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            sub_type = sub_types[0]
+            if _includes_custom_type(sub_type):
+                decoding_str += (
+                    self.indent
+                    + f"{content_name}_tuple = tuple(({sub_type}.decode(i) for i in {content_name}))\n"
+                )
+            else:
+                decoding_str += self.indent + "{}_tuple = tuple({})\n".format(
+                    content_name, content_name
+                )
+
             decoding_str += (
                 self.indent
                 + 'performative_content["{}"] = {}_tuple\n'.format(
@@ -1482,9 +1523,20 @@ class ProtocolGenerator:
                 performative,
                 content_name,
             )
-            decoding_str += self.indent + "{}_dict = dict({})\n".format(
-                content_name, content_name
-            )
+
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            sub_type = sub_types[1]
+
+            if _includes_custom_type(sub_type):
+                decoding_str += (
+                    self.indent
+                    + f"{content_name}_dict = {{k:{sub_type}.decode(v) for k,v in dict({content_name}).items()}}\n"
+                )
+            else:
+                decoding_str += self.indent + "{}_dict = dict({})\n".format(
+                    content_name, content_name
+                )
+
             decoding_str += (
                 self.indent
                 + 'performative_content["{}"] = {}_dict\n'.format(
@@ -1592,10 +1644,31 @@ class ProtocolGenerator:
                 self.protocol_specification.name,
             )
         )
+        # encode custom type
+        for custom_type in self.spec.all_custom_types:
+            cls_str += self.indent + "@staticmethod\n"
+            pb_type = f"{self.protocol_specification.name}_pb2.{self.protocol_specification_in_camel_case}Message.{custom_type}"
+            cls_str += (
+                self.indent
+                + f"def _encode_{custom_type}(value: {custom_type}) ->"
+                + f"{pb_type}:\n"
+            )
+            self._change_indent(1)
+            cls_str += self.indent + '"""\n'
+            cls_str += self.indent + "Encode custom_type {custom_type}.\n\n"
+            cls_str += self.indent + ":param value: the custom type object.\n"
+            cls_str += (
+                self.indent + ":return: protobuf encoded message of custom type.\n"
+            )
+            cls_str += self.indent + '"""\n'
+            cls_str += self.indent + f"result = {pb_type}()\n"
+            cls_str += self.indent + f"{custom_type}.encode(result, value)\n"
+            cls_str += self.indent + "return result\n\n"
+            self._change_indent(-1)
 
         # encoder
-        cls_str += self.indent + "@staticmethod\n"
-        cls_str += self.indent + "def encode(msg: Message) -> bytes:\n"
+        cls_str += self.indent + "@classmethod\n"
+        cls_str += self.indent + "def encode(cls, msg: Message) -> bytes:\n"
         self._change_indent(1)
         cls_str += self.indent + '"""\n'
         cls_str += self.indent + "Encode a '{}' message into bytes.\n\n".format(

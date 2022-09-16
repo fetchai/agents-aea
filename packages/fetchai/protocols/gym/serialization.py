@@ -35,7 +35,19 @@ class GymSerializer(Serializer):
     """Serialization for the 'gym' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_AnyObject(value: AnyObject) -> gym_pb2.GymMessage.AnyObject:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = gym_pb2.GymMessage.AnyObject()
+        AnyObject.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Gym' message into bytes.
 

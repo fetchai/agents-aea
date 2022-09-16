@@ -35,7 +35,33 @@ class MlTradeSerializer(Serializer):
     """Serialization for the 'ml_trade' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_Description(
+        value: Description,
+    ) -> ml_trade_pb2.MlTradeMessage.Description:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ml_trade_pb2.MlTradeMessage.Description()
+        Description.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_Query(value: Query) -> ml_trade_pb2.MlTradeMessage.Query:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ml_trade_pb2.MlTradeMessage.Query()
+        Query.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'MlTrade' message into bytes.
 

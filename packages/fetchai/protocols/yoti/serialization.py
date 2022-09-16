@@ -33,8 +33,8 @@ from packages.fetchai.protocols.yoti.message import YotiMessage
 class YotiSerializer(Serializer):
     """Serialization for the 'yoti' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Yoti' message into bytes.
 

@@ -33,8 +33,8 @@ from packages.fetchai.protocols.http.message import HttpMessage
 class HttpSerializer(Serializer):
     """Serialization for the 'http' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Http' message into bytes.
 

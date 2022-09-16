@@ -9,6 +9,8 @@ protocol_specification_id: fetchai/two_party_negotiation:0.1.0
 speech_acts:
   cfp:
     query: ct:Query
+  cfp_multi:
+    queries: pt:list[ct:Query]
   propose:
     price: pt:float
     proposal: pt:dict[pt:str, pt:str]
@@ -22,9 +24,10 @@ ct:Query: |
   bytes query_bytes = 1;
 ...
 ---
-initiation: [cfp]
+initiation: [cfp, cfp_multi]
 reply:
   cfp: [propose, decline]
+  cfp_multi: [propose, decline]
   propose: [propose, accept, decline]
   accept: []
   decline: []

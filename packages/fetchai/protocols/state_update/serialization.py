@@ -33,8 +33,8 @@ from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 class StateUpdateSerializer(Serializer):
     """Serialization for the 'state_update' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'StateUpdate' message into bytes.
 

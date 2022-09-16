@@ -33,8 +33,8 @@ from tests.data.generator.t_protocol_no_ct.message import TProtocolNoCtMessage
 class TProtocolNoCtSerializer(Serializer):
     """Serialization for the 't_protocol_no_ct' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'TProtocolNoCt' message into bytes.
 

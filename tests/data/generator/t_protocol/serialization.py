@@ -35,7 +35,21 @@ class TProtocolSerializer(Serializer):
     """Serialization for the 't_protocol' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_DataModel(
+        value: DataModel,
+    ) -> t_protocol_pb2.TProtocolMessage.DataModel:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = t_protocol_pb2.TProtocolMessage.DataModel()
+        DataModel.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'TProtocol' message into bytes.
 
@@ -84,6 +98,9 @@ class TProtocolSerializer(Serializer):
             performative.content_set_bool.extend(content_set_bool)
             content_set_str = msg.content_set_str
             performative.content_set_str.extend(content_set_str)
+            content_list_ct = msg.content_list_ct
+            content_list_ct = [cls._encode_DataModel(i) for i in content_list_ct]
+            performative.content_list_ct.extend(content_list_ct)
             content_list_bytes = msg.content_list_bytes
             performative.content_list_bytes.extend(content_list_bytes)
             content_list_int = msg.content_list_int
@@ -97,6 +114,9 @@ class TProtocolSerializer(Serializer):
             t_protocol_msg.performative_pct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pmt_Performative()  # type: ignore
+            content_dict_int_ct = msg.content_dict_int_ct
+            for k, v in content_dict_int_ct.items():
+                performative.content_dict_int_ct[k].CopyFrom(cls._encode_DataModel(v))
             content_dict_int_bytes = msg.content_dict_int_bytes
             performative.content_dict_int_bytes.update(content_dict_int_bytes)
             content_dict_int_int = msg.content_dict_int_int
@@ -338,6 +358,11 @@ class TProtocolSerializer(Serializer):
             content_set_str = t_protocol_pb.performative_pct.content_set_str
             content_set_str_frozenset = frozenset(content_set_str)
             performative_content["content_set_str"] = content_set_str_frozenset
+            content_list_ct = t_protocol_pb.performative_pct.content_list_ct
+            content_list_ct_tuple = tuple(
+                (DataModel.decode(i) for i in content_list_ct)
+            )
+            performative_content["content_list_ct"] = content_list_ct_tuple
             content_list_bytes = t_protocol_pb.performative_pct.content_list_bytes
             content_list_bytes_tuple = tuple(content_list_bytes)
             performative_content["content_list_bytes"] = content_list_bytes_tuple
@@ -354,6 +379,11 @@ class TProtocolSerializer(Serializer):
             content_list_str_tuple = tuple(content_list_str)
             performative_content["content_list_str"] = content_list_str_tuple
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
+            content_dict_int_ct = t_protocol_pb.performative_pmt.content_dict_int_ct
+            content_dict_int_ct_dict = {
+                k: DataModel.decode(v) for k, v in dict(content_dict_int_ct).items()
+            }
+            performative_content["content_dict_int_ct"] = content_dict_int_ct_dict
             content_dict_int_bytes = (
                 t_protocol_pb.performative_pmt.content_dict_int_bytes
             )

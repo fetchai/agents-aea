@@ -137,7 +137,7 @@ def _is_valid_set(content_type: str) -> bool:
         return False
 
     sub_type = sub_types[0]
-    return _is_valid_pt(sub_type)
+    return _is_valid_pt(sub_type) or _is_valid_ct(sub_type)
 
 
 def _is_valid_list(content_type: str) -> bool:
@@ -163,7 +163,7 @@ def _is_valid_list(content_type: str) -> bool:
         return False
 
     sub_type = sub_types[0]
-    return _is_valid_pt(sub_type)
+    return _is_valid_pt(sub_type) or _is_valid_ct(sub_type)
 
 
 def _is_valid_dict(content_type: str) -> bool:
@@ -190,7 +190,9 @@ def _is_valid_dict(content_type: str) -> bool:
 
     sub_type_1 = sub_types[0]
     sub_type_2 = sub_types[1]
-    return _is_valid_pt(sub_type_1) and _is_valid_pt(sub_type_2)
+    return (_is_valid_pt(sub_type_1)) and (
+        _is_valid_pt(sub_type_2) or _is_valid_ct(sub_type_2)
+    )
 
 
 def _is_valid_union(content_type: str) -> bool:

@@ -33,8 +33,8 @@ from packages.fetchai.protocols.register.message import RegisterMessage
 class RegisterSerializer(Serializer):
     """Serialization for the 'register' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Register' message into bytes.
 

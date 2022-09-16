@@ -43,7 +43,99 @@ class LedgerApiSerializer(Serializer):
     """Serialization for the 'ledger_api' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_Kwargs(value: Kwargs) -> ledger_api_pb2.LedgerApiMessage.Kwargs:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.Kwargs()
+        Kwargs.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_RawTransaction(
+        value: RawTransaction,
+    ) -> ledger_api_pb2.LedgerApiMessage.RawTransaction:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.RawTransaction()
+        RawTransaction.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_SignedTransaction(
+        value: SignedTransaction,
+    ) -> ledger_api_pb2.LedgerApiMessage.SignedTransaction:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.SignedTransaction()
+        SignedTransaction.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_State(value: State) -> ledger_api_pb2.LedgerApiMessage.State:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.State()
+        State.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_Terms(value: Terms) -> ledger_api_pb2.LedgerApiMessage.Terms:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.Terms()
+        Terms.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_TransactionDigest(
+        value: TransactionDigest,
+    ) -> ledger_api_pb2.LedgerApiMessage.TransactionDigest:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.TransactionDigest()
+        TransactionDigest.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_TransactionReceipt(
+        value: TransactionReceipt,
+    ) -> ledger_api_pb2.LedgerApiMessage.TransactionReceipt:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = ledger_api_pb2.LedgerApiMessage.TransactionReceipt()
+        TransactionReceipt.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'LedgerApi' message into bytes.
 

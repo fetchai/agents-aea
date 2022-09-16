@@ -74,7 +74,11 @@ PROTOCOL_GENERATOR_DOCSTRING_REGEX = "It was created with protocol buffer compil
 
 def subdirs(path: Path) -> Iterator[Path]:
     """Get subdirectories of a path."""
-    return filter(methodcaller("is_dir"), path.iterdir())
+    return (
+        i
+        for i in filter(methodcaller("is_dir"), path.iterdir())
+        if not str(i).endswith("__pycache__")  # small fix against __pycache__
+    )
 
 
 def find_protocols_in_local_registry() -> Iterator[Path]:

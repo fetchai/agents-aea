@@ -35,7 +35,21 @@ class CosmTradeSerializer(Serializer):
     """Serialization for the 'cosm_trade' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_SignedTransaction(
+        value: SignedTransaction,
+    ) -> cosm_trade_pb2.CosmTradeMessage.SignedTransaction:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = cosm_trade_pb2.CosmTradeMessage.SignedTransaction()
+        SignedTransaction.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'CosmTrade' message into bytes.
 

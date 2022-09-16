@@ -35,7 +35,19 @@ class TacSerializer(Serializer):
     """Serialization for the 'tac' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_ErrorCode(value: ErrorCode) -> tac_pb2.TacMessage.ErrorCode:
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = tac_pb2.TacMessage.ErrorCode()
+        ErrorCode.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Tac' message into bytes.
 

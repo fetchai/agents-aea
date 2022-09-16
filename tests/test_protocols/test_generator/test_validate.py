@@ -268,6 +268,9 @@ class TestValidate(TestCase):
         invalid_content_type_10 = "pt:set"
         assert _is_valid_set(invalid_content_type_10) is False
 
+        valid_content_type = "pt:set[ct:Query]"
+        assert _is_valid_set(valid_content_type) is True
+
     def test_is_valid_list(self):
         """Test for the '_is_valid_list' method."""
         valid_content_type_1 = "pt:list[pt:bytes]"
@@ -319,6 +322,9 @@ class TestValidate(TestCase):
 
         invalid_content_type_10 = "pt:list"
         assert _is_valid_list(invalid_content_type_10) is False
+
+        valid_content_type = "pt:list[ct:Query]"
+        assert _is_valid_list(valid_content_type) is True
 
     def test_is_valid_dict(self):
         """Test for the '_is_valid_dict' method."""
@@ -374,6 +380,12 @@ class TestValidate(TestCase):
 
         invalid_content_type_11 = "pt:dict"
         assert _is_valid_dict(invalid_content_type_11) is False
+
+        valid_content_type = "pt:dict[ct:Query, pt:int]"
+        assert _is_valid_dict(valid_content_type) is False
+
+        valid_content_type = "pt:dict[pt:int, ct:Query]"
+        assert _is_valid_dict(valid_content_type) is True
 
     def test_is_valid_union(self):
         """Test for the '_is_valid_union' method."""
@@ -443,6 +455,9 @@ class TestValidate(TestCase):
 
         invalid_content_type_12 = "pt:union"
         assert _is_valid_union(invalid_content_type_12) is False
+
+        valid_content_type = "pt:union[ct:Query, pt:int]"
+        assert _is_valid_union(valid_content_type) is True
 
     def test_is_valid_optional(self):
         """Test for the '_is_valid_optional' method."""
@@ -525,6 +540,9 @@ class TestValidate(TestCase):
         invalid_content_type_12 = "pt:optional"
         assert _is_valid_optional(invalid_content_type_12) is False
 
+        valid_content_type = "pt:optional[ct:Query]"
+        assert _is_valid_optional(valid_content_type) is True
+
     def test_is_valid_content_type_format(self):
         """Test for the '_is_valid_content_type_format' method."""
         valid_content_type_1 = "ct:DataModel"
@@ -581,6 +599,23 @@ class TestValidate(TestCase):
 
         invalid_content_type_7 = "pt:optional[pt:str, pt:int, pt:list[pt:bool]]"
         assert _is_valid_content_type_format(invalid_content_type_7) is False
+
+        # nested custom type
+
+        invalid_content_type_3 = "pt:set[ct:Query]"
+        assert _is_valid_content_type_format(invalid_content_type_3) is True
+
+        invalid_content_type_4 = "pt:list[ct:Query]"
+        assert _is_valid_content_type_format(invalid_content_type_4) is True
+
+        invalid_content_type_5 = "pt:dict[pt:bool, ct:Query]"
+        assert _is_valid_content_type_format(invalid_content_type_5) is True
+
+        invalid_content_type_6 = "pt:union[pt:bool, ct:Query]"
+        assert _is_valid_content_type_format(invalid_content_type_6) is True
+
+        invalid_content_type_7 = "pt:optional[ct:Query]"
+        assert _is_valid_content_type_format(invalid_content_type_7) is True
 
     def test_validate_performatives(self):
         """Test for the '_validate_performatives' method."""

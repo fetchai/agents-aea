@@ -323,6 +323,17 @@ class TestSerialisations:
 
     def test_generated_protocol_serialisation_pct(self):
         """Test serialisation and deserialisation of a message involving a pct type."""
+        some_dict = {1: True, 2: False, 3: True, 4: False}
+        data_model = TProtocolMessage.DataModel(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
         message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
@@ -338,9 +349,11 @@ class TestSerialisations:
             content_list_float=(4.5, 5.6, 6.7),
             content_list_bool=(False, True, False, False),
             content_list_str=("string4", "string5", "string6"),
+            content_list_ct=(data_model, data_model),
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
+
         decoded_message = cast(
             TProtocolMessage,
             TProtocolMessage.serializer.decode(encoded_message_in_bytes),
@@ -365,6 +378,17 @@ class TestSerialisations:
 
     def test_generated_protocol_serialisation_pmt(self):
         """Test serialisation and deserialisation of a message involving a pmt type."""
+        some_dict = {1: True, 2: False, 3: True, 4: False}
+        data_model = TProtocolMessage.DataModel(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
         message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
@@ -393,6 +417,7 @@ class TestSerialisations:
                 "string2": "string5",
                 "string3": "string6",
             },
+            content_dict_int_ct={1: data_model},
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
