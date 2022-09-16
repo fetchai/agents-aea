@@ -47,7 +47,7 @@ Init AEA config dir task.
 
 **Arguments**:
 
-- `agent_dir`: directory with aea config.
+- `agent_dir`: directory with AEA config.
 - `password`: the password to encrypt/decrypt the private key.
 
 <a id="aea.launcher.AEADirTask.id"></a>
@@ -117,7 +117,7 @@ Init AEA config dir task.
 
 **Arguments**:
 
-- `agent_dir`: directory with aea config.
+- `agent_dir`: directory with AEA config.
 - `log_level`: debug level applied for AEA in subprocess
 - `password`: the password to encrypt/decrypt the private key.
 
