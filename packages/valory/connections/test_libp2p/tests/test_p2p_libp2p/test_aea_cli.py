@@ -20,12 +20,13 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import json
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.test_tools.network import LOCALHOST
 
-from packages.valory.agents.test_libp2p.tests.base import LIBP2P_LEDGER
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
@@ -37,9 +38,10 @@ from packages.valory.connections.p2p_libp2p.tests.test_aea_cli import (
     BaseP2PLibp2pConnectionAEATest,
     p2p_libp2p_path,
 )
+from packages.valory.connections.test_libp2p.tests.base import LIBP2P_LEDGER
 
 
-@libp2p_log_on_failure_all()
+@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(
     BaseP2PLibp2pConnectionAEATest
 ):

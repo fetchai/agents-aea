@@ -46,7 +46,7 @@ async def test_send_acn_confirm_failed() -> None:
     """Test nodeclient send fails on confirmation from other point ."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
+    f: Future = Future()
     f.set_result(None)
     node.pipe = Mock()
     node.pipe.connect = Mock(return_value=f)
@@ -55,7 +55,7 @@ async def test_send_acn_confirm_failed() -> None:
     node_client = node.get_client()
     status = Mock()
     status.code = int(AcnMessage.StatusBody.StatusCode.ERROR_GENERIC)
-    status_future = Future()
+    status_future: Future = Future()
     status_future.set_result(status)
     with patch.object(
         node_client, "make_acn_envelope_message", return_value=b"some_data"
@@ -72,7 +72,7 @@ async def test_send_acn_confirm_timeout() -> None:
     """Test node client send fails on timeout."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
+    f: Future = Future()
     f.set_result(None)
     node.pipe = Mock()
     node.pipe.connect = Mock(return_value=f)
@@ -93,7 +93,7 @@ async def test_acn_decode_error_on_read() -> None:
     """Test ACN decode error on read."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
+    f: Future = Future()
     f.set_result(b"some_data")
     node.pipe = Mock()
     node.pipe.connect = Mock(return_value=f)
@@ -116,7 +116,7 @@ async def test_write_acn_error() -> None:
     """Test write ACN error."""
 
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
+    f: Future = Future()
     f.set_result(b"some_data")
     node.pipe = Mock()
     node.pipe.connect = Mock(return_value=f)

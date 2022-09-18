@@ -42,7 +42,7 @@ class DummyConnection(Connection):
 
     async def connect(self, *args: Any, **kwargs: Any) -> None:
         """Connect."""
-        self._queue = asyncio.Queue()
+        self._queue = asyncio.Queue()  # type: ignore
         self.state = ConnectionStates.connected
 
     async def disconnect(self, *args: Any, **kwargs: Any) -> None:

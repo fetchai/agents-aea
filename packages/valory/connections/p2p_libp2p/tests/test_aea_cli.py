@@ -53,6 +53,7 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
     capture_log = True
 
     package_registry_src_rel = Path(__file__).parent.parent.parent.parent.parent
+    conn_key_file: str
 
     @classmethod
     def setup_class(cls) -> None:
@@ -97,6 +98,8 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
     BaseP2PLibp2pConnectionAEATest
 ):
     """Test AEA with p2p_libp2p connection is correctly run"""
+
+    conn_key_file: str
 
     def test_agent(self) -> None:
         """Test with aea."""

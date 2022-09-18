@@ -4,7 +4,27 @@ version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-fingerprint: {}
+fingerprint:
+  __init__.py: bafybeigw647w5htzwoixvbbqq7pqaiey3lldu7yrm3itq5ylf66xeudxd4
+  bad_requirements.txt: bafybeiec634q3lr5pt45t53mmp7cq342kmjqdkdqezoplgrsg4n5dgw6ne
+  connections/__init__.py: bafybeihpzlmywb57wqgjstbxbcg4rwha5srgiyqzqsbqcmie2njplgd7sy
+  contracts/__init__.py: bafybeifcou5z7wn4df3orrlgkkshgwpuvmth4spzwwgue22nmb2qhirbxe
+  default_private_key.pem: bafybeibfszi7527u3dcdifqisgwfnolsassiirasar3pbxxaiiozfkodxq
+  protocols/__init__.py: bafybeiggikjao2canwy4k26xba737m6brbh4kdes3lwtwyi3fkorapmegu
+  requirements.txt: bafybeibijjlcf4xb7ffunwt3tpznwduyjbhukfngzvdt4bylpof7uxec7i
+  skills/__init__.py: bafybeia3uluv26vepimvrok2wkiptocnc3v4jr6vndfafi7louiu7af27i
+  skills/test_skill/__init__.py: bafybeighod47zbq3emz4mwcayqqzbgf73ivlkxsarqncmmeprzyijdgqzi
+  skills/test_skill/behaviours.py: bafybeigvoskmq3cx6vyry7u6wnvrllnxco4ilwbrvflhua6xrbusqfrwi4
+  skills/test_skill/handlers.py: bafybeidjgsb7tf7netzemmndpr7r4wjtqdb7fi2m5fvdazuvbhuznj7l2e
+  skills/test_skill/my_model.py: bafybeih447pl7wbcnrhjfbpt2cplyfs7jo4c37ocq3rd6yowc645arf5sm
+  vendor/__init__.py: bafybeibrjzrujhqwwm2artwcfiayk5yv5a4cgavb6fnfxz2yimp72v7264
+  vendor/fetchai/__init__.py: bafybeidek25kayryck3qo6z3hoywlhumr2kascnhad47xf23ynjwjyhi3u
+  vendor/fetchai/connections/__init__.py: bafybeihzkdfwqkjtb3ilyy44b4yrjsue64ecttujuaepmoi4wouxdjcxhe
+  vendor/fetchai/contracts/__init__.py: bafybeifcou5z7wn4df3orrlgkkshgwpuvmth4spzwwgue22nmb2qhirbxe
+  vendor/fetchai/protocols/__init__.py: bafybeiggikjao2canwy4k26xba737m6brbh4kdes3lwtwyi3fkorapmegu
+  vendor/fetchai/skills/__init__.py: bafybeiakogboyalt6d55jo34zg5em3lq4ucqdld5hrxa67rcdblpaozfca
+  vendor/open_aea/__init__.py: bafybeiedb6knh4gnkd2tui6s6twku6d7l7koyclyfxrokjt5ldjsxhanfm
+  vendor/open_aea/protocols/__init__.py: bafybeifkxyeenln6egwfhpilt6m35fdfh3b55w3u4pjr6k5qwpaywvxqa4
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/local:0.20.0
