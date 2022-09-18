@@ -109,7 +109,12 @@ def test_aea_project(
     click.echo("Executing tests of the AEA project...")
     ctx = cast(Context, click_context.obj)
     # in case of an AEA project, the 'packages' directory is the AEA project path itself
-    test_package_by_path(aea_project_dirpath, args, aea_project_path=Path(ctx.cwd))
+    test_package_by_path(
+        aea_project_dirpath,
+        args,
+        aea_project_path=Path(ctx.cwd),
+        skip_consistency_check=ctx.config.get("skip_consistency_check", False),
+    )
 
 
 @test.command(
@@ -202,6 +207,7 @@ def by_path(
         packages_dir=Path(ctx.registry_path),
         cov=ctx.config.get("cov", False),
         cov_output=ctx.config.get("cov_output"),
+        skip_consistency_check=ctx.config.get("skip_consistency_check", False),
     )
 
 
@@ -211,8 +217,15 @@ def by_path(
         allow_extra_args=True,
     ),
 )
+@click.option(
+    "--author",
+    "-a",
+    type=str,
+    multiple=True,
+    help="Directory to output codecov reports.",
+)
 @click.pass_context
-def packages(click_context: click.Context) -> None:
+def packages(click_context: click.Context, author: Tuple[str]) -> None:
     """Executes a test suite for a collection of packages."""
     ctx: Context = click_context.obj
     packages_dir = Path(ctx.registry_path)
@@ -229,6 +242,7 @@ def packages(click_context: click.Context) -> None:
             pytest_args=click_context.args,
             cov=cov,
             covrc_file=covrc_file,
+            authors=author,
         )
         if cov:
             aggregate_coverage(coverage_data=coverage_data, covrc_file=covrc_file)
@@ -280,6 +294,7 @@ def test_item(
         pytest_arguments,
         aea_project_path=aea_project_path,
         cov=ctx.config.get("cov", False),
+        skip_consistency_check=ctx.config.get("skip_consistency_check", False),
     )
 
 
@@ -287,6 +302,7 @@ def load_package(
     package_dir: Path,
     aea_project_path: Optional[Path] = None,
     packages_dir: Optional[Path] = None,
+    skip_consistency_check: bool = False,
 ) -> None:
     """Load packages into cache."""
     enforce(
@@ -308,7 +324,9 @@ def load_package(
         if root_packages is None:
             raise ValueError("Packages dir not set!")
         component_type = ComponentType(package_type.value)
-        configuration = load_component_configuration(component_type, package_dir)
+        configuration = load_component_configuration(
+            component_type, package_dir, skip_consistency_check=skip_consistency_check
+        )
         configuration.directory = package_dir
         load_aea_packages_recursively(configuration, package_path_finder, root_packages)
 
@@ -327,6 +345,7 @@ def test_package_by_path(
     packages_dir: Optional[Path] = None,
     cov: bool = False,
     cov_output: Optional[Path] = None,
+    skip_consistency_check: bool = False,
 ) -> None:
     """
     Fingerprint package placed in package_dir.
@@ -337,9 +356,16 @@ def test_package_by_path(
     :param packages_dir: directory of the packages to import from
     :param cov: coverage capture indicator
     :param cov_output: Path to coverage output directory
+    :param skip_consistency_check: skip the package consistency check
     """
     cov_output = Path(cov_output or Path.cwd()).resolve()
-    load_package(package_dir, aea_project_path, packages_dir)
+
+    load_package(
+        package_dir,
+        aea_project_path,
+        packages_dir,
+        skip_consistency_check=skip_consistency_check,
+    )
     with CoveragercFile(root_dir=cov_output) as covrc_file:
         with cd(package_dir):
             runtime_args = [
@@ -374,6 +400,7 @@ def test_package_collection(
     pytest_args: List[str],
     cov: bool,
     covrc_file: Path,
+    authors: Tuple[str, ...],
 ) -> Tuple[List[str], List[Tuple[int, str]]]:
     """Test a collection of packages."""
 
@@ -381,6 +408,10 @@ def test_package_collection(
     failures = []
 
     for package_type, package_dir in available_packages:
+        if authors != () and not any(
+            [author in str(package_dir) for author in authors]
+        ):
+            continue
         test_dir = package_dir / AEA_TEST_DIRNAME
         if not test_dir.exists():
             continue
