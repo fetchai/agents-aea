@@ -9,9 +9,9 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiazl5fv537mvhkqu2jsxhztcbe5cpa5mrdcm3xnnbinz3on3whipa
   __init__.py: bafybeiafdr7ynn72cev3ldmh7jpm2hkavrli7fwmq5h2is6632kiaqi3qa
-  behaviours.py: bafybeifdwcntgwobpzagul3fxgmtptlrkk4e2yuhq2icb6crxf2onqwf6u
+  behaviours.py: bafybeid5f3mtwhjz5vo2dl2fsyz32toglmow7allqasxfd7i5yzx6fqzyi
   dialogues.py: bafybeiddznyqdx5h7mzbmdgzs2w635hxhcjo3fcck2h5o4rpnl4rl3e6m4
-  handlers.py: bafybeigz7pthvel63y4o3xq77icym2thcw4jy53hcj4a7t56eebqzdbgay
+  handlers.py: bafybeigntxwv2lmvfnlwa6bdodqgwjyn3ad7uzkzc73zsd6gaodvid5kom
   strategy.py: bafybeia5mjxph7ui2iav5uxutwnr6q2uf4otxdge5vuk7g5ycaso3jldkm
   tests/__init__.py: bafybeihqxdniovyormfdxlfyxosmbstbriacfo4si7gofld5fx66jwmp5a
   tests/test_behaviours.py: bafybeihd2ngqekfjqxlowzy2p3cy3tfu4ajtyewfvwb3ghwt4o4724xrui
@@ -20,7 +20,7 @@ fingerprint:
   tests/test_models.py: bafybeigymvfralqr63dpybfiqc4x4glcwmxmsweqycrmd75exi3gdz4oo4
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeiew6wsxz6bgm3c44hnk55avt2ftdgiwy2pvw67mkfz7fyhibeotku
+- fetchai/ledger:0.19.0:bafybeihvt2evsxzr3gsaskhd5td7o3sdbt6vkeqcin4t7ahehekwywcd4e
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu

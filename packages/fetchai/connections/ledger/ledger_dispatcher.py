@@ -29,7 +29,8 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
+from packages.fetchai.connections.ledger.base import RequestDispatcher
+from packages.fetchai.connections.ledger.connection import PUBLIC_ID
 from packages.fetchai.protocols.ledger_api.custom_types import TransactionReceipt
 from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.fetchai.protocols.ledger_api.dialogues import (
@@ -67,7 +68,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=str(CONNECTION_ID),
+            self_address=str(PUBLIC_ID),
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
