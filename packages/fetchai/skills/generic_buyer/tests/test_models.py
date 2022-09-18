@@ -76,6 +76,13 @@ class TestGenericStrategy(BaseSkillTestCase):
             name="strategy",
             skill_context=cls._skill.skill_context,
         )
+        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
+
+    def teardown(self) -> None:
+        """Teardown"""
+
+        super().teardown()
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
 
     def test_properties(self):
         """Test the properties of GenericStrategy class."""

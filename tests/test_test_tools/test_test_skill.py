@@ -70,6 +70,10 @@ class TestSkillTestCase(BaseSkillTestCase):
             dm_context_kwargs={},
         )
 
+    def teardown(self) -> None:
+        """Overwriting: no dialogues for DummyStateUpdateHandler"""
+        self.empty_message_queues()
+
     def test_setup(self):
         """Test the setup() class method."""
         assert self.skill.skill_context.agent_address == "test_agent_address"
@@ -700,14 +704,6 @@ class TestSkillTestCase(BaseSkillTestCase):
                 dialogue_messages,
                 "counterparty",
             )
-
-    def teardown(self) -> None:
-        """Empty message queues"""
-
-        while not self._outbox.empty():
-            self._multiplexer.out_queue.get_nowait()
-        while not self._skill.skill_context.decision_maker_message_queue.empty():
-            self._skill.skill_context.decision_maker_message_queue.get_nowait()
 
 
 class FipaDialogues(BaseFipaDialogues):

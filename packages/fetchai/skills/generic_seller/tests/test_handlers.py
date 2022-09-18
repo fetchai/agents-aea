@@ -547,8 +547,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
     def teardown(self):
         """Teardown"""
-        self.reset_all_dialogues()
-        self.empty_message_queues()
+        super().teardown()
         self.strategy.__dict__.update(self._init_strategy)
 
 
@@ -1036,8 +1035,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
     def teardown(self):
         """Teardown"""
 
-        self.reset_all_dialogues()
-        self.empty_message_queues()
+        super().teardown()
         init_kwargs = self._init_service_registration_behaviour_kwargs
         self.service_registration_behaviour.__dict__.update(init_kwargs)
 
