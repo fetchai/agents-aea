@@ -222,7 +222,7 @@ def by_path(
     "-a",
     type=str,
     multiple=True,
-    help="Directory to output codecov reports.",
+    help="Author name(s) to restrict tests to.",
 )
 @click.pass_context
 def packages(click_context: click.Context, author: Tuple[str]) -> None:
