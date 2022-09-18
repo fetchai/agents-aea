@@ -20,6 +20,7 @@
 """Run different checks on AEA packages."""
 
 import pprint
+import re
 import sys
 from abc import abstractmethod
 from functools import partial
@@ -148,6 +149,45 @@ class UnexpectedAuthorError(CustomException):
         print("=" * 50)
 
 
+class PublicIdDefinitionError(CustomException):
+    """Custom exception for error about PUBLIC_ID definitions in package Python modules."""
+
+    def __init__(
+        self, package_type: PackageType, public_id: PublicId, actual_nb_definitions: int
+    ) -> None:
+        """Initialize the exception."""
+        self.package_type = package_type
+        self.public_id = public_id
+        self.actual_nb_definitions = actual_nb_definitions
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print(
+            f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; found {self.actual_nb_definitions}"
+        )
+
+
+class WrongPublicIdError(CustomException):
+    """Custom exception for error about wrong value of PUBLIC_ID."""
+
+    def __init__(
+        self,
+        package_type: PackageType,
+        public_id: PublicId,
+        actual_public_id_constant_value: Any,
+    ) -> None:
+        """Initialize the exception."""
+        self.package_type = package_type
+        self.public_id = public_id
+        self.actual_public_id_constant_value = actual_public_id_constant_value
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print(
+            f"expected {self.public_id} for package of type {self.package_type.value}; found {self.actual_public_id_constant_value}"
+        )
+
+
 def find_all_configuration_files(packages_dir: Path) -> List:
     """Find all configuration files."""
     config_files = [
@@ -258,6 +298,32 @@ def check_author(configuration_file: Path, expected_author: str) -> None:
         raise UnexpectedAuthorError(configuration_file, expected_author, actual_author)
 
 
+def check_public_id(configuration_file: Path) -> None:
+    expected_public_id = get_public_id_from_yaml(configuration_file)
+    # remove last 's' character (as package type is plural in packages directory)
+    package_type_str = configuration_file.parent.parent.name[:-1]
+    package_type = PackageType(package_type_str)
+    if package_type == PackageType.CONNECTION:
+        module_name_to_load = Path("connection.py")
+    elif package_type == PackageType.SKILL:
+        module_name_to_load = Path("__init__.py")
+    else:
+        # no check to do.
+        return
+    module_path_to_load = configuration_file.parent / module_name_to_load
+    content = module_path_to_load.read_text()
+    matches = re.findall("^PUBLIC_ID = (.*)", content, re.MULTILINE)
+    if len(matches) != 1:
+        raise PublicIdDefinitionError(package_type, expected_public_id, len(matches))
+
+    public_id_code = matches[0]
+    actual_public_id_constant_value = eval(public_id_code)
+    if expected_public_id != actual_public_id_constant_value:
+        raise WrongPublicIdError(
+            package_type, public_id_code, actual_public_id_constant_value
+        )
+
+
 @click.command(name="check-packages")
 @click.argument(
     "packages_dir",
@@ -285,6 +351,7 @@ def check_packages(packages_dir: Path) -> None:
             check_author(file, expected_author)
             check_dependencies(file, all_packages_ids_)
             check_description(file)
+            check_public_id(file)
         except CustomException as exception:
             exception.print_error()
             failed = True
