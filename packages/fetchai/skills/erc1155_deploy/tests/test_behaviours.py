@@ -54,7 +54,7 @@ class TestServiceRegistrationBehaviour(ERC1155DeployTestCase):
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:
-            self.registration_behaviour.setup_class()
+            self.registration_behaviour.setup()
 
         # after
         self.assert_quantity_in_outbox(2)

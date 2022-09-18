@@ -34,7 +34,7 @@ class TestSearchBehaviour(ERC1155ClientTestCase):
     def test_setup(self):
         """Test the setup method of the search behaviour."""
         # operation
-        self.search_behaviour.setup_class()
+        self.search_behaviour.setup()
 
         # after
         self.assert_quantity_in_outbox(1)
