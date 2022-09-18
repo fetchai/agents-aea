@@ -50,7 +50,7 @@ class TestSkillTestCase(BaseSkillTestCase):
         cls.behaviour_arg_1 = 2
         cls.behaviour_arg_2 = "3"
 
-        config_overrides = {
+        cls.config_overrides = {
             "behaviours": {
                 "dummy": {
                     "args": {
@@ -65,14 +65,10 @@ class TestSkillTestCase(BaseSkillTestCase):
         cls.shared_state = {cls.shared_state_key: cls.shared_state_value}
 
         super().setup_class(
-            config_overrides=config_overrides,
+            config_overrides=cls.config_overrides,
             shared_state=cls.shared_state,
             dm_context_kwargs={},
         )
-
-    def teardown(self) -> None:
-        """Overwriting: no dialogues for DummyStateUpdateHandler"""
-        self.empty_message_queues()
 
     def test_setup(self):
         """Test the setup() class method."""

@@ -54,9 +54,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             GenericServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,
         )
-        cls._init_service_registration = cls.service_registration.__dict__.copy()
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
-        cls._strategy_kwargs = cls.strategy.__dict__.copy()
         cls.logger = cls._skill.skill_context.logger
 
         cls.registration_message = OefSearchMessage(
@@ -69,9 +67,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         cls.mocked_description = Description({"foo1": 1, "bar1": 2})
 
-    def teardown(self):
-        """Teardowm"""
+    def setup(self):
+        """Setup"""
+        super().teardown()
+        self._init_service_registration = self.service_registration.__dict__.copy()
+        self._strategy_kwargs = self.strategy.__dict__.copy()
 
+    def teardown(self):
+        """Teardown"""
         super().teardown()
         self.strategy.__dict__.update(self._strategy_kwargs)
         self.service_registration.__dict__.update(self._init_service_registration)

@@ -239,16 +239,6 @@ For every DialogueMessage (performative, contents, is_incoming, target):
 
 the created incoming message
 
-<a id="aea.test_tools.test_skill.BaseSkillTestCase.setup"></a>
-
-#### setup
-
-```python
-def setup(**kwargs: Any) -> None
-```
-
-Setup calling setup_class for backwards compatibility
-
 <a id="aea.test_tools.test_skill.BaseSkillTestCase.setup_class"></a>
 
 #### setup`_`class
@@ -260,6 +250,28 @@ def setup_class(cls, **kwargs: Any) -> None
 
 Set up the skill test case.
 
+Only called once at the beginning before test methods on the test class are called.
+
+**Arguments**:
+
+- `kwargs`: the keyword arguments passed to _prepare_skill
+
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.setup"></a>
+
+#### setup
+
+```python
+def setup(**kwargs: Any) -> None
+```
+
+Set up the test method.
+
+Called each time before a test method is called.
+
+**Arguments**:
+
+- `kwargs`: the keyword arguments passed to _prepare_skill
+
 <a id="aea.test_tools.test_skill.BaseSkillTestCase.teardown"></a>
 
 #### teardown
@@ -268,7 +280,9 @@ Set up the skill test case.
 def teardown() -> None
 ```
 
-Teardown
+Teardown the test method.
+
+Called each time after a test method is called.
 
 <a id="aea.test_tools.test_skill.BaseSkillTestCase.empty_message_queues"></a>
 

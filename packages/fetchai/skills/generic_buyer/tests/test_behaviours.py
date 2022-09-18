@@ -68,13 +68,16 @@ class TestSearchBehaviour(BaseSkillTestCase):
             GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
-        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
 
         cls.logger = cls._skill.skill_context.logger
 
+    def setup(self):
+        """Setup."""
+        super().setup()
+        self._init_strategy_kwargs = self.strategy.__dict__.copy()
+
     def teardown(self):
         """Teardown"""
-
         super().teardown()
         self.strategy.__dict__.update(self._init_strategy_kwargs)
         self.tx_behaviour.waiting.clear()
@@ -181,7 +184,6 @@ class TestTransactionBehaviour(BaseSkillTestCase):
             GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
-        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
         cls.logger = cls._skill.skill_context.logger
 
         cls.fipa_dialogues = cast(
@@ -205,7 +207,8 @@ class TestTransactionBehaviour(BaseSkillTestCase):
 
     def setup(self):
         """Setup"""
-
+        super().setup()
+        self._init_strategy_kwargs = self.strategy.__dict__.copy()
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
@@ -234,7 +237,6 @@ class TestTransactionBehaviour(BaseSkillTestCase):
 
     def teardown(self):
         """Teardown"""
-
         super().teardown()
         self.strategy.__dict__.update(self._init_strategy_kwargs)
         self.transaction_behaviour.teardown()
