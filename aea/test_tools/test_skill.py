@@ -522,3 +522,25 @@ class BaseSkillTestCase:
         skill_config.directory = cls.path_to_skill
 
         cls._skill = Skill.from_config(skill_config, agent_context)
+
+    # helpers for setup / teardown
+    def empty_message_queues(self) -> None:
+        """Empty message queues"""
+
+        while not self._outbox.empty():
+            self._multiplexer.out_queue.get_nowait()
+        while not self._skill.skill_context.decision_maker_message_queue.empty():
+            self._skill.skill_context.decision_maker_message_queue.get_nowait()
+
+    def reset_all_dialogues(self) -> None:
+        """Reset the state of all dialogues"""
+
+        for handler in self._skill.handlers.values():
+            dialogues = handler.protocol_dialogues()
+            dialogues.teardown()
+            dialogues.cleanup()
+            stats = dialogues.dialogue_stats
+            # pylint: disable=protected-access
+            stats._self_initiated = dict.fromkeys(stats._self_initiated, 0)
+            # pylint: disable=protected-access
+            stats._other_initiated = dict.fromkeys(stats._other_initiated, 0)
