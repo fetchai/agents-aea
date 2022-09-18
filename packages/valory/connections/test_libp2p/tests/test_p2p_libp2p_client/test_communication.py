@@ -32,7 +32,8 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.mail.base import Empty
 from aea.test_tools.mocks import RegexComparator
 
-from packages.valory.agents.test_libp2p.tests.base import (
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
     TIMEOUT,
@@ -40,10 +41,9 @@ from packages.valory.agents.test_libp2p.tests.base import (
     _make_libp2p_connection,
     ports,
 )
-from packages.valory.agents.test_libp2p.tests.test_p2p_libp2p.test_communication import (
+from packages.valory.connections.test_libp2p.tests.test_p2p_libp2p.test_communication import (
     TestP2PLibp2pConnectionRouting,
 )
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 DEFAULT_CLIENTS_PER_NODE = 1

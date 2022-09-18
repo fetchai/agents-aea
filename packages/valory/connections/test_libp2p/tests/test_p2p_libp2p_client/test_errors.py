@@ -20,6 +20,8 @@
 
 """This test module contains negative tests for Libp2p tcp client connection."""
 
+# pylint: skip-file
+
 import asyncio
 import os
 from asyncio.futures import Future
@@ -29,7 +31,12 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 
-from packages.valory.agents.test_libp2p.tests.base import (
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.p2p_libp2p_client.connection import (
+    NodeClient,
+    P2PLibp2pClientConnection,
+)
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
@@ -37,11 +44,6 @@ from packages.valory.agents.test_libp2p.tests.base import (
     create_identity,
     make_cert_request,
     ports,
-)
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
-from packages.valory.connections.p2p_libp2p_client.connection import (
-    NodeClient,
-    P2PLibp2pClientConnection,
 )
 
 

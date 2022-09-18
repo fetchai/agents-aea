@@ -19,6 +19,8 @@
 
 """This test module compares P2PLibp2p go code in open-aea and open-acn"""
 
+# pylint: skip-file
+
 import difflib
 import filecmp
 import logging
@@ -50,6 +52,9 @@ def get_all_file_paths(directory: str, extension: str = "") -> List[str]:
     Get all nested files from a directory with a specific extension.
 
     usage: get_all_file_paths("packages/valory/skills")
+    :param directory: Directory to iterate
+    :param extension: File extention
+    :return: A list of files matching the extention
     """
 
     return [

@@ -19,6 +19,8 @@
 
 """Test errors."""
 
+# pylint: skip-file
+
 import asyncio
 import os
 import platform
@@ -33,11 +35,6 @@ import pytest
 from aea.configurations.base import ConnectionConfig
 from aea.multiplexer import Multiplexer
 
-from packages.valory.agents.test_libp2p.tests.base import (
-    BaseP2PLibp2pTest,
-    _make_libp2p_connection,
-    create_identity,
-)
 from packages.valory.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
@@ -46,6 +43,11 @@ from packages.valory.connections.p2p_libp2p.connection import (
     _ip_all_private_or_all_public,
 )
 from packages.valory.connections.p2p_libp2p.tests.base import ports
+from packages.valory.connections.test_libp2p.tests.base import (
+    BaseP2PLibp2pTest,
+    _make_libp2p_connection,
+    create_identity,
+)
 from packages.valory.protocols.acn.message import AcnMessage
 
 
