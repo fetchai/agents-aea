@@ -51,7 +51,9 @@ def remove_test_directory(directory: str, retries: int = 3) -> bool:
     :return: whether the directory was successfully deleted
     """
 
-    def readonly_handler(func: Any, path: Any, *args: Any, **kwargs: Any) -> None:
+    def readonly_handler(
+        func: Any, path: Any, execinfo: Any  # pylint: disable=unused-argument
+    ) -> None:
         """If permission is readonly, we change these and retry."""
         os.chmod(path, stat.S_IWRITE)
         func(path)

@@ -45,7 +45,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
     """Decorate a method running a libp2p node to print its logs in case test fails."""
 
     @functools.wraps(fn)
-    def wrapper(self, *args: Any, **kwargs: Any) -> None:
+    def wrapper(self, *args: Any, **kwargs: Any) -> None:  # type: ignore
         try:
             return fn(self, *args, **kwargs)
         except Exception:

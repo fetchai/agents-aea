@@ -20,6 +20,8 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import asyncio
 from itertools import permutations
 from unittest import mock
@@ -29,13 +31,13 @@ import pytest
 
 from aea.mail.base import Empty
 
-from packages.valory.agents.test_libp2p.tests.base import (
+from packages.valory.connections.p2p_libp2p.connection import NodeClient
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     TIMEOUT,
     _make_libp2p_connection,
 )
-from packages.valory.connections.p2p_libp2p.connection import NodeClient
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 DEFAULT_NET_SIZE = 4

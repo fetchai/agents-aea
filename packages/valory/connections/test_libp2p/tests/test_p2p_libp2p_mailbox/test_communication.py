@@ -20,6 +20,8 @@
 
 """This test module contains tests for Libp2p tcp client connection."""
 
+# pylint: skip-file
+
 from itertools import permutations
 from unittest.mock import Mock
 
@@ -30,13 +32,12 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea.mail.base import Empty
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     TIMEOUT,
     _make_libp2p_connection,
     _make_libp2p_mailbox_connection,
-    libp2p_log_on_failure_all,
     ports,
 )
 

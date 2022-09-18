@@ -320,7 +320,7 @@ DEFAULT_HOST = LOCALHOST.hostname
 
 
 @contextmanager
-def project_root_pythonpath() -> None:
+def project_root_pythonpath():
     """Set pythonpath to project root."""
     old_python_path = os.environ.get("PYTHONPATH", None)
     os.environ["PYTHONPATH"] = ":".join(
@@ -404,7 +404,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
     """
 
     # for docstyle.
-    def decorator(pytest_func) -> None:
+    def decorator(pytest_func):
         """
         For the sake of clarity, assume the chosen platform for the action is "Windows".
 
@@ -422,7 +422,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
         if is_different is skip:
             return pytest_func
 
-        def action(*args, **kwargs) -> None:
+        def action(*args, **kwargs):
             if skip:
                 pytest.skip(
                     f"Skipping the test since it doesn't work on {platform_name}."
@@ -445,7 +445,7 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
             )
 
         @wraps(pytest_func)
-        def wrapper(*args, **kwargs) -> None:  # type: ignore
+        def wrapper(*args, **kwargs):  # type: ignore
             action(*args, **kwargs)
 
         return wrapper
@@ -541,7 +541,7 @@ def inet_disable(request) -> None:
 
     orig_connect = socket.socket.connect
 
-    def socket_connect(*args) -> None:
+    def socket_connect(*args):
         host = args[1][0]
         if host == "localhost" or host.startswith("127."):
             return orig_connect(*args)
@@ -571,19 +571,19 @@ def apply_aea_loop(request) -> None:
 
 
 @pytest.fixture(scope="session")
-def ganache_configuration() -> None:
+def ganache_configuration():
     """Get the Ganache configuration for testing purposes."""
     return GANACHE_CONFIGURATION
 
 
 @pytest.fixture(scope="session")
-def fetchd_configuration() -> None:
+def fetchd_configuration():
     """Get the Fetch ledger configuration for testing purposes."""
     return FETCHD_CONFIGURATION
 
 
 @pytest.fixture(scope="session")
-def ethereum_testnet_config(ganache_addr, ganache_port) -> None:
+def ethereum_testnet_config(ganache_addr, ganache_port):
     """Get Ethereum ledger api configurations using Ganache."""
     new_uri = f"{ganache_addr}:{ganache_port}"
     new_config = {
@@ -603,7 +603,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port) -> None:
 
 
 @pytest.fixture(scope="function")
-def update_default_ethereum_ledger_api(ethereum_testnet_config) -> None:
+def update_default_ethereum_ledger_api(ethereum_testnet_config):
     """Change temporarily default Ethereum ledger api configurations to interact with local Ganache."""
     old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumCrypto.identifier, None)
     DEFAULT_LEDGER_CONFIGS[EthereumCrypto.identifier] = ethereum_testnet_config
@@ -621,7 +621,7 @@ def ganache(
     ganache_port=DEFAULT_GANACHE_PORT,
     timeout: float = 2.0,
     max_attempts: int = 10,
-) -> None:
+):
     """Launch the Ganache image."""
     with _ganache_context(
         ganache_configuration, ganache_addr, ganache_port, timeout, max_attempts
@@ -636,7 +636,7 @@ def _ganache_context(
     ganache_port: int = DEFAULT_GANACHE_PORT,
     timeout: float = 2.0,
     max_attempts: int = 10,
-) -> None:
+):
     client = docker.from_env()
     image = GanacheDockerImage(
         client, ganache_addr, ganache_port, config=ganache_configuration
@@ -652,16 +652,14 @@ def fetchd(
     fetchd_configuration,
     timeout: float = 2.0,
     max_attempts: int = 20,
-) -> None:
+):
     """Launch the Fetch ledger image."""
     with _fetchd_context(fetchd_configuration, timeout, max_attempts) as fetchd:
         yield fetchd
 
 
 @contextmanager
-def _fetchd_context(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20
-) -> None:
+def _fetchd_context(fetchd_configuration, timeout: float = 2.0, max_attempts: int = 20):
     client = docker.from_env()
     image = FetchLedgerDockerImage(
         client,
@@ -673,9 +671,7 @@ def _fetchd_context(
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
-def _launch_image(
-    image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
-) -> None:
+def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10):
     """
     Launch image.
 
@@ -709,7 +705,7 @@ def reset_aea_cli_config() -> None:
     _init_cli_config()
 
 
-def get_unused_tcp_port() -> None:
+def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((LOCALHOST.hostname, 0))
@@ -719,7 +715,7 @@ def get_unused_tcp_port() -> None:
     return port
 
 
-def get_host() -> None:
+def get_host():
     """Get the host."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -733,7 +729,7 @@ def get_host() -> None:
     return IP
 
 
-def double_escape_windows_path_separator(path) -> None:
+def double_escape_windows_path_separator(path):
     r"""Doubleescape Windows path separator '\'."""
     return path.replace("\\", "\\\\")
 
@@ -771,7 +767,7 @@ def _make_local_connection(
     return oef_local_connection
 
 
-def _make_stub_connection(input_file_path: str, output_file_path: str) -> None:
+def _make_stub_connection(input_file_path: str, output_file_path: str):
     configuration = ConnectionConfig(
         input_file=input_file_path,
         output_file=output_file_path,
@@ -790,13 +786,13 @@ def is_port_in_use(host: str, port: int) -> bool:
 class CwdException(Exception):
     """Exception to raise if cwd was not restored by test."""
 
-    def __init__(self) -> None:
+    def __init__(self):
         """Init exception with default message."""
         super().__init__("CWD was not restored")
 
 
 @pytest.fixture(scope="class", autouse=True)
-def aea_testcase_teardown_check(request) -> None:
+def aea_testcase_teardown_check(request):
     """Check BaseAEATestCase.teardown_class for BaseAEATestCase based test cases."""
     from aea.test_tools.test_cases import BaseAEATestCase  # cause circular import
 
@@ -812,7 +808,7 @@ def aea_testcase_teardown_check(request) -> None:
 
 
 @pytest.fixture(scope="class", autouse=True)
-def check_test_class_cwd() -> None:
+def check_test_class_cwd():
     """Check test case class restore CWD."""
     os.chdir(ROOT_DIR)
     old_cwd = os.getcwd()
@@ -822,7 +818,7 @@ def check_test_class_cwd() -> None:
 
 
 @pytest.fixture(autouse=True)
-def check_test_cwd(request) -> None:
+def check_test_cwd(request):
     """Check particular test restore CWD."""
     if request.cls:
         yield
@@ -836,14 +832,14 @@ def check_test_cwd(request) -> None:
 
 
 @pytest.fixture(autouse=True)
-def set_logging_to_debug(request) -> None:
+def set_logging_to_debug(request):
     """Set aea logger to debug."""
     aea_logger = logging.getLogger("aea")
     aea_logger.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(autouse=True)
-def check_test_threads(request) -> None:
+def check_test_threads(request):
     """Check particular test close all spawned threads."""
     if not request.config.getoption("--check-threads"):
         yield
@@ -858,7 +854,7 @@ def check_test_threads(request) -> None:
 
 
 @pytest.fixture()
-async def ledger_apis_connection(request, ethereum_testnet_config) -> None:
+async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("name", crypto.address, crypto.public_key)
@@ -881,7 +877,7 @@ async def ledger_apis_connection(request, ethereum_testnet_config) -> None:
 
 
 @pytest.fixture()
-def ledger_api(ethereum_testnet_config, ganache) -> None:
+def ledger_api(ethereum_testnet_config, ganache):
     """Ledger api fixture."""
     ledger_id, config = EthereumCrypto.identifier, ethereum_testnet_config
     api = ledger_apis_registry.make(ledger_id, **config)
@@ -904,7 +900,7 @@ def get_register_erc1155() -> Contract:
 
 
 @pytest.fixture()
-def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port) -> None:
+def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     """
     Instantiate an ERC1155 contract instance.
 
@@ -930,7 +926,7 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port) -> None:
 
 
 @pytest.fixture()
-def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port) -> None:
+def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
     """Instantiate an ERC20 contract."""
     directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "fet_erc20")
     configuration = load_component_configuration(ComponentType.CONTRACT, directory)
@@ -983,9 +979,7 @@ def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port) -> None:
 
 
 @pytest.fixture()
-def oracle_contract(
-    ledger_api, ganache, ganache_addr, ganache_port, erc20_contract
-) -> None:
+def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contract):
     """Instantiate a Fetch Oracle contract."""
     directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "oracle")
     configuration = load_component_configuration(ComponentType.CONTRACT, directory)
@@ -1019,7 +1013,7 @@ def oracle_contract(
     yield contract, contract_address
 
 
-def docker_exec_cmd(image_tag: str, cmd: str, **kwargs) -> None:
+def docker_exec_cmd(image_tag: str, cmd: str, **kwargs):
     """Execute a command in running docker containers matching image tag."""
     client = docker.from_env()
     for container in client.containers.list():
@@ -1031,7 +1025,7 @@ def docker_exec_cmd(image_tag: str, cmd: str, **kwargs) -> None:
 
 def fund_accounts_from_local_validator(
     addresses: List[str], amount: int, denom: str = DEFAULT_DENOMINATION
-) -> None:
+):
     """Send funds to local accounts from the local genesis validator."""
 
     pk = PrivateKey(bytes.fromhex(FUNDED_FETCHAI_PRIVATE_KEY_1))
@@ -1052,7 +1046,7 @@ def fund_accounts_from_local_validator(
 
 
 @pytest.fixture()
-def fund_fetchai_accounts(fetchd) -> None:
+def fund_fetchai_accounts(fetchd):
     """Fund test accounts from local validator."""
     for _ in range(5):
         try:
@@ -1090,7 +1084,7 @@ def random_string(length: int = 8) -> str:
     )
 
 
-def make_uri(addr: str, port: int) -> None:
+def make_uri(addr: str, port: int):
     """Make uri from address and port."""
     return f"{addr}:{port}"
 
@@ -1100,7 +1094,7 @@ class UseGanache:
     """Inherit from this class to use Ganache."""
 
     @pytest.fixture(autouse=True)
-    def _start_ganache(self, ganache) -> None:
+    def _start_ganache(self, ganache):
         """Start a Ganache image."""
 
 
@@ -1109,7 +1103,7 @@ class UseSOEF:
     """Inherit from this class to use SOEF."""
 
     @pytest.fixture(autouse=True)
-    def _start_soef(self, soef) -> None:
+    def _start_soef(self, soef):
         """Start an SOEF image."""
 
 
@@ -1118,12 +1112,12 @@ class UseLocalFetchNode:
     """Inherit from this class to use a local Fetch ledger node."""
 
     @pytest.fixture(autouse=True)
-    def _start_fetchd(self, fetchd) -> None:
+    def _start_fetchd(self, fetchd):
         """Start a Fetch ledger image."""
 
 
 @pytest.fixture()
-def change_directory() -> None:
+def change_directory():
     """Change directory and execute the test."""
     temporary_directory = tempfile.mkdtemp()
     try:
@@ -1143,7 +1137,7 @@ def password_or_none(request) -> Optional[str]:
     return request.param
 
 
-def method_scope(cls) -> None:
+def method_scope(cls):
     """
     Class decorator to make the setup/teardown to have the 'method' scope.
 
@@ -1163,7 +1157,7 @@ def method_scope(cls) -> None:
     return cls
 
 
-def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None) -> None:
+def get_wealth_if_needed(address: Address, fetchai_api: FetchAIApi = None):
     """
      Get wealth from fetch.ai faucet to specific address
 
@@ -1195,7 +1189,7 @@ def disable_logging_handlers_cleanup(request) -> Generator:
     Check https://github.com/fetchai/agents-aea/issues/2431
     """
 
-    def do_nothing(*args) -> None:
+    def do_nothing(*args):
         pass
 
     with MonkeyPatch().context() as mp:
