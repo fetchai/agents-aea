@@ -24,6 +24,7 @@ from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Dict, Optional, Tuple, Type, cast
+from warnings import warn
 
 from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
@@ -457,6 +458,16 @@ class BaseSkillTestCase:
 
         return dialogue
 
+    def setup(self, **kwargs: Any) -> None:
+        """Setup calling setup_class for backwards compatibility"""
+
+        warn(
+            "Use .setup_class or overwrite this method",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.setup_class(**kwargs)
+
     @classmethod
     def setup_class(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
@@ -511,3 +522,31 @@ class BaseSkillTestCase:
         skill_config.directory = cls.path_to_skill
 
         cls._skill = Skill.from_config(skill_config, agent_context)
+
+    def teardown(self) -> None:
+        """Teardown"""
+
+        self.empty_message_queues()
+        self.reset_all_dialogues()
+
+    # helpers for setup / teardown
+    def empty_message_queues(self) -> None:
+        """Empty message queues"""
+
+        while not self._outbox.empty():
+            self._multiplexer.out_queue.get_nowait()
+        while not self._skill.skill_context.decision_maker_message_queue.empty():
+            self._skill.skill_context.decision_maker_message_queue.get_nowait()
+
+    def reset_all_dialogues(self) -> None:
+        """Reset the state of all dialogues"""
+
+        for handler in self._skill.handlers.values():
+            dialogues = handler.protocol_dialogues()
+            dialogues.teardown()
+            dialogues.cleanup()
+            stats = dialogues.dialogue_stats
+            # pylint: disable=protected-access
+            stats._self_initiated = dict.fromkeys(stats._self_initiated, 0)
+            # pylint: disable=protected-access
+            stats._other_initiated = dict.fromkeys(stats._other_initiated, 0)

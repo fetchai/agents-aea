@@ -72,6 +72,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             GenericFipaHandler, cls._skill.skill_context.handlers.fipa
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls._init_strategy = cls.strategy.__dict__.copy()
         cls.fipa_dialogues = cast(
             FipaDialogues, cls._skill.skill_context.fipa_dialogues
         )
@@ -544,6 +545,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         assert self.fipa_handler.teardown() is None
         self.assert_quantity_in_outbox(0)
 
+    def teardown(self):
+        """Teardown"""
+        super().teardown()
+        self.strategy.__dict__.update(self._init_strategy)
+
 
 class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic seller."""
@@ -937,6 +943,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
             GenericServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,
         )
+        init_kwargs = cls.service_registration_behaviour.__dict__.copy()
+        cls._init_service_registration_behaviour_kwargs = init_kwargs
 
         cls.register_location_description = Description(
             {"location": Location(51.5194, 0.1270)},
@@ -1023,6 +1031,13 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
                 is_incoming=False,
             ),
         )
+
+    def teardown(self):
+        """Teardown"""
+
+        super().teardown()
+        init_kwargs = self._init_service_registration_behaviour_kwargs
+        self.service_registration_behaviour.__dict__.update(init_kwargs)
 
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
