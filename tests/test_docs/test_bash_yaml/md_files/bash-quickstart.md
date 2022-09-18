@@ -44,7 +44,7 @@ pip install open-aea[all]
 pip install open-aea-cli-ipfs
 ```
 ```
-svn checkout https://github.com/valory-xyz/open-aea/tags/v1.18.0.post1/packages packages
+svn checkout https://github.com/valory-xyz/open-aea/tags/v1.19.0/packages packages
 ```
 
 ``` bash
@@ -72,7 +72,7 @@ v1.7.0
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeifelwg4md24lwpxgx7x5cugq7ovhbkew3lxw43m52rdppfn5o5g4i --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeidqq73k63tr5baafodg3w5xy3g5so45k5wn2rpo7plkeiq3ojdxfu --remote
 cd my_first_aea
 ```
 ``` bash
@@ -119,10 +119,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ...
 ```
-``` bash
-cd my_first_aea
-aea interact
-```
+
 ``` bash
 info: Echo Behaviour: act method called.
 info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=my_first_aea_interact
@@ -147,9 +144,6 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 ``` bash
-aea interact
-```
-``` bash
 pipenv run pytest test.py
 ```
 ``` bash
@@ -158,12 +152,12 @@ aea delete my_first_aea
 
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeifelwg4md24lwpxgx7x5cugq7ovhbkew3lxw43m52rdppfn5o5g4i --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeidqq73k63tr5baafodg3w5xy3g5so45k5wn2rpo7plkeiq3ojdxfu --remote
 cd my_first_aea
 ```
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeifelwg4md24lwpxgx7x5cugq7ovhbkew3lxw43m52rdppfn5o5g4i --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeidqq73k63tr5baafodg3w5xy3g5so45k5wn2rpo7plkeiq3ojdxfu --remote
 cd my_first_aea
 ```
 

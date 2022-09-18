@@ -5,7 +5,7 @@ metadata:
 build:
   tagPolicy:
     envTemplate:
-      template: "1.18.0.post1"
+      template: "1.19.0"
   artifacts:
   - image: valory/open-aea-develop
     docker:
@@ -24,7 +24,7 @@ profiles:
     build:
       tagPolicy:
         envTemplate:
-          template: "1.18.0.post1"
+          template: "1.19.0"
       artifacts:
       - image: valory/open-aea-docs
         docker:

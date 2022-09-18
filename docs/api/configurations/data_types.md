@@ -571,6 +571,16 @@ def without_hash() -> "PublicId"
 
 Returns a `PublicId` object with same parameters.
 
+<a id="aea.configurations.data_types.PublicId.with_hash"></a>
+
+#### with`_`hash
+
+```python
+def with_hash(package_hash: str) -> "PublicId"
+```
+
+Returns a `PublicId` object with same parameters.
+
 <a id="aea.configurations.data_types.PublicId.__str__"></a>
 
 #### `__`str`__`
@@ -737,6 +747,16 @@ uri path string
 
 ```python
 def without_hash() -> "PackageId"
+```
+
+Returns PackageId object without hash
+
+<a id="aea.configurations.data_types.PackageId.with_hash"></a>
+
+#### with`_`hash
+
+```python
+def with_hash(package_hash: str) -> "PackageId"
 ```
 
 Returns PackageId object without hash

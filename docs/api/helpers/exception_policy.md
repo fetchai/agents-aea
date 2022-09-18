@@ -2,7 +2,7 @@
 
 # aea.helpers.exception`_`policy
 
-This module contains enum of aea exception policies.
+This module contains enum of AEA exception policies.
 
 <a id="aea.helpers.exception_policy.ExceptionPolicyEnum"></a>
 

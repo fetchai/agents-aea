@@ -38,7 +38,7 @@ It is also possible to develop directly in an AEA project:
 
 - Create a new project `aea create AGENT_NAME && cd AGENT_NAME`
 
-- Scaffold a new package `aea scaffold --with-symlinks PACKAGE_TYPE PACKAGE_NAME`. This will create the package scaffold under the directory `{PACKAGE_TYPE}s` and create symlinks to ensure package import paths line up with the folder structure. The symlinks are not needed to run the AEA. They are purely for your IDE.
+- Scaffold a new package (connection, contract, protocol, skill...). For example: `aea scaffold --with-symlinks protocol PACKAGE_NAME`. This will create the package scaffold under the directory `{PACKAGE_TYPE}s` and create symlinks to ensure package import paths line up with the folder structure. The symlinks are not needed to run the AEA. They are purely for your IDE.
 
 - In your working directory, create a `.env` file with the constant `PYTHONPATH=$PYTHONPATH:path_to_project_dir` where `path_to_project_dir` is the path to the AEA project contained in your working directory.
 

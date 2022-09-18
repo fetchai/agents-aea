@@ -7,7 +7,7 @@ This demo assumes you have followed the setup guide.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch open_aea/my_first_aea:0.1.0:bafybeifelwg4md24lwpxgx7x5cugq7ovhbkew3lxw43m52rdppfn5o5g4i --remote
+aea fetch open_aea/my_first_aea:0.1.0:bafybeidqq73k63tr5baafodg3w5xy3g5so45k5wn2rpo7plkeiq3ojdxfu --remote
 cd my_first_aea
 ```
 ### Install AEA dependencies
@@ -70,7 +70,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
-Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the <code>aea interact</code> command.
+Note, due to the dialogue reference having to be incremented, you can only send the above envelope once!
 
 ### Stop the AEA
 

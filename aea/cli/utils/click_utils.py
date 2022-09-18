@@ -222,15 +222,17 @@ class AgentDirectory(click.Path):
             os.chdir(cwd)
 
 
-def registry_flag(mark_default: bool = True) -> Callable:
+def registry_flag(
+    mark_default: bool = True,
+    default_registry: Optional[str] = None,
+) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
-    default_registry: Optional[str] = (
+    default_registry = default_registry or (
         get_or_create_cli_config().get("registry_config", {}).get("default")
     )
 
-    if default_registry is None:
-        default_registry = REGISTRY_LOCAL
+    default_registry = default_registry or REGISTRY_LOCAL
 
     def wrapper(f: Callable) -> Callable:
         f = option(
@@ -252,10 +254,13 @@ def registry_flag(mark_default: bool = True) -> Callable:
     return wrapper
 
 
-def remote_registry_flag(mark_default: bool = True) -> Callable:
+def remote_registry_flag(
+    mark_default: bool = True,
+    default_registry: Optional[str] = None,
+) -> Callable:
     """Choice of one flag between: '--ipfs/--http'."""
 
-    default_registry: Optional[str] = (
+    default_registry = default_registry or (
         get_or_create_cli_config()
         .get("registry_config", {})
         .get("settings", {})
@@ -263,8 +268,7 @@ def remote_registry_flag(mark_default: bool = True) -> Callable:
         .get("default")
     )
 
-    if default_registry is None:
-        default_registry = REMOTE_IPFS
+    default_registry = default_registry or REMOTE_IPFS
 
     def wrapper(f: Callable) -> Callable:
         f = option(

@@ -2,7 +2,6 @@
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2022 Valory AG
-#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,21 +16,5 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Helpers for Windows."""
-import ctypes
-import logging
-import platform
 
-
-_default_logger = logging.getLogger(__name__)
-
-
-def enable_ctrl_c_support() -> None:  # pragma: no cover
-    """Enable ctrl+c support for aea.cli command to be tested on windows platform."""
-    if platform.system() != "Windows":
-        return
-
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)  # type: ignore
-
-    if not kernel32.SetConsoleCtrlHandler(None, False):
-        _default_logger.debug(f"SetConsoleCtrlHandler Error: {ctypes.get_last_error()}")  # type: ignore
+"""This test module contains the tests for the `aea packages` sub-command."""

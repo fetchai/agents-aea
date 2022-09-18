@@ -22,7 +22,7 @@ Task to run agent instance.
 def __init__(agent: AEA) -> None
 ```
 
-Init aea instance task.
+Init AEA instance task.
 
 **Arguments**:
 

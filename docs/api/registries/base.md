@@ -49,7 +49,7 @@ Register an item.
 
 **Raises**:
 
-- `None`: ValueError if an item is already registered with that item id.
+- `ValueError`: if an item is already registered with that item id.
 
 **Returns**:
 
@@ -72,7 +72,7 @@ Unregister an item.
 
 **Raises**:
 
-- `None`: ValueError if no item registered with that item id.
+- `ValueError`: if no item registered with that item id.
 
 **Returns**:
 
@@ -445,7 +445,7 @@ Register a item.
 
 **Raises**:
 
-- `None`: ValueError if an item is already registered with that item id.
+- `ValueError`: if an item is already registered with that item id.
 
 <a id="aea.registries.base.ComponentRegistry.unregister"></a>
 
@@ -460,10 +460,6 @@ Unregister a item.
 **Arguments**:
 
 - `item_id`: a pair (skill id, item name).
-
-**Raises**:
-
-- `None`: ValueError if no item registered with that item id.
 
 **Returns**:
 
@@ -606,10 +602,6 @@ Unregister a item.
 **Arguments**:
 
 - `item_id`: a pair (skill id, item name).
-
-**Raises**:
-
-- `None`: ValueError if no item is registered with that item id.
 
 **Returns**:
 

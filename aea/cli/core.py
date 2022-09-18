@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -53,6 +52,7 @@ from aea.cli.list import list_command as _list
 from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
+from aea.cli.packages import package_manager
 from aea.cli.plugin import with_plugins
 from aea.cli.publish import publish
 from aea.cli.push import push
@@ -148,3 +148,4 @@ cli.add_command(hash_group)
 cli.add_command(generate_all_protocols)
 cli.add_command(check_packages)
 cli.add_command(push_all)
+cli.add_command(package_manager)

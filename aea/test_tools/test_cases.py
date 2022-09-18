@@ -678,7 +678,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param private_key: the private key
         :param private_key_filepath: the filepath to the private key file
-        :raises: exception if file does not exist
         """
         with cd(cls._get_cwd()):  # pragma: nocover
             with open_file(private_key_filepath, "wt") as f:

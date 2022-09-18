@@ -344,7 +344,7 @@ class AgentConfigManager:
 
     @classmethod
     def _get_agent_config_file_path(cls, aea_project_path: Union[str, Path]) -> Path:
-        """Get agent config file path for aea project path."""
+        """Get agent config file path for AEA project path."""
         return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
     @classmethod

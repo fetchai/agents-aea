@@ -73,6 +73,8 @@ test-sub-p:
 hashes:
 	python -m aea.cli hash all
 	python -m aea.cli hash all --packages-dir=./tests/data/packages
+	python -m aea.cli packages lock
+	python -m aea.cli --registry-path=./tests/data/packages packages lock
 
 .PHONY: test-all
 test-all:

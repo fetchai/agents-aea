@@ -1939,7 +1939,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path:
-        """Return path to aea-config file for the given aea project path."""
+        """Return path to aea-config file for the given AEA project path."""
         return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
     def _load_and_add_components(

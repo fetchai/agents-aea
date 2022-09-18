@@ -1145,7 +1145,7 @@ an AEABuilder.
 def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path
 ```
 
-Return path to aea-config file for the given aea project path.
+Return path to aea-config file for the given AEA project path.
 
 <a id="aea.aea_builder.make_component_logger"></a>
 

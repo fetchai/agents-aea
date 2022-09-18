@@ -32,6 +32,7 @@
 | `local-registry-sync`                       | Upgrade the local package registry.                                          |
 | `login USERNAME [--password password]`      | Login to a registry account with credentials.                                |
 | `logout`                                    | Logout from registry account.                                                |
+| `packages`                                  | Local package manager.                                                       |
 | `publish`                                   | Publish the AEA to registry. Needs to be executed from an AEA project.`publish --local` to publish to local `packages` directory. |
 | `push [package_type] [public_id]`           | Push connection, protocol, or skill with `public_id` to registry.	`push --local` to push to local `packages` directory. |
 | `push-all`                                  | Push all available packages to a registry. |

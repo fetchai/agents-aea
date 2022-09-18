@@ -19,11 +19,12 @@
 
 """Test if constants are valid."""
 
+
 from pathlib import Path
 
-from aea.configurations.constants import SIGNING_PROTOCOL_WITH_HASH
-from aea.configurations.data_types import PublicId
-from aea.helpers.io import from_csv
+from aea.cli.packages import PackageManager
+from aea.configurations.constants import PACKAGES, SIGNING_PROTOCOL_WITH_HASH
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 
 from tests.conftest import ROOT_DIR
 
@@ -31,6 +32,8 @@ from tests.conftest import ROOT_DIR
 def test_signing_protocol_hash() -> None:
     """Test signing protocol"""
 
+    package_manager = PackageManager.from_dir(Path(ROOT_DIR, PACKAGES))
     public_id = PublicId.from_str(SIGNING_PROTOCOL_WITH_HASH)
-    hashes = from_csv(Path(ROOT_DIR, "packages", "hashes.csv"))
-    assert public_id.hash == hashes["open_aea/protocols/signing"]
+    package_id = PackageId(PackageType.PROTOCOL, public_id)
+
+    assert public_id.hash == package_manager.packages[package_id]
