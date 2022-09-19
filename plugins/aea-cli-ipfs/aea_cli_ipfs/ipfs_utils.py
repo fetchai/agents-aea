@@ -306,7 +306,10 @@ class IPFSTool:
         if os.path.exists(os.path.join(target_dir, hash_id)):  # pragma: nocover
             raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
 
-        self.client.get(hash_id, target_dir)
+        try:
+            self.client.get(hash_id, target_dir)
+        except ipfshttpclient.exceptions.StatusError as e:
+            raise DownloadError(f"error on download {str(e)}") from e
         downloaded_path = str(Path(target_dir) / hash_id)
 
         package_path = None
