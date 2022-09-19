@@ -8,18 +8,18 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeig3rwpeqh5kdr2iflvy72vkfmby3sl4ulb3sbblt5lndvogvlblme
   __init__.py: bafybeic6biuigdmylscufxz6suvtkxems27j2cns3h36e53gxlm5hihvza
-  behaviours.py: bafybeidrzmefr6puhgda7hv3vvzy6xojr62edyq4jfnoa3fr52wd5erfnu
+  behaviours.py: bafybeih3vzn2ojneft3skontrdk3kptn76mnlmekxcqnbty4wt5al6bpz4
   dialogues.py: bafybeigyzu2uvp2dmj7wpjlcqlablr2wibnlkxhwyxzetizsaz5lifooea
-  handlers.py: bafybeicbg7vv6r7ebp6qtrdjppx2lufhan4i2lt25mmnwm3cujbjgsvaxi
+  handlers.py: bafybeia5wzpc5jlzyrum3fkitim567vxhwilffrbgtfttctsoqyb6j2uom
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
   tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
-  tests/test_behaviours.py: bafybeidprjgsar4pgtnl7edfyb4575ultnzfvopjycpc4ixu6k5kwrkhwu
-  tests/test_dialogues.py: bafybeicabpwlrm2ppqllol5fhuyzujsbakwbnwagrtllfv2jve5jotgbqq
-  tests/test_handlers.py: bafybeiez7vth2e45mg6gza4d2tmhwawtt5wqx7fbvjnr2afcavj7mgl324
-  tests/test_models.py: bafybeibc5tdfcizkxi7mannv22m7svbw2q5eytkxw726nswomzt7gucyzm
+  tests/test_behaviours.py: bafybeifpzc7kregsvlsbrxdwnki7j6onh7sd2qrx7mb3yxjkf6eowtqg2u
+  tests/test_dialogues.py: bafybeiffzdtvbjeeblrqivfsxeochqd6ff5ioq7i2oiubu5lohxjuqg5ti
+  tests/test_handlers.py: bafybeignesdsobb56ljqs3ij3rwj3c63znjlcwxdoziclptbwxgsacbed4
+  tests/test_models.py: bafybeibh72j3n72yseqvmpppucpu5wtidf6ebxbxkfnmrnlh4zv5y5apei
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeihvt2evsxzr3gsaskhd5td7o3sdbt6vkeqcin4t7ahehekwywcd4e
+- fetchai/ledger:0.19.0:bafybeiftnqca3kir7r44dnzoghnwc2mhcqkibtivus3kzzjvpnxo2oj7qu
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu

@@ -81,12 +81,14 @@ class LedgerConnection(Connection):
             loop=self.loop,
             api_configs=self.api_configs,
             logger=self.logger,
+            connection_id=self.connection_id,
         )
         self._contract_dispatcher = ContractApiRequestDispatcher(
             self._state,
             loop=self.loop,
             api_configs=self.api_configs,
             logger=self.logger,
+            connection_id=self.connection_id,
         )
         self._event_new_receiving_task = asyncio.Event()
 

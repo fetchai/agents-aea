@@ -17,7 +17,7 @@ protocols:
 - fetchai/state_update:1.0.0:bafybeidtndlmppst6l6iughpflqbbbkzditixo2fy2dncxfkb5apkx5y4m
 - open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
 skills:
-- fetchai/gym:0.20.0:bafybeiebnyx6r7hqiw4226jdlwijtknhomxdspjpypso6tm64a7kpyrcjq
+- fetchai/gym:0.20.0:bafybeiexgdek5fajc5od4irk4haj4v22iy4gjbjaqbp3rm6624xhxxsj3q
 default_connection: fetchai/gym:0.19.0
 default_ledger: ethereum
 private_key_paths: {}

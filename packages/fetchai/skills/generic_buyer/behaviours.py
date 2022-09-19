@@ -161,6 +161,11 @@ class GenericTransactionBehaviour(TickerBehaviour):
     def teardown(self) -> None:
         """Teardown behaviour."""
 
+        self.processing = None
+        self.processing_time = 0.0
+        self.timedout.clear()
+        self.waiting.clear()
+
     def _timeout_processing(self) -> None:
         """Timeout processing."""
         if self.processing is None:

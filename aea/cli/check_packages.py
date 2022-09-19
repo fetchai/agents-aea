@@ -153,18 +153,25 @@ class PublicIdDefinitionError(CustomException):
     """Custom exception for error about PUBLIC_ID definitions in package Python modules."""
 
     def __init__(
-        self, package_type: PackageType, public_id: PublicId, actual_nb_definitions: int
+        self,
+        package_type: PackageType,
+        public_id: PublicId,
+        actual_nb_definitions: int,
+        *args: Any,
     ) -> None:
         """Initialize the exception."""
+        super().__init__(*args)
         self.package_type = package_type
         self.public_id = public_id
         self.actual_nb_definitions = actual_nb_definitions
 
     def print_error(self) -> None:
         """Print the error message."""
+        print("=" * 50)
         print(
             f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; found {self.actual_nb_definitions}"
         )
+        print("=" * 50)
 
 
 class WrongPublicIdError(CustomException):
@@ -174,18 +181,22 @@ class WrongPublicIdError(CustomException):
         self,
         package_type: PackageType,
         public_id: PublicId,
-        actual_public_id_constant_value: Any,
+        public_id_code: str,
+        *args: Any,
     ) -> None:
         """Initialize the exception."""
+        super().__init__(*args)
         self.package_type = package_type
         self.public_id = public_id
-        self.actual_public_id_constant_value = actual_public_id_constant_value
+        self.public_id_code = public_id_code
 
     def print_error(self) -> None:
         """Print the error message."""
+        print("=" * 50)
         print(
-            f"expected {self.public_id} for package of type {self.package_type.value}; found {self.actual_public_id_constant_value}"
+            f"expected {self.public_id} for package of type {self.package_type.value}; found '{self.public_id_code}'"
         )
+        print("=" * 50)
 
 
 def find_all_configuration_files(packages_dir: Path) -> List:
@@ -299,6 +310,7 @@ def check_author(configuration_file: Path, expected_author: str) -> None:
 
 
 def check_public_id(configuration_file: Path) -> None:
+    """Check the public_id in the code and configuration match."""
     expected_public_id = get_public_id_from_yaml(configuration_file)
     # remove last 's' character (as package type is plural in packages directory)
     package_type_str = configuration_file.parent.parent.name[:-1]
@@ -317,11 +329,8 @@ def check_public_id(configuration_file: Path) -> None:
         raise PublicIdDefinitionError(package_type, expected_public_id, len(matches))
 
     public_id_code = matches[0]
-    actual_public_id_constant_value = eval(public_id_code)
-    if expected_public_id != actual_public_id_constant_value:
-        raise WrongPublicIdError(
-            package_type, public_id_code, actual_public_id_constant_value
-        )
+    if str(expected_public_id) not in public_id_code:
+        raise WrongPublicIdError(package_type, expected_public_id, public_id_code)
 
 
 @click.command(name="check-packages")
