@@ -171,6 +171,7 @@ generators:
 	tox -e fix-copyright
 	python -m aea.cli hash all
 	python -m aea.cli hash all --packages-dir=./tests/data/packages
+	python -m aea.cli packages sync --update-hashes
 	python -m aea.cli generate-all-protocols
 	python -m aea.cli generate-all-protocols tests/data/packages
 	tox -e generate-api-documentation
