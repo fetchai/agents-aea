@@ -187,3 +187,7 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
             containers.append(self._client.containers.run(**kwargs))
 
         return containers
+
+    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
+        time.sleep(1)
+        return True
