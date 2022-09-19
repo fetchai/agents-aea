@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea scaffold' subcommand."""
-import logging
+
 import os
 import re
 import shutil

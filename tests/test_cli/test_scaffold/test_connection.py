@@ -24,8 +24,9 @@ import re
 import shutil
 import tempfile
 import unittest.mock
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import jsonschema
 import yaml
 from jsonschema import Draft4Validator, ValidationError
