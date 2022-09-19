@@ -845,6 +845,40 @@ class UseACNNode:
         """Start a ACN Node image."""
 
 
+@contextmanager
+def _acn_multiple_nodes_context(
+    acn_configuration: Dict,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    client = docker.from_env()
+    image = ACNWithBootstrappedEntryNodesDockerImage(client, config=acn_configuration)
+    yield from launch_many_containers(image, timeout, max_attempts)
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.fixture(scope="class")
+def acn_multiple_nodes(
+    acn_configuration,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    """Launch the ACN images."""
+    with _acn_multiple_nodes_context(acn_configuration, timeout, max_attempts) as image:
+        yield image
+
+
+@pytest.mark.integration
+class UseACNWithBootstrappedEntryNodes:
+    """Inherit from this class to an ACN Node."""
+
+    @pytest.fixture(autouse=True)
+    def _start_acn(self, acn_multiple_nodes):
+        """Start a series of ACN Node images."""
+
+
+
 @pytest.fixture(scope="session", autouse=True)
 def reset_aea_cli_config() -> None:
     """Reset the cli config for each test."""
