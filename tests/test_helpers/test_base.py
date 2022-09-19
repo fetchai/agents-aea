@@ -34,6 +34,7 @@ from tempfile import TemporaryDirectory
 from typing import Dict, Optional, Set
 from unittest.mock import patch
 
+import _strptime  # pylint: disbale=unsed-import # noqa: F401
 import pytest
 from packaging.version import Version
 
