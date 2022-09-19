@@ -24,16 +24,21 @@ import socket
 import time
 from typing import Dict, List
 
+from docker import DockerClient  # pylint: disable=import-error
+from docker.models.containers import Container  # pylint: disable=import-error
+
 from aea.exceptions import enforce
 from aea.test_tools.docker_image import DockerImage
-from docker import DockerClient
-from docker.models.containers import Container
 
 
 LOCAL_ADDRESS = "0.0.0.0"
-PUBLIC_DHT_MADDRS = ["/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAmMC2tJMRaRTeWSESv8mArbq6jipJCD4adSBcBLsbc7cSL"]
+PUBLIC_DHT_MADDRS = [
+    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAmMC2tJMRaRTeWSESv8mArbq6jipJCD4adSBcBLsbc7cSL"
+]
 PUBLIC_DHT_DELEGATE_URIS = ["localhost:11000"]
-PUBLIC_DHT_PUBLIC_KEYS = ["037ed15dcee3a317e590cbdd28768ad8e2d29960b3e5d4eccca14bc94f83747f09"]
+PUBLIC_DHT_PUBLIC_KEYS = [
+    "037ed15dcee3a317e590cbdd28768ad8e2d29960b3e5d4eccca14bc94f83747f09"
+]
 
 
 BOOTSTRAP: Dict[str, str] = dict(
@@ -51,7 +56,7 @@ NODE1: Dict[str, str] = dict(
     AEA_P2P_URI=f"{LOCAL_ADDRESS}:10001",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11001",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8081",
-    AEA_P2P_ENTRY_URIS=PUBLIC_DHT_MADDRS,
+    AEA_P2P_ENTRY_URIS=",".join(PUBLIC_DHT_MADDRS),
     ACN_LOG_FILE="/acn/libp2p_node.log",
 )
 
@@ -62,7 +67,7 @@ NODE2: Dict[str, str] = dict(
     AEA_P2P_URI=f"{LOCAL_ADDRESS}:10002",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11002",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8082",
-    AEA_P2P_ENTRY_URIS=PUBLIC_DHT_MADDRS,
+    AEA_P2P_ENTRY_URIS=",".join(PUBLIC_DHT_MADDRS),
     ACN_LOG_FILE="/acn/libp2p_node.log",
 )
 
@@ -91,7 +96,7 @@ class ACNNodeDockerImage(DockerImage):
         :param config: optional configuration to command line.
         """
         super().__init__(client)
-        self._config = BOOTSTRAP  # TODO
+        self._config = config
         self._extra_hosts = {name: "host-gateway" for name in self.nodes}
 
     @property
@@ -117,7 +122,7 @@ class ACNNodeDockerImage(DockerImage):
             detach=True,
             ports=self._make_ports(),
             environment=self._config,
-            extra_hosts=self._extra_hosts
+            extra_hosts=self._extra_hosts,
         )
         return container
 
@@ -168,7 +173,7 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
                 detach=True,
                 ports=self._make_ports(),
                 environment=self._config,
-                extra_hosts=self._extra_hosts
+                extra_hosts=self._extra_hosts,
             )
             containers.append(self._client.containers.run(**kwargs))
 
@@ -176,5 +181,5 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
         """Wait until the image is up."""
-        time.sleep(1)  # TODO
+        time.sleep(1)  # TOFIX
         return True

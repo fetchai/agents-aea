@@ -69,9 +69,9 @@ from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from cosmpy.aerial.wallet import LocalWallet
 from cosmpy.crypto.address import Address as CosmpyAddress
 from cosmpy.crypto.keypairs import PrivateKey
-DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
-from docker.models.containers import Container
 from docker.errors import ImageNotFound, NotFound
+from docker.models.containers import Container
+
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -106,11 +106,11 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
-
 from packages.valory.connections.test_tools.docker_images import (
     ACNNodeDockerImage,
     ACNWithBootstrappedEntryNodesDockerImage,
 )
+
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
 
@@ -323,6 +323,7 @@ protocol_specification_files = [
     ),
 ]
 
+DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
 DEFAULT_HOST = LOCALHOST.hostname
 
 
@@ -772,7 +773,9 @@ def _stop_container(container: Container, tag: str) -> None:
             f"{DOCKER_PRINT_SEPARATOR}Logs from container {container.name}:\n{container.logs().decode()}"
         )
         if str(container.name).startswith("node"):
-            logger.info(f"{DOCKER_PRINT_SEPARATOR}Logs from container log file {container.name}:\n")
+            logger.info(
+                f"{DOCKER_PRINT_SEPARATOR}Logs from container log file {container.name}:\n"
+            )
             bits, _ = container.get_archive(f"/logs/{container.name}.txt")
             for chunk in bits:
                 logger.info(chunk.decode())
@@ -876,7 +879,6 @@ class UseACNWithBootstrappedEntryNodes:
     @pytest.fixture(autouse=True)
     def _start_acn(self, acn_multiple_nodes):
         """Start a series of ACN Node images."""
-
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -48,10 +48,6 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
 
 genesis_nodes = load_client_connection_yaml_config()["nodes"]
 
-# PUBLIC_DHT_MADDRS = [node["maddr"] for node in genesis_nodes]
-# PUBLIC_DHT_DELEGATE_URIS = [node["uri"] for node in genesis_nodes]
-# PUBLIC_DHT_PUBLIC_KEYS = [node["public_key"] for node in genesis_nodes]
-
 PUBLIC_DHT_MADDRS = [
     "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAmMC2tJMRaRTeWSESv8mArbq6jipJCD4adSBcBLsbc7cSL"
 ]
@@ -108,7 +104,7 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest, UseACNNode):
 
     def setup(self):
         """Setup test"""
-        # assert len(self.maddrs) > 1, "Test requires at least 2 public DHT node"
+        # TOFIX: Test requires 2 public DHT nodes
         for maddr in self.maddrs:
             for _ in range(2):  # make pairs
                 self.make_connection(relay=False, entry_peers=[maddr])
@@ -165,7 +161,7 @@ class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
     def setup(self):  # overwrite the setup, reuse the rest
         """Set up test"""
         assert len(self.uris) == len(self.public_keys)
-        # assert len(self.uris) > 1 and len(self.public_keys) > 1
+        # TOFIX: Test requires 2 public DHT nodes
         for uri, public_keys in zip(self.uris, self.public_keys):
             for _ in range(2):
                 self.make_client_connection(uri=uri, peer_public_key=public_keys)
