@@ -475,8 +475,8 @@ def recursive_update(
             and value is not None
             and value_to_update is not None
         ):
-            error_str = "Trying to replace value '{value_to_update}' of type '{value_to_update_type}' with value '{value}' which is of type '{value_type}'."
-            if "${" in value:
+            error_str = f"Trying to replace value '{value_to_update}' of type '{value_to_update_type.__name__}' with value '{value}' which is of type '{value_type.__name__}'."
+            if isinstance(value, str) and "${" in value:
                 error_str += " It appears you are using environmental variables as overwrites. Make sure to use the `--aev` flag."
             raise ValueError(error_str)
 
