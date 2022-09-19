@@ -49,7 +49,9 @@ LOCAL_ADDRESS = "0.0.0.0"
 #     PeerID:      16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj
 
 
-GENESIS_MADDR = "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
+GENESIS_MADDR = (
+    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
+)
 
 BOOTSTRAP: Dict[str, str] = dict(
     AEA_P2P_ID="7f669ab5eee5719e385f7aeb1973769fc75b7cbbe0850ca16c4eabe84e01afbd",
@@ -186,4 +188,4 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
             )
             containers.append(self._client.containers.run(**kwargs))
 
-        return []
+        return containers

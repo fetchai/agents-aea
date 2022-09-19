@@ -35,7 +35,7 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
 
-from tests.conftest import DEFAULT_LEDGER, UseACNNode, UseACNWithBootstrappedEntryNodes
+from tests.conftest import DEFAULT_LEDGER, UseACNWithBootstrappedEntryNodes
 from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
@@ -55,7 +55,7 @@ LOCAL_DHT_PUBLIC_KEYS = [
     "0270475f9b78c0285a6ac6067582f5e159ec147ccb03aee16a32731f68920b1ae8",
     "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
     "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
-][:1]
+][1:]
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
@@ -78,7 +78,9 @@ def delegate_uris_public_keys(request):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTRelay(BaseP2PLibp2pTest, UseACNWithBootstrappedEntryNodes):
+class TestLibp2pConnectionLocalDHTRelay(
+    BaseP2PLibp2pTest, UseACNWithBootstrappedEntryNodes
+):
     """Test that public DHT's relay service is working properly"""
 
     maddrs = LOCAL_DHT_MADDRS
@@ -149,7 +151,9 @@ class TestLibp2pConnectionLocalDHTDelegate(TestLibp2pConnectionLocalDHTRelay):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTRelayAEACli(AEATestCaseMany, UseACNWithBootstrappedEntryNodes):
+class TestLibp2pConnectionLocalDHTRelayAEACli(
+    AEATestCaseMany, UseACNWithBootstrappedEntryNodes
+):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
     @pytest.mark.parametrize("maddrs", [LOCAL_DHT_MADDRS], indirect=True)
@@ -220,7 +224,9 @@ class TestLibp2pConnectionLocalDHTRelayAEACli(AEATestCaseMany, UseACNWithBootstr
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTDelegateAEACli(AEATestCaseMany, UseACNWithBootstrappedEntryNodes):
+class TestLibp2pConnectionLocalDHTDelegateAEACli(
+    AEATestCaseMany, UseACNWithBootstrappedEntryNodes
+):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
     @pytest.mark.parametrize(
