@@ -105,6 +105,9 @@ from aea.test_tools.test_cases import BaseAEATestCase
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
 
+from packages.valory.connections.test_tools.docker_images import (
+    ACNNodeDockerImage,
+)
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
 
@@ -723,6 +726,56 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
             logger.info(f"Stopping the image {image.tag}...")
             container.stop()
             container.remove()
+
+
+LOCAL_ADDRESS = "0.0.0.0"
+ACN_CONFIGURATION: Dict[str, str] = dict(
+    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:5000",
+    AEA_P2P_URI=f"{LOCAL_ADDRESS}:5000",
+    AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11000",
+    AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8080",
+    ACN_LOG_FILE="/acn/libp2p_node.log",
+)
+
+
+@pytest.fixture(scope="session")
+def acn_configuration():
+    """Get the ACN Node configuration for testing purposes."""
+    return ACN_CONFIGURATION
+
+
+@contextmanager
+def _acn_context(
+    acn_configuration: Dict,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    client = docker.from_env()
+    image = ACNNodeDockerImage(client, config=acn_configuration)
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.fixture(scope="class")
+def acn_node(
+    acn_configuration,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    """Launch the ACN image."""
+    with _acn_context(acn_configuration, timeout, max_attempts) as image:
+        yield image
+
+
+@pytest.mark.integration
+class UseACNNode:
+    """Inherit from this class to an ACN Node."""
+
+    @pytest.fixture(autouse=True)
+    def _start_acn_node(self, acn_node):
+        """Start a ACN Node image."""
 
 
 @pytest.fixture(scope="session", autouse=True)
