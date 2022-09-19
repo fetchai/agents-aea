@@ -69,7 +69,9 @@ from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from cosmpy.aerial.wallet import LocalWallet
 from cosmpy.crypto.address import Address as CosmpyAddress
 from cosmpy.crypto.keypairs import PrivateKey
-
+DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
+from docker.models.containers import Container
+from docker.errors import ImageNotFound, NotFound
 from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
@@ -107,6 +109,7 @@ from packages.fetchai.connections.stub.connection import StubConnection
 
 from packages.valory.connections.test_tools.docker_images import (
     ACNNodeDockerImage,
+    ACNWithBootstrappedEntryNodesDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -726,6 +729,70 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
             logger.info(f"Stopping the image {image.tag}...")
             container.stop()
             container.remove()
+
+
+def _pre_launch(image: DockerImage) -> None:
+    """Run pre-launch checks."""
+    image.check_skip()
+    image.stop_if_already_running()
+
+
+def _start_container(
+    image: DockerImage, container, timeout: float, max_attempts: int
+) -> None:
+    """
+    Start a container.
+
+    :param image: an instance of Docker image.
+    :param container: the container to start, created from the image.
+    :param timeout: timeout to launch
+    :param max_attempts: max launch attempts
+    """
+    container.start()
+    logger.info(f"Setting up image {image.tag}...")
+    success = image.wait(max_attempts, timeout)
+    if not success:
+        container.stop()
+        logger.error(
+            f"{DOCKER_PRINT_SEPARATOR}Logs from container {container.name}:\n{container.logs().decode()}"
+        )
+        container.remove()
+        pytest.fail(f"{image.tag} doesn't work. Exiting...")
+    else:
+        logger.info("Done!")
+        time.sleep(timeout)
+
+
+def _stop_container(container: Container, tag: str) -> None:
+    """Stop a container."""
+    logger.info(f"Stopping container {container.name} from image {tag}...")
+    container.stop()
+    try:
+        logger.info(
+            f"{DOCKER_PRINT_SEPARATOR}Logs from container {container.name}:\n{container.logs().decode()}"
+        )
+        if str(container.name).startswith("node"):
+            logger.info(f"{DOCKER_PRINT_SEPARATOR}Logs from container log file {container.name}:\n")
+            bits, _ = container.get_archive(f"/logs/{container.name}.txt")
+            for chunk in bits:
+                logger.info(chunk.decode())
+    except (ImageNotFound, NotFound) as e:
+        logger.error(e)
+    finally:
+        container.remove()
+
+
+def launch_many_containers(
+    image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
+) -> Generator[DockerImage, None, None]:
+    """Launch many containers from an image."""
+    _pre_launch(image)
+    containers = image.create()
+    for container in containers:
+        _start_container(image, container, timeout, max_attempts)
+    yield image
+    for container in containers:
+        _stop_container(container, image.tag)
 
 
 LOCAL_ADDRESS = "0.0.0.0"
