@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea scaffold' subcommand."""
+import logging
 import os
 import re
 import shutil
@@ -88,14 +89,14 @@ def update_copyright_headers(path: Path) -> None:
     bottom = "\n".join(COPYRIGHT_HEADER_TEMPLATE.split("\n")[-15:])
     new_copyright_header = COPYRIGHT_HEADER_TEMPLATE.format(year=year)
 
-    for file in path.glob("**/*.py"):
+    for file in path.rglob("**/*.py"):
         content = file.read_text()
         i, j = content.find(top), content.find(bottom)
         if i == j == -1:  # no copyright header present yet
             file.write_text(f"{new_copyright_header}\n{content}")
         elif i != j != -1:  # copyright header detected
             old_copyright_header = content[i : j + len(bottom)]
-            content.replace(old_copyright_header, new_copyright_header)
+            content = content.replace(old_copyright_header, new_copyright_header)
             file.write_text(content)
         else:
             raise ValueError(f"Copyright pattern detection failed: {content}")
