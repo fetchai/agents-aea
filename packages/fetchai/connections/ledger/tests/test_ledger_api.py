@@ -61,9 +61,6 @@ from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
-from packages.fetchai.connections.ledger.tests.conftest import (  # noqa: F401
-    ledger_apis_connection,
-)
 from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.fetchai.protocols.ledger_api.dialogues import (

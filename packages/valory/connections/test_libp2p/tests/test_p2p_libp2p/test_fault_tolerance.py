@@ -19,17 +19,16 @@
 # ------------------------------------------------------------------------------
 """This test module contains resilience and fault tolerance tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import pytest
 
 from aea.multiplexer import Empty, Multiplexer
+from aea.test_tools.utils import wait_for_condition
 
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
-
-from tests.common.utils import wait_for_condition
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
-    BaseP2PLibp2pTest,
-    libp2p_log_on_failure_all,
-)
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import BaseP2PLibp2pTest
 
 
 TIMEOUT = 10
@@ -39,7 +38,7 @@ class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
     """Base test class for libp2p connection relay."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
         build_node(cls.tmp)
@@ -60,7 +59,7 @@ class BaseTestLibp2pRelay(BaseP2PLibp2pTest):
 class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
     """Test that connection will reliably forward envelopes after its relay node restarted"""
 
-    def setup(self):
+    def setup(self) -> None:
         """Set up the individual test method"""
 
         self.genesis = self.make_connection()
@@ -76,22 +75,22 @@ class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
         self.multiplexer1 = self.multiplexers[2]
         self.multiplexer2 = self.multiplexers[3]
 
-    def teardown(self):
+    def teardown(self) -> None:
         """Teardown"""
         self._disconnect()
         self.multiplexers.clear()
 
-    def test_connection_is_established(self):
+    def test_connection_is_established(self) -> None:
         """Test connection established."""
         assert self.all_connected
 
-    def test_envelope_routed_from_peer_after_relay_restart(self):
+    def test_envelope_routed_from_peer_after_relay_restart(self) -> None:
         """Test envelope routed from third peer after relay restart."""
 
         to = self.connection1.address
         sender = self.genesis.address
 
-        def attempt_sending():
+        def attempt_sending() -> None:
             envelope = self.enveloped_default_message(to=to, sender=sender)
             self.multiplexer_genesis.put(envelope)
             delivered_envelope = self.multiplexer1.get(block=True, timeout=TIMEOUT)
@@ -113,13 +112,13 @@ class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
         assert self.multiplexer_relay.is_connected
         attempt_sending()
 
-    def test_envelope_routed_from_client_after_relay_restart(self):
+    def test_envelope_routed_from_client_after_relay_restart(self) -> None:
         """Test envelope routed from third relay client after relay restart."""
 
         to = self.connection1.address
         sender = self.connection2.address
 
-        def attempt_sending():
+        def attempt_sending() -> None:
             envelope = self.enveloped_default_message(to=to, sender=sender)
             self.multiplexer2.put(envelope)
             delivered_envelope = self.multiplexer1.get(block=True, timeout=TIMEOUT)
@@ -141,13 +140,13 @@ class TestLibp2pConnectionRelayNodeRestart(BaseTestLibp2pRelay):
         assert self.multiplexer_relay.is_connected
         attempt_sending()
 
-    def test_envelope_routed_after_relay_restart(self):
+    def test_envelope_routed_after_relay_restart(self) -> None:
         """Test envelope routed after relay restart."""
 
         sender = self.connection1.address
         to = self.genesis.address
 
-        def attempt_sending():
+        def attempt_sending() -> None:
             envelope = self.enveloped_default_message(to=to, sender=sender)
             self.multiplexer1.put(envelope)
             delivered_envelope = self.multiplexer_genesis.get(
@@ -177,7 +176,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
     """Test that connection will correctly route envelope to destination that changed its peer"""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
 
@@ -193,13 +192,13 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         cls.multiplexer1 = cls.multiplexers[1]
         cls.multiplexer2 = cls.multiplexers[2]
 
-    def test_envelope_routed_after_peer_changed(self):
+    def test_envelope_routed_after_peer_changed(self) -> None:
         """Test envelope routed after peer changed."""
 
         sender = self.connection1.address
         to = self.connection2.address
 
-        def attempt_sending():
+        def attempt_sending() -> None:
             envelope = self.enveloped_default_message(to=to, sender=sender)
             self.multiplexer1.put(envelope)
             delivered_envelope = self.multiplexer2.get(block=True, timeout=TIMEOUT)
