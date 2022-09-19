@@ -46,11 +46,11 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
 
 
 LOCAL_DHT_MADDRS = [
-    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw",
-    "/dns4/0.0.0.0/tcp/10001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
-    "/dns4/0.0.0.0/tcp/10002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
-][:1]
-LOCAL_DHT_DELEGATE_URIS = ["localhost:11000", "localhost:11001", "localhost:11002"][:1]
+    "/dns4/0.0.0.0/tcp/9000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw",
+    "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
+    "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
+][1:]
+LOCAL_DHT_DELEGATE_URIS = ["localhost:11000", "localhost:11001", "localhost:11002"][1:]
 LOCAL_DHT_PUBLIC_KEYS = [
     "0270475f9b78c0285a6ac6067582f5e159ec147ccb03aee16a32731f68920b1ae8",
     "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
@@ -79,7 +79,8 @@ def delegate_uris_public_keys(request):
 @pytest.mark.integration
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionLocalDHTRelay(
-    BaseP2PLibp2pTest, UseACNWithBootstrappedEntryNodes
+    BaseP2PLibp2pTest,
+    UseACNWithBootstrappedEntryNodes,
 ):
     """Test that public DHT's relay service is working properly"""
 
@@ -87,7 +88,7 @@ class TestLibp2pConnectionLocalDHTRelay(
 
     def setup(self):
         """Setup test"""
-        # TOFIX: Test requires 2 public DHT nodes
+
         for maddr in self.maddrs:
             for _ in range(2):  # make pairs
                 self.make_connection(relay=False, entry_peers=[maddr])
@@ -100,7 +101,7 @@ class TestLibp2pConnectionLocalDHTRelay(
 
     @property
     def pairs_with_same_entry_peers(self):
-        """Multiplexer pairs with different entry peers"""
+        """Multiplexer pairs with the same entry peers"""
         return itertools.zip_longest(*[iter(self.multiplexers)] * 2)
 
     @property

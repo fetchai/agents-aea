@@ -50,13 +50,13 @@ LOCAL_ADDRESS = "0.0.0.0"
 
 
 GENESIS_MADDR = (
-    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
+    "/dns4/0.0.0.0/tcp/9000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
 )
 
 BOOTSTRAP: Dict[str, str] = dict(
     AEA_P2P_ID="7f669ab5eee5719e385f7aeb1973769fc75b7cbbe0850ca16c4eabe84e01afbd",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9000",
-    AEA_P2P_URI=f"{LOCAL_ADDRESS}:10000",
+    AEA_P2P_URI=f"{LOCAL_ADDRESS}:9000",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11000",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8080",
     ACN_LOG_FILE="/acn/libp2p_node.log",
@@ -65,7 +65,7 @@ BOOTSTRAP: Dict[str, str] = dict(
 NODE1: Dict[str, str] = dict(
     AEA_P2P_ID="5b8d3be9f27489040a01adc2b746b9a5f9d32ed843d99cf7d2995c8140636190",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9001",
-    AEA_P2P_URI=f"{LOCAL_ADDRESS}:10001",
+    AEA_P2P_URI=f"{LOCAL_ADDRESS}:9001",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11001",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8081",
     AEA_P2P_ENTRY_URIS=GENESIS_MADDR,
@@ -76,7 +76,7 @@ NODE1: Dict[str, str] = dict(
 NODE2: Dict[str, str] = dict(
     AEA_P2P_ID="cc096b7be575c11d3d3d2f8a9c9be9bd59b351317b2a114ef7e014cc5a92508e",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9002",
-    AEA_P2P_URI=f"{LOCAL_ADDRESS}:10002",
+    AEA_P2P_URI=f"{LOCAL_ADDRESS}:9002",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11002",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8082",
     AEA_P2P_ENTRY_URIS=GENESIS_MADDR,
@@ -189,5 +189,6 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
         return containers
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
+        """Wait"""
         time.sleep(1)
         return True
