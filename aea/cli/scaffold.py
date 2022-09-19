@@ -58,11 +58,11 @@ from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
 
-COPYRIGHT_HEADER_TEMPLATE = """\
+COPYRIGHT_HEADER = """\
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright {year} Valory AG
+#   Copyright {year} {author}
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -80,14 +80,14 @@ COPYRIGHT_HEADER_TEMPLATE = """\
 """
 
 
-def update_copyright_headers(path: Path) -> None:
+def update_copyright_headers(ctx: Context, path: Path) -> None:
     """Update copyright headers"""
 
     # this allows for arbitrary authors
-    year = datetime.now().year
-    top = "\n".join(COPYRIGHT_HEADER_TEMPLATE.split("\n")[:3])
-    bottom = "\n".join(COPYRIGHT_HEADER_TEMPLATE.split("\n")[-15:])
-    new_copyright_header = COPYRIGHT_HEADER_TEMPLATE.format(year=year)
+    year, author = datetime.now().year, ctx.agent_config.author
+    top = "\n".join(COPYRIGHT_HEADER.split("\n")[:3])
+    bottom = "\n".join(COPYRIGHT_HEADER.split("\n")[-15:])
+    new_copyright_header = COPYRIGHT_HEADER.format(year=year, author=author)
 
     for file in path.rglob("**/*.py"):
         content = file.read_text()
@@ -232,7 +232,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
         logger.debug(f"Copying {item_type} modules. src={src} dst={dest}")
         shutil.copytree(src, dest)
-        update_copyright_headers(dest)
+        update_copyright_headers(ctx, dest)
 
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
 
