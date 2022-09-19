@@ -44,9 +44,9 @@ class TestDialogues(BaseSkillTestCase):
     path_to_skill = PACKAGE_DIR
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.default_dialogues = cast(
             DefaultDialogues, cls._skill.skill_context.default_dialogues
         )

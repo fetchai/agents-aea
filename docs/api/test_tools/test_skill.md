@@ -239,14 +239,68 @@ For every DialogueMessage (performative, contents, is_incoming, target):
 
 the created incoming message
 
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.setup_class"></a>
+
+#### setup`_`class
+
+```python
+@classmethod
+def setup_class(cls, **kwargs: Any) -> None
+```
+
+Set up the skill test case.
+
+Only called once at the beginning before test methods on the test class are called.
+
+**Arguments**:
+
+- `kwargs`: the keyword arguments passed to _prepare_skill
+
 <a id="aea.test_tools.test_skill.BaseSkillTestCase.setup"></a>
 
 #### setup
 
 ```python
-@classmethod
-def setup(cls, **kwargs: Any) -> None
+def setup(**kwargs: Any) -> None
 ```
 
-Set up the skill test case.
+Set up the test method.
+
+Called each time before a test method is called.
+
+**Arguments**:
+
+- `kwargs`: the keyword arguments passed to _prepare_skill
+
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.teardown"></a>
+
+#### teardown
+
+```python
+def teardown() -> None
+```
+
+Teardown the test method.
+
+Called each time after a test method is called.
+
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.empty_message_queues"></a>
+
+#### empty`_`message`_`queues
+
+```python
+def empty_message_queues() -> None
+```
+
+Empty message queues
+
+<a id="aea.test_tools.test_skill.BaseSkillTestCase.reset_all_dialogues"></a>
+
+#### reset`_`all`_`dialogues
+
+```python
+def reset_all_dialogues() -> None
+```
+
+Reset the state of all dialogues
 

@@ -22,7 +22,7 @@
 
 import logging
 from pathlib import Path
-from typing import Tuple, cast
+from typing import cast
 from unittest.mock import patch
 
 import pytest
@@ -58,9 +58,9 @@ class TestSearchBehaviour(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.search_behaviour = cast(
             GenericSearchBehaviour, cls._skill.skill_context.behaviours.search
         )
@@ -70,6 +70,17 @@ class TestSearchBehaviour(BaseSkillTestCase):
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
 
         cls.logger = cls._skill.skill_context.logger
+
+    def setup(self):
+        """Setup."""
+        super().setup()
+        self._init_strategy_kwargs = self.strategy.__dict__.copy()
+
+    def teardown(self):
+        """Teardown"""
+        super().teardown()
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
+        self.tx_behaviour.waiting.clear()
 
     @pytest.mark.skip  # wrong ledger_id
     def test_setup_is_ledger_tx(self):
@@ -108,6 +119,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
         """Test the act method of the search behaviour where is_searching is True."""
         # setup
         self.strategy._is_searching = True
+        assert self.strategy.is_searching
 
         # operation
         self.search_behaviour.act()
@@ -164,9 +176,10 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+
+        super().setup_class()
         cls.transaction_behaviour = cast(
             GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
         )
@@ -192,58 +205,23 @@ class TestTransactionBehaviour(BaseSkillTestCase):
             ),
         )
 
-    @staticmethod
-    def _check_start_processing_effects(self_, fipa_dialogue, mock_logger) -> None:
-        """Perform checks related to running _start_processing."""
-        # _start_processing
-        mock_logger.assert_any_call(
-            logging.INFO,
-            f"Processing transaction, {len(self_.transaction_behaviour.waiting)} transactions remaining",
-        )
-
-        message = self_.get_message_from_outbox()
-        has_attributes, error_str = self_.message_has_attributes(
-            actual_message=message,
-            message_type=LedgerApiMessage,
-            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-            to=LEDGER_API_ADDRESS,
-            sender=str(self_.skill.public_id),
-            terms=fipa_dialogue.terms,
-        )
-        assert has_attributes, error_str
-
-        ledger_api_dialogue = cast(
-            LedgerApiDialogue, self_.ledger_api_dialogues.get_dialogue(message)
-        )
-        assert ledger_api_dialogue.associated_fipa_dialogue == fipa_dialogue
-
-        assert self_.transaction_behaviour.processing_time == 0.0
-
-        assert self_.transaction_behaviour.processing == ledger_api_dialogue
-
-        mock_logger.assert_any_call(
-            logging.INFO,
-            f"requesting transfer transaction from ledger api for message={message}...",
-        )
-
-    @staticmethod
-    def _setup_fipa_ledger_api_dialogues(
-        self_,
-    ) -> Tuple[LedgerApiDialogue, FipaDialogue]:
-        """Setup fipa and ledger_api dialogues for some of the following tests."""
+    def setup(self):
+        """Setup"""
+        super().setup()
+        self._init_strategy_kwargs = self.strategy.__dict__.copy()
         fipa_dialogue = cast(
             FipaDialogue,
-            self_.prepare_skill_dialogue(
-                dialogues=self_.fipa_dialogues,
-                messages=self_.list_of_messages,
+            self.prepare_skill_dialogue(
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages,
             ),
         )
         fipa_dialogue.terms = "terms"  # type: ignore
 
         ledger_api_dialogue = cast(
             LedgerApiDialogue,
-            self_.prepare_skill_dialogue(
-                dialogues=self_.ledger_api_dialogues,
+            self.prepare_skill_dialogue(
+                dialogues=self.ledger_api_dialogues,
                 messages=(
                     DialogueMessage(
                         LedgerApiMessage.Performative.GET_BALANCE,
@@ -254,7 +232,50 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
 
-        return ledger_api_dialogue, fipa_dialogue
+        self.ledger_api_dialogue = ledger_api_dialogue
+        self.fipa_dialogue = fipa_dialogue
+
+    def teardown(self):
+        """Teardown"""
+        super().teardown()
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
+        self.transaction_behaviour.teardown()
+
+    def _check_start_processing_effects(self, fipa_dialogue, mock_logger) -> None:
+        """Perform checks related to running _start_processing."""
+        # _start_processing
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Processing transaction, {len(self.transaction_behaviour.waiting)} transactions remaining",
+        )
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            to=LEDGER_API_ADDRESS,
+            sender=str(self.skill.public_id),
+            terms=fipa_dialogue.terms,
+        )
+        assert has_attributes, error_str
+
+        ledger_api_dialogue = cast(
+            LedgerApiDialogue, self.ledger_api_dialogues.get_dialogue(message)
+        )
+        logging.error(">" * 100)
+        logging.error(fipa_dialogue)
+        logging.error(ledger_api_dialogue.associated_fipa_dialogue)
+        assert ledger_api_dialogue.associated_fipa_dialogue == fipa_dialogue
+
+        assert self.transaction_behaviour.processing_time == 0.0
+
+        assert self.transaction_behaviour.processing == ledger_api_dialogue
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"requesting transfer transaction from ledger api for message={message}...",
+        )
 
     def test_setup(self):
         """Test the setup method of the transaction behaviour."""
@@ -264,14 +285,11 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_act_i(self):
         """Test the act method of the transaction behaviour where processing IS None and len(self.waiting) is NOT 0."""
         # setup
-        _, fipa_dialogue = self._setup_fipa_ledger_api_dialogues(self)
-
         processing_time = 5.0
         max_processing = 120
-        self.transaction_behaviour.processing = None
         self.transaction_behaviour.max_processing = max_processing
         self.transaction_behaviour.processing_time = processing_time
-        self.transaction_behaviour.waiting = [fipa_dialogue]
+        self.transaction_behaviour.waiting = [self.fipa_dialogue]
 
         # before
         assert self.transaction_behaviour.processing_time == processing_time
@@ -285,13 +303,13 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         # _start_processing
-        self._check_start_processing_effects(self, fipa_dialogue, mock_logger)
+        self._check_start_processing_effects(self.fipa_dialogue, mock_logger)
 
     def test_act_ii(self):
         """Test the act method of the transaction behaviour where processing is NOT None and processing_time < max_processing."""
         # setup
         processing_time = 5.0
-        self.transaction_behaviour.processing = "some_dialogue"
+        self.transaction_behaviour.processing = "some_dialogue"  # TODO: type
         self.transaction_behaviour.max_processing = 120
         self.transaction_behaviour.processing_time = processing_time
 
@@ -308,10 +326,9 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_act_iii(self):
         """Test the act method of the transaction behaviour where processing is NOT None and processing_time > max_processing."""
         # setup
-        ledger_api_dialogue, fipa_dialogue = self._setup_fipa_ledger_api_dialogues(self)
 
         processing_time = 121.0
-        self.transaction_behaviour.processing = ledger_api_dialogue
+        self.transaction_behaviour.processing = self.ledger_api_dialogue
         self.transaction_behaviour.max_processing = 120
         self.transaction_behaviour.processing_time = processing_time
 
@@ -323,15 +340,18 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         # _timeout_processing
-        assert ledger_api_dialogue.dialogue_label in self.transaction_behaviour.timedout
+        assert (
+            self.ledger_api_dialogue.dialogue_label
+            in self.transaction_behaviour.timedout
+        )
         # below is overridden in _start_processing
-        # assert fipa_dialogue in self.transaction_behaviour.waiting
+        # assert self.fipa_dialogue in self.transaction_behaviour.waiting
         assert self.transaction_behaviour.processing_time == 0.0
         # below is overridden in _start_processing
         # assert self.transaction_behaviour.processing is None
 
         # _start_processing
-        self._check_start_processing_effects(self, fipa_dialogue, mock_logger)
+        self._check_start_processing_effects(self.fipa_dialogue, mock_logger)
 
     def test_timeout_processing(self):
         """Test the _timeout_processing method of the transaction behaviour where self.processing IS None."""
@@ -347,7 +367,6 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_act_iv(self):
         """Test the act method of the transaction behaviour where len(waiting) == 0."""
         # setup
-        self.transaction_behaviour.processing = None
         self.transaction_behaviour.waiting = []
 
         # operation
@@ -359,13 +378,12 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_failed_processing(self):
         """Test the failed_processing method of the transaction behaviour."""
         # setup
-        ledger_api_dialogue, fipa_dialogue = self._setup_fipa_ledger_api_dialogues(self)
 
-        self.transaction_behaviour.timedout.add(ledger_api_dialogue.dialogue_label)
+        self.transaction_behaviour.timedout.add(self.ledger_api_dialogue.dialogue_label)
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:
-            self.transaction_behaviour.failed_processing(ledger_api_dialogue)
+            self.transaction_behaviour.failed_processing(self.ledger_api_dialogue)
 
         # after
         self.assert_quantity_in_outbox(0)
@@ -375,20 +393,20 @@ class TestTransactionBehaviour(BaseSkillTestCase):
 
         mock_logger.assert_any_call(
             logging.DEBUG,
-            f"Timeout dialogue in transaction processing: {ledger_api_dialogue}",
+            f"Timeout dialogue in transaction processing: {self.ledger_api_dialogue}",
         )
 
         # failed_processing
-        assert fipa_dialogue in self.transaction_behaviour.waiting
+        assert self.fipa_dialogue in self.transaction_behaviour.waiting
 
     def test_finish_processing_i(self):
         """Test the finish_processing method of the transaction behaviour where self.processing == ledger_api_dialogue."""
         # setup
-        ledger_api_dialogue, fipa_dialogue = self._setup_fipa_ledger_api_dialogues(self)
-        self.transaction_behaviour.processing = ledger_api_dialogue
+
+        self.transaction_behaviour.processing = self.ledger_api_dialogue
 
         # operation
-        self.transaction_behaviour.failed_processing(ledger_api_dialogue)
+        self.transaction_behaviour.failed_processing(self.ledger_api_dialogue)
 
         # after
         assert self.transaction_behaviour.processing_time == 0.0
@@ -397,16 +415,15 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     def test_finish_processing_ii(self):
         """Test the finish_processing method of the transaction behaviour where ledger_api_dialogue's dialogue_label is NOT in self.timedout."""
         # setup
-        ledger_api_dialogue, fipa_dialogue = self._setup_fipa_ledger_api_dialogues(self)
 
         # operation
         with pytest.raises(ValueError) as err:
-            self.transaction_behaviour.finish_processing(ledger_api_dialogue)
+            self.transaction_behaviour.finish_processing(self.ledger_api_dialogue)
 
         # after
         assert (
             err.value.args[0]
-            == f"Non-matching dialogues in transaction behaviour: {self.transaction_behaviour.processing} and {ledger_api_dialogue}"
+            == f"Non-matching dialogues in transaction behaviour: {self.transaction_behaviour.processing} and {self.ledger_api_dialogue}"
         )
 
     def test_teardown(self):

@@ -44,9 +44,9 @@ class TestEchoHandler(BaseSkillTestCase):
     path_to_skill = Path(CUR_PATH, "..")
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.echo_handler = cast(EchoHandler, cls._skill.skill_context.handlers.echo)
         cls.logger = cls._skill.skill_context.logger
 

@@ -12,9 +12,9 @@ fingerprint:
   dialogues.py: bafybeici4rlde6qdpjtftn4xgelrrphpwzzymvhjrgua7frx7qvyw32gue
   handlers.py: bafybeihjjglefhpwbprqu6anjpmhj3nn7p53nsci3kmueab7hnhchfcmsi
   tests/__init__.py: bafybeidedsb72is3z5jndaoh232r7y5qvqb3acotjm6xi4pea3bmkoq6le
-  tests/test_behaviours.py: bafybeicfbfgoqishdrxvfy77qqmkztpkmceanhmheq6h5odyun5i23vwoe
-  tests/test_dialogues.py: bafybeiap6rqpxu46po5vgwv5xcupv7tnlzzlwuwzp35xolel6cgtrbp5vi
-  tests/test_handlers.py: bafybeienyvkpjil76o7bvkx3b2dqv3y7ouaha5mcaeyxgfettt3q4xsasa
+  tests/test_behaviours.py: bafybeiaainn272wn52rlnuomeczgglwvvuj2mdrim3hjajuunw6d2dqnw4
+  tests/test_dialogues.py: bafybeifslpfv7xqji4zkpbqlm2ndnoixuxb23w5374npvc6sz3dmqwqqii
+  tests/test_handlers.py: bafybeih3w5m7nc3fodxlisps5azpo5jeuun223bhnwejlyfkgquy6ou5b4
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
