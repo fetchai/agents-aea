@@ -40,21 +40,22 @@ from tests.test_packages.test_connections.test_p2p_libp2p.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
     libp2p_log_on_failure_all,
-    load_client_connection_yaml_config,
     make_cert_request,
     ports,
 )
 
 
-genesis_nodes = load_client_connection_yaml_config()["nodes"]
-
-PUBLIC_DHT_MADDRS = [
-    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAmMC2tJMRaRTeWSESv8mArbq6jipJCD4adSBcBLsbc7cSL"
-]
-PUBLIC_DHT_DELEGATE_URIS = ["localhost:11000"]
-PUBLIC_DHT_PUBLIC_KEYS = [
-    "037ed15dcee3a317e590cbdd28768ad8e2d29960b3e5d4eccca14bc94f83747f09"
-]
+LOCAL_DHT_MADDRS = [
+    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw",
+    "/dns4/0.0.0.0/tcp/10001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
+    "/dns4/0.0.0.0/tcp/10002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
+][:1]
+LOCAL_DHT_DELEGATE_URIS = ["localhost:11000", "localhost:11001", "localhost:11002"][:1]
+LOCAL_DHT_PUBLIC_KEYS = [
+    "0270475f9b78c0285a6ac6067582f5e159ec147ccb03aee16a32731f68920b1ae8",
+    "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
+    "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
+][:1]
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
@@ -77,30 +78,10 @@ def delegate_uris_public_keys(request):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionDHTDelegate(
-    BaseP2PLibp2pTest, UseACNWithBootstrappedEntryNodes
-):
-    """Test that local DHTs delegate service is working properly"""
-
-    def setup(self):
-        """Set up test"""
-        uri = "localhost:11000"
-        public_key = (
-            "037ed15dcee3a317e590cbdd28768ad8e2d29960b3e5d4eccca14bc94f83747f09"
-        )
-        self.make_client_connection(uri=uri, peer_public_key=public_key)
-
-    def test_connectivity(self):
-        """Test connectivity."""
-        assert self.all_connected
-
-
-@pytest.mark.integration
-@libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest, UseACNNode):
+class TestLibp2pConnectionLocalDHTRelay(BaseP2PLibp2pTest, UseACNWithBootstrappedEntryNodes):
     """Test that public DHT's relay service is working properly"""
 
-    maddrs = PUBLIC_DHT_MADDRS
+    maddrs = LOCAL_DHT_MADDRS
 
     def setup(self):
         """Setup test"""
@@ -152,16 +133,15 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest, UseACNNode):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
+class TestLibp2pConnectionLocalDHTDelegate(TestLibp2pConnectionLocalDHTRelay):
     """Test that public DHTs delegate service is working properly"""
 
-    uris = PUBLIC_DHT_DELEGATE_URIS
-    public_keys = PUBLIC_DHT_PUBLIC_KEYS
+    uris = LOCAL_DHT_DELEGATE_URIS
+    public_keys = LOCAL_DHT_PUBLIC_KEYS
 
     def setup(self):  # overwrite the setup, reuse the rest
         """Set up test"""
         assert len(self.uris) == len(self.public_keys)
-        # TOFIX: Test requires 2 public DHT nodes
         for uri, public_keys in zip(self.uris, self.public_keys):
             for _ in range(2):
                 self.make_client_connection(uri=uri, peer_public_key=public_keys)
@@ -169,10 +149,10 @@ class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany, UseACNNode):
+class TestLibp2pConnectionLocalDHTRelayAEACli(AEATestCaseMany, UseACNWithBootstrappedEntryNodes):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
-    @pytest.mark.parametrize("maddrs", [PUBLIC_DHT_MADDRS], indirect=True)
+    @pytest.mark.parametrize("maddrs", [LOCAL_DHT_MADDRS], indirect=True)
     def test_connectivity(self, maddrs):
         """Test connectivity."""
         self.log_files = []
@@ -240,12 +220,12 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany, UseACNNode):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany, UseACNNode):
+class TestLibp2pConnectionLocalDHTDelegateAEACli(AEATestCaseMany, UseACNWithBootstrappedEntryNodes):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
     @pytest.mark.parametrize(
         "delegate_uris_public_keys",
-        [(PUBLIC_DHT_DELEGATE_URIS, PUBLIC_DHT_PUBLIC_KEYS)],
+        [(LOCAL_DHT_DELEGATE_URIS, LOCAL_DHT_PUBLIC_KEYS)],
         indirect=True,
     )
     def test_connectivity(self, delegate_uris_public_keys):
