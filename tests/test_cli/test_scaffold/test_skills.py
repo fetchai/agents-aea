@@ -38,6 +38,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_VERSION
 from aea.configurations.loader import make_jsonschema_base_uri
 
+from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -99,19 +100,19 @@ class TestScaffoldSkill:
         """Test that the resource folder contains scaffold handlers.py module."""
         p = Path(self.t, self.agent_name, "skills", self.resource_name, "handlers.py")
         original = Path(AEA_DIR, "skills", "scaffold", "handlers.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_module_behaviours(self):
         """Test that the resource folder contains scaffold behaviours.py module."""
         p = Path(self.t, self.agent_name, "skills", self.resource_name, "behaviours.py")
         original = Path(AEA_DIR, "skills", "scaffold", "behaviours.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_module_model(self):
         """Test that the resource folder contains scaffold my_model.py module."""
         p = Path(self.t, self.agent_name, "skills", self.resource_name, "my_model.py")
         original = Path(AEA_DIR, "skills", "scaffold", "my_model.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
@@ -201,7 +202,7 @@ class TestScaffoldSkillToRegistry:
             self.t, "packages", AUTHOR, "skills", self.resource_name, "handlers.py"
         )
         original = Path(AEA_DIR, "skills", "scaffold", "handlers.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_module_behaviours(self):
         """Test that the resource folder contains scaffold behaviours.py module."""
@@ -209,7 +210,7 @@ class TestScaffoldSkillToRegistry:
             self.t, "packages", AUTHOR, "skills", self.resource_name, "behaviours.py"
         )
         original = Path(AEA_DIR, "skills", "scaffold", "behaviours.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_module_model(self):
         """Test that the resource folder contains scaffold my_model.py module."""
@@ -217,7 +218,7 @@ class TestScaffoldSkillToRegistry:
             self.t, "packages", AUTHOR, "skills", self.resource_name, "my_model.py"
         )
         original = Path(AEA_DIR, "skills", "scaffold", "my_model.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""

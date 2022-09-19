@@ -37,6 +37,7 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
 
+from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -45,18 +46,6 @@ from tests.conftest import (
     PROTOCOL_CONFIGURATION_SCHEMA,
     ROOT_DIR,
 )
-
-
-def files_outside_copyright_are_identical(*files: Path) -> bool:
-
-    def remove_copyright_author_year_lines(s: str) -> str:
-        """Filter copyright author and year for file comparison"""
-        lines, prefix = s.splitlines(), "#   Copyright"
-        return "/n".join(line for line in lines if not line.startswith(prefix))
-
-    lines = (f.read_text() for f in files)
-    cleaned_lines = set(map(remove_copyright_author_year_lines, lines))
-    return len(set(cleaned_lines)) == 1
 
 
 class TestScaffoldProtocol:

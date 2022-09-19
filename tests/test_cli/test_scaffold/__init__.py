@@ -18,3 +18,18 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea scaffold` sub-command."""
+
+from pathlib import Path
+
+
+def files_outside_copyright_are_identical(*files: Path) -> bool:
+    """Check files are identical outside copyright author / year"""
+
+    def remove_copyright_author_year_lines(s: str) -> str:
+        """Filter copyright author and year for file comparison"""
+        lines, prefix = s.splitlines(), "#   Copyright"
+        return "/n".join(line for line in lines if not line.startswith(prefix))
+
+    lines = (f.read_text() for f in files)
+    cleaned_lines = set(map(remove_copyright_author_year_lines, lines))
+    return len(set(cleaned_lines)) == 1
