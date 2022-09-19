@@ -20,11 +20,12 @@
 """This test module contains the tests for the `aea scaffold connection` sub-command."""
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
-
+from datetime import datetime
 import jsonschema
 import yaml
 from jsonschema import Draft4Validator, ValidationError
@@ -90,6 +91,21 @@ class TestScaffoldConnection:
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""
         assert self.result.exit_code == 0
+
+    def test_copyright_header_year_is_current(self):
+        """Test that the year in copyright header is updated to current"""
+
+        incorrect_files, files_left_to_inspect = [], 2
+        current_year = datetime.now().year
+        path_pattern = f"**/{self.resource_name}/*.py"
+        for file in (Path(self.t) / self.agent_name).rglob(path_pattern):
+            content = file.read_text()
+            years_in_header = re.findall(r"Copyright.*([0-9]{4})", content)
+            if years_in_header != [str(current_year)]:
+                incorrect_files.append(file)
+            files_left_to_inspect -= 1
+        assert not "\n".join(map(str, incorrect_files))
+        assert not files_left_to_inspect
 
     def test_resource_folder_contains_module_connection(self):
         """Test that the resource folder contains scaffold connection.py module."""
