@@ -20,13 +20,16 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import pytest
 
-from tests.common.utils import wait_for_condition
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from aea.test_tools.utils import wait_for_condition
+
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_connection,
-    libp2p_log_on_failure_all,
 )
 
 

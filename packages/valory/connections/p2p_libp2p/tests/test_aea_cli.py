@@ -22,6 +22,7 @@
 
 import json
 import os
+from pathlib import Path
 from typing import List
 
 from aea_ledger_cosmos import CosmosCrypto
@@ -33,15 +34,11 @@ from packages.valory.connections import p2p_libp2p
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
-
-from tests.conftest import DEFAULT_LEDGER, LOCALHOST
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.connections.p2p_libp2p.consts import (
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
-    LIBP2P_LEDGER,
-    libp2p_log_on_failure_all,
-    ports,
 )
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 
 
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
@@ -55,15 +52,18 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
     log_files: List[str] = []
     capture_log = True
 
+    package_registry_src_rel = Path(__file__).parent.parent.parent.parent.parent
+    conn_key_file: str
+
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
         super().setup_class()
         cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Tear down the test"""
         cls.terminate_agents()
         cls.log_files.clear()
@@ -94,46 +94,14 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
 
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(
-    BaseP2PLibp2pConnectionAEATest
-):
-    """Test AEA with p2p_libp2p connection is correctly run"""
-
-    def test_agent(self):
-        """Test with aea."""
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
-        # set config
-        self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config(
-            "agent.required_ledgers",
-            json.dumps([agent_ledger_id, node_ledger_id]),
-            "list",
-        )
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-        # agent keys
-        self.generate_private_key(agent_ledger_id)
-        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
-        # libp2p node keys
-        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
-        self.add_private_key(
-            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
-        )
-        # add connection and build
-        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.run_cli_command("build", cwd=self._get_cwd())
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
-
-        self.set_logging()
-        self.run_aea_cli_test()
-
-
-@libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
     BaseP2PLibp2pConnectionAEATest
 ):
     """Test AEA with p2p_libp2p connection is correctly run"""
 
-    def test_agent(self):
+    conn_key_file: str
+
+    def test_agent(self) -> None:
         """Test with aea."""
         key_path = "ethereum_private_key.txt"
         self.generate_private_key(
@@ -173,45 +141,6 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
             ]
         )
         self.set_config(setting_path, settings, type_="list")
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
-
-        self.set_logging()
-        self.run_aea_cli_test()
-
-
-@libp2p_log_on_failure_all
-class TestP2PLibp2pConnectionAEARunningFullNode(BaseP2PLibp2pConnectionAEATest):
-    """Test AEA with p2p_libp2p connection is correctly run"""
-
-    def test_agent(self):
-        """Test with aea."""
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
-        # set config
-        self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config(
-            "agent.required_ledgers",
-            json.dumps([agent_ledger_id, node_ledger_id]),
-            "list",
-        )
-        # agent keys
-        self.generate_private_key(agent_ledger_id)
-        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
-        # libp2p node keys
-        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
-        self.add_private_key(
-            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
-        )
-        # add connection and build
-        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.run_cli_command("build", cwd=self._get_cwd())
-
-        # setup a full node: with public uri, relay service, and delegate service
-        config_path = f"{p2p_libp2p_path}.config"
-        hostname = LOCALHOST.hostname
-        self.set_config(f"{config_path}.local_uri", f"{hostname}:{next(ports)}")
-        self.set_config(f"{config_path}.public_uri", f"{hostname}:{next(ports)}")
-        self.set_config(f"{config_path}.delegate_uri", f"{hostname}:{next(ports)}")
-
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         self.set_logging()

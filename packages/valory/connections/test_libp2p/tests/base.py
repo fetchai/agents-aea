@@ -17,22 +17,24 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Constants, utility functions and base classes for ACN p2p_libp2p tests"""
+"""Base class."""
+
+# pylint: skip-file
 
 import atexit
 import functools
-import inspect
-import itertools
 import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
-from unittest import mock
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import yaml
+from aea_ledger_cosmos.cosmos import CosmosCrypto
+from aea_ledger_ethereum.ethereum import EthereumCrypto
 
 from aea.configurations.base import ConnectionConfig
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
@@ -41,6 +43,8 @@ from aea.helpers.base import CertRequest, SimpleId
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
+from aea.test_tools.network import LOCALHOST
+from aea.test_tools.utils import remove_test_directory, wait_for_condition
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections import p2p_libp2p_client
@@ -55,6 +59,12 @@ from packages.valory.connections.p2p_libp2p.consts import (
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
 )
+from packages.valory.connections.p2p_libp2p.tests.base import (
+    MockDefaultMessageProtocol,
+    TEMP_LIBP2P_TEST_DIR,
+    TIMEOUT,
+    ports,
+)
 from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
@@ -62,59 +72,8 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 
-from tests.common.utils import wait_for_condition
-from tests.conftest import (
-    CosmosCrypto,
-    DEFAULT_HOST,
-    DEFAULT_LEDGER,
-    EthereumCrypto,
-    remove_test_directory,
-)
 
-
-TIMEOUT = 20
-TEMP_LIBP2P_TEST_DIR = tempfile.mkdtemp()
-ports = itertools.count(10234)
-
-MockDefaultMessageProtocol = mock.Mock()
-MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
-MockDefaultMessageProtocol.protocol_specification_id = (
-    DefaultMessage.protocol_specification_id
-)
-
-
-@functools.lru_cache()
-def load_client_connection_yaml_config() -> Dict[str, Any]:
-    """Load libp2p client connection yaml configuration"""
-
-    module_path = os.path.sep.join(p2p_libp2p_client.__package__.split("."))
-    connection_yaml = Path(module_path).absolute() / "connection.yaml"
-    config = yaml.safe_load(connection_yaml.read_text())["config"]
-    dns_template = "/dns4/{domain}/tcp/{port}/p2p/{peer_id}"
-
-    # add matching information needed in ACN libp2p tests
-    port_mapping = {
-        "9005": ("9003", "16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"),
-        "9006": ("9004", "16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"),
-    }
-
-    for node in config["nodes"]:
-        domain, port = node["uri"].split(":")
-        port, peer_id = port_mapping[port]
-        node["maddr"] = dns_template.format(domain=domain, port=port, peer_id=peer_id)
-
-    return config
-
-
-LIBP2P_LEDGER = load_client_connection_yaml_config()["ledger_id"]
-
-
-def create_data_dir() -> str:
-    """Create data directory in temporary libp2p test directory"""
-    subdir = Path(tempfile.mkdtemp()).parts[-1]
-    data_dir = Path(TEMP_LIBP2P_TEST_DIR) / subdir
-    Path(data_dir).mkdir(parents=True, exist_ok=False)
-    return str(data_dir)
+DEFAULT_HOST = LOCALHOST.hostname
 
 
 def create_identity(crypto) -> Identity:
@@ -128,6 +87,14 @@ def create_identity(crypto) -> Identity:
     )
 
     return identity
+
+
+def create_data_dir() -> str:
+    """Create data directory in temporary libp2p test directory"""
+    subdir = Path(tempfile.mkdtemp()).parts[-1]
+    data_dir = Path(TEMP_LIBP2P_TEST_DIR) / subdir
+    Path(data_dir).mkdir(parents=True, exist_ok=False)
+    return str(data_dir)
 
 
 def make_cert_request(
@@ -155,6 +122,99 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     signature = key.sign_message(message).encode("ascii").hex()
     Path(cert.get_absolute_save_path(path_prefix)).write_bytes(
         signature.encode("ascii")
+    )
+
+
+@functools.lru_cache()
+def load_client_connection_yaml_config() -> Dict[str, Any]:
+    """Load libp2p client connection yaml configuration"""
+
+    connection_yaml = (
+        Path(p2p_libp2p_client.__file__).absolute().parent / "connection.yaml"
+    )
+    config = yaml.safe_load(connection_yaml.read_text())["config"]
+    dns_template = "/dns4/{domain}/tcp/{port}/p2p/{peer_id}"
+
+    # add matching information needed in ACN libp2p tests
+    port_mapping = {
+        "9005": ("9003", "16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"),
+        "9006": ("9004", "16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"),
+    }
+
+    for node in config["nodes"]:
+        domain, port = node["uri"].split(":")
+        port, peer_id = port_mapping[port]
+        node["maddr"] = dns_template.format(domain=domain, port=port, peer_id=peer_id)
+
+    return config
+
+
+LIBP2P_LEDGER = load_client_connection_yaml_config()["ledger_id"]
+
+
+def _make_libp2p_client_connection(
+    peer_public_key: str,
+    data_dir: Optional[str] = None,
+    node_port: Optional[int] = None,
+    node_host: Optional[str] = DEFAULT_HOST,
+    uri: Optional[str] = None,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+) -> P2PLibp2pClientConnection:
+    """Get a libp2p client connection."""
+
+    data_dir = data_dir or create_data_dir()
+    node_port = node_port or next(ports)
+    crypto = make_crypto(ledger_api_id)
+    identity = create_identity(crypto)
+
+    cert_request = make_cert_request(peer_public_key, ledger_api_id, crypto.address)
+    _process_cert(crypto, cert_request, path_prefix=data_dir)
+    config = {"ledger_id": crypto.identifier}
+    node = {"uri": uri or f"{node_host}:{node_port}", "public_key": peer_public_key}
+
+    configuration = ConnectionConfig(
+        tcp_key_file=None,
+        nodes=[node],
+        connection_id=P2PLibp2pClientConnection.connection_id,
+        cert_requests=[cert_request],
+        **config,  # type: ignore
+    )
+
+    return P2PLibp2pClientConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
+
+
+def _make_libp2p_mailbox_connection(
+    peer_public_key: str,
+    data_dir: Optional[str] = None,
+    node_port: Optional[int] = None,
+    node_host: Optional[str] = DEFAULT_HOST,
+    uri: Optional[str] = None,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+) -> P2PLibp2pMailboxConnection:
+    """Get a libp2p mailbox connection."""
+
+    data_dir = data_dir or create_data_dir()
+    node_port = node_port or next(ports)
+    crypto = make_crypto(ledger_api_id)
+    identity = create_identity(crypto)
+
+    cert_request = make_cert_request(peer_public_key, ledger_api_id, crypto.address)
+    _process_cert(crypto, cert_request, path_prefix=data_dir)
+    config = {"ledger_id": crypto.identifier}
+    node = {"uri": uri or f"{node_host}:{node_port}", "public_key": peer_public_key}
+
+    configuration = ConnectionConfig(
+        tcp_key_file=None,
+        nodes=[node],
+        connection_id=P2PLibp2pMailboxConnection.connection_id,
+        cert_requests=[cert_request],
+        **config,  # type: ignore
+    )
+
+    return P2PLibp2pMailboxConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
     )
 
 
@@ -229,102 +289,6 @@ def _make_libp2p_connection(
     )
 
     return connection
-
-
-def _make_libp2p_client_connection(
-    peer_public_key: str,
-    data_dir: Optional[str] = None,
-    node_port: Optional[int] = None,
-    node_host: Optional[str] = DEFAULT_HOST,
-    uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-) -> P2PLibp2pClientConnection:
-    """Get a libp2p client connection."""
-
-    data_dir = data_dir or create_data_dir()
-    node_port = node_port or next(ports)
-    crypto = make_crypto(ledger_api_id)
-    identity = create_identity(crypto)
-
-    cert_request = make_cert_request(peer_public_key, ledger_api_id, crypto.address)
-    _process_cert(crypto, cert_request, path_prefix=data_dir)
-    config = {"ledger_id": crypto.identifier}
-    node = {"uri": uri or f"{node_host}:{node_port}", "public_key": peer_public_key}
-
-    configuration = ConnectionConfig(
-        tcp_key_file=None,
-        nodes=[node],
-        connection_id=P2PLibp2pClientConnection.connection_id,
-        cert_requests=[cert_request],
-        **config,  # type: ignore
-    )
-
-    return P2PLibp2pClientConnection(
-        configuration=configuration, data_dir=data_dir, identity=identity
-    )
-
-
-def _make_libp2p_mailbox_connection(
-    peer_public_key: str,
-    data_dir: Optional[str] = None,
-    node_port: Optional[int] = None,
-    node_host: Optional[str] = DEFAULT_HOST,
-    uri: Optional[str] = None,
-    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-) -> P2PLibp2pMailboxConnection:
-    """Get a libp2p mailbox connection."""
-
-    data_dir = data_dir or create_data_dir()
-    node_port = node_port or next(ports)
-    crypto = make_crypto(ledger_api_id)
-    identity = create_identity(crypto)
-
-    cert_request = make_cert_request(peer_public_key, ledger_api_id, crypto.address)
-    _process_cert(crypto, cert_request, path_prefix=data_dir)
-    config = {"ledger_id": crypto.identifier}
-    node = {"uri": uri or f"{node_host}:{node_port}", "public_key": peer_public_key}
-
-    configuration = ConnectionConfig(
-        tcp_key_file=None,
-        nodes=[node],
-        connection_id=P2PLibp2pMailboxConnection.connection_id,
-        cert_requests=[cert_request],
-        **config,  # type: ignore
-    )
-
-    return P2PLibp2pMailboxConnection(
-        configuration=configuration, data_dir=data_dir, identity=identity
-    )
-
-
-def libp2p_log_on_failure(fn: Callable) -> Callable:
-    """Decorate a method running a libp2p node to print its logs in case test fails."""
-
-    @functools.wraps(fn)
-    def wrapper(self, *args, **kwargs):
-        try:
-            return fn(self, *args, **kwargs)
-        except Exception:
-            for log_file in getattr(self, "log_files", []):
-                print(f"libp2p log file ======================= {log_file}")
-                try:
-                    with open(log_file, "r") as f:
-                        print(f.read())
-                except FileNotFoundError:
-                    print("FileNotFoundError")
-                print("=======================================")
-            raise
-
-    return wrapper
-
-
-def libp2p_log_on_failure_all(cls: Type) -> Type:
-    """Decorate every method of a class with `libp2p_log_on_failure`."""
-
-    for name, fn in inspect.getmembers(cls, inspect.isfunction):
-        setattr(cls, name, libp2p_log_on_failure(fn))
-
-    return cls
 
 
 class BaseP2PLibp2pTest:

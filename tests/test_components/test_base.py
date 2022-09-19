@@ -28,6 +28,7 @@ from itertools import zip_longest
 from pathlib import Path
 from textwrap import dedent
 
+import _strptime  # pylint: disbale=unsed-import # noqa: F401
 import pytest
 
 from aea.aea_builder import AEABuilder
