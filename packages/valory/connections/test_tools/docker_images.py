@@ -32,17 +32,27 @@ from aea.test_tools.docker_image import DockerImage
 
 
 LOCAL_ADDRESS = "0.0.0.0"
-PUBLIC_DHT_MADDRS = [
-    "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAmMC2tJMRaRTeWSESv8mArbq6jipJCD4adSBcBLsbc7cSL"
-]
-PUBLIC_DHT_DELEGATE_URIS = ["localhost:11000"]
-PUBLIC_DHT_PUBLIC_KEYS = [
-    "037ed15dcee3a317e590cbdd28768ad8e2d29960b3e5d4eccca14bc94f83747f09"
-]
 
+# created agent: bootstrap_peer
+#     private key: 7f669ab5eee5719e385f7aeb1973769fc75b7cbbe0850ca16c4eabe84e01afbd
+#     public key:  0270475f9b78c0285a6ac6067582f5e159ec147ccb03aee16a32731f68920b1ae8
+#     PeerID:      16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw
+#
+# created agent: entry_node_1
+#     private key: 5b8d3be9f27489040a01adc2b746b9a5f9d32ed843d99cf7d2995c8140636190
+#     public key:  02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8
+#     PeerID:      16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF
+#
+# created agent: entry_node_2
+#     private key: cc096b7be575c11d3d3d2f8a9c9be9bd59b351317b2a114ef7e014cc5a92508e
+#     public key:  0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12
+#     PeerID:      16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj
+
+
+GENESIS_MADDR = "/dns4/0.0.0.0/tcp/10000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
 
 BOOTSTRAP: Dict[str, str] = dict(
-    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_ID="7f669ab5eee5719e385f7aeb1973769fc75b7cbbe0850ca16c4eabe84e01afbd",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9000",
     AEA_P2P_URI=f"{LOCAL_ADDRESS}:10000",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11000",
@@ -51,23 +61,23 @@ BOOTSTRAP: Dict[str, str] = dict(
 )
 
 NODE1: Dict[str, str] = dict(
-    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_ID="5b8d3be9f27489040a01adc2b746b9a5f9d32ed843d99cf7d2995c8140636190",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9001",
     AEA_P2P_URI=f"{LOCAL_ADDRESS}:10001",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11001",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8081",
-    AEA_P2P_ENTRY_URIS=",".join(PUBLIC_DHT_MADDRS),
+    AEA_P2P_ENTRY_URIS=GENESIS_MADDR,
     ACN_LOG_FILE="/acn/libp2p_node.log",
 )
 
 
 NODE2: Dict[str, str] = dict(
-    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_ID="cc096b7be575c11d3d3d2f8a9c9be9bd59b351317b2a114ef7e014cc5a92508e",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9002",
     AEA_P2P_URI=f"{LOCAL_ADDRESS}:10002",
     AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11002",
     AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8082",
-    AEA_P2P_ENTRY_URIS=",".join(PUBLIC_DHT_MADDRS),
+    AEA_P2P_ENTRY_URIS=GENESIS_MADDR,
     ACN_LOG_FILE="/acn/libp2p_node.log",
 )
 
@@ -155,19 +165,18 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
     """ACN with bootstrapped entry nodes"""
 
     nodes = ["bootstrap", "entry_node_1", "entry_node_2"]
+    configs = [BOOTSTRAP, NODE1, NODE2]
 
     def create(self) -> List[Container]:
         """Instantiate the image in many containers, parametrized."""
 
         containers = []
-        configs = [BOOTSTRAP, NODE1, NODE2]
 
         for i, name in enumerate(self.nodes):
             # this is odd looking for now, because _make_ports()
-            self._config = configs[i]
+            self._config = self.configs[i]
             kwargs = dict(
                 image=self.tag,
-                name=name,
                 hostname=name,
                 command=["--config-from-env"],
                 detach=True,
@@ -178,8 +187,3 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
             containers.append(self._client.containers.run(**kwargs))
 
         return []
-
-    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
-        """Wait until the image is up."""
-        time.sleep(1)  # TOFIX
-        return True
