@@ -20,7 +20,6 @@
 
 """This test module contains the tests for the `aea scaffold skill` sub-command."""
 
-import filecmp
 import json
 import os
 import re
@@ -38,7 +37,6 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE, DEFAULT_VERSION
 from aea.configurations.loader import make_jsonschema_base_uri
 
-from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -47,6 +45,7 @@ from tests.conftest import (
     ROOT_DIR,
     SKILL_CONFIGURATION_SCHEMA,
 )
+from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 
 
 class TestScaffoldSkill:

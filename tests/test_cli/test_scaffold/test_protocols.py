@@ -18,9 +18,8 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea scaffold protocol` sub-command."""
-import filecmp
+
 import json
-import logging
 import os
 import shutil
 import tempfile
@@ -37,7 +36,6 @@ from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
 
-from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 from tests.conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
@@ -46,6 +44,7 @@ from tests.conftest import (
     PROTOCOL_CONFIGURATION_SCHEMA,
     ROOT_DIR,
 )
+from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 
 
 class TestScaffoldProtocol:
