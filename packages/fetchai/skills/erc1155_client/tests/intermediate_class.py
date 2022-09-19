@@ -69,7 +69,7 @@ class ERC1155ClientTestCase(BaseSkillTestCase):
     path_to_skill = PACKAGE_DIR
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
         cls.location = {"longitude": 0.1270, "latitude": 51.5194}
         cls.search_query = {
@@ -90,7 +90,7 @@ class ERC1155ClientTestCase(BaseSkillTestCase):
             },
         }
 
-        super().setup(config_overrides=config_overrides)
+        super().setup_class(config_overrides=config_overrides)
 
         # behaviours
         cls.search_behaviour = cast(

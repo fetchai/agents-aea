@@ -73,7 +73,7 @@ def get(ctx: Context, apply_environment_variables: bool, json_path: str) -> None
     "--type",
     "type_",
     default=None,
-    type=click.Choice(CONFIG_SUPPORTED_KEY_TYPES + [None]),  # type: ignore
+    type=click.Choice(CONFIG_SUPPORTED_KEY_TYPES),
     help="Specify the type of the value.",
 )
 @click.argument("JSON_PATH", required=True)

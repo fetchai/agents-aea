@@ -21,6 +21,7 @@
 
 import pprint
 import sys
+from abc import abstractmethod
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List, Set
@@ -48,7 +49,15 @@ CONFIG_FILE_NAMES = [
 ]  # type: List[str]
 
 
-class DependencyNotFound(Exception):
+class CustomException(Exception):
+    """A custom exception class for this script."""
+
+    @abstractmethod
+    def print_error(self) -> None:
+        """Print the error message."""
+
+
+class DependencyNotFound(CustomException):
     """Custom exception for dependencies not found."""
 
     def __init__(
@@ -71,8 +80,18 @@ class DependencyNotFound(Exception):
         self.expected_dependencies = expected_deps
         self.missing_dependencies = missing_dependencies
 
+    def print_error(self) -> None:
+        """Print the error message."""
+        sorted_expected = list(map(str, sorted(self.expected_dependencies)))
+        sorted_missing = list(map(str, sorted(self.missing_dependencies)))
+        print("=" * 50)
+        print(f"Package {self.configuration_file}:")
+        print(f"Expected: {pprint.pformat(sorted_expected)}")
+        print(f"Missing: {pprint.pformat(sorted_missing)}")
+        print("=" * 50)
 
-class EmptyPackageDescription(Exception):
+
+class EmptyPackageDescription(CustomException):
     """Custom exception for empty description field."""
 
     def __init__(
@@ -88,6 +107,45 @@ class EmptyPackageDescription(Exception):
         """
         super().__init__(*args)
         self.configuration_file = configuration_file
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print("=" * 50)
+        print(f"Package '{self.configuration_file}' has empty description field.")
+        print("=" * 50)
+
+
+class UnexpectedAuthorError(CustomException):
+    """Custom exception for unexpected author value."""
+
+    def __init__(
+        self,
+        configuration_file: Path,
+        expected_author: str,
+        actual_author: str,
+        *args: Any,
+    ):
+        """
+        Initialize the exception.
+
+        :param configuration_file: the file to the configuration that raised the error.
+        :param expected_author: the expected author.
+        :param actual_author: the actual author.
+        :param args: other positional arguments.
+        """
+        super().__init__(*args)
+        self.configuration_file = configuration_file
+        self.expected_author = expected_author
+        self.actual_author = actual_author
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print("=" * 50)
+        print(
+            f"Package '{self.configuration_file}' has an unexpected author value: "
+            f"expected {self.expected_author}, found '{self.actual_author}'."
+        )
+        print("=" * 50)
 
 
 def find_all_configuration_files(packages_dir: Path) -> List:
@@ -133,24 +191,6 @@ def find_all_packages_ids(packages_dir: Path) -> Set[PackageId]:
         package_ids.add(package_id)
 
     return package_ids
-
-
-def handle_dependency_not_found(e: DependencyNotFound) -> None:
-    """Handle PackageIdNotFound errors."""
-    sorted_expected = list(map(str, sorted(e.expected_dependencies)))
-    sorted_missing = list(map(str, sorted(e.missing_dependencies)))
-    click.echo("=" * 50)
-    click.echo(f"Package {e.configuration_file}:")
-    click.echo(f"Expected: {pprint.pformat(sorted_expected)}")
-    click.echo(f"Missing: {pprint.pformat(sorted_missing)}")
-    click.echo("=" * 50)
-
-
-def handle_empty_package_description(e: EmptyPackageDescription) -> None:
-    """Handle EmptyPackageDescription errors."""
-    click.echo("=" * 50)
-    click.echo(f"Package '{e.configuration_file}' has empty description field.")
-    click.echo("=" * 50)
 
 
 def unified_yaml_load(configuration_file: Path) -> Dict:
@@ -210,6 +250,14 @@ def check_description(configuration_file: Path) -> None:
         raise EmptyPackageDescription(configuration_file)
 
 
+def check_author(configuration_file: Path, expected_author: str) -> None:
+    """Check the author matches a certain desired value."""
+    yaml_object = unified_yaml_load(configuration_file)
+    actual_author = yaml_object.get("author", "")
+    if actual_author != expected_author:
+        raise UnexpectedAuthorError(configuration_file, expected_author, actual_author)
+
+
 @click.command(name="check-packages")
 @click.argument(
     "packages_dir",
@@ -232,14 +280,13 @@ def check_packages(packages_dir: Path) -> None:
 
     for file in find_all_configuration_files(packages_dir):
         try:
+            expected_author = file.parent.parent.parent.name
             click.echo("Processing " + str(file))
+            check_author(file, expected_author)
             check_dependencies(file, all_packages_ids_)
             check_description(file)
-        except DependencyNotFound as e_:
-            handle_dependency_not_found(e_)
-            failed = True
-        except EmptyPackageDescription as e_:
-            handle_empty_package_description(e_)
+        except CustomException as exception:
+            exception.print_error()
             failed = True
 
     if failed:

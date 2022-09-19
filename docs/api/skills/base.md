@@ -714,7 +714,19 @@ an handler, or None if the parsing fails.
 def protocol_dialogues(attribute: Optional[str] = None)
 ```
 
-Protocol dialogues
+Protocol dialogues.
+
+This method must NOT be called by the framework with exception handling.
+It assumes a user-behaviour whereby dialogues are stored
+under specifically named attributes.
+
+**Arguments**:
+
+- `attribute`: attribute under which dialogue is stored
+
+**Returns**:
+
+dialogue
 
 <a id="aea.skills.base.Model"></a>
 
