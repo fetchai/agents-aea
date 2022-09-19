@@ -14,7 +14,7 @@ fingerprint:
   ledger_dispatcher.py: bafybeihc5z7ndxizqh7kjnf7geixgswvr76ewzeoo7fl7iujud7w6xrtju
   tests/__init__.py: bafybeibx5zdcpx3u6sglbpp7yflnr7uaz557e6wqltawtzclubhhvaiw5e
   tests/conftest.py: bafybeiehywp4w4pddrqew4yt2i43rjdi74ple4nkwgasbrcvxjs536mvee
-  tests/test_ledger_api.py: bafybeidhgrqxn43v736ms5v7jk7cfwcys4obnmhhisd4z7p7lvbzrf3zn4
+  tests/test_ledger_api.py: bafybeif7wk6nvgn5eyr7wsvzjhucujec2llgzbgjgjzqjze4m75q2gerry
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
