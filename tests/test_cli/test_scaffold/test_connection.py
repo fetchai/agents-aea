@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea scaffold connection` sub-command."""
 import json
+import logging
 import os
 import re
 import shutil
@@ -41,6 +42,7 @@ from tests.conftest import (
     CONFIGURATION_SCHEMA_DIR,
     CONNECTION_CONFIGURATION_SCHEMA,
     CliRunner,
+    DEFAULT_AUTHOR,
     ROOT_DIR,
 )
 
@@ -102,7 +104,10 @@ class TestScaffoldConnection:
         for file in (Path(self.t) / self.agent_name).rglob(path_pattern):
             content = file.read_text()
             years_in_header = re.findall(r"Copyright.*([0-9]{4})", content)
-            if years_in_header != [str(current_year)]:
+            has_correct_year = years_in_header == [str(current_year)]
+            has_correct_author = DEFAULT_AUTHOR in content
+            if not has_correct_year or not has_correct_author:
+                logging.error(content[:200])
                 incorrect_files.append(file)
             files_left_to_inspect -= 1
         assert not "\n".join(map(str, incorrect_files))
