@@ -45,6 +45,27 @@ BOOTSTRAP: Dict[str, str] = dict(
     ACN_LOG_FILE="/acn/libp2p_node.log",
 )
 
+NODE1: Dict[str, str] = dict(
+    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9001",
+    AEA_P2P_URI=f"{LOCAL_ADDRESS}:10001",
+    AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11001",
+    AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8081",
+    AEA_P2P_ENTRY_URIS=PUBLIC_DHT_MADDRS,
+    ACN_LOG_FILE="/acn/libp2p_node.log",
+)
+
+
+NODE2: Dict[str, str] = dict(
+    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:9002",
+    AEA_P2P_URI=f"{LOCAL_ADDRESS}:10002",
+    AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11002",
+    AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8082",
+    AEA_P2P_ENTRY_URIS=PUBLIC_DHT_MADDRS,
+    ACN_LOG_FILE="/acn/libp2p_node.log",
+)
+
 
 class ACNNodeDockerImage(DockerImage):
     """Wrapper to ACNNode Docker image."""
@@ -123,3 +144,37 @@ class ACNNodeDockerImage(DockerImage):
                     time.sleep(sleep_rate)
 
         return not to_be_connected
+
+
+class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
+    """ACN with bootstrapped entry nodes"""
+
+    nodes = ["bootstrap", "entry_node_1", "entry_node_2"]
+
+    def create(self) -> List[Container]:
+        """Instantiate the image in many containers, parametrized."""
+
+        containers = []
+        configs = [BOOTSTRAP, NODE1, NODE2]
+
+        for i, name in enumerate(self.nodes):
+            # this is odd looking for now, because _make_ports()
+            self._config = configs[i]
+            kwargs = dict(
+                image=self.tag,
+                name=name,
+                hostname=name,
+                command=["--config-from-env"],
+                detach=True,
+                ports=self._make_ports(),
+                environment=self._config,
+                extra_hosts=self._extra_hosts
+            )
+            containers.append(self._client.containers.run(**kwargs))
+
+        return []
+
+    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
+        """Wait until the image is up."""
+        time.sleep(1)  # TODO
+        return True
