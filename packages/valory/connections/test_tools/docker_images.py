@@ -174,16 +174,14 @@ class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
 
         containers = []
 
-        for i, name in enumerate(self.nodes):
-            # this is odd looking for now, because _make_ports()
-            self._config = self.configs[i]
+        for name, config in zip(self.nodes, self.configs):
             kwargs = dict(
                 image=self.tag,
                 hostname=name,
                 command=["--config-from-env"],
                 detach=True,
-                ports=self._make_ports(),
-                environment=self._config,
+                network="host",
+                environment=config,
                 extra_hosts=self._extra_hosts,
             )
             containers.append(self._client.containers.run(**kwargs))
