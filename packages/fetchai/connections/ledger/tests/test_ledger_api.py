@@ -412,7 +412,7 @@ async def test_new_message_wait_flag(
 @pytest.mark.asyncio
 async def test_no_balance():
     """Test no balance."""
-    dispatcher = LedgerApiRequestDispatcher(AsyncState())
+    dispatcher = LedgerApiRequestDispatcher(AsyncState(), connection_id="test_id")
     mock_api = Mock()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
@@ -433,7 +433,7 @@ async def test_no_balance():
 @pytest.mark.asyncio
 async def test_no_raw_tx():
     """Test no raw tx returned."""
-    dispatcher = LedgerApiRequestDispatcher(AsyncState())
+    dispatcher = LedgerApiRequestDispatcher(AsyncState(), connection_id="test_id")
     mock_api = Mock()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
@@ -463,7 +463,9 @@ async def test_no_raw_tx():
 @pytest.mark.asyncio
 async def test_attempts_get_transaction_receipt():
     """Test retry and sleep."""
-    dispatcher = LedgerApiRequestDispatcher(AsyncState(ConnectionStates.connected))
+    dispatcher = LedgerApiRequestDispatcher(
+        AsyncState(ConnectionStates.connected), connection_id="test_id"
+    )
     mock_api = Mock()
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
