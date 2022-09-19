@@ -152,9 +152,7 @@ class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
 class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
-    package_registry_src_rel: Path = Path(
-        __file__
-    ).parent.parent.parent.parent.parent.parent
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
     @pytest.mark.parametrize("maddrs", [PUBLIC_DHT_MADDRS], indirect=True)
     def test_connectivity(self, maddrs):
