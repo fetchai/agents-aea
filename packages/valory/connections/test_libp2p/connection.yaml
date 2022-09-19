@@ -29,7 +29,7 @@ fingerprint:
   tests/test_p2p_libp2p_mailbox/test_communication.py: bafybeiaiwlqxuzp34nu33s5pz6sudvwmdi3h2ckfa4mmwyvd6wqn2elo4m
   tests/test_p2p_libp2p_mailbox/test_errors.py: bafybeiampgm6dxpo4tqiyhyhpwr5d3kdsq5x5vwl323oauhdzmsnprf4bi
   tests/test_p2p_libp2p_mailbox/test_mailbox_service.py: bafybeibp3bkwkrw57qahvuysjdlumywtlk3te5gsvusgrvhsc75k7rrk4u
-  tests/test_public_dht.py: bafybeicgtgtizk657o2zrld53wqtotvi2swa63xpvoeb2wilpwzfcnd7ba
+  tests/test_public_dht.py: bafybeibaiho6midub7yceb4womnmufwzmqdn4nw5exi5mypaftja6tqem4
 fingerprint_ignore_patterns: []
 connections:
 - valory/p2p_libp2p:0.1.0:bafybeianrhfktvaoprloiprshqdssmgqvrz4z3sza2a42gi76ehyu6jxgi

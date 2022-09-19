@@ -227,9 +227,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
 class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
-    package_registry_src_rel: Path = Path(
-        __file__
-    ).parent.parent.parent.parent.parent.parent
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
     @pytest.mark.parametrize(
         "delegate_uris_public_keys",
