@@ -24,14 +24,11 @@ import socket
 import time
 from typing import Dict, List
 
-from docker import DockerClient  # pylint: disable=import-error
-from docker.models.containers import Container  # pylint: disable=import-error
-
 from aea.exceptions import enforce
-from aea.test_tools.docker_image import DockerImage
+from aea.test_tools.docker_image import Container, DockerClient, DockerImage
 
 
-LOCAL_ADDRESS = "0.0.0.0"
+LOCAL_ADDRESS = "0.0.0.0"  # nosec
 
 # created agent: bootstrap_peer
 #     private key: 7f669ab5eee5719e385f7aeb1973769fc75b7cbbe0850ca16c4eabe84e01afbd
@@ -49,9 +46,7 @@ LOCAL_ADDRESS = "0.0.0.0"
 #     PeerID:      16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj
 
 
-GENESIS_MADDR = (
-    "/dns4/0.0.0.0/tcp/9000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
-)
+GENESIS_MADDR = f"/dns4/{LOCAL_ADDRESS}/tcp/9000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw"
 
 BOOTSTRAP: Dict[str, str] = dict(
     AEA_P2P_ID="7f669ab5eee5719e385f7aeb1973769fc75b7cbbe0850ca16c4eabe84e01afbd",
@@ -124,7 +119,7 @@ class ACNNodeDockerImage(DockerImage):
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
 
-        return {f"{p}/tcp": ("0.0.0.0", p) for p in self.ports}
+        return {f"{p}/tcp": (LOCAL_ADDRESS, p) for p in self.ports}
 
     def create(self) -> Container:
         """Create the container."""

@@ -233,7 +233,7 @@ jobs:
       - name: Install current aea
         run: |
           pip install -e .[all]
-      - name: Check aea dependenices and imports
+      - name: Check aea dependencies and imports
         run: |
           tox -e dependencies-check
 

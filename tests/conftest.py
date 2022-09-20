@@ -772,7 +772,7 @@ def launch_many_containers(
         _stop_container(container, image.tag)
 
 
-LOCAL_ADDRESS = "0.0.0.0"
+LOCAL_ADDRESS = "0.0.0.0"  # nosec
 ACN_CONFIGURATION: Dict[str, str] = dict(
     AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
     AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:5000",
