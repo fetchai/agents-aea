@@ -38,7 +38,7 @@ from packages.valory.connections.p2p_libp2p.check_dependencies import (
 )
 
 
-def test_check_versions():
+def test_check_versions() -> None:
     """Test check_versions - positive case."""
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
         check_versions()
@@ -47,7 +47,7 @@ def test_check_versions():
     assert f"check 'gcc'>={version_to_string(MINIMUM_GCC_VERSION)}, found " in stdout
 
 
-def test_check_versions_negative_binary_not_found():
+def test_check_versions_negative_binary_not_found() -> None:
     """Test check_versions - negative case, binary not found."""
     with mock.patch("shutil.which", return_value=None):
         with pytest.raises(
@@ -57,7 +57,7 @@ def test_check_versions_negative_binary_not_found():
             check_versions()
 
 
-def test_check_versions_negative_version_too_low():
+def test_check_versions_negative_version_too_low() -> None:
     """Test check_versions - negative case, version too low."""
     with mock.patch.object(
         check_dependencies,
@@ -71,7 +71,7 @@ def test_check_versions_negative_version_too_low():
             check_versions()
 
 
-def test_check_versions_negative_cannot_parse_version():
+def test_check_versions_negative_cannot_parse_version() -> None:
     """Test the check_versions - negative case, cannot parse version."""
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
         with mock.patch("subprocess.check_output", return_value=b""):
@@ -86,7 +86,7 @@ def test_check_versions_negative_cannot_parse_version():
     )
 
 
-def test_build_node():
+def test_build_node() -> None:
     """Test build node function."""
     with tempfile.TemporaryDirectory() as build_dir:
         build_node(build_dir)

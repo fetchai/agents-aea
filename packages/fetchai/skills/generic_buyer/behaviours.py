@@ -25,8 +25,8 @@ from typing import Any, List, Optional, Set, cast
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.connections.ledger.base import (
-    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+from packages.fetchai.connections.ledger.connection import (
+    PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -160,6 +160,11 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def teardown(self) -> None:
         """Teardown behaviour."""
+
+        self.processing = None
+        self.processing_time = 0.0
+        self.timedout.clear()
+        self.waiting.clear()
 
     def _timeout_processing(self) -> None:
         """Timeout processing."""

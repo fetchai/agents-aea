@@ -24,6 +24,7 @@ import shutil
 from pathlib import Path
 from typing import List
 
+import _strptime  # pylint: disbale=unsed-import # noqa: F401
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_FILE

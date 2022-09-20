@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea scaffold protocol` sub-command."""
-import filecmp
+
 import json
 import os
 import shutil
@@ -44,6 +44,7 @@ from tests.conftest import (
     PROTOCOL_CONFIGURATION_SCHEMA,
     ROOT_DIR,
 )
+from tests.test_cli.test_scaffold import files_outside_copyright_are_identical
 
 
 class TestScaffoldProtocol:
@@ -100,7 +101,7 @@ class TestScaffoldProtocol:
         """Test that the resource folder contains scaffold message.py module."""
         p = Path(self.t, self.agent_name, "protocols", self.resource_name, "message.py")
         original = Path(AEA_DIR, "protocols", "scaffold", "message.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_module_protocol(self):
         """Test that the resource folder contains scaffold protocol.py module."""
@@ -108,7 +109,7 @@ class TestScaffoldProtocol:
             self.t, self.agent_name, "protocols", self.resource_name, "serialization.py"
         )
         original = Path(AEA_DIR, "protocols", "scaffold", "serialization.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
@@ -189,7 +190,7 @@ class TestScaffoldProtocolToRegistry:
             self.t, "packages", AUTHOR, "protocols", self.resource_name, "message.py"
         )
         original = Path(AEA_DIR, "protocols", "scaffold", "message.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_module_protocol(self):
         """Test that the resource folder contains scaffold protocol.py module."""
@@ -202,7 +203,7 @@ class TestScaffoldProtocolToRegistry:
             "serialization.py",
         )
         original = Path(AEA_DIR, "protocols", "scaffold", "serialization.py")
-        assert filecmp.cmp(p, original)
+        assert files_outside_copyright_are_identical(p, original)
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""

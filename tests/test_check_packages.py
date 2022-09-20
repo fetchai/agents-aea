@@ -2,7 +2,6 @@
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2022 Valory AG
-#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,5 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""This module contains the tests for aea/aea.py."""
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
-"""This module contains the tests of the Libp2p client connection."""
+
+class TestCheckPackages(AEATestCaseEmpty):
+    """Test 'aea check_packages'."""
+
+    def test_run(self) -> None:
+        """Run the test."""
+        result = self.run_cli_command("check-packages", str(self.packages_dir_path))
+        assert result.exit_code == 0

@@ -318,7 +318,7 @@ class PackageManager:
                 if calculated_hash != expected_hash:
                     failed = True
                     self._logger.info(
-                        f"\nHash does not match for {package_id}\n\tCalculated hash: {calculated_hash}\n\tExpected hash:{expected_hash}"
+                        f"\nHash does not match for {package_id}\n\tCalculated hash: {calculated_hash}\n\tExpected hash: {expected_hash}"
                     )
 
         except Exception:  # pylint: disable=broad-except

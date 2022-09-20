@@ -518,7 +518,16 @@ class Handler(SkillComponent, ABC):
         return _parse_module(path, handler_configs, skill_context, Handler)
 
     def protocol_dialogues(self, attribute: Optional[str] = None):  # type: ignore
-        """Protocol dialogues"""
+        """
+        Protocol dialogues.
+
+        This method must NOT be called by the framework with exception handling.
+        It assumes a user-behaviour whereby dialogues are stored
+        under specifically named attributes.
+
+        :param attribute: attribute under which dialogue is stored
+        :return: dialogue
+        """
         if self.SUPPORTED_PROTOCOL is None:
             raise ValueError(f"SUPPORTED_PROTOCOL not set on {self}")
         attribute = (

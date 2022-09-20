@@ -36,7 +36,8 @@ from aea_cli_ipfs.exceptions import (
 )
 
 
-DEFAULT_IPFS_URL = "/ip4/127.0.0.1/tcp/5001"
+DEFAULT_IPFS_URL = "/dns/registry.autonolas.tech/tcp/443/https"
+DEFAULT_IPFS_URL_LOCAL = "/ip4/127.0.0.1/tcp/5001"
 ALLOWED_CONNECTION_TYPES = ("tcp",)
 ALLOWED_ADDR_TYPES = ("ip4", "dns")
 ALLOWED_PROTOCOL_TYPES = ("http", "https")
@@ -305,7 +306,10 @@ class IPFSTool:
         if os.path.exists(os.path.join(target_dir, hash_id)):  # pragma: nocover
             raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
 
-        self.client.get(hash_id, target_dir)
+        try:
+            self.client.get(hash_id, target_dir)
+        except ipfshttpclient.exceptions.StatusError as e:
+            raise DownloadError(f"error on download {str(e)}") from e
         downloaded_path = str(Path(target_dir) / hash_id)
 
         package_path = None

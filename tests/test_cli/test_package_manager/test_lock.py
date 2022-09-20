@@ -22,8 +22,11 @@
 
 import json
 import logging
+import platform
 from typing import Any
 from unittest import mock
+
+import pytest
 
 from aea.cli import cli
 from aea.cli.packages import PACKAGES_FILE, PackageManager
@@ -33,6 +36,10 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 
 @mock.patch("aea.cli.packages.fetch_ipfs")
+@pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="Fix hashing on windows.",
+)
 class TestLockCommand(BaseAEATestCase):
     """Test sync command."""
 

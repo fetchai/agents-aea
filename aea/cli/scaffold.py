@@ -18,9 +18,11 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea scaffold' subcommand."""
+
 import os
 import re
 import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, cast
 
@@ -55,6 +57,50 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
 )
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
+
+
+COPYRIGHT_HEADER = """\
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright {year} {author}
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+"""
+
+
+def update_copyright_headers(ctx: Context, path: Path) -> None:
+    """Update copyright headers"""
+
+    # this allows for arbitrary authors
+    year, author = datetime.now().year, ctx.agent_config.author
+    top = "\n".join(COPYRIGHT_HEADER.split("\n")[:3])
+    bottom = "\n".join(COPYRIGHT_HEADER.split("\n")[-15:])
+    new_copyright_header = COPYRIGHT_HEADER.format(year=year, author=author)
+
+    for file in path.rglob("**/*.py"):
+        content = file.read_text()
+        i, j = content.find(top), content.find(bottom)
+        if i == j == -1:  # no copyright header present yet
+            file.write_text(f"{new_copyright_header}\n{content}")
+        elif i != j != -1:  # copyright header detected
+            old_copyright_header = content[i : j + len(bottom)]
+            content = content.replace(old_copyright_header, new_copyright_header)
+            file.write_text(content)
+        else:
+            raise ValueError(f"Copyright pattern detection failed: {content}")
 
 
 @click.group()
@@ -192,6 +238,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         src = Path(os.path.join(AEA_DIR, item_type_plural, "scaffold"))
         logger.debug(f"Copying {item_type} modules. src={src} dst={dest}")
         shutil.copytree(src, dest)
+        update_copyright_headers(ctx, dest)
 
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
 

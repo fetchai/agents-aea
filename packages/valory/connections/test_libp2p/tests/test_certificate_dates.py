@@ -19,7 +19,8 @@
 
 """This test module ensures the dates on certificates are not outdated on issuance"""
 
-import os
+# pylint: skip-file
+
 from datetime import datetime
 from pathlib import Path
 from types import ModuleType
@@ -27,29 +28,29 @@ from types import ModuleType
 import pytest
 import yaml
 
-from packages.valory.connections import (
-    p2p_libp2p,
-    p2p_libp2p_client,
-    p2p_libp2p_mailbox,
-)
 from packages.valory.connections.p2p_libp2p.consts import (
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
 )
 
 
-P2P_LIBP2P_MODULES = (p2p_libp2p, p2p_libp2p_client, p2p_libp2p_mailbox)
+CONNECTIONS = Path(__file__).parent.parent.parent
+
+P2P_LIBP2P_MODULES = (
+    CONNECTIONS / "p2p_libp2p",
+    CONNECTIONS / "p2p_libp2p_client",
+    CONNECTIONS / "p2p_libp2p_mailbox",
+)
 
 
-@pytest.mark.parametrize("p2p_libp2p_module", P2P_LIBP2P_MODULES)
-def test_certificate_dates(p2p_libp2p_module: ModuleType):
+@pytest.mark.parametrize("path", P2P_LIBP2P_MODULES)
+def test_certificate_dates(path: ModuleType) -> None:
     """Test certificate dates not outdated"""
 
     def to_datetime(time: str) -> datetime:
         return datetime.strptime(time, date_format)
 
-    path = Path(os.path.sep.join(p2p_libp2p_module.__name__.split(".")))
-    data = yaml.safe_load((path.absolute() / "connection.yaml").read_text())
+    data = yaml.safe_load((path / "connection.yaml").read_text())
 
     date_format = "%Y-%m-%d"
     cert_requests = data["cert_requests"]

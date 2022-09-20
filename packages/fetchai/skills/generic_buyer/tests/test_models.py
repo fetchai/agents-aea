@@ -42,9 +42,9 @@ class TestGenericStrategy(BaseSkillTestCase):
     path_to_skill = PACKAGE_ROOT
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.ledger_id = DEFAULT_LEDGER
         cls.is_ledger_tx = True
         cls.currency_id = "some_currency_id"
@@ -76,6 +76,13 @@ class TestGenericStrategy(BaseSkillTestCase):
             name="strategy",
             skill_context=cls._skill.skill_context,
         )
+        cls._init_strategy_kwargs = cls.strategy.__dict__.copy()
+
+    def teardown(self) -> None:
+        """Teardown"""
+
+        super().teardown()
+        self.strategy.__dict__.update(self._init_strategy_kwargs)
 
     def test_properties(self):
         """Test the properties of GenericStrategy class."""

@@ -20,7 +20,9 @@
 """Run different checks on AEA packages."""
 
 import pprint
+import re
 import sys
+from abc import abstractmethod
 from functools import partial
 from pathlib import Path
 from typing import Any, Dict, List, Set
@@ -48,7 +50,15 @@ CONFIG_FILE_NAMES = [
 ]  # type: List[str]
 
 
-class DependencyNotFound(Exception):
+class CustomException(Exception):
+    """A custom exception class for this script."""
+
+    @abstractmethod
+    def print_error(self) -> None:
+        """Print the error message."""
+
+
+class DependencyNotFound(CustomException):
     """Custom exception for dependencies not found."""
 
     def __init__(
@@ -71,8 +81,18 @@ class DependencyNotFound(Exception):
         self.expected_dependencies = expected_deps
         self.missing_dependencies = missing_dependencies
 
+    def print_error(self) -> None:
+        """Print the error message."""
+        sorted_expected = list(map(str, sorted(self.expected_dependencies)))
+        sorted_missing = list(map(str, sorted(self.missing_dependencies)))
+        print("=" * 50)
+        print(f"Package {self.configuration_file}:")
+        print(f"Expected: {pprint.pformat(sorted_expected)}")
+        print(f"Missing: {pprint.pformat(sorted_missing)}")
+        print("=" * 50)
 
-class EmptyPackageDescription(Exception):
+
+class EmptyPackageDescription(CustomException):
     """Custom exception for empty description field."""
 
     def __init__(
@@ -88,6 +108,95 @@ class EmptyPackageDescription(Exception):
         """
         super().__init__(*args)
         self.configuration_file = configuration_file
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print("=" * 50)
+        print(f"Package '{self.configuration_file}' has empty description field.")
+        print("=" * 50)
+
+
+class UnexpectedAuthorError(CustomException):
+    """Custom exception for unexpected author value."""
+
+    def __init__(
+        self,
+        configuration_file: Path,
+        expected_author: str,
+        actual_author: str,
+        *args: Any,
+    ):
+        """
+        Initialize the exception.
+
+        :param configuration_file: the file to the configuration that raised the error.
+        :param expected_author: the expected author.
+        :param actual_author: the actual author.
+        :param args: other positional arguments.
+        """
+        super().__init__(*args)
+        self.configuration_file = configuration_file
+        self.expected_author = expected_author
+        self.actual_author = actual_author
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print("=" * 50)
+        print(
+            f"Package '{self.configuration_file}' has an unexpected author value: "
+            f"expected {self.expected_author}, found '{self.actual_author}'."
+        )
+        print("=" * 50)
+
+
+class PublicIdDefinitionError(CustomException):
+    """Custom exception for error about PUBLIC_ID definitions in package Python modules."""
+
+    def __init__(
+        self,
+        package_type: PackageType,
+        public_id: PublicId,
+        actual_nb_definitions: int,
+        *args: Any,
+    ) -> None:
+        """Initialize the exception."""
+        super().__init__(*args)
+        self.package_type = package_type
+        self.public_id = public_id
+        self.actual_nb_definitions = actual_nb_definitions
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print("=" * 50)
+        print(
+            f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; found {self.actual_nb_definitions}"
+        )
+        print("=" * 50)
+
+
+class WrongPublicIdError(CustomException):
+    """Custom exception for error about wrong value of PUBLIC_ID."""
+
+    def __init__(
+        self,
+        package_type: PackageType,
+        public_id: PublicId,
+        public_id_code: str,
+        *args: Any,
+    ) -> None:
+        """Initialize the exception."""
+        super().__init__(*args)
+        self.package_type = package_type
+        self.public_id = public_id
+        self.public_id_code = public_id_code
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        print("=" * 50)
+        print(
+            f"expected {self.public_id} for package of type {self.package_type.value}; found '{self.public_id_code}'"
+        )
+        print("=" * 50)
 
 
 def find_all_configuration_files(packages_dir: Path) -> List:
@@ -133,24 +242,6 @@ def find_all_packages_ids(packages_dir: Path) -> Set[PackageId]:
         package_ids.add(package_id)
 
     return package_ids
-
-
-def handle_dependency_not_found(e: DependencyNotFound) -> None:
-    """Handle PackageIdNotFound errors."""
-    sorted_expected = list(map(str, sorted(e.expected_dependencies)))
-    sorted_missing = list(map(str, sorted(e.missing_dependencies)))
-    click.echo("=" * 50)
-    click.echo(f"Package {e.configuration_file}:")
-    click.echo(f"Expected: {pprint.pformat(sorted_expected)}")
-    click.echo(f"Missing: {pprint.pformat(sorted_missing)}")
-    click.echo("=" * 50)
-
-
-def handle_empty_package_description(e: EmptyPackageDescription) -> None:
-    """Handle EmptyPackageDescription errors."""
-    click.echo("=" * 50)
-    click.echo(f"Package '{e.configuration_file}' has empty description field.")
-    click.echo("=" * 50)
 
 
 def unified_yaml_load(configuration_file: Path) -> Dict:
@@ -210,6 +301,38 @@ def check_description(configuration_file: Path) -> None:
         raise EmptyPackageDescription(configuration_file)
 
 
+def check_author(configuration_file: Path, expected_author: str) -> None:
+    """Check the author matches a certain desired value."""
+    yaml_object = unified_yaml_load(configuration_file)
+    actual_author = yaml_object.get("author", "")
+    if actual_author != expected_author:
+        raise UnexpectedAuthorError(configuration_file, expected_author, actual_author)
+
+
+def check_public_id(configuration_file: Path) -> None:
+    """Check the public_id in the code and configuration match."""
+    expected_public_id = get_public_id_from_yaml(configuration_file)
+    # remove last 's' character (as package type is plural in packages directory)
+    package_type_str = configuration_file.parent.parent.name[:-1]
+    package_type = PackageType(package_type_str)
+    if package_type == PackageType.CONNECTION:
+        module_name_to_load = Path("connection.py")
+    elif package_type == PackageType.SKILL:
+        module_name_to_load = Path("__init__.py")
+    else:
+        # no check to do.
+        return
+    module_path_to_load = configuration_file.parent / module_name_to_load
+    content = module_path_to_load.read_text()
+    matches = re.findall("^PUBLIC_ID = (.*)", content, re.MULTILINE)
+    if len(matches) != 1:
+        raise PublicIdDefinitionError(package_type, expected_public_id, len(matches))
+
+    public_id_code = matches[0]
+    if str(expected_public_id) not in public_id_code:
+        raise WrongPublicIdError(package_type, expected_public_id, public_id_code)
+
+
 @click.command(name="check-packages")
 @click.argument(
     "packages_dir",
@@ -232,14 +355,14 @@ def check_packages(packages_dir: Path) -> None:
 
     for file in find_all_configuration_files(packages_dir):
         try:
+            expected_author = file.parent.parent.parent.name
             click.echo("Processing " + str(file))
+            check_author(file, expected_author)
             check_dependencies(file, all_packages_ids_)
             check_description(file)
-        except DependencyNotFound as e_:
-            handle_dependency_not_found(e_)
-            failed = True
-        except EmptyPackageDescription as e_:
-            handle_empty_package_description(e_)
+            check_public_id(file)
+        except CustomException as exception:
+            exception.print_error()
             failed = True
 
     if failed:

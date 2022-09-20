@@ -34,6 +34,7 @@ from tempfile import TemporaryDirectory
 from typing import Dict, Optional, Set
 from unittest.mock import patch
 
+import _strptime  # pylint: disbale=unsed-import # noqa: F401
 import pytest
 from packaging.version import Version
 
@@ -276,7 +277,7 @@ def test_recursive_update_negative_different_type():
 
     with pytest.raises(
         ValueError,
-        match="Trying to replace value '1' with value 'False' which is of different type.",
+        match="Trying to replace value '1' of type 'int' with value 'False' which is of type 'bool'.",
     ):
         recursive_update(to_update, new_values)
 

@@ -52,7 +52,8 @@ class TestSearchBehaviour(ERC1155ClientTestCase):
     def test_act_is_searching(self):
         """Test the act method of the search behaviour where is_searching is True."""
         # setup
-        self.strategy._is_searching = True
+        self.strategy.is_searching = True
+        assert self.strategy.is_searching
 
         # operation
         self.search_behaviour.act()
