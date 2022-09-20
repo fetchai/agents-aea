@@ -22,11 +22,8 @@
 
 import json
 import logging
-import platform
 from typing import Any
 from unittest import mock
-
-import pytest
 
 from aea.cli import cli
 from aea.cli.packages import PACKAGES_FILE, PackageManager

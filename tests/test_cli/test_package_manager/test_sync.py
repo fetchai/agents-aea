@@ -22,7 +22,6 @@
 
 import json
 import logging
-import platform
 import re
 from typing import Any
 from unittest import mock
