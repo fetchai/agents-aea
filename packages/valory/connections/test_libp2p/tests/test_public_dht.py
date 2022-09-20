@@ -27,6 +27,7 @@ import json
 import os
 from pathlib import Path
 
+from dataclasses import dataclass
 import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -61,6 +62,22 @@ AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
+
+
+@dataclass
+class NodeConfig:
+    """Node configuration"""
+
+    uri: str
+    maddr: str
+    public_key: str
+
+
+local_nodes = [
+    NodeConfig("localhost:11001", "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF", "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8"),
+    NodeConfig("localhost:11002", "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj", "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12"),
+]
+public_nodes = [NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]]
 
 
 @pytest.fixture
