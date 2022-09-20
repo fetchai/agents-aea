@@ -27,6 +27,7 @@ import os
 
 import pytest
 
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
@@ -44,7 +45,9 @@ from packages.valory.connections.test_libp2p.tests.base import (
     ports,
 )
 
-from tests.conftest import DEFAULT_LEDGER, UseACNWithBootstrappedEntryNodes
+from packages.valory.connections.test_libp2p.tests.conftest import (
+    UseACNWithBootstrappedEntryNodes,
+)
 
 
 LOCAL_DHT_MADDRS = [
