@@ -19,10 +19,13 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea scaffold connection` sub-command."""
 import json
+import logging
 import os
+import re
 import shutil
 import tempfile
 import unittest.mock
+from datetime import datetime
 from pathlib import Path
 
 import jsonschema
@@ -39,6 +42,7 @@ from tests.conftest import (
     CONFIGURATION_SCHEMA_DIR,
     CONNECTION_CONFIGURATION_SCHEMA,
     CliRunner,
+    DEFAULT_AUTHOR,
     ROOT_DIR,
 )
 
@@ -90,6 +94,24 @@ class TestScaffoldConnection:
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""
         assert self.result.exit_code == 0
+
+    def test_copyright_header_year_is_current(self):
+        """Test that the year in copyright header is updated to current"""
+
+        incorrect_files, files_left_to_inspect = [], 2
+        current_year = datetime.now().year
+        path_pattern = f"**/{self.resource_name}/*.py"
+        for file in (Path(self.t) / self.agent_name).rglob(path_pattern):
+            content = file.read_text()
+            years_in_header = re.findall(r"Copyright.*([0-9]{4})", content)
+            has_correct_year = years_in_header == [str(current_year)]
+            has_correct_author = DEFAULT_AUTHOR in content
+            if not has_correct_year or not has_correct_author:
+                logging.error(content[:200])
+                incorrect_files.append(file)
+            files_left_to_inspect -= 1
+        assert not "\n".join(map(str, incorrect_files))
+        assert not files_left_to_inspect
 
     def test_resource_folder_contains_module_connection(self):
         """Test that the resource folder contains scaffold connection.py module."""
