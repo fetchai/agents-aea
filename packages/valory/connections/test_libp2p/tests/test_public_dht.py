@@ -27,6 +27,7 @@ import json
 import os
 from pathlib import Path
 
+from typing import List
 from dataclasses import dataclass
 import pytest
 
@@ -41,6 +42,7 @@ from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_fail
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
+from packages.valory.connections.test_libp2p.tests.conftest import ACNWithBootstrappedEntryNodes
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
@@ -92,19 +94,25 @@ def delegate_uris_public_keys(request):
     return request.param
 
 
+class DHTTestMixin(ACNWithBootstrappedEntryNodes):
+    """DHTTestMixin"""
+
+    start_local = False
+    nodes: List[NodeConfig] = []
+
+
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
+class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest, DHTTestMixin):
     """Test that public DHT's relay service is working properly"""
-
-    maddrs = PUBLIC_DHT_MADDRS
 
     def setup(self):
         """Setup test"""
-        assert len(self.maddrs) > 1, "Test requires at least 2 public DHT node"
-        for maddr in self.maddrs:
+
+        assert len(self.nodes) > 1, "Test requires at least 2 public DHT node"
+        for node in self.nodes:
             for _ in range(2):  # make pairs
-                self.make_connection(relay=False, entry_peers=[maddr])
+                self.make_connection(relay=False, entry_peers=[node.maddr])
 
     def teardown(self):
         """Teardown after test method"""
@@ -152,27 +160,23 @@ class TestLibp2pConnectionPublicDHTRelay(BaseP2PLibp2pTest):
 class TestLibp2pConnectionPublicDHTDelegate(TestLibp2pConnectionPublicDHTRelay):
     """Test that public DHTs delegate service is working properly"""
 
-    uris = PUBLIC_DHT_DELEGATE_URIS
-    public_keys = PUBLIC_DHT_PUBLIC_KEYS
-
     def setup(self):  # overwrite the setup, reuse the rest
         """Set up test"""
         assert len(self.uris) == len(self.public_keys)
         assert len(self.uris) > 1 and len(self.public_keys) > 1
-        for uri, public_keys in zip(self.uris, self.public_keys):
+        for node in self.nodes:
             for _ in range(2):
-                self.make_client_connection(uri=uri, peer_public_key=public_keys)
+                self.make_client_connection(uri=node.uri, peer_public_key=node.public_key)
 
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
+class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany, DHTTestMixin):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
     package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
-    @pytest.mark.parametrize("maddrs", [PUBLIC_DHT_MADDRS], indirect=True)
-    def test_connectivity(self, maddrs):
+    def test_connectivity(self,):
         """Test connectivity."""
         self.log_files = []
         self.agent_name = "some"
@@ -210,7 +214,7 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
             config_path,
             {
                 "local_uri": f"127.0.0.1:{next(ports)}",
-                "entry_peers": maddrs,
+                "entry_peers": [node.maddr for node in self.nodes],
                 "log_file": log_file,
                 "ledger_id": node_ledger_id,
             },
@@ -239,20 +243,14 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseMany):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
+class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany, DHTTestMixin):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
     package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
-    @pytest.mark.parametrize(
-        "delegate_uris_public_keys",
-        [(PUBLIC_DHT_DELEGATE_URIS, PUBLIC_DHT_PUBLIC_KEYS)],
-        indirect=True,
-    )
-    def test_connectivity(self, delegate_uris_public_keys):
+    def test_connectivity(self):
         """Test connectivity."""
 
-        delegate_uris, public_keys = delegate_uris_public_keys
         self.agent_name = "some"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
@@ -272,18 +270,17 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseMany):
         config_path = f"{p2p_libp2p_client_path}.config"
         self.nested_set_config(
             config_path,
-            {"nodes": [{"uri": uri} for uri in delegate_uris]},
+            {"nodes": [{"uri": node.uri} for node in self.nodes]},
         )
-        zipper = zip(*delegate_uris_public_keys)
-        nodes = [{"uri": uri, "public_key": public_key} for uri, public_key in zipper]
+        nodes = [{"uri": node.uri, "public_key": node.public_key} for node in self.nodes]
         self.nested_set_config(p2p_libp2p_client_path + ".config", {"nodes": nodes})
 
         # generate certificates for connection
         self.nested_set_config(
             p2p_libp2p_client_path + ".cert_requests",
             [
-                make_cert_request(k, agent_ledger_id, f"./cli_test_{k}")
-                for k in public_keys
+                make_cert_request(node.public_key, agent_ledger_id, f"./cli_test_{node.public_key}")
+                for node in self.nodes
             ],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
