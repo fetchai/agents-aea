@@ -19,7 +19,7 @@
 """This module contains the code to generate dependency trees from registries."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, cast
+from typing import Dict, List, Optional, Set, Tuple
 
 import yaml
 
@@ -33,11 +33,14 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_SERVICE_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
+    PACKAGE_TYPE_TO_CONFIG_FILE,
     PROTOCOL,
     SERVICE,
     SKILL,
+    VENDOR,
 )
 from aea.configurations.data_types import PackageId, PublicId
+from aea.exceptions import AEAPackageLoadingError
 from aea.helpers.yaml_utils import _AEAYamlDumper, _AEAYamlLoader
 
 
@@ -96,7 +99,7 @@ def to_package_id(public_id: str, package_type: str) -> PackageId:
     return PackageId(package_type, PublicId.from_str(public_id)).without_hash()
 
 
-class DependecyTree:
+class DependencyTree:
     """This class represents the dependency tree for a registry."""
 
     @staticmethod
@@ -117,18 +120,61 @@ class DependecyTree:
         )
 
     @classmethod
-    def resolve_tree(
-        cls, dependency_list: Dict[PackageId, List[PackageId]], tree: Dict
-    ) -> None:
-        """Resolve dependency tree"""
+    def resolve_tree(cls, dependency_list: Dict[PackageId, List[PackageId]]) -> Dict:
+        """
+        Resolve dependency tree.
 
+        :param dependency_list: the adjacency list of the dependency graph
+        :return: the dependency tree
+        """
+        tree: Dict[PackageId, Dict] = {root_node: {} for root_node in dependency_list}
+        # auxiliary variables to keep track during recursive calls :
+        #  visited: a set for fast checking of already visited nodes in the current path of DFS
+        #  stack:   the current stack of nodes in the depth-first visiting of nodes
+        visited: Set[PackageId] = set()
+        stack: List[PackageId] = []
+        cls._resolve_tree_aux(dependency_list, tree, visited, stack)
+
+        # _resolve_tree_aux did side-effect on the 'tree' object
+        return tree
+
+    @classmethod
+    def _resolve_tree_aux(
+        cls,
+        dependency_list: Dict[PackageId, List[PackageId]],
+        tree: Dict,
+        visited: Set[PackageId],
+        stack: List[PackageId],
+    ) -> None:
+        """
+        Resolve dependency tree (auxiliary method of resolve_tree).
+
+        IMPORTANT: This method does side-effect on the parameter 'tree', 'visited' and 'stack'.
+
+        :param dependency_list: the adjacency list of hte dependency graph
+        :param tree: the dependency tree
+        :param visited: the set of visited nodes in the current path
+        :param stack: the current path stored in a LIFO data structure
+        """
         for root_package in tree:
+            if root_package in visited:
+                # cycle found; raise error
+                cls._raise_circular_dependency_error(root_package, stack)
+                return
+
+            # add current package to the stack - needed to check if there are circular dependencies
+            visited.add(root_package)
+            stack.append(root_package)
+
+            # build the root of the subtree according to the dependency list
             root_dependencies: List[PackageId] = dependency_list.get(root_package, [])
-            for package in root_dependencies:
-                tree[root_package][package] = {
-                    p: {} for p in cast(list, dependency_list.get(package))
-                }
-                cls.resolve_tree(dependency_list, tree[root_package][package])
+            tree[root_package] = {p: {} for p in root_dependencies}
+            # do a recursive call on the newly created subtree
+            cls._resolve_tree_aux(dependency_list, tree[root_package], visited, stack)
+
+            # the current search node can be removed from the stack
+            visited.discard(root_package)
+            stack.pop()
 
     @classmethod
     def flatten_tree(
@@ -143,29 +189,69 @@ class DependecyTree:
             flat_tree[level].append(package)
             cls.flatten_tree(dependencies, flat_tree, level + 1)
 
+    @staticmethod
+    def find_packages_in_a_project(
+        project_dir: Path,
+    ) -> List[Tuple[str, Path]]:
+        """Find packages in an AEA project."""
+
+        packages = []
+        for package_type, config_file in COMPONENTS:
+            _packages = [
+                *Path(project_dir, VENDOR).glob(f"*/{package_type}s/*/{config_file}"),
+                *Path(project_dir, f"{package_type}s").glob(f"*/{config_file}"),
+            ]
+            packages += [
+                (package_type, package_path.parent) for package_path in _packages
+            ]
+
+        return packages
+
+    @staticmethod
+    def find_packages_in_a_local_repository(
+        packages_dir: Path,
+    ) -> List[Tuple[str, Path]]:
+        """Find packages in a local repository."""
+
+        packages = []
+        for package_type, config_file in COMPONENTS:
+            packages += [
+                (package_type, package_path.parent)
+                for package_path in Path(packages_dir).glob(
+                    f"*/{package_type}s/*/{config_file}"
+                )
+            ]
+
+        return packages
+
     @classmethod
-    def generate(cls, packages_dir: Path) -> List[List[PackageId]]:
+    def generate(
+        cls, packages_dir: Path, from_project: bool = False
+    ) -> List[List[PackageId]]:
         """Returns PublicId to hash mapping."""
         package_to_dependency_mappings = {}
-        for component_type, component_file in COMPONENTS:
-            for file_path in packages_dir.glob(f"**/{component_file}"):
-                item_config, _ = load_yaml(file_path)
-                item_config["name"] = item_config.get(
-                    "name", item_config.get("agent_name")
-                )
-                public_id = PublicId.from_json(item_config)
-                package_to_dependency_mappings[
-                    to_package_id(str(public_id), component_type)
-                ] = cls.get_all_dependencies(item_config)
+        packages_list = []
 
-        dep_tree: Dict[PackageId, Dict] = {
-            root_node: {} for root_node in package_to_dependency_mappings
-        }
+        if from_project or (packages_dir / VENDOR).exists():
+            packages_list = cls.find_packages_in_a_project(packages_dir)
+        else:
+            packages_list = cls.find_packages_in_a_local_repository(packages_dir)
+
+        for package_type, package_path in packages_list:
+            item_config, _ = load_yaml(
+                package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_type]
+            )
+            item_config["name"] = item_config.get("name", item_config.get("agent_name"))
+            public_id = PublicId.from_json(item_config)
+            package_to_dependency_mappings[
+                to_package_id(str(public_id), package_type)
+            ] = cls.get_all_dependencies(item_config)
+
         flat_tree: List[List[PackageId]] = []
         flat_tree_dirty: List[List[PackageId]] = []
         dirty_packages: List[PackageId] = []
 
-        cls.resolve_tree(package_to_dependency_mappings, dep_tree)
+        dep_tree = cls.resolve_tree(package_to_dependency_mappings)
         cls.flatten_tree(dep_tree, flat_tree_dirty, 0)
 
         for tree_level in reversed(flat_tree_dirty[:-1]):
@@ -177,3 +263,20 @@ class DependecyTree:
             dirty_packages += tree_level
 
         return flat_tree
+
+    @classmethod
+    def _raise_circular_dependency_error(
+        cls, package: PackageId, stack: List[PackageId]
+    ) -> None:
+        # find first occurrence of the package in the stack:
+        start = stack.index(package)
+        start_node = stack[start]
+        cycle = stack[start:]
+        if len(cycle) == 1:
+            raise AEAPackageLoadingError(
+                f"Found a self-loop dependency while resolving dependency tree in package {cycle[0]}"
+            )
+        raise AEAPackageLoadingError(
+            "Found a circular dependency while resolving dependency tree: "
+            + " -> ".join(map(str, cycle + [start_node]))
+        )

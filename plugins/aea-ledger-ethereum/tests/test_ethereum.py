@@ -23,6 +23,7 @@ import hashlib
 import logging
 import math
 import random
+import re
 import tempfile
 import time
 from pathlib import Path
@@ -487,7 +488,6 @@ def test_gas_price_strategy_eip1559() -> None:
             gas_stregy = callable_(web3, "tx_params")
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
-
     assert all([value > 1e8 for value in gas_stregy.values()])
 
 
@@ -518,8 +518,6 @@ def test_gas_price_strategy_eip1559_estimate_none() -> None:
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
 
-    assert gas_stregy["baseFee"] is None
-
 
 def test_gas_price_strategy_eip1559_fallback() -> None:
     """Test eip1559 based gas price strategy."""
@@ -549,8 +547,6 @@ def test_gas_price_strategy_eip1559_fallback() -> None:
                 gas_stregy = callable_(web3, "tx_params")
 
     assert all([key in gas_stregy for key in ["maxFeePerGas", "maxPriorityFeePerGas"]])
-
-    assert gas_stregy["baseFee"] is None
 
 
 def test_gas_price_strategy_eth_gasstation():
@@ -673,6 +669,25 @@ def test_build_transaction(ethereum_testnet_config):
     contract_instance.functions.dummy_method = method_mock
 
     eth_api = EthereumApi(**ethereum_testnet_config)
+
+    with pytest.raises(
+        ValueError, match=re.escape("Argument 'method_args' cannot be 'None'.")
+    ):
+        eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args=None,
+            tx_args={},
+        )
+    with pytest.raises(
+        ValueError, match=re.escape("Argument 'tx_args' cannot be 'None'.")
+    ):
+        eth_api.build_transaction(
+            contract_instance=contract_instance,
+            method_name="dummy_method",
+            method_args={},
+            tx_args=None,
+        )
 
     with mock.patch(
         "web3.eth.Eth.get_transaction_count",
@@ -871,3 +886,37 @@ def test_try_get_gas_pricing_poa(
         gas_price_param: math.ceil(gas_price[gas_price_param] * TIP_INCREASE)
         for gas_price_param in strategy["params"]
     }, "The repricing was performed incorrectly!"
+
+
+@pytest.mark.parametrize("mock_exception", (True, False))
+def test_gas_estimation(
+    mock_exception,
+    ethereum_testnet_config: dict,
+    ganache: Generator,
+    caplog,
+) -> None:
+    """Test gas estimation."""
+    ethereum_api = EthereumApi(**ethereum_testnet_config)
+    tx = {
+        "value": 0,
+        "chainId": 1337,
+        "from": "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+        "gas": 291661,
+        "maxPriorityFeePerGas": 3000000000,
+        "maxFeePerGas": 4000000000,
+        "to": "0x68FCdF52066CcE5612827E872c45767E5a1f6551",
+        "data": "",
+    }
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
+        with patch.object(ethereum_api._api.eth, "estimate_gas") as estimate_gas_mock:
+            if mock_exception:
+                # raise exception on first call only
+                estimate_gas_mock.side_effect = [
+                    ValueError("triggered exception"),
+                    None,
+                ]
+            ethereum_api.update_with_gas_estimate(tx)
+        if mock_exception:
+            assert (
+                "ValueError: triggered exception" in caplog.text
+            ), f"Cannot find message in output: {caplog.text}"

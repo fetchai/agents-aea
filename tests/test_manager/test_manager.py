@@ -51,6 +51,12 @@ from tests.common.utils import wait_for_condition
 from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
+try:
+    from multiprocessing.popen_spawn_posix import _DupFd  # type: ignore # noqa: F401
+except AttributeError:
+    pass
+
+
 DEFAULT_TIMEOUT = 120
 NOT_BEFORE = "2022-01-01"
 NOT_AFTER = "2023-01-01"
@@ -148,6 +154,7 @@ class TestMultiAgentManagerDependencies(BaseCase):
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
+@patch("aea.aea_builder.AEABuilder.check_project_dependencies")
 class BaseTestMultiAgentManager(BaseCase):
     """Base test class for multi-agent manager"""
 

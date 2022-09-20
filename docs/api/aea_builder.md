@@ -1059,6 +1059,18 @@ These are the ledgers for which the AEA requires a key pair.
 
 the list of required ledgers.
 
+<a id="aea.aea_builder.AEABuilder.check_project_dependencies"></a>
+
+#### check`_`project`_`dependencies
+
+```python
+@staticmethod
+def check_project_dependencies(agent_configuration: AgentConfig,
+                               project_path: Path) -> None
+```
+
+Check project config for missing dependencies.
+
 <a id="aea.aea_builder.AEABuilder.try_to_load_agent_configuration_file"></a>
 
 #### try`_`to`_`load`_`agent`_`configuration`_`file
@@ -1133,7 +1145,7 @@ an AEABuilder.
 def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path
 ```
 
-Return path to aea-config file for the given aea project path.
+Return path to aea-config file for the given AEA project path.
 
 <a id="aea.aea_builder.make_component_logger"></a>
 

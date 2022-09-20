@@ -104,6 +104,6 @@ class CliRunner(ClickCliRunner):
             stderr_bytes=stderr,  # type: ignore
             exit_code=exit_code,
             exception=exception,
-            exc_info=exc_info,
+            exc_info=exc_info,  # type: ignore
             return_value=None,
         )

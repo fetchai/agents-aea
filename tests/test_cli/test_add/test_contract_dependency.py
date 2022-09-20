@@ -115,8 +115,8 @@ class TestCreate:
         with mock.patch("builtins.print", new=_print_patch):
             result = self._run_command(["run"], False)
 
-            assert "Contract stub_0 initialized." in outputs
-            assert "Contract stub_1 initialized." in outputs
+        assert "Contract stub_0 initialized." in outputs
+        assert "Contract stub_1 initialized." in outputs
 
     def teardown(
         self,

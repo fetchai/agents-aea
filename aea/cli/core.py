@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -53,6 +52,7 @@ from aea.cli.list import list_command as _list
 from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
+from aea.cli.packages import package_manager
 from aea.cli.plugin import with_plugins
 from aea.cli.publish import publish
 from aea.cli.push import push
@@ -64,6 +64,7 @@ from aea.cli.reset_password import reset_password
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
+from aea.cli.test import test
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
 from aea.cli.utils.click_utils import registry_path_option
@@ -140,9 +141,11 @@ cli.add_command(run)
 cli.add_command(scaffold)
 cli.add_command(search)
 cli.add_command(local_registry_sync)
+cli.add_command(test)
 cli.add_command(transfer)
 cli.add_command(upgrade)
 cli.add_command(hash_group)
 cli.add_command(generate_all_protocols)
 cli.add_command(check_packages)
 cli.add_command(push_all)
+cli.add_command(package_manager)

@@ -21,6 +21,7 @@
 """This module contains the tools for autoupdating ipfs hashes in the documentation."""
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -28,11 +29,12 @@ from typing import Dict, Optional
 
 import yaml
 
+from aea.configurations.data_types import PackageId
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
 
 CLI_REGEX = r"(?P<cli>aea)"
-CMD_REGEX = r"(?P<cmd>.*)"
+CMD_REGEX = r"(?P<cmd>(?!-)\S+(\s--\S+)*)"
 VENDOR_REGEX = rf"(?P<vendor>{SIMPLE_ID_REGEX})"
 PACKAGE_REGEX = rf"(?P<package>{SIMPLE_ID_REGEX})"
 VERSION_REGEX = r"(?P<version>\d+\.\d+\.\d+)"
@@ -50,21 +52,16 @@ def read_file(filepath: str) -> str:
 
 
 class Package:  # pylint: disable=too-few-public-methods
-    """Class that represents a package in hashes.csv"""
+    """Class that represents a package in packages.json"""
 
-    CSV_HASH_REGEX = r"(?P<vendor>.*)\/(?P<type>.*)\/(?P<name>.*),(?P<hash>.*)(?:\n|$)"
-
-    def __init__(self, package_line: str) -> None:
+    def __init__(self, package_id_str: str, package_hash: str) -> None:
         """Constructor"""
-        m = re.match(self.CSV_HASH_REGEX, package_line)
-        if not m:
-            raise ValueError(
-                f"PackageHashManager: the line {package_line} does not match the package format"
-            )
-        self.vendor = m.groupdict()["vendor"]
-        self.type = m.groupdict()["type"]
-        self.name = m.groupdict()["name"]
-        self.hash = m.groupdict()["hash"]
+
+        self.package_id = PackageId.from_uri_path(package_id_str)
+        self.vendor = self.package_id.author
+        self.type = self.package_id.package_type.to_plural()
+        self.name = self.package_id.name
+        self.hash = package_hash
 
         if self.name == "scaffold":
             return
@@ -78,7 +75,7 @@ class Package:  # pylint: disable=too-few-public-methods
             "contracts",
         ):
             raise ValueError(
-                f"Package: unknown package type in hashes.csv: {self.type}"
+                f"Package: unknown package type in packages.json: {self.type}"
             )
         self.type = self.type[:-1]  # remove last s
 
@@ -107,14 +104,13 @@ class Package:  # pylint: disable=too-few-public-methods
 
 
 class PackageHashManager:
-    """Class that represents the packages in hashes.csv"""
+    """Class that represents the packages in packages.json"""
 
     def __init__(self) -> None:
         """Constructor"""
-        hashes_file = Path("packages", "hashes.csv").relative_to(".")
-        with open(hashes_file, "r", encoding="utf-8") as file_:
-            self.packages = [Package(line) for line in file_.readlines()]
-            self.packages = [p for p in self.packages if p.name != "scaffold"]
+        hashes_file = Path("packages", "packages.json").relative_to(".")
+        hash_data = json.loads(hashes_file.read_text())
+        self.packages = [Package(key, value) for key, value in hash_data.items()]
 
         self.package_tree: Dict = {}
         for p in self.packages:
@@ -130,7 +126,7 @@ class PackageHashManager:
             return None
         if len(packages) > 1:
             raise ValueError(
-                f"PackageHashManager: hash search for {package_hash} returned more than 1 result in hashes.csv"
+                f"PackageHashManager: hash search for {package_hash} returned more than 1 result in packages.json"
             )
         return packages[0]
 
@@ -151,15 +147,15 @@ class PackageHashManager:
             d = m.groupdict()
 
             # Underspecified commands that only use the hash
-            # In this case we cannot infer the package type, just check whether or not the hash exists in hashes.csv
+            # In this case we cannot infer the package type, just check whether or not the hash exists in packages.json
             if not d["vendor"] and not d["package"]:
                 package = self.get_package_by_hash(d["hash"])
 
-                # This hash exists in hashes.csv
+                # This hash exists in packages.json
                 if package:
                     return package.hash
 
-                # This hash does not exist in hashes.csv
+                # This hash does not exist in packages.json
                 print(
                     f"Docs [{md_file}]: unknown IPFS hash in line '{package_line}'. Can't fix because this command just uses the hash"
                 )
@@ -193,7 +189,11 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
 
     all_md_files_docs = Path("docs").rglob("*.md")
     all_md_files_tests = Path("tests/test_docs/test_bash_yaml/md_files").rglob("*.md")
-    all_md_files = [*all_md_files_docs] + [*all_md_files_tests]
+    all_md_files = [
+        *all_md_files_docs,
+        *all_md_files_tests,
+        Path("deploy-image/build.sh"),
+    ]
     errors = False
     hash_mismatches = False
     old_to_new_hashes = {}

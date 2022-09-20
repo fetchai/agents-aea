@@ -22,7 +22,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Sequence, Union, cast
 
 import click
 from click import argument, option
@@ -36,13 +36,14 @@ from aea.cli.registry.settings import (
 from aea.cli.utils.config import get_or_create_cli_config, try_to_load_agent_config
 from aea.cli.utils.constants import DUMMY_PACKAGE_ID
 from aea.configurations.constants import (
+    CONFIG_FILE_TO_PACKAGE_TYPE,
     CONNECTION,
     CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
     PROTOCOL,
     SKILL,
 )
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import PackageType, PublicId
 from aea.helpers.io import open_file
 
 
@@ -80,6 +81,22 @@ class ConnectionsOption(click.Option):
             return list(result.keys())
         except Exception:  # pragma: no cover
             raise click.BadParameter(value)
+
+
+class PytestArgs(click.Option):
+    """Custom Click option for parsing Pytest arguments."""
+
+    def type_cast_value(
+        self, ctx: click.Context, value: Optional[str]
+    ) -> Sequence[str]:
+        """Cast a string value to a sequence of Pytest arguments."""
+        try:
+            if value is None:
+                return []
+            return value.split(" ")
+        except Exception:
+            error_message = f"cannot split '{value}' into pytest arguments"
+            raise click.BadParameter(error_message)
 
 
 class PublicIdOrPathParameter(click.ParamType):
@@ -205,15 +222,17 @@ class AgentDirectory(click.Path):
             os.chdir(cwd)
 
 
-def registry_flag(mark_default: bool = True) -> Callable:
+def registry_flag(
+    mark_default: bool = True,
+    default_registry: Optional[str] = None,
+) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
-    default_registry: Optional[str] = (
+    default_registry = default_registry or (
         get_or_create_cli_config().get("registry_config", {}).get("default")
     )
 
-    if default_registry is None:
-        default_registry = REGISTRY_LOCAL
+    default_registry = default_registry or REGISTRY_LOCAL
 
     def wrapper(f: Callable) -> Callable:
         f = option(
@@ -235,10 +254,13 @@ def registry_flag(mark_default: bool = True) -> Callable:
     return wrapper
 
 
-def remote_registry_flag(mark_default: bool = True) -> Callable:
+def remote_registry_flag(
+    mark_default: bool = True,
+    default_registry: Optional[str] = None,
+) -> Callable:
     """Choice of one flag between: '--ipfs/--http'."""
 
-    default_registry: Optional[str] = (
+    default_registry = default_registry or (
         get_or_create_cli_config()
         .get("registry_config", {})
         .get("settings", {})
@@ -246,8 +268,7 @@ def remote_registry_flag(mark_default: bool = True) -> Callable:
         .get("default")
     )
 
-    if default_registry is None:
-        default_registry = REMOTE_IPFS
+    default_registry = default_registry or REMOTE_IPFS
 
     def wrapper(f: Callable) -> Callable:
         f = option(
@@ -331,3 +352,32 @@ def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  #
         )  # type: ignore
 
     return wrap
+
+
+def determine_package_type_for_directory(package_dir: Path) -> PackageType:
+    """
+    Find package type for the package directory by checking config file names.
+
+    :param package_dir: package dir to determine package type:
+
+    :return: PackageType
+    """
+    config_files = list(
+        set(os.listdir(str(package_dir))).intersection(
+            set(CONFIG_FILE_TO_PACKAGE_TYPE.keys())
+        )
+    )
+
+    if len(config_files) > 1:
+        raise ValueError(
+            f"Too many config files in the directory, only one has to present!: {', '.join(config_files)}"
+        )
+    if len(config_files) == 0:
+        raise ValueError(
+            f"No package config file found in `{str(package_dir)}`. Incorrect directory?"
+        )
+
+    config_file = config_files[0]
+    package_type = PackageType(CONFIG_FILE_TO_PACKAGE_TYPE[config_file])
+
+    return package_type

@@ -43,6 +43,10 @@ from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
 from aea.multiplexer import AsyncMultiplexer, InBox, Multiplexer, OutBox
 from aea.test_tools.click_testing import CliRunner
+from aea.test_tools.constants import (
+    UNKNOWN_CONNECTION_PUBLIC_ID,
+    UNKNOWN_PROTOCOL_PUBLIC_ID,
+)
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
@@ -53,8 +57,6 @@ from .conftest import (
     AUTHOR,
     CLI_LOG_OPTION,
     ROOT_DIR,
-    UNKNOWN_CONNECTION_PUBLIC_ID,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
     _make_dummy_connection,
     _make_local_connection,
     _make_stub_connection,

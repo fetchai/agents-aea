@@ -9,8 +9,7 @@ fingerprint:
   __init__.py: QmejjdhqVfgR3ABQbUFT5xwjAwTt9MvPTpGd9oC2xHKzY4
 fingerprint_ignore_patterns: []
 contracts: []
-protocols:
-- fetchai/default:1.0.0
+protocols: []
 skills: []
 behaviours: {}
 handlers: {}

@@ -89,6 +89,7 @@ Commands:
   local-registry-sync     Upgrade the local package registry.
   login                   Login to the registry account.
   logout                  Logout from the registry account.
+  packages                Local package manager.
   publish                 Publish the agent to the registry.
   push                    Push a non-vendor package of the agent to the...
   push-all                Push all available packages to a registry.
@@ -99,6 +100,7 @@ Commands:
   run                     Run the agent.
   scaffold                Scaffold a package for the agent.
   search                  Search for packages in the registry.
+  test                    Run tests of an AEA project.
   transfer                Transfer wealth associated with a private key of...
   upgrade                 Upgrade the packages of the agent.
 """

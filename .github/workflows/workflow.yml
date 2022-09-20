@@ -134,13 +134,13 @@ jobs:
       - name: License Check
         run: tox -e liccheck
       - name: AEA Package Hashes Check
-        run: tox -e hash_check -- --timeout 60.0
+        run: tox -e hash-check
       - name: Check package versions in documentation
-        run: tox -e package_version_checks
+        run: tox -e package-version-checks
       - name: Check package dependencies
-        run: tox -e package_dependencies_checks
+        run: tox -e package-dependencies-checks
       - name: Check generate protocols
-        run: tox -e check_generate_all_protocols
+        run: tox -e check-generate-all-protocols
       - name: Generate Documentation
         run: tox -e docs
 
@@ -189,11 +189,27 @@ jobs:
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links and IPFS hashes
-        run: tox -e check_doc_links_hashes
+        run: tox -e check-doc-links-hashes
       - name: Check API Docs updated
-        run: tox -e check_api_docs
+        run: tox -e check-api-docs
       - name: Check spelling
-        run: tox -e spell_check
+        run: tox -e spell-check
+
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.17.7"
+      - run: |
+          wget https://github.com/zricethezav/gitleaks/releases/download/v8.10.1/gitleaks_8.10.1_linux_x64.tar.gz && \
+          tar -xzf gitleaks_8.10.1_linux_x64.tar.gz && \
+          sudo install gitleaks /usr/bin && \
+          gitleaks detect --report-format json --report-path leak_report
 
   dependencies_checks:
     continue-on-error: False
@@ -219,7 +235,7 @@ jobs:
           pip install -e .[all]
       - name: Check aea dependenices and imports
         run: |
-          tox -e dependencies_check
+          tox -e dependencies-check
 
   plugins_install_check:
     continue-on-error: False
@@ -306,8 +322,10 @@ jobs:
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
-      - name: Async integration tests
+      - name: Framework integration tests
         run: tox -e py3.10 -- -m 'integration and not unstable and not ledger and not profiling'
+      - name: Packages integration tests
+        run: tox -e packages-py3.10 -- -m 'integration and not unstable and not ledger and not profiling'
 
   profiling_checks:
     continue-on-error: True
@@ -338,7 +356,7 @@ jobs:
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
-      - name: Async integration tests
+      - name: Framework integration tests
         run: tox -e py3.10 -- -m 'profiling'
 
   integration_checks_ledger:
@@ -363,8 +381,10 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
-      - name: Integration tests
+      - name: Framework integration tests
         run: tox -e py3.10 -- -m 'integration and not unstable and ledger and not profiling'
+      - name: Packages integration tests
+        run: tox -e packages-py3.10 -- -m 'integration and not unstable and ledger and not profiling'
 
   platform_checks:
     continue-on-error: True
@@ -462,10 +482,13 @@ jobs:
           ipfs init
 
       - if: True
-        name: Unit tests
+        name: Framework unit tests
         run: |
           tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
-      - name: Plugin tests
+      - name: Packages unit tests
+        run: |
+          tox -e packages-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
+      - name: Plugin unit tests
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable and not profiling'
 
@@ -530,6 +553,7 @@ jobs:
         run: |
           tox -e py3.10-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
           tox -e plugins-py3.10-cov -- --cov-append -m 'not unstable'
+          tox -e packages-py3.10-cov -- --cov-append -m 'not unstable'
         continue-on-error: true
       - name: Show full coverage report
         run: |

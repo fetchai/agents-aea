@@ -10,10 +10,12 @@ fingerprint:
   README.md: bafybeibx4ko4f5xbgozqlgfnxwc3rksm5b7khtikf46izrlndjrojv2lw4
   __init__.py: bafybeiateb3vma46yihntj5gbai3eqcy3fkx55lkrwye6tbr4cuo5xktdm
   connection.py: bafybeihlwvleotrr5cgzokgcia7wek36c7pcflbuaminiqgvdrt2iuihoe
+  tests/__init__.py: bafybeifdwnjjmrmu6g3eiuraixxfrumeacwdbjxcxqufeuhcks4hlc65nu
+  tests/test_http_client.py: bafybeid5zspv56oacfrxqlint5jkkendg7az2t7ohxzfien2yqy2rjif6i
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeie2gaufz5ydmxiucqoqnlxfs2psqds6ewmk6kv6zsm5bg67d6sgyq
+- fetchai/http:1.0.0:bafybeib3f4rgld3v2r7ubb4qlfaev7y4azm6ndw4x2of4lp73nfmmiabeu
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1

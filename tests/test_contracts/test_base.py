@@ -32,6 +32,7 @@ from unittest.mock import MagicMock
 import pytest
 import web3
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_TESTNET_CONFIG
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli.scaffold import add_contract_abi, scaffold_item
@@ -48,7 +49,7 @@ from aea.crypto.ledger_apis import ETHEREUM_DEFAULT_ADDRESS, FETCHAI_DEFAULT_ADD
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
-from tests.conftest import ETHEREUM_TESTNET_CONFIG, ROOT_DIR, make_uri
+from tests.conftest import ROOT_DIR, make_uri
 
 
 logger = logging.getLogger(__name__)

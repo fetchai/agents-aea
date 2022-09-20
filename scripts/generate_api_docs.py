@@ -174,8 +174,11 @@ def run_pydoc_markdown(module: str) -> str:
     :return: the PyDoc content (pre-processed).
     """
     pydoc = subprocess.Popen(  # nosec
-        ["pydoc-markdown", "-m", module, "-I", "."], stdout=subprocess.PIPE
+        ["pydoc-markdown", "-m", module, "-I", "."],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
+
     stdout, _ = pydoc.communicate()
     pydoc.wait()
     stdout_text = stdout.decode("utf-8")

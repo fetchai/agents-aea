@@ -147,6 +147,47 @@ It adds all the __init__.py modules into `sys.modules`.
 
 - `configuration`: the configuration object.
 
+<a id="aea.components.base._CheckUsedDependencies"></a>
+
+## `_`CheckUsedDependencies Objects
+
+```python
+class _CheckUsedDependencies()
+```
+
+Auxiliary class to keep track of used packages in import statements of package modules.
+
+<a id="aea.components.base._CheckUsedDependencies.__init__"></a>
+
+#### `__`init`__`
+
+```python
+def __init__(configuration: ComponentConfiguration) -> None
+```
+
+Initialize the instance.
+
+<a id="aea.components.base._CheckUsedDependencies.run_check"></a>
+
+#### run`_`check
+
+```python
+def run_check() -> None
+```
+
+Run the check.
+
+<a id="aea.components.base._CheckUsedDependencies.package_id_prefix_to_str"></a>
+
+#### package`_`id`_`prefix`_`to`_`str
+
+```python
+@classmethod
+def package_id_prefix_to_str(cls, package_id_prefix: PackageIdPrefix) -> str
+```
+
+Get string from package id prefix.
+
 <a id="aea.components.base.perform_load_aea_package"></a>
 
 #### perform`_`load`_`aea`_`package
@@ -159,6 +200,10 @@ def perform_load_aea_package(dir_: Path, author: str, package_type_plural: str,
 Load the AEA package from values provided.
 
 It adds all the __init__.py modules into `sys.modules`.
+
+This function also checks that:
+ - all packages declared as dependencies are used in package modules;
+ - all imports correspond to a package declared as dependency.
 
 **Arguments**:
 

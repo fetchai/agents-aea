@@ -32,6 +32,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 from click import ClickException
 from pexpect.exceptions import EOF  # type: ignore
 
@@ -54,14 +55,7 @@ from packages.fetchai.connections.stub.connection import (
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import (
-    AUTHOR,
-    CLI_LOG_OPTION,
-    CliRunner,
-    FETCHAI_PRIVATE_KEY_FILE,
-    MAX_FLAKY_RERUNS,
-    ROOT_DIR,
-)
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -542,7 +536,10 @@ def test_run_unknown_private_key():
         standalone_mode=False,
     )
 
-    s = "Unsupported identifier `fetchai_not` in private key paths. Supported identifiers: ['cosmos', 'ethereum', 'fetchai']."
+    s = (
+        "Unsupported identifier `fetchai_not` in private key paths. Supported identifiers: ['cosmos', 'ethereum', "
+        "'fetchai']."
+    )
     assert result.exception.message == s
 
     os.chdir(cwd)
@@ -1109,8 +1106,11 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Agent configuration file '{}' is invalid: `ExtraPropertiesError: properties not expected: invalid_attribute`. Please check the documentation.".format(
-            DEFAULT_AEA_CONFIG_FILE
+        s = (
+            "Agent configuration file '{}' is invalid: `ExtraPropertiesError: properties not expected: "
+            "invalid_attribute`. Please check the documentation.".format(
+                DEFAULT_AEA_CONFIG_FILE
+            )
         )
         assert self.result.exception.message == s
 
@@ -1287,8 +1287,11 @@ class TestRunFailsWhenConnectionNotComplete(AEATestCaseEmpty):
 
     def test_run(self):
         """Run the test."""
-        expected_message = "Package loading error: An error occurred while loading connection {}: Connection module '{}' not found.".format(
-            self.connection_id, self.relative_connection_module_path
+        expected_message = (
+            "Package loading error: An error occurred while loading connection {}: Connection module "
+            "'{}' not found.".format(
+                self.connection_id, self.relative_connection_module_path
+            )
         )
         with pytest.raises(ClickException, match=re.escape(expected_message)):
             self.run_cli_command(
@@ -1330,12 +1333,14 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             "connections",
             cls.connection_name,
             "connection.py",
-        ).write_text("")
+            # preserve import statement so to make the check of unused packages to pass
+        ).write_text("import packages.fetchai.protocols.http")
 
     def test_run(self):
         """Run the test."""
-        expected_message = "Package loading error: An error occurred while loading connection {}: Connection class '{}' not found.".format(
-            self.connection_id, "HTTPClientConnection"
+        expected_message = (
+            "Package loading error: An error occurred while loading connection {}: Connection class '{"
+            "}' not found.".format(self.connection_id, "HTTPClientConnection")
         )
         with pytest.raises(ClickException, match=expected_message):
             self.run_cli_command(

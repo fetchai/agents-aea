@@ -1,4 +1,4 @@
-The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.ml" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
+The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://github.com/openai/gym" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
 ### Discussion
 
@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch open_aea/gym_aea:0.1.0:bafybeiaa35zgoyqtef6c5fvm5j4skvapohw6fclxv2v4tufw7u3qjcqnjy --remote
+aea fetch open_aea/gym_aea:0.1.0:bafybeigeyp52amdtgluqd4t3djdieawk7l4fyysfqdui6j4vsvfdxmdqwq --remote
 cd gym_aea
 aea install
 ```
@@ -36,7 +36,7 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.20.0:bafybeibghoxthfa5bcm2excb5e6bvgtrcg5cwnrkyf6dvtuvnphroc3uki --remote
+aea add skill fetchai/gym:0.20.0:bafybeif774uxl33jeg6lk5rov4bkmq5vn6ryvtochyah3czvo56rgvfnzu --remote
 ```
 
 ### Set gym connection as default

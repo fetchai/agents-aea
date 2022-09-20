@@ -117,7 +117,7 @@ class Project(_Base):
         :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
-        :param skip_aea_validation: aea validation flag
+        :param skip_aea_validation: AEA validation flag
         :return: project
         """
         ctx = Context(
@@ -279,7 +279,7 @@ class AgentAlias(_Base):
         return result
 
     def get_aea_instance(self) -> AEA:
-        """Build new aea instance."""
+        """Build new AEA instance."""
         self.issue_certificates()
         aea = self.builder.build(password=self._password)
         # override build dir to project's one

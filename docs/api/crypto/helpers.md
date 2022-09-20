@@ -22,10 +22,6 @@ Try validate a private key path.
 - `private_key_path`: the path to the private key.
 - `password`: the password to encrypt/decrypt the private key.
 
-**Raises**:
-
-- `None`: ValueError if the identifier is invalid.
-
 <a id="aea.crypto.helpers.create_private_key"></a>
 
 #### create`_`private`_`key
@@ -45,10 +41,6 @@ Create a private key for the specified ledger identifier.
 - `private_key_file`: the private key file.
 - `password`: the password to encrypt/decrypt the private key.
 - `extra_entropy`: add extra randomness to whatever randomness your OS can provide
-
-**Raises**:
-
-- `None`: ValueError if the identifier is invalid.
 
 <a id="aea.crypto.helpers.try_generate_testnet_wealth"></a>
 

@@ -29,6 +29,7 @@ from typing import Any, Callable, Dict, Tuple, Union, cast
 import click
 from jsonschema import ValidationError
 
+from aea.cli.utils.click_utils import PytestArgs
 from aea.cli.utils.config import (
     get_default_author_from_cli_config,
     try_to_load_agent_config,
@@ -207,7 +208,7 @@ def _cast_ctx(context: Union[Context, click.core.Context]) -> Context:
     :param context: Context or click.core.Context object.
 
     :return: context object.
-    :raises: AEAException if context is none of Context and click.core.Context types.
+    :raises AEAException: if context is none of Context and click.core.Context types.
     """
     if isinstance(context, Context):
         return context
@@ -250,3 +251,6 @@ def clean_after(func: Callable) -> Callable:
             raise e
 
     return wrapper
+
+
+pytest_args = click.option("--args", "-a", cls=PytestArgs)

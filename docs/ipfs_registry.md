@@ -6,7 +6,7 @@ IPFS registry utilizes an updated version of the existing PublicId format. Previ
 
 So to utilize the newer PublicId format we have a script which extends all available packages with the new PublicId format.
 
-## Setup the aea to use the IPFS registry
+## Setup the AEA to use the IPFS registry
 
 Initialize AEA cli tool with default registry set to remote and default remote registry set to ipfs.
 
@@ -38,11 +38,11 @@ Packages can be downloaded using both extended public ids and hashes
 
 Add the signing protocol using
 
-`aea add protocol bafybeighvx4vpsyspffggewidvkfq3lqbse6ap4tdewd6j5bs73ifnuaui --remote`
+`aea add protocol open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi --remote`
 
 Or
 
-`aea add protocol open_aea/signing:1.0.0:bafybeighvx4vpsyspffggewidvkfq3lqbse6ap4tdewd6j5bs73ifnuaui --remote`
+`aea add protocol open_aea/signing:1.0.0:bafybeihjlpgjm5vkg6kxm66a5k2r357dadnsjfpddta2mzd2bshstv6vdi --remote`
 
 ## Publishing agents
 

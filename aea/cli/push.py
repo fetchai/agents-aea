@@ -208,7 +208,7 @@ def push_item_ipfs(component_path: Path, public_id: PublicId) -> None:
         )
 
     ipfs_tool = IPFSTool(get_ipfs_node_multiaddr())
-    _, package_hash, _ = ipfs_tool.add(component_path)
+    _, package_hash, _ = ipfs_tool.add(str(component_path))
     package_hash = to_v1(package_hash)
 
     click.echo("Pushed component with:")

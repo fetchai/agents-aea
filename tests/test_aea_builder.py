@@ -23,6 +23,7 @@ import re
 import shutil
 import sys
 import tempfile
+from copy import copy
 from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
@@ -60,6 +61,7 @@ from aea.helpers.install_dependency import call_pip
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
+from aea.test_tools.mocks import RegexComparator
 from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections.http_server.connection import (
@@ -69,7 +71,6 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 
-from tests.common.mocks import RegexComparator
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
@@ -179,9 +180,6 @@ class TestReentrancy:
     @classmethod
     def setup_class(cls):
         """Set up the test."""
-        protocol_path = os.path.join(
-            ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
-        )
         connection_path = os.path.join(
             ROOT_DIR, "packages", "fetchai", "connections", "local"
         )
@@ -189,6 +187,13 @@ class TestReentrancy:
         builder = AEABuilder()
         builder.set_name("aea1")
         builder.add_private_key(DEFAULT_LEDGER)
+        protocol_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "oef_search"
+        )
+        builder.add_protocol(protocol_path)
+        protocol_path = os.path.join(
+            ROOT_DIR, "packages", "fetchai", "protocols", "fipa"
+        )
         builder.add_protocol(protocol_path)
         protocol = os.path.join(ROOT_DIR, "packages", "fetchai", "protocols", "default")
         builder.add_component(ComponentType.PROTOCOL, protocol)
@@ -903,6 +908,7 @@ class TestExtraDeps(AEATestCaseEmpty):
 
     def test_install_dependency(self):
         """Test dependencies installed."""
+        old_sys_modules = copy(sys.modules)
         package_name = "async_generator"
         dependency = Dependency(package_name, "==1.10")
         sys.modules.pop(package_name, None)
@@ -931,6 +937,7 @@ class TestExtraDeps(AEATestCaseEmpty):
             raise Exception("should not be raised")
         except ModuleNotFoundError:
             pass
+        sys.modules = old_sys_modules
 
 
 class TestBuildEntrypoint(AEATestCaseEmpty, CleanDirectoryClass):
@@ -1045,6 +1052,26 @@ def test_builder_pypi_dependencies():
         "open-aea-ledger-ethereum",
         "open-aea-ledger-cosmos",
     }
+
+
+def test_dependency_tree_check():
+    """Test getter for PyPI dependencies."""
+    dummy_aea_path = Path(CUR_PATH, "data", "dummy_aea")
+    aea_config_file = dummy_aea_path / DEFAULT_AEA_CONFIG_FILE
+    original_content = aea_config_file.read_text()
+    missing_dependencies = original_content.replace("- dummy_author/dummy:0.1.0\n", "")
+    aea_config_file.write_text(missing_dependencies)
+
+    try:
+        with pytest.raises(
+            AEAEnforceError,
+            match=re.escape(
+                "Following dependencies are present in the project but missing from the aea-config.yaml; {PackageId(skill, dummy_author/dummy:0.1.0)}"
+            ),
+        ):
+            AEABuilder.from_aea_project(dummy_aea_path)
+    finally:
+        aea_config_file.write_text(original_content)
 
 
 class TestApplyEnvironmentVariables(AEATestCaseEmpty, CleanDirectoryClass):

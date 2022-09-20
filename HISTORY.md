@@ -1,5 +1,107 @@
 # Release History - open AEA
 
+## 1.19.0 (2022-09-14)
+
+AEA:
+- Updates the `aea init` command to set the local as default registry and IPFS as default remote registry
+- Updates the `aea test packages` to include the agent tests
+- Introduces 
+  - `aea packages` command group to manage local packages repository
+  - `aea packages lock` command to lock all available packages and create `packages.json` file 
+  - `aea packages sync` command to synchronize the local packages repository
+
+Chores:
+- Fix README header link
+- Removes `shebangs` from non-script files
+- Adds a command validator for docs and Makefile
+- Deprecates the usage of `hashes.csv` to maintain packages consistency
+
+Tests:
+- Fixes test failures introduced on `v1.18.0`
+
+## 1.18.0.post1 (2022-09-06)
+
+AEA:
+- Reverts a problematic package loading logic introduced in `1.18.0`
+
+Tests:
+- Fixes flaky tests
+
+Chores:
+- Restructures CI to avoid environment cross-effects between the package and framework tests
+
+## 1.18.0 (2022-09-04)
+
+AEA:
+- Fixes protocol header string regex.
+- Adds `FIELDS_WITH_NESTED_FIELDS` and `NESTED_FIELDS_ALLOWED_TO_UPDATE` in the base config class.
+- Introduces `aea test` command group:
+  - `aea test item_type public_id`: Run all tests of the AEA package specified by `item_type` and `public_id`
+  - `aea test by-path package_dir`: Run all the tests of the AEA package located at `package_dir`
+  - `aea test packages`: Runs all tests in the `packages` (local registry) folder.
+  - `aea test`: Runs tests in the `tests` folder, if present in the agent folder.
+
+Tests:
+- Ports tests for the following packages into their respective package folders
+  - `packages/valory/protocols/acn`
+  - `packages/valory/protocols/tendermint`
+  - `packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhttests`
+  - `packages/open_aea/protocols/signing`
+  - `packages/fetchai/skills/generic_seller`
+  - `packages/fetchai/skills/http_echo`
+  - `packages/fetchai/skills/echo`
+  - `packages/fetchai/skills/erc1155_client`
+  - `packages/fetchai/skills/gym`
+  - `packages/fetchai/skills/erc1155_deploy`
+  - `packages/fetchai/skills/generic_buyer`
+  - `packages/fetchai/protocols/http`
+  - `packages/fetchai/protocols/fipa`
+  - `packages/fetchai/protocols/default`
+  - `packages/fetchai/protocols/state_update`
+  - `packages/fetchai/protocols/ledger_api`
+  - `packages/fetchai/protocols/oef_search`
+  - `packages/fetchai/protocols/contract_api`
+  - `packages/fetchai/protocols/gym`
+  - `packages/fetchai/protocols/tac`
+  - `packages/fetchai/connections/ledger`
+  - `packages/fetchai/connections/http_server`
+  - `packages/fetchai/connections/local`
+  - `packages/fetchai/connections/stub`
+  - `packages/fetchai/connections/gym`
+  - `packages/fetchai/connections/http_client`
+  - `packages/fetchai/contracts/erc1155`
+
+## 1.17.0 (2022-08-26)
+
+AEA:
+- Updates the deploy image Dockerfile to use Python 3.10
+- Updates the deploy image Dockerfile to utilize remote registry when fetching components
+- Improves handling for variables with potential none values
+
+Chore:
+- Bumps `mistune` to a secure version
+- Bumps `protobuf` dependencies to address `dependabot` security warning
+- Improves command regex on `scripts/check_doc_ipfs_hashes.py`
+- Updates `tox` definitions and `Makefile` targets to align with the latest changes
+
+## 1.16.0 (2022-08-18)
+
+AEA:
+- Adds schema validation for global CLI config file
+- Improves the dependency resolver
+- Provides more useful error messages when circular package dependencies are present
+- Adds check to make sure all the packages referenced in an AEA package's `config.yaml` are being used as imports in the code, and vice versa that all imported packages are reference in the `config.yaml`
+- Adds check to make sure all the packages in an AEA project are listed in the `aea-config.yaml`
+- Fixes a bug related to async function call on `TCPSocketProtocol`
+- Updates transaction building to handle gas estimation properly
+- Update `ContractConfig` class to include contract dependencies in the dependency list
+
+Docs:
+- Adds missing command on the `http-echo-demo.md` doc.
+
+Chore:
+- Add the gitleaks scan job
+
 ## 1.15.0 (2022-08-01)
 
 AEA:

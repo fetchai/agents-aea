@@ -154,9 +154,8 @@ class ProtocolGenerator:
         :param output_path: the path to the location in which the protocol module is to be generated.
         :param dotted_path_to_protocol_package: the path to the protocol package
 
-        :raises FileNotFoundError if any prerequisite application is not installed
-        :raises yaml.YAMLError if yaml parser encounters an error condition
-        :raises ProtocolSpecificationParseError if specification fails generator's validation
+        :raises FileNotFoundError: if any prerequisite application is not installed
+        :raises ProtocolSpecificationParseError: if specification fails generator's validation
         """
         # Check the prerequisite applications are installed
         try:

@@ -153,6 +153,27 @@ class TestContractConfig:
         actual_json = actual_config.json
         assert expected_json == actual_json
 
+    def test_dependencies_list(
+        self,
+    ) -> None:
+        """Test dependencies list property."""
+
+        dummy_contract = PublicId(author="dummy_author", name="contract")
+
+        config_file, *_ = contract_config_files
+        f = open(config_file)
+        original_json = yaml.safe_load(f)
+        original_json["build_directory"] = "some"
+        original_json["contracts"] = [
+            str(dummy_contract),
+        ]
+
+        expected_config = ContractConfig.from_json(original_json)
+        assert isinstance(expected_config, ContractConfig)
+        assert expected_config.package_dependencies == {
+            PackageId(PackageType.CONTRACT, dummy_contract),
+        }
+
 
 class TestConnectionConfig:
     """Test the connection configuration class."""
@@ -345,7 +366,7 @@ class TestAgentConfigUpdate:
 
     def test_component_configurations_setter(self):
         """Test component configuration setter."""
-        assert self.aea_config.component_configurations == {}
+        assert len(self.aea_config.component_configurations) == 1
         new_component_configurations = {
             self.dummy_skill_component_id: self.new_dummy_skill_config
         }
@@ -353,7 +374,7 @@ class TestAgentConfigUpdate:
 
     def test_component_configurations_setter_negative(self):
         """Test component configuration setter with wrong configurations."""
-        assert self.aea_config.component_configurations == {}
+        assert len(self.aea_config.component_configurations) == 1
         new_component_configurations = {
             self.dummy_skill_component_id: {
                 "handlers": {"dummy": {"class_name": "SomeClass"}}

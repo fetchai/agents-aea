@@ -7,6 +7,33 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+## `v1.18.0` to `v1.19.0`
+
+- Deprecated the usage of `hashes.csv` and replaces it with `packages.json`, which is maintained by `aea packages lock`
+- `--check` flag is deprecated from `aea hash all`, from now package consistencies can be verified by `aea packages lock --check`
+- When running `init` if no registry flags provided, `local` will be used as the default registry and `IPFS` as the default remote registry
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.17.0` to `v1.18.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.16.0` to `v1.17.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.15.0` to `v1.16.0`
+
+- A typo change, now import `from aea.helpers.dependency_tree import DependencyTree` rather than `from aea.helpers.dependency_tree import DependecyTree`.
+- The global configuration file for the `aea` CLI has a breaking change. Please remove `~/.aea/cli_config.yaml` and rerun `autonomy init --remote`.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.14.0` to `v1.15.0`
 
 No backwards incompatible changes.

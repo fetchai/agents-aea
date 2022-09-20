@@ -29,7 +29,9 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_PATH
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_PATH
 
 import aea
 from aea.aea import AEA
@@ -56,13 +58,7 @@ from aea.skills.base import (
 )
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from tests.conftest import (
-    CUR_PATH,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI_PRIVATE_KEY_PATH,
-    ROOT_DIR,
-    _make_dummy_connection,
-)
+from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
 
 
 class BaseTestSkillContext:

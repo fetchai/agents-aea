@@ -34,11 +34,11 @@ import tempfile
 import threading
 import time
 from contextlib import contextmanager
+from copy import copy
 from functools import wraps
 from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple, cast
 from unittest.mock import MagicMock, patch
-from urllib.parse import urlparse
 
 import docker as docker
 import gym
@@ -47,11 +47,24 @@ from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_cli_ipfs.ipfs_utils import IPFSDaemon  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_ethereum.ethereum import (
+from aea_ledger_ethereum.test_tools.constants import (
     DEFAULT_EIP1559_STRATEGY,
-    DEFAULT_GAS_STATION_STRATEGY,
+    ETHEREUM_PRIVATE_KEY_PATH,
+    ETHEREUM_PRIVATE_KEY_TWO_PATH,
+    FUNDED_ETH_PRIVATE_KEY_1,
+    FUNDED_ETH_PRIVATE_KEY_2,
+    FUNDED_ETH_PRIVATE_KEY_3,
 )
+from aea_ledger_ethereum.test_tools.docker_images import GanacheDockerImage
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from aea_ledger_fetchai.test_tools.constants import (
+    FETCHAI_P2P_ADDRESS,
+    FETCHAI_TESTNET_CONFIG,
+    FUNDED_FETCHAI_ADDRESS_ONE,
+    FUNDED_FETCHAI_ADDRESS_TWO,
+    FUNDED_FETCHAI_PRIVATE_KEY_1,
+)
+from aea_ledger_fetchai.test_tools.docker_images import FetchLedgerDockerImage
 from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from cosmpy.aerial.wallet import LocalWallet
 from cosmpy.crypto.address import Address as CosmpyAddress
@@ -76,10 +89,7 @@ from aea.contracts.base import Contract, contract_registry
 from aea.crypto.ledger_apis import (
     COSMOS_DEFAULT_ADDRESS,
     DEFAULT_LEDGER_CONFIGS,
-    ETHEREUM_DEFAULT_ADDRESS,
-    ETHEREUM_DEFAULT_CHAIN_ID,
     ETHEREUM_DEFAULT_CURRENCY_DENOM,
-    FETCHAI_DEFAULT_ADDRESS,
 )
 from aea.crypto.registries import ledger_apis_registry, make_crypto, make_ledger_api
 from aea.crypto.wallet import CryptoStore
@@ -88,16 +98,13 @@ from aea.helpers.base import cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
+from aea.test_tools.docker_image import DockerImage
+from aea.test_tools.network import LOCALHOST
 from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
 
-from tests.common.docker_image import (
-    DockerImage,
-    FetchLedgerDockerImage,
-    GanacheDockerImage,
-)
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
 
@@ -132,10 +139,9 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 
 DUMMY_ENV = gym.GoalEnv
 
-LOCAL_HOST = urlparse("http://127.0.0.1")
 
 # URL to local Ganache instance
-DEFAULT_GANACHE_ADDR = LOCAL_HOST.geturl()
+DEFAULT_GANACHE_ADDR = LOCALHOST.geturl()
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 DEFAULT_MAX_PRIORITY_FEE_PER_GAS = 1_000_000_000
@@ -143,7 +149,7 @@ DEFAULT_MAX_FEE_PER_GAS = 1_000_000_000
 
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.10.2"
-DEFAULT_FETCH_LEDGER_ADDR = LOCAL_HOST.geturl()
+DEFAULT_FETCH_LEDGER_ADDR = LOCALHOST.geturl()
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
 DEFAULT_FETCH_ADDR_REMOTE = "https://rest-dorado.fetch.ai:443"
@@ -155,13 +161,8 @@ DEFAULT_DENOMINATION = "atestfet"
 FETCHD_INITIAL_TX_SLEEP = 6
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
-FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
-
 COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
-ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier)
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 
-ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
 
 DEFAULT_AMOUNT = 1000000000000000000000
 GAS_PRICE_API_KEY = ""
@@ -170,51 +171,21 @@ GAS_PRICE_API_KEY = ""
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
     ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
 )
-ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
-)
-ETHEREUM_PRIVATE_KEY_TWO_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_TWO_FILE
-)
-FETCHAI_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
-)
+
 DEFAULT_PRIVATE_KEY_PATH = COSMOS_PRIVATE_KEY_PATH
-FUNDED_ETH_PRIVATE_KEY_1 = (
-    "0xa337a9149b4e1eafd6c21c421254cf7f98130233595db25f0f6f0a545fb08883"
-)
-FUNDED_ETH_PRIVATE_KEY_2 = (
-    "0x04b4cecf78288f2ab09d1b4c60219556928f86220f0fb2dcfc05e6a1c1149dbf"
-)
-FUNDED_ETH_PRIVATE_KEY_3 = (
-    "0x6F611408F7EF304947621C51A4B7D84A13A2B9786E9F984DA790A096E8260C64"
-)
+
 NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
     "81b0352f99a08a754b56e529dda965c4ce974edb6db7e90035e01ed193e1b7bc"
-)
-NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
-    "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
-)
-FUNDED_FETCHAI_PRIVATE_KEY_1 = (
-    "bbaef7511f275dc15f47436d14d6d3c92d4d01befea073d23d0c2750a46f6cb3"
-)
-FUNDED_FETCHAI_PRIVATE_KEY_2 = (
-    "9d6459d1f93dd153335291af940f6b5224a34a9a1e1062e2158a45fa4901ed3f"
 )
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
 COSMOS_ADDRESS_TWO = "cosmos1gssy8pmjdx8v4reg7lswvfktsaucp0w95nk78m"
-ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
-ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
-FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
-FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
-FUNDED_FETCHAI_ADDRESS_ONE = "fetch1k9dns2fd74644g0q9mfpsmfeqg0h2ym2cm6wdh"
-FUNDED_FETCHAI_ADDRESS_TWO = "fetch1x2vfp8ec2yk8nnlzn52agflpmpwtucm6yj2hw4"
+
 
 # P2P addresses
 COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
-FETCHAI_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"  # relates to NON_FUNDED_FETCHAI_PRIVATE_KEY_1
+
 NON_GENESIS_CONFIG = {
     "delegate_uri": "127.0.0.1:11001",
     "entry_peers": [FETCHAI_P2P_ADDRESS],
@@ -234,20 +205,9 @@ NON_GENESIS_CONFIG_TWO = {
 
 # testnets
 COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
-ETHEREUM_TESTNET_CONFIG = {
-    "address": ETHEREUM_DEFAULT_ADDRESS,
-    "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
-    "default_gas_price_strategy": "gas_station",
-    "gas_price_strategies": {
-        "gas_station": DEFAULT_GAS_STATION_STRATEGY,
-        "eip1559": DEFAULT_EIP1559_STRATEGY,
-    },
-}
-FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 
 # common public ids used in the tests
-UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
-UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
+
 MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.27.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
@@ -357,7 +317,7 @@ protocol_specification_files = [
     ),
 ]
 
-DEFAULT_HOST = LOCAL_HOST.hostname
+DEFAULT_HOST = LOCALHOST.hostname
 
 
 def remove_test_directory(directory: str, retries: int = 3) -> bool:
@@ -774,7 +734,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((LOCAL_HOST.hostname, 0))
+    s.bind((LOCALHOST.hostname, 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()
@@ -789,7 +749,7 @@ def get_host():
         s.connect(("10.255.255.255", 1))
         IP = s.getsockname()[0]
     except Exception:
-        IP = LOCAL_HOST.hostname
+        IP = LOCALHOST.hostname
     finally:
         s.close()
     return IP
@@ -1271,3 +1231,11 @@ def use_ipfs_daemon() -> Generator:
 
     yield
     ipfs_daemon.stop()
+
+
+@pytest.fixture(scope="function")
+def mock_sys_modules() -> Generator:
+    """Store previous content of sys.modules and restore it after test execution."""
+    old_sys_modules = copy(sys.modules)
+    yield
+    sys.modules = old_sys_modules

@@ -263,7 +263,7 @@ class CosmosHelper(Helper):
         """
         return {
             i["key"]: i["value"]
-            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])
+            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])  # type: ignore
         }
 
     @classmethod
@@ -1203,7 +1203,7 @@ class _CosmosApi(LedgerApi):
         :param tx_fee_denom: Denomination of tx_fee, identical with denom param when None
         :param raise_on_try: whether the method will raise or log on error
 
-        :raises: RuntimeError if number of pubkeys is not equal to number of from_addresses
+        :raises RuntimeError: if number of pubkeys is not equal to number of from_addresses
 
         :return: the transaction
         """
@@ -1266,7 +1266,9 @@ class _CosmosApi(LedgerApi):
         :param msgs: Messages to be part of transaction.
         :param pub_keys: Public keys of each sender
 
-        :raises: RuntimeError
+        :raises RuntimeError: If pubkey is inserted during signing would make
+                              second signer to change tx and make the first
+                              signature invalid
 
         :return: the transaction
         """
@@ -1307,7 +1309,7 @@ class _CosmosApi(LedgerApi):
             )
 
         # Get account and signer info for each sender
-        signer_infos: List[SignerInfo] = []
+        signer_infos: List[SignerInfo] = []  # type: ignore
         sign_data: JSONLike = {}
         for from_address, pub_key, sequence, account_number in zip(
             from_addresses, pub_keys, sequences, account_numbers
@@ -1486,7 +1488,6 @@ class _CosmosApi(LedgerApi):
         Attempts to update the transaction with a gas estimate
 
         :param transaction: the transaction
-        :raises: NotImplementedError
         """
         raise NotImplementedError(  # pragma: nocover
             "No gas estimation has been implemented."
@@ -1582,7 +1583,7 @@ class CosmosFaucetApi(FaucetApi):
 
         :param address: the address.
         :param url: the url
-        :raises: RuntimeError of explicit faucet failures
+        :raises RuntimeError: of explicit faucet failures
         """
         uid = self._try_create_faucet_claim(address, url)
         if uid is None:  # pragma: nocover

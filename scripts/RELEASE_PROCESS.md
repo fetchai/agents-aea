@@ -13,7 +13,7 @@
 
 5. [CURRENTLY SKIPPED] Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
-6. Update the package and dependency hashes using `aea hash all`. And the same for the test packages using `aea hash all --packages-dir tests/data/packages/`. Commit if changes occurred.
+6. Update the package and dependency hashes using `make hashes`. Commit if changes occurred.
 
 7. Check the package upgrades are correct by running `python -m aea.cli check-packages` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 
@@ -38,11 +38,11 @@
 
 17. Make clean environment and install release from PyPI: `pip install open-aea[all] --no-cache`.
 
-18. Publish the latest packages to the IPFS registry using `aea push-all`. If necessary, run it several times until all packages are updated.
+18. Publish the latest packages to the IPFS registry using `aea init --reset --author valory --ipfs --remote` and `aea push-all`. If necessary, run it several times until all packages are updated.
 
-19. Build the release images using `skaffold build -p release` which will also publish them on docker. This builds with no cache so to ensure replicable builds.
+19. Build the release images using `skaffold build -p release` which will also publish them to Docker Hub. This builds with no cache so to ensure replicable builds.
 
-20. Tag the latest images using `skaffold build -p release-latest` which will also publish them on docker.
+20. Tag the latest images using `skaffold build -p release-latest` which will also publish them to Docker Hub.
 
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.

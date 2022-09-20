@@ -3,6 +3,7 @@ site_url: https://open-aea.docs.autonolas.tech/
 site_description: Everything you need to know about (open) AEAs.
 repo_url: https://github.com/valory-xyz/open-aea
 site_author: developer@fetch.ai,info@valory.xyz
+edit_uri: edit/main/docs/
 
 theme:
   name: 'material'
@@ -216,6 +217,10 @@ nav:
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Contract: 'api/test_tools/test_contract.md'
         - Test Skill: 'api/test_tools/test_skill.md'
+        - Docker Image : api/test_tools/docker_image.md
+        - Mocks : api/test_tools/mocks.md
+        - Network : api/test_tools/network.md
+        - Utils : api/test_tools/utils.md
       - Plugins:
         - CLI:
           - IPFS:
@@ -274,8 +279,13 @@ nav:
             - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'
           - Ethereum:
             - API: 'api/plugins/aea_ledger_ethereum/ethereum.md'
+            - Constants: api/plugins/aea_ledger_ethereum/test_tools/constants.md
+            - Docker Images: api/plugins/aea_ledger_ethereum/test_tools/docker_images.md
+            - Fixture Helpers: api/plugins/aea_ledger_ethereum/test_tools/fixture_helpers.md
           - Fetchai:
             - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
+            - Constants: api/plugins/aea_ledger_fetchai/test_tools/constants.md
+            - Docker Images: api/plugins/aea_ledger_fetchai/test_tools/docker_images.md
             - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Registries:
     - IPFS: ipfs_registry.md

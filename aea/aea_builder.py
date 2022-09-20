@@ -98,6 +98,7 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
 )
+from aea.helpers.dependency_tree import DependencyTree
 from aea.helpers.env_vars import apply_env_variables
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
@@ -1644,6 +1645,33 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     f"Conflict on package {pkg_name}: specifier set '{dep_info.version}' not satisfiable."
                 )
 
+    @staticmethod
+    def check_project_dependencies(
+        agent_configuration: AgentConfig, project_path: Path
+    ) -> None:
+        """Check project config for missing dependencies."""
+
+        dep_tree: Set[ComponentId] = set()
+        for level in DependencyTree.generate(project_path, from_project=True):
+            dep_tree.update(
+                {
+                    ComponentId(package.package_type.value, package.public_id)
+                    for package in level
+                    if package.package_type != PackageType.AGENT
+                }
+            )
+
+        available_components = {
+            component.without_hash()
+            for component in agent_configuration.all_components_id
+        }
+
+        missing_dependencies_from_config = dep_tree - available_components
+        enforce(
+            len(missing_dependencies_from_config) == 0,
+            f"Following dependencies are present in the project but missing from the aea-config.yaml; {missing_dependencies_from_config}",
+        )
+
     @classmethod
     def try_to_load_agent_configuration_file(
         cls,
@@ -1661,6 +1689,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     agent_configuration = apply_env_variables(
                         agent_configuration, os.environ
                     )
+                cls.check_project_dependencies(agent_configuration, aea_project_path)
                 return agent_configuration
         except FileNotFoundError:  # pragma: nocover
             raise ValueError(
@@ -1910,7 +1939,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def get_configuration_file_path(aea_project_path: Union[Path, str]) -> Path:
-        """Return path to aea-config file for the given aea project path."""
+        """Return path to aea-config file for the given AEA project path."""
         return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
     def _load_and_add_components(

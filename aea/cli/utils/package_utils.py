@@ -29,12 +29,6 @@ from jsonschema import ValidationError
 
 from aea import AEA_DIR, get_current_aea_version
 from aea.cli.fingerprint import fingerprint_item
-from aea.cli.registry.settings import (
-    REGISTRY_LOCAL,
-    REGISTRY_TYPES,
-    REMOTE_HTTP,
-    REMOTE_IPFS,
-)
 from aea.cli.utils.config import (
     dump_item_config,
     get_non_vendor_package_path,
@@ -467,46 +461,6 @@ def validate_author_name(author: Optional[str] = None) -> str:
     return valid_author
 
 
-def validate_registry_type(default_registry: Optional[str] = None) -> str:
-    """
-    Validate registry type.
-
-    :param default_registry: registry type (optional)
-    :return: validated registry name
-    """
-    if default_registry is None:
-        default_registry = click.prompt(
-            text="Please select default registry type",
-            type=click.Choice(REGISTRY_TYPES, case_sensitive=True),
-            show_choices=True,
-            default=REGISTRY_LOCAL,
-        )
-    if default_registry not in REGISTRY_TYPES:
-        raise ValueError(f"Default registry type should be one of {REGISTRY_TYPES}")
-    return default_registry
-
-
-def validate_remote_registry_type(remote_registry: Optional[str] = None) -> str:
-    """
-    Validate registry type.
-
-    :param remote_registry: registry type (optional)
-    :return: validated registry name
-    """
-    if remote_registry is None:
-        remote_registry = click.prompt(
-            text="Please select the type of remote registry to use",
-            type=click.Choice((REMOTE_HTTP, REMOTE_IPFS), case_sensitive=True),
-            show_choices=True,
-            default=REMOTE_HTTP,
-        )
-    if remote_registry not in (REMOTE_HTTP, REMOTE_IPFS):
-        raise ValueError(
-            f"Default registry type should be one of {(REMOTE_HTTP, REMOTE_IPFS)}"
-        )
-    return remote_registry
-
-
 def is_fingerprint_correct(
     package_path: Path, item_config: PackageConfiguration
 ) -> bool:
@@ -638,7 +592,7 @@ def get_item_id_present(
     :param item_public_id: PublicId of an item.
 
     :return: boolean is item present.
-    :raises: AEAEnforceError
+    :raises AEAEnforceError: if `registered_item_public_id` is None
     """
     registered_item_public_id = get_item_public_id_by_author_name(
         agent_config, item_type, item_public_id.author, item_public_id.name

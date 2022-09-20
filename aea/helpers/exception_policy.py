@@ -17,7 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains enum of aea exception policies."""
+"""This module contains enum of AEA exception policies."""
 
 from enum import Enum
 

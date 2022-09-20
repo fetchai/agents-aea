@@ -9,10 +9,15 @@ fingerprint:
   README.md: bafybeigayltuo3dejkvuqvm6cysyzw6xueha4ehgo23qv75xdavd7bik24
   __init__.py: bafybeibojyrqpiw5xkemsnrdie572mixa5ud4sxdtmpgfutl253kj4zjga
   connection.py: bafybeielwpaxz4nvhbrhmg3eyp55qq42drfyicfmbfbfty45bnzat7pvwm
+  tests/__init__.py: bafybeiecschrd664thii7emksuuziz3xrporjptci4wodsgdavlzpfzhqi
+  tests/test_misc.py: bafybeifctqrq55fa6swalswkhe7bokxizvidy354e4naywcamkwckbgi54
+  tests/test_search_services.py: bafybeibcgnt5db5ms2zbshlxthzralqvmudyzy3llxurqkjg5cm7xhx56m
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/oef_search:1.0.0:bafybeieytybenjlkcdzmqw2u6xzl26jtoe4fjlzxifqy3ollobtq4k33ii
+- fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
+- fetchai/fipa:1.0.0:bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei
+- fetchai/oef_search:1.0.0:bafybeifiec4jvsa6mcbmasjno3bwvjwwwubyp25hjqwe7gjfksgvwgdisq
 class_name: OEFLocalConnection
 config: {}
 excluded_protocols: []

@@ -81,6 +81,7 @@ from aea.helpers.base import (
     SimpleId,
     SimpleIdOrStr,
     load_module,
+    perform_dict_override,
     recursive_update,
 )
 from aea.helpers.ipfs.base import IPFSHashOnly
@@ -225,7 +226,11 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
+
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset()
+    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
+
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
 
@@ -303,11 +308,7 @@ class PackageConfiguration(Configuration, ABC):
         self._aea_version = new_aea_version
 
     def check_aea_version(self) -> None:
-        """
-        Check that the AEA version matches the specifier set.
-
-        :raises ValueError if the version of the aea framework falls within a specifier.
-        """
+        """Check that the AEA version matches the specifier set."""
         _check_aea_version(self)
 
     @property
@@ -572,6 +573,7 @@ class ConnectionConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["config", "cert_requests", "is_abstract", "build_directory"]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["config"])
 
     __slots__ = (
         "class_name",
@@ -1184,6 +1186,7 @@ class AgentConfig(PackageConfiguration):
             "storage_uri",
         ]
     )
+    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["logging_config"])
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
@@ -1580,7 +1583,12 @@ class AgentConfig(PackageConfiguration):
 
         return result
 
-    def update(self, data: Dict, env_vars_friendly: bool = False) -> None:
+    def update(  # pylint: disable=arguments-differ
+        self,
+        data: Dict,
+        env_vars_friendly: bool = False,
+        dict_overrides: Optional[Dict] = None,
+    ) -> None:
         """
         Update configuration with other data.
 
@@ -1589,6 +1597,7 @@ class AgentConfig(PackageConfiguration):
 
         :param data: the data to replace.
         :param env_vars_friendly: whether or not it is env vars friendly.
+        :param dict_overrides: A dictionary containing mapping for Component ID -> List of paths
         """
         data = copy(data)
         # update component parts
@@ -1599,11 +1608,20 @@ class AgentConfig(PackageConfiguration):
         for component_id, obj in new_component_configurations.items():
             if component_id not in updated_component_configurations:
                 updated_component_configurations[component_id] = obj
+
             else:
                 recursive_update(
                     updated_component_configurations[component_id],
                     obj,
                     allow_new_values=True,
+                )
+
+            if dict_overrides is not None and component_id in dict_overrides:
+                perform_dict_override(
+                    component_id,
+                    dict_overrides,
+                    updated_component_configurations,
+                    new_component_configurations,
                 )
 
         self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)
@@ -1847,6 +1865,14 @@ class ContractConfig(ComponentConfiguration):
         instance = cast(ContractConfig, cls._apply_params_to_instance(params, instance))
 
         return instance
+
+    @property
+    def package_dependencies(self) -> Set[ComponentId]:
+        """Get the contract dependencies."""
+        return {
+            ComponentId(ComponentType.CONTRACT, contract_id)
+            for contract_id in self.contracts
+        }
 
 
 """The following functions are called from aea.cli.utils."""

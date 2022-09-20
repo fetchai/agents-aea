@@ -66,17 +66,17 @@ def to_package_id(public_id: str, package_type: str) -> PackageId
 
 Convert to public id.
 
-<a id="aea.helpers.dependency_tree.DependecyTree"></a>
+<a id="aea.helpers.dependency_tree.DependencyTree"></a>
 
-## DependecyTree Objects
+## DependencyTree Objects
 
 ```python
-class DependecyTree()
+class DependencyTree()
 ```
 
 This class represents the dependency tree for a registry.
 
-<a id="aea.helpers.dependency_tree.DependecyTree.get_all_dependencies"></a>
+<a id="aea.helpers.dependency_tree.DependencyTree.get_all_dependencies"></a>
 
 #### get`_`all`_`dependencies
 
@@ -87,19 +87,27 @@ def get_all_dependencies(item_config: Dict) -> List[PackageId]
 
 Returns a list of all available dependencies.
 
-<a id="aea.helpers.dependency_tree.DependecyTree.resolve_tree"></a>
+<a id="aea.helpers.dependency_tree.DependencyTree.resolve_tree"></a>
 
 #### resolve`_`tree
 
 ```python
 @classmethod
-def resolve_tree(cls, dependency_list: Dict[PackageId, List[PackageId]],
-                 tree: Dict) -> None
+def resolve_tree(cls, dependency_list: Dict[PackageId,
+                                            List[PackageId]]) -> Dict
 ```
 
-Resolve dependency tree
+Resolve dependency tree.
 
-<a id="aea.helpers.dependency_tree.DependecyTree.flatten_tree"></a>
+**Arguments**:
+
+- `dependency_list`: the adjacency list of the dependency graph
+
+**Returns**:
+
+the dependency tree
+
+<a id="aea.helpers.dependency_tree.DependencyTree.flatten_tree"></a>
 
 #### flatten`_`tree
 
@@ -111,13 +119,38 @@ def flatten_tree(cls, dependency_tree: Dict, flat_tree: List[List[PackageId]],
 
 Flatten tree.
 
-<a id="aea.helpers.dependency_tree.DependecyTree.generate"></a>
+<a id="aea.helpers.dependency_tree.DependencyTree.find_packages_in_a_project"></a>
+
+#### find`_`packages`_`in`_`a`_`project
+
+```python
+@staticmethod
+def find_packages_in_a_project(project_dir: Path) -> List[Tuple[str, Path]]
+```
+
+Find packages in an AEA project.
+
+<a id="aea.helpers.dependency_tree.DependencyTree.find_packages_in_a_local_repository"></a>
+
+#### find`_`packages`_`in`_`a`_`local`_`repository
+
+```python
+@staticmethod
+def find_packages_in_a_local_repository(
+        packages_dir: Path) -> List[Tuple[str, Path]]
+```
+
+Find packages in a local repository.
+
+<a id="aea.helpers.dependency_tree.DependencyTree.generate"></a>
 
 #### generate
 
 ```python
 @classmethod
-def generate(cls, packages_dir: Path) -> List[List[PackageId]]
+def generate(cls,
+             packages_dir: Path,
+             from_project: bool = False) -> List[List[PackageId]]
 ```
 
 Returns PublicId to hash mapping.

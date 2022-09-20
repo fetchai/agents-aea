@@ -27,7 +27,12 @@ from unittest.mock import mock_open, patch
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_ethereum.test_tools.constants import (
+    ETHEREUM_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_PATH,
+)
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_PATH
 
 from aea.crypto.helpers import (
     create_private_key,
@@ -39,13 +44,7 @@ from aea.crypto.helpers import (
 )
 from aea.crypto.wallet import Wallet
 
-from tests.conftest import (
-    COSMOS_PRIVATE_KEY_FILE,
-    CUR_PATH,
-    ETHEREUM_PRIVATE_KEY_FILE,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI_PRIVATE_KEY_PATH,
-)
+from tests.conftest import COSMOS_PRIVATE_KEY_FILE, CUR_PATH
 from tests.test_cli.tools_for_testing import AgentConfigMock
 
 
