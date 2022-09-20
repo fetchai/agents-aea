@@ -9,7 +9,6 @@ AEA:
   - to validate author
 - Fixes CLI help message for `aea config set` command
 - Extends test command to support consistency check skips and to run tests for a specific author
-- Fixes scaffold tool to update the copyright header with the current year
 - Adds proper exception raising and error handling 
   - Exception handling when downloading from IPFS nodes
   - Better error message when the `--aev` flag is not provided
@@ -20,7 +19,7 @@ Plugins:
 
 Packages:
 - Ports `libp2p` connection packages tests
-  - Ports `p2p_libp2p_client` tests
+  - Ports `p2p_libp2p_mailbox` tests
   - Ports `p2p_libp2p_client` tests
   - Ports `p2p_libp2p` tests
 - Introduces `test_libp2p` connection package to test `libp2p` integration
