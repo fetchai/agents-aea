@@ -2,6 +2,7 @@
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2022 Valory AG
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,7 +25,10 @@
 import itertools
 import json
 import os
+from pathlib import Path
 
+from typing import List
+from dataclasses import dataclass
 import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -38,34 +42,37 @@ from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_fail
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
+from packages.valory.connections.test_libp2p.tests.conftest import ACNWithBootstrappedEntryNodes
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
+    load_client_connection_yaml_config,
     make_cert_request,
     ports,
 )
-from packages.valory.connections.test_libp2p.tests.conftest import (
-    UseACNWithBootstrappedEntryNodes,
-)
 
-
-LOCAL_DHT_MADDRS = [
-    "/dns4/0.0.0.0/tcp/9000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw",
-    "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
-    "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
-][1:]
-LOCAL_DHT_DELEGATE_URIS = ["localhost:11000", "localhost:11001", "localhost:11002"][1:]
-LOCAL_DHT_PUBLIC_KEYS = [
-    "0270475f9b78c0285a6ac6067582f5e159ec147ccb03aee16a32731f68920b1ae8",
-    "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
-    "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
-][1:]
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
+
+
+@dataclass
+class NodeConfig:
+    """Node configuration"""
+
+    uri: str
+    maddr: str
+    public_key: str
+
+
+local_nodes = [
+    NodeConfig("localhost:11001", "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF", "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8"),
+    NodeConfig("localhost:11002", "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj", "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12"),
+]
+public_nodes = [NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]]
 
 
 @pytest.fixture
@@ -80,22 +87,24 @@ def delegate_uris_public_keys(request):
     return request.param
 
 
+class DHTTestMixin(ACNWithBootstrappedEntryNodes):
+    """DHTTestMixin"""
+
+    start_local = False
+    nodes: List[NodeConfig] = []
+
+
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTRelay(
-    BaseP2PLibp2pTest,
-    UseACNWithBootstrappedEntryNodes,
-):
+class Libp2pConnectionDHTRelay(BaseP2PLibp2pTest, DHTTestMixin):
     """Test that public DHT's relay service is working properly"""
-
-    maddrs = LOCAL_DHT_MADDRS
 
     def setup(self):
         """Setup test"""
-
-        for maddr in self.maddrs:
+        assert len(self.nodes) > 1, "Test requires at least 2 public DHT node"
+        for node in self.nodes:
             for _ in range(2):  # make pairs
-                self.make_connection(relay=False, entry_peers=[maddr])
+                self.make_connection(relay=False, entry_peers=[node.maddr])
 
     def teardown(self):
         """Teardown after test method"""
@@ -105,7 +114,7 @@ class TestLibp2pConnectionLocalDHTRelay(
 
     @property
     def pairs_with_same_entry_peers(self):
-        """Multiplexer pairs with the same entry peers"""
+        """Multiplexer pairs with different entry peers"""
         return itertools.zip_longest(*[iter(self.multiplexers)] * 2)
 
     @property
@@ -140,29 +149,26 @@ class TestLibp2pConnectionLocalDHTRelay(
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTDelegate(TestLibp2pConnectionLocalDHTRelay):
+class Libp2pConnectionDHTDelegate(Libp2pConnectionDHTRelay):
     """Test that public DHTs delegate service is working properly"""
-
-    uris = LOCAL_DHT_DELEGATE_URIS
-    public_keys = LOCAL_DHT_PUBLIC_KEYS
 
     def setup(self):  # overwrite the setup, reuse the rest
         """Set up test"""
-        assert len(self.uris) == len(self.public_keys)
-        for uri, public_keys in zip(self.uris, self.public_keys):
+
+        assert len(self.nodes) > 1
+        for node in self.nodes:
             for _ in range(2):
-                self.make_client_connection(uri=uri, peer_public_key=public_keys)
+                self.make_client_connection(uri=node.uri, peer_public_key=node.public_key)
 
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTRelayAEACli(
-    AEATestCaseMany, UseACNWithBootstrappedEntryNodes
-):
+class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany, DHTTestMixin):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
-    @pytest.mark.parametrize("maddrs", [LOCAL_DHT_MADDRS], indirect=True)
-    def test_connectivity(self, maddrs):
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
+
+    def test_connectivity(self):
         """Test connectivity."""
         self.log_files = []
         self.agent_name = "some"
@@ -200,7 +206,7 @@ class TestLibp2pConnectionLocalDHTRelayAEACli(
             config_path,
             {
                 "local_uri": f"127.0.0.1:{next(ports)}",
-                "entry_peers": maddrs,
+                "entry_peers": [node.maddr for node in self.nodes],
                 "log_file": log_file,
                 "ledger_id": node_ledger_id,
             },
@@ -229,20 +235,13 @@ class TestLibp2pConnectionLocalDHTRelayAEACli(
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class TestLibp2pConnectionLocalDHTDelegateAEACli(
-    AEATestCaseMany, UseACNWithBootstrappedEntryNodes
-):
+class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany, DHTTestMixin):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
-    @pytest.mark.parametrize(
-        "delegate_uris_public_keys",
-        [(LOCAL_DHT_DELEGATE_URIS, LOCAL_DHT_PUBLIC_KEYS)],
-        indirect=True,
-    )
-    def test_connectivity(self, delegate_uris_public_keys):
-        """Test connectivity."""
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
-        delegate_uris, public_keys = delegate_uris_public_keys
+    def test_connectivity(self):
+        """Test connectivity."""
         self.agent_name = "some"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
@@ -262,18 +261,17 @@ class TestLibp2pConnectionLocalDHTDelegateAEACli(
         config_path = f"{p2p_libp2p_client_path}.config"
         self.nested_set_config(
             config_path,
-            {"nodes": [{"uri": uri} for uri in delegate_uris]},
+            {"nodes": [{"uri": node.uri} for node in self.nodes]},
         )
-        zipper = zip(*delegate_uris_public_keys)
-        nodes = [{"uri": uri, "public_key": public_key} for uri, public_key in zipper]
+        nodes = [{"uri": node.uri, "public_key": node.public_key} for node in self.nodes]
         self.nested_set_config(p2p_libp2p_client_path + ".config", {"nodes": nodes})
 
         # generate certificates for connection
         self.nested_set_config(
             p2p_libp2p_client_path + ".cert_requests",
             [
-                make_cert_request(k, agent_ledger_id, f"./cli_test_{k}")
-                for k in public_keys
+                make_cert_request(node.public_key, agent_ledger_id, f"./cli_test_{node.public_key}")
+                for node in self.nodes
             ],
         )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
@@ -288,3 +286,31 @@ class TestLibp2pConnectionLocalDHTDelegateAEACli(
         """Clean up after test case run."""
         self.unset_agent_context()
         self.run_cli_command("delete", self.agent_name)
+
+
+test_classes = [
+    Libp2pConnectionDHTRelay,
+    Libp2pConnectionDHTDelegate,
+    Libp2pConnectionDHTRelayAEACli,
+    Libp2pConnectionDHTDelegateAEACli,
+]
+
+
+@dataclass
+class TestCaseConfig:
+    """TestCase"""
+    name: str
+    nodes: List[NodeConfig]
+    start_local: bool = False
+
+
+# dynamically create tests
+for test_cls in test_classes:
+    for test_case in (
+        TestCaseConfig("Local", local_nodes, True),
+        TestCaseConfig("Public", public_nodes),
+    ):
+        test_cls.nodes = test_case.nodes
+        test_cls.start_local = test_case.start_local
+        cls_name = f"Test{test_case.name}{test_cls.__name__[1:]}"
+        globals()[cls_name] = test_cls
