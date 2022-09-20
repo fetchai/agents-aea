@@ -163,7 +163,7 @@ class ACNNodeDockerImage(DockerImage):
         return not to_be_connected
 
 
-class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):
+class ACNWithBootstrappedEntryNodesDockerImage(ACNNodeDockerImage):  # noqa: F401
     """ACN with bootstrapped entry nodes"""
 
     nodes = ["bootstrap", "entry_node_1", "entry_node_2"]

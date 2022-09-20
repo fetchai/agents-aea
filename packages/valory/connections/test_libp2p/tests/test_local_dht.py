@@ -19,6 +19,8 @@
 
 """This test module contains integration tests for P2PLibp2p connection."""
 
+# pylint: skip-file
+
 import itertools
 import json
 import os
@@ -31,17 +33,19 @@ from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
+from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
-from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
-from tests.conftest import DEFAULT_LEDGER, UseACNWithBootstrappedEntryNodes
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
     make_cert_request,
     ports,
 )
+
+from tests.conftest import DEFAULT_LEDGER, UseACNWithBootstrappedEntryNodes
+
 
 LOCAL_DHT_MADDRS = [
     "/dns4/0.0.0.0/tcp/9000/p2p/16Uiu2HAm2yxmLQTZTrxjo5c4k5ka8AVMcpeD5zMMeasE6xDw1YQw",

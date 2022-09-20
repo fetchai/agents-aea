@@ -97,6 +97,10 @@ from aea.crypto.wallet import CryptoStore
 from aea.exceptions import enforce
 from aea.helpers.base import cd
 from aea.identity.base import Identity
+from aea.test_tools.acn_image import (
+    ACNNodeDockerImage,
+    ACNWithBootstrappedEntryNodesDockerImage,
+)
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.docker_image import DockerImage
@@ -105,10 +109,6 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
-from aea.test_tools.acn_image import (
-    ACNNodeDockerImage,
-    ACNWithBootstrappedEntryNodesDockerImage,
-)
 
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
