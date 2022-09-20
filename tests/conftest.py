@@ -105,7 +105,7 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.stub.connection import StubConnection
-from packages.valory.connections.test_tools.docker_images import (
+from aea.test_tools.acn_image import (
     ACNNodeDockerImage,
     ACNWithBootstrappedEntryNodesDockerImage,
 )
