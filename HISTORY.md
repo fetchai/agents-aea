@@ -1,5 +1,35 @@
 # Release History - open AEA
 
+## 1.20.0 (2022-09-20)
+
+AEA:
+- Ensures author and year in copyright headers are updated in scaffolded components
+- Updates `check-packages` 
+  - to check the presence of the constant `PUBLIC_ID` for connections and skills.
+  - to validate author
+- Fixes CLI help message for `aea config set` command
+- Extends test command to support consistency check skips and to run tests for a specific author
+- Fixes scaffold tool to update the copyright header with the current year
+- Adds proper exception raising and error handling 
+  - Exception handling when downloading from IPFS nodes
+  - Better error message when the `--aev` flag is not provided
+- Fixes file sorting to maintain consistency of links on `PBNode` object on `IPFSHashOnly` tool
+
+Plugins:
+- Updates the IPFS plugin to make make sure we don't use the local IPFS node unless explicitly specified
+
+Packages:
+- Ports `libp2p` connection packages tests
+  - Ports `p2p_libp2p_client` tests
+  - Ports `p2p_libp2p_client` tests
+  - Ports `p2p_libp2p` tests
+- Introduces `test_libp2p` connection package to test `libp2p` integration
+
+Chores:
+- Fixes docstring formatting to make sure doc generator works fine
+- Updated `check_ipfs_hashes.py` script to use `packages.json` instead of `hashes.csv`
+- Updates the command regex to align with the latest version
+  
 ## 1.19.0 (2022-09-14)
 
 AEA:
