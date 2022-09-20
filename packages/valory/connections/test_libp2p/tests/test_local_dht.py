@@ -44,7 +44,6 @@ from packages.valory.connections.test_libp2p.tests.base import (
     make_cert_request,
     ports,
 )
-
 from packages.valory.connections.test_libp2p.tests.conftest import (
     UseACNWithBootstrappedEntryNodes,
 )

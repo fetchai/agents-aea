@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
+# pylint: skip-file
+
 """Conftest module for Pytest."""
 
 import logging
@@ -32,7 +34,7 @@ from aea.test_tools.acn_image import (
     ACNNodeDockerImage,
     ACNWithBootstrappedEntryNodesDockerImage,
 )
-from aea.test_tools.docker_image import Container, DockerClient, DockerImage
+from aea.test_tools.docker_image import Container, DockerImage
 
 
 DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
@@ -40,13 +42,11 @@ DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
 logger = logging.getLogger(__name__)
 
 
-def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 10):
-    """
-    Launch image.
+def _launch_image(
+    image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
+) -> None:
+    """Launch image."""
 
-    :param image: an instance of Docker image.
-    :return: None
-    """
     image.check_skip()
     image.stop_if_already_running()
     container = image.create()
