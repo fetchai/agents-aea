@@ -27,7 +27,6 @@ import platform
 import random
 import shutil
 import socket
-import stat
 import string
 import sys
 import tempfile
@@ -325,31 +324,6 @@ protocol_specification_files = [
 
 DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
 DEFAULT_HOST = LOCALHOST.hostname
-
-
-def remove_test_directory(directory: str, retries: int = 3) -> bool:
-    """Destroy a directory once tests are done, change permissions if needed.
-
-    Note that on Windows directories and files that are open cannot be deleted.
-
-    :param directory: directory to be deleted
-    :param retries: number of re-attempts
-    :return: whether the directory was successfully deleted
-    """
-
-    def readonly_handler(func, path, execinfo) -> None:
-        """If permission is readonly, we change these and retry."""
-        os.chmod(path, stat.S_IWRITE)
-        func(path)
-
-    # we need `onerror` to deal with permissions, e.g. on Windows
-    while os.path.exists(directory) and retries:
-        try:
-            shutil.rmtree(directory, onerror=readonly_handler)
-        except Exception:  # pylint: disable=broad-except
-            retries -= 1
-            time.sleep(1)
-    return not os.path.exists(directory)
 
 
 @contextmanager

@@ -458,17 +458,38 @@ class BaseSkillTestCase:
         return dialogue
 
     @classmethod
-    def setup(cls, **kwargs: Any) -> None:
-        """Set up the skill test case."""
-        identity = Identity(
-            "test_agent_name", "test_agent_address", "test_agent_public_key"
-        )
+    def setup_class(cls, **kwargs: Any) -> None:
+        """
+        Set up the skill test case.
 
+        Only called once at the beginning before test methods on the test class are called.
+
+        :param kwargs: the keyword arguments passed to _prepare_skill
+        """
         cls._multiplexer = AsyncMultiplexer()
         cls._multiplexer._out_queue = (  # pylint: disable=protected-access
             asyncio.Queue()
         )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
+        cls._skill = cls._prepare_skill(**kwargs)
+
+    def setup(self, **kwargs: Any) -> None:
+        """
+        Set up the test method.
+
+        Called each time before a test method is called.
+
+        :param kwargs: the keyword arguments passed to _prepare_skill
+        """
+        if len(kwargs) != 0:
+            self._skill = self._prepare_skill(**kwargs)
+
+    @classmethod
+    def _prepare_skill(cls, **kwargs: Any) -> Skill:
+        """Prepare the skill with custom data."""
+        identity = Identity(
+            "test_agent_name", "test_agent_address", "test_agent_public_key"
+        )
         _shared_state = cast(Optional[Dict[str, Any]], kwargs.pop("shared_state", None))
         _skill_config_overrides = cast(
             Optional[Dict[str, Any]], kwargs.pop("config_overrides", None)
@@ -510,4 +531,36 @@ class BaseSkillTestCase:
 
         skill_config.directory = cls.path_to_skill
 
-        cls._skill = Skill.from_config(skill_config, agent_context)
+        return Skill.from_config(skill_config, agent_context)
+
+    def teardown(self) -> None:
+        """
+        Teardown the test method.
+
+        Called each time after a test method is called.
+        """
+        self.empty_message_queues()
+        self.reset_all_dialogues()
+
+    # helpers for setup / teardown
+    def empty_message_queues(self) -> None:
+        """Empty message queues"""
+        while not self._outbox.empty():
+            self._multiplexer.out_queue.get_nowait()
+        while not self._skill.skill_context.decision_maker_message_queue.empty():
+            self._skill.skill_context.decision_maker_message_queue.get_nowait()
+
+    def reset_all_dialogues(self) -> None:
+        """Reset the state of all dialogues"""
+        for handler in self._skill.handlers.values():
+            try:
+                dialogues = handler.protocol_dialogues()
+            except AttributeError:
+                continue
+            dialogues.teardown()
+            dialogues.cleanup()
+            stats = dialogues.dialogue_stats
+            # pylint: disable=protected-access
+            stats._self_initiated = dict.fromkeys(stats._self_initiated, 0)
+            # pylint: disable=protected-access
+            stats._other_initiated = dict.fromkeys(stats._other_initiated, 0)

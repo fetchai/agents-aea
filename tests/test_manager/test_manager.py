@@ -34,6 +34,7 @@ from typing import Optional
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
+import _strptime  # pylint: disbale=unsed-import # noqa: F401
 import pytest
 
 from aea.configurations.base import PublicId

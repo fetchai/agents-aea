@@ -47,9 +47,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
     is_agent_to_agent_messages = False
 
     @classmethod
-    def setup(cls):
+    def setup_class(cls):
         """Setup the test class."""
-        super().setup()
+        super().setup_class()
         cls.service_registration = cast(
             GenericServiceRegistrationBehaviour,
             cls._skill.skill_context.behaviours.service_registration,
@@ -66,6 +66,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.registration_message.to = cls._skill.skill_context.search_service_address
 
         cls.mocked_description = Description({"foo1": 1, "bar1": 2})
+
+    def setup(self):
+        """Setup"""
+        super().teardown()
+        self._init_service_registration = self.service_registration.__dict__.copy()
+        self._strategy_kwargs = self.strategy.__dict__.copy()
+
+    def teardown(self):
+        """Teardown"""
+        super().teardown()
+        self.strategy.__dict__.update(self._strategy_kwargs)
+        self.service_registration.__dict__.update(self._init_service_registration)
 
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""

@@ -284,9 +284,9 @@ async def test_run_async():
         ),
     )
     api = None
-    msg = await ContractApiRequestDispatcher(MultiplexerStatus()).run_async(
-        _raise, api, request, dialogue
-    )
+    msg = await ContractApiRequestDispatcher(
+        MultiplexerStatus(), connection_id="test_id"
+    ).run_async(_raise, api, request, dialogue)
     assert msg.performative == ContractApiMessage.Performative.ERROR
 
 
@@ -294,9 +294,9 @@ async def test_run_async():
 async def test_get_handler():
     """Test failed to get handler."""
     with pytest.raises(Exception, match="Performative not recognized."):
-        ContractApiRequestDispatcher(MultiplexerStatus()).get_handler(
-            ContractApiMessage.Performative.ERROR
-        )
+        ContractApiRequestDispatcher(
+            MultiplexerStatus(), connection_id="test_id"
+        ).get_handler(ContractApiMessage.Performative.ERROR)
 
 
 @pytest.mark.integration
@@ -524,7 +524,7 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
 
 def test_build_response_fails_on_bad_data_type():
     """Test internal build_response functions for data type check."""
-    dispatcher = ContractApiRequestDispatcher(MagicMock())
+    dispatcher = ContractApiRequestDispatcher(MagicMock(), connection_id="test_id")
     with patch.object(
         dispatcher,
         "dispatch_request",
