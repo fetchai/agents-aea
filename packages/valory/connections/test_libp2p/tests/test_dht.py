@@ -25,10 +25,10 @@
 import itertools
 import json
 import os
-from pathlib import Path
-
-from typing import List
 from dataclasses import dataclass
+from pathlib import Path
+from typing import List
+
 import pytest
 
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -42,13 +42,15 @@ from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_fail
 from packages.valory.connections.p2p_libp2p_client.connection import (
     PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
 )
-from packages.valory.connections.test_libp2p.tests.conftest import ACNWithBootstrappedEntryNodes
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
     load_client_connection_yaml_config,
     make_cert_request,
     ports,
+)
+from packages.valory.connections.test_libp2p.tests.conftest import (
+    ACNWithBootstrappedEntryNodes,
 )
 
 
@@ -69,10 +71,20 @@ class NodeConfig:
 
 
 local_nodes = [
-    NodeConfig("localhost:11001", "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF", "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8"),
-    NodeConfig("localhost:11002", "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj", "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12"),
+    NodeConfig(
+        "localhost:11001",
+        "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
+        "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
+    ),
+    NodeConfig(
+        "localhost:11002",
+        "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
+        "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
+    ),
 ]
-public_nodes = [NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]]
+public_nodes = [
+    NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]
+]
 
 
 @pytest.fixture
@@ -158,7 +170,9 @@ class Libp2pConnectionDHTDelegate(Libp2pConnectionDHTRelay):
         assert len(self.nodes) > 1
         for node in self.nodes:
             for _ in range(2):
-                self.make_client_connection(uri=node.uri, peer_public_key=node.public_key)
+                self.make_client_connection(
+                    uri=node.uri, peer_public_key=node.public_key
+                )
 
 
 @pytest.mark.integration
@@ -263,14 +277,18 @@ class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany, DHTTestMixin):
             config_path,
             {"nodes": [{"uri": node.uri} for node in self.nodes]},
         )
-        nodes = [{"uri": node.uri, "public_key": node.public_key} for node in self.nodes]
+        nodes = [
+            {"uri": node.uri, "public_key": node.public_key} for node in self.nodes
+        ]
         self.nested_set_config(p2p_libp2p_client_path + ".config", {"nodes": nodes})
 
         # generate certificates for connection
         self.nested_set_config(
             p2p_libp2p_client_path + ".cert_requests",
             [
-                make_cert_request(node.public_key, agent_ledger_id, f"./cli_test_{node.public_key}")
+                make_cert_request(
+                    node.public_key, agent_ledger_id, f"./cli_test_{node.public_key}"
+                )
                 for node in self.nodes
             ],
         )
@@ -299,6 +317,7 @@ test_classes = [
 @dataclass
 class TestCaseConfig:
     """TestCase"""
+
     name: str
     nodes: List[NodeConfig]
     start_local: bool = False
@@ -312,5 +331,5 @@ for test_cls in test_classes:
     ):
         test_cls.nodes = test_case.nodes
         test_cls.start_local = test_case.start_local
-        cls_name = f"Test{test_case.name}{test_cls.__name__[1:]}"
+        cls_name = f"Test{test_case.name}{test_cls.__name__}"
         globals()[cls_name] = test_cls

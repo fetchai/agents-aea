@@ -200,14 +200,18 @@ def _acn_multiple_nodes_context(
 class ACNWithBootstrappedEntryNodes:
     """Inherit from this class to an ACN Node."""
 
-    start_local = False
+    start_local: bool = False
 
     @pytest.fixture(autouse=True, scope="class")
-    def _start_acn(self, acn_configuration, timeout: float = 2.0, max_attempts: int = 10):
+    def _start_acn(
+        self, acn_configuration, timeout: float = 2.0, max_attempts: int = 10
+    ):
         """Start a series of ACN Node images."""
         if self.start_local:
             logging.info("Starting up local ACN nodes")
-            with _acn_multiple_nodes_context(acn_configuration, timeout, max_attempts) as image:
+            with _acn_multiple_nodes_context(
+                acn_configuration, timeout, max_attempts
+            ) as image:
                 yield image
         else:
             yield
