@@ -185,7 +185,7 @@ class IPFSHashOnly:
         root_node = PBNode()
         content_size = 0
 
-        for child_path in sorted(root.iterdir()):
+        for child_path in sorted(root.iterdir(), key=lambda x: x.name):
             if child_path.is_dir():
                 if child_path.name == "__pycache__":
                     continue

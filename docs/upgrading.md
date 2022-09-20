@@ -7,6 +7,14 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+
+## `v1.19.0` to `v1.20.0`
+
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
 ## `v1.18.0` to `v1.19.0`
 
 - Deprecated the usage of `hashes.csv` and replaces it with `packages.json`, which is maintained by `aea packages lock`
