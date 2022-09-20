@@ -127,7 +127,7 @@ def _golang_module_run(
 class NodeClient:
     """Client to communicate with node using ipc channel(pipe)."""
 
-    ACN_ACK_TIMEOUT = 5
+    ACN_ACK_TIMEOUT = 5.0
 
     def __init__(self, pipe: IPCChannel, agent_record: AgentRecord) -> None:
         """Set node client with pipe."""

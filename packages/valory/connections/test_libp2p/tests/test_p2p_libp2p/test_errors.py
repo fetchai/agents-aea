@@ -2,7 +2,6 @@
 # ------------------------------------------------------------------------------
 #
 #   Copyright 2022 Valory AG
-#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains Negative tests for Libp2p connection."""
+"""Test errors."""
+
+# pylint: skip-file
 
 import asyncio
 import os
@@ -41,30 +42,26 @@ from packages.valory.connections.p2p_libp2p.connection import (
     _golang_module_run,
     _ip_all_private_or_all_public,
 )
-from packages.valory.protocols.acn.message import AcnMessage
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import (
+from packages.valory.connections.p2p_libp2p.tests.base import ports
+from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     _make_libp2p_connection,
     create_identity,
-    ports,
 )
-
-
-DEFAULT_NET_SIZE = 4
+from packages.valory.protocols.acn.message import AcnMessage
 
 
 class TestP2PLibp2pConnectionFailureGolangRun(BaseP2PLibp2pTest):
     """Test that golang run fails if wrong path or timeout"""
 
-    def test_wrong_path(self):
+    def test_wrong_path(self) -> None:
         """Test the wrong path."""
         log_file_desc = open("log", "a", 1)
         wrong_path = tempfile.mkdtemp()
         with pytest.raises(FileNotFoundError):  # match differs based on OS
             _golang_module_run(wrong_path, LIBP2P_NODE_MODULE_NAME, [], log_file_desc)
 
-    def test_timeout(self):
+    def test_timeout(self) -> None:
         """Test the timeout."""
 
         connection = _make_libp2p_connection()
@@ -81,7 +78,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
     key_file: str
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set the test up"""
 
         super().setup_class()
@@ -92,7 +89,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
         cls.key_file = os.path.join(cls.tmp, "keyfile")
         crypto.dump(cls.key_file)
 
-    def test_entry_peers_when_no_public_uri_provided(self):
+    def test_entry_peers_when_no_public_uri_provided(self) -> None:
         """Test entry peers when no public uri provided."""
 
         configuration = ConnectionConfig(
@@ -109,7 +106,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
                 configuration=configuration, data_dir=self.tmp, identity=self.identity
             )
 
-    def test_local_uri_provided_when_public_uri_provided(self):
+    def test_local_uri_provided_when_public_uri_provided(self) -> None:
         """Test local uri provided when public uri provided."""
 
         configuration = ConnectionConfig(
@@ -126,7 +123,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection(BaseP2PLibp2pTest):
             )
 
 
-def test_libp2p_connection_mixed_ip_address():
+def test_libp2p_connection_mixed_ip_address() -> None:
     """Test correct public uri ip and entry peers ips configuration."""
     assert _ip_all_private_or_all_public([]) is True
     assert _ip_all_private_or_all_public(["127.0.0.1", "127.0.0.1"]) is True
@@ -137,14 +134,14 @@ def test_libp2p_connection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
 
 
-def test_libp2p_connection_node_config_registration_delay():
+def test_libp2p_connection_node_config_registration_delay() -> None:
     """Test node registration delay configuration"""
 
     with pytest.raises(ValueError, match="must be a float number in seconds"):
         _make_libp2p_connection(peer_registration_delay="must_be_float")
 
 
-def test_build_dir_not_set():
+def test_build_dir_not_set() -> None:
     """Test build dir not set."""
 
     with tempfile.TemporaryDirectory() as data_dir:
@@ -162,7 +159,7 @@ def test_build_dir_not_set():
 
 
 @pytest.mark.asyncio
-async def test_reconnect_on_write_failed():
+async def test_reconnect_on_write_failed() -> None:
     """Test node restart on write fail."""
 
     con = _make_libp2p_connection()
@@ -189,7 +186,7 @@ async def test_reconnect_on_write_failed():
 
 
 @pytest.mark.asyncio
-async def test_reconnect_on_write_failed_reconnect_pipe():
+async def test_reconnect_on_write_failed_reconnect_pipe() -> None:
     """Test node restart on write fail."""
 
     con = _make_libp2p_connection()
@@ -222,7 +219,7 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
 
 
 @pytest.mark.asyncio
-async def test_reconnect_on_read_failed():
+async def test_reconnect_on_read_failed() -> None:
     """Test node restart on read fail."""
 
     con = _make_libp2p_connection()
@@ -246,15 +243,7 @@ async def test_reconnect_on_read_failed():
 
 
 @pytest.mark.asyncio
-async def test_max_restarts():
-    """Test node max restarts exception."""
-    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp", max_restarts=0)
-    with pytest.raises(ValueError, match="Max restarts attempts reached:"):
-        await node.restart()
-
-
-@pytest.mark.asyncio
-async def test_node_stopped_callback():
+async def test_node_stopped_callback() -> None:
     """Test node stopped callback called."""
 
     if not (
@@ -280,91 +269,3 @@ async def test_node_stopped_callback():
     await con.node.stop()
     await asyncio.sleep(2)
     con.node.logger.error.assert_not_called()
-
-
-@pytest.mark.asyncio
-async def test_send_acn_confirm_failed():
-    """Test nodeclient send fails on confirmation from other point ."""
-
-    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
-    f.set_result(None)
-    node.pipe = Mock()
-    node.pipe.connect = Mock(return_value=f)
-    node.pipe.write = Mock(return_value=f)
-
-    node_client = node.get_client()
-    status = Mock()
-    status.code = int(AcnMessage.StatusBody.StatusCode.ERROR_GENERIC)
-    status_future = Future()
-    status_future.set_result(status)
-    with patch.object(
-        node_client, "make_acn_envelope_message", return_value=b"some_data"
-    ), patch.object(
-        node_client, "wait_for_status", lambda: status_future
-    ), pytest.raises(
-        Exception, match=r"failed to send envelope. got error confirmation"
-    ):
-        await node_client.send_envelope(Mock())
-
-
-@pytest.mark.asyncio
-async def test_send_acn_confirm_timeout():
-    """Test node client send fails on timeout."""
-
-    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
-    f.set_result(None)
-    node.pipe = Mock()
-    node.pipe.connect = Mock(return_value=f)
-    node.pipe.write = Mock(return_value=f)
-
-    node_client = node.get_client()
-    node_client.ACN_ACK_TIMEOUT = 0.5
-    with patch.object(
-        node_client, "make_acn_envelope_message", return_value=b"some_data"
-    ), patch("asyncio.wait_for", side_effect=asyncio.TimeoutError()), pytest.raises(
-        Exception, match=r"acn status await timeout!"
-    ):
-        await node_client.send_envelope(Mock())
-
-
-@pytest.mark.asyncio
-async def test_acn_decode_error_on_read():
-    """Test ACN decode error on read."""
-
-    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
-    f.set_result(b"some_data")
-    node.pipe = Mock()
-    node.pipe.connect = Mock(return_value=f)
-
-    node_client = node.get_client()
-    node_client.ACN_ACK_TIMEOUT = 0.5
-
-    with patch.object(node_client, "_read", lambda: f), patch.object(
-        node_client, "write_acn_status_error", return_value=f
-    ) as mocked_write_acn_status_error, pytest.raises(
-        Exception, match=r"Error parsing acn message:"
-    ):
-        await node_client.read_envelope()
-
-    mocked_write_acn_status_error.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_write_acn_error():
-    """Test write ACN error."""
-
-    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
-    f = Future()
-    f.set_result(b"some_data")
-    node.pipe = Mock()
-    node.pipe.connect = Mock(return_value=f)
-
-    node_client = node.get_client()
-
-    with patch.object(node_client, "_write", return_value=f) as write_mock:
-        await node_client.write_acn_status_error("some error")
-
-    write_mock.assert_called_once()

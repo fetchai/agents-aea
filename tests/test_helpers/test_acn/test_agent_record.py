@@ -30,8 +30,7 @@ from packages.valory.connections.p2p_libp2p.consts import (
     LIBP2P_CERT_NOT_AFTER,
     LIBP2P_CERT_NOT_BEFORE,
 )
-
-from tests.test_packages.test_connections.test_p2p_libp2p.base import _process_cert
+from packages.valory.connections.test_libp2p.tests.base import _process_cert
 
 
 def test_agent_record(change_directory):

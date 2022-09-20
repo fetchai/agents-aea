@@ -34,7 +34,7 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import CONNECTION_ID, RequestDispatcher
+from packages.fetchai.connections.ledger.base import RequestDispatcher
 from packages.fetchai.protocols.contract_api import ContractApiMessage
 from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.fetchai.protocols.contract_api.dialogues import (
@@ -71,7 +71,7 @@ class ContractApiDialogues(BaseContractApiDialogues):
 
         BaseContractApiDialogues.__init__(
             self,
-            self_address=str(CONNECTION_ID),
+            self_address=str(kwargs.pop("connection_id")),
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -83,10 +83,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the dispatcher."""
         logger = kwargs.pop("logger", None)
+        connection_id = kwargs.pop("connection_id")
         logger = logger if logger is not None else _default_logger
-
         super().__init__(logger, *args, **kwargs)
-        self._contract_api_dialogues = ContractApiDialogues()
+        self._contract_api_dialogues = ContractApiDialogues(connection_id=connection_id)
 
     @property
     def dialogues(self) -> BaseDialogues:

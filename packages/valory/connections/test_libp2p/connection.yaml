@@ -1,0 +1,48 @@
+name: test_libp2p
+author: valory
+version: 0.1.0
+type: connection
+description: The scaffold connection provides a scaffold for a connection to be implemented
+  by the developer.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: bafybeigddvtlrl7xrcpyo253phiomibsrfnihvx45d64r77rmyl6dnwrdi
+  connection.py: bafybeih7la26pgvxryhkwnhdvy7laguras5vka64fz22ur2w7tfxhr4dtq
+  readme.md: bafybeihg5yfzgqvg5ngy7r2o5tfeqnelx2ffxw4po5hmheqjfhumpmxpoq
+  tests/__init__.py: bafybeiarz6mhky6pnkdihibcuqrfpx3qo55roygneoaoq2mndi5lzdlcj4
+  tests/base.py: bafybeibqbfqtjqlye7b2aatjvc7n3w7dkzqybsijbcjlttjy4rto3pf3fm
+  tests/test_certificate_dates.py: bafybeif4t76wsvsfvvplkmi4gecgod6ijff3bbqgtaqmpep6ywfapfptfm
+  tests/test_p2p_libp2p/__init__.py: bafybeig7f7s5ptqtscf74y25dtqvhp75joekcxi6qnuzxgxyzictpsp4dm
+  tests/test_p2p_libp2p/test_aea_cli.py: bafybeiej55kwbxuqjvjjz4tc7we54pxur7kvsh5o36lau7b7utltzwkc34
+  tests/test_p2p_libp2p/test_communication.py: bafybeihnkle2pokfzfkguegmq4ptatvpcaezxrv564l76atjnuec57b2am
+  tests/test_p2p_libp2p/test_errors.py: bafybeifyl3anbjjm22xey73vhgdkosnd3nubyyl7xxr4kxbigsiwdsk25u
+  tests/test_p2p_libp2p/test_fault_tolerance.py: bafybeigbzraksxj35q3q6thnkbvgvybixapkow4dz6vyo7jlbgnyulbv4a
+  tests/test_p2p_libp2p/test_integration.py: bafybeicuu7nlyksb6ytipmjyuk5v4jhjt7ossegp74t7u5b2ckmlk5swci
+  tests/test_p2p_libp2p/test_slow_queue.py: bafybeihx6dga3bxiy7i67ggf6gnoakygyf5djyzv6prias5tcjpxawlpyy
+  tests/test_p2p_libp2p_client/__init__.py: bafybeihjzl7ireo5rbnxcdbghbncykgcgcbh26m4mjjofsseeflauuf6sy
+  tests/test_p2p_libp2p_client/test_aea_cli.py: bafybeigkd2qtb527jtiks7jytx6ppumews4c2ydyweybft32pk2nwsqsfy
+  tests/test_p2p_libp2p_client/test_communication.py: bafybeigflhmhqmfkytzhpcglmljvd3qqk6cpf6vci6hs4ceqwadc6azufa
+  tests/test_p2p_libp2p_client/test_errors.py: bafybeiakajzr6jtecwnlzcrrx7paydz3obmleqzv7am5xbadu6wjtzabmm
+  tests/test_p2p_libp2p_mailbox/__init__.py: bafybeiad64wftnugaahubhqc6bcqzg7om4435dzojdv7oeq4zdmn7kxzui
+  tests/test_p2p_libp2p_mailbox/test_aea_cli.py: bafybeievjaiacpvcpabemtrmmeejbf4cbkrqzhu2ekxzyfyeg42ityxn5q
+  tests/test_p2p_libp2p_mailbox/test_communication.py: bafybeiaiwlqxuzp34nu33s5pz6sudvwmdi3h2ckfa4mmwyvd6wqn2elo4m
+  tests/test_p2p_libp2p_mailbox/test_errors.py: bafybeiampgm6dxpo4tqiyhyhpwr5d3kdsq5x5vwl323oauhdzmsnprf4bi
+  tests/test_p2p_libp2p_mailbox/test_mailbox_service.py: bafybeibp3bkwkrw57qahvuysjdlumywtlk3te5gsvusgrvhsc75k7rrk4u
+  tests/test_public_dht.py: bafybeiatzekfykoxa7kuai7iaz5ada26eii7axa5dkhovwd23nvqvlljze
+fingerprint_ignore_patterns: []
+connections:
+- valory/p2p_libp2p:0.1.0:bafybeianrhfktvaoprloiprshqdssmgqvrz4z3sza2a42gi76ehyu6jxgi
+- valory/p2p_libp2p_client:0.1.0:bafybeicxp7kgrkewdfq763gk5rtxii4k5dwhjbblym275m62vkbygfyuie
+- valory/p2p_libp2p_mailbox:0.1.0:bafybeigjanxsumu34z2rq6biylmewva54kfiz6ymtdmyvo53bknmykl26a
+protocols:
+- fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
+- valory/acn:1.1.0:bafybeih5pz5re4kycou46xbzgguantxzj46aqtc575pgvej3m6bfg4xpfy
+class_name: MyScaffoldAsyncConnection
+config:
+  foo: bar
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies: {}
+is_abstract: false
+cert_requests: []
