@@ -36,10 +36,6 @@ from aea.test_tools.test_cases import BaseAEATestCase
 
 
 @mock.patch("aea.cli.packages.fetch_ipfs")
-@pytest.mark.skipif(
-    platform.system() == "Windows",
-    reason="Fix hashing on windows.",
-)
 class TestLockCommand(BaseAEATestCase):
     """Test sync command."""
 
