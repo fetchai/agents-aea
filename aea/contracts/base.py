@@ -258,6 +258,42 @@ class Contract(Component):
         return tx
 
     @classmethod
+    def default_method_call(
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
+        """
+        Make a contract call.
+
+        :param ledger_api: the ledger apis.
+        :param method_name: the contract method name.
+        :param kwargs: keyword arguments.
+        :return: the call result
+        """
+
+        contract_instance = cls.get_instance(ledger_api, contract_address)
+        # contract_instance = cls.get_instance(ledger_api)  # only for deployment txs
+
+        # Get the function building its signature from kwargs:
+
+        # Contract.get_function_by_signature(signature)
+        # -------------------------------------------------------------
+        # Searches for a distinct function with matching signature.
+        # Returns an instance of ContractFunction upon finding a match.
+        # Raises ValueError if no match is found.
+        # contract.get_function_by_signature('identity(uint256,bool)')
+
+        # Other options
+        # -------------
+        # Contract.find_functions_by_name(name), Contract.get_function_by_name(name)
+
+        method_name = "get_name_from_function_above"
+
+        result = ledger_api.contract_method_call(
+            contract_instance, method_name, **kwargs
+        )
+        return result
+
+    @classmethod
     def get_transaction_transfer_logs(
         cls,
         ledger_api: LedgerApi,
