@@ -108,7 +108,7 @@ class ACNNodeDockerImage(DockerImage):
     @property
     def tag(self) -> str:
         """Get the image tag."""
-        return "valory/acn-node:v0.1.0"
+        return "valory/open-acn-node:latest"
 
     @property
     def ports(self) -> List[str]:
