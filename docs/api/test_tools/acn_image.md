@@ -99,5 +99,5 @@ Instantiate the image in many containers, parametrized.
 def wait(max_attempts: int = 15, sleep_rate: float = 1.0) -> bool
 ```
 
-Wait
+Wait - this is container specific (using self._config) so doesn't work
 

@@ -14,7 +14,7 @@ fingerprint:
   tests/base.py: bafybeibqbfqtjqlye7b2aatjvc7n3w7dkzqybsijbcjlttjy4rto3pf3fm
   tests/conftest.py: bafybeia5bykog5y6ulugpkrcycuaivnigrvcawxrrcm75akbmitgbkpwmu
   tests/test_certificate_dates.py: bafybeif4t76wsvsfvvplkmi4gecgod6ijff3bbqgtaqmpep6ywfapfptfm
-  tests/test_dht.py: bafybeihuqdrpxaj32w665goxda4z5lmekxseloa2bcosfoubyiy7rbbuaa
+  tests/test_dht.py: bafybeig3wyejhm77r4bcoct2sxvp4vvcuoo4nnwlaxxruzpzb6ja762mdm
   tests/test_p2p_libp2p/__init__.py: bafybeig7f7s5ptqtscf74y25dtqvhp75joekcxi6qnuzxgxyzictpsp4dm
   tests/test_p2p_libp2p/test_aea_cli.py: bafybeiej55kwbxuqjvjjz4tc7we54pxur7kvsh5o36lau7b7utltzwkc34
   tests/test_p2p_libp2p/test_communication.py: bafybeihnkle2pokfzfkguegmq4ptatvpcaezxrv564l76atjnuec57b2am

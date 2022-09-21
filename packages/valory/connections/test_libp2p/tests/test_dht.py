@@ -62,7 +62,13 @@ AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
-flaky_rerun_marker = [pytest.Mark(name="flaky", args=(), kwargs={"reruns": 3})]
+skip_if_ci_marker = [
+    pytest.Mark(
+        name="skipif",
+        args=(bool(os.environ.get("IS_CI_WORKFLOW")),),
+        kwargs={"reason": "public ACN node tests flaky on CI"},
+    )
+]
 
 
 @dataclass
@@ -156,8 +162,6 @@ class Libp2pConnectionDHTRelay(BaseP2PLibp2pTest):
             assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
 
-@pytest.mark.integration
-@libp2p_log_on_failure_all
 class Libp2pConnectionDHTDelegate(Libp2pConnectionDHTRelay):
     """Test that public DHTs delegate service is working properly"""
 
@@ -333,7 +337,7 @@ for base_cls in test_classes:
             test_cls = type(name, bases, {})
         else:
             test_cls = type(name, (base_cls,), {})
-            test_cls.pytestmark = flaky_rerun_marker
+            test_cls.pytestmark = skip_if_ci_marker
 
         test_cls.__name__ = name
         test_cls.nodes = test_case.nodes
