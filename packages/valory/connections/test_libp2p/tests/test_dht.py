@@ -24,9 +24,7 @@
 
 import itertools
 import json
-import logging
 import os
-import pytest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -62,7 +60,7 @@ AEA_LIBP2P_LAUNCH_TIMEOUT = 30
 p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
 p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
-flaky_rerun_marker = [pytest.Mark(name='flaky', args=(), kwargs={'reruns': 1})]
+flaky_rerun_marker = [pytest.Mark(name="flaky", args=(), kwargs={"reruns": 3})]
 
 
 @dataclass
@@ -135,25 +133,25 @@ class Libp2pConnectionDHTRelay(BaseP2PLibp2pTest):
         """Test connectivity."""
         assert self.all_connected
 
-    # def test_communication_direct(self):
-    #     """Test direct communication through the same entry peer"""
-    #
-    #     for mux_pair in self.pairs_with_same_entry_peers:
-    #         sender, to = (c.address for m in mux_pair for c in m.connections)
-    #         envelope = self.enveloped_default_message(to=to, sender=sender)
-    #         mux_pair[0].put(envelope)
-    #         delivered_envelope = mux_pair[1].get(block=True, timeout=30)
-    #         assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
-    #
-    # def test_communication_indirect(self):
-    #     """Test indirect communication through another entry peer"""
-    #
-    #     for mux_pair in self.pairs_with_different_entry_peers:
-    #         sender, to = (c.address for m in mux_pair for c in m.connections)
-    #         envelope = self.enveloped_default_message(to=to, sender=sender)
-    #         mux_pair[0].put(envelope)
-    #         delivered_envelope = mux_pair[1].get(block=True, timeout=30)
-    #         assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+    def test_communication_direct(self):
+        """Test direct communication through the same entry peer"""
+
+        for mux_pair in self.pairs_with_same_entry_peers:
+            sender, to = (c.address for m in mux_pair for c in m.connections)
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            mux_pair[0].put(envelope)
+            delivered_envelope = mux_pair[1].get(block=True, timeout=30)
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+
+    def test_communication_indirect(self):
+        """Test indirect communication through another entry peer"""
+
+        for mux_pair in self.pairs_with_different_entry_peers:
+            sender, to = (c.address for m in mux_pair for c in m.connections)
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            mux_pair[0].put(envelope)
+            delivered_envelope = mux_pair[1].get(block=True, timeout=30)
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
 
 
 @pytest.mark.integration
@@ -332,7 +330,7 @@ for base_cls in test_classes:
             bases = base_cls, ACNWithBootstrappedEntryNodes
             test_cls = type(name, bases, {})
         else:
-            test_cls = type(name,  (base_cls,), {})
+            test_cls = type(name, (base_cls,), {})
             test_cls.pytestmark = flaky_rerun_marker
 
         test_cls.__name__ = name
