@@ -134,13 +134,13 @@ def launch_many_containers(
         _stop_container(container, image.tag)
 
 
-LOCAL_ADDRESS = "0.0.0.0"  # nosec
+META_ADDRESS = "0.0.0.0"  # nosec
 ACN_CONFIGURATION: Dict[str, str] = dict(
     AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
-    AEA_P2P_URI_PUBLIC=f"{LOCAL_ADDRESS}:5000",
-    AEA_P2P_URI=f"{LOCAL_ADDRESS}:5000",
-    AEA_P2P_DELEGATE_URI=f"{LOCAL_ADDRESS}:11000",
-    AEA_P2P_URI_MONITORING=f"{LOCAL_ADDRESS}:8080",
+    AEA_P2P_URI_PUBLIC=f"{META_ADDRESS}:5000",
+    AEA_P2P_URI=f"{META_ADDRESS}:5000",
+    AEA_P2P_DELEGATE_URI=f"{META_ADDRESS}:11000",
+    AEA_P2P_URI_MONITORING=f"{META_ADDRESS}:8080",
     ACN_LOG_FILE="/acn/libp2p_node.log",
 )
 

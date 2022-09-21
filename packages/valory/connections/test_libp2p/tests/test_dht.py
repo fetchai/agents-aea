@@ -45,12 +45,14 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LIBP2P_LEDGER,
+    LOCALHOST,
     load_client_connection_yaml_config,
     make_cert_request,
     ports,
 )
 from packages.valory.connections.test_libp2p.tests.conftest import (
     ACNWithBootstrappedEntryNodes,
+    META_ADDRESS,
 )
 
 
@@ -75,12 +77,12 @@ class NodeConfig:
 local_nodes = [
     NodeConfig(
         "localhost:11001",
-        "/dns4/0.0.0.0/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
+        f"/dns4/{META_ADDRESS}/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
         "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
     ),
     NodeConfig(
         "localhost:11002",
-        "/dns4/0.0.0.0/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
+        f"/dns4/{META_ADDRESS}/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
         "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
     ),
 ]
@@ -214,7 +216,7 @@ class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
         self.nested_set_config(
             config_path,
             {
-                "local_uri": f"127.0.0.1:{next(ports)}",
+                "local_uri": f"{LOCALHOST.netloc}:{next(ports)}",
                 "entry_peers": [node.maddr for node in self.nodes],
                 "log_file": log_file,
                 "ledger_id": node_ledger_id,
