@@ -42,80 +42,74 @@ class SigningSerializer(Serializer):
     """Serialization for the 'signing' protocol."""
 
     @staticmethod
-    def _encode_ErrorCode(value: ErrorCode) -> signing_pb2.SigningMessage.ErrorCode:
+    def _encode_ErrorCode(value: ErrorCode) -> signing_pb2.SigningMessage.ErrorCode:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = signing_pb2.SigningMessage.ErrorCode()
+        result = signing_pb2.SigningMessage.ErrorCode()  # type: ignore
         ErrorCode.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_RawMessage(value: RawMessage) -> signing_pb2.SigningMessage.RawMessage:
+    def _encode_RawMessage(value: RawMessage) -> signing_pb2.SigningMessage.RawMessage:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = signing_pb2.SigningMessage.RawMessage()
+        result = signing_pb2.SigningMessage.RawMessage()  # type: ignore
         RawMessage.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_RawTransaction(
-        value: RawTransaction,
-    ) -> signing_pb2.SigningMessage.RawTransaction:
+    def _encode_RawTransaction(value: RawTransaction) -> signing_pb2.SigningMessage.RawTransaction:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = signing_pb2.SigningMessage.RawTransaction()
+        result = signing_pb2.SigningMessage.RawTransaction()  # type: ignore
         RawTransaction.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_SignedMessage(
-        value: SignedMessage,
-    ) -> signing_pb2.SigningMessage.SignedMessage:
+    def _encode_SignedMessage(value: SignedMessage) -> signing_pb2.SigningMessage.SignedMessage:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = signing_pb2.SigningMessage.SignedMessage()
+        result = signing_pb2.SigningMessage.SignedMessage()  # type: ignore
         SignedMessage.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_SignedTransaction(
-        value: SignedTransaction,
-    ) -> signing_pb2.SigningMessage.SignedTransaction:
+    def _encode_SignedTransaction(value: SignedTransaction) -> signing_pb2.SigningMessage.SignedTransaction:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = signing_pb2.SigningMessage.SignedTransaction()
+        result = signing_pb2.SigningMessage.SignedTransaction()  # type: ignore
         SignedTransaction.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_Terms(value: Terms) -> signing_pb2.SigningMessage.Terms:
+    def _encode_Terms(value: Terms) -> signing_pb2.SigningMessage.Terms:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = signing_pb2.SigningMessage.Terms()
+        result = signing_pb2.SigningMessage.Terms()  # type: ignore
         Terms.encode(result, value)
         return result
 

@@ -35,26 +35,26 @@ class FipaSerializer(Serializer):
     """Serialization for the 'fipa' protocol."""
 
     @staticmethod
-    def _encode_Description(value: Description) -> fipa_pb2.FipaMessage.Description:
+    def _encode_Description(value: Description) -> fipa_pb2.FipaMessage.Description:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = fipa_pb2.FipaMessage.Description()
+        result = fipa_pb2.FipaMessage.Description()  # type: ignore
         Description.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_Query(value: Query) -> fipa_pb2.FipaMessage.Query:
+    def _encode_Query(value: Query) -> fipa_pb2.FipaMessage.Query:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = fipa_pb2.FipaMessage.Query()
+        result = fipa_pb2.FipaMessage.Query()  # type: ignore
         Query.encode(result, value)
         return result
 

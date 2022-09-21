@@ -40,54 +40,50 @@ class ContractApiSerializer(Serializer):
     """Serialization for the 'contract_api' protocol."""
 
     @staticmethod
-    def _encode_Kwargs(value: Kwargs) -> contract_api_pb2.ContractApiMessage.Kwargs:
+    def _encode_Kwargs(value: Kwargs) -> contract_api_pb2.ContractApiMessage.Kwargs:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = contract_api_pb2.ContractApiMessage.Kwargs()
+        result = contract_api_pb2.ContractApiMessage.Kwargs()  # type: ignore
         Kwargs.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_RawMessage(
-        value: RawMessage,
-    ) -> contract_api_pb2.ContractApiMessage.RawMessage:
+    def _encode_RawMessage(value: RawMessage) -> contract_api_pb2.ContractApiMessage.RawMessage:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = contract_api_pb2.ContractApiMessage.RawMessage()
+        result = contract_api_pb2.ContractApiMessage.RawMessage()  # type: ignore
         RawMessage.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_RawTransaction(
-        value: RawTransaction,
-    ) -> contract_api_pb2.ContractApiMessage.RawTransaction:
+    def _encode_RawTransaction(value: RawTransaction) -> contract_api_pb2.ContractApiMessage.RawTransaction:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = contract_api_pb2.ContractApiMessage.RawTransaction()
+        result = contract_api_pb2.ContractApiMessage.RawTransaction()  # type: ignore
         RawTransaction.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_State(value: State) -> contract_api_pb2.ContractApiMessage.State:
+    def _encode_State(value: State) -> contract_api_pb2.ContractApiMessage.State:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = contract_api_pb2.ContractApiMessage.State()
+        result = contract_api_pb2.ContractApiMessage.State()  # type: ignore
         State.encode(result, value)
         return result
 

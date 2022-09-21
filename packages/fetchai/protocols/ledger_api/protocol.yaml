@@ -14,7 +14,7 @@ fingerprint:
   ledger_api.proto: QmR92cmoxSxKANTvCmm9skftvgzYobNwcWCUanNkduJjyh
   ledger_api_pb2.py: QmQjpsb6yPfzwrFW8LJ2HTTCj3iZmbD9aFNxj1p4tdkEme
   message.py: QmVY49iJkynU38fHwHmzcfgT42DgKGsSDuk7JVUN7pNr8L
-  serialization.py: QmY8ri8AvcvBSKdDAUsfbvYPxdZwSc5uR8TeuLa8nXNXjt
+  serialization.py: QmfPkrsvXjUjDnN54fkkF7e7DjUQzJgsA1Lj8QjPqwMf9T
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

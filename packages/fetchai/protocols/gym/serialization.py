@@ -35,14 +35,14 @@ class GymSerializer(Serializer):
     """Serialization for the 'gym' protocol."""
 
     @staticmethod
-    def _encode_AnyObject(value: AnyObject) -> gym_pb2.GymMessage.AnyObject:
+    def _encode_AnyObject(value: AnyObject) -> gym_pb2.GymMessage.AnyObject:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = gym_pb2.GymMessage.AnyObject()
+        result = gym_pb2.GymMessage.AnyObject()  # type: ignore
         AnyObject.encode(result, value)
         return result
 

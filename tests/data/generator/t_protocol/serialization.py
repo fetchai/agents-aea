@@ -35,16 +35,14 @@ class TProtocolSerializer(Serializer):
     """Serialization for the 't_protocol' protocol."""
 
     @staticmethod
-    def _encode_DataModel(
-        value: DataModel,
-    ) -> t_protocol_pb2.TProtocolMessage.DataModel:
+    def _encode_DataModel(value: DataModel) -> t_protocol_pb2.TProtocolMessage.DataModel:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = t_protocol_pb2.TProtocolMessage.DataModel()
+        result = t_protocol_pb2.TProtocolMessage.DataModel()  # type: ignore
         DataModel.encode(result, value)
         return result
 

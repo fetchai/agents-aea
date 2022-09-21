@@ -1651,7 +1651,7 @@ class ProtocolGenerator:
             cls_str += (
                 self.indent
                 + f"def _encode_{custom_type}(value: {custom_type}) ->"
-                + f"{pb_type}:\n"
+                + f"{pb_type}:  # type: ignore\n"
             )
             self._change_indent(1)
             cls_str += self.indent + '"""\n'
@@ -1661,7 +1661,7 @@ class ProtocolGenerator:
                 self.indent + ":return: protobuf encoded message of custom type.\n"
             )
             cls_str += self.indent + '"""\n'
-            cls_str += self.indent + f"result = {pb_type}()\n"
+            cls_str += self.indent + f"result = {pb_type}()  # type: ignore\n"
             cls_str += self.indent + f"{custom_type}.encode(result, value)\n"
             cls_str += self.indent + "return result\n\n"
             self._change_indent(-1)

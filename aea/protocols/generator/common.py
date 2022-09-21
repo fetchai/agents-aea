@@ -164,6 +164,21 @@ def _has_matched_brackets(text: str) -> bool:
     return len(open_bracket_stack) == 0
 
 
+def _is_compositional_type(content_type: str) -> bool:
+    """
+    Checks if content_type is compositional.
+
+    :param content_type: the type string.
+    :return: bool.
+    """
+    for valid_compositional_type in (
+        SPECIFICATION_COMPOSITIONAL_TYPES + PYTHON_COMPOSITIONAL_TYPES
+    ):
+        if content_type.startswith(valid_compositional_type):
+            return True
+    return False
+
+
 def _get_sub_types_of_compositional_types(compositional_type: str) -> Tuple[str, ...]:
     """
     Extract the sub-types of compositional types.
