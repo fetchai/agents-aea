@@ -11,8 +11,9 @@ fingerprint:
   connection.py: bafybeih7la26pgvxryhkwnhdvy7laguras5vka64fz22ur2w7tfxhr4dtq
   readme.md: bafybeihg5yfzgqvg5ngy7r2o5tfeqnelx2ffxw4po5hmheqjfhumpmxpoq
   tests/__init__.py: bafybeiarz6mhky6pnkdihibcuqrfpx3qo55roygneoaoq2mndi5lzdlcj4
+  tests/acn_image.py: bafybeidkaavxkfocmg5c6y3i32fmbdf5i77jmqteoylmutifoh4zig3pr4
   tests/base.py: bafybeibqbfqtjqlye7b2aatjvc7n3w7dkzqybsijbcjlttjy4rto3pf3fm
-  tests/conftest.py: bafybeia5bykog5y6ulugpkrcycuaivnigrvcawxrrcm75akbmitgbkpwmu
+  tests/conftest.py: bafybeig762o33tq4ecn2pri4ahy2ow3uvzikzhjbvamxm365kmyouggvd4
   tests/test_certificate_dates.py: bafybeif4t76wsvsfvvplkmi4gecgod6ijff3bbqgtaqmpep6ywfapfptfm
   tests/test_dht.py: bafybeig3wyejhm77r4bcoct2sxvp4vvcuoo4nnwlaxxruzpzb6ja762mdm
   tests/test_p2p_libp2p/__init__.py: bafybeig7f7s5ptqtscf74y25dtqvhp75joekcxi6qnuzxgxyzictpsp4dm

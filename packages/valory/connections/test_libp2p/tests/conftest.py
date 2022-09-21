@@ -30,11 +30,12 @@ import docker
 import pytest
 from docker.errors import ImageNotFound, NotFound
 
-from aea.test_tools.acn_image import (
+from aea.test_tools.docker_image import Container, DockerImage
+
+from packages.valory.connections.test_libp2p.tests.acn_image import (
     ACNNodeDockerImage,
     ACNWithBootstrappedEntryNodesDockerImage,
 )
-from aea.test_tools.docker_image import Container, DockerImage
 
 
 DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
