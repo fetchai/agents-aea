@@ -33,7 +33,7 @@ setup(
     install_requires=[
         "aea>=1.0.0, <2.0.0",
         "web3==5.28.0",
-        "ipfshttpclient==0.6.1",
+        "ipfshttpclient>=0.6.1,<=0.8.0a2",
         "eth-account==0.5.2",
     ],
     tests_require=["pytest"],
