@@ -65,7 +65,6 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
     @classmethod
     def teardown_class(cls) -> None:
         """Tear down the test"""
-        cls.terminate_agents()
         cls.log_files.clear()
         super().teardown_class()
 
