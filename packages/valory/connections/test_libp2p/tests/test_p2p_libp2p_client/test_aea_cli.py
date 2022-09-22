@@ -100,8 +100,6 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         assert is_running, "AEA not running within timeout!"
         missing_strings = self.missing_from_output(process, self.expected)
         assert not missing_strings
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
 
     @classmethod
     def teardown_class(cls):

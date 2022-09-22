@@ -89,9 +89,6 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
         missing_strings = self.missing_from_output(process, check_strings)
         assert not missing_strings
 
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
-
 
 @libp2p_log_on_failure_all
 class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(
