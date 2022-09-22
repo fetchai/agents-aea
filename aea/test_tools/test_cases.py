@@ -78,6 +78,7 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
+from aea.test_tools.utils import wait_for_condition
 
 
 _default_logger = logging.getLogger(__name__)
@@ -86,6 +87,7 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
+TEARDOWN_TERMINATION_TIMEOUT = 30
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -987,7 +989,11 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
-        assert cls.is_successfully_terminated(*cls.subprocesses)
+        wait_for_condition(
+            lambda: cls.is_successfully_terminated(*cls.subprocesses),
+            error_msg="Not all subprocesses terminated successfully",
+            timeout=TEARDOWN_TERMINATION_TIMEOUT,
+        )
         cls.subprocesses.clear()
 
 
