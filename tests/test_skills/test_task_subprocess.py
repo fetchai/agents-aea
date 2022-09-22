@@ -36,19 +36,14 @@ class TestTaskTestSkill(AEATestCaseEmpty):
         cls.set_config("agent.task_manager_mode", "multiprocess", "str")
 
     def test_task_run_in_a_subprocess(self):
-        """Test task run in a subporocess."""
+        """Test task run in a subprocess."""
         process = self.run_agent()
-        try:
-            is_running = self.is_running(process)
-            assert is_running, "AEA not running within timeout!"
-            assert not self.missing_from_output(
-                process, ["Task id is"], 10, is_terminating=False
-            )
-            assert not self.missing_from_output(
-                process, ["result is"], 10, is_terminating=False
-            )
-        finally:
-            process.terminate()
-            process.wait(10)
-            print(self.stdout[process.pid])
-            print(self.stderr[process.pid])
+        is_running = self.is_running(process)
+        assert is_running, "AEA not running within timeout!"
+        assert not self.missing_from_output(
+            process, ["Task id is"], 10, is_terminating=False
+        )
+        assert not self.missing_from_output(
+            process, ["result is"], 10, is_terminating=False
+        )
+
