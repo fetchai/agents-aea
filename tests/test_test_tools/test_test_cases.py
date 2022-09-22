@@ -239,6 +239,7 @@ class TestGenericCases(AEATestCaseEmpty):
         proc = self.start_subprocess("-c", "import time; time.sleep(10)")
         assert proc.returncode is None
         self._terminate_subprocesses()
+        self.subprocesses.clear()
         assert proc.returncode is not None
 
     def test_miss_from_output(self):
