@@ -29,7 +29,7 @@
     "agent/open_aea/my_first_aea/0.1.0": "bafybeifelwg4md24lwpxgx7x5cugq7ovhbkew3lxw43m52rdppfn5o5g4i",
     "connection/fetchai/http_client/0.23.0": "bafybeigaiftpxtii7pyagcjizk47unhgiw7m2clacws7yuzou2g53qwx6i",
     "connection/fetchai/local/0.20.0": "bafybeig63bqafaornyk4nwoqiyrxzbebdn4cusbznlhqjs2fxuhy65itzm",
-    "connection/valory/test_libp2p/0.1.0": "bafybeibswbcsguxgidit43rzox6pth53k6s5kffowsp5wdfixht6upfe2i",
+    "connection/valory/test_libp2p/0.1.0": "bafybeia2gm6allplflkpkvj64nbnbr5u5cwu32wzuef6ubavgwk355njc4",
     "protocol/fetchai/tac/1.0.0": "bafybeiaew226n32rwp3h57zl4b2mmbrhjbyrdjbl2evnxf2tmmi4vrls7a",
     "protocol/valory/tendermint/0.1.0": "bafybeid2locdgdy6xn4lr64ouubfeukc6se4d7px3mfz52d6r6d6gk2z24",
     "skill/fetchai/erc1155_client/0.28.0": "bafybeiarnixbce2smw27tqwsck422jtdrrw7wz4zgs2pirzebkwwzehu5q",

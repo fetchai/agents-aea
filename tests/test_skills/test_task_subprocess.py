@@ -46,4 +46,3 @@ class TestTaskTestSkill(AEATestCaseEmpty):
         assert not self.missing_from_output(
             process, ["result is"], 10, is_terminating=False
         )
-
