@@ -104,6 +104,5 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
     @classmethod
     def teardown_class(cls):
         """Tear down the test"""
-        cls.terminate_agents()
         cls.node_multiplexer.disconnect()
         super().teardown_class()
