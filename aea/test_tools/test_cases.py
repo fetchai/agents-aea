@@ -481,7 +481,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
 
-        all_terminated = all([process.returncode == 0 for process in subprocesses])
+        all_terminated = all(process.returncode == 0 for process in subprocesses)
         return all_terminated
 
     @classmethod
@@ -781,7 +781,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 if poll is None:
                     process.terminate()
                     process.wait(2)
-        cls.subprocesses = []
 
     @classmethod
     def _join_threads(cls) -> None:
@@ -988,6 +987,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
+        assert cls.is_successfully_terminated(*cls.subprocesses)
+        cls.subprocesses.clear()
 
 
 def _get_password_option_args(password: Optional[str]) -> List[str]:
