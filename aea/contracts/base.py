@@ -265,28 +265,13 @@ class Contract(Component):
         Make a contract call.
 
         :param ledger_api: the ledger apis.
-        :param method_name: the contract method name.
+        :param contract_address: the contract address.
         :param kwargs: keyword arguments.
         :return: the call result
         """
 
+        method_name = kwargs.pop("method_name")
         contract_instance = cls.get_instance(ledger_api, contract_address)
-        # contract_instance = cls.get_instance(ledger_api)  # only for deployment txs
-
-        # Get the function building its signature from kwargs:
-
-        # Contract.get_function_by_signature(signature)
-        # -------------------------------------------------------------
-        # Searches for a distinct function with matching signature.
-        # Returns an instance of ContractFunction upon finding a match.
-        # Raises ValueError if no match is found.
-        # contract.get_function_by_signature('identity(uint256,bool)')
-
-        # Other options
-        # -------------
-        # Contract.find_functions_by_name(name), Contract.get_function_by_name(name)
-
-        method_name = "get_name_from_function_above"
 
         result = ledger_api.contract_method_call(
             contract_instance, method_name, **kwargs

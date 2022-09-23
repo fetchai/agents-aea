@@ -45,6 +45,7 @@ DEFAULT_REGISTRY_NAME = PACKAGES
 VENDOR = "vendor"
 AGENT = "agent"
 AGENTS = "agents"
+BUILD = "build"
 CONNECTION = "connection"
 CONNECTIONS = "connections"
 CONTRACT = "contract"

@@ -27,7 +27,6 @@ from pathlib import Path
 from typing import Optional, cast
 
 import click
-import yaml
 from jsonschema import ValidationError
 
 from aea import AEA_DIR
@@ -40,21 +39,22 @@ from aea.cli.utils.package_utils import (
     create_symlink_vendor_to_local,
     validate_package_name,
 )
-from aea.configurations.base import PublicId
+from aea.configurations.base import PackageType, PublicId
 from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
+    BUILD,
     CONNECTION,
     CONTRACT,
+    CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
     DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     PROTOCOL,
     SCAFFOLD_PUBLIC_ID,
     SKILL,
+    _ETHEREUM_IDENTIFIER,
 )
+from aea.configurations.loader import ConfigLoader
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -138,15 +138,17 @@ def connection(ctx: Context, connection_name: str) -> None:
 
 @scaffold.command()
 @click.argument("contract_name", type=str, required=True)
-@click.argument("contract_abi_path", type=str, required=False)
+@click.argument(
+    "contract_abi_path", type=click.Path(dir_okay=True, exists=True), required=False
+)
 @pass_ctx
 def contract(
-    ctx: Context, contract_name: str, contract_abi_path: Optional[str] = None
+    ctx: Context, contract_name: str, contract_abi_path: Optional[Path] = None
 ) -> None:
     """Add a contract scaffolding to the configuration file and agent."""
     scaffold_item(ctx, CONTRACT, contract_name)
     if contract_abi_path:
-        add_contract_abi(ctx, contract_name, contract_abi_path)
+        add_contract_abi(ctx, contract_name, Path(contract_abi_path))
 
 
 @scaffold.command()
@@ -368,7 +370,7 @@ def _scaffold_non_package_item(
         raise click.ClickException(str(e))
 
 
-def add_contract_abi(ctx: Context, contract_name: str, contract_abi_path: str) -> None:
+def add_contract_abi(ctx: Context, contract_name: str, contract_abi_path: Path) -> None:
     """
     Add the contract ABI to a contract scaffold.
 
@@ -382,27 +384,32 @@ def add_contract_abi(ctx: Context, contract_name: str, contract_abi_path: str) -
     author_name = ctx.agent_config.author
 
     # Create the build directory and copy the ABI file
-    src = Path(contract_abi_path)
-
     contract_dir_root = (
         Path(str(ctx.agent_config.directory)) if to_local_registry else Path()
     )
-    contract_dir = contract_dir_root / Path("contracts") / Path(contract_name)
-    abi_dest = contract_dir / Path("build") / Path(src.name)
+
+    contract_dir = contract_dir_root / Path(CONTRACTS) / Path(contract_name)
+    abi_dest = contract_dir / Path(BUILD) / Path(contract_abi_path.name)
 
     click.echo(f"Updating contract scaffold '{contract_name}' to include ABI...")
 
     os.makedirs(os.path.dirname(abi_dest), exist_ok=True)
-    shutil.copyfile(src, abi_dest)
+    shutil.copyfile(str(contract_abi_path), abi_dest)
 
-    # Update contract.yaml
-    with open(contract_dir / Path("contract.yaml"), "r") as contract_yaml:
-        content = yaml.full_load(contract_yaml)
+    # Load configuration (contract.yaml)
+    config_file = Path(contract_dir / DEFAULT_CONTRACT_CONFIG_FILE)
+    config_loader = ConfigLoader.from_configuration_type(PackageType.CONTRACT)
+    contract_config = config_loader.load(config_file.open("r"))
 
-    content["contract_interface_paths"] = {"ethereum": f"build/{src.name}"}
+    # Add ABI to the configuration
+    # Can't use contract_config.update() here. Since contract_interface_paths is empty during instantiation,
+    # it cannot be validated afterwards even if we add the correct values to ContractConfig.FIELDS_ALLOWED_TO_UPDATE
+    contract_config.contract_interface_paths = {
+        _ETHEREUM_IDENTIFIER: f"{BUILD}/{contract_abi_path.name}"
+    }
 
-    with open(contract_dir / Path("contract.yaml"), "w") as contract_yaml:
-        yaml.dump(content, contract_yaml, sort_keys=False)
+    # Write the new configuration
+    config_loader.dump(contract_config, config_file.open("w+"))
 
     # Fingerprint again
     new_public_id = PublicId(author_name, contract_name, DEFAULT_VERSION)
