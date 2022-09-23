@@ -306,6 +306,33 @@ def test_build_transaction_2():
     assert result == {}
 
 
+def test_default_method_call():
+    """Tests a default method build."""
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+
+    ledger_api = ledger_apis_registry.make(
+        EthereumCrypto.identifier,
+        address=ETHEREUM_DEFAULT_ADDRESS,
+    )
+
+    # Call a function present in the ABI but not in the contract package
+    with mock.patch("web3.contract.ContractFunction.call", return_value=0):
+        result = contract.default_method_call(
+            ledger_api=ledger_api,
+            contract_address=dummy_address,
+            **dict(
+                method_name="getAddress",
+                _addr=dummy_address,
+            )
+        )
+
+        assert result == 0
+
+
 def test_get_transaction_transfer_logs():
     """Tests a transaction log retrieval."""
     contract = Contract.from_dir(
