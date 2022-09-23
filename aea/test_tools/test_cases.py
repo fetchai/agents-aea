@@ -992,12 +992,12 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         try:
             wait_for_condition(
                 lambda: cls.is_successfully_terminated(*cls.subprocesses),
-                error_msg="Not all subprocesses terminated successfully",
+                error_msg="Not all subprocesses terminated successfully.",
                 timeout=TERMINATION_TIMEOUT,
             )
         except TimeoutError as e:
             nonzero = [p.returncode for p in cls.subprocesses if p.returncode]
-            raise subprocess.SubprocessError(f"returncodes: {nonzero}") from e
+            logging.error(f"{e} Non-zero returncodes: {nonzero}")
         cls.subprocesses.clear()
 
 
