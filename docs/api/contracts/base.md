@@ -270,6 +270,28 @@ Build a transaction.
 
 the transaction
 
+<a id="aea.contracts.base.Contract.default_method_call"></a>
+
+#### default`_`method`_`call
+
+```python
+@classmethod
+def default_method_call(cls, ledger_api: LedgerApi, contract_address: str,
+                        **kwargs: Any) -> Optional[JSONLike]
+```
+
+Make a contract call.
+
+**Arguments**:
+
+- `ledger_api`: the ledger apis.
+- `contract_address`: the contract address.
+- `kwargs`: keyword arguments.
+
+**Returns**:
+
+the call result
+
 <a id="aea.contracts.base.Contract.get_transaction_transfer_logs"></a>
 
 #### get`_`transaction`_`transfer`_`logs
