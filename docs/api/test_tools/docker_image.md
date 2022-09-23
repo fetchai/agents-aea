@@ -12,7 +12,7 @@ This module contains testing utilities.
 class DockerImage(ABC)
 ```
 
-A class to wrap interatction with a Docker image.
+A class to wrap interaction with a Docker image.
 
 <a id="aea.test_tools.docker_image.DockerImage.__init__"></a>
 

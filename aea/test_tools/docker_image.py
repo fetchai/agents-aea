@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class DockerImage(ABC):
-    """A class to wrap interatction with a Docker image."""
+    """A class to wrap interaction with a Docker image."""
 
     MINIMUM_DOCKER_VERSION = (19, 0, 0)
 
