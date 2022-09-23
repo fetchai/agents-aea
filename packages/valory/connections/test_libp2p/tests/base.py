@@ -23,10 +23,11 @@
 
 import atexit
 import functools
+import json
 import logging
 import os
-import json
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Union
 
@@ -45,16 +46,20 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.network import LOCALHOST
-from aea.test_tools.utils import remove_test_directory, wait_for_condition
 from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.utils import remove_test_directory, wait_for_condition
+
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.valory.connections import p2p_libp2p_client
+from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
 from packages.valory.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     MultiAddr,
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
+)
+from packages.valory.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 from packages.valory.connections.p2p_libp2p.consts import (
     LIBP2P_CERT_NOT_AFTER,
@@ -69,12 +74,24 @@ from packages.valory.connections.p2p_libp2p.tests.base import (
 from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
+from packages.valory.connections.p2p_libp2p_client.connection import (
+    PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
+)
 from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 
 
 DEFAULT_HOST = LOCALHOST.hostname
+
+
+@dataclass
+class NodeConfig:
+    """Node configuration"""
+
+    uri: str
+    maddr: str
+    public_key: str
 
 
 def create_identity(crypto) -> Identity:
@@ -459,9 +476,13 @@ class BaseP2PLibp2pTest:
 class BaseP2PLibp2pAEATestCaseMany(AEATestCaseMany):
     """BaseP2PLibp2pAEATestCaseMany"""
 
+    nodes: List[NodeConfig]
+    log_files: List[str] = []
     package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
     agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
     conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
+    p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
+    p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
     def setup(self):
         """Setup"""
@@ -476,18 +497,37 @@ class BaseP2PLibp2pAEATestCaseMany(AEATestCaseMany):
             json.dumps([self.agent_ledger_id, self.node_ledger_id]),
             "list",
         )
+
         # agent keys
         self.generate_private_key(self.agent_ledger_id)
-        self.add_private_key(self.agent_ledger_id, f"{self.agent_ledger_id}_private_key.txt")
-
-    def add_libp2p_node_keys(self):
-        """"""
-        self.generate_private_key(self.node_ledger_id, private_key_file=self.conn_key_file)
         self.add_private_key(
-            self.node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
+            self.agent_ledger_id, f"{self.agent_ledger_id}_private_key.txt"
         )
+        # node keys
+        self.generate_private_key(
+            self.node_ledger_id, private_key_file=self.conn_key_file
+        )
+        self.add_private_key(
+            self.node_ledger_id,
+            private_key_filepath=self.conn_key_file,
+            connection=True,
+        )
+
+    def add_libp2p_connection(self):
+        """Add libp2p connection"""
+        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.run_cli_command("build", cwd=self._get_cwd())
+
+    def add_libp2p_client_connection(self):
+        """Add libp2p client connection"""
+        self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
+
+    def make_node_cert_request(self, pub_key: str) -> CertRequest:
+        """Make node cert request"""
+        return make_cert_request(pub_key, self.agent_ledger_id, f"./{pub_key}")
 
     def teardown(self):
         """Clean up after test case run."""
         self.unset_agent_context()
         self.run_cli_command("delete", self.agent_name)
+        self.log_files.clear()

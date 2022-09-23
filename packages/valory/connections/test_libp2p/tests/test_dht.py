@@ -31,19 +31,12 @@ from pathlib import Path
 import pytest
 
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
-from packages.valory.connections.p2p_libp2p.connection import (
-    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
-)
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
-from packages.valory.connections.p2p_libp2p_client.connection import (
-    PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
-)
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     BaseP2PLibp2pAEATestCaseMany,
     LOCALHOST,
     load_client_connection_yaml_config,
-    make_cert_request,
     ports,
 )
 from packages.valory.connections.test_libp2p.tests.conftest import (
@@ -177,22 +170,13 @@ class Libp2pConnectionDHTDelegate(Libp2pConnectionDHTRelay):
 class Libp2pConnectionDHTRelayAEACli(BaseP2PLibp2pAEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
-    def test_connectivity(self):
-        """Test connectivity."""
+    def set_libp2p_connection_config(self):
+        """Set libp2p connection config"""
 
-        self.add_libp2p_node_keys()
-
-        # add connection and build
-        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.run_cli_command("build", cwd=self._get_cwd())
-        # for logging
         log_file = str(Path(f"libp2p_node_{self.agent_name}.log").absolute())
         self.log_files.append(log_file)
-
-        config_path = f"{p2p_libp2p_path}.config"
         self.nested_set_config(
-            config_path,
+            f"{p2p_libp2p_path}.config",
             {
                 "local_uri": f"{LOCALHOST.netloc}:{next(ports)}",
                 "entry_peers": [node.maddr for node in self.nodes],
@@ -200,9 +184,13 @@ class Libp2pConnectionDHTRelayAEACli(BaseP2PLibp2pAEATestCaseMany):
                 "ledger_id": self.node_ledger_id,
             },
         )
-
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
+    def test_connectivity(self):
+        """Test connectivity."""
+
+        self.add_libp2p_connection()
+        self.set_libp2p_connection_config()
         process = self.run_agent()
 
         is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)
@@ -218,34 +206,21 @@ class Libp2pConnectionDHTRelayAEACli(BaseP2PLibp2pAEATestCaseMany):
 class Libp2pConnectionDHTDelegateAEACli(BaseP2PLibp2pAEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
+    def set_libp2p_client_connection_config(self):
+        """Set libp2p client connection config"""
+
+        nodes = [{"uri": n.uri, "public_key": n.public_key} for n in self.nodes]
+        cert_requests = [self.make_node_cert_request(n.public_key) for n in self.nodes]
+        self.nested_set_config(f"{p2p_libp2p_client_path}.config", {"nodes": nodes})
+        self.nested_set_config(p2p_libp2p_client_path + ".cert_requests", cert_requests)
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+
     def test_connectivity(self):
         """Test connectivity."""
 
-        self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
-        config_path = f"{p2p_libp2p_client_path}.config"
-        self.nested_set_config(
-            config_path,
-            {"nodes": [{"uri": node.uri} for node in self.nodes]},
-        )
-        nodes = [
-            {"uri": node.uri, "public_key": node.public_key} for node in self.nodes
-        ]
-        self.nested_set_config(p2p_libp2p_client_path + ".config", {"nodes": nodes})
-
-        # generate certificates for connection
-        self.nested_set_config(
-            p2p_libp2p_client_path + ".cert_requests",
-            [
-                make_cert_request(
-                    node.public_key, self.agent_ledger_id, f"./cli_test_{node.public_key}"
-                )
-                for node in self.nodes
-            ],
-        )
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
-
+        self.add_libp2p_client_connection()
+        self.set_libp2p_client_connection_config()
         process = self.run_agent()
-
         is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
 
