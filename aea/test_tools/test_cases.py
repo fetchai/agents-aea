@@ -87,7 +87,7 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
-TEARDOWN_TERMINATION_TIMEOUT = 30
+TERMINATION_TIMEOUT = 30
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -455,7 +455,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def terminate_agents(
         cls,
         *subprocesses: subprocess.Popen,
-        timeout: int = 20,
+        timeout: int = TERMINATION_TIMEOUT,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -782,7 +782,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 poll = process.poll()
                 if poll is None:
                     process.terminate()
-                    process.wait(2)
+                    process.wait(timeout=TERMINATION_TIMEOUT)
 
     @classmethod
     def _join_threads(cls) -> None:
@@ -992,7 +992,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         wait_for_condition(
             lambda: cls.is_successfully_terminated(*cls.subprocesses),
             error_msg="Not all subprocesses terminated successfully",
-            timeout=TEARDOWN_TERMINATION_TIMEOUT,
+            timeout=TERMINATION_TIMEOUT,
         )
         cls.subprocesses.clear()
 
