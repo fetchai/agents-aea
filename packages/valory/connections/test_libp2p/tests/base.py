@@ -25,6 +25,7 @@ import atexit
 import functools
 import logging
 import os
+import json
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Union
@@ -45,7 +46,7 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.network import LOCALHOST
 from aea.test_tools.utils import remove_test_directory, wait_for_condition
-
+from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections import p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
@@ -453,3 +454,40 @@ class BaseP2PLibp2pTest:
     def mailbox_multiplexers(self) -> List[Multiplexer]:
         """Mailbox multiplexers"""
         return self._multiplexers_by_connection_type(P2PLibp2pMailboxConnection)
+
+
+class BaseP2PLibp2pAEATestCaseMany(AEATestCaseMany):
+    """BaseP2PLibp2pAEATestCaseMany"""
+
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
+    agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
+    conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
+
+    def setup(self):
+        """Setup"""
+
+        self.agent_name = "agent_name"
+        self.create_agents(self.agent_name)
+        self.set_agent_context(self.agent_name)
+
+        self.set_config("agent.default_ledger", self.agent_ledger_id)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([self.agent_ledger_id, self.node_ledger_id]),
+            "list",
+        )
+        # agent keys
+        self.generate_private_key(self.agent_ledger_id)
+        self.add_private_key(self.agent_ledger_id, f"{self.agent_ledger_id}_private_key.txt")
+
+    def add_libp2p_node_keys(self):
+        """"""
+        self.generate_private_key(self.node_ledger_id, private_key_file=self.conn_key_file)
+        self.add_private_key(
+            self.node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
+        )
+
+    def teardown(self):
+        """Clean up after test case run."""
+        self.unset_agent_context()
+        self.run_cli_command("delete", self.agent_name)

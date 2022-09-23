@@ -23,16 +23,12 @@
 # pylint: skip-file
 
 import itertools
-import json
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import List
+from pathlib import Path
 
 import pytest
-
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.connection import (
@@ -44,7 +40,7 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 )
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
-    LIBP2P_LEDGER,
+    BaseP2PLibp2pAEATestCaseMany,
     LOCALHOST,
     load_client_connection_yaml_config,
     make_cert_request,
@@ -178,43 +174,21 @@ class Libp2pConnectionDHTDelegate(Libp2pConnectionDHTRelay):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
+class Libp2pConnectionDHTRelayAEACli(BaseP2PLibp2pAEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
-
-    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
     def test_connectivity(self):
         """Test connectivity."""
-        self.log_files = []
-        self.agent_name = "some"
-        self.create_agents(self.agent_name)
-        self.set_agent_context(self.agent_name)
-        self.conn_key_file = os.path.join(
-            os.path.abspath(os.getcwd()), "./conn_key.txt"
-        )
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
-        # set config
-        self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config(
-            "agent.required_ledgers",
-            json.dumps([agent_ledger_id, node_ledger_id]),
-            "list",
-        )
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-        # agent keys
-        self.generate_private_key(agent_ledger_id)
-        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
-        # libp2p node keys
-        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
-        self.add_private_key(
-            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
-        )
+
+        self.add_libp2p_node_keys()
+
         # add connection and build
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         # for logging
-        log_file = f"libp2p_node_{self.agent_name}.log"
-        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
+        log_file = str(Path(f"libp2p_node_{self.agent_name}.log").absolute())
+        self.log_files.append(log_file)
 
         config_path = f"{p2p_libp2p_path}.config"
         self.nested_set_config(
@@ -223,13 +197,12 @@ class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
                 "local_uri": f"{LOCALHOST.netloc}:{next(ports)}",
                 "entry_peers": [node.maddr for node in self.nodes],
                 "log_file": log_file,
-                "ledger_id": node_ledger_id,
+                "ledger_id": self.node_ledger_id,
             },
         )
 
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
-        self.log_files = [log_file]
         process = self.run_agent()
 
         is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)
@@ -239,35 +212,14 @@ class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
         missing_strings = self.missing_from_output(process, check_strings)
         assert not missing_strings
 
-    def teardown(self):
-        """Clean up after test case run."""
-        self.unset_agent_context()
-        self.run_cli_command("delete", self.agent_name)
-
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany):
+class Libp2pConnectionDHTDelegateAEACli(BaseP2PLibp2pAEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
-
-    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
     def test_connectivity(self):
         """Test connectivity."""
-        self.agent_name = "some"
-        self.create_agents(self.agent_name)
-        self.set_agent_context(self.agent_name)
-
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
-        self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config(
-            "agent.required_ledgers",
-            json.dumps([agent_ledger_id, node_ledger_id]),
-            "list",
-        )
-        # agent keys
-        self.generate_private_key(agent_ledger_id)
-        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
 
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
         config_path = f"{p2p_libp2p_client_path}.config"
@@ -285,7 +237,7 @@ class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany):
             p2p_libp2p_client_path + ".cert_requests",
             [
                 make_cert_request(
-                    node.public_key, agent_ledger_id, f"./cli_test_{node.public_key}"
+                    node.public_key, self.agent_ledger_id, f"./cli_test_{node.public_key}"
                 )
                 for node in self.nodes
             ],
@@ -296,11 +248,6 @@ class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany):
 
         is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
-
-    def teardown(self):
-        """Clean up after test case run."""
-        self.unset_agent_context()
-        self.run_cli_command("delete", self.agent_name)
 
 
 test_classes = [
