@@ -24,6 +24,7 @@
 
 import itertools
 import os
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -232,3 +233,37 @@ for base_cls in test_classes:
         test_cls.__name__ = name
         test_cls.nodes = test_case.nodes
         globals()[test_cls.__name__] = test_cls
+
+
+class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
+    """Test DHT Robustness"""
+
+    nodes = local_nodes
+    pytestmark = skip_if_ci_marker
+
+    def setup(self):
+        """Setup"""
+
+        for node in self.nodes:
+            self.make_connection(relay=False, entry_peers=[node.maddr])
+            self.make_client_connection(uri=node.uri, peer_public_key=node.public_key)
+
+    def teardown(self):
+        """Teardown"""
+
+        self._disconnect()
+        self.multiplexers.clear()
+        self.log_files.clear()
+
+    @pytest.mark.parametrize("exponent", [2, 3, 4])
+    def test_prolonged_message_exchange(self, exponent: int):
+        """Test prolonged message exchange"""
+
+        n_messages = 10 ** exponent
+        for _ in range(n_messages):
+            mux_pair = random.sample(self.multiplexers, 2)
+            sender, to = (c.address for m in mux_pair for c in m.connections)
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            mux_pair[0].put(envelope)
+            delivered_envelope = mux_pair[1].get(block=True, timeout=5)
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
