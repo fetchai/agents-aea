@@ -337,38 +337,32 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
 
         assert {e.encode() for e in shipped} == {e.encode() for e in delivered}
 
-    @settings(deadline=2000)
-    @given(st.builds(DefaultMessage, **default_message_strategy))
-    def test_randomized_default_message_exchange(self, message):
-        """Test randomized default message strategy"""
+    def send_message_via_random_multiplexer_pair(self, message) -> bool:
+        """Send message via random multiplexers"""
 
         mux_pair = random.sample(self.multiplexers, 2)
         sender, to = (c.address for m in mux_pair for c in m.connections)
         envelope = Envelope(
             to=to,
             sender=sender,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            protocol_specification_id=message.protocol_specification_id,
             message=message,
         )
         logging.debug(envelope)
         mux_pair[0].put(envelope)
         delivered_envelope = mux_pair[1].get(block=True, timeout=5)
-        assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+        return self.sent_is_delivered_envelope(envelope, delivered_envelope)
+
+    @settings(deadline=2000)
+    @given(st.builds(DefaultMessage, **default_message_strategy))
+    def test_randomized_default_message_exchange(self, message):
+        """Test randomized default message strategy"""
+
+        assert self.send_message_via_random_multiplexer_pair(message)
 
     @settings(deadline=2000)
     @given(st.builds(lambda kw: TendermintMessage(**kw), tendermint_message_strategy))
     def test_randomized_tendermint_message_exchange(self, message):
         """Test randomized tendermint message strategy"""
 
-        mux_pair = random.sample(self.multiplexers, 2)
-        sender, to = (c.address for m in mux_pair for c in m.connections)
-        envelope = Envelope(
-            to=to,
-            sender=sender,
-            protocol_specification_id=TendermintMessage.protocol_specification_id,
-            message=message,
-        )
-        logging.debug(envelope)
-        mux_pair[0].put(envelope)
-        delivered_envelope = mux_pair[1].get(block=True, timeout=5)
-        assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+        assert self.send_message_via_random_multiplexer_pair(message)
