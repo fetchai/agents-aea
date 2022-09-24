@@ -23,6 +23,7 @@
 # pylint: skip-file
 
 import itertools
+import logging
 import os
 import random
 from dataclasses import dataclass
@@ -37,6 +38,7 @@ from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     LOCALHOST,
     ports,
+    wait_for_condition,
 )
 from packages.valory.connections.test_libp2p.tests.conftest import (
     ACNWithBootstrappedEntryNodes,
@@ -267,3 +269,31 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
             mux_pair[0].put(envelope)
             delivered_envelope = mux_pair[1].get(block=True, timeout=5)
             assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+
+    @pytest.mark.parametrize("exponent", [2, 3, 4])
+    def test_ship_first_check_later(self, exponent: int):
+        """Ship first check later"""
+
+        shipped, delivered = [], []
+        n_messages = 10 ** exponent
+        for _ in range(n_messages):
+            mux_pair = random.sample(self.multiplexers, 2)
+            sender, to = (c.address for m in mux_pair for c in m.connections)
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            mux_pair[0].put(envelope)
+            shipped.append(envelope)
+
+        def check():
+            for mux in self.multiplexers:
+                while not mux.in_queue.empty():
+                    delivered.append(mux.get())
+            logging.info(f"{len(delivered)} / {len(shipped)}")
+            return len(delivered) >= n_messages
+
+        timeout = max(2, n_messages // 10)
+        try:
+            wait_for_condition(lambda: check(), timeout, period=1.0)
+        except TimeoutError:
+            raise TimeoutError(f"Found only {len(delivered)} / {len(shipped)} messages")
+
+        assert {e.encode() for e in shipped} == {e.encode() for e in delivered}
