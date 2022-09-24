@@ -31,7 +31,11 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from hypothesis import strategies as st
+from hypothesis import given, settings
+from aea.mail.base import Envelope
 
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pAEATestCaseMany,
@@ -237,6 +241,17 @@ for base_cls in test_classes:
         globals()[test_cls.__name__] = test_cls
 
 
+RANGE_32_BIT = -1 << 31, (1 << 31) - 1
+
+default_message_strategy = dict(
+    dialogue_reference=st.tuples(st.text(), st.text()),
+    message_id=st.integers(*RANGE_32_BIT),
+    target=st.integers(*RANGE_32_BIT),
+    content=st.binary(),
+    performative=st.just(DefaultMessage.Performative.BYTES)
+)
+
+
 class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
     """Test DHT Robustness"""
 
@@ -297,3 +312,21 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
             raise TimeoutError(f"Found only {len(delivered)} / {len(shipped)} messages")
 
         assert {e.encode() for e in shipped} == {e.encode() for e in delivered}
+
+    @settings(deadline=2000)
+    @given(st.builds(DefaultMessage, **default_message_strategy))
+    def test_randomized_default_message_exchange(self, message):
+        """Test randomized default message strategy"""
+
+        mux_pair = random.sample(self.multiplexers, 2)
+        sender, to = (c.address for m in mux_pair for c in m.connections)
+        envelope = Envelope(
+            to=to,
+            sender=sender,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=message,
+        )
+        logging.debug(envelope)
+        mux_pair[0].put(envelope)
+        delivered_envelope = mux_pair[1].get(block=True, timeout=5)
+        assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
