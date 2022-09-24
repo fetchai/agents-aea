@@ -31,12 +31,12 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from hypothesis import strategies as st
 from hypothesis import given, settings
+from hypothesis import strategies as st
+
 from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.valory.protocols.tendermint.message import TendermintMessage, CustomErrorCode
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pAEATestCaseMany,
@@ -50,6 +50,10 @@ from packages.valory.connections.test_libp2p.tests.conftest import (
     NodeConfig,
     local_nodes,
     public_nodes,
+)
+from packages.valory.protocols.tendermint.message import (
+    CustomErrorCode,
+    TendermintMessage,
 )
 
 
@@ -252,26 +256,32 @@ base_message_strategy = dict(
 default_message_strategy = dict(
     **base_message_strategy,
     content=st.binary(),
-    performative=st.just(DefaultMessage.Performative.BYTES)
+    performative=st.just(DefaultMessage.Performative.BYTES),
 )
 tendermint_message_strategy = st.one_of(
     [
-        st.fixed_dictionaries(dict(
-            **base_message_strategy,
-            performative=st.just(TendermintMessage.Performative.REQUEST),
-        )),
-        st.fixed_dictionaries(dict(
-            **base_message_strategy,
-            performative=st.just(TendermintMessage.Performative.RESPONSE),
-            info=st.text(),
-        )),
-        st.fixed_dictionaries(dict(
-            **base_message_strategy,
-            performative=st.just(TendermintMessage.Performative.ERROR),
-            error_code=st.sampled_from(CustomErrorCode),
-            error_msg=st.text(),
-            error_data=st.just({}),
-        )),
+        st.fixed_dictionaries(
+            dict(
+                **base_message_strategy,
+                performative=st.just(TendermintMessage.Performative.REQUEST),
+            )
+        ),
+        st.fixed_dictionaries(
+            dict(
+                **base_message_strategy,
+                performative=st.just(TendermintMessage.Performative.RESPONSE),
+                info=st.text(),
+            )
+        ),
+        st.fixed_dictionaries(
+            dict(
+                **base_message_strategy,
+                performative=st.just(TendermintMessage.Performative.ERROR),
+                error_code=st.sampled_from(CustomErrorCode),
+                error_msg=st.text(),
+                error_data=st.just({}),
+            )
+        ),
     ],
 )
 
@@ -300,7 +310,7 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
     def test_prolonged_message_exchange(self, exponent: int):
         """Test prolonged message exchange"""
 
-        n_messages = 10 ** exponent
+        n_messages = 10**exponent
         for _ in range(n_messages):
             mux_pair = random.sample(self.multiplexers, 2)
             sender, to = (c.address for m in mux_pair for c in m.connections)
@@ -314,7 +324,7 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
         """Ship first check later"""
 
         shipped, delivered = [], []
-        n_messages = 10 ** exponent
+        n_messages = 10**exponent
         for _ in range(n_messages):
             mux_pair = random.sample(self.multiplexers, 2)
             sender, to = (c.address for m in mux_pair for c in m.connections)

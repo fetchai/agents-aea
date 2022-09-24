@@ -113,7 +113,7 @@ public_nodes = [
 
 def _launch_image(
     image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
-) -> None:
+) -> Generator:
     """Launch image."""
 
     image.check_skip()
