@@ -36,6 +36,7 @@ from hypothesis import given, settings
 from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.valory.protocols.tendermint.message import TendermintMessage, CustomErrorCode
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pAEATestCaseMany,
@@ -243,12 +244,35 @@ for base_cls in test_classes:
 
 RANGE_32_BIT = -1 << 31, (1 << 31) - 1
 
-default_message_strategy = dict(
+base_message_strategy = dict(
     dialogue_reference=st.tuples(st.text(), st.text()),
     message_id=st.integers(*RANGE_32_BIT),
     target=st.integers(*RANGE_32_BIT),
+)
+default_message_strategy = dict(
+    **base_message_strategy,
     content=st.binary(),
     performative=st.just(DefaultMessage.Performative.BYTES)
+)
+tendermint_message_strategy = st.one_of(
+    [
+        st.fixed_dictionaries(dict(
+            **base_message_strategy,
+            performative=st.just(TendermintMessage.Performative.REQUEST),
+        )),
+        st.fixed_dictionaries(dict(
+            **base_message_strategy,
+            performative=st.just(TendermintMessage.Performative.RESPONSE),
+            info=st.text(),
+        )),
+        st.fixed_dictionaries(dict(
+            **base_message_strategy,
+            performative=st.just(TendermintMessage.Performative.ERROR),
+            error_code=st.sampled_from(CustomErrorCode),
+            error_msg=st.text(),
+            error_data=st.just({}),
+        )),
+    ],
 )
 
 
@@ -324,6 +348,24 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
             to=to,
             sender=sender,
             protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=message,
+        )
+        logging.debug(envelope)
+        mux_pair[0].put(envelope)
+        delivered_envelope = mux_pair[1].get(block=True, timeout=5)
+        assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+
+    @settings(deadline=2000)
+    @given(st.builds(lambda kw: TendermintMessage(**kw), tendermint_message_strategy))
+    def test_randomized_tendermint_message_exchange(self, message):
+        """Test randomized tendermint message strategy"""
+
+        mux_pair = random.sample(self.multiplexers, 2)
+        sender, to = (c.address for m in mux_pair for c in m.connections)
+        envelope = Envelope(
+            to=to,
+            sender=sender,
+            protocol_specification_id=TendermintMessage.protocol_specification_id,
             message=message,
         )
         logging.debug(envelope)
