@@ -21,16 +21,17 @@
 
 """Conftest module for Pytest."""
 
+import functools
 import logging
 import time
-import yaml
 from contextlib import contextmanager
-from typing import Dict, Generator, Any
-import functools
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, Generator
+
 import docker
 import pytest
+import yaml
 from docker.errors import ImageNotFound, NotFound
 
 from aea.test_tools.docker_image import Container, DockerImage
@@ -112,7 +113,7 @@ public_nodes = [
 
 def _launch_image(
     image: DockerImage, timeout: float = 2.0, max_attempts: int = 10
-) -> None:
+) -> Generator:
     """Launch image."""
 
     image.check_skip()

@@ -25,15 +25,15 @@
 import itertools
 import os
 from dataclasses import dataclass
-from typing import List
 from pathlib import Path
+from typing import List
 
 import pytest
 
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.test_libp2p.tests.base import (
-    BaseP2PLibp2pTest,
     BaseP2PLibp2pAEATestCaseMany,
+    BaseP2PLibp2pTest,
     LOCALHOST,
     ports,
 )

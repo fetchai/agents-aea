@@ -27,9 +27,8 @@ import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
-import yaml
 from aea_ledger_cosmos.cosmos import CosmosCrypto
 from aea_ledger_ethereum.ethereum import EthereumCrypto
 
@@ -79,9 +78,11 @@ from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
 from packages.valory.connections.test_libp2p.tests.conftest import (
-    NodeConfig,
     LIBP2P_LEDGER,
+    NodeConfig,
 )
+
+
 DEFAULT_HOST = LOCALHOST.hostname
 
 
