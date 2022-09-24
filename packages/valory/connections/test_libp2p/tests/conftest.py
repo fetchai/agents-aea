@@ -23,24 +23,91 @@
 
 import logging
 import time
+import yaml
 from contextlib import contextmanager
-from typing import Dict, Generator
-
+from typing import Dict, Generator, Any
+import functools
+from dataclasses import dataclass
+from pathlib import Path
 import docker
 import pytest
 from docker.errors import ImageNotFound, NotFound
 
 from aea.test_tools.docker_image import Container, DockerImage
 
+from packages.valory.connections import p2p_libp2p_client
 from packages.valory.connections.test_libp2p.tests.acn_image import (
     ACNNodeDockerImage,
     ACNWithBootstrappedEntryNodesDockerImage,
 )
 
 
+@dataclass
+class NodeConfig:
+    """Node configuration"""
+
+    uri: str
+    maddr: str
+    public_key: str
+
+
 DOCKER_PRINT_SEPARATOR = ("\n" + "*" * 40) * 3 + "\n"
 
 logger = logging.getLogger(__name__)
+
+
+META_ADDRESS = "0.0.0.0"  # nosec
+ACN_CONFIGURATION: Dict[str, str] = dict(
+    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
+    AEA_P2P_URI_PUBLIC=f"{META_ADDRESS}:5000",
+    AEA_P2P_URI=f"{META_ADDRESS}:5000",
+    AEA_P2P_DELEGATE_URI=f"{META_ADDRESS}:11000",
+    AEA_P2P_URI_MONITORING=f"{META_ADDRESS}:8080",
+    ACN_LOG_FILE="/acn/libp2p_node.log",
+)
+
+local_nodes = [
+    NodeConfig(
+        "localhost:11001",
+        f"/dns4/{META_ADDRESS}/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
+        "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
+    ),
+    NodeConfig(
+        "localhost:11002",
+        f"/dns4/{META_ADDRESS}/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
+        "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
+    ),
+]
+
+
+@functools.lru_cache()
+def load_client_connection_yaml_config() -> Dict[str, Any]:
+    """Load libp2p client connection yaml configuration"""
+
+    connection_yaml = (
+        Path(p2p_libp2p_client.__file__).absolute().parent / "connection.yaml"
+    )
+    config = yaml.safe_load(connection_yaml.read_text())["config"]
+    dns_template = "/dns4/{domain}/tcp/{port}/p2p/{peer_id}"
+
+    # add matching information needed in ACN libp2p tests
+    port_mapping = {
+        "9005": ("9003", "16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"),
+        "9006": ("9004", "16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"),
+    }
+
+    for node in config["nodes"]:
+        domain, port = node["uri"].split(":")
+        port, peer_id = port_mapping[port]
+        node["maddr"] = dns_template.format(domain=domain, port=port, peer_id=peer_id)
+
+    return config
+
+
+LIBP2P_LEDGER = load_client_connection_yaml_config()["ledger_id"]
+public_nodes = [
+    NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]
+]
 
 
 def _launch_image(
@@ -133,17 +200,6 @@ def launch_many_containers(
     yield image
     for container in containers:
         _stop_container(container, image.tag)
-
-
-META_ADDRESS = "0.0.0.0"  # nosec
-ACN_CONFIGURATION: Dict[str, str] = dict(
-    AEA_P2P_ID="54562eb807d2f80df8151db0a394cac72e16435a5f64275c277cae70308e8b24",
-    AEA_P2P_URI_PUBLIC=f"{META_ADDRESS}:5000",
-    AEA_P2P_URI=f"{META_ADDRESS}:5000",
-    AEA_P2P_DELEGATE_URI=f"{META_ADDRESS}:11000",
-    AEA_P2P_URI_MONITORING=f"{META_ADDRESS}:8080",
-    ACN_LOG_FILE="/acn/libp2p_node.log",
-)
 
 
 @pytest.fixture(scope="session")

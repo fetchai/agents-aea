@@ -22,12 +22,10 @@
 # pylint: skip-file
 
 import atexit
-import functools
 import json
 import logging
 import os
 import tempfile
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Union
 
@@ -80,18 +78,11 @@ from packages.valory.connections.p2p_libp2p_client.connection import (
 from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
 )
-
-
+from packages.valory.connections.test_libp2p.tests.conftest import (
+    NodeConfig,
+    LIBP2P_LEDGER,
+)
 DEFAULT_HOST = LOCALHOST.hostname
-
-
-@dataclass
-class NodeConfig:
-    """Node configuration"""
-
-    uri: str
-    maddr: str
-    public_key: str
 
 
 def create_identity(crypto) -> Identity:
@@ -141,33 +132,6 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     Path(cert.get_absolute_save_path(path_prefix)).write_bytes(
         signature.encode("ascii")
     )
-
-
-@functools.lru_cache()
-def load_client_connection_yaml_config() -> Dict[str, Any]:
-    """Load libp2p client connection yaml configuration"""
-
-    connection_yaml = (
-        Path(p2p_libp2p_client.__file__).absolute().parent / "connection.yaml"
-    )
-    config = yaml.safe_load(connection_yaml.read_text())["config"]
-    dns_template = "/dns4/{domain}/tcp/{port}/p2p/{peer_id}"
-
-    # add matching information needed in ACN libp2p tests
-    port_mapping = {
-        "9005": ("9003", "16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"),
-        "9006": ("9004", "16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"),
-    }
-
-    for node in config["nodes"]:
-        domain, port = node["uri"].split(":")
-        port, peer_id = port_mapping[port]
-        node["maddr"] = dns_template.format(domain=domain, port=port, peer_id=peer_id)
-
-    return config
-
-
-LIBP2P_LEDGER = load_client_connection_yaml_config()["ledger_id"]
 
 
 def _make_libp2p_client_connection(
@@ -476,18 +440,19 @@ class BaseP2PLibp2pTest:
 class BaseP2PLibp2pAEATestCaseMany(AEATestCaseMany):
     """BaseP2PLibp2pAEATestCaseMany"""
 
+    agent_name = "agent_name"
     nodes: List[NodeConfig]
     log_files: List[str] = []
-    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
     agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
+
     conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
     p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
     p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
 
     def setup(self):
         """Setup"""
 
-        self.agent_name = "agent_name"
         self.create_agents(self.agent_name)
         self.set_agent_context(self.agent_name)
 
@@ -530,4 +495,5 @@ class BaseP2PLibp2pAEATestCaseMany(AEATestCaseMany):
         """Clean up after test case run."""
         self.unset_agent_context()
         self.run_cli_command("delete", self.agent_name)
+        os.remove(self.conn_key_file)
         self.log_files.clear()

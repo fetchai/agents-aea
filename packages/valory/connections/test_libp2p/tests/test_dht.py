@@ -30,26 +30,23 @@ from pathlib import Path
 
 import pytest
 
-from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
 from packages.valory.connections.test_libp2p.tests.base import (
     BaseP2PLibp2pTest,
     BaseP2PLibp2pAEATestCaseMany,
     LOCALHOST,
-    load_client_connection_yaml_config,
     ports,
 )
 from packages.valory.connections.test_libp2p.tests.conftest import (
     ACNWithBootstrappedEntryNodes,
-    META_ADDRESS,
+    NodeConfig,
+    local_nodes,
+    public_nodes,
 )
 
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
-
-p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
-p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
 skip_if_ci_marker = [
     pytest.Mark(
@@ -57,32 +54,6 @@ skip_if_ci_marker = [
         args=(bool(os.environ.get("IS_CI_WORKFLOW")),),
         kwargs={"reason": "public ACN node tests flaky on CI"},
     )
-]
-
-
-@dataclass
-class NodeConfig:
-    """Node configuration"""
-
-    uri: str
-    maddr: str
-    public_key: str
-
-
-local_nodes = [
-    NodeConfig(
-        "localhost:11001",
-        f"/dns4/{META_ADDRESS}/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
-        "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
-    ),
-    NodeConfig(
-        "localhost:11002",
-        f"/dns4/{META_ADDRESS}/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
-        "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
-    ),
-]
-public_nodes = [
-    NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]
 ]
 
 
@@ -176,7 +147,7 @@ class Libp2pConnectionDHTRelayAEACli(BaseP2PLibp2pAEATestCaseMany):
         log_file = str(Path(f"libp2p_node_{self.agent_name}.log").absolute())
         self.log_files.append(log_file)
         self.nested_set_config(
-            f"{p2p_libp2p_path}.config",
+            f"{self.p2p_libp2p_path}.config",
             {
                 "local_uri": f"{LOCALHOST.netloc}:{next(ports)}",
                 "entry_peers": [node.maddr for node in self.nodes],
@@ -209,10 +180,11 @@ class Libp2pConnectionDHTDelegateAEACli(BaseP2PLibp2pAEATestCaseMany):
     def set_libp2p_client_connection_config(self):
         """Set libp2p client connection config"""
 
+        path = self.p2p_libp2p_client_path
         nodes = [{"uri": n.uri, "public_key": n.public_key} for n in self.nodes]
         cert_requests = [self.make_node_cert_request(n.public_key) for n in self.nodes]
-        self.nested_set_config(f"{p2p_libp2p_client_path}.config", {"nodes": nodes})
-        self.nested_set_config(p2p_libp2p_client_path + ".cert_requests", cert_requests)
+        self.nested_set_config(f"{path}.config", {"nodes": nodes})
+        self.nested_set_config(f"{path}.cert_requests", cert_requests)
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
     def test_connectivity(self):
