@@ -310,7 +310,7 @@ class AgentRunProcessTask(BaseAgentRunTask):
         self.process.join(self.PROCESS_JOIN_TIMEOUT)
         if self.is_running:  # pragma: nocover
             self.process.terminate()
-            self.process.join(5)
+            self.process.join(self.PROCESS_JOIN_TIMEOUT)
             raise ValueError(
                 f"process was not stopped within timeout: {self.PROCESS_JOIN_TIMEOUT} and was terminated"
             )
