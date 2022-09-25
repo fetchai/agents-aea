@@ -95,7 +95,7 @@ class BaseCase(TestCase):
             for task in self.manager._agents_tasks.values():
                 if isinstance(task, AgentRunProcessTask):
                     task.process.terminate()
-                    task.process.join(5)
+                    task.process.join(AgentRunProcessTask.PROCESS_JOIN_TIMEOUT)
 
             time.sleep(1)
             logging.shutdown(
@@ -119,11 +119,11 @@ class BaseCase(TestCase):
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
 class TestMultiAgentManagerDependencies(BaseCase):
-    """Test plugin installed and loaded as a depencndecy."""
+    """Test plugin installed and loaded as a dependency."""
 
     @pytest.mark.skip  # issue with plugins
     def test_plugin_dependencies(self, *args):
-        """Test plugin installed and loaded as a depencndecy."""
+        """Test plugin installed and loaded as a dependency."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
         install_cmd = f"install --no-deps {plugin_path}".split(" ")
         try:
