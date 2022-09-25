@@ -40,6 +40,7 @@ connections:
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
 - valory/acn:1.1.0:bafybeih5pz5re4kycou46xbzgguantxzj46aqtc575pgvej3m6bfg4xpfy
+- valory/tendermint:0.1.0:bafybeid2locdgdy6xn4lr64ouubfeukc6se4d7px3mfz52d6r6d6gk2z24
 class_name: MyScaffoldAsyncConnection
 config:
   foo: bar
