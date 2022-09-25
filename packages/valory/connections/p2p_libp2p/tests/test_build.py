@@ -42,6 +42,7 @@ def test_check_versions() -> None:
     """Test check_versions - positive case."""
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
         check_versions()
+        mock_stdout.flush()
         stdout = mock_stdout.getvalue()
     assert f"check 'go'>={version_to_string(MINIMUM_GO_VERSION)}, found " in stdout
     assert f"check 'gcc'>={version_to_string(MINIMUM_GCC_VERSION)}, found " in stdout
@@ -76,7 +77,8 @@ def test_check_versions_negative_cannot_parse_version() -> None:
     with mock.patch("sys.stdout", new_callable=StringIO) as mock_stdout:
         with mock.patch("subprocess.check_output", return_value=b""):
             check_versions()
-        stdout = mock_stdout.getvalue()
+            mock_stdout.flush()
+            stdout = mock_stdout.getvalue()
     assert (
         "Warning: cannot parse 'go' version from command: ['go', 'version']." in stdout
     )
