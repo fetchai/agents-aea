@@ -35,8 +35,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections:
 - valory/p2p_libp2p:0.1.0:bafybeianrhfktvaoprloiprshqdssmgqvrz4z3sza2a42gi76ehyu6jxgi
-- valory/p2p_libp2p_client:0.1.0:bafybeicxp7kgrkewdfq763gk5rtxii4k5dwhjbblym275m62vkbygfyuie
-- valory/p2p_libp2p_mailbox:0.1.0:bafybeigjanxsumu34z2rq6biylmewva54kfiz6ymtdmyvo53bknmykl26a
+- valory/p2p_libp2p_client:0.1.0:bafybeibg45zmc5zvgmakq4krixb7r7xs6scfymg554oimnqafh2wj7hgay
+- valory/p2p_libp2p_mailbox:0.1.0:bafybeibyqd4arygwfj4zeexm4f5xvmjtk7ljs44cfbr2loxw7676cbat3a
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
 - valory/acn:1.1.0:bafybeih5pz5re4kycou46xbzgguantxzj46aqtc575pgvej3m6bfg4xpfy

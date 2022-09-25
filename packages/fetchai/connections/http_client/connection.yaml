@@ -26,4 +26,6 @@ restricted_to_protocols:
 dependencies:
   aiohttp:
     version: <3.8,>=3.7.4
+  certifi: {}
+  multidict: {}
 is_abstract: false
