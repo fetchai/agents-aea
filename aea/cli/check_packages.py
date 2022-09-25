@@ -21,6 +21,7 @@
 
 import dis
 import importlib
+import os
 import pprint
 import re
 import sys
@@ -54,7 +55,8 @@ CONFIG_FILE_NAMES = [
 ]  # type: List[str]
 
 
-IGNORE: Set[str] = {"pkg_resources"}
+IGNORE_PACKAGES: Set[str] = {"pkg_resources"}
+IGNORE_PACKAGE_SUBFOLDERS: Set[Path] = {Path("tests")}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 
@@ -419,11 +421,18 @@ class ImportsTool:
     @staticmethod
     @list_decorator
     def list_all_pyfiles(
-        root_path: Union[Path, str], pattern: str = "**/*.py"
+        root_path: Union[Path, str],
+        pattern: str = "**/*.py",
+        ignores: Optional[Set[Path]] = None,
     ) -> Generator:
         """List all python files in directory."""
+        ignores = ignores or set()
         root_path = Path(root_path)
         for path in root_path.glob(pattern):
+            # check if path is a subpath of an ignore path
+            relative_path = path.relative_to(root_path)
+            if any(os.path.commonprefix([relative_path, p]) != "" for p in ignores):
+                continue
             yield path.relative_to(root_path)
 
     @classmethod
@@ -445,7 +454,9 @@ class ImportsTool:
         cls, root_path: Union[str, Path], pattern: str = "**/*.py"
     ) -> Generator:
         """Get list of all python sources with 3rd party modules imported."""
-        for pyfile in cls.list_all_pyfiles(root_path, pattern=pattern):
+        for pyfile in cls.list_all_pyfiles(
+            root_path, pattern=pattern, ignores=IGNORE_PACKAGE_SUBFOLDERS
+        ):
             mods = list(cls.get_third_part_imports_for_file(root_path / pyfile))
             if not mods:
                 continue
@@ -525,7 +536,7 @@ class PyPIDependenciesCheckTool:
         imports_packages: Dict[str, Optional[str]] = {}
         for module, pyfile in third_party_imports.items():
             package_or_none = _find_dependency_for_module(pypi_dependencies, pyfile)
-            if module not in IGNORE:
+            if module not in IGNORE_PACKAGES:
                 imports_packages[module] = package_or_none
 
         all_dependencies_set = set(third_party_imports.keys())
