@@ -54,7 +54,6 @@ CONFIG_FILE_NAMES = [
     DEFAULT_PROTOCOL_CONFIG_FILE,
 ]  # type: List[str]
 
-
 IGNORE_PACKAGES: Set[str] = {"pkg_resources"}
 IGNORE_PACKAGE_SUBFOLDERS: Set[Path] = {Path("tests")}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
@@ -189,7 +188,8 @@ class PublicIdDefinitionError(CustomException):
         """Print the error message."""
         print("=" * 50)
         print(
-            f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; found {self.actual_nb_definitions}"
+            f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; "
+            f"found {self.actual_nb_definitions}"
         )
         print("=" * 50)
 
@@ -344,9 +344,43 @@ def check_public_id(configuration_file: Path) -> None:
         return
     module_path_to_load = configuration_file.parent / module_name_to_load
     content = module_path_to_load.read_text()
-    matches = re.findall("^PUBLIC_ID = (.*)", content, re.MULTILINE)
-    if len(matches) != 1:
-        raise PublicIdDefinitionError(package_type, expected_public_id, len(matches))
+
+    # check number of definitions of PUBLIC_ID. Required exactly one match.
+    assignments_to_public_id = re.findall("^PUBLIC_ID = (.*)", content, re.MULTILINE)
+    if len(assignments_to_public_id) != 1:
+        raise PublicIdDefinitionError(
+            package_type, expected_public_id, len(assignments_to_public_id)
+        )
+
+    # check first pattern of public id: PublicId.from_str(...)
+    matches = re.findall(
+        r"^PUBLIC_ID = PublicId.from_str\( *(\"(.*)\"|'(.*)') *\)$",
+        content,
+        re.MULTILINE,
+    )
+    if len(matches) == 1:
+        # process the result
+        _, match1, match2 = matches[0]
+        match = match1 if match1 != "" else match2
+        if str(expected_public_id) != match:
+            raise WrongPublicIdError(package_type, expected_public_id, match)
+        return
+
+    # check second pattern of public id: PublicId('...', '...', '...')
+    matches = re.findall(
+        r"^PUBLIC_ID = PublicId\( *['\"](.*)['\"] *, *['\"](.*)['\"] *, *['\"](.*)['\"] *\)$",
+        content,
+        re.MULTILINE,
+    )
+    if len(matches) == 1:
+        # process the result
+        author, name, version = matches[0]
+        actual_public_id_str = f"{author}/{name}:{version}"
+        if str(expected_public_id) != actual_public_id_str:
+            raise WrongPublicIdError(
+                package_type, expected_public_id, actual_public_id_str
+            )
+        return
 
     public_id_code = matches[0]
     if str(expected_public_id) not in public_id_code:
