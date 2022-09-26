@@ -19,7 +19,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- valory/http:1.0.0:bafybeicrohjrezfkkuob6u5w2i3wbfqbtwlq4c6oapsyr3r6ka26nckr3q
+- valory/http:1.0.0:bafybeibfjhmmjut4dukhunbcmp5zi4eqsk6rgreztmg4svqfzyq4ei3o7i
 class_name: HTTPServerConnection
 config:
   api_spec_path: null
