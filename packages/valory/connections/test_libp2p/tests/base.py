@@ -22,14 +22,13 @@
 # pylint: skip-file
 
 import atexit
-import functools
+import json
 import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
-import yaml
 from aea_ledger_cosmos.cosmos import CosmosCrypto
 from aea_ledger_ethereum.ethereum import EthereumCrypto
 
@@ -44,16 +43,20 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.network import LOCALHOST
+from aea.test_tools.test_cases import AEATestCaseMany
 from aea.test_tools.utils import remove_test_directory, wait_for_condition
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.valory.connections import p2p_libp2p_client
+from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
 from packages.valory.connections.p2p_libp2p.check_dependencies import build_node
 from packages.valory.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     MultiAddr,
     P2PLibp2pConnection,
     POR_DEFAULT_SERVICE_ID,
+)
+from packages.valory.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
 )
 from packages.valory.connections.p2p_libp2p.consts import (
     LIBP2P_CERT_NOT_AFTER,
@@ -68,8 +71,15 @@ from packages.valory.connections.p2p_libp2p.tests.base import (
 from packages.valory.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
 )
+from packages.valory.connections.p2p_libp2p_client.connection import (
+    PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
+)
 from packages.valory.connections.p2p_libp2p_mailbox.connection import (
     P2PLibp2pMailboxConnection,
+)
+from packages.valory.connections.test_libp2p.tests.conftest import (
+    LIBP2P_LEDGER,
+    NodeConfig,
 )
 
 
@@ -123,33 +133,6 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     Path(cert.get_absolute_save_path(path_prefix)).write_bytes(
         signature.encode("ascii")
     )
-
-
-@functools.lru_cache()
-def load_client_connection_yaml_config() -> Dict[str, Any]:
-    """Load libp2p client connection yaml configuration"""
-
-    connection_yaml = (
-        Path(p2p_libp2p_client.__file__).absolute().parent / "connection.yaml"
-    )
-    config = yaml.safe_load(connection_yaml.read_text())["config"]
-    dns_template = "/dns4/{domain}/tcp/{port}/p2p/{peer_id}"
-
-    # add matching information needed in ACN libp2p tests
-    port_mapping = {
-        "9005": ("9003", "16Uiu2HAm9ftkcmsBwPf2KXjrUd9G6GPi2WN3opXvjrjukNpE9e5k"),
-        "9006": ("9004", "16Uiu2HAmAzQL3YV2Yv37ffafuMaaPtLUSPBEoyjDyFyrcLQzgB6P"),
-    }
-
-    for node in config["nodes"]:
-        domain, port = node["uri"].split(":")
-        port, peer_id = port_mapping[port]
-        node["maddr"] = dns_template.format(domain=domain, port=port, peer_id=peer_id)
-
-    return config
-
-
-LIBP2P_LEDGER = load_client_connection_yaml_config()["ledger_id"]
 
 
 def _make_libp2p_client_connection(
@@ -453,3 +436,65 @@ class BaseP2PLibp2pTest:
     def mailbox_multiplexers(self) -> List[Multiplexer]:
         """Mailbox multiplexers"""
         return self._multiplexers_by_connection_type(P2PLibp2pMailboxConnection)
+
+
+class BaseP2PLibp2pAEATestCaseMany(AEATestCaseMany):
+    """BaseP2PLibp2pAEATestCaseMany"""
+
+    agent_name = "agent_name"
+    nodes: List[NodeConfig]
+    log_files: List[str] = []
+    agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
+
+    conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
+    p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
+    p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
+    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
+
+    def setup(self):
+        """Setup"""
+
+        self.create_agents(self.agent_name)
+        self.set_agent_context(self.agent_name)
+
+        self.set_config("agent.default_ledger", self.agent_ledger_id)
+        self.set_config(
+            "agent.required_ledgers",
+            json.dumps([self.agent_ledger_id, self.node_ledger_id]),
+            "list",
+        )
+
+        # agent keys
+        self.generate_private_key(self.agent_ledger_id)
+        self.add_private_key(
+            self.agent_ledger_id, f"{self.agent_ledger_id}_private_key.txt"
+        )
+        # node keys
+        self.generate_private_key(
+            self.node_ledger_id, private_key_file=self.conn_key_file
+        )
+        self.add_private_key(
+            self.node_ledger_id,
+            private_key_filepath=self.conn_key_file,
+            connection=True,
+        )
+
+    def add_libp2p_connection(self):
+        """Add libp2p connection"""
+        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.run_cli_command("build", cwd=self._get_cwd())
+
+    def add_libp2p_client_connection(self):
+        """Add libp2p client connection"""
+        self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
+
+    def make_node_cert_request(self, pub_key: str) -> CertRequest:
+        """Make node cert request"""
+        return make_cert_request(pub_key, self.agent_ledger_id, f"./{pub_key}")
+
+    def teardown(self):
+        """Clean up after test case run."""
+        self.unset_agent_context()
+        self.run_cli_command("delete", self.agent_name)
+        os.remove(self.conn_key_file)
+        self.log_files.clear()
