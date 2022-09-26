@@ -2,7 +2,7 @@
     "protocol/fetchai/gym/1.0.0": "bafybeihpjm2sgnrpuwaqicikw4aybltm7xrjmf7cscpp2cy2xdoi6pekbq",
     "connection/fetchai/gym/0.19.0": "bafybeiak5qnlo4b6ai5ep5cp5tyw26dyv5finwjcbwo3aryhtjqmdl2keu",
     "protocol/fetchai/default/1.0.0": "bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu",
-    "protocol/fetchai/ledger_api/1.0.0": "bafybeiaht5xpstevcoyxxsqx5icthtnoq7f3fif5mlr2zczhy4ie63xura",
+    "protocol/valory/ledger_api/1.0.0": "bafybeifawyt7ayxrvpagqecowx6y5hvc3dxzjbhhkutxsuk7u54cxo2g54",
     "protocol/valory/acn/1.1.0": "bafybeidaujylpuw3ja3ibeipklfb4iq72ukwwsmarlbnjbbl55wa72ammy",
     "protocol/valory/contract_api/1.0.0": "bafybeidyjrthhq3p27k3v3a4xx7b7lu4fe4h765gmkyyyj7xur4b25bxim",
     "protocol/valory/http/1.0.0": "bafybeibfjhmmjut4dukhunbcmp5zi4eqsk6rgreztmg4svqfzyq4ei3o7i",
