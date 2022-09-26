@@ -253,7 +253,7 @@ protocol_config_files = [
     os.path.join(FETCHAI_PREF, "protocols", "fipa", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML),
     os.path.join(VALORY_REF, "protocols", "http", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "ledger_api", PROTOCOL_YAML),
+    os.path.join(VALORY_REF, "protocols", "ledger_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
