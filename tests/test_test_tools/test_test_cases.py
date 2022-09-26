@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2021 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -239,6 +239,7 @@ class TestGenericCases(AEATestCaseEmpty):
         proc = self.start_subprocess("-c", "import time; time.sleep(10)")
         assert proc.returncode is None
         self._terminate_subprocesses()
+        self.subprocesses.clear()
         assert proc.returncode is not None
 
     def test_miss_from_output(self):
