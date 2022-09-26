@@ -1334,7 +1334,7 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             cls.connection_name,
             "connection.py",
             # preserve import statement so to make the check of unused packages to pass
-        ).write_text("import packages.fetchai.protocols.http")
+        ).write_text("import packages.valory.protocols.http")
 
     def test_run(self):
         """Run the test."""

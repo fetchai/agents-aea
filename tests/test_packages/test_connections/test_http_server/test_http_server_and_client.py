@@ -38,8 +38,8 @@ from packages.fetchai.connections.http_server.connection import (
     HTTPServerConnection,
     headers_to_string,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 
 from tests.conftest import get_host, get_unused_tcp_port
 

@@ -39,9 +39,9 @@ from aea.test_tools.mocks import AnyStringWith
 from aea.test_tools.network import get_host, get_unused_tcp_port
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.protocols.http.dialogues import HttpDialogue
-from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.dialogues import HttpDialogue
+from packages.valory.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 
 
 logger = logging.getLogger(__name__)

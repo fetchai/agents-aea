@@ -9,20 +9,20 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeibx4ko4f5xbgozqlgfnxwc3rksm5b7khtikf46izrlndjrojv2lw4
   __init__.py: bafybeiateb3vma46yihntj5gbai3eqcy3fkx55lkrwye6tbr4cuo5xktdm
-  connection.py: bafybeihlwvleotrr5cgzokgcia7wek36c7pcflbuaminiqgvdrt2iuihoe
+  connection.py: bafybeih2el75aeooxk3g2itkt2taz6wocp6nnedmhusfals34np7irrq5y
   tests/__init__.py: bafybeifdwnjjmrmu6g3eiuraixxfrumeacwdbjxcxqufeuhcks4hlc65nu
-  tests/test_http_client.py: bafybeid5zspv56oacfrxqlint5jkkendg7az2t7ohxzfien2yqy2rjif6i
+  tests/test_http_client.py: bafybeibxwe7w5lzf5sueta6fcqtwxpqmfmojot5l6b7mtxdzrl5suuwogy
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.0.0:bafybeib3f4rgld3v2r7ubb4qlfaev7y4azm6ndw4x2of4lp73nfmmiabeu
+- valory/http:1.0.0:bafybeibfjhmmjut4dukhunbcmp5zi4eqsk6rgreztmg4svqfzyq4ei3o7i
 class_name: HTTPClientConnection
 config:
   host: 127.0.0.1
   port: 8000
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:1.0.0
+- valory/http:1.0.0
 dependencies:
   aiohttp:
     version: <3.8,>=3.7.4

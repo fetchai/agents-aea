@@ -69,7 +69,7 @@ from packages.fetchai.connections.http_server.connection import (
 )
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.message import HttpMessage
 
 from tests.conftest import (
     CUR_PATH,

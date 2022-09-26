@@ -26,7 +26,7 @@ from typing import cast
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.default.message import DefaultMessage
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.message import HttpMessage
 from packages.fetchai.skills.http_echo.dialogues import (
     DefaultDialogue,
     DefaultDialogues,

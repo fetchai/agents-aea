@@ -37,8 +37,8 @@ from benchmark.checks.utils import (
     print_results,
 )
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 
 
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")

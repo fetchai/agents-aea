@@ -38,8 +38,8 @@ from packages.fetchai.protocols.default.dialogues import (
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogues as BaseDefaultDialogues,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
-from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.valory.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
+from packages.valory.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 
 
 DefaultDialogue = BaseDefaultDialogue
