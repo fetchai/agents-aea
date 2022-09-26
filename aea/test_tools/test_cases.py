@@ -78,6 +78,7 @@ from aea.test_tools.generic import (
     read_envelope_from_file,
     write_envelope_to_file,
 )
+from aea.test_tools.utils import wait_for_condition
 
 
 _default_logger = logging.getLogger(__name__)
@@ -86,6 +87,7 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
+TERMINATION_TIMEOUT = 30
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -453,7 +455,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def terminate_agents(
         cls,
         *subprocesses: subprocess.Popen,
-        timeout: int = 20,
+        timeout: int = TERMINATION_TIMEOUT,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -481,7 +483,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
 
-        all_terminated = all([process.returncode == 0 for process in subprocesses])
+        all_terminated = all(process.returncode == 0 for process in subprocesses)
         return all_terminated
 
     @classmethod
@@ -780,8 +782,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 poll = process.poll()
                 if poll is None:
                     process.terminate()
-                    process.wait(2)
-        cls.subprocesses = []
+                    process.wait(timeout=TERMINATION_TIMEOUT)
 
     @classmethod
     def _join_threads(cls) -> None:
@@ -988,6 +989,16 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
+        try:
+            wait_for_condition(
+                lambda: cls.is_successfully_terminated(*cls.subprocesses),
+                error_msg="Not all subprocesses terminated successfully.",
+                timeout=TERMINATION_TIMEOUT,
+            )
+        except TimeoutError as e:
+            nonzero = [p.returncode for p in cls.subprocesses if p.returncode]
+            logging.error(f"{e} Non-zero returncodes: {nonzero}")
+        cls.subprocesses.clear()
 
 
 def _get_password_option_args(password: Optional[str]) -> List[str]:

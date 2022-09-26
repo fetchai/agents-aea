@@ -239,9 +239,6 @@ class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
         missing_strings = self.missing_from_output(process, check_strings)
         assert not missing_strings
 
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
-
     def teardown(self):
         """Clean up after test case run."""
         self.unset_agent_context()
@@ -296,10 +293,9 @@ class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany):
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
+
         is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
 
     def teardown(self):
         """Clean up after test case run."""
