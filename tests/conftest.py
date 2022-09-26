@@ -248,11 +248,11 @@ contract_config_files = [
 
 protocol_config_files = [
     os.path.join(ROOT_DIR, "aea", "protocols", "scaffold", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "contract_api", PROTOCOL_YAML),
+    os.path.join(VALORY_REF, "protocols", "contract_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "default", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "fipa", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "http", PROTOCOL_YAML),
+    os.path.join(VALORY_REF, "protocols", "http", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "ledger_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),

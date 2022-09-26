@@ -115,7 +115,7 @@ def test_directory_setter():
 def test_load_aea_package():
     """Test aea package load."""
     config = ConnectionConfig(
-        "http_client", "fetchai", "0.5.0", protocols={PublicId("fetchai", "http")}
+        "http_client", "fetchai", "0.5.0", protocols={PublicId("valory", "http")}
     )
     config.directory = (
         Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
@@ -126,7 +126,7 @@ def test_load_aea_package():
 def test_load_aea_package_twice():
     """Test aea package load twice and ensure python objects stay the same."""
     config = ConnectionConfig(
-        "http_client", "fetchai", "0.5.0", protocols={PublicId("fetchai", "http")}
+        "http_client", "fetchai", "0.5.0", protocols={PublicId("valory", "http")}
     )
     config.directory = (
         Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
