@@ -26,7 +26,6 @@ from aea.exceptions import AEAEnforceError
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.test_tools.test_skill import COUNTERPARTY_AGENT_ADDRESS
 
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -43,6 +42,7 @@ from packages.fetchai.skills.erc1155_deploy.tests.intermediate_class import (
     ERC1155DeployTestCase,
 )
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.contract_api.message import ContractApiMessage
 
 
 class TestDialogues(ERC1155DeployTestCase):

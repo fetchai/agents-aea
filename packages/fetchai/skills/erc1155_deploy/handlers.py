@@ -30,7 +30,6 @@ from aea.skills.base import Handler
 from packages.fetchai.connections.ledger.connection import (
     PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -53,6 +52,7 @@ from packages.fetchai.skills.erc1155_deploy.dialogues import (
 )
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.contract_api.message import ContractApiMessage
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)

@@ -40,11 +40,11 @@ from packages.fetchai.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
-from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
-from packages.fetchai.protocols.contract_api.dialogues import (
+from packages.valory.protocols.contract_api.dialogues import ContractApiDialogue
+from packages.valory.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
+from packages.valory.protocols.contract_api.message import ContractApiMessage
 
 
 SOME_SKILL_ID = "some/skill:0.1.0"

@@ -6,11 +6,11 @@ description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeidngz2sschz53n2zrj3fbifoxtnanmgskth2buroghhydniulxblq
+  README.md: bafybeieqffrtnmtccte6hfdue3vjpsh6exqfderwzfkflxycciwdvkt5ii
   __init__.py: bafybeidmifvya6yjc6h7xppntnwqji2crm5o74xrwhmkutycdo4cqdryhy
   base.py: bafybeianao36rhqbcdv7hs76ynbwk4dcqr4eirxkjogfz6vr2rq4twhrpa
-  connection.py: bafybeifi3yxgx77v2qxwykgu6uicn2eyuedfvnqtff7ik5rtezybfux2ve
-  contract_dispatcher.py: bafybeiaiclpelx6mwetq6b6734e2cekxwcjynvo5yu5sojgj5qioqotmwq
+  connection.py: bafybeigjo3hbfqkhj6eyobwawnxfrfppdy6bz4pov7qlxb6lpsjvdhkfwq
+  contract_dispatcher.py: bafybeidyds2tcpyrvqu4qg3mpsgvamqz3xwbl2i3fikv4hfwlzjku3rage
   ledger_dispatcher.py: bafybeihc5z7ndxizqh7kjnf7geixgswvr76ewzeoo7fl7iujud7w6xrtju
   tests/__init__.py: bafybeibx5zdcpx3u6sglbpp7yflnr7uaz557e6wqltawtzclubhhvaiw5e
   tests/conftest.py: bafybeiehywp4w4pddrqew4yt2i43rjdi74ple4nkwgasbrcvxjs536mvee
@@ -18,8 +18,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:1.0.0:bafybeierqtg3fi2t4mn4dbz2xmwfqd4qeuz5rwxqp4ew6jzz24bxjbytpi
 - fetchai/ledger_api:1.0.0:bafybeiaht5xpstevcoyxxsqx5icthtnoq7f3fif5mlr2zczhy4ie63xura
+- valory/contract_api:1.0.0:bafybeidyjrthhq3p27k3v3a4xx7b7lu4fe4h765gmkyyyj7xur4b25bxim
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -38,7 +38,7 @@ config:
       chain_id: dorado-1
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/contract_api:1.0.0
 - fetchai/ledger_api:1.0.0
+- valory/contract_api:1.0.0
 dependencies: {}
 is_abstract: false

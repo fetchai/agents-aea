@@ -35,9 +35,9 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
 from packages.fetchai.connections.ledger.base import RequestDispatcher
-from packages.fetchai.protocols.contract_api import ContractApiMessage
-from packages.fetchai.protocols.contract_api.dialogues import ContractApiDialogue
-from packages.fetchai.protocols.contract_api.dialogues import (
+from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.protocols.contract_api.dialogues import ContractApiDialogue
+from packages.valory.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 

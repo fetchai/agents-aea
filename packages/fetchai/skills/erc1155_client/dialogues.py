@@ -35,13 +35,6 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.contract_api.dialogues import (
-    ContractApiDialogue as BaseContractApiDialogue,
-)
-from packages.fetchai.protocols.contract_api.dialogues import (
-    ContractApiDialogues as BaseContractApiDialogues,
-)
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -69,6 +62,13 @@ from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.contract_api.dialogues import (
+    ContractApiDialogue as BaseContractApiDialogue,
+)
+from packages.valory.protocols.contract_api.dialogues import (
+    ContractApiDialogues as BaseContractApiDialogues,
+)
+from packages.valory.protocols.contract_api.message import ContractApiMessage
 
 
 class ContractApiDialogue(BaseContractApiDialogue):

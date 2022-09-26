@@ -43,8 +43,6 @@ from aea.helpers.transaction.base import (
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.protocols.contract_api.custom_types import Kwargs
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -68,6 +66,8 @@ from packages.fetchai.skills.erc1155_deploy.handlers import (
 )
 from packages.fetchai.skills.erc1155_deploy.strategy import Strategy
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.contract_api.custom_types import Kwargs
+from packages.valory.protocols.contract_api.message import ContractApiMessage
 
 
 PACKAGE_ROOT = Path(__file__).parent.parent

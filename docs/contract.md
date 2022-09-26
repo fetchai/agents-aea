@@ -1,4 +1,4 @@
-<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for Fetch.ai and third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract and its byte code. They implement a translation between framework messages (in the `fetchai/contract_api:1.0.0` protocol) and the implementation specifics of the ABI.
+<a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for Fetch.ai and third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract and its byte code. They implement a translation between framework messages (in the `valory/contract_api:1.0.0` protocol) and the implementation specifics of the ABI.
 
 Contracts usually implement four types of methods:
 
@@ -18,7 +18,7 @@ Interacting with contracts in almost all cases requires network access. Therefor
 
 <img src="../assets/message-flow-contract-ledger.svg" alt="Message flow for contract and ledger interactions" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
-In particular, the `fetchai/ledger:0.19.0` connection can be used to execute contract related logic. The skills communicate with the `fetchai/ledger:0.19.0` connection via the `fetchai/contract_api:1.0.0` protocol. This protocol implements a request-response pattern to serve the four types of methods listed above:
+In particular, the `fetchai/ledger:0.19.0` connection can be used to execute contract related logic. The skills communicate with the `fetchai/ledger:0.19.0` connection via the `valory/contract_api:1.0.0` protocol. This protocol implements a request-response pattern to serve the four types of methods listed above:
 
 - the `get_deploy_transaction` message is used to request a deploy transaction for a specific contract. For instance, to request a deploy transaction for the deployment of the smart contract wrapped in the `fetchai/erc1155:0.22.0` package, we send the following message to the `fetchai/ledger:0.19.0`:
 
