@@ -1,0 +1,22 @@
+name: acn
+author: valory
+version: 1.1.0
+protocol_specification_id: aea/acn:1.0.0
+type: protocol
+description: The protocol used for envelope delivery on the ACN.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeie7paijucvzemlfhwfmmhorypwuhzbeimgoitlkokdio5c3ne4pjq
+  __init__.py: bafybeifbivnfjo32xpnjdhcy5xkvl5hzgvwaxzskqyeehwd5nsjbturv7a
+  acn.proto: bafybeidkun7o75sxpyk2sixt7dsykgty62f6dnixnes2irbunyamilqsh4
+  acn_pb2.py: bafybeierg4nqvwi7oas2opq6pthwbxwvzrsadhqif2epdeqxr263tzh4w4
+  custom_types.py: bafybeigpueuq6mdeyjyayzv3menkmemutfgfiwlozlpl64t67cfnnom24q
+  dialogues.py: bafybeicgcqcnztuwcwvwzzbh5jjmc5gw56yzk65b33gxj7fu7caoay6bd4
+  message.py: bafybeiggjefapn3d5s623fazxrl7von5yqel4eczrie5yvwk4s7gbumt44
+  serialization.py: bafybeiaz3ykvi6nyyx6cdry7fepy76l55jpduhl6vazhmrgt7trejmksam
+  tests/__init__.py: bafybeidteufp2npjd77ekcftk5e4gbaquq3gike5nxtk5xfmnusls56keu
+  tests/test_acn.py: bafybeignjgdtlfdnj25hc5necmg7zl3kvngsmzkjgcwfm5qg36liqa63ki
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}
