@@ -29,7 +29,7 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import RequestDispatcher
+from packages.valory.connections.ledger.base import RequestDispatcher
 from packages.valory.protocols.ledger_api.custom_types import TransactionReceipt
 from packages.valory.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.valory.protocols.ledger_api.dialogues import (
@@ -39,7 +39,7 @@ from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 _default_logger = logging.getLogger(
-    "aea.packages.fetchai.connections.ledger.ledger_dispatcher"
+    "aea.packages.valory.connections.ledger.ledger_dispatcher"
 )
 
 

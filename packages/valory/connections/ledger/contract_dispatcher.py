@@ -34,7 +34,7 @@ from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
-from packages.fetchai.connections.ledger.base import RequestDispatcher
+from packages.valory.connections.ledger.base import RequestDispatcher
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.valory.protocols.contract_api.dialogues import (
@@ -43,7 +43,7 @@ from packages.valory.protocols.contract_api.dialogues import (
 
 
 _default_logger = logging.getLogger(
-    "aea.packages.fetchai.connections.ledger.contract_dispatcher"
+    "aea.packages.valory.connections.ledger.contract_dispatcher"
 )
 
 

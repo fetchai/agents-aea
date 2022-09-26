@@ -1,5 +1,5 @@
 name: http_client
-author: fetchai
+author: valory
 version: 0.23.0
 type: connection
 description: The HTTP_client connection that wraps a web-based client connecting to
@@ -7,11 +7,11 @@ description: The HTTP_client connection that wraps a web-based client connecting
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeibx4ko4f5xbgozqlgfnxwc3rksm5b7khtikf46izrlndjrojv2lw4
+  README.md: bafybeigqhgnqpgi22gfxqvsgbmrjdkrklpgu2m4px6zwb7bhvy3gkkyetu
   __init__.py: bafybeiateb3vma46yihntj5gbai3eqcy3fkx55lkrwye6tbr4cuo5xktdm
-  connection.py: bafybeih2el75aeooxk3g2itkt2taz6wocp6nnedmhusfals34np7irrq5y
+  connection.py: bafybeib3sqk27eixpnm4wnzowbbqjqtyw5u5sf4v5qzu374gokjdixswce
   tests/__init__.py: bafybeifdwnjjmrmu6g3eiuraixxfrumeacwdbjxcxqufeuhcks4hlc65nu
-  tests/test_http_client.py: bafybeibxwe7w5lzf5sueta6fcqtwxpqmfmojot5l6b7mtxdzrl5suuwogy
+  tests/test_http_client.py: bafybeigc5otouhdd2zrn46qcxomfz5f2rggioxxdb75iewr3ssd4ztpdee
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

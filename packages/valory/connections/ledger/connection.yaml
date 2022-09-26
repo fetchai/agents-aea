@@ -1,20 +1,20 @@
 name: ledger
-author: fetchai
+author: valory
 version: 0.19.0
 type: connection
 description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeiduo7ry266yxyfjs673jmr5awv447m3q7vzf22gle2b35l2dcn6qq
+  README.md: bafybeihkgodu7o7v6pfazm7u6orlspsfrae3cyz36yc46x67phfmw3l57e
   __init__.py: bafybeidmifvya6yjc6h7xppntnwqji2crm5o74xrwhmkutycdo4cqdryhy
   base.py: bafybeianao36rhqbcdv7hs76ynbwk4dcqr4eirxkjogfz6vr2rq4twhrpa
-  connection.py: bafybeihshmjr42gtdofb66mqhzfabgirx43pmlxe3bjr5ohjzz7nvh2jb4
-  contract_dispatcher.py: bafybeidyds2tcpyrvqu4qg3mpsgvamqz3xwbl2i3fikv4hfwlzjku3rage
-  ledger_dispatcher.py: bafybeig7s7xrnzno45jvyhcyn7ak5yh2z7n6s2ygokogjegw6azobl4l6m
+  connection.py: bafybeihyhp47pjpz2wn5te2dcaug47k3c3qtiud7x5rcijse3xzvxkvl3q
+  contract_dispatcher.py: bafybeieoz725r5ttvfrdo6moxt66cfb3szuknbrx6y76om67bibrgj7nga
+  ledger_dispatcher.py: bafybeigluxarmkvq4xsm6fy3djzcrif35zwx463shd7mwfxadvolr2qgti
   tests/__init__.py: bafybeibx5zdcpx3u6sglbpp7yflnr7uaz557e6wqltawtzclubhhvaiw5e
-  tests/conftest.py: bafybeiehywp4w4pddrqew4yt2i43rjdi74ple4nkwgasbrcvxjs536mvee
-  tests/test_ledger_api.py: bafybeigbcsgarw24vkaut6ww7u3kvknbs6kkfwyxmae7bcprh55hbzdn6m
+  tests/conftest.py: bafybeihkefgeterrzehqkqcjokkxyiubq4hado44sbpvytdndogw7p7tiq
+  tests/test_ledger_api.py: bafybeiangggah2up2d7dg7rp4jmklrlmztdj3vhtlnqq5ie75ii3n6tbhq
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
