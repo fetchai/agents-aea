@@ -6,20 +6,20 @@ description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeieqffrtnmtccte6hfdue3vjpsh6exqfderwzfkflxycciwdvkt5ii
+  README.md: bafybeiduo7ry266yxyfjs673jmr5awv447m3q7vzf22gle2b35l2dcn6qq
   __init__.py: bafybeidmifvya6yjc6h7xppntnwqji2crm5o74xrwhmkutycdo4cqdryhy
   base.py: bafybeianao36rhqbcdv7hs76ynbwk4dcqr4eirxkjogfz6vr2rq4twhrpa
-  connection.py: bafybeigjo3hbfqkhj6eyobwawnxfrfppdy6bz4pov7qlxb6lpsjvdhkfwq
+  connection.py: bafybeihshmjr42gtdofb66mqhzfabgirx43pmlxe3bjr5ohjzz7nvh2jb4
   contract_dispatcher.py: bafybeidyds2tcpyrvqu4qg3mpsgvamqz3xwbl2i3fikv4hfwlzjku3rage
-  ledger_dispatcher.py: bafybeihc5z7ndxizqh7kjnf7geixgswvr76ewzeoo7fl7iujud7w6xrtju
+  ledger_dispatcher.py: bafybeig7s7xrnzno45jvyhcyn7ak5yh2z7n6s2ygokogjegw6azobl4l6m
   tests/__init__.py: bafybeibx5zdcpx3u6sglbpp7yflnr7uaz557e6wqltawtzclubhhvaiw5e
   tests/conftest.py: bafybeiehywp4w4pddrqew4yt2i43rjdi74ple4nkwgasbrcvxjs536mvee
-  tests/test_ledger_api.py: bafybeif7wk6nvgn5eyr7wsvzjhucujec2llgzbgjgjzqjze4m75q2gerry
+  tests/test_ledger_api.py: bafybeigbcsgarw24vkaut6ww7u3kvknbs6kkfwyxmae7bcprh55hbzdn6m
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/ledger_api:1.0.0:bafybeiaht5xpstevcoyxxsqx5icthtnoq7f3fif5mlr2zczhy4ie63xura
 - valory/contract_api:1.0.0:bafybeidyjrthhq3p27k3v3a4xx7b7lu4fe4h765gmkyyyj7xur4b25bxim
+- valory/ledger_api:1.0.0:bafybeifawyt7ayxrvpagqecowx6y5hvc3dxzjbhhkutxsuk7u54cxo2g54
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -38,7 +38,7 @@ config:
       chain_id: dorado-1
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/ledger_api:1.0.0
 - valory/contract_api:1.0.0
+- valory/ledger_api:1.0.0
 dependencies: {}
 is_abstract: false

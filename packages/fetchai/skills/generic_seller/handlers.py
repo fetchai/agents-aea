@@ -33,7 +33,6 @@ from packages.fetchai.connections.ledger.connection import (
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_seller.behaviours import (
     GenericServiceRegistrationBehaviour,
@@ -48,6 +47,7 @@ from packages.fetchai.skills.generic_seller.dialogues import (
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)

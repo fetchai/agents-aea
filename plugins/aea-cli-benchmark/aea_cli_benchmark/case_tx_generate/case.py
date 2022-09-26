@@ -70,9 +70,9 @@ from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.connection import (
     PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.open_aea.protocols.signing.dialogues import SigningDialogue
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)

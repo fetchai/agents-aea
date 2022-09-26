@@ -61,12 +61,12 @@ from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
-from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
-from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
-from packages.fetchai.protocols.ledger_api.dialogues import (
+from packages.valory.protocols.ledger_api.custom_types import Kwargs
+from packages.valory.protocols.ledger_api.dialogues import LedgerApiDialogue
+from packages.valory.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 DEFAULT_GANACHE_ADDR = LOCALHOST.geturl()

@@ -43,12 +43,6 @@ from packages.fetchai.protocols.default.dialogues import (
 )
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
-from packages.fetchai.protocols.ledger_api.dialogues import (
-    LedgerApiDialogue as BaseLedgerApiDialogue,
-)
-from packages.fetchai.protocols.ledger_api.dialogues import (
-    LedgerApiDialogues as BaseLedgerApiDialogues,
-)
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -69,6 +63,12 @@ from packages.valory.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.valory.protocols.contract_api.message import ContractApiMessage
+from packages.valory.protocols.ledger_api.dialogues import (
+    LedgerApiDialogue as BaseLedgerApiDialogue,
+)
+from packages.valory.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
 
 
 class ContractApiDialogue(BaseContractApiDialogue):

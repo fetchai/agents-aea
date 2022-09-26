@@ -37,7 +37,7 @@ contract_api_msg = ContractApiMessage(
 
 Any additional arguments needed by the contract's constructor method should be added to `kwargs`.
 
-This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. To send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.19.0` connection using the `fetchai/ledger_api:1.0.0` protocol. For details on how to implement the message handling, see the handlers in the `erc1155_deploy` skill.
+This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. To send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.19.0` connection using the `valory/ledger_api:1.0.0` protocol. For details on how to implement the message handling, see the handlers in the `erc1155_deploy` skill.
 
 <div class="admonition note">
   <p class="admonition-title">CosmWasm based smart contract deployments</p>
@@ -64,7 +64,7 @@ contract_api_msg = ContractApiMessage(
 )
 ```
 
-This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. For this to be executed correctly, the `fetchai/erc1155:0.22.0` contract package needs to implement the `get_create_batch_transaction` method with the specified key word arguments (see example in *Deploy your own*, below). Similarly to above, to send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.19.0` connection using the `fetchai/ledger_api:1.0.0` protocol.
+This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. For this to be executed correctly, the `fetchai/erc1155:0.22.0` contract package needs to implement the `get_create_batch_transaction` method with the specified key word arguments (see example in *Deploy your own*, below). Similarly to above, to send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.19.0` connection using the `valory/ledger_api:1.0.0` protocol.
 
 - the `get_raw_message` message is used to request any contract method call for a specific contract which does not change state in the contract. For instance, to request a call to get a hash from some input data in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.22.0` package, we send the following message to the `fetchai/ledger:0.19.0`:
 
@@ -89,7 +89,7 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `raw_message` message will be returned with the matching raw message. For this to be executed correctly, the `fetchai/erc1155:0.22.0` contract package needs to implement the `get_hash_single` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.19.0` connection using the `fetchai/ledger_api:1.0.0` protocol. In this case, signing is not required.
+This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `raw_message` message will be returned with the matching raw message. For this to be executed correctly, the `fetchai/erc1155:0.22.0` contract package needs to implement the `get_hash_single` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.19.0` connection using the `valory/ledger_api:1.0.0` protocol. In this case, signing is not required.
 
 
 - the `get_state` message is used to request any contract method call to query state in the deployed contract. For instance, to request a call to get the balances in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.22.0` package, we send the following message to the `fetchai/ledger:0.19.0`:
@@ -107,7 +107,7 @@ contract_api_msg = ContractApiMessage(
     ),
 )
 ```
-This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `state` message will be returned with the matching state. For this to be executed correctly, the `fetchai/erc1155:0.22.0` contract package needs to implement the `get_balance` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.19.0` connection using the `fetchai/ledger_api:1.0.0` protocol. In this case, signing is not required.
+This message will be handled by the `fetchai/ledger:0.19.0` connection and then a `state` message will be returned with the matching state. For this to be executed correctly, the `fetchai/erc1155:0.22.0` contract package needs to implement the `get_balance` method with the specified key word arguments. We can then send the raw message to the `fetchai/ledger:0.19.0` connection using the `valory/ledger_api:1.0.0` protocol. In this case, signing is not required.
 
 
 ## Developing your own

@@ -30,12 +30,12 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
 
 from packages.fetchai.connections.ledger.base import RequestDispatcher
-from packages.fetchai.protocols.ledger_api.custom_types import TransactionReceipt
-from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
-from packages.fetchai.protocols.ledger_api.dialogues import (
+from packages.valory.protocols.ledger_api.custom_types import TransactionReceipt
+from packages.valory.protocols.ledger_api.dialogues import LedgerApiDialogue
+from packages.valory.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
 )
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 _default_logger = logging.getLogger(

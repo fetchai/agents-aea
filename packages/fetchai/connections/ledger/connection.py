@@ -36,8 +36,8 @@ from packages.fetchai.connections.ledger.contract_dispatcher import (
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
-from packages.fetchai.protocols.ledger_api import LedgerApiMessage
 from packages.valory.protocols.contract_api import ContractApiMessage
+from packages.valory.protocols.ledger_api import LedgerApiMessage
 
 
 PUBLIC_ID = PublicId.from_str("fetchai/ledger:0.19.0")

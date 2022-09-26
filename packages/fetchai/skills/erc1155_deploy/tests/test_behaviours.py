@@ -24,7 +24,6 @@ import logging
 from typing import cast
 from unittest.mock import patch
 
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_deploy.behaviours import LEDGER_API_ADDRESS
 from packages.fetchai.skills.erc1155_deploy.dialogues import ContractApiDialogue
@@ -32,6 +31,7 @@ from packages.fetchai.skills.erc1155_deploy.tests.intermediate_class import (
     ERC1155DeployTestCase,
 )
 from packages.valory.protocols.contract_api.message import ContractApiMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 class TestServiceRegistrationBehaviour(ERC1155DeployTestCase):
