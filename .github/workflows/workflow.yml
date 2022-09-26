@@ -64,6 +64,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          tox -e sync
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
@@ -103,6 +104,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          tox -e sync
       - name: Pylint check
         run: |
           tox -e pylint
@@ -134,6 +136,7 @@ jobs:
           sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
           ipfs init
           make protolint_install
+          tox -e sync
       - name: License Check
         run: tox -e liccheck
       - name: AEA Package Hashes Check
@@ -189,6 +192,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          tox -e sync
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links and IPFS hashes
@@ -422,6 +426,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          tox -e sync
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
@@ -443,6 +448,7 @@ jobs:
         name: Install dependencies (macos-latest)
         run: |
           pip install tox
+          tox -e sync
           brew install gcc
           # brew install protobuf
           # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
@@ -474,6 +480,7 @@ jobs:
           # to check make was installed
           make --version
           pip install tox
+          tox -e sync
           # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
           # unzip protoc-3.19.4-win64.zip -d protoc
           # sudo mv protoc/bin/protoc /usr/local/bin/protoc
