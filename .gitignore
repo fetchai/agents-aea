@@ -126,7 +126,6 @@ joined-path
 
 packages/default_author/
 
-packages/valory/connections/p2p_libp2p_client/
 packages/valory/protocols/acn
 packages/valory/protocols/http
 
