@@ -36,10 +36,10 @@ from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 
-from packages.fetchai.connections.ledger.contract_dispatcher import (
+from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
+from packages.valory.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )
-from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 from packages.valory.protocols.contract_api.dialogues import ContractApiDialogue
 from packages.valory.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
@@ -433,7 +433,7 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
     with unittest.mock.patch.object(
         ledger_apis_connection._contract_dispatcher, "_call_stub", return_value=None
     ):
-        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
+        with caplog.at_level(logging.DEBUG, "aea.packages.valory.connections.ledger"):
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
             # We use the regex pattern with "(Contract\.)?" because Python with versions
@@ -516,7 +516,7 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         message=request,
     )
 
-    with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
+    with caplog.at_level(logging.DEBUG, "aea.packages.valory.connections.ledger"):
         await ledger_apis_connection.send(envelope)
         await asyncio.sleep(0.01)
         assert f"Cannot find {request.callable} in contract" in caplog.text

@@ -46,13 +46,13 @@ from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.exceptions import AEAPackageLoadingError
 from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
-from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
-)
 from packages.fetchai.connections.stub.connection import (
     PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
 )
 from packages.fetchai.protocols.fipa.message import FipaMessage
+from packages.valory.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
+)
 
 from tests.common.pexpect_popen import PexpectWrapper
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner, MAX_FLAKY_RERUNS, ROOT_DIR

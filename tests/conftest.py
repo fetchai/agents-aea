@@ -864,7 +864,7 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
         directory, data_dir=MagicMock(), identity=identity, crypto_store=crypto_store
     )
     connection = cast(Connection, connection)
-    connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
+    connection._logger = logging.getLogger("aea.packages.valory.connections.ledger")
 
     # use testnet config
     connection.configuration.config.get("ledger_apis", {})[

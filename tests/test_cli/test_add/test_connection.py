@@ -35,11 +35,11 @@ from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
-from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
-)
 from packages.fetchai.connections.local.connection import (
     PUBLIC_ID as LOCAL_CONNECTION_PUBLIC_ID,
+)
+from packages.valory.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
 
 from tests.conftest import (

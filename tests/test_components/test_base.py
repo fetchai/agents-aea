@@ -134,18 +134,18 @@ def test_load_aea_package_twice():
     # It doesn't matter if the package is already loaded.
     # We cannot safely remove it as references to other modules
     # would persist and get stale.
-    if "packages.fetchai.connections.http_client.connection" not in sys.modules:
+    if "packages.valory.connections.http_client.connection" not in sys.modules:
         load_aea_package(config)
-        assert "packages.fetchai.connections.http_client.connection" not in sys.modules
-        from packages.fetchai.connections.http_client.connection import (
+        assert "packages.valory.connections.http_client.connection" not in sys.modules
+        from packages.valory.connections.http_client.connection import (
             HTTPClientConnection,
         )
 
-        assert "packages.fetchai.connections.http_client.connection" in sys.modules
+        assert "packages.valory.connections.http_client.connection" in sys.modules
         BaseHTTPCLientConnection = HTTPClientConnection
     else:
         members = inspect.getmembers(
-            sys.modules["packages.fetchai.connections.http_client.connection"],
+            sys.modules["packages.valory.connections.http_client.connection"],
             inspect.isclass,
         )
         BaseHTTPCLientConnection = [
@@ -153,7 +153,7 @@ def test_load_aea_package_twice():
         ][0]
     # second time
     load_aea_package(config)
-    from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+    from packages.valory.connections.http_client.connection import HTTPClientConnection
 
     assert BaseHTTPCLientConnection is HTTPClientConnection
 
