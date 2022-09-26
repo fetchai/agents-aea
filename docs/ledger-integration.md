@@ -145,7 +145,7 @@ Dorado is our stable, public testnet for the Fetch Ledger v2. As such, most deve
 | Token Faucet   | Use block explorer                                                         |
 
 
-The configurations can be specified for the `fetchai/ledger:0.19.0` connection.
+The configurations can be specified for the `valory/ledger:0.19.0` connection.
 
 ## CosmWasm supporting chains
 
