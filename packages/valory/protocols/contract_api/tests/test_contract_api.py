@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,12 +18,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests package for the 'valory/contract_api' protocol."""
-from abc import abstractmethod
-from typing import Callable, Type
+"""This module contains the tests of the contract_api protocol package."""
+# pylint: skip-file
+
+from typing import Type
 from unittest import mock
 
 import pytest
+
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
@@ -30,213 +33,348 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-from packages.valory.protocols.contract_api import ContractApiMessage, message
-from packages.valory.protocols.contract_api.custom_types import Kwargs
+from packages.valory.protocols.contract_api import message
 from packages.valory.protocols.contract_api.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
 )
+from packages.valory.protocols.contract_api.message import ContractApiMessage
 from packages.valory.protocols.contract_api.message import (
     _default_logger as contract_api_message_logger,
 )
 
 
-LEDGER_ID = "ethereum"
-CONTRACT_ID = "contract_id_stub"
-CALLABLE = "callable_stub"
-CONTRACT_ADDRESS = "contract_address_stub"
+def test_get_deploy_transaction_serialization():
+    """Test the serialization for 'get_deploy_transaction' speech-act works."""
+    kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
+    msg = ContractApiMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+        ledger_id="some_ledger_id",
+        contract_id="some_contract_id",
+        callable="some_callable",
+        kwargs=kwargs_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-class BaseTestMessageConstruction:
-    """Base class to test message construction for the ABCI protocol."""
+def test_get_raw_transaction_serialization():
+    """Test the serialization for 'get_raw_transaction' speech-act works."""
+    kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
+    msg = ContractApiMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+        ledger_id="some_ledger_id",
+        contract_id="some_contract_id",
+        contract_address="some_contract_address",
+        callable="some_callable",
+        kwargs=kwargs_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
-    ledger_id = LEDGER_ID
-    contract_id = CONTRACT_ID
-    callable_ = CALLABLE
-    msg_class = ContractApiMessage
-    contract_address = CONTRACT_ADDRESS
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
 
-    @abstractmethod
-    def build_message(self) -> ContractApiMessage:
-        """Build the message to be used for testing."""
-
-    def test_run(self) -> None:
-        """Run the test."""
-        msg = self.build_message()
-        msg.to = "receiver"
-        envelope = Envelope(to=msg.to, sender="sender", message=msg)
-        envelope_bytes = envelope.encode()
-
-        actual_envelope = Envelope.decode(envelope_bytes)
-        expected_envelope = envelope
-
-        assert expected_envelope.to == actual_envelope.to
-        assert expected_envelope.sender == actual_envelope.sender
-        assert (
-            expected_envelope.protocol_specification_id
-            == actual_envelope.protocol_specification_id
-        )
-        assert expected_envelope.message != actual_envelope.message
-
-        actual_msg = self.msg_class.serializer.decode(actual_envelope.message_bytes)
-        actual_msg.to = actual_envelope.to
-        actual_msg.sender = actual_envelope.sender
-        expected_msg = msg
-        assert expected_msg == actual_msg
-
-    @classmethod
-    def _make_kwargs(cls) -> Kwargs:
-        """Build a ConsensuParams object."""
-        return Kwargs(body={})
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-class TestGetDeployTransaction(BaseTestMessageConstruction):
-    """Test message."""
+def test_get_raw_message_serialization():
+    """Test the serialization for 'get_raw_message' speech-act works."""
+    kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
+    msg = ContractApiMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
+        ledger_id="some_ledger_id",
+        contract_id="some_contract_id",
+        contract_address="some_contract_address",
+        callable="some_callable",
+        kwargs=kwargs_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        assert str(self._make_kwargs()) == "Kwargs: body={}"
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,  # type: ignore
-            ledger_id=self.ledger_id,
-            contract_id=self.contract_id,
-            callable=self.callable_,
-            kwargs=self._make_kwargs(),
-        )
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
 
-
-class TestError(BaseTestMessageConstruction):
-    """Test message."""
-
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.ERROR,  # type: ignore
-            code=1,
-            message="",
-            data=b"",
-        )
-
-
-class TestGetRawTransaction(BaseTestMessageConstruction):
-    """Test message."""
-
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,  # type: ignore
-            ledger_id=self.ledger_id,
-            contract_id=self.contract_id,
-            contract_address=self.contract_address,
-            callable=self.callable_,
-            kwargs=self._make_kwargs(),
-        )
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-class TestRawTransaction(BaseTestMessageConstruction):
-    """Test message."""
+def test_get_state_serialization():
+    """Test the serialization for 'get_state' speech-act works."""
+    kwargs_arg = ContractApiMessage.Kwargs({"key_1": 1, "key_2": 2})
+    msg = ContractApiMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.GET_STATE,
+        ledger_id="some_ledger_id",
+        contract_id="some_contract_id",
+        contract_address="some_contract_address",
+        callable="some_callable",
+        kwargs=kwargs_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.RAW_TRANSACTION,  # type: ignore
-            raw_transaction=ContractApiMessage.RawTransaction(
-                ledger_id=LEDGER_ID, body={}
-            ),
-        )
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
 
-
-class TestGetRawMessage(BaseTestMessageConstruction):
-    """Test message."""
-
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,  # type: ignore
-            ledger_id=self.ledger_id,
-            contract_id=self.contract_id,
-            contract_address=self.contract_address,
-            callable=self.callable_,
-            kwargs=self._make_kwargs(),
-        )
-
-
-class TestRawMessage(BaseTestMessageConstruction):
-    """Test message."""
-
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.RAW_MESSAGE,  # type: ignore
-            raw_message=ContractApiMessage.RawMessage(ledger_id=LEDGER_ID, body=b""),
-        )
-
-
-class TestGetState(BaseTestMessageConstruction):
-    """Test message."""
-
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
-            ledger_id=self.ledger_id,
-            contract_id=self.contract_id,
-            contract_address=self.contract_address,
-            callable=self.callable_,
-            kwargs=self._make_kwargs(),
-        )
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-class TestState(BaseTestMessageConstruction):
-    """Test message."""
+def test_state_serialization():
+    """Test the serialization for 'state' speech-act works."""
+    state_arg = ContractApiMessage.State("some_ledger_id", {"key": "some_body"})
+    msg = ContractApiMessage(
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.STATE,
+        state=state_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
-    def build_message(self) -> ContractApiMessage:
-        """Build the message."""
-        return ContractApiMessage(
-            performative=ContractApiMessage.Performative.STATE,  # type: ignore
-            state=ContractApiMessage.State(ledger_id=LEDGER_ID, body={}),
-        )
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-@mock.patch.object(
-    message,
-    "enforce",
-    side_effect=AEAEnforceError("some error"),
-)
-def test_incorrect_message(
-    mocked_enforce: Callable,  # pylint: disable=unused-argument
-) -> None:
-    """Test that we raise an exception when the message is incorrect."""
-    with mock.patch.object(contract_api_message_logger, "error") as mock_logger:
-        ContractApiMessage(
-            message_id=1,
-            dialogue_reference=(str(0), ""),
-            target=0,
-            performative=ContractApiMessage.Performative.RAW_MESSAGE,  # type: ignore
-            raw_message=ContractApiMessage.RawMessage("some_ledger_id", b"some_body"),
-        )
+def test_raw_transaction_serialization():
+    """Test the serialization for 'raw_transaction' speech-act works."""
+    raw_transaction_arg = ContractApiMessage.RawTransaction(
+        "some_ledger_id", {"body": "some_body"}
+    )
+    msg = ContractApiMessage(
+        message_id=2,
+        target=1,
+        performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+        raw_transaction=raw_transaction_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
-        mock_logger.assert_any_call("some error")
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-def test_performative_string_value() -> None:
-    """Test the string valoe of performatives."""
+def test_raw_message_serialization():
+    """Test the serialization for 'raw_message' speech-act works."""
+    raw_message_arg = ContractApiMessage.RawMessage("some_ledger_id", b"some_body")
+    msg = ContractApiMessage(
+        performative=ContractApiMessage.Performative.RAW_MESSAGE,
+        raw_message=raw_message_arg,
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
+def test_error_serialization():
+    """Test the serialization for 'error' speech-act works."""
+    msg = ContractApiMessage(
+        performative=ContractApiMessage.Performative.ERROR,
+        code=7,
+        message="some_error_message",
+        data=b"some_error_data",
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
+
+
+def test_performative_string_value():
+    """Test the string value of the performatives."""
     assert (
         str(ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION)
         == "get_deploy_transaction"
     ), "The str value must be get_deploy_transaction"
+    assert (
+        str(ContractApiMessage.Performative.GET_RAW_TRANSACTION)
+        == "get_raw_transaction"
+    ), "The str value must be get_raw_transaction"
+    assert (
+        str(ContractApiMessage.Performative.GET_RAW_MESSAGE) == "get_raw_message"
+    ), "The str value must be get_raw_message"
+    assert (
+        str(ContractApiMessage.Performative.GET_STATE) == "get_state"
+    ), "The str value must be get_state"
+    assert (
+        str(ContractApiMessage.Performative.STATE) == "state"
+    ), "The str value must be state"
+    assert (
+        str(ContractApiMessage.Performative.RAW_TRANSACTION) == "raw_transaction"
+    ), "The str value must be raw_transaction"
+    assert (
+        str(ContractApiMessage.Performative.RAW_MESSAGE) == "raw_message"
+    ), "The str value must be raw_message"
+    assert (
+        str(ContractApiMessage.Performative.ERROR) == "error"
+    ), "The str value must be error"
 
 
-def test_encoding_unknown_performative() -> None:
+def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
     msg = ContractApiMessage(
-        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,  # type: ignore
-        ledger_id=LEDGER_ID,
-        contract_id=CONTRACT_ID,
-        callable=CALLABLE,
-        kwargs=Kwargs({}),
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.RAW_MESSAGE,
+        raw_message=ContractApiMessage.RawMessage("some_ledger_id", b"some_body"),
     )
+
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(
             ContractApiMessage.Performative, "__eq__", return_value=False
@@ -244,14 +382,14 @@ def test_encoding_unknown_performative() -> None:
             ContractApiMessage.serializer.encode(msg)
 
 
-def test_decoding_unknown_performative() -> None:
-    """Test that we raise an exception when the performative is unknown during encoding."""
+def test_decoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during decoding."""
     msg = ContractApiMessage(
-        performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,  # type: ignore
-        ledger_id=LEDGER_ID,
-        contract_id=CONTRACT_ID,
-        callable=CALLABLE,
-        kwargs=Kwargs({}),
+        message_id=1,
+        dialogue_reference=(str(0), ""),
+        target=0,
+        performative=ContractApiMessage.Performative.RAW_MESSAGE,
+        raw_message=ContractApiMessage.RawMessage("some_ledger_id", b"some_body"),
     )
 
     encoded_msg = ContractApiMessage.serializer.encode(msg)
@@ -260,6 +398,64 @@ def test_decoding_unknown_performative() -> None:
             ContractApiMessage.Performative, "__eq__", return_value=False
         ):
             ContractApiMessage.serializer.decode(encoded_msg)
+
+
+@mock.patch.object(
+    message,
+    "enforce",
+    side_effect=AEAEnforceError("some error"),
+)
+def test_incorrect_message(mocked_enforce):
+    """Test that we raise an exception when the message is incorrect."""
+    with mock.patch.object(contract_api_message_logger, "error") as mock_logger:
+        ContractApiMessage(
+            message_id=1,
+            dialogue_reference=(str(0), ""),
+            target=0,
+            performative=ContractApiMessage.Performative.RAW_MESSAGE,
+            raw_message=ContractApiMessage.RawMessage("some_ledger_id", b"some_body"),
+        )
+
+        mock_logger.assert_any_call("some error")
+
+
+def test_kwargs():
+    """Test the kwargs custom type."""
+    body = {"key_1": 1, "key_2": 2}
+    kwargs = ContractApiMessage.Kwargs(body)
+    assert str(kwargs) == "Kwargs: body={}".format(body)
+
+
+class TestDialogues:
+    """Tests contract_api dialogues."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.agent_addr = "agent address"
+        cls.ledger_addr = "ledger address"
+        cls.agent_dialogues = AgentDialogues(cls.agent_addr)
+        cls.ledger_dialogues = LedgerDialogues(cls.ledger_addr)
+
+    def test_create_self_initiated(self):
+        """Test the self initialisation of a dialogue."""
+        result = self.agent_dialogues._create_self_initiated(
+            dialogue_opponent_addr=self.ledger_addr,
+            dialogue_reference=(str(0), ""),
+            role=ContractApiDialogue.Role.AGENT,
+        )
+        assert isinstance(result, ContractApiDialogue)
+        assert result.role == ContractApiDialogue.Role.AGENT, "The role must be Agent."
+
+    def test_create_opponent_initiated(self):
+        """Test the opponent initialisation of a dialogue."""
+        result = self.agent_dialogues._create_opponent_initiated(
+            dialogue_opponent_addr=self.ledger_addr,
+            dialogue_reference=(str(0), ""),
+            role=ContractApiDialogue.Role.AGENT,
+        )
+        assert isinstance(result, ContractApiDialogue)
+        assert result.role == ContractApiDialogue.Role.AGENT, "The role must be agent."
 
 
 class AgentDialogue(ContractApiDialogue):
@@ -278,7 +474,7 @@ class AgentDialogue(ContractApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class
+        :param message_class: the class of a message type of the contract api protocol
         """
         ContractApiDialogue.__init__(
             self,
@@ -296,12 +492,11 @@ class AgentDialogues(ContractApiDialogues):
         """
         Initialize dialogues.
 
-        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param self_address: the self-address
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message,  # pylint: disable=redefined-outer-name
-            receiver_address: Address,
+            message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
 
@@ -335,7 +530,7 @@ class LedgerDialogue(ContractApiDialogue):
         :param dialogue_label: the identifier of the dialogue
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-        :param message_class: the message class
+        :param message_class: the class of a message type of the contract api protocol
         """
         ContractApiDialogue.__init__(
             self,
@@ -353,12 +548,11 @@ class LedgerDialogues(ContractApiDialogues):
         """
         Initialize dialogues.
 
-        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param self_address: the self-address
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message,  # pylint: disable=redefined-outer-name
-            receiver_address: Address,
+            message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
 
@@ -374,40 +568,3 @@ class LedgerDialogues(ContractApiDialogues):
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerDialogue,
         )
-
-
-class TestDialogues:
-    """Tests abci dialogues."""
-
-    agent_addr: str
-    ledger_addr: str
-    agent_dialogues: AgentDialogues
-    ledger_dialogues: LedgerDialogues
-
-    @classmethod
-    def setup_class(cls) -> None:
-        """Set up the test."""
-        cls.agent_addr = "agent address"
-        cls.ledger_addr = "ledger address"
-        cls.agent_dialogues = AgentDialogues(cls.agent_addr)
-        cls.ledger_dialogues = LedgerDialogues(cls.ledger_addr)
-
-    def test_create_self_initiated(self) -> None:
-        """Test the self initialisation of a dialogue."""
-        result = self.agent_dialogues._create_self_initiated(  # pylint: disable=protected-access
-            dialogue_opponent_addr=self.ledger_addr,
-            dialogue_reference=(str(0), ""),
-            role=ContractApiDialogue.Role.AGENT,
-        )
-        assert isinstance(result, ContractApiDialogue)
-        assert result.role == ContractApiDialogue.Role.AGENT, "The role must be agent."
-
-    def test_create_opponent_initiated(self) -> None:
-        """Test the opponent initialisation of a dialogue."""
-        result = self.agent_dialogues._create_opponent_initiated(  # pylint: disable=protected-access
-            dialogue_opponent_addr=self.ledger_addr,
-            dialogue_reference=(str(0), ""),
-            role=ContractApiDialogue.Role.AGENT,
-        )
-        assert isinstance(result, ContractApiDialogue)
-        assert result.role == ContractApiDialogue.Role.AGENT, "The role must be agent."
