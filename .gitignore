@@ -125,7 +125,10 @@ output_file
 joined-path
 
 packages/default_author/
+
 packages/valory/connections/p2p_libp2p_client/
+packages/valory/protocols/acn
+
 
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build
