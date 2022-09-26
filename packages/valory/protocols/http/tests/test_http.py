@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2022 Valory AG
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,12 +18,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests package for the 'valory/http' protocol."""
-from abc import abstractmethod
-from typing import Callable, Type
+"""This module contains the tests of the http protocol package."""
+# pylint: skip-file
+
+from typing import Type
 from unittest import mock
 
 import pytest
+
 from aea.common import Address
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
@@ -30,78 +33,127 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
-from packages.valory.protocols.http import HttpMessage, message
+from packages.valory.protocols.http import message
 from packages.valory.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 from packages.valory.protocols.http.message import (
     _default_logger as http_message_logger,
 )
 
 
-LEDGER_ID = "ethereum"
+def test_request_serialization():
+    """Test the serialization for 'request' speech-act works."""
+    msg = HttpMessage(
+        performative=HttpMessage.Performative.REQUEST,
+        method="some_method",
+        url="url",
+        version="some_version",
+        headers="some_headers",
+        body=b"some_body",
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
+
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
+
+    actual_msg = HttpMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-class BaseTestMessageConstruction:
-    """Base class to test message construction for the ABCI protocol."""
+def test_response_serialization():
+    """Test the serialization for 'response' speech-act works."""
+    msg = HttpMessage(
+        message_id=2,
+        target=1,
+        performative=HttpMessage.Performative.RESPONSE,
+        version="some_version",
+        status_code=1,
+        status_text="some_status_text",
+        headers="some_headers",
+        body=b"some_body",
+    )
+    msg.to = "receiver"
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
+    envelope_bytes = envelope.encode()
 
-    msg_class = HttpMessage
+    actual_envelope = Envelope.decode(envelope_bytes)
+    expected_envelope = envelope
+    assert expected_envelope.to == actual_envelope.to
+    assert expected_envelope.sender == actual_envelope.sender
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
+    assert expected_envelope.message != actual_envelope.message
 
-    @abstractmethod
-    def build_message(self) -> HttpMessage:
-        """Build the message to be used for testing."""
-
-    def test_run(self) -> None:
-        """Run the test."""
-        msg = self.build_message()
-        msg.to = "receiver"
-        envelope = Envelope(to=msg.to, sender="sender", message=msg)
-        envelope_bytes = envelope.encode()
-
-        actual_envelope = Envelope.decode(envelope_bytes)
-        expected_envelope = envelope
-
-        assert expected_envelope.to == actual_envelope.to
-        assert expected_envelope.sender == actual_envelope.sender
-        assert (
-            expected_envelope.protocol_specification_id
-            == actual_envelope.protocol_specification_id
-        )
-        assert expected_envelope.message != actual_envelope.message
-
-        actual_msg = self.msg_class.serializer.decode(actual_envelope.message_bytes)
-        actual_msg.to = actual_envelope.to
-        actual_msg.sender = actual_envelope.sender
-        expected_msg = msg
-        assert expected_msg == actual_msg
-
-
-class TestRequest(BaseTestMessageConstruction):
-    """Test message."""
-
-    def build_message(self) -> HttpMessage:
-        """Build the message."""
-        return HttpMessage(
-            performative=HttpMessage.Performative.REQUEST,  # type: ignore
-            method="GET",
-            url="http://example.com",
-            version="",
-            headers="",
-            body=b"",
-        )
+    actual_msg = HttpMessage.serializer.decode(actual_envelope.message)
+    actual_msg.to = actual_envelope.to
+    actual_msg.sender = actual_envelope.sender
+    expected_msg = msg
+    assert expected_msg == actual_msg
 
 
-class TestResponse(BaseTestMessageConstruction):
-    """Test message."""
+def test_performative_string_value():
+    """Test the string value of the performatives."""
+    assert (
+        str(HttpMessage.Performative.REQUEST) == "request"
+    ), "The str value must be request"
+    assert (
+        str(HttpMessage.Performative.RESPONSE) == "response"
+    ), "The str value must be response"
 
-    def build_message(self) -> HttpMessage:
-        """Build the message."""
-        return HttpMessage(
-            performative=HttpMessage.Performative.RESPONSE,  # type: ignore
-            version="",
-            status_code=200,
-            status_text="OK",
-            headers="",
-            body=b"",
-        )
+
+def test_encoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during encoding."""
+    msg = HttpMessage(
+        performative=HttpMessage.Performative.REQUEST,
+        method="some_method",
+        url="url",
+        version="some_version",
+        headers="some_headers",
+        body=b"some_body",
+    )
+
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(HttpMessage.Performative, "__eq__", return_value=False):
+            HttpMessage.serializer.encode(msg)
+
+
+def test_decoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during decoding."""
+    msg = HttpMessage(
+        performative=HttpMessage.Performative.REQUEST,
+        method="some_method",
+        url="url",
+        version="some_version",
+        headers="some_headers",
+        body=b"some_body",
+    )
+
+    encoded_msg = HttpMessage.serializer.encode(msg)
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(HttpMessage.Performative, "__eq__", return_value=False):
+            HttpMessage.serializer.decode(encoded_msg)
 
 
 @mock.patch.object(
@@ -109,60 +161,51 @@ class TestResponse(BaseTestMessageConstruction):
     "enforce",
     side_effect=AEAEnforceError("some error"),
 )
-def test_incorrect_message(
-    mocked_enforce: Callable,  # pylint: disable=unused-argument
-) -> None:
+def test_incorrect_message(mocked_enforce):
     """Test that we raise an exception when the message is incorrect."""
     with mock.patch.object(http_message_logger, "error") as mock_logger:
         HttpMessage(
-            performative=HttpMessage.Performative.REQUEST,  # type: ignore
-            method="GET",
-            url="http://example.com",
-            version="",
-            headers="",
-            body=b"",
+            performative=HttpMessage.Performative.REQUEST,
+            method="some_method",
+            url="url",
+            version="some_version",
+            headers="some_headers",
+            body=b"some_body",
         )
+
         mock_logger.assert_any_call("some error")
 
 
-def test_performative_string_value() -> None:
-    """Test the string valoe of performatives."""
+class TestDialogues:
+    """Tests http dialogues."""
 
-    assert (
-        str(HttpMessage.Performative.REQUEST) == "request"
-    ), "The str value must be request"
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        cls.agent_addr = "agent address"
+        cls.server_addr = "server address"
+        cls.agent_dialogues = AgentDialogues(cls.agent_addr)
+        cls.server_dialogues = ServerDialogues(cls.server_addr)
 
+    def test_create_self_initiated(self):
+        """Test the self initialisation of a dialogue."""
+        result = self.agent_dialogues._create_self_initiated(
+            dialogue_opponent_addr=self.server_addr,
+            dialogue_reference=(str(0), ""),
+            role=HttpDialogue.Role.CLIENT,
+        )
+        assert isinstance(result, HttpDialogue)
+        assert result.role == HttpDialogue.Role.CLIENT, "The role must be client."
 
-def test_encoding_unknown_performative() -> None:
-    """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = HttpMessage(
-        performative=HttpMessage.Performative.REQUEST,  # type: ignore
-        method="GET",
-        url="http://example.com",
-        version="",
-        headers="",
-        body=b"",
-    )
-    with pytest.raises(ValueError, match="Performative not valid:"):
-        with mock.patch.object(HttpMessage.Performative, "__eq__", return_value=False):
-            HttpMessage.serializer.encode(msg)
-
-
-def test_decoding_unknown_performative() -> None:
-    """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = HttpMessage(
-        performative=HttpMessage.Performative.REQUEST,  # type: ignore
-        method="GET",
-        url="http://example.com",
-        version="",
-        headers="",
-        body=b"",
-    )
-
-    encoded_msg = HttpMessage.serializer.encode(msg)
-    with pytest.raises(ValueError, match="Performative not valid:"):
-        with mock.patch.object(HttpMessage.Performative, "__eq__", return_value=False):
-            HttpMessage.serializer.decode(encoded_msg)
+    def test_create_opponent_initiated(self):
+        """Test the opponent initialisation of a dialogue."""
+        result = self.agent_dialogues._create_opponent_initiated(
+            dialogue_opponent_addr=self.server_addr,
+            dialogue_reference=(str(0), ""),
+            role=HttpDialogue.Role.CLIENT,
+        )
+        assert isinstance(result, HttpDialogue)
+        assert result.role == HttpDialogue.Role.CLIENT, "The role must be client."
 
 
 class AgentDialogue(HttpDialogue):
@@ -203,8 +246,7 @@ class AgentDialogues(HttpDialogues):
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message,  # pylint: disable=redefined-outer-name
-            receiver_address: Address,
+            message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
 
@@ -222,7 +264,7 @@ class AgentDialogues(HttpDialogues):
         )
 
 
-class LedgerDialogue(HttpDialogue):
+class ServerDialogue(HttpDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
     def __init__(
@@ -249,7 +291,7 @@ class LedgerDialogue(HttpDialogue):
         )
 
 
-class LedgerDialogues(HttpDialogues):
+class ServerDialogues(HttpDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, self_address: Address) -> None:
@@ -260,8 +302,7 @@ class LedgerDialogues(HttpDialogues):
         """
 
         def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message,  # pylint: disable=redefined-outer-name
-            receiver_address: Address,
+            message: Message, receiver_address: Address
         ) -> BaseDialogue.Role:
             """Infer the role of the agent from an incoming/outgoing first message
 
@@ -275,42 +316,5 @@ class LedgerDialogues(HttpDialogues):
             self,
             self_address=self_address,
             role_from_first_message=role_from_first_message,
-            dialogue_class=LedgerDialogue,
+            dialogue_class=ServerDialogue,
         )
-
-
-class TestDialogues:
-    """Tests abci dialogues."""
-
-    agent_addr: str
-    ledger_addr: str
-    agent_dialogues: AgentDialogues
-    ledger_dialogues: LedgerDialogues
-
-    @classmethod
-    def setup_class(cls) -> None:
-        """Set up the test."""
-        cls.agent_addr = "agent address"
-        cls.ledger_addr = "ledger address"
-        cls.agent_dialogues = AgentDialogues(cls.agent_addr)
-        cls.ledger_dialogues = LedgerDialogues(cls.ledger_addr)
-
-    def test_create_self_initiated(self) -> None:
-        """Test the self initialisation of a dialogue."""
-        result = self.agent_dialogues._create_self_initiated(  # pylint: disable=protected-access
-            dialogue_opponent_addr=self.ledger_addr,
-            dialogue_reference=(str(0), ""),
-            role=HttpDialogue.Role.CLIENT,
-        )
-        assert isinstance(result, HttpDialogue)
-        assert result.role == HttpDialogue.Role.CLIENT, "The role must be agent."
-
-    def test_create_opponent_initiated(self) -> None:
-        """Test the opponent initialisation of a dialogue."""
-        result = self.agent_dialogues._create_opponent_initiated(  # pylint: disable=protected-access
-            dialogue_opponent_addr=self.ledger_addr,
-            dialogue_reference=(str(0), ""),
-            role=HttpDialogue.Role.CLIENT,
-        )
-        assert isinstance(result, HttpDialogue)
-        assert result.role == HttpDialogue.Role.CLIENT, "The role must be agent."
