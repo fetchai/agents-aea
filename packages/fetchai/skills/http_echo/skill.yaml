@@ -10,16 +10,16 @@ fingerprint:
   README.md: bafybeiesl5jlvvu4enydib32bpyfqphlkdulxy3oqid3t32cjxya5qykci
   __init__.py: bafybeigk7kbqmfrjjhyv6dvaacogp24qsv7czeb24zupvcgjqluxmlhlba
   dialogues.py: bafybeif475776gtmo3jd5vch6ir7pgqx7uvtfn3tw3skhwismjv7h5z2hm
-  handlers.py: bafybeifh3utmopk2q7q6ryowawjtp6lxxbau2ng4dezoygachm5z62q3ly
+  handlers.py: bafybeieea33n64fisdyelhbiyzmnxf3qkv3w6csvhfawvc26z2nivmuxwu
   tests/__init__.py: bafybeigqjv34vhfwcxmri75l5opezgu66jsyjj7metj7lgk2jbx4rqztyy
-  tests/test_dialogues.py: bafybeidcqxdptxmubhsvimvp76q62bieg7xxcldtanjr7za6e3gjizzw4y
-  tests/test_handlers.py: bafybeiesltsgfappd2resenrsiry2x5kzp6wjxzu3vfbpbce2zmfs37m4y
+  tests/test_dialogues.py: bafybeigkes2ococrau7q5ar6xzpebferfxxuelze4abxprhqhmbqu64c3q
+  tests/test_handlers.py: bafybeiejzew7wpmlhwqr5tb2ajzdlqi4gqfhdsadnfidi4uud6oxr4xmhm
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
-- valory/http:1.0.0:bafybeibfjhmmjut4dukhunbcmp5zi4eqsk6rgreztmg4svqfzyq4ei3o7i
+- valory/http:1.0.0:bafybeicrohjrezfkkuob6u5w2i3wbfqbtwlq4c6oapsyr3r6ka26nckr3q
 skills: []
 behaviours: {}
 handlers:
