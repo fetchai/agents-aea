@@ -126,6 +126,7 @@ joined-path
 
 packages/default_author/
 
+packages/valory/protocols/tendermint
 
 
 !packages/fetchai/contracts/erc1155/build
