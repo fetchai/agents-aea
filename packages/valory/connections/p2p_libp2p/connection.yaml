@@ -65,7 +65,7 @@ build_entrypoint: check_dependencies.py
 connections: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
-- valory/acn:1.1.0:bafybeih5pz5re4kycou46xbzgguantxzj46aqtc575pgvej3m6bfg4xpfy
+- valory/acn:1.1.0:bafybeidaujylpuw3ja3ibeipklfb4iq72ukwwsmarlbnjbbl55wa72ammy
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
