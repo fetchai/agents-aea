@@ -600,7 +600,7 @@ def test_validate_and_call_callable():
     message.callable = "dummy_method"
     with pytest.raises(
         AEAException,
-        match="Contract method dummy_method not found in the None contract ABI",
+        match=f"Contract method dummy_method not found in ABI of contract {type(contract)}",
     ):
         ContractApiRequestDispatcher._validate_and_call_callable(
             ledger_api, message, contract
