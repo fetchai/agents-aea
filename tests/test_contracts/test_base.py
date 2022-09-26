@@ -40,6 +40,7 @@ from aea.cli.utils.context import Context
 from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
     CONTRACT,
+    CONTRACTS,
 )
 from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
@@ -234,7 +235,8 @@ def test_scaffolded_contract_method_call():
         add_contract_abi(ctx, contract_name, contract_abi_path)
 
         # Load the new contract
-        contract = Contract.from_dir(td + "/contracts/" + contract_name)
+        contract_path = Path(td, CONTRACTS, contract_name)
+        contract = Contract.from_dir(str(contract_path))
         ledger_api = ledger_apis_registry.make(
             EthereumCrypto.identifier,
             address=ETHEREUM_DEFAULT_ADDRESS,
