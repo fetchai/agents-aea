@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x10ledger_api.proto\x12\x1d\x61\x65\x61.valory.ledger_api.v1_0_0"\x86\x15\n\x10LedgerApiMessage\x12W\n\x07\x62\x61lance\x18\x05 \x01(\x0b\x32\x44.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Balance_PerformativeH\x00\x12S\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x42.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Error_PerformativeH\x00\x12_\n\x0bget_balance\x18\x07 \x01(\x0b\x32H.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_Balance_PerformativeH\x00\x12o\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32P.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12[\n\tget_state\x18\t \x01(\x0b\x32\x46.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_State_PerformativeH\x00\x12w\n\x17get_transaction_receipt\x18\n \x01(\x0b\x32T.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_Transaction_Receipt_PerformativeH\x00\x12g\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32L.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Raw_Transaction_PerformativeH\x00\x12w\n\x17send_signed_transaction\x18\x0c \x01(\x0b\x32T.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Send_Signed_Transaction_PerformativeH\x00\x12S\n\x05state\x18\r \x01(\x0b\x32\x42.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.State_PerformativeH\x00\x12m\n\x12transaction_digest\x18\x0e \x01(\x0b\x32O.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Transaction_Digest_PerformativeH\x00\x12o\n\x13transaction_receipt\x18\x0f \x01(\x0b\x32P.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Transaction_Receipt_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a/\n\x11TransactionDigest\x12\x1a\n\x12transaction_digest\x18\x01 \x01(\x0c\x1a\x31\n\x12TransactionReceipt\x12\x1b\n\x13transaction_receipt\x18\x01 \x01(\x0c\x1a>\n\x18Get_Balance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x1ah\n Get_Raw_Transaction_Performative\x12\x44\n\x05terms\x18\x01 \x01(\x0b\x32\x35.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Terms\x1a\x85\x01\n$Send_Signed_Transaction_Performative\x12]\n\x12signed_transaction\x18\x01 \x01(\x0b\x32\x41.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.SignedTransaction\x1a\x85\x01\n$Get_Transaction_Receipt_Performative\x12]\n\x12transaction_digest\x18\x01 \x01(\x0b\x32\x41.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.TransactionDigest\x1a:\n\x14\x42\x61lance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x05\x1aw\n\x1cRaw_Transaction_Performative\x12W\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32>.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.RawTransaction\x1a\x80\x01\n\x1fTransaction_Digest_Performative\x12]\n\x12transaction_digest\x18\x01 \x01(\x0b\x32\x41.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.TransactionDigest\x1a\x83\x01\n Transaction_Receipt_Performative\x12_\n\x13transaction_receipt\x18\x01 \x01(\x0b\x32\x42.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.TransactionReceipt\x1a\x93\x01\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x12\x46\n\x06kwargs\x18\x04 \x01(\x0b\x32\x36.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Kwargs\x1am\n\x12State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x44\n\x05state\x18\x02 \x01(\x0b\x32\x35.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.State\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x12\x13\n\x0b\x64\x61ta_is_set\x18\x05 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3'
+    b'\n\x10ledger_api.proto\x12\x1c\x61\x65\x61.valory.ledger_api.v1_0_0"\xf2\x14\n\x10LedgerApiMessage\x12V\n\x07\x62\x61lance\x18\x05 \x01(\x0b\x32\x43.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Balance_PerformativeH\x00\x12R\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x41.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Error_PerformativeH\x00\x12^\n\x0bget_balance\x18\x07 \x01(\x0b\x32G.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_Balance_PerformativeH\x00\x12n\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32O.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12Z\n\tget_state\x18\t \x01(\x0b\x32\x45.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_State_PerformativeH\x00\x12v\n\x17get_transaction_receipt\x18\n \x01(\x0b\x32S.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Get_Transaction_Receipt_PerformativeH\x00\x12\x66\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32K.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Raw_Transaction_PerformativeH\x00\x12v\n\x17send_signed_transaction\x18\x0c \x01(\x0b\x32S.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Send_Signed_Transaction_PerformativeH\x00\x12R\n\x05state\x18\r \x01(\x0b\x32\x41.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.State_PerformativeH\x00\x12l\n\x12transaction_digest\x18\x0e \x01(\x0b\x32N.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Transaction_Digest_PerformativeH\x00\x12n\n\x13transaction_receipt\x18\x0f \x01(\x0b\x32O.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Transaction_Receipt_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a/\n\x11TransactionDigest\x12\x1a\n\x12transaction_digest\x18\x01 \x01(\x0c\x1a\x31\n\x12TransactionReceipt\x12\x1b\n\x13transaction_receipt\x18\x01 \x01(\x0c\x1a>\n\x18Get_Balance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x1ag\n Get_Raw_Transaction_Performative\x12\x43\n\x05terms\x18\x01 \x01(\x0b\x32\x34.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Terms\x1a\x84\x01\n$Send_Signed_Transaction_Performative\x12\\\n\x12signed_transaction\x18\x01 \x01(\x0b\x32@.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.SignedTransaction\x1a\x84\x01\n$Get_Transaction_Receipt_Performative\x12\\\n\x12transaction_digest\x18\x01 \x01(\x0b\x32@.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.TransactionDigest\x1a:\n\x14\x42\x61lance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x05\x1av\n\x1cRaw_Transaction_Performative\x12V\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32=.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.RawTransaction\x1a\x7f\n\x1fTransaction_Digest_Performative\x12\\\n\x12transaction_digest\x18\x01 \x01(\x0b\x32@.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.TransactionDigest\x1a\x82\x01\n Transaction_Receipt_Performative\x12^\n\x13transaction_receipt\x18\x01 \x01(\x0b\x32\x41.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.TransactionReceipt\x1a\x92\x01\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x12\x45\n\x06kwargs\x18\x04 \x01(\x0b\x32\x35.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.Kwargs\x1al\n\x12State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x43\n\x05state\x18\x02 \x01(\x0b\x32\x34.aea.valory.ledger_api.v1_0_0.LedgerApiMessage.State\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x12\x13\n\x0b\x64\x61ta_is_set\x18\x05 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3'
 )
 
 
@@ -261,42 +261,42 @@ _sym_db.RegisterMessage(LedgerApiMessage.Error_Performative)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
     DESCRIPTOR._options = None
-    _LEDGERAPIMESSAGE._serialized_start = 52
-    _LEDGERAPIMESSAGE._serialized_end = 2746
-    _LEDGERAPIMESSAGE_KWARGS._serialized_start = 1205
-    _LEDGERAPIMESSAGE_KWARGS._serialized_end = 1229
-    _LEDGERAPIMESSAGE_RAWTRANSACTION._serialized_start = 1231
-    _LEDGERAPIMESSAGE_RAWTRANSACTION._serialized_end = 1272
-    _LEDGERAPIMESSAGE_SIGNEDTRANSACTION._serialized_start = 1274
-    _LEDGERAPIMESSAGE_SIGNEDTRANSACTION._serialized_end = 1321
-    _LEDGERAPIMESSAGE_STATE._serialized_start = 1323
-    _LEDGERAPIMESSAGE_STATE._serialized_end = 1345
-    _LEDGERAPIMESSAGE_TERMS._serialized_start = 1347
-    _LEDGERAPIMESSAGE_TERMS._serialized_end = 1369
-    _LEDGERAPIMESSAGE_TRANSACTIONDIGEST._serialized_start = 1371
-    _LEDGERAPIMESSAGE_TRANSACTIONDIGEST._serialized_end = 1418
-    _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT._serialized_start = 1420
-    _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT._serialized_end = 1469
-    _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE._serialized_start = 1471
-    _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE._serialized_end = 1533
-    _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE._serialized_start = 1535
-    _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE._serialized_end = 1639
-    _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE._serialized_start = 1642
-    _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE._serialized_end = 1775
-    _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_start = 1778
-    _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_end = 1911
-    _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE._serialized_start = 1913
-    _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE._serialized_end = 1971
-    _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE._serialized_start = 1973
-    _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE._serialized_end = 2092
-    _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE._serialized_start = 2095
-    _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE._serialized_end = 2223
-    _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_start = 2226
-    _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_end = 2357
-    _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE._serialized_start = 2360
-    _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE._serialized_end = 2507
-    _LEDGERAPIMESSAGE_STATE_PERFORMATIVE._serialized_start = 2509
-    _LEDGERAPIMESSAGE_STATE_PERFORMATIVE._serialized_end = 2618
-    _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE._serialized_start = 2620
-    _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE._serialized_end = 2730
+    _LEDGERAPIMESSAGE._serialized_start = 51
+    _LEDGERAPIMESSAGE._serialized_end = 2725
+    _LEDGERAPIMESSAGE_KWARGS._serialized_start = 1193
+    _LEDGERAPIMESSAGE_KWARGS._serialized_end = 1217
+    _LEDGERAPIMESSAGE_RAWTRANSACTION._serialized_start = 1219
+    _LEDGERAPIMESSAGE_RAWTRANSACTION._serialized_end = 1260
+    _LEDGERAPIMESSAGE_SIGNEDTRANSACTION._serialized_start = 1262
+    _LEDGERAPIMESSAGE_SIGNEDTRANSACTION._serialized_end = 1309
+    _LEDGERAPIMESSAGE_STATE._serialized_start = 1311
+    _LEDGERAPIMESSAGE_STATE._serialized_end = 1333
+    _LEDGERAPIMESSAGE_TERMS._serialized_start = 1335
+    _LEDGERAPIMESSAGE_TERMS._serialized_end = 1357
+    _LEDGERAPIMESSAGE_TRANSACTIONDIGEST._serialized_start = 1359
+    _LEDGERAPIMESSAGE_TRANSACTIONDIGEST._serialized_end = 1406
+    _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT._serialized_start = 1408
+    _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT._serialized_end = 1457
+    _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE._serialized_start = 1459
+    _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE._serialized_end = 1521
+    _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE._serialized_start = 1523
+    _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE._serialized_end = 1626
+    _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE._serialized_start = 1629
+    _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE._serialized_end = 1761
+    _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_start = 1764
+    _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_end = 1896
+    _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE._serialized_start = 1898
+    _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE._serialized_end = 1956
+    _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE._serialized_start = 1958
+    _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE._serialized_end = 2076
+    _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE._serialized_start = 2078
+    _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE._serialized_end = 2205
+    _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_start = 2208
+    _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE._serialized_end = 2338
+    _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE._serialized_start = 2341
+    _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE._serialized_end = 2487
+    _LEDGERAPIMESSAGE_STATE_PERFORMATIVE._serialized_start = 2489
+    _LEDGERAPIMESSAGE_STATE_PERFORMATIVE._serialized_end = 2597
+    _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE._serialized_start = 2599
+    _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE._serialized_end = 2709
 # @@protoc_insertion_point(module_scope)
