@@ -19,6 +19,7 @@
 """This module contains the protocol generator."""
 import itertools
 import os
+import re
 import shutil
 
 # pylint: skip-file
@@ -295,8 +296,11 @@ class ProtocolGenerator:
         new_content_type = content_type
         if _includes_custom_type(content_type):
             for custom_type in self.spec.all_custom_types:
-                new_content_type = new_content_type.replace(
-                    custom_type, self.spec.custom_custom_types[custom_type]
+
+                new_content_type = re.sub(
+                    fr"(^|[ \[\,])({custom_type})($|[, \]])",
+                    fr"\g<1>{self.spec.custom_custom_types[custom_type]}\g<3>",
+                    new_content_type,
                 )
         return new_content_type
 

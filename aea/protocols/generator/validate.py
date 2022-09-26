@@ -27,6 +27,7 @@ from aea.protocols.generator.common import (
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
     _has_matched_brackets,
+    _is_compositional_type,
 )
 
 
@@ -38,7 +39,11 @@ RESERVED_NAMES = {"_body", "message_id", "dialogue_reference", "target", "perfor
 PERFORMATIVE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 CONTENT_NAME_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 
-CT_CONTENT_TYPE_REGEX_PATTERN = "^ct:([A-Z]+[a-z]*)+$"  # or maybe "ct:(?:[A-Z][a-z]+)+" or # "^ct:[A-Z][a-zA-Z0-9]*$"
+
+CT_NAME_RE = "[A-Z][a-zA-Z0-9]*"
+CT_CONTENT_TYPE_REGEX_PATTERN = (
+    f"^ct:{CT_NAME_RE}$"  # or maybe "ct:(?:[A-Z][a-z]+)+" or # "^ct:([A-Z]+[a-z]*)+$"
+)
 
 ROLE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
 END_STATE_REGEX_PATTERN = "^[a-zA-Z0-9]+$|^[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)+$"
@@ -480,8 +485,13 @@ def _validate_speech_acts_section(
 
             content_names_types[content_name] = (performative, content_type)
 
-            if _is_valid_ct(content_type):
-                custom_types_set.add(content_type.strip())
+            for sub_type in (
+                list(_get_sub_types_of_compositional_types(content_type))
+                if _is_compositional_type(content_type)
+                else []
+            ) + [content_type]:
+                if _is_valid_ct(sub_type):
+                    custom_types_set.add(sub_type.strip())
 
     return True, "Speech-acts are valid.", performatives_set, custom_types_set
 

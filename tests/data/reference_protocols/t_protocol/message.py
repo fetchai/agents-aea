@@ -28,6 +28,7 @@ from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
+from tests.data.generator.t_protocol.custom_types import DataModel2 as CustomDataModel2
 
 
 _default_logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
@@ -44,6 +45,8 @@ class TProtocolMessage(Message):
     )
 
     DataModel = CustomDataModel
+
+    DataModel2 = CustomDataModel2
 
     class Performative(Message.Performative):
         """Performatives for the t_protocol protocol."""
@@ -113,6 +116,7 @@ class TProtocolMessage(Message):
             "content_str",
             "content_union_1",
             "content_union_2",
+            "content_union_3",
             "dialogue_reference",
             "message_id",
             "performative",
@@ -522,6 +526,14 @@ class TProtocolMessage(Message):
                 Dict[bool, bytes],
             ],
             self.get("content_union_2"),
+        )
+
+    @property
+    def content_union_3(self) -> Union[CustomDataModel, CustomDataModel2, bytes]:
+        """Get the 'content_union_3' content from the message."""
+        enforce(self.is_set("content_union_3"), "'content_union_3' content is not set.")
+        return cast(
+            Union[CustomDataModel, CustomDataModel2, bytes], self.get("content_union_3")
         )
 
     def _is_consistent(self) -> bool:
@@ -1092,7 +1104,7 @@ class TProtocolMessage(Message):
                         ),
                     )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_MT:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 3
                 enforce(
                     isinstance(self.content_union_1, CustomDataModel)
                     or isinstance(self.content_union_1, bool)
@@ -1188,6 +1200,14 @@ class TProtocolMessage(Message):
                             ),
                             "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'.",
                         )
+                enforce(
+                    isinstance(self.content_union_3, CustomDataModel)
+                    or isinstance(self.content_union_3, CustomDataModel2)
+                    or isinstance(self.content_union_3, bytes),
+                    "Invalid type for content 'content_union_3'. Expected either of '['DataModel', 'DataModel2', 'bytes']'. Found '{}'.".format(
+                        type(self.content_union_3)
+                    ),
+                )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_ct"):

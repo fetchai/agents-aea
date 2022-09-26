@@ -16,6 +16,17 @@ message TProtocolMessage{
     map<int64, bool> dict_field = 8;
   }
 
+  message DataModel2{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
 
   // Performatives and contents
   message Performative_Ct_Performative{
@@ -82,6 +93,9 @@ message TProtocolMessage{
     map<string, int64> content_union_2_type_dict_of_str_int = 16;
     map<int64, float> content_union_2_type_dict_of_int_float = 17;
     map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 18;
+    DataModel content_union_3_type_DataModel = 19;
+    DataModel2 content_union_3_type_DataModel2 = 20;
+    bytes content_union_3_type_bytes = 21;
   }
 
   message Performative_O_Performative{

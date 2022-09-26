@@ -180,7 +180,10 @@ class TestValidate(TestCase):
         assert _is_valid_ct(invalid_content_type_3) is False
 
         invalid_content_type_4 = "ct:E3"
-        assert _is_valid_ct(invalid_content_type_4) is False
+        assert _is_valid_ct(invalid_content_type_4) is True
+
+        invalid_content_type_5 = "ct:3E"
+        assert _is_valid_ct(invalid_content_type_5) is False
 
     def test_is_valid_pt(self):
         """Test for the '_is_valid_pt' method."""

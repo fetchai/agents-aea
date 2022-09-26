@@ -389,6 +389,7 @@ class TestExtractSpecification(TestCase):
                 "Tuple[float, ...], Tuple[bool, ...], "
                 "Tuple[bytes, ...], Dict[str, int], "
                 "Dict[int, float], Dict[bool, bytes]]",
+                "content_union_3": "Union[DataModel, DataModel2, bytes]",
             },
             "performative_o": {
                 "content_o_bool": "Optional[bool]",
@@ -490,10 +491,14 @@ class TestExtractSpecification(TestCase):
             "content_union_2": "Union[FrozenSet[bytes], FrozenSet[int], FrozenSet[str], "
             "Tuple[float, ...], Tuple[bool, ...], Tuple[bytes, ...], "
             "Dict[str, int], Dict[int, float], Dict[bool, bytes]]",
+            "content_union_3": "Union[DataModel, DataModel2, bytes]",
         }
 
-        assert spec.all_custom_types == ["DataModel"]
-        assert spec.custom_custom_types == {"DataModel": "CustomDataModel"}
+        assert spec.all_custom_types == ["DataModel", "DataModel2"]
+        assert spec.custom_custom_types == {
+            "DataModel": "CustomDataModel",
+            "DataModel2": "CustomDataModel2",
+        }
         assert spec.initial_performatives == ["PERFORMATIVE_CT", "PERFORMATIVE_PT"]
         assert spec.reply == {
             "performative_ct": ["performative_pct"],

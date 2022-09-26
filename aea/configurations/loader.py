@@ -167,7 +167,6 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
             raise ValueError(
                 "Incorrect number of Yaml documents in the protocol specification."
             )
-
         self.validate(configuration_file_json)
 
         protocol_specification = cast(
