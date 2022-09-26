@@ -87,14 +87,6 @@ class LedgerApiSerializer(Serializer):
             TransactionDigest.encode(
                 performative.transaction_digest, transaction_digest
             )
-            if msg.is_set("retry_timeout"):
-                performative.retry_timeout_is_set = True
-                retry_timeout = msg.retry_timeout
-                performative.retry_timeout = retry_timeout
-            if msg.is_set("retry_attempts"):
-                performative.retry_attempts_is_set = True
-                retry_attempts = msg.retry_attempts
-                performative.retry_attempts = retry_attempts
             ledger_api_msg.get_transaction_receipt.CopyFrom(performative)
         elif performative_id == LedgerApiMessage.Performative.BALANCE:
             performative = ledger_api_pb2.LedgerApiMessage.Balance_Performative()  # type: ignore
@@ -205,12 +197,6 @@ class LedgerApiSerializer(Serializer):
             )
             transaction_digest = TransactionDigest.decode(pb2_transaction_digest)
             performative_content["transaction_digest"] = transaction_digest
-            if ledger_api_pb.get_transaction_receipt.retry_timeout_is_set:
-                retry_timeout = ledger_api_pb.get_transaction_receipt.retry_timeout
-                performative_content["retry_timeout"] = retry_timeout
-            if ledger_api_pb.get_transaction_receipt.retry_attempts_is_set:
-                retry_attempts = ledger_api_pb.get_transaction_receipt.retry_attempts
-                performative_content["retry_attempts"] = retry_attempts
         elif performative_id == LedgerApiMessage.Performative.BALANCE:
             ledger_id = ledger_api_pb.balance.ledger_id
             performative_content["ledger_id"] = ledger_id

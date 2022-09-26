@@ -118,8 +118,6 @@ class LedgerApiMessage(Message):
             "message_id",
             "performative",
             "raw_transaction",
-            "retry_attempts",
-            "retry_timeout",
             "signed_transaction",
             "state",
             "target",
@@ -239,16 +237,6 @@ class LedgerApiMessage(Message):
         """Get the 'raw_transaction' content from the message."""
         enforce(self.is_set("raw_transaction"), "'raw_transaction' content is not set.")
         return cast(CustomRawTransaction, self.get("raw_transaction"))
-
-    @property
-    def retry_attempts(self) -> Optional[int]:
-        """Get the 'retry_attempts' content from the message."""
-        return cast(Optional[int], self.get("retry_attempts"))
-
-    @property
-    def retry_timeout(self) -> Optional[int]:
-        """Get the 'retry_timeout' content from the message."""
-        return cast(Optional[int], self.get("retry_timeout"))
 
     @property
     def signed_transaction(self) -> CustomSignedTransaction:
@@ -379,24 +367,6 @@ class LedgerApiMessage(Message):
                         type(self.transaction_digest)
                     ),
                 )
-                if self.is_set("retry_timeout"):
-                    expected_nb_of_contents += 1
-                    retry_timeout = cast(int, self.retry_timeout)
-                    enforce(
-                        type(retry_timeout) is int,
-                        "Invalid type for content 'retry_timeout'. Expected 'int'. Found '{}'.".format(
-                            type(retry_timeout)
-                        ),
-                    )
-                if self.is_set("retry_attempts"):
-                    expected_nb_of_contents += 1
-                    retry_attempts = cast(int, self.retry_attempts)
-                    enforce(
-                        type(retry_attempts) is int,
-                        "Invalid type for content 'retry_attempts'. Expected 'int'. Found '{}'.".format(
-                            type(retry_attempts)
-                        ),
-                    )
             elif self.performative == LedgerApiMessage.Performative.BALANCE:
                 expected_nb_of_contents = 2
                 enforce(
