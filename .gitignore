@@ -125,6 +125,7 @@ output_file
 joined-path
 
 packages/default_author/
+packages/valory/connections/p2p_libp2p_client/
 
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build
@@ -139,7 +140,6 @@ packages/fetchai/connections/p2p_libp2p/libp2p_node/libp2p_node
 !plugins/aea-ledger-fetchai/tests/data/dummy_contract/build
 
 deploy-image/.env
-deploy-image/packages/valory
 deploy-image/packages/open_aea
 deploy-image/packages/fetchai
 deploy-image/packages/hashes.csv
