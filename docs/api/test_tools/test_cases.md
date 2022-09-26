@@ -275,7 +275,7 @@ subprocess object.
 @classmethod
 def terminate_agents(cls,
                      *subprocesses: subprocess.Popen,
-                     timeout: int = 20) -> None
+                     timeout: int = TERMINATION_TIMEOUT) -> None
 ```
 
 Terminate agent subprocesses.
