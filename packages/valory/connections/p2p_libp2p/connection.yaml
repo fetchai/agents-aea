@@ -57,7 +57,7 @@ fingerprint:
   tests/__init__.py: bafybeieftcbmxxpe7okvm3ycualpyec6xys4nx5tihcjii7lqxd3w5lx7e
   tests/base.py: bafybeibn5afb3fiy2lakt7j53kalfbi22vfd35ls25iqzddm7etwvqmiry
   tests/test_aea_cli.py: bafybeicyqnu4pzdl26pd765qcommyqccwvge7uh3keuk6cswpnbc47ovii
-  tests/test_build.py: bafybeievrnqdmg5qa6kmgjsjzxqx47vgxkf7rrhtw4gkf5y4w76n34idmm
+  tests/test_build.py: bafybeifkvfr4o225sbedkkp6hwv42cvqujzwu645jbpvuc7sbgh7bjfkhq
   tests/test_errors.py: bafybeigfwg7cmxbgo7j2pce5vy55wvqze7wv67d4v37k3wpcflwbgzege4
   tests/test_go_code_matching_acn.py: bafybeig3mxp6l5g2fokkireopfxc6j3rvmxgo6nomy25fvoa3a6ozgk2ay
 fingerprint_ignore_patterns: []
