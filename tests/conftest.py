@@ -859,7 +859,7 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("name", crypto.address, crypto.public_key)
     crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
+    directory = Path(ROOT_DIR, "packages", "valory", "connections", "ledger")
     connection = Connection.from_dir(
         directory, data_dir=MagicMock(), identity=identity, crypto_store=crypto_store
     )
