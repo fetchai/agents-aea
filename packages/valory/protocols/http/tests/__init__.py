@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the tests of the default http package."""
+"""Tests package for valory/http protocol."""
