@@ -20,6 +20,7 @@
 """Test P2PLibp2p connection build."""
 import os
 import tempfile
+import time
 from io import StringIO
 from unittest import mock
 
@@ -33,9 +34,17 @@ from packages.valory.connections.p2p_libp2p.check_dependencies import (
     MINIMUM_GCC_VERSION,
     MINIMUM_GO_VERSION,
     build_node,
-    check_versions,
-    version_to_string,
 )
+from packages.valory.connections.p2p_libp2p.check_dependencies import (
+    check_versions as base_check_versions,
+)
+from packages.valory.connections.p2p_libp2p.check_dependencies import version_to_string
+
+
+def check_versions() -> None:
+    """Otherwise buffer may occasionally be found empty"""
+    base_check_versions()
+    time.sleep(0.1)
 
 
 def test_check_versions() -> None:
