@@ -212,7 +212,7 @@ class AgentRunThreadTask(AgentRunAsyncTask):
 class AgentRunProcessTask(BaseAgentRunTask):
     """Subprocess wrapper to run agent."""
 
-    PROCESS_JOIN_TIMEOUT = 20  # in seconds
+    PROCESS_JOIN_TIMEOUT = 30  # in seconds
     PROCESS_ALIVE_SLEEP_TIME = 0.005  # in seconds
 
     def __init__(  # pylint: disable=super-init-not-called
