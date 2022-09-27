@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the libp2p client connection."""
+# pylint: disable-all
 import asyncio
 import contextlib
 import hashlib
@@ -31,9 +32,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from asn1crypto import x509  # type: ignore
-from ecdsa.curves import SECP256k1
-from ecdsa.keys import BadSignatureError, VerifyingKey
-from ecdsa.util import sigdecode_der
+from ecdsa.curves import SECP256k1  # type: ignore
+from ecdsa.keys import BadSignatureError, VerifyingKey  # type: ignore
+from ecdsa.util import sigdecode_der  # type: ignore
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -50,7 +51,9 @@ from packages.valory.protocols.acn.message import AcnMessage
 
 
 try:
-    from asyncio.streams import IncompleteReadError  # pylint: disable=ungrouped-imports
+    from asyncio.streams import (  # type: ignore # pylint: disable=ungrouped-imports
+        IncompleteReadError,
+    )
 except ImportError:  # pragma: nocover
     from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
 
@@ -325,7 +328,7 @@ class P2PLibp2pClientConnection(Connection):
             save_path = cert_request.get_absolute_save_path(Path(self.data_dir))
             if not save_path.is_file():
                 raise Exception(  # pragma: nocover
-                    "cert_request 'save_path' field is not a file. "
+                    f"cert_request 'save_path' field is not a file:\n{save_path}\n"
                     "Please ensure that 'issue-certificates' command is called beforehand"
                 )
 
@@ -418,7 +421,7 @@ class P2PLibp2pClientConnection(Connection):
     async def _perform_connection_to_node(self) -> None:
         """Connect to node with retries."""
         for attempt in range(self.connect_retries):
-            if self.state not in [
+            if self.state not in [  # type: ignore
                 ConnectionStates.connecting,
                 ConnectionStates.connected,
             ]:
@@ -439,7 +442,7 @@ class P2PLibp2pClientConnection(Connection):
                 if not await pipe.connect():
                     raise ValueError(
                         f"Pipe connection error: {pipe.last_exception or ''}"
-                    ) from pipe.last_exception
+                    )
 
                 self._node_client = NodeClient(pipe, self.node_por)
                 await self._setup_connection()
