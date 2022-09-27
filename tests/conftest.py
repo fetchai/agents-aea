@@ -265,9 +265,9 @@ protocol_config_files = [
 connection_config_files = [
     os.path.join(ROOT_DIR, "aea", "connections", "scaffold", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "gym", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "http_client", CONNECTION_YAML),
+    os.path.join(VALORY_REF, "connections", "http_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "http_server", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
+    os.path.join(VALORY_REF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "stub", CONNECTION_YAML),
     os.path.join(VALORY_REF, "connections", "p2p_libp2p", CONNECTION_YAML),

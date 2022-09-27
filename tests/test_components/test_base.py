@@ -45,6 +45,10 @@ from aea.helpers.base import cd
 from aea.helpers.io import open_file
 from aea.test_tools.test_cases import AEATestCase
 
+from packages.valory.protocols.http.dialogues import (  # noqa: F401 # pylint: disable=unused-import
+    HttpDialogue,
+)
+
 from tests.conftest import (
     CUR_PATH,
     ROOT_DIR,
@@ -115,10 +119,10 @@ def test_directory_setter():
 def test_load_aea_package():
     """Test aea package load."""
     config = ConnectionConfig(
-        "http_client", "fetchai", "0.5.0", protocols={PublicId("valory", "http")}
+        "http_client", "valory", "0.5.0", protocols={PublicId("valory", "http")}
     )
     config.directory = (
-        Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
+        Path(ROOT_DIR) / "packages" / "valory" / "connections" / "http_client"
     )
     load_aea_package(config)
 
@@ -126,10 +130,10 @@ def test_load_aea_package():
 def test_load_aea_package_twice():
     """Test aea package load twice and ensure python objects stay the same."""
     config = ConnectionConfig(
-        "http_client", "fetchai", "0.5.0", protocols={PublicId("valory", "http")}
+        "http_client", "valory", "0.5.0", protocols={PublicId("valory", "http")}
     )
     config.directory = (
-        Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
+        Path(ROOT_DIR) / "packages" / "valory" / "connections" / "http_client"
     )
     # It doesn't matter if the package is already loaded.
     # We cannot safely remove it as references to other modules

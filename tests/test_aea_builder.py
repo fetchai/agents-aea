@@ -901,7 +901,7 @@ class TestExtraDeps(AEATestCaseEmpty):
     def test_check_dependencies_correct(self):
         """Test dependencies properly listed."""
         self.run_cli_command(
-            "add", "--local", "connection", "fetchai/http_client", cwd=self._get_cwd()
+            "add", "--local", "connection", "valory/http_client", cwd=self._get_cwd()
         )
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         assert "aiohttp" in builder._package_dependency_manager.pypi_dependencies
