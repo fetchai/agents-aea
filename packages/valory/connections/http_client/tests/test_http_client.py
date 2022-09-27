@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,13 +17,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Tests for the HTTP Client connection and channel."""
+"""Tests for valory/http_client connection. Adapted from original AEA code."""
 # pylint: skip-file
 
 import asyncio
 import logging
 from asyncio import CancelledError
-from typing import cast
+from typing import Any, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
@@ -58,7 +58,7 @@ class _MockRequest:
         """Enter async context."""
         return self.response
 
-    async def __aexit__(self, *args, **kwargs) -> None:
+    async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
         """Exit async context."""
         return None
 
@@ -66,11 +66,11 @@ class _MockRequest:
 class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, self_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
-        :param self_address: self address
+        :param self_address: the address
         :param kwargs: keyword arguments
         """
 
@@ -96,7 +96,7 @@ class HttpDialogues(BaseHttpDialogues):
 class TestHTTPClientConnect:
     """Tests the http client connection's 'connect' functionality."""
 
-    def setup(self):
+    def setup(self) -> None:
         """Initialise the class."""
         self.address = get_host()
         self.port = get_unused_tcp_port()
@@ -118,18 +118,18 @@ class TestHTTPClientConnect:
         self.http_dialogs = HttpDialogues(self.client_skill_id)
 
     @pytest.mark.asyncio
-    async def test_initialization(self):
+    async def test_initialization(self) -> None:
         """Test the initialisation of the class."""
         assert self.http_client_connection.address == self.agent_identity.address
 
     @pytest.mark.asyncio
-    async def test_connection(self):
+    async def test_connection(self) -> None:
         """Test the connect functionality of the http client connection."""
         await self.http_client_connection.connect()
         assert self.http_client_connection.is_connected is True
 
     @pytest.mark.asyncio
-    async def test_disconnect(self):
+    async def test_disconnect(self) -> None:
         """Test the disconnect functionality of the http client connection."""
         await self.http_client_connection.connect()
         assert self.http_client_connection.is_connected is True
@@ -138,7 +138,7 @@ class TestHTTPClientConnect:
         assert self.http_client_connection.is_connected is False
 
     @pytest.mark.asyncio
-    async def test_http_send_error(self):
+    async def test_http_send_error(self) -> None:
         """Test request fails and send back result with code 600."""
         await self.http_client_connection.connect()
         request_http_message, _ = self.http_dialogs.create(
@@ -166,40 +166,41 @@ class TestHTTPClientConnect:
             self.http_client_connection.receive(), timeout=10
         )
         assert envelope
+        assert isinstance(envelope.message, HttpMessage)
         assert envelope.message.status_code == 600
 
         await self.http_client_connection.disconnect()
 
     @pytest.mark.asyncio
-    async def test_http_client_send_not_connected_error(self):
+    async def test_http_client_send_not_connected_error(self) -> None:
         """Test connection.send error if not conencted."""
         with pytest.raises(ConnectionError):
             await self.http_client_connection.send(Mock())
 
     @pytest.mark.asyncio
-    async def test_http_channel_send_not_connected_error(self):
+    async def test_http_channel_send_not_connected_error(self) -> None:
         """Test channel.send error if not conencted."""
         with pytest.raises(ValueError):
             self.http_client_connection.channel.send(Mock())
 
     @pytest.mark.asyncio
-    async def test_send_empty_envelope_skip(self):
+    async def test_send_empty_envelope_skip(self) -> None:
         """Test skip on empty envelope request sent."""
         await self.http_client_connection.connect()
         with patch.object(
             self.http_client_connection.channel, "_http_request_task"
         ) as mock:
-            await self.http_client_connection.send(None)
+            await self.http_client_connection.send(None)  # type: ignore
         mock.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_channel_get_message_not_connected(self):
+    async def test_channel_get_message_not_connected(self) -> None:
         """Test errro on message get if not connected."""
         with pytest.raises(ValueError):
             await self.http_client_connection.channel.get_message()
 
     @pytest.mark.asyncio
-    async def test_channel_cancel_tasks_on_disconnect(self):
+    async def test_channel_cancel_tasks_on_disconnect(self) -> None:
         """Test requests tasks cancelled on disconnect."""
         await self.http_client_connection.connect()
         request_http_message, _ = self.http_dialogs.create(
@@ -207,7 +208,7 @@ class TestHTTPClientConnect:
             performative=HttpMessage.Performative.REQUEST,
             method="get",
             url="https://not-a-google.com",
-            headers="",
+            headers="Host: https://not-a-google.com",
             version="",
             body=b"",
         )
@@ -246,7 +247,7 @@ class TestHTTPClientConnect:
             await task
 
     @pytest.mark.asyncio
-    async def test_http_send_ok(self):
+    async def test_http_send_ok(self) -> None:
         """Test request is ok cause mocked."""
         await self.http_client_connection.connect()
         request_http_message, sending_dialogue = self.http_dialogs.create(
@@ -288,19 +289,20 @@ class TestHTTPClientConnect:
 
         assert envelope is not None and envelope.message is not None
         message = envelope.message
+        assert isinstance(message, HttpMessage)
         response_dialogue = self.http_dialogs.update(message)
         assert message.status_code == response_mock.status, message.body.decode("utf-8")
         assert sending_dialogue == response_dialogue
         await self.http_client_connection.disconnect()
 
     @pytest.mark.asyncio
-    async def test_http_dialogue_construct_fail(self):
+    async def test_http_dialogue_construct_fail(self) -> None:
         """Test dialogue not properly constructed."""
         await self.http_client_connection.connect()
 
         incorrect_http_message = HttpMessage(
             dialogue_reference=self.http_dialogs.new_self_initiated_dialogue_reference(),
-            performative=HttpMessage.Performative.RESPONSE,
+            performative=HttpMessage.Performative.RESPONSE,  # type: ignore
             status_code=500,
             headers="",
             status_text="",
@@ -326,15 +328,15 @@ class TestHTTPClientConnect:
             )
 
     @pytest.mark.asyncio
-    async def test_http_send_exception(self):
+    async def test_http_send_exception(self) -> None:
         """Test request is ok cause mocked."""
         await self.http_client_connection.connect()
         request_http_message, sending_dialogue = self.http_dialogs.create(
             counterparty=self.connection_address,
-            performative=HttpMessage.Performative.REQUEST,
+            performative=HttpMessage.Performative.REQUEST,  # type: ignore
             method="get",
             url="https://not-a-google.com",
-            headers="",
+            headers="Host: https://not-a-google.com",
             version="",
             body=b"",
         )

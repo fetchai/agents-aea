@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +26,15 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, cast
+from typing import Any, Optional, Set, Tuple, Union, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
-from aiohttp.client_reqrep import ClientResponse
-from multidict import CIMultiDict, CIMultiDictProxy
+from aiohttp.client_reqrep import ClientResponse  # pylint: disable=wrong-import-order
+from multidict import (  # pylint: disable=wrong-import-order
+    CIMultiDict,
+    CIMultiDictProxy,
+)
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -101,7 +104,7 @@ class HttpDialogues(BaseHttpDialogues):
         )
 
 
-class HTTPClientAsyncChannel:
+class HTTPClientAsyncChannel:  # pylint: disable=too-many-instance-attributes
     """A wrapper for a HTTPClient."""
 
     DEFAULT_TIMEOUT = 300  # default timeout in seconds
@@ -158,7 +161,7 @@ class HTTPClientAsyncChannel:
 
         :param envelope: incoming envelope
 
-        :return: Tuple[MEssage, Optional[Dialogue]]
+        :return: Tuple[Message, Optional[Dialogue]]
         """
         message = cast(HttpMessage, envelope.message)
         dialogue = cast(Optional[HttpDialogue], self._dialogues.update(message))
@@ -168,7 +171,7 @@ class HTTPClientAsyncChannel:
         """
         Perform http request and send back response.
 
-        :param request_envelope: request envelope.
+        :param request_envelope: request envelope
         """
         if not self._loop:  # pragma: nocover
             raise ValueError("Channel is not connected")
@@ -179,7 +182,7 @@ class HTTPClientAsyncChannel:
 
         if not dialogue:
             self.logger.warning(
-                "Could not create dialogue for message={}".format(request_http_message)
+                f"Could not create dialogue for message={request_http_message}"
             )
             return
 
@@ -238,9 +241,9 @@ class HTTPClientAsyncChannel:
                 ) as resp:
                     await resp.read()
                 return resp
-        except Exception:  # pragma: nocover # pylint: disable=broad-except
-            self.logger.exception(
-                f"Exception raised during http call: {request_http_message.method} {request_http_message.url}"
+        except Exception as e:  # pragma: nocover # pylint: disable=broad-except
+            self.logger.debug(
+                f"Exception raised during http call: {request_http_message.method} {request_http_message.url}, {e}"
             )
             raise
 
@@ -292,7 +295,7 @@ class HTTPClientAsyncChannel:
         self._tasks.remove(task)
         self.logger.debug(f"Task completed: {task}")
 
-    async def get_message(self) -> Optional["Envelope"]:
+    async def get_message(self) -> Union["Envelope", None]:
         """
         Get http response from in-queue.
 
@@ -361,7 +364,7 @@ class HTTPClientAsyncChannel:
     async def disconnect(self) -> None:
         """Disconnect."""
         if not self.is_stopped:
-            self.logger.info("HTTP Client has shutdown on port: {}.".format(self.port))
+            self.logger.info(f"HTTP Client has shutdown on port: {self.port}.")
             self.is_stopped = True
 
             await self._cancel_tasks()
@@ -373,11 +376,7 @@ class HTTPClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     def __init__(self, **kwargs: Any) -> None:
-        """
-        Initialize a HTTP client connection.
-
-        :param kwargs: keyword arguments
-        """
+        """Initialize a HTTP client connection."""
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
@@ -416,11 +415,13 @@ class HTTPClientConnection(Connection):
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
+    async def receive(
+        self, *args: Any, **kwargs: Any
+    ) -> Optional[Union["Envelope", None]]:
         """
         Receive an envelope.
 
-        :param args: positional arguments
+        :param args: arguments
         :param kwargs: keyword arguments
         :return: the envelope received, or None.
         """
@@ -428,5 +429,5 @@ class HTTPClientConnection(Connection):
         try:
             return await self.channel.get_message()
         except Exception:  # pragma: nocover # pylint: disable=broad-except
-            self.logger.exception("Exception on receive")
+            self.logger.debug("Exception on receive")
             return None
