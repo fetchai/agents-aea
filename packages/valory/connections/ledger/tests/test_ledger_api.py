@@ -57,8 +57,8 @@ from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.test_tools.network import LOCALHOST
 
-from packages.fetchai.connections.ledger.connection import LedgerConnection
-from packages.fetchai.connections.ledger.ledger_dispatcher import (
+from packages.valory.connections.ledger.connection import LedgerConnection
+from packages.valory.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
 from packages.valory.protocols.ledger_api.custom_types import Kwargs

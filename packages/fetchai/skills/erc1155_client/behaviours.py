@@ -24,15 +24,15 @@ from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.connections.ledger.connection import (
-    PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
-)
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.dialogues import (
     LedgerApiDialogues,
     OefSearchDialogues,
 )
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
+from packages.valory.connections.ledger.connection import (
+    PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
 from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 

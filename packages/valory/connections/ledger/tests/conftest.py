@@ -92,7 +92,7 @@ async def ledger_apis_connection(
     )
     connection = cast(Connection, connection)
     connection._logger = logging.getLogger(
-        "aea.packages.fetchai.connections.ledger"
+        "aea.packages.valory.connections.ledger"
     )  # pylint: disable=protected-access
 
     # use testnet config

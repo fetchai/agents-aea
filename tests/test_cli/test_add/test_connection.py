@@ -35,11 +35,11 @@ from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
-from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
-)
 from packages.fetchai.connections.local.connection import (
     PUBLIC_ID as LOCAL_CONNECTION_PUBLIC_ID,
+)
+from packages.valory.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
 
 from tests.conftest import (
@@ -63,7 +63,7 @@ class TestAddConnectionFailsWhenConnectionAlreadyExists:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_name = "http_client"
-        cls.connection_author = "fetchai"
+        cls.connection_author = "valory"
         cls.connection_version = "0.3.0"
         cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
         # copy the 'packages' directory in the parent of the agent folder.
@@ -155,7 +155,7 @@ class TestAddConnectionFailsWhenConnectionWithSameAuthorAndNameButDifferentVersi
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         cls.connection_name = "http_client"
-        cls.connection_author = "fetchai"
+        cls.connection_author = "valory"
         cls.connection_version = "0.3.0"
         cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
 
@@ -445,7 +445,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
             cls.t,
             cls.agent_name,
             "vendor",
-            "fetchai",
+            "valory",
             "connections",
             cls.connection_name,
         ).mkdir(parents=True, exist_ok=True)
@@ -465,7 +465,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
         The expected message is: 'Cannot find connection: '{connection_name}''
         """
         missing_path = os.path.join(
-            "vendor", "fetchai", "connections", self.connection_name
+            "vendor", "valory", "connections", self.connection_name
         )
         missing_path = double_escape_windows_path_separator(missing_path)
         assert missing_path in self.result.exception.message

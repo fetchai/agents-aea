@@ -29,18 +29,18 @@ from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 
-from packages.fetchai.connections.ledger.base import RequestDispatcher
-from packages.fetchai.connections.ledger.contract_dispatcher import (
+from packages.valory.connections.ledger.base import RequestDispatcher
+from packages.valory.connections.ledger.contract_dispatcher import (
     ContractApiRequestDispatcher,
 )
-from packages.fetchai.connections.ledger.ledger_dispatcher import (
+from packages.valory.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
 from packages.valory.protocols.contract_api import ContractApiMessage
 from packages.valory.protocols.ledger_api import LedgerApiMessage
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/ledger:0.19.0")
+PUBLIC_ID = PublicId.from_str("valory/ledger:0.19.0")
 
 
 class LedgerConnection(Connection):

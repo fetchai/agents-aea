@@ -49,7 +49,7 @@ from aea.protocols.base import Message, Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Handler, Skill, SkillContext
 
-from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+from packages.valory.connections.http_client.connection import HTTPClientConnection
 from packages.valory.protocols.http.message import HttpMessage
 
 
