@@ -126,8 +126,6 @@ joined-path
 
 packages/default_author/
 
-packages/valory/protocols/tendermint
-
 
 !packages/fetchai/contracts/erc1155/build
 !packages/fetchai/contracts/staking_erc20/build

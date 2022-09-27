@@ -51,10 +51,6 @@ from packages.valory.connections.test_libp2p.tests.conftest import (
     local_nodes,
     public_nodes,
 )
-from packages.valory.protocols.tendermint.message import (
-    CustomErrorCode,
-    TendermintMessage,
-)
 
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
@@ -258,32 +254,6 @@ default_message_strategy = dict(
     content=st.binary(),
     performative=st.just(DefaultMessage.Performative.BYTES),
 )
-tendermint_message_strategy = st.one_of(
-    [
-        st.fixed_dictionaries(
-            dict(
-                **base_message_strategy,
-                performative=st.just(TendermintMessage.Performative.REQUEST),
-            )
-        ),
-        st.fixed_dictionaries(
-            dict(
-                **base_message_strategy,
-                performative=st.just(TendermintMessage.Performative.RESPONSE),
-                info=st.text(),
-            )
-        ),
-        st.fixed_dictionaries(
-            dict(
-                **base_message_strategy,
-                performative=st.just(TendermintMessage.Performative.ERROR),
-                error_code=st.sampled_from(CustomErrorCode),
-                error_msg=st.text(),
-                error_data=st.just({}),
-            )
-        ),
-    ],
-)
 
 
 class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
@@ -367,12 +337,5 @@ class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
     @given(st.builds(DefaultMessage, **default_message_strategy))
     def test_randomized_default_message_exchange(self, message):
         """Test randomized default message strategy"""
-
-        assert self.send_message_via_random_multiplexer_pair(message)
-
-    @settings(deadline=2000)
-    @given(st.builds(lambda kw: TendermintMessage(**kw), tendermint_message_strategy))
-    def test_randomized_tendermint_message_exchange(self, message):
-        """Test randomized tendermint message strategy"""
 
         assert self.send_message_via_random_multiplexer_pair(message)
