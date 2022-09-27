@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +20,9 @@
 
 """Scaffold connection and channel."""
 import asyncio
-from asyncio import Task
-from collections import deque
-from typing import Any, Deque, Dict, List, Optional, cast
+from typing import Any, Dict, Optional
 
-from aea.configurations.data_types import PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
@@ -47,6 +45,8 @@ class LedgerConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
     connection_id = PUBLIC_ID
+    TIMEOUT = 3
+    MAX_ATTEMPTS = 120
 
     def __init__(self, **kwargs: Any):
         """Initialize a connection to interact with a ledger APIs."""
@@ -54,19 +54,27 @@ class LedgerConnection(Connection):
 
         self._ledger_dispatcher: Optional[LedgerApiRequestDispatcher] = None
         self._contract_dispatcher: Optional[ContractApiRequestDispatcher] = None
-        self._event_new_receiving_task: Optional[asyncio.Event] = None
+        self._response_envelopes: Optional[asyncio.Queue] = None
 
-        self.receiving_tasks: List[asyncio.Future] = []
         self.task_to_request: Dict[asyncio.Future, Envelope] = {}
-        self.done_tasks: Deque[asyncio.Future] = deque()
         self.api_configs = self.configuration.config.get(
             "ledger_apis", {}
         )  # type: Dict[str, Dict[str, str]]
+        self.request_retry_attempts = self.configuration.config.get(
+            "retry_attempts", self.MAX_ATTEMPTS
+        )
+        self.request_retry_timeout = self.configuration.config.get(
+            "retry_timeout", self.TIMEOUT
+        )
 
     @property
-    def event_new_receiving_task(self) -> asyncio.Event:
-        """Get the event to notify the 'receive' method of new receiving tasks."""
-        return cast(asyncio.Event, self._event_new_receiving_task)
+    def response_envelopes(self) -> asyncio.Queue:
+        """Get the response envelopes. Only intended to be accessed when connected."""
+        if self._response_envelopes is None:
+            raise ValueError(
+                "`asyncio.Queue` for `_response_envelopes` not set. Is the ledger connection active?"
+            )
+        return self._response_envelopes
 
     async def connect(self) -> None:
         """Set up the connection."""
@@ -81,6 +89,8 @@ class LedgerConnection(Connection):
             loop=self.loop,
             api_configs=self.api_configs,
             logger=self.logger,
+            retry_attempts=self.request_retry_attempts,
+            retry_timeout=self.request_retry_timeout,
             connection_id=self.connection_id,
         )
         self._contract_dispatcher = ContractApiRequestDispatcher(
@@ -88,10 +98,12 @@ class LedgerConnection(Connection):
             loop=self.loop,
             api_configs=self.api_configs,
             logger=self.logger,
+            retry_attempts=self.request_retry_attempts,
+            retry_timeout=self.request_retry_timeout,
             connection_id=self.connection_id,
         )
-        self._event_new_receiving_task = asyncio.Event()
 
+        self._response_envelopes = asyncio.Queue()
         self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
@@ -101,12 +113,12 @@ class LedgerConnection(Connection):
 
         self.state = ConnectionStates.disconnecting
 
-        for task in self.receiving_tasks:
+        for task in self.task_to_request.keys():
             if not task.cancelled():  # pragma: nocover
                 task.cancel()
         self._ledger_dispatcher = None
         self._contract_dispatcher = None
-        self._event_new_receiving_task = None
+        self._response_envelopes = None
 
         self.state = ConnectionStates.disconnected
 
@@ -117,11 +129,10 @@ class LedgerConnection(Connection):
         :param envelope: the envelope to send.
         """
         task = self._schedule_request(envelope)
-        self.receiving_tasks.append(task)
+        task.add_done_callback(self._handle_done_task)
         self.task_to_request[task] = envelope
-        self.event_new_receiving_task.set()
 
-    def _schedule_request(self, envelope: Envelope) -> Task:
+    def _schedule_request(self, envelope: Envelope) -> asyncio.Task:
         """
         Schedule a ledger API request.
 
@@ -153,41 +164,19 @@ class LedgerConnection(Connection):
         """
         Receive an envelope. Blocking.
 
-        :param args: positional arguments
-        :param kwargs: keyword arguments
+        :param args: the arguments
+        :param kwargs: the keyword arguments
         :return: the envelope received, or None.
         """
-        # if there are done tasks, return the result
-        if len(self.done_tasks) > 0:  # pragma: nocover
-            done_task = self.done_tasks.pop()
-            return self._handle_done_task(done_task)
+        return await self.response_envelopes.get()
 
-        if len(self.receiving_tasks) == 0:
-            self.event_new_receiving_task.clear()
-            await self.event_new_receiving_task.wait()
-
-        # wait for completion of at least one receiving task
-        done, _ = await asyncio.wait(
-            self.receiving_tasks, return_when=asyncio.FIRST_COMPLETED
-        )
-
-        # pick one done task
-        done_task = done.pop()
-
-        # update done tasks
-        self.done_tasks.extend([*done])
-
-        return self._handle_done_task(done_task)
-
-    def _handle_done_task(self, task: asyncio.Future) -> Optional[Envelope]:
+    def _handle_done_task(self, task: asyncio.Future) -> None:
         """
         Process a done receiving task.
 
         :param task: the done task.
-        :return: the response envelope.
         """
         request = self.task_to_request.pop(task)
-        self.receiving_tasks.remove(task)
         response_message: Optional[Message] = task.result()
 
         response_envelope = None
@@ -198,4 +187,6 @@ class LedgerConnection(Connection):
                 message=response_message,
                 context=request.context,
             )
-        return response_envelope
+
+        # not handling `asyncio.QueueFull` exception, because the maxsize we defined for the Queue is infinite
+        self.response_envelopes.put_nowait(response_envelope)

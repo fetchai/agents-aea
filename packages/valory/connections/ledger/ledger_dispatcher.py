@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,10 +121,14 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :param dialogue: the dialogue
-        :return: the ledger api message
+        :param dialogue: the Ledger API dialogue
+        :return: response Ledger API message
         """
-        balance = api.get_balance(message.address, raise_on_try=True)
+        try:
+            balance = api.get_balance(message.address, raise_on_try=True)
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            return self.get_error_message(e, api, message, dialogue)
+
         if balance is None:
             response = self.get_error_message(
                 ValueError("No balance returned"), api, message, dialogue
@@ -152,15 +156,19 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :param dialogue: the dialogue
-        :return: the ledger api message
+        :param dialogue: the Ledger API dialogue
+        :return: response Ledger API message
         """
-        result = api.get_state(
-            message.callable,
-            *message.args,
-            raise_on_try=True,
-            **message.kwargs.body,
-        )
+        try:
+            result = api.get_state(
+                message.callable,
+                *message.args,
+                raise_on_try=True,
+                **message.kwargs.body,
+            )
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            return self.get_error_message(e, api, message, dialogue)
+
         if result is None:  # pragma: nocover
             response = self.get_error_message(
                 ValueError("Failed to get state"), api, message, dialogue
@@ -188,18 +196,22 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :param dialogue: the dialogue
-        :return: the ledger api message
+        :param dialogue: the Ledger API dialogue
+        :return: response Ledger API message
         """
-        raw_transaction = api.get_transfer_transaction(
-            sender_address=message.terms.sender_address,
-            destination_address=message.terms.counterparty_address,
-            amount=message.terms.sender_payable_amount,
-            tx_fee=message.terms.fee,
-            tx_nonce=message.terms.nonce,
-            raise_on_try=True,
-            **message.terms.kwargs,
-        )
+        try:
+            raw_transaction = api.get_transfer_transaction(
+                sender_address=message.terms.sender_address,
+                destination_address=message.terms.counterparty_address,
+                amount=message.terms.sender_payable_amount,
+                tx_fee=message.terms.fee,
+                tx_nonce=message.terms.nonce,
+                raise_on_try=True,
+                **message.terms.kwargs,
+            )
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
+            return self.get_error_message(e, api, message, dialogue)
+
         if raw_transaction is None:
             response = self.get_error_message(
                 ValueError("No raw transaction returned"), api, message, dialogue
@@ -217,7 +229,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             )
         return response
 
-    def get_transaction_receipt(
+    async def get_transaction_receipt(
         self,
         api: LedgerApi,
         message: LedgerApiMessage,
@@ -226,42 +238,77 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """
         Send the request 'get_transaction_receipt'.
 
+        NOTE: Under no circumstance can async methods block!
+        All possible methods that can block here, should be run async.
+
         :param api: the API object.
         :param message: the Ledger API message
-        :param dialogue: the dialogue
-        :return: the ledger api message
+        :param dialogue: the Ledger API dialogue
+        :return: response Ledger API message
         """
+        retry_attempts = (
+            self.retry_attempts
+            if message.retry_attempts is None
+            else message.retry_attempts
+        )
+        retry_timeout = (
+            self.retry_timeout
+            if message.retry_timeout is None
+            else message.retry_timeout
+        )
+
         transaction_receipt = None
         is_settled = False
         attempts = 0
         while (
             not is_settled
-            and attempts < self.MAX_ATTEMPTS
+            and attempts < retry_attempts
             and self.connection_state.get() == ConnectionStates.connected
         ):
-            time.sleep(self.TIMEOUT)
-            transaction_receipt = api.get_transaction_receipt(
-                message.transaction_digest.body,
-                raise_on_try=True,
-            )
+            try:
+                transaction_receipt = await self.wait_for(
+                    lambda: api.get_transaction_receipt(
+                        message.transaction_digest.body,
+                        raise_on_try=True,
+                    ),
+                    timeout=retry_timeout,
+                )
+            except Exception as e:  # pylint: disable=broad-except
+                self.logger.warning(e)
+                transaction_receipt = None
+
             if transaction_receipt is not None:
                 is_settled = api.is_transaction_settled(transaction_receipt)
             attempts += 1
-        attempts = 0
-        transaction = api.get_transaction(
-            message.transaction_digest.body, raise_on_try=True
+            time.sleep(retry_timeout * attempts)
+        self.logger.debug(
+            f"Transaction receipt: {transaction_receipt}, settled: {is_settled}"
         )
+
+        attempts = 0
+        transaction = None
         while (
             transaction is None
-            and attempts < self.MAX_ATTEMPTS
+            and attempts < retry_attempts
             and self.connection_state.get() == ConnectionStates.connected
         ):
-            time.sleep(self.TIMEOUT)
-            transaction = api.get_transaction(
-                message.transaction_digest.body, raise_on_try=True
-            )
+            try:
+                transaction = await self.wait_for(
+                    lambda: api.get_transaction(
+                        message.transaction_digest.body,
+                        raise_on_try=True,
+                    ),
+                    timeout=retry_timeout,
+                )
+            except Exception as e:  # pylint: disable=broad-except
+                self.logger.warning(e)
+                transaction = None
+
             attempts += 1
-        if not is_settled:  # pragma: nocover
+            time.sleep(retry_timeout * attempts)
+        self.logger.debug(f"Transaction: {transaction}")
+
+        if not is_settled:
             response = self.get_error_message(
                 ValueError("Transaction not settled within timeout"),
                 api,
@@ -272,7 +319,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             response = self.get_error_message(
                 ValueError("No transaction_receipt returned"), api, message, dialogue
             )
-        elif transaction is None:  # pragma: nocover
+        elif transaction is None:
             response = self.get_error_message(
                 ValueError("No transaction returned"), api, message, dialogue
             )
@@ -302,15 +349,15 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
         :param api: the API object.
         :param message: the Ledger API message
-        :param dialogue: the dialogue
-        :return: the ledger api message
+        :param dialogue: the Ledger API dialogue
+        :return: response Ledger API message
         """
         try:
             transaction_digest = api.send_signed_transaction(
                 message.signed_transaction.body,
                 raise_on_try=True,
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             return self.get_error_message(e, api, message, dialogue)
 
         if transaction_digest is None:  # pragma: nocover
@@ -331,7 +378,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
     def get_error_message(
         self,
-        e: Exception,
+        exception: Exception,
         api: LedgerApi,
         message: Message,
         dialogue: BaseDialogue,
@@ -339,10 +386,10 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
         """
         Build an error message.
 
-        :param e: the exception.
+        :param exception: the exception.
         :param api: the Ledger API.
         :param message: the request message.
-        :param dialogue: the dialogue
+        :param dialogue: the Ledger API dialogue.
         :return: an error message response.
         """
         message = cast(LedgerApiMessage, message)
@@ -353,7 +400,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                 performative=LedgerApiMessage.Performative.ERROR,
                 target_message=message,
                 code=500,
-                message=str(e),
+                message=str(exception),
                 data=b"",
             ),
         )
