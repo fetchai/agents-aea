@@ -25,6 +25,8 @@ speech_acts:
     signed_transaction: ct:SignedTransaction
   get_transaction_receipt:
     transaction_digest: ct:TransactionDigest
+    retry_timeout: pt:optional[pt:int]
+    retry_attempts: pt:optional[pt:int]
   balance:
     ledger_id: pt:str
     balance: pt:int
@@ -71,13 +73,13 @@ reply:
   get_state: [state, error]
   state: []
   get_raw_transaction: [raw_transaction, error]
-  raw_transaction: [send_signed_transaction]
+  raw_transaction: []
   send_signed_transaction: [transaction_digest, error]
-  transaction_digest: [get_transaction_receipt]
+  transaction_digest: []
   get_transaction_receipt: [transaction_receipt, error]
   transaction_receipt: []
   error: []
-termination: [balance, state, transaction_receipt, error]
+termination: [balance, state, raw_transaction, transaction_digest, transaction_receipt, error]
 roles: {agent, ledger}
 end_states: [successful]
 keep_terminal_state_dialogues: false

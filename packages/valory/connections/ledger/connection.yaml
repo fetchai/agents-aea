@@ -19,7 +19,7 @@ fingerprint_ignore_patterns: []
 connections: []
 protocols:
 - valory/contract_api:1.0.0:bafybeiaxbrvgtbdrh4lslskuxyp4awyr4whcx3nqq5yrr6vimzsxg5dy64
-- valory/ledger_api:1.0.0:bafybeia73ivm5p6el62ypho6v2mpj3admdq2zfb6evj7vmxogkg6fza2k4
+- valory/ledger_api:1.0.0:bafybeih7rhi5zvfvwakx5ifgxsz2cfipeecsh7bm3gnudjxtvhrygpcftq
 class_name: LedgerConnection
 config:
   ledger_apis:

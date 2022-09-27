@@ -50,6 +50,8 @@ class LedgerApiDialogue(Dialogue):
         {
             LedgerApiMessage.Performative.BALANCE,
             LedgerApiMessage.Performative.STATE,
+            LedgerApiMessage.Performative.RAW_TRANSACTION,
+            LedgerApiMessage.Performative.TRANSACTION_DIGEST,
             LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
             LedgerApiMessage.Performative.ERROR,
         }
@@ -75,9 +77,7 @@ class LedgerApiDialogue(Dialogue):
                 LedgerApiMessage.Performative.ERROR,
             }
         ),
-        LedgerApiMessage.Performative.RAW_TRANSACTION: frozenset(
-            {LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION}
-        ),
+        LedgerApiMessage.Performative.RAW_TRANSACTION: frozenset(),
         LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION: frozenset(
             {
                 LedgerApiMessage.Performative.TRANSACTION_DIGEST,
@@ -85,9 +85,7 @@ class LedgerApiDialogue(Dialogue):
             }
         ),
         LedgerApiMessage.Performative.STATE: frozenset(),
-        LedgerApiMessage.Performative.TRANSACTION_DIGEST: frozenset(
-            {LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT}
-        ),
+        LedgerApiMessage.Performative.TRANSACTION_DIGEST: frozenset(),
         LedgerApiMessage.Performative.TRANSACTION_RECEIPT: frozenset(),
     }
 
