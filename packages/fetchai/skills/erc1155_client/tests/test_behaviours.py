@@ -20,12 +20,12 @@
 """This module contains the tests of the behaviour classes of the erc1155_client skill."""
 # pylint: skip-file
 
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.behaviours import LEDGER_API_ADDRESS
 from packages.fetchai.skills.erc1155_client.tests.intermediate_class import (
     ERC1155ClientTestCase,
 )
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 class TestSearchBehaviour(ERC1155ClientTestCase):

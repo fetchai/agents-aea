@@ -27,7 +27,7 @@ connections:
 contracts: []
 protocols:
 - fetchai/default:1.0.0
-- fetchai/http:1.0.0
+- valory/http:1.0.0
 - open_aea/signing:1.0.0
 skills:
 - fetchai/http_echo:0.20.0

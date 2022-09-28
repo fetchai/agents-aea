@@ -1,0 +1,57 @@
+name: ledger
+author: valory
+version: 0.19.0
+type: connection
+description: A connection to interact with any ledger API and contract API.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeifn5mj5hlqrttxsnwueac2wro4kttpirc6dlajgbyxh2vkjaojdbm
+  __init__.py: bafybeierqitcqk7oy6m3qp7jgs67lcg55mzt3arltkwimuii2ynfejccwi
+  base.py: bafybeicpyhus3h2t5urzldnjns2sfwae64uinethqnlunudclbdg4xftnq
+  connection.py: bafybeiehfn2chbgeat5mj23mcelfrfifiezvrwwucdpaz7ku2ygo7dxd5y
+  contract_dispatcher.py: bafybeiatma5jzq3ynh52t5r7ibq4k6qzs3c5opkf4ct67qkmq7l2mccmxq
+  ledger_dispatcher.py: bafybeibh2d5qgj76stlkiiynu2irvcohntf27f3zrqwlkxwz5zjz67u4qm
+  tests/__init__.py: bafybeieyhttiwruutk6574yzj7dk2afamgdum5vktyv54gsax7dlkuqtc4
+  tests/conftest.py: bafybeihqsdoamxlgox2klpjwmyrylrycyfon3jldvmr24q4ai33h24llpi
+  tests/test_ledger.py: bafybeidnsvv327lkuntxunuop33vx7baqqlppwahsd3ppgshd3fns47dhe
+  tests/test_ledger_api.py: bafybeig6myoxfqgvmojjd5gquzfy5ev4sl6tzuy3dsbb6yhedmd625httm
+fingerprint_ignore_patterns: []
+connections: []
+protocols:
+- valory/contract_api:1.0.0:bafybeiaxbrvgtbdrh4lslskuxyp4awyr4whcx3nqq5yrr6vimzsxg5dy64
+- valory/ledger_api:1.0.0:bafybeih7rhi5zvfvwakx5ifgxsz2cfipeecsh7bm3gnudjxtvhrygpcftq
+class_name: LedgerConnection
+config:
+  ledger_apis:
+    ethereum:
+      address: http://127.0.0.1:8545
+      chain_id: 1337
+      default_gas_price_strategy: eip1559
+      gas_price_strategies:
+        gas_station:
+          gas_price_api_key: null
+          gas_price_strategy: fast
+        eip1559:
+          max_gas_fast: 1500
+          fee_history_blocks: 10
+          fee_history_percentile: 5
+          priority_fee_estimation_trigger: 100
+          default_priority_fee: 3
+          fallback_estimate:
+            maxFeePerGas: 20000000000
+            maxPriorityFeePerGas: 3000000000
+            baseFee: null
+          priority_fee_increase_boundary: 200
+      is_gas_estimation_enabled: true
+      poa_chain: false
+  retry_attempts: 240
+  retry_timeout: 3
+excluded_protocols: []
+restricted_to_protocols:
+- valory/contract_api:1.0.0
+- valory/ledger_api:1.0.0
+dependencies:
+  open-aea-test-autonomy:
+    version: ==0.3.1
+is_abstract: false

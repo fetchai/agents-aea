@@ -28,8 +28,8 @@ from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 
 
 class DialogueHandler:

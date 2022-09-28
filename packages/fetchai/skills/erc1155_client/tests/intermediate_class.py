@@ -35,10 +35,7 @@ from aea.helpers.transaction.base import RawMessage, RawTransaction, Terms
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.protocols.contract_api.custom_types import Kwargs
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.behaviours import SearchBehaviour
 from packages.fetchai.skills.erc1155_client.dialogues import (
@@ -58,6 +55,9 @@ from packages.fetchai.skills.erc1155_client.handlers import (
 )
 from packages.fetchai.skills.erc1155_client.strategy import Strategy
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.contract_api.custom_types import Kwargs
+from packages.valory.protocols.contract_api.message import ContractApiMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 PACKAGE_DIR = Path(__file__).parent.parent

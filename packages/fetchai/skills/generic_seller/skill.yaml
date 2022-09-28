@@ -9,24 +9,24 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeiazl5fv537mvhkqu2jsxhztcbe5cpa5mrdcm3xnnbinz3on3whipa
   __init__.py: bafybeiafdr7ynn72cev3ldmh7jpm2hkavrli7fwmq5h2is6632kiaqi3qa
-  behaviours.py: bafybeie5klagy5bdwfgnu47cqpf3wjnr7almnn7msujhs3fsskfs2s5vym
-  dialogues.py: bafybeiddznyqdx5h7mzbmdgzs2w635hxhcjo3fcck2h5o4rpnl4rl3e6m4
-  handlers.py: bafybeieksmgsn4mvk6fk54sjrzi6cvh6sykkwatmgx6vldujwccfw5wmne
+  behaviours.py: bafybeic3gw4cup4c2fufetwkgv7qtyewa6xtcwntkzbd2t3y53ehrfunju
+  dialogues.py: bafybeiakiuh742hgsopjl25unyu6osnnfylhp3w2kt5a2juej3a25jbnwi
+  handlers.py: bafybeiezirvynokkyhkasjcdi6miqw7ss37gx4fohc4jiqryt3moywjnhy
   strategy.py: bafybeia5mjxph7ui2iav5uxutwnr6q2uf4otxdge5vuk7g5ycaso3jldkm
   tests/__init__.py: bafybeihqxdniovyormfdxlfyxosmbstbriacfo4si7gofld5fx66jwmp5a
-  tests/test_behaviours.py: bafybeihqgd6ynfgr7wj7rkqcmarvzjuqsvzaezztqbg5ksjursyxnlvd6q
-  tests/test_dialogues.py: bafybeiewddgjrn74kzwbvlcspnsejisfqqy27avarharz5kargpfz6wt5i
-  tests/test_handlers.py: bafybeigtylqhbbxsloxudxhjhtenjnvr3qigi6ekoqzsfqj5koa6lkwrea
+  tests/test_behaviours.py: bafybeihihmi2ex7praigjeqomwwli7z3nyymcvdaregrcrnwk755zn24om
+  tests/test_dialogues.py: bafybeibvhilg6cy2bupe7xvdekdflykmoqe6oo45hmm6g7mjfoemamuzs4
+  tests/test_handlers.py: bafybeiay7w3drl5tq4bnkwrnyakookgtysf4jrlbb7ukajphzj3k3eil2y
   tests/test_models.py: bafybeihabrc22zqssit3fmqhxptosy6qz6mx65ukhf5iayvirfv42xrhoq
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeigebcnhhdnel6clt4ybqfr343orgpfmbzqnkrxb76kv6shm3lwjve
+- valory/ledger:0.19.0:bafybeigpltrga4ggf4nejvl7l32zioyk77jzodvhthjwd3uvdkuxedvnz4
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
 - fetchai/fipa:1.0.0:bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei
-- fetchai/ledger_api:1.0.0:bafybeiaht5xpstevcoyxxsqx5icthtnoq7f3fif5mlr2zczhy4ie63xura
 - fetchai/oef_search:1.0.0:bafybeifiec4jvsa6mcbmasjno3bwvjwwwubyp25hjqwe7gjfksgvwgdisq
+- valory/ledger_api:1.0.0:bafybeih7rhi5zvfvwakx5ifgxsz2cfipeecsh7bm3gnudjxtvhrygpcftq
 skills: []
 behaviours:
   service_registration:

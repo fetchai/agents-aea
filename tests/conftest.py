@@ -248,12 +248,12 @@ contract_config_files = [
 
 protocol_config_files = [
     os.path.join(ROOT_DIR, "aea", "protocols", "scaffold", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "contract_api", PROTOCOL_YAML),
+    os.path.join(VALORY_REF, "protocols", "contract_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "default", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "fipa", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "gym", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "http", PROTOCOL_YAML),
-    os.path.join(FETCHAI_PREF, "protocols", "ledger_api", PROTOCOL_YAML),
+    os.path.join(VALORY_REF, "protocols", "http", PROTOCOL_YAML),
+    os.path.join(VALORY_REF, "protocols", "ledger_api", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "oef_search", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "state_update", PROTOCOL_YAML),
     os.path.join(FETCHAI_PREF, "protocols", "tac", PROTOCOL_YAML),
@@ -265,9 +265,9 @@ protocol_config_files = [
 connection_config_files = [
     os.path.join(ROOT_DIR, "aea", "connections", "scaffold", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "gym", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "http_client", CONNECTION_YAML),
+    os.path.join(VALORY_REF, "connections", "http_client", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "http_server", CONNECTION_YAML),
-    os.path.join(FETCHAI_PREF, "connections", "ledger", CONNECTION_YAML),
+    os.path.join(VALORY_REF, "connections", "ledger", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "local", CONNECTION_YAML),
     os.path.join(FETCHAI_PREF, "connections", "stub", CONNECTION_YAML),
     os.path.join(VALORY_REF, "connections", "p2p_libp2p", CONNECTION_YAML),
@@ -859,12 +859,12 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("name", crypto.address, crypto.public_key)
     crypto_store = CryptoStore()
-    directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
+    directory = Path(ROOT_DIR, "packages", "valory", "connections", "ledger")
     connection = Connection.from_dir(
         directory, data_dir=MagicMock(), identity=identity, crypto_store=crypto_store
     )
     connection = cast(Connection, connection)
-    connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
+    connection._logger = logging.getLogger("aea.packages.valory.connections.ledger")
 
     # use testnet config
     connection.configuration.config.get("ledger_apis", {})[

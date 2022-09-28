@@ -25,16 +25,16 @@ from typing import Any, Optional, cast
 from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.connections.ledger.connection import (
-    PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
-)
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_seller.dialogues import (
     LedgerApiDialogues,
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
+from packages.valory.connections.ledger.connection import (
+    PUBLIC_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0

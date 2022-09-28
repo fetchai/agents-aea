@@ -290,6 +290,7 @@ abci
 metaclass
 api
 gitleaks
+valory
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

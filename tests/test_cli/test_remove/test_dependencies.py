@@ -41,7 +41,7 @@ from aea.configurations.loader import ConfigLoader
 from packages.fetchai.connections.http_server.connection import (
     PUBLIC_ID as HTTP_SERVER_PUBLIC_ID,
 )
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.message import HttpMessage
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 

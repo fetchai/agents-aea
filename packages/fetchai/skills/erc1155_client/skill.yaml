@@ -9,28 +9,28 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeid73sgd24psits3e6ktrxrwwin7zd6xb7adxsplxi5bizlrxk5bom
   __init__.py: bafybeidi6meicrc6tyeokv42f5u7xymlgfy2eua5ueuxmqv272oouhqehu
-  behaviours.py: bafybeiazmad73imv45sojplemfrvar3vbd6qzj4nqeajnw72rwvdmpryem
-  dialogues.py: bafybeif7tegamwzgfeviq5ehq547gp3fvufcq2wwpx2vliu7ivz373sthm
-  handlers.py: bafybeihepsujtgp22difglmqevj5r2r5oebm7peoxu3wrirz6t2omufgom
+  behaviours.py: bafybeifwle5mmpklafdqeptbrntujnj3pees32ibv2hxosuklrjr7ecaeu
+  dialogues.py: bafybeiggrjhnlyd2xgdtoy22olbbpwzp5knkk2t7xg75iexdsishloocsq
+  handlers.py: bafybeif7opwvneon35cg3zojhnkj3p2mp3zcajhkzi4orxwtky73mbeyc4
   strategy.py: bafybeifudijy3opr6srw5kik3x3rmv6f75dts2pcqtlhjwkkzcafpad4em
   tests/__init__.py: bafybeiagjee55nf2csbyob2o5u3au6r76elv4b6o6qoxnrupinam2brfia
-  tests/intermediate_class.py: bafybeianhkrg6utgdfieylwpmczbcwqnlmbl7epfdclf7tmhhb4stumkae
-  tests/test_behaviours.py: bafybeigcxgqn73wzy2ybgdugdkwvbda3an2lr3hdxnc7ki6ea6cmz6cj4u
-  tests/test_dialogues.py: bafybeigmimeopcrjvgaq3e6ap3w3aqxyjfjacbtay6i2pcvx4nhzdmbtzi
-  tests/test_handlers.py: bafybeifgqbvf56uhyosydl3xoloc244uefo4f5nlelpaxfesrgdlmu24wu
+  tests/intermediate_class.py: bafybeifcvd4xautun4fhi7hh7jywgd3kt4pfzle5qlcqpxza4iz2dhbrku
+  tests/test_behaviours.py: bafybeic6ibptolj4ondl6gie6rhhwyyvsuv35t5vr5vvkk4k7e52qzf7hu
+  tests/test_dialogues.py: bafybeiautieucrrlypj2u5iobaufah63gerlt362pba3d3l5pa5spppqtq
+  tests/test_handlers.py: bafybeigiapgp3inw3yun7wrsbbhrwbr5ah4cwdq6axzdglteagqrp2dgoq
   tests/test_strategy.py: bafybeicbxie3v6vue3gcnru6vsvggcgy3shxwrldis5gppizbuhooslcqa
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeigebcnhhdnel6clt4ybqfr343orgpfmbzqnkrxb76kv6shm3lwjve
+- valory/ledger:0.19.0:bafybeigpltrga4ggf4nejvl7l32zioyk77jzodvhthjwd3uvdkuxedvnz4
 contracts:
 - fetchai/erc1155:0.22.0:bafybeidw2vhsh3ifmg5sxnbxhpu4ygosov5jtzjhilsfkdhoanvwiu7dyi
 protocols:
-- fetchai/contract_api:1.0.0:bafybeierqtg3fi2t4mn4dbz2xmwfqd4qeuz5rwxqp4ew6jzz24bxjbytpi
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
 - fetchai/fipa:1.0.0:bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei
-- fetchai/ledger_api:1.0.0:bafybeiaht5xpstevcoyxxsqx5icthtnoq7f3fif5mlr2zczhy4ie63xura
 - fetchai/oef_search:1.0.0:bafybeifiec4jvsa6mcbmasjno3bwvjwwwubyp25hjqwe7gjfksgvwgdisq
 - open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
+- valory/contract_api:1.0.0:bafybeiaxbrvgtbdrh4lslskuxyp4awyr4whcx3nqq5yrr6vimzsxg5dy64
+- valory/ledger_api:1.0.0:bafybeih7rhi5zvfvwakx5ifgxsz2cfipeecsh7bm3gnudjxtvhrygpcftq
 skills: []
 behaviours:
   search:

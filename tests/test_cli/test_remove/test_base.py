@@ -41,11 +41,11 @@ from aea.helpers.base import cd
 from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
-)
 from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.valory.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
+)
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
