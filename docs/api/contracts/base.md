@@ -277,7 +277,7 @@ the transaction
 ```python
 @classmethod
 def default_method_call(cls, ledger_api: LedgerApi, contract_address: str,
-                        **kwargs: Any) -> Optional[JSONLike]
+                        method_name: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Make a contract call.
@@ -286,6 +286,7 @@ Make a contract call.
 
 - `ledger_api`: the ledger apis.
 - `contract_address`: the contract address.
+- `method_name`: the method to call.
 - `kwargs`: keyword arguments.
 
 **Returns**:

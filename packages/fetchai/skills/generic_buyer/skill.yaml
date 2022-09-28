@@ -19,7 +19,7 @@ fingerprint:
   tests/test_models.py: bafybeibh72j3n72yseqvmpppucpu5wtidf6ebxbxkfnmrnlh4zv5y5apei
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeiepxjh7ita3flhf5c5v5tpv6bdkd6hyqixzzoik4uqz4sgglt2bja
+- fetchai/ledger:0.19.0:bafybeih3jl6uvklab4zkrd2wt3fi6fn7td2kv5wurqmqhyt2tzmvmqfu2i
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
