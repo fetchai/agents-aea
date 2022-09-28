@@ -1,5 +1,20 @@
 # Release History - open AEA
 
+## 1.21.0 (2022-09-28)
+
+Packages:
+- Adds support for running local ACN nodes
+- Converts `ledger` and `http_client` connections and `http`, `ledger_api` and `contract_api` protocols to valory packages and syncs them with `open-autonomy` versions of the same packages
+
+Plugins:
+- Introduces test tools module for IPFS cli plugin
+
+Tests:
+- Fixes flaky timeout tests
+- Fixes flaky `DHT (ACN/Libp2p)` tests on windows
+- Introduces test for assessing robustness of the ACN setup without agents
+
+
 ## 1.20.0 (2022-09-20)
 
 AEA:

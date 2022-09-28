@@ -34,17 +34,17 @@ from packages.fetchai.protocols.default.dialogues import (
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue as BaseFipaDialogue
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.ledger_api.dialogues import (
-    LedgerApiDialogue as BaseLedgerApiDialogue,
-)
-from packages.fetchai.protocols.ledger_api.dialogues import (
-    LedgerApiDialogues as BaseLedgerApiDialogues,
-)
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.open_aea.protocols.signing.dialogues import SigningDialogue
 from packages.open_aea.protocols.signing.dialogues import (
     SigningDialogues as BaseSigningDialogues,
 )
+from packages.valory.protocols.ledger_api.dialogues import (
+    LedgerApiDialogue as BaseLedgerApiDialogue,
+)
+from packages.valory.protocols.ledger_api.dialogues import (
+    LedgerApiDialogues as BaseLedgerApiDialogues,
+)
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 DefaultDialogue = BaseDefaultDialogue

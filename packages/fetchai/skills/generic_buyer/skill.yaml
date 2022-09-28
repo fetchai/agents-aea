@@ -8,25 +8,25 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: bafybeig3rwpeqh5kdr2iflvy72vkfmby3sl4ulb3sbblt5lndvogvlblme
   __init__.py: bafybeic6biuigdmylscufxz6suvtkxems27j2cns3h36e53gxlm5hihvza
-  behaviours.py: bafybeih3vzn2ojneft3skontrdk3kptn76mnlmekxcqnbty4wt5al6bpz4
-  dialogues.py: bafybeigyzu2uvp2dmj7wpjlcqlablr2wibnlkxhwyxzetizsaz5lifooea
-  handlers.py: bafybeia5wzpc5jlzyrum3fkitim567vxhwilffrbgtfttctsoqyb6j2uom
+  behaviours.py: bafybeicsftdc3rya773wbxgbn4punkedgnu6ls7z7f4i3fs5nkhwgdfcj4
+  dialogues.py: bafybeicuhvcjgwzjbntzpa3pae6bitq53k3j7kgf6ze5n7jxslhkxayyyq
+  handlers.py: bafybeidkhyu5veuaqt3e4l2cyyqgpjqligprrjoivikmi4wtwq432iori4
   strategy.py: bafybeidzwda36osegdqljxoxcj5ljds5k62iuti73qu2ghzl6nubadmaxe
   tests/__init__.py: bafybeid6od3orr5gjysmm4lbcn6xcul22n2dlc7qafppiqvkvcov2pftiu
-  tests/test_behaviours.py: bafybeifpzc7kregsvlsbrxdwnki7j6onh7sd2qrx7mb3yxjkf6eowtqg2u
-  tests/test_dialogues.py: bafybeiffzdtvbjeeblrqivfsxeochqd6ff5ioq7i2oiubu5lohxjuqg5ti
-  tests/test_handlers.py: bafybeignesdsobb56ljqs3ij3rwj3c63znjlcwxdoziclptbwxgsacbed4
+  tests/test_behaviours.py: bafybeie66ohekfvlixawb6utvwkzc4yeqxqfhljrdgunya2gpyonmkpp44
+  tests/test_dialogues.py: bafybeih3hp72ueixsboojh3wzjgw26qluv54i6kirgn23o7jmwmcqrgboy
+  tests/test_handlers.py: bafybeieefbale6rl7qi4x6bkjcln7p2m2ufkuyw47qfyxa2aqghptlbgpe
   tests/test_models.py: bafybeibh72j3n72yseqvmpppucpu5wtidf6ebxbxkfnmrnlh4zv5y5apei
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.19.0:bafybeief2ckluncbd2lto4z7vjxh3ndjoljvl37h5snsm7ggi6tvz457pe
+- valory/ledger:0.19.0:bafybeigpltrga4ggf4nejvl7l32zioyk77jzodvhthjwd3uvdkuxedvnz4
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
 - fetchai/fipa:1.0.0:bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei
-- fetchai/ledger_api:1.0.0:bafybeiaht5xpstevcoyxxsqx5icthtnoq7f3fif5mlr2zczhy4ie63xura
 - fetchai/oef_search:1.0.0:bafybeifiec4jvsa6mcbmasjno3bwvjwwwubyp25hjqwe7gjfksgvwgdisq
 - open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
+- valory/ledger_api:1.0.0:bafybeih7rhi5zvfvwakx5ifgxsz2cfipeecsh7bm3gnudjxtvhrygpcftq
 skills: []
 behaviours:
   search:

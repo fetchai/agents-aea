@@ -28,10 +28,8 @@ from aea.helpers.search.models import Description
 from aea.helpers.transaction.base import RawMessage, State, Terms
 from aea.test_tools.test_skill import COUNTERPARTY_AGENT_ADDRESS
 
-from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.erc1155_client.dialogues import (
     ContractApiDialogue,
@@ -45,6 +43,8 @@ from packages.fetchai.skills.erc1155_client.tests.intermediate_class import (
     ERC1155ClientTestCase,
 )
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.contract_api.message import ContractApiMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 class TestFipaHandler(ERC1155ClientTestCase):

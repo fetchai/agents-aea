@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,7 +60,7 @@
 # from packages.fetchai.connections.stub.connection import StubConnection
 # from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 # from packages.fetchai.protocols.default import DefaultMessage
-# from packages.fetchai.protocols.http.message import HttpMessage
+# from packages.valory.protocols.http.message import HttpMessage
 # from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 # from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 # from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID

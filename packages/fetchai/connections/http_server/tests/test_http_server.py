@@ -46,9 +46,9 @@ from packages.fetchai.connections.http_server.connection import (
     HTTPServerConnection,
     Response,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue
-from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.dialogues import HttpDialogue
+from packages.valory.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 
 
 logger = logging.getLogger(__name__)

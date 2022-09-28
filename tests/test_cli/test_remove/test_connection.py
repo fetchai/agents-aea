@@ -33,11 +33,11 @@ import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 
-from packages.fetchai.connections.http_client.connection import (
-    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
-)
 from packages.fetchai.connections.local.connection import (
     PUBLIC_ID as LOCAL_CONNECTION_PUBLIC_ID,
+)
+from packages.valory.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
 )
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner

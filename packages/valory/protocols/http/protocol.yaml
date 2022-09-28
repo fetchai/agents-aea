@@ -1,0 +1,21 @@
+name: http
+author: valory
+version: 1.0.0
+protocol_specification_id: valory/http:1.0.0
+type: protocol
+description: A protocol for HTTP requests and responses.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: bafybeihkatpicz56ofrvu5fgks7ecrsfzw5toz23o23yvoymhk6l6hl7dy
+  __init__.py: bafybeie6sulxayb4zaz55lld2ei5sat2dd3atgcuvjzdauhh4akaltn4w4
+  dialogues.py: bafybeif3mqqsn75u6j4obwlw2jrghopo4ydbkekpuudxaldkzglcgb5x3i
+  http.proto: bafybeigq6ykgxdqi4m65x3rcj4ehdm3usaisejzl2oisn6kzkjits3fzkq
+  http_pb2.py: bafybeih2pq5ptjzz7g7wio3o223jffamh5ph5qsonztvjbygdsr3fgmwci
+  message.py: bafybeicgi2q53ztpylw3jksqyiwq6athxb74q3jnzy5bbriugpnfsynlba
+  serialization.py: bafybeihg24kxzt6tnsqc6ni5svmiawkry26ng3nq4msxm6ffwlt5edzw3q
+  tests/__init__.py: bafybeifitr3wqclw3kammd2fw5zww6gvzbvu6s72di2p7544qfisuslhpq
+  tests/test_http.py: bafybeibbz5zcqmqsvtwp2rucj2ubbbazmqt3shpjnkt5bdhnlclqy4fseq
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}
