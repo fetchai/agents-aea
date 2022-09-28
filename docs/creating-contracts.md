@@ -19,19 +19,13 @@ Now, let's create our contract package:
 autonomy init --reset --author john_doe --remote --ipfs --ipfs-node "/dns/registry.autonolas.tech/tcp/443/https"
 ```
 
-3. Create an agent and scaffold the ERC20 contract:
+3. Scaffold the ERC20 contract:
 ```bash
-aea create my_aea && cd my_aea
 aea scaffold --to-local-registry contract ERC20Contract /path/to/IERC20.json
 ```
 You'll find the contract in the local registry at `packages/john_doe/contracts/ERC20Contract`.
 
-4. Delete the agent:
-```bash
-cd .. && aea delete my_aea
-```
-
-5. Open the contract at `packages/john_doe/contracts/ERC20Contract/contract.py` and add the following imports at the top of the file:
+4. Open the contract at `packages/john_doe/contracts/ERC20Contract/contract.py` and add the following imports at the top of the file:
 ```python
 from aea_ledger_ethereum import EthereumApi
 from typing import Optional
@@ -53,7 +47,7 @@ from typing import Optional
         )
 ```
 
-6. Now it is time to call the new method from an agent. Let's say that we would like to get the WETH balance for the WETH account itself. In your agent's `behaviour.py` file, first import the contract package and set the target address:
+5. Now it is time to call the new method from an agent. Let's say that we would like to get the WETH balance for the WETH account itself. In your agent's `behaviour.py` file, first import the contract package and set the target address:
 ```python
 from packages.john_doe.contracts.erc20.contract import (
     ContractApiMessage,
