@@ -528,7 +528,7 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         await ledger_apis_connection.send(envelope)
         await asyncio.sleep(0.01)
         assert (
-            f"Contract method {request.callable} not found in ABI of contract {type(contract)}"
+            f"Contract method {request.callable} not found in ABI of contract"
             in caplog.text
         )
 
