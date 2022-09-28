@@ -392,7 +392,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raise AEAException(
                     f"Expected two or more positional arguments, got {len(full_args_spec.args)}"
                 )
-            return method_to_call(api, message.contract_address, **message.kwargs.body)  # type: ignore
+            return method_to_call(api, message.contract_address, **message.kwargs.body)
         if message.performative in [
             ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         ]:
@@ -400,7 +400,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 raise AEAException(
                     f"Expected one or more positional arguments, got {len(full_args_spec.args)}"
                 )
-            return method_to_call(api, **message.kwargs.body)  # type: ignore
+            return method_to_call(api, **message.kwargs.body)
         raise AEAException(  # pragma: nocover
             f"Unexpected performative: {message.performative}"
         )
