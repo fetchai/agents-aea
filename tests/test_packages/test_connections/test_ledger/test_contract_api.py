@@ -334,20 +334,22 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
         "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[None])
     ):
         with unittest.mock.patch.object(
-            ledger_apis_connection._logger, "error"
+            ledger_apis_connection._logger, "debug"
         ) as mock_logger:
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
             response = await ledger_apis_connection.receive()
-            mock_logger.assert_any_call(
-                "Exception during contract request: Expected two or more positional arguments, got 1"
+            mock_logger.assert_called_once()
+            assert (
+                "Expected two or more positional arguments, got 1"
+                in mock_logger.call_args[0][0]
             )
             assert (
                 response.message.performative == ContractApiMessage.Performative.ERROR
             )
             assert (
-                response.message.message
-                == "Expected two or more positional arguments, got 1"
+                "Expected two or more positional arguments, got 1"
+                in response.message.message
             )
 
 
@@ -385,21 +387,23 @@ async def test_callable_wrong_number_of_arguments_apis(
             ledger_apis_connection._contract_dispatcher, "_call_stub", return_value=None
         ):
             with unittest.mock.patch.object(
-                ledger_apis_connection._contract_dispatcher.logger, "error"
+                ledger_apis_connection._contract_dispatcher.logger, "debug"
             ) as mock_logger:
                 await ledger_apis_connection.send(envelope)
                 await asyncio.sleep(0.01)
                 response = await ledger_apis_connection.receive()
-                mock_logger.assert_any_call(
-                    "Exception during contract request: Expected one or more positional arguments, got 0"
+                mock_logger.assert_called_once()
+                assert (
+                    "Expected one or more positional arguments, got 0"
+                    in mock_logger.call_args[0][0]
                 )
                 assert (
                     response.message.performative
                     == ContractApiMessage.Performative.ERROR
                 )
                 assert (
-                    response.message.message
-                    == "Expected one or more positional arguments, got 0"
+                    "Expected one or more positional arguments, got 0"
+                    in response.message.message
                 )
 
 
@@ -441,7 +445,7 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
             # In particular, 3.10 includes the class of the method called with invalid arguments.
             assert (
                 re.search(
-                    r"An error occurred while processing the contract api request: '(Contract\.)?get_deploy_transaction\(\) missing 1 required positional argument: 'deployer_address''.",
+                    r"TypeError: (Contract\.)?get_deploy_transaction\(\) missing 1 required positional argument: 'deployer_address'",
                     caplog.text,
                 )
                 is not None
@@ -477,18 +481,17 @@ async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
         "inspect.getfullargspec", side_effect=Exception("Generic error")
     ):
         with unittest.mock.patch.object(
-            ledger_apis_connection._logger, "error"
+            ledger_apis_connection._logger, "debug"
         ) as mock_logger:
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
             response = await ledger_apis_connection.receive()
-            mock_logger.assert_any_call(
-                "An error occurred while processing the contract api request: 'Generic error'."
-            )
+            mock_logger.assert_called_once()
+            assert "Exception: Generic error" in mock_logger.call_args[0][0]
             assert (
                 response.message.performative == ContractApiMessage.Performative.ERROR
             )
-            assert response.message.message == "Generic error"
+            assert "Exception: Generic error" in response.message.message
 
 
 @pytest.mark.integration
@@ -537,14 +540,14 @@ def test_build_response_fails_on_bad_data_type():
     with patch.object(
         dispatcher,
         "dispatch_request",
-        lambda x, x1, x2, fn: fn(rm=12, dialogue=MagicMock()),
+        lambda x, x1, x2, fn: fn(raw_message=12, dialogue=MagicMock()),
     ), pytest.raises(ValueError, match=r"Invalid message type"):
         dispatcher.get_raw_message(MagicMock(), MagicMock(), MagicMock())
 
     with patch.object(
         dispatcher,
         "dispatch_request",
-        lambda x, x1, x2, fn: fn(tx=b"some_data", dialogue=MagicMock()),
+        lambda x, x1, x2, fn: fn(transaction=b"some_data", dialogue=MagicMock()),
     ):
         with pytest.raises(
             ValueError,
