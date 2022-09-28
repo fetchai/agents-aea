@@ -56,8 +56,8 @@ class TestExtractSpecification(TestCase):
 
     def test_ct_specification_type_to_python_type(self):
         """Test the '_ct_specification_type_to_python_type' method."""
-        specification_type_1 = "ct:DataModel"
-        expected_1 = "DataModel"
+        specification_type_1 = "ct:CustomDataType"
+        expected_1 = "CustomDataType"
         assert _ct_specification_type_to_python_type(specification_type_1) == expected_1
 
         specification_type_2 = "ct:Query"
@@ -246,16 +246,16 @@ class TestExtractSpecification(TestCase):
         expected_1 = "Union[int, bytes]"
         assert _mt_specification_type_to_python_type(specification_type_1) == expected_1
 
-        specification_type_2 = "pt:union[ct:DataModel, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], pt:list[pt:bool], pt:dict[pt:str,pt:str]]"
-        expected_2 = "Union[DataModel, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]"
+        specification_type_2 = "pt:union[ct:CustomDataType, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], pt:list[pt:bool], pt:dict[pt:str,pt:str]]"
+        expected_2 = "Union[CustomDataType, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]"
         assert _mt_specification_type_to_python_type(specification_type_2) == expected_2
 
         specification_type_3 = (
-            "pt:union[ct:DataModel, pt:set[pt:int], pt:list[pt:bool], pt:bytes, pt:dict[pt:bool,pt:float], pt:int, "
+            "pt:union[ct:CustomDataType, pt:set[pt:int], pt:list[pt:bool], pt:bytes, pt:dict[pt:bool,pt:float], pt:int, "
             "pt:set[pt:bool], pt:dict[pt:int, pt:str], pt:list[pt:str], pt:bool, pt:float, pt:str, pt:dict[pt:str, pt:str]]"
         )
         expected_3 = (
-            "Union[DataModel, FrozenSet[int], Tuple[bool, ...], bytes, Dict[bool, float], int, "
+            "Union[CustomDataType, FrozenSet[int], Tuple[bool, ...], bytes, Dict[bool, float], int, "
             "FrozenSet[bool], Dict[int, str], Tuple[str, ...], bool, float, str, Dict[str, str]]"
         )
         assert _mt_specification_type_to_python_type(specification_type_3) == expected_3
@@ -263,27 +263,27 @@ class TestExtractSpecification(TestCase):
     def test_optional_specification_type_to_python_type(self):
         """Test the '_optional_specification_type_to_python_type' method."""
         specification_type_1 = (
-            "pt:optional[pt:union[ct:DataModel, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], "
+            "pt:optional[pt:union[ct:CustomDataType, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], "
             "pt:list[pt:bool], pt:dict[pt:str, pt:str]]]"
         )
-        expected_1 = "Optional[Union[DataModel, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]]"
+        expected_1 = "Optional[Union[CustomDataType, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]]"
         assert (
             _optional_specification_type_to_python_type(specification_type_1)
             == expected_1
         )
 
         specification_type_2 = (
-            "pt:optional[pt:union[ct:DataModel, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], "
+            "pt:optional[pt:union[ct:CustomDataType, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], "
             "pt:list[pt:bool], pt:dict[pt:str,pt:str]]]"
         )
-        expected_2 = "Optional[Union[DataModel, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]]"
+        expected_2 = "Optional[Union[CustomDataType, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]]"
         assert (
             _optional_specification_type_to_python_type(specification_type_2)
             == expected_2
         )
 
-        specification_type_3 = "pt:optional[ct:DataModel]"
-        expected_3 = "Optional[DataModel]"
+        specification_type_3 = "pt:optional[ct:CustomDataType]"
+        expected_3 = "Optional[CustomDataType]"
         assert (
             _optional_specification_type_to_python_type(specification_type_3)
             == expected_3
@@ -291,8 +291,8 @@ class TestExtractSpecification(TestCase):
 
     def test_specification_type_to_python_type(self):
         """Test the '_specification_type_to_python_type' method."""
-        specification_type_1 = "ct:DataModel"
-        expected_1 = "DataModel"
+        specification_type_1 = "ct:CustomDataType"
+        expected_1 = "CustomDataType"
         assert _specification_type_to_python_type(specification_type_1) == expected_1
 
         specification_type_2 = "pt:bytes"
@@ -316,10 +316,10 @@ class TestExtractSpecification(TestCase):
         assert _specification_type_to_python_type(specification_type_6) == expected_6
 
         specification_type_7 = (
-            "pt:optional[pt:union[ct:DataModel, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], "
+            "pt:optional[pt:union[ct:CustomDataType, pt:bytes, pt:int, pt:bool, pt:float, pt:str, pt:set[pt:int], "
             "pt:list[pt:bool], pt:dict[pt:str,pt:str]]]"
         )
-        expected_7 = "Optional[Union[DataModel, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]]"
+        expected_7 = "Optional[Union[CustomDataType, bytes, int, bool, float, str, FrozenSet[int], Tuple[bool, ...], Dict[str, str]]]"
         assert _specification_type_to_python_type(specification_type_7) == expected_7
 
         specification_type_8 = "wrong_type"
@@ -378,10 +378,10 @@ class TestExtractSpecification(TestCase):
         )
         spec = extract(protocol_specification)
         assert spec.speech_acts == {
-            "performative_ct": {"content_ct": "DataModel"},
+            "performative_ct": {"content_ct": "CustomDataType"},
             "performative_empty_contents": {},
             "performative_mt": {
-                "content_union_1": "Union[DataModel, bytes, int, float, "
+                "content_union_1": "Union[CustomDataType, bytes, int, float, "
                 "bool, str, FrozenSet[int], "
                 "Tuple[bool, ...], Dict[str, int]]",
                 "content_union_2": "Union[FrozenSet[bytes], "
@@ -389,11 +389,11 @@ class TestExtractSpecification(TestCase):
                 "Tuple[float, ...], Tuple[bool, ...], "
                 "Tuple[bytes, ...], Dict[str, int], "
                 "Dict[int, float], Dict[bool, bytes]]",
-                "content_union_3": "Union[DataModel, DataModel2, bytes]",
+                "content_union_3": "Union[CustomDataType, CustomDataType2, bytes]",
             },
             "performative_o": {
                 "content_o_bool": "Optional[bool]",
-                "content_o_ct": "Optional[DataModel]",
+                "content_o_ct": "Optional[CustomDataType]",
                 "content_o_dict_str_int": "Optional[Dict[str, int]]",
                 "content_o_list_bytes": "Optional[Tuple[bytes, ...]]",
                 "content_o_set_int": "Optional[FrozenSet[int]]",
@@ -401,7 +401,7 @@ class TestExtractSpecification(TestCase):
             "performative_pct": {
                 "content_list_bool": "Tuple[bool, ...]",
                 "content_list_bytes": "Tuple[bytes, ...]",
-                "content_list_ct": "Tuple[DataModel, ...]",
+                "content_list_ct": "Tuple[CustomDataType, ...]",
                 "content_list_float": "Tuple[float, ...]",
                 "content_list_int": "Tuple[int, ...]",
                 "content_list_str": "Tuple[str, ...]",
@@ -419,7 +419,7 @@ class TestExtractSpecification(TestCase):
                 "content_dict_bool_str": "Dict[bool, str]",
                 "content_dict_int_bool": "Dict[int, bool]",
                 "content_dict_int_bytes": "Dict[int, bytes]",
-                "content_dict_int_ct": "Dict[int, DataModel]",
+                "content_dict_int_ct": "Dict[int, CustomDataType]",
                 "content_dict_int_float": "Dict[int, float]",
                 "content_dict_int_int": "Dict[int, int]",
                 "content_dict_int_str": "Dict[int, str]",
@@ -450,7 +450,7 @@ class TestExtractSpecification(TestCase):
         assert spec.all_unique_contents == {
             "content_bool": "bool",
             "content_bytes": "bytes",
-            "content_ct": "DataModel",
+            "content_ct": "CustomDataType",
             "content_dict_bool_bool": "Dict[bool, bool]",
             "content_dict_bool_bytes": "Dict[bool, bytes]",
             "content_dict_bool_float": "Dict[bool, float]",
@@ -458,7 +458,7 @@ class TestExtractSpecification(TestCase):
             "content_dict_bool_str": "Dict[bool, str]",
             "content_dict_int_bool": "Dict[int, bool]",
             "content_dict_int_bytes": "Dict[int, bytes]",
-            "content_dict_int_ct": "Dict[int, DataModel]",
+            "content_dict_int_ct": "Dict[int, CustomDataType]",
             "content_dict_int_float": "Dict[int, float]",
             "content_dict_int_int": "Dict[int, int]",
             "content_dict_int_str": "Dict[int, str]",
@@ -471,12 +471,12 @@ class TestExtractSpecification(TestCase):
             "content_int": "int",
             "content_list_bool": "Tuple[bool, ...]",
             "content_list_bytes": "Tuple[bytes, ...]",
-            "content_list_ct": "Tuple[DataModel, ...]",
+            "content_list_ct": "Tuple[CustomDataType, ...]",
             "content_list_float": "Tuple[float, ...]",
             "content_list_int": "Tuple[int, ...]",
             "content_list_str": "Tuple[str, ...]",
             "content_o_bool": "Optional[bool]",
-            "content_o_ct": "Optional[DataModel]",
+            "content_o_ct": "Optional[CustomDataType]",
             "content_o_dict_str_int": "Optional[Dict[str, int]]",
             "content_o_list_bytes": "Optional[Tuple[bytes, ...]]",
             "content_o_set_int": "Optional[FrozenSet[int]]",
@@ -486,18 +486,18 @@ class TestExtractSpecification(TestCase):
             "content_set_int": "FrozenSet[int]",
             "content_set_str": "FrozenSet[str]",
             "content_str": "str",
-            "content_union_1": "Union[DataModel, bytes, int, float, bool, str, "
+            "content_union_1": "Union[CustomDataType, bytes, int, float, bool, str, "
             "FrozenSet[int], Tuple[bool, ...], Dict[str, int]]",
             "content_union_2": "Union[FrozenSet[bytes], FrozenSet[int], FrozenSet[str], "
             "Tuple[float, ...], Tuple[bool, ...], Tuple[bytes, ...], "
             "Dict[str, int], Dict[int, float], Dict[bool, bytes]]",
-            "content_union_3": "Union[DataModel, DataModel2, bytes]",
+            "content_union_3": "Union[CustomDataType, CustomDataType2, bytes]",
         }
 
-        assert spec.all_custom_types == ["DataModel", "DataModel2"]
+        assert spec.all_custom_types == ["CustomDataType", "CustomDataType2"]
         assert spec.custom_custom_types == {
-            "DataModel": "CustomDataModel",
-            "DataModel2": "CustomDataModel2",
+            "CustomDataType": "CustomCustomDataType",
+            "CustomDataType2": "CustomCustomDataType2",
         }
         assert spec.initial_performatives == ["PERFORMATIVE_CT", "PERFORMATIVE_PT"]
         assert spec.reply == {

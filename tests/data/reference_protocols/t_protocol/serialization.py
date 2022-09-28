@@ -27,7 +27,7 @@ from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
 from tests.data.generator.t_protocol import t_protocol_pb2
-from tests.data.generator.t_protocol.custom_types import DataModel, DataModel2
+from tests.data.generator.t_protocol.custom_types import CustomDataType, CustomDataType2
 from tests.data.generator.t_protocol.message import TProtocolMessage
 
 
@@ -35,27 +35,27 @@ class TProtocolSerializer(Serializer):
     """Serialization for the 't_protocol' protocol."""
 
     @staticmethod
-    def _encode_DataModel(value: DataModel) -> t_protocol_pb2.TProtocolMessage.DataModel:  # type: ignore
+    def _encode_CustomDataType(value: CustomDataType) -> t_protocol_pb2.TProtocolMessage.CustomDataType:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = t_protocol_pb2.TProtocolMessage.DataModel()  # type: ignore
-        DataModel.encode(result, value)
+        result = t_protocol_pb2.TProtocolMessage.CustomDataType()  # type: ignore
+        CustomDataType.encode(result, value)
         return result
 
     @staticmethod
-    def _encode_DataModel2(value: DataModel2) -> t_protocol_pb2.TProtocolMessage.DataModel2:  # type: ignore
+    def _encode_CustomDataType2(value: CustomDataType2) -> t_protocol_pb2.TProtocolMessage.CustomDataType2:  # type: ignore
         """
         Encode custom_type {custom_type}.
 
         :param value: the custom type object.
         :return: protobuf encoded message of custom type.
         """
-        result = t_protocol_pb2.TProtocolMessage.DataModel2()  # type: ignore
-        DataModel2.encode(result, value)
+        result = t_protocol_pb2.TProtocolMessage.CustomDataType2()  # type: ignore
+        CustomDataType2.encode(result, value)
         return result
 
     @classmethod
@@ -81,7 +81,7 @@ class TProtocolSerializer(Serializer):
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Ct_Performative()  # type: ignore
             content_ct = msg.content_ct
-            DataModel.encode(performative.content_ct, content_ct)
+            CustomDataType.encode(performative.content_ct, content_ct)
             t_protocol_msg.performative_ct.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pt_Performative()  # type: ignore
@@ -109,7 +109,7 @@ class TProtocolSerializer(Serializer):
             content_set_str = msg.content_set_str
             performative.content_set_str.extend(content_set_str)
             content_list_ct = msg.content_list_ct
-            content_list_ct = [cls._encode_DataModel(i) for i in content_list_ct]
+            content_list_ct = [cls._encode_CustomDataType(i) for i in content_list_ct]
             performative.content_list_ct.extend(content_list_ct)
             content_list_bytes = msg.content_list_bytes
             performative.content_list_bytes.extend(content_list_bytes)
@@ -126,7 +126,9 @@ class TProtocolSerializer(Serializer):
             performative = t_protocol_pb2.TProtocolMessage.Performative_Pmt_Performative()  # type: ignore
             content_dict_int_ct = msg.content_dict_int_ct
             for k, v in content_dict_int_ct.items():
-                performative.content_dict_int_ct[k].CopyFrom(cls._encode_DataModel(v))
+                performative.content_dict_int_ct[k].CopyFrom(
+                    cls._encode_CustomDataType(v)
+                )
             content_dict_int_bytes = msg.content_dict_int_bytes
             performative.content_dict_int_bytes.update(content_dict_int_bytes)
             content_dict_int_int = msg.content_dict_int_int
@@ -160,12 +162,14 @@ class TProtocolSerializer(Serializer):
             t_protocol_msg.performative_pmt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_MT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Mt_Performative()  # type: ignore
-            if msg.is_set("content_union_1_type_DataModel"):
-                performative.content_union_1_type_DataModel_is_set = True
-                content_union_1_type_DataModel = msg.content_union_1_type_DataModel
-                DataModel.encode(
-                    performative.content_union_1_type_DataModel,
-                    content_union_1_type_DataModel,
+            if msg.is_set("content_union_1_type_CustomDataType"):
+                performative.content_union_1_type_CustomDataType_is_set = True
+                content_union_1_type_CustomDataType = (
+                    msg.content_union_1_type_CustomDataType
+                )
+                CustomDataType.encode(
+                    performative.content_union_1_type_CustomDataType,
+                    content_union_1_type_CustomDataType,
                 )
             if msg.is_set("content_union_1_type_bytes"):
                 performative.content_union_1_type_bytes_is_set = True
@@ -277,19 +281,23 @@ class TProtocolSerializer(Serializer):
                 performative.content_union_2_type_dict_of_bool_bytes.update(
                     content_union_2_type_dict_of_bool_bytes
                 )
-            if msg.is_set("content_union_3_type_DataModel"):
-                performative.content_union_3_type_DataModel_is_set = True
-                content_union_3_type_DataModel = msg.content_union_3_type_DataModel
-                DataModel.encode(
-                    performative.content_union_3_type_DataModel,
-                    content_union_3_type_DataModel,
+            if msg.is_set("content_union_3_type_CustomDataType"):
+                performative.content_union_3_type_CustomDataType_is_set = True
+                content_union_3_type_CustomDataType = (
+                    msg.content_union_3_type_CustomDataType
                 )
-            if msg.is_set("content_union_3_type_DataModel2"):
-                performative.content_union_3_type_DataModel2_is_set = True
-                content_union_3_type_DataModel2 = msg.content_union_3_type_DataModel2
-                DataModel2.encode(
-                    performative.content_union_3_type_DataModel2,
-                    content_union_3_type_DataModel2,
+                CustomDataType.encode(
+                    performative.content_union_3_type_CustomDataType,
+                    content_union_3_type_CustomDataType,
+                )
+            if msg.is_set("content_union_3_type_CustomDataType2"):
+                performative.content_union_3_type_CustomDataType2_is_set = True
+                content_union_3_type_CustomDataType2 = (
+                    msg.content_union_3_type_CustomDataType2
+                )
+                CustomDataType2.encode(
+                    performative.content_union_3_type_CustomDataType2,
+                    content_union_3_type_CustomDataType2,
                 )
             if msg.is_set("content_union_3_type_bytes"):
                 performative.content_union_3_type_bytes_is_set = True
@@ -301,7 +309,7 @@ class TProtocolSerializer(Serializer):
             if msg.is_set("content_o_ct"):
                 performative.content_o_ct_is_set = True
                 content_o_ct = msg.content_o_ct
-                DataModel.encode(performative.content_o_ct, content_o_ct)
+                CustomDataType.encode(performative.content_o_ct, content_o_ct)
             if msg.is_set("content_o_bool"):
                 performative.content_o_bool_is_set = True
                 content_o_bool = msg.content_o_bool
@@ -357,7 +365,7 @@ class TProtocolSerializer(Serializer):
         performative_content = dict()  # type: Dict[str, Any]
         if performative_id == TProtocolMessage.Performative.PERFORMATIVE_CT:
             pb2_content_ct = t_protocol_pb.performative_ct.content_ct
-            content_ct = DataModel.decode(pb2_content_ct)
+            content_ct = CustomDataType.decode(pb2_content_ct)
             performative_content["content_ct"] = content_ct
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PT:
             content_bytes = t_protocol_pb.performative_pt.content_bytes
@@ -388,7 +396,7 @@ class TProtocolSerializer(Serializer):
             performative_content["content_set_str"] = content_set_str_frozenset
             content_list_ct = t_protocol_pb.performative_pct.content_list_ct
             content_list_ct_tuple = tuple(
-                (DataModel.decode(i) for i in content_list_ct)
+                (CustomDataType.decode(i) for i in content_list_ct)
             )
             performative_content["content_list_ct"] = content_list_ct_tuple
             content_list_bytes = t_protocol_pb.performative_pct.content_list_bytes
@@ -409,7 +417,8 @@ class TProtocolSerializer(Serializer):
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_PMT:
             content_dict_int_ct = t_protocol_pb.performative_pmt.content_dict_int_ct
             content_dict_int_ct_dict = {
-                k: DataModel.decode(v) for k, v in dict(content_dict_int_ct).items()
+                k: CustomDataType.decode(v)
+                for k, v in dict(content_dict_int_ct).items()
             }
             performative_content["content_dict_int_ct"] = content_dict_int_ct_dict
             content_dict_int_bytes = (
@@ -476,11 +485,13 @@ class TProtocolSerializer(Serializer):
             content_dict_str_str_dict = dict(content_dict_str_str)
             performative_content["content_dict_str_str"] = content_dict_str_str_dict
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_MT:
-            if t_protocol_pb.performative_mt.content_union_1_type_DataModel_is_set:
-                pb2_content_union_1_type_DataModel = (
-                    t_protocol_pb.performative_mt.content_union_1_type_DataModel
+            if t_protocol_pb.performative_mt.content_union_1_type_CustomDataType_is_set:
+                pb2_content_union_1_type_CustomDataType = (
+                    t_protocol_pb.performative_mt.content_union_1_type_CustomDataType
                 )
-                content_union_1 = DataModel.decode(pb2_content_union_1_type_DataModel)
+                content_union_1 = CustomDataType.decode(
+                    pb2_content_union_1_type_CustomDataType
+                )
                 performative_content["content_union_1"] = content_union_1
             if t_protocol_pb.performative_mt.content_union_1_type_bytes_is_set:
                 content_union_1 = (
@@ -559,17 +570,23 @@ class TProtocolSerializer(Serializer):
                 content_union_2 = t_protocol_pb.performative_mt.content_union_2
                 content_union_2_dict = dict(content_union_2)
                 performative_content["content_union_2"] = content_union_2_dict
-            if t_protocol_pb.performative_mt.content_union_3_type_DataModel_is_set:
-                pb2_content_union_3_type_DataModel = (
-                    t_protocol_pb.performative_mt.content_union_3_type_DataModel
+            if t_protocol_pb.performative_mt.content_union_3_type_CustomDataType_is_set:
+                pb2_content_union_3_type_CustomDataType = (
+                    t_protocol_pb.performative_mt.content_union_3_type_CustomDataType
                 )
-                content_union_3 = DataModel.decode(pb2_content_union_3_type_DataModel)
+                content_union_3 = CustomDataType.decode(
+                    pb2_content_union_3_type_CustomDataType
+                )
                 performative_content["content_union_3"] = content_union_3
-            if t_protocol_pb.performative_mt.content_union_3_type_DataModel2_is_set:
-                pb2_content_union_3_type_DataModel2 = (
-                    t_protocol_pb.performative_mt.content_union_3_type_DataModel2
+            if (
+                t_protocol_pb.performative_mt.content_union_3_type_CustomDataType2_is_set
+            ):
+                pb2_content_union_3_type_CustomDataType2 = (
+                    t_protocol_pb.performative_mt.content_union_3_type_CustomDataType2
                 )
-                content_union_3 = DataModel2.decode(pb2_content_union_3_type_DataModel2)
+                content_union_3 = CustomDataType2.decode(
+                    pb2_content_union_3_type_CustomDataType2
+                )
                 performative_content["content_union_3"] = content_union_3
             if t_protocol_pb.performative_mt.content_union_3_type_bytes_is_set:
                 content_union_3 = (
@@ -579,7 +596,7 @@ class TProtocolSerializer(Serializer):
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_O:
             if t_protocol_pb.performative_o.content_o_ct_is_set:
                 pb2_content_o_ct = t_protocol_pb.performative_o.content_o_ct
-                content_o_ct = DataModel.decode(pb2_content_o_ct)
+                content_o_ct = CustomDataType.decode(pb2_content_o_ct)
                 performative_content["content_o_ct"] = content_o_ct
             if t_protocol_pb.performative_o.content_o_bool_is_set:
                 content_o_bool = t_protocol_pb.performative_o.content_o_bool

@@ -257,7 +257,7 @@ class TestSerialisations:
     def test_generated_protocol_serialisation_ct(self):
         """Test serialisation and deserialisation of a message involving a ct type."""
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
+        data_model = TProtocolMessage.CustomDataType(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
@@ -324,7 +324,7 @@ class TestSerialisations:
     def test_generated_protocol_serialisation_pct(self):
         """Test serialisation and deserialisation of a message involving a pct type."""
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
+        data_model = TProtocolMessage.CustomDataType(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
@@ -379,7 +379,7 @@ class TestSerialisations:
     def test_generated_protocol_serialisation_pmt(self):
         """Test serialisation and deserialisation of a message involving a pmt type."""
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
+        data_model = TProtocolMessage.CustomDataType(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
@@ -456,7 +456,7 @@ class TestSerialisations:
             "Currently, union type is not properly implemented in the generator."
         )
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
+        data_model = TProtocolMessage.CustomDataType(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
@@ -738,7 +738,7 @@ class TestSerialisations:
     def test_generated_protocol_serialisation_o(self):
         """Test serialisation and deserialisation of a message involving an optional type."""
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
+        data_model = TProtocolMessage.CustomDataType(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,
