@@ -13,7 +13,7 @@ fingerprint:
   contract_dispatcher.py: bafybeiatma5jzq3ynh52t5r7ibq4k6qzs3c5opkf4ct67qkmq7l2mccmxq
   ledger_dispatcher.py: bafybeibh2d5qgj76stlkiiynu2irvcohntf27f3zrqwlkxwz5zjz67u4qm
   tests/__init__.py: bafybeieyhttiwruutk6574yzj7dk2afamgdum5vktyv54gsax7dlkuqtc4
-  tests/conftest.py: bafybeidz6gulkogsjgoo33i7ou2vgzocqak6567zwqiupit4zys6nrci4i
+  tests/conftest.py: bafybeihqsdoamxlgox2klpjwmyrylrycyfon3jldvmr24q4ai33h24llpi
   tests/test_ledger.py: bafybeidnsvv327lkuntxunuop33vx7baqqlppwahsd3ppgshd3fns47dhe
   tests/test_ledger_api.py: bafybeig6myoxfqgvmojjd5gquzfy5ev4sl6tzuy3dsbb6yhedmd625httm
 fingerprint_ignore_patterns: []

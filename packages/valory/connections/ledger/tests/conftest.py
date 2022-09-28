@@ -30,6 +30,10 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import (
     ETHEREUM_TESTNET_CONFIG as _DEFAULT_ETHEREUM_TESTNET_CONFIG,
 )
+from aea_ledger_ethereum.test_tools.fixture_helpers import (
+    DEFAULT_GANACHE_ADDR,
+    DEFAULT_GANACHE_PORT,
+)
 
 from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -62,6 +66,18 @@ def get_register_contract(directory: Path) -> Contract:
 
     contract = contract_registry.make(str(configuration.public_id))
     return contract
+
+
+@pytest.fixture()
+def ganache_addr() -> str:
+    """Get the ganache addr"""
+    return DEFAULT_GANACHE_ADDR
+
+
+@pytest.fixture()
+def ganache_port() -> int:
+    """Get the ganache port"""
+    return DEFAULT_GANACHE_PORT
 
 
 @pytest.fixture(scope="function")
