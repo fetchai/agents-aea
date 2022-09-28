@@ -259,7 +259,7 @@ class Contract(Component):
 
     @classmethod
     def default_method_call(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+        cls, ledger_api: LedgerApi, contract_address: str, method_name: str, **kwargs: Any
     ) -> Optional[JSONLike]:
         """
         Make a contract call.
