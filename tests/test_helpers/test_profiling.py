@@ -135,7 +135,7 @@ def test_profiling_instance_number():
     result = ""
 
     # Generate some dummy classes to check that they appear in the gc counter
-    dummy_classes_to_count = create_dummies()
+    __reference = create_dummies()
 
     p = Profiling([Message], 1, output_function=output_function)
     p.start()
@@ -153,7 +153,7 @@ def test_profiling_instance_number():
 
         assert count_dict["created"] == {"Message": MESSAGE_NUMBER}
         assert count_dict["present"] == {"Message": MESSAGE_NUMBER}
-        assert count_dict["gc"]["DummyClass"] == len(dummy_classes_to_count)
+        assert count_dict["gc"]["DummyClass"] == DUMMIES_NUMBER
 
         # Modify the number of messages
         messages = messages[: int(MESSAGE_NUMBER / 2)]
@@ -242,9 +242,7 @@ def test_profiling_counts_not_equal():
 
     wait_for_condition(lambda: p.is_running, timeout=20)
 
-    _ = create_dummies()
-
-    __reference = __create_two_return_one()
+    __reference = create_dummies(), __create_two_return_one()
     expected_shared = {'Message': MESSAGE_NUMBER, 'DummyClass': 1000}
     expected_created = {**expected_shared, 'MessageContainer': 2}
     expected_present = {**expected_shared, 'MessageContainer': 1}
