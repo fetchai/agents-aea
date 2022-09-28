@@ -37,6 +37,9 @@ from tests.common.utils import wait_for_condition
 from tests.conftest import CUR_PATH
 
 
+TIMEOUT = 30
+
+
 class TestThreadLauncherMode(AEATestCaseMany):
     """Test launcher in threaded mode."""
 
@@ -103,7 +106,7 @@ class TestThreadLauncherMode(AEATestCaseMany):
                     in log_text
                 )
 
-            wait_for_condition(_check, timeout=10, period=0.1)
+            wait_for_condition(_check, timeout=TIMEOUT, period=0.1)
             assert runner.num_failed == 0
         finally:
             runner.stop()
