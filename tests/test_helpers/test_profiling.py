@@ -56,9 +56,9 @@ class MessageContainer:
 
 
 def __create_two_return_one() -> MessageContainer:
-    """Create two message containers return only one"""
+    """Create two message containers return only one referencing the same messages"""
     # create MessageContainer twice, Messages in them only once (shared)
-    # only one of them is stored in memory (gc), as the inner is unbound
+    # only one of them is tracked by garbage collector, as the inner is unbound
     return MessageContainer(MessageContainer())
 
 
@@ -109,19 +109,17 @@ def test_basic_profiling():
         nonlocal result
         result = report
 
-    result = ""
-    p = Profiling([Message], 1, output_function=output_function)
+    result, types_to_track = "", [Message]
+    p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
     wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
-    m = Message()
+
     try:
         wait_for_condition(lambda: result, timeout=TIMEOUT)
-
         assert "Profiling details" in result
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=TIMEOUT)
-    del m
 
 
 @pytest.mark.profiling
@@ -138,49 +136,29 @@ def test_profiling_instance_number():
     p.start()
     wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
-    __reference = create_dummies()
-    messages = create_messages()
+    __reference, messages = create_dummies(), create_messages()
 
     try:
-        # Check the number of created and present messages
         wait_for_condition(lambda: result, timeout=TIMEOUT)
-
         count_dict = extract_object_counts(result)
-
         assert count_dict["created"] == {"Message": MESSAGE_NUMBER}
         assert count_dict["present"] == {"Message": MESSAGE_NUMBER}
         assert count_dict["gc"]["DummyClass"] == DUMMIES_NUMBER
-
-        # Modify the number of messages
-        messages = messages[: MESSAGE_NUMBER // 2]
-        result = ""
-
-        # Check the number of created and present objects
+        # create no new, cut existing messages by half
+        result, messages = "", messages[: MESSAGE_NUMBER // 2]
         wait_for_condition(lambda: result, timeout=TIMEOUT)
-
         count_dict = extract_object_counts(result)
-
         assert count_dict["created"] == {"Message": MESSAGE_NUMBER}
-        assert count_dict["present"] == {"Message": int(MESSAGE_NUMBER / 2)}
-
-        # Modify the number of messages
-        messages += [Message() for _ in range(len(messages))]
-        result = ""
-
-        # Check the number of created and present objects
+        assert count_dict["present"] == {"Message": MESSAGE_NUMBER // 2}
+        # create a second series of messages, add to the remaining half
+        result, messages = "", [messages + create_messages()]
         wait_for_condition(lambda: result, timeout=TIMEOUT)
-
         count_dict = extract_object_counts(result)
-
-        assert count_dict["created"] == {
-            "Message": MESSAGE_NUMBER + MESSAGE_NUMBER // 2
-        }
-        assert count_dict["present"] == {"Message": MESSAGE_NUMBER}
-
+        assert count_dict["created"] == {"Message": 2 * MESSAGE_NUMBER}
+        assert count_dict["present"] == {"Message": 1.5 * MESSAGE_NUMBER}
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=TIMEOUT)
-    del messages
 
 
 @pytest.mark.profiling
@@ -202,12 +180,10 @@ def test_profiling_cross_reference():
     expected_present = {'Message': MESSAGE_NUMBER, 'MessageContainer': 1}
 
     try:
-        # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=TIMEOUT)
         count_dict = extract_object_counts(result)
         assert count_dict["created"] == expected_created
         assert count_dict["present"] == expected_present
-
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=TIMEOUT)
@@ -232,7 +208,6 @@ def test_profiling_counts_not_equal():
     expected_present = {**expected_shared, 'MessageContainer': 1}
 
     try:
-        # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=TIMEOUT)
         count_dict = extract_object_counts(result)
         assert count_dict["created"] == expected_created
@@ -240,7 +215,6 @@ def test_profiling_counts_not_equal():
         assert count_dict["gc"].get("DummyClass", 0) == 1000
         assert "Message" not in count_dict["gc"]
         assert "MessageContainer" not in count_dict["gc"]
-
     finally:
         p.stop()
         p.wait_completed(sync=True, timeout=TIMEOUT)
