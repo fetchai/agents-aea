@@ -197,20 +197,15 @@ def test_profiling_cross_reference():
     container_a = MessageContainer()  # contains new messages
     MessageContainer(container_a)  # shares the same messages with a
 
+    expected_created = {'Message': MESSAGE_NUMBER, 'MessageContainer': 2}
+    expected_present = {'Message': MESSAGE_NUMBER, 'MessageContainer': 1}
+
     try:
         # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
-
         count_dict = extract_object_counts(result)
-
-        assert count_dict["created"] == {
-            "Message": MESSAGE_NUMBER,
-            "MessageContainer": 2,
-        }
-        assert count_dict["present"] == {
-            "Message": MESSAGE_NUMBER,
-            "MessageContainer": 1,
-        }
+        assert count_dict["created"] == expected_created
+        assert count_dict["present"] == expected_present
 
     finally:
         p.stop()
@@ -244,18 +239,20 @@ def test_profiling_counts_not_equal():
     container_a = MessageContainer()  # contains new messages
     MessageContainer(container_a)  # shares the same messages with a
 
+    expected_shared = {'Message': MESSAGE_NUMBER, 'DummyClass': 1000}
+    expected_created = {**expected_shared, 'MessageContainer': 2}
+    expected_present = {**expected_shared, 'MessageContainer': 1}
+
     try:
         # Check the number of created and present objects
         wait_for_condition(lambda: result, timeout=20)
-
         count_dict = extract_object_counts(result)
-        assert (
-            len(set(count_dict["present"].values())) == 3
-        ), "All element counts are equal"
-        assert (
-            len(set(count_dict["created"].values())) == 3
-        ), "All element counts are equal"
-        assert len(set(count_dict["gc"].values())) > 1, "All element counts are equal"
+        assert count_dict["created"] == expected_created
+        assert count_dict["present"] == expected_present
+        assert count_dict["gc"].get("DummyClass", 0) == 1000
+        assert "Message" not in count_dict["gc"]
+        assert "MessageContainer" not in count_dict["gc"]
+
 
     finally:
         p.stop()
