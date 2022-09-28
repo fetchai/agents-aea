@@ -38,6 +38,7 @@ from tests.common.utils import make_behaviour_cls_from_funcion, wait_for_conditi
 class TestThreadedRunner:
     """Test runner in threaded mode."""
 
+    SLEEP = 5
     RUNNER_MODE = "threaded"
 
     def _builder(self, agent_name="agent1", act_func=None) -> AEABuilder:
@@ -79,7 +80,7 @@ class TestThreadedRunner:
         runner = AEARunner([self.aea1, self.aea2], self.RUNNER_MODE)
         runner.start(True)
         wait_for_condition(lambda: runner.is_running, timeout=5)
-        time.sleep(1)
+        time.sleep(self.SLEEP)
         runner.stop()
         assert not runner.is_running
 
@@ -104,7 +105,7 @@ class TestThreadedRunner:
         )
         with patch.object(executor_logger, "exception") as mock:
             runner.start(threaded=True)
-            time.sleep(1)
+            time.sleep(self.SLEEP)
         mock.assert_called_with(
             f"Exception raised during {self.failing_aea.name} running."
         )
@@ -120,7 +121,7 @@ class TestThreadedRunner:
         )
         with patch.object(executor_logger, "exception") as mock:
             runner.start(threaded=True)
-            time.sleep(1)
+            time.sleep(self.SLEEP)
         mock.assert_has_calls(
             [call(f"Exception raised during {self.failing_aea.name} running.")]
         )

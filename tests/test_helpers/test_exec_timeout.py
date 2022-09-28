@@ -56,7 +56,7 @@ class BaseTestExecTimeout(TestCase):
     def test_cancel_by_timeout(self):
         """Test function interrupted by timeout."""
         slow_function_time = 0.4
-        timeout = 0.1
+        timeout, margin = 0.1, 0.1
 
         assert timeout < slow_function_time
 
@@ -67,10 +67,7 @@ class BaseTestExecTimeout(TestCase):
 
             assert exec_timeout.is_cancelled_by_timeout()
 
-        assert (
-            timeit_result.time_passed >= timeout
-            and timeit_result.time_passed < slow_function_time
-        )
+        assert timeout <= timeit_result.time_passed < slow_function_time + margin
 
     def test_limit_is_0_do_not_limit_execution(self):
         """Test function will not be interrupted cause timeout is 0 or None."""

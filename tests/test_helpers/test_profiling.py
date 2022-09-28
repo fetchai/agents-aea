@@ -56,15 +56,6 @@ class MessageContainer:
         )
 
 
-result = ""
-
-
-def output_function(report):
-    """Test output function"""
-    global result
-    result = report
-
-
 def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
     """Extract object counts from the profiling log."""
     result: Dict[str, Dict[str, int]] = {"created": {}, "present": {}, "gc": {}}
@@ -96,7 +87,12 @@ def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
 
 def test_basic_profiling():
     """Test profiling tool."""
-    global result
+
+    def output_function(report):
+        """Test output function"""
+        nonlocal result
+        result = report
+
     result = ""
 
     p = Profiling([Message], 1, output_function=output_function)
@@ -117,7 +113,12 @@ def test_basic_profiling():
 @pytest.mark.profiling
 def test_profiling_instance_number():
     """Test profiling tool."""
-    global result
+
+    def output_function(report):
+        """Test output function"""
+        nonlocal result
+        result = report
+
     result = ""
 
     # Generate some dummy classes to check that they appear in the gc counter
@@ -176,7 +177,12 @@ def test_profiling_instance_number():
 @pytest.mark.profiling
 def test_profiling_cross_reference():
     """Test profiling tool."""
-    global result
+
+    def output_function(report):
+        """Test output function"""
+        nonlocal result
+        result = report
+
     result = ""
 
     p = Profiling(
@@ -213,7 +219,12 @@ def test_profiling_cross_reference():
 
 def test_profiling_counts_not_equal():
     """Test profiling tool."""
-    global result
+
+    def output_function(report):
+        """Test output function"""
+        nonlocal result
+        result = report
+
     result = ""
 
     p = Profiling(

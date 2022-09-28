@@ -212,7 +212,7 @@ class AgentRunThreadTask(AgentRunAsyncTask):
 class AgentRunProcessTask(BaseAgentRunTask):
     """Subprocess wrapper to run agent."""
 
-    PROCESS_JOIN_TIMEOUT = 20  # in seconds
+    PROCESS_JOIN_TIMEOUT = 30  # in seconds
     PROCESS_ALIVE_SLEEP_TIME = 0.005  # in seconds
 
     def __init__(  # pylint: disable=super-init-not-called
@@ -310,7 +310,7 @@ class AgentRunProcessTask(BaseAgentRunTask):
         self.process.join(self.PROCESS_JOIN_TIMEOUT)
         if self.is_running:  # pragma: nocover
             self.process.terminate()
-            self.process.join(5)
+            self.process.join(self.PROCESS_JOIN_TIMEOUT)
             raise ValueError(
                 f"process was not stopped within timeout: {self.PROCESS_JOIN_TIMEOUT} and was terminated"
             )
