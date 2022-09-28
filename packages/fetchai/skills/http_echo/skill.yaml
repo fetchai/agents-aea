@@ -19,7 +19,7 @@ connections: []
 contracts: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
-- valory/http:1.0.0:bafybeidh46onnd24fudkks63duhhmp54txxosir72g665h5mivkesemmzy
+- valory/http:1.0.0:bafybeigzqo2zaakcjtzzsm6dh4x73v72xg6ctk6muyp5uq5ueb7y34fbxy
 skills: []
 behaviours: {}
 handlers:

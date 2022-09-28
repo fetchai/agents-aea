@@ -21,7 +21,7 @@ fingerprint:
   tests/test_strategy.py: bafybeigxtw2j2c7vl6xhdwos62jbtmx62xfgdyadptm5eewmkesmcooyea
 fingerprint_ignore_patterns: []
 connections:
-- valory/ledger:0.19.0:bafybeierjmjbmukcdb7nbbe7np6j5z2rwvsol5pzupa4bjxy6jdh27dxye
+- valory/ledger:0.19.0:bafybeibc3bvod5fit7wtsz6q3mogjxfuc26xi3ydzkszowd4l32h6zkyhm
 contracts:
 - fetchai/erc1155:0.22.0:bafybeidw2vhsh3ifmg5sxnbxhpu4ygosov5jtzjhilsfkdhoanvwiu7dyi
 protocols:
@@ -29,8 +29,8 @@ protocols:
 - fetchai/fipa:1.0.0:bafybeih27chr3b3anjeq26yd5c2p3hypp4sijzdu6yrorpwwxnvkeoa2ei
 - fetchai/oef_search:1.0.0:bafybeifiec4jvsa6mcbmasjno3bwvjwwwubyp25hjqwe7gjfksgvwgdisq
 - open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44
-- valory/contract_api:1.0.0:bafybeifzqlmdpltanymggq2v5c2vbuq5buyv22qsoktultdnu76beei7zy
-- valory/ledger_api:1.0.0:bafybeia73ivm5p6el62ypho6v2mpj3admdq2zfb6evj7vmxogkg6fza2k4
+- valory/contract_api:1.0.0:bafybeiaxbrvgtbdrh4lslskuxyp4awyr4whcx3nqq5yrr6vimzsxg5dy64
+- valory/ledger_api:1.0.0:bafybeih7rhi5zvfvwakx5ifgxsz2cfipeecsh7bm3gnudjxtvhrygpcftq
 skills: []
 behaviours:
   service_registration:

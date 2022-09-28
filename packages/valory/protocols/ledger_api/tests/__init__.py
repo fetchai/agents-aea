@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains the tests of the default ledger_api package."""
+"""Tests package for valory/ledger_api protocol."""

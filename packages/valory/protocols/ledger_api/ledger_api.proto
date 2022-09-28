@@ -50,6 +50,10 @@ message LedgerApiMessage{
 
   message Get_Transaction_Receipt_Performative{
     TransactionDigest transaction_digest = 1;
+    int32 retry_timeout = 2;
+    bool retry_timeout_is_set = 3;
+    int32 retry_attempts = 4;
+    bool retry_attempts_is_set = 5;
   }
 
   message Balance_Performative{
