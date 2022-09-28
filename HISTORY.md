@@ -6,6 +6,8 @@ Packages:
 - Adds support for running local ACN nodes
 - Converts `ledger` and `http_client` connections and `http`, `ledger_api` and `contract_api` protocols to valory packages and syncs them with `open-autonomy` versions of the same packages
 
+Plugins:
+- Introduces test tools module for IPFS cli plugin
 
 Tests:
 - Fixes flaky timeout tests
