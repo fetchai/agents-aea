@@ -334,6 +334,16 @@ class TestSerialisations:
             list_field=["some string 1", "some string 2"],
             dict_field=some_dict,
         )
+        data_model3 = TProtocolMessage.DataModel3(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
         message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
@@ -350,6 +360,7 @@ class TestSerialisations:
             content_list_bool=(False, True, False, False),
             content_list_str=("string4", "string5", "string6"),
             content_list_ct=(data_model, data_model),
+            content_list_ct2=(data_model3, data_model3),
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)
@@ -389,6 +400,16 @@ class TestSerialisations:
             list_field=["some string 1", "some string 2"],
             dict_field=some_dict,
         )
+        data_model2 = TProtocolMessage.DataModel2(
+            bytes_field=b"some bytes",
+            int_field=42,
+            float_field=42.7,
+            bool_field=True,
+            str_field="some string",
+            set_field={1, 2, 3, 4, 5},
+            list_field=["some string 1", "some string 2"],
+            dict_field=some_dict,
+        )
         message = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
@@ -418,6 +439,7 @@ class TestSerialisations:
                 "string3": "string6",
             },
             content_dict_int_ct={1: data_model},
+            content_dict_int_ct2={1: data_model2},
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message)

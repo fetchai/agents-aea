@@ -179,6 +179,9 @@ class TProtocolSerializer(Serializer):
             content_list_ct = msg.content_list_ct
             content_list_ct = [cls._encode_DataModel6(i) for i in content_list_ct]
             performative.content_list_ct.extend(content_list_ct)
+            content_list_ct2 = msg.content_list_ct2
+            content_list_ct2 = [cls._encode_DataModel3(i) for i in content_list_ct2]
+            performative.content_list_ct2.extend(content_list_ct2)
             content_list_bytes = msg.content_list_bytes
             performative.content_list_bytes.extend(content_list_bytes)
             content_list_int = msg.content_list_int
@@ -195,6 +198,9 @@ class TProtocolSerializer(Serializer):
             content_dict_int_ct = msg.content_dict_int_ct
             for k, v in content_dict_int_ct.items():
                 performative.content_dict_int_ct[k].CopyFrom(cls._encode_DataModel(v))
+            content_dict_int_ct2 = msg.content_dict_int_ct2
+            for k, v in content_dict_int_ct2.items():
+                performative.content_dict_int_ct2[k].CopyFrom(cls._encode_DataModel2(v))
             content_dict_int_bytes = msg.content_dict_int_bytes
             performative.content_dict_int_bytes.update(content_dict_int_bytes)
             content_dict_int_int = msg.content_dict_int_int
@@ -459,6 +465,11 @@ class TProtocolSerializer(Serializer):
                 (DataModel6.decode(i) for i in content_list_ct)
             )
             performative_content["content_list_ct"] = content_list_ct_tuple
+            content_list_ct2 = t_protocol_pb.performative_pct.content_list_ct2
+            content_list_ct2_tuple = tuple(
+                (DataModel3.decode(i) for i in content_list_ct2)
+            )
+            performative_content["content_list_ct2"] = content_list_ct2_tuple
             content_list_bytes = t_protocol_pb.performative_pct.content_list_bytes
             content_list_bytes_tuple = tuple(content_list_bytes)
             performative_content["content_list_bytes"] = content_list_bytes_tuple
@@ -480,6 +491,11 @@ class TProtocolSerializer(Serializer):
                 k: DataModel.decode(v) for k, v in dict(content_dict_int_ct).items()
             }
             performative_content["content_dict_int_ct"] = content_dict_int_ct_dict
+            content_dict_int_ct2 = t_protocol_pb.performative_pmt.content_dict_int_ct2
+            content_dict_int_ct2_dict = {
+                k: DataModel2.decode(v) for k, v in dict(content_dict_int_ct2).items()
+            }
+            performative_content["content_dict_int_ct2"] = content_dict_int_ct2_dict
             content_dict_int_bytes = (
                 t_protocol_pb.performative_pmt.content_dict_int_bytes
             )

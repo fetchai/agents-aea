@@ -103,30 +103,32 @@ message TProtocolMessage{
     repeated bool content_set_bool = 4;
     repeated string content_set_str = 5;
     repeated DataModel6 content_list_ct = 6;
-    repeated bytes content_list_bytes = 7;
-    repeated int64 content_list_int = 8;
-    repeated float content_list_float = 9;
-    repeated bool content_list_bool = 10;
-    repeated string content_list_str = 11;
+    repeated DataModel3 content_list_ct2 = 7;
+    repeated bytes content_list_bytes = 8;
+    repeated int64 content_list_int = 9;
+    repeated float content_list_float = 10;
+    repeated bool content_list_bool = 11;
+    repeated string content_list_str = 12;
   }
 
   message Performative_Pmt_Performative{
     map<int64, DataModel> content_dict_int_ct = 1;
-    map<int64, bytes> content_dict_int_bytes = 2;
-    map<int64, int64> content_dict_int_int = 3;
-    map<int64, float> content_dict_int_float = 4;
-    map<int64, bool> content_dict_int_bool = 5;
-    map<int64, string> content_dict_int_str = 6;
-    map<bool, bytes> content_dict_bool_bytes = 7;
-    map<bool, int64> content_dict_bool_int = 8;
-    map<bool, float> content_dict_bool_float = 9;
-    map<bool, bool> content_dict_bool_bool = 10;
-    map<bool, string> content_dict_bool_str = 11;
-    map<string, bytes> content_dict_str_bytes = 12;
-    map<string, int64> content_dict_str_int = 13;
-    map<string, float> content_dict_str_float = 14;
-    map<string, bool> content_dict_str_bool = 15;
-    map<string, string> content_dict_str_str = 16;
+    map<int64, DataModel2> content_dict_int_ct2 = 2;
+    map<int64, bytes> content_dict_int_bytes = 3;
+    map<int64, int64> content_dict_int_int = 4;
+    map<int64, float> content_dict_int_float = 5;
+    map<int64, bool> content_dict_int_bool = 6;
+    map<int64, string> content_dict_int_str = 7;
+    map<bool, bytes> content_dict_bool_bytes = 8;
+    map<bool, int64> content_dict_bool_int = 9;
+    map<bool, float> content_dict_bool_float = 10;
+    map<bool, bool> content_dict_bool_bool = 11;
+    map<bool, string> content_dict_bool_str = 12;
+    map<string, bytes> content_dict_str_bytes = 13;
+    map<string, int64> content_dict_str_int = 14;
+    map<string, float> content_dict_str_float = 15;
+    map<string, bool> content_dict_str_bool = 16;
+    map<string, string> content_dict_str_str = 17;
   }
 
   message Performative_Mt_Performative{
