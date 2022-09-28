@@ -26,6 +26,7 @@ from typing import Any, Callable, Optional, Union, cast
 
 from aea.common import JSONLike
 from aea.contracts import Contract, contract_registry
+from aea.contracts.base import snake_to_camel
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
 from aea.exceptions import AEAException
@@ -378,7 +379,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 default_method_call(
                     api,
                     message.contract_address,
-                    message.callable,
+                    snake_to_camel(message.callable),
                     **message.kwargs.body,
                 )
                 or {}
