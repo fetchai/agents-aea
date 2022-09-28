@@ -56,6 +56,13 @@ class MessageContainer:
         )
 
 
+def __create_two_return_one() -> MessageContainer:
+    """Create two message containers return only one"""
+    # create MessageContainer twice, Messages in them only once (shared)
+    # only one of them is stored in memory (gc), as the inner is unbound
+    return MessageContainer(MessageContainer())
+
+
 def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
     """Extract object counts from the profiling log."""
     result: Dict[str, Dict[str, int]] = {"created": {}, "present": {}, "gc": {}}
@@ -194,9 +201,7 @@ def test_profiling_cross_reference():
 
     wait_for_condition(lambda: p.is_running, timeout=20)
 
-    container_a = MessageContainer()  # contains new messages
-    MessageContainer(container_a)  # shares the same messages with a
-
+    __reference = __create_two_return_one()
     expected_created = {'Message': MESSAGE_NUMBER, 'MessageContainer': 2}
     expected_present = {'Message': MESSAGE_NUMBER, 'MessageContainer': 1}
 
@@ -236,9 +241,7 @@ def test_profiling_counts_not_equal():
         DummyClass() for _ in range(1000)
     ]
 
-    container_a = MessageContainer()  # contains new messages
-    MessageContainer(container_a)  # shares the same messages with a
-
+    __reference = __create_two_return_one()
     expected_shared = {'Message': MESSAGE_NUMBER, 'DummyClass': 1000}
     expected_created = {**expected_shared, 'MessageContainer': 2}
     expected_present = {**expected_shared, 'MessageContainer': 1}
