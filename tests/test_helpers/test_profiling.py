@@ -37,6 +37,7 @@ if platform.system() == "Windows":  # pragma: nocover
 
     import win32process  # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import # noqa: F401
 
+
 MESSAGE_NUMBER = 10
 DUMMIES_NUMBER = 1000
 
@@ -48,13 +49,9 @@ class DummyClass:
 class MessageContainer:
     """Dummy class for counting purposes"""
 
-    def __init__(
-        self, other: Optional["MessageContainer"] = None, message_number=MESSAGE_NUMBER
-    ) -> None:
+    def __init__(self, other: Optional["MessageContainer"] = None) -> None:
         """Initializer"""
-        self.messages: List[Message] = (
-            other.messages if other else [Message() for _ in range(message_number)]
-        )
+        self.messages: List[Message] = other.messages if other else create_messages()
 
 
 def __create_two_return_one() -> MessageContainer:
@@ -65,8 +62,13 @@ def __create_two_return_one() -> MessageContainer:
 
 
 def create_dummies() -> List[DummyClass]:
-    """Create n dummy classes"""
+    """Create n dummy class instances"""
     return [DummyClass() for _ in range(DUMMIES_NUMBER)]
+
+
+def create_messages() -> List[Message]:
+    """Create n messages"""
+    return [Message() for _ in range(MESSAGE_NUMBER)]
 
 
 def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
@@ -107,10 +109,8 @@ def test_basic_profiling():
         result = report
 
     result = ""
-
     p = Profiling([Message], 1, output_function=output_function)
     p.start()
-
     wait_for_condition(lambda: p.is_running, timeout=20)
     m = Message()
     try:
@@ -132,18 +132,13 @@ def test_profiling_instance_number():
         nonlocal result
         result = report
 
-    result = ""
-
-    # Generate some dummy classes to check that they appear in the gc counter
-    __reference = create_dummies()
-
-    p = Profiling([Message], 1, output_function=output_function)
+    result, types_to_track = "", [Message]
+    p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
-
     wait_for_condition(lambda: p.is_running, timeout=20)
 
-    # Create some messages
-    messages = [Message() for _ in range(MESSAGE_NUMBER)]
+    __reference = create_dummies()
+    messages = create_messages()
 
     try:
         # Check the number of created and present messages
@@ -156,7 +151,7 @@ def test_profiling_instance_number():
         assert count_dict["gc"]["DummyClass"] == DUMMIES_NUMBER
 
         # Modify the number of messages
-        messages = messages[: int(MESSAGE_NUMBER / 2)]
+        messages = messages[: MESSAGE_NUMBER // 2]
         result = ""
 
         # Check the number of created and present objects
@@ -177,7 +172,7 @@ def test_profiling_instance_number():
         count_dict = extract_object_counts(result)
 
         assert count_dict["created"] == {
-            "Message": MESSAGE_NUMBER + int(MESSAGE_NUMBER / 2)
+            "Message": MESSAGE_NUMBER + MESSAGE_NUMBER // 2
         }
         assert count_dict["present"] == {"Message": MESSAGE_NUMBER}
 
@@ -196,15 +191,9 @@ def test_profiling_cross_reference():
         nonlocal result
         result = report
 
-    result = ""
-
-    p = Profiling(
-        [Message, MessageContainer],
-        1,
-        output_function=output_function,
-    )
+    result, types_to_track = "", [Message, MessageContainer]
+    p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
-
     wait_for_condition(lambda: p.is_running, timeout=20)
 
     __reference = __create_two_return_one()
@@ -231,15 +220,9 @@ def test_profiling_counts_not_equal():
         nonlocal result
         result = report
 
-    result = ""
-
-    p = Profiling(
-        [Message, MessageContainer, DummyClass],
-        1,
-        output_function=output_function,
-    )
+    result, types_to_track = "", [Message, MessageContainer, DummyClass]
+    p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
-
     wait_for_condition(lambda: p.is_running, timeout=20)
 
     __reference = create_dummies(), __create_two_return_one()
@@ -256,7 +239,6 @@ def test_profiling_counts_not_equal():
         assert count_dict["gc"].get("DummyClass", 0) == 1000
         assert "Message" not in count_dict["gc"]
         assert "MessageContainer" not in count_dict["gc"]
-
 
     finally:
         p.stop()
