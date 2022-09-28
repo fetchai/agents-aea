@@ -4,9 +4,7 @@
 
 Packages:
 - Adds support for running local ACN nodes
-- Ports `ledger` and `http_client` connections as valory packages
-- Ports `http`, `ledger_api` and `contract_api` protocols as valory packages
-- Merges packages from `open-autonomy` and `open-aea` repo to prevent code duplication
+- Converts `ledger` and `http_client` connections and `http`, `ledger_api` and `contract_api` protocols to valory packages and syncs them with `open-autonomy` versions of the same packages
 
 
 Tests:
