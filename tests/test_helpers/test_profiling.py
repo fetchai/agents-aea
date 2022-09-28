@@ -217,6 +217,7 @@ def test_profiling_cross_reference():
         p.wait_completed(sync=True, timeout=20)
 
 
+@pytest.mark.profiling
 def test_profiling_counts_not_equal():
     """Test profiling tool."""
 
