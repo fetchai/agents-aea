@@ -47,7 +47,12 @@ from typing import Optional
         )
 ```
 
-5. Now it is time to call the new method from an agent. Let's say that we would like to get the WETH balance for the WETH account itself. In your agent's `behaviour.py` file, first import the contract package and set the target address:
+5. Fingerprint the contract so its hash matches our changes:
+```bash
+aea hash all
+```
+
+6. Now it is time to call the new method from an agent. Let's say that we would like to get the WETH balance for the WETH account itself. In your agent's `behaviour.py` file, first import the contract package and set the target address:
 ```python
 from packages.john_doe.contracts.erc20.contract import (
     ContractApiMessage,
