@@ -38,6 +38,7 @@ if platform.system() == "Windows":  # pragma: nocover
     import win32process  # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import # noqa: F401
 
 
+TIMEOUT = 20
 MESSAGE_NUMBER = 10
 DUMMIES_NUMBER = 1000
 
@@ -111,15 +112,15 @@ def test_basic_profiling():
     result = ""
     p = Profiling([Message], 1, output_function=output_function)
     p.start()
-    wait_for_condition(lambda: p.is_running, timeout=20)
+    wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
     m = Message()
     try:
-        wait_for_condition(lambda: result, timeout=20)
+        wait_for_condition(lambda: result, timeout=TIMEOUT)
 
         assert "Profiling details" in result
     finally:
         p.stop()
-        p.wait_completed(sync=True, timeout=20)
+        p.wait_completed(sync=True, timeout=TIMEOUT)
     del m
 
 
@@ -135,14 +136,14 @@ def test_profiling_instance_number():
     result, types_to_track = "", [Message]
     p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
-    wait_for_condition(lambda: p.is_running, timeout=20)
+    wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
     __reference = create_dummies()
     messages = create_messages()
 
     try:
         # Check the number of created and present messages
-        wait_for_condition(lambda: result, timeout=20)
+        wait_for_condition(lambda: result, timeout=TIMEOUT)
 
         count_dict = extract_object_counts(result)
 
@@ -155,7 +156,7 @@ def test_profiling_instance_number():
         result = ""
 
         # Check the number of created and present objects
-        wait_for_condition(lambda: result, timeout=20)
+        wait_for_condition(lambda: result, timeout=TIMEOUT)
 
         count_dict = extract_object_counts(result)
 
@@ -167,7 +168,7 @@ def test_profiling_instance_number():
         result = ""
 
         # Check the number of created and present objects
-        wait_for_condition(lambda: result, timeout=20)
+        wait_for_condition(lambda: result, timeout=TIMEOUT)
 
         count_dict = extract_object_counts(result)
 
@@ -178,7 +179,7 @@ def test_profiling_instance_number():
 
     finally:
         p.stop()
-        p.wait_completed(sync=True, timeout=20)
+        p.wait_completed(sync=True, timeout=TIMEOUT)
     del messages
 
 
@@ -194,7 +195,7 @@ def test_profiling_cross_reference():
     result, types_to_track = "", [Message, MessageContainer]
     p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
-    wait_for_condition(lambda: p.is_running, timeout=20)
+    wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
     __reference = __create_two_return_one()
     expected_created = {'Message': MESSAGE_NUMBER, 'MessageContainer': 2}
@@ -202,14 +203,14 @@ def test_profiling_cross_reference():
 
     try:
         # Check the number of created and present objects
-        wait_for_condition(lambda: result, timeout=20)
+        wait_for_condition(lambda: result, timeout=TIMEOUT)
         count_dict = extract_object_counts(result)
         assert count_dict["created"] == expected_created
         assert count_dict["present"] == expected_present
 
     finally:
         p.stop()
-        p.wait_completed(sync=True, timeout=20)
+        p.wait_completed(sync=True, timeout=TIMEOUT)
 
 
 def test_profiling_counts_not_equal():
@@ -223,7 +224,7 @@ def test_profiling_counts_not_equal():
     result, types_to_track = "", [Message, MessageContainer, DummyClass]
     p = Profiling(types_to_track, 1, output_function=output_function)
     p.start()
-    wait_for_condition(lambda: p.is_running, timeout=20)
+    wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
     __reference = create_dummies(), __create_two_return_one()
     expected_shared = {'Message': MESSAGE_NUMBER, 'DummyClass': 1000}
@@ -232,7 +233,7 @@ def test_profiling_counts_not_equal():
 
     try:
         # Check the number of created and present objects
-        wait_for_condition(lambda: result, timeout=20)
+        wait_for_condition(lambda: result, timeout=TIMEOUT)
         count_dict = extract_object_counts(result)
         assert count_dict["created"] == expected_created
         assert count_dict["present"] == expected_present
@@ -242,4 +243,4 @@ def test_profiling_counts_not_equal():
 
     finally:
         p.stop()
-        p.wait_completed(sync=True, timeout=20)
+        p.wait_completed(sync=True, timeout=TIMEOUT)
