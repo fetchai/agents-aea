@@ -1,18 +1,18 @@
 While developing AEAs, users frequently face the need of interacting with smart contracts in a third-party decentralized ledger. To achieve this, developers must create <a href="../contract">Contract</a> packages: components that provide wrappers around the API or ABI of the target smart contract.
 
-In this guide, we will learn how to develop our own contract package to interface with an ERC20 token. We will use the WETH contract deployed on Ethereum [at this address](https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#readContract).
+In this guide, we will learn how to develop our own contract package to interface with an ERC20 token. We will use the WETH contract deployed on Ethereum <a href="https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#readContract" target="_blank">at this address</a>.
 
 ## Step-by-step instructions
 
 Before starting this guide, ensure that you have done one of the following things:
 
-- You have cloned our [developer template](https://github.com/valory-xyz/dev-template). Once setup, it will generate a virtual environment with Open AEA installed, an empty local registry, some useful tools for checking packages and dummy tests.
+- You have cloned our <a href="https://github.com/valory-xyz/dev-template" target="_blank">developer template</a>. Once setup, it will generate a virtual environment with Open AEA installed, an empty local registry, some useful tools for checking packages and dummy tests.
 
-- You have gone through the [quickstart](./quickstart.md) to verify that your machine satisfies the framework requirements and that you have followed the setup instructions so you have the Open AEA framework and the Ethereum plugin installed.
+- You have gone through the <a href="https://open-aea.docs.autonolas.tech/quickstart/" target="_blank">quickstart</a> to verify that your machine satisfies the framework requirements and that you have followed the setup instructions so you have the Open AEA framework and the Ethereum plugin installed.
 
 Now, let's create our contract package:
 
-1. Download the WETH contract ABI [here](https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#code): scroll down to the **Contract ABI** section and click the **copy** button on the right. Then, create a new file called `IERC20.json` and paste the content you have just copied there.
+1. Download the WETH contract ABI <a href="https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#code" target="_blank">here</a>: scroll down to the **Contract ABI** section and click the **copy** button on the right. Then, create a new file called `IERC20.json` and paste the content you have just copied there.
 
 2. Initialize the IPFS registry:
 ```bash
