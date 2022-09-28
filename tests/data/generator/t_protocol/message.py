@@ -27,12 +27,13 @@ from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
-from tests.data.generator.t_protocol.custom_types import (
-    CustomDataType as CustomCustomDataType,
-)
-from tests.data.generator.t_protocol.custom_types import (
-    CustomDataType2 as CustomCustomDataType2,
-)
+from tests.data.generator.t_protocol.custom_types import DataModel as CustomDataModel
+from tests.data.generator.t_protocol.custom_types import DataModel2 as CustomDataModel2
+from tests.data.generator.t_protocol.custom_types import DataModel3 as CustomDataModel3
+from tests.data.generator.t_protocol.custom_types import DataModel4 as CustomDataModel4
+from tests.data.generator.t_protocol.custom_types import DataModel5 as CustomDataModel5
+from tests.data.generator.t_protocol.custom_types import DataModel6 as CustomDataModel6
+from tests.data.generator.t_protocol.custom_types import DataModel7 as CustomDataModel7
 
 
 _default_logger = logging.getLogger("aea.packages.fetchai.protocols.t_protocol.message")
@@ -48,9 +49,19 @@ class TProtocolMessage(Message):
         "some_author/some_protocol_name:1.0.0"
     )
 
-    CustomDataType = CustomCustomDataType
+    DataModel = CustomDataModel
 
-    CustomDataType2 = CustomCustomDataType2
+    DataModel2 = CustomDataModel2
+
+    DataModel3 = CustomDataModel3
+
+    DataModel4 = CustomDataModel4
+
+    DataModel5 = CustomDataModel5
+
+    DataModel6 = CustomDataModel6
+
+    DataModel7 = CustomDataModel7
 
     class Performative(Message.Performative):
         """Performatives for the t_protocol protocol."""
@@ -194,10 +205,10 @@ class TProtocolMessage(Message):
         return cast(bytes, self.get("content_bytes"))
 
     @property
-    def content_ct(self) -> CustomCustomDataType:
+    def content_ct(self) -> CustomDataModel7:
         """Get the 'content_ct' content from the message."""
         enforce(self.is_set("content_ct"), "'content_ct' content is not set.")
-        return cast(CustomCustomDataType, self.get("content_ct"))
+        return cast(CustomDataModel7, self.get("content_ct"))
 
     @property
     def content_dict_bool_bool(self) -> Dict[bool, bool]:
@@ -263,13 +274,13 @@ class TProtocolMessage(Message):
         return cast(Dict[int, bytes], self.get("content_dict_int_bytes"))
 
     @property
-    def content_dict_int_ct(self) -> Dict[int, CustomCustomDataType]:
+    def content_dict_int_ct(self) -> Dict[int, CustomDataModel]:
         """Get the 'content_dict_int_ct' content from the message."""
         enforce(
             self.is_set("content_dict_int_ct"),
             "'content_dict_int_ct' content is not set.",
         )
-        return cast(Dict[int, CustomCustomDataType], self.get("content_dict_int_ct"))
+        return cast(Dict[int, CustomDataModel], self.get("content_dict_int_ct"))
 
     @property
     def content_dict_int_float(self) -> Dict[int, float]:
@@ -373,10 +384,10 @@ class TProtocolMessage(Message):
         return cast(Tuple[bytes, ...], self.get("content_list_bytes"))
 
     @property
-    def content_list_ct(self) -> Tuple[CustomCustomDataType, ...]:
+    def content_list_ct(self) -> Tuple[CustomDataModel6, ...]:
         """Get the 'content_list_ct' content from the message."""
         enforce(self.is_set("content_list_ct"), "'content_list_ct' content is not set.")
-        return cast(Tuple[CustomCustomDataType, ...], self.get("content_list_ct"))
+        return cast(Tuple[CustomDataModel6, ...], self.get("content_list_ct"))
 
     @property
     def content_list_float(self) -> Tuple[float, ...]:
@@ -409,9 +420,9 @@ class TProtocolMessage(Message):
         return cast(Optional[bool], self.get("content_o_bool"))
 
     @property
-    def content_o_ct(self) -> Optional[CustomCustomDataType]:
+    def content_o_ct(self) -> Optional[CustomDataModel5]:
         """Get the 'content_o_ct' content from the message."""
-        return cast(Optional[CustomCustomDataType], self.get("content_o_ct"))
+        return cast(Optional[CustomDataModel5], self.get("content_o_ct"))
 
     @property
     def content_o_dict_str_int(self) -> Optional[Dict[str, int]]:
@@ -474,7 +485,7 @@ class TProtocolMessage(Message):
     def content_union_1(
         self,
     ) -> Union[
-        CustomCustomDataType,
+        CustomDataModel2,
         bytes,
         int,
         float,
@@ -488,7 +499,7 @@ class TProtocolMessage(Message):
         enforce(self.is_set("content_union_1"), "'content_union_1' content is not set.")
         return cast(
             Union[
-                CustomCustomDataType,
+                CustomDataModel2,
                 bytes,
                 int,
                 float,
@@ -533,13 +544,11 @@ class TProtocolMessage(Message):
         )
 
     @property
-    def content_union_3(
-        self,
-    ) -> Union[CustomCustomDataType, CustomCustomDataType2, bytes]:
+    def content_union_3(self) -> Union[CustomDataModel3, CustomDataModel4, bytes]:
         """Get the 'content_union_3' content from the message."""
         enforce(self.is_set("content_union_3"), "'content_union_3' content is not set.")
         return cast(
-            Union[CustomCustomDataType, CustomCustomDataType2, bytes],
+            Union[CustomDataModel3, CustomDataModel4, bytes],
             self.get("content_union_3"),
         )
 
@@ -592,8 +601,8 @@ class TProtocolMessage(Message):
             if self.performative == TProtocolMessage.Performative.PERFORMATIVE_CT:
                 expected_nb_of_contents = 1
                 enforce(
-                    isinstance(self.content_ct, CustomCustomDataType),
-                    "Invalid type for content 'content_ct'. Expected 'CustomDataType'. Found '{}'.".format(
+                    isinstance(self.content_ct, CustomDataModel7),
+                    "Invalid type for content 'content_ct'. Expected 'DataModel7'. Found '{}'.".format(
                         type(self.content_ct)
                     ),
                 )
@@ -693,10 +702,10 @@ class TProtocolMessage(Message):
                 )
                 enforce(
                     all(
-                        isinstance(element, CustomCustomDataType)
+                        isinstance(element, CustomDataModel6)
                         for element in self.content_list_ct
                     ),
-                    "Invalid type for tuple elements in content 'content_list_ct'. Expected 'CustomDataType'.",
+                    "Invalid type for tuple elements in content 'content_list_ct'. Expected 'DataModel6'.",
                 )
                 enforce(
                     isinstance(self.content_list_bytes, tuple),
@@ -775,8 +784,8 @@ class TProtocolMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_content_dict_int_ct, CustomCustomDataType),
-                        "Invalid type for dictionary values in content 'content_dict_int_ct'. Expected 'CustomDataType'. Found '{}'.".format(
+                        isinstance(value_of_content_dict_int_ct, CustomDataModel),
+                        "Invalid type for dictionary values in content 'content_dict_int_ct'. Expected 'DataModel'. Found '{}'.".format(
                             type(value_of_content_dict_int_ct)
                         ),
                     )
@@ -1113,7 +1122,7 @@ class TProtocolMessage(Message):
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_MT:
                 expected_nb_of_contents = 3
                 enforce(
-                    isinstance(self.content_union_1, CustomCustomDataType)
+                    isinstance(self.content_union_1, CustomDataModel2)
                     or isinstance(self.content_union_1, bool)
                     or isinstance(self.content_union_1, bytes)
                     or isinstance(self.content_union_1, dict)
@@ -1122,7 +1131,7 @@ class TProtocolMessage(Message):
                     or type(self.content_union_1) is int
                     or isinstance(self.content_union_1, str)
                     or isinstance(self.content_union_1, tuple),
-                    "Invalid type for content 'content_union_1'. Expected either of '['CustomDataType', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
+                    "Invalid type for content 'content_union_1'. Expected either of '['DataModel2', 'bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
                         type(self.content_union_1)
                     ),
                 )
@@ -1208,10 +1217,10 @@ class TProtocolMessage(Message):
                             "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'.",
                         )
                 enforce(
-                    isinstance(self.content_union_3, CustomCustomDataType)
-                    or isinstance(self.content_union_3, CustomCustomDataType2)
+                    isinstance(self.content_union_3, CustomDataModel3)
+                    or isinstance(self.content_union_3, CustomDataModel4)
                     or isinstance(self.content_union_3, bytes),
-                    "Invalid type for content 'content_union_3'. Expected either of '['CustomDataType', 'CustomDataType2', 'bytes']'. Found '{}'.".format(
+                    "Invalid type for content 'content_union_3'. Expected either of '['DataModel3', 'DataModel4', 'bytes']'. Found '{}'.".format(
                         type(self.content_union_3)
                     ),
                 )
@@ -1219,10 +1228,10 @@ class TProtocolMessage(Message):
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_ct"):
                     expected_nb_of_contents += 1
-                    content_o_ct = cast(CustomCustomDataType, self.content_o_ct)
+                    content_o_ct = cast(CustomDataModel5, self.content_o_ct)
                     enforce(
-                        isinstance(content_o_ct, CustomCustomDataType),
-                        "Invalid type for content 'content_o_ct'. Expected 'CustomDataType'. Found '{}'.".format(
+                        isinstance(content_o_ct, CustomDataModel5),
+                        "Invalid type for content 'content_o_ct'. Expected 'DataModel5'. Found '{}'.".format(
                             type(content_o_ct)
                         ),
                     )

@@ -5,7 +5,7 @@ package aea.some_author.some_protocol_name.v1_0_0;
 message TProtocolMessage{
 
   // Custom Types
-  message CustomDataType{
+  message DataModel{
     bytes bytes_field = 1;
     int64 int_field = 2;
     float float_field = 3;
@@ -16,7 +16,62 @@ message TProtocolMessage{
     map<int64, bool> dict_field = 8;
   }
 
-  message CustomDataType2{
+  message DataModel2{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel3{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel4{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel5{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel6{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel7{
     bytes bytes_field = 1;
     int64 int_field = 2;
     float float_field = 3;
@@ -30,7 +85,7 @@ message TProtocolMessage{
 
   // Performatives and contents
   message Performative_Ct_Performative{
-    CustomDataType content_ct = 1;
+    DataModel7 content_ct = 1;
   }
 
   message Performative_Pt_Performative{
@@ -47,7 +102,7 @@ message TProtocolMessage{
     repeated float content_set_float = 3;
     repeated bool content_set_bool = 4;
     repeated string content_set_str = 5;
-    repeated CustomDataType content_list_ct = 6;
+    repeated DataModel6 content_list_ct = 6;
     repeated bytes content_list_bytes = 7;
     repeated int64 content_list_int = 8;
     repeated float content_list_float = 9;
@@ -56,7 +111,7 @@ message TProtocolMessage{
   }
 
   message Performative_Pmt_Performative{
-    map<int64, CustomDataType> content_dict_int_ct = 1;
+    map<int64, DataModel> content_dict_int_ct = 1;
     map<int64, bytes> content_dict_int_bytes = 2;
     map<int64, int64> content_dict_int_int = 3;
     map<int64, float> content_dict_int_float = 4;
@@ -75,7 +130,7 @@ message TProtocolMessage{
   }
 
   message Performative_Mt_Performative{
-    CustomDataType content_union_1_type_CustomDataType = 1;
+    DataModel2 content_union_1_type_DataModel2 = 1;
     bytes content_union_1_type_bytes = 2;
     int64 content_union_1_type_int = 3;
     float content_union_1_type_float = 4;
@@ -93,13 +148,13 @@ message TProtocolMessage{
     map<string, int64> content_union_2_type_dict_of_str_int = 16;
     map<int64, float> content_union_2_type_dict_of_int_float = 17;
     map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 18;
-    CustomDataType content_union_3_type_CustomDataType = 19;
-    CustomDataType2 content_union_3_type_CustomDataType2 = 20;
+    DataModel3 content_union_3_type_DataModel3 = 19;
+    DataModel4 content_union_3_type_DataModel4 = 20;
     bytes content_union_3_type_bytes = 21;
   }
 
   message Performative_O_Performative{
-    CustomDataType content_o_ct = 1;
+    DataModel5 content_o_ct = 1;
     bool content_o_ct_is_set = 2;
     bool content_o_bool = 3;
     bool content_o_bool_is_set = 4;

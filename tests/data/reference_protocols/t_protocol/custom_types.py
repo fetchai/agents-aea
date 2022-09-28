@@ -22,8 +22,8 @@
 from typing import Dict, List, Set
 
 
-class CustomDataType:
-    """This class represents an instance of CustomDataType."""
+class DataModel:
+    """This class represents an instance of DataModel."""
 
     def __init__(
         self,
@@ -36,7 +36,7 @@ class CustomDataType:
         list_field: List[str],
         dict_field: Dict[int, bool],
     ):
-        """Initialise an instance of CustomDataType."""
+        """Initialise an instance of DataModel."""
         self.bytes_field = bytes_field
         self.int_field = int_field
         self.float_field = float_field
@@ -47,7 +47,7 @@ class CustomDataType:
         self.dict_field = dict_field
 
     @staticmethod
-    def encode(data_model_protobuf_object, data_model_object: "CustomDataType") -> None:
+    def encode(data_model_protobuf_object, data_model_object: "DataModel") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -68,7 +68,7 @@ class CustomDataType:
         data_model_protobuf_object.dict_field.update(data_model_object.dict_field)
 
     @classmethod
-    def decode(cls, data_model_protobuf_object) -> "CustomDataType":
+    def decode(cls, data_model_protobuf_object) -> "DataModel":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -105,5 +105,25 @@ class CustomDataType:
         )
 
 
-class CustomDataType2(CustomDataType):
-    """This class represents an instance of CustomDataType2."""
+class DataModel2(DataModel):
+    """This class represents an instance of DataModel2."""
+
+
+class DataModel3(DataModel):
+    """This class represents an instance of DataModel3."""
+
+
+class DataModel4(DataModel):
+    """This class represents an instance of DataModel4."""
+
+
+class DataModel5(DataModel):
+    """This class represents an instance of DataModel5."""
+
+
+class DataModel6(DataModel):
+    """This class represents an instance of DataModel6."""
+
+
+class DataModel7(DataModel):
+    """This class represents an instance of DataModel7."""
