@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,4 +18,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains tests for the ledger API connection module, plus some utils."""
+"""Tests package for valory/ledger connection."""

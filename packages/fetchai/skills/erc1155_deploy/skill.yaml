@@ -17,11 +17,11 @@ fingerprint:
   tests/intermediate_class.py: bafybeihduyb3zuhtfgbi2c625gerwdumf5mdybufa4bz5rmgm2ksgpd5jq
   tests/test_behaviours.py: bafybeieqmuwxk3f5ktmpzjdh5aow5ge7p7h7hzbhqdkmygrfzu3s4o5gu4
   tests/test_dialogues.py: bafybeiddb5xuvxuuneuepr4nwctbn3rs6g224i3khr6vdcj6dpx2c6wbc4
-  tests/test_handlers.py: bafybeig726fbpxsbbllseioe7pgozngqyyvhfbh2t4r5jb4lcr6sy6fpbu
+  tests/test_handlers.py: bafybeibzitwe2u3ssoabdsz5tiyucr2wb4uuuihs4bbab2kmetnovcglxy
   tests/test_strategy.py: bafybeigxtw2j2c7vl6xhdwos62jbtmx62xfgdyadptm5eewmkesmcooyea
 fingerprint_ignore_patterns: []
 connections:
-- valory/ledger:0.19.0:bafybeibc3bvod5fit7wtsz6q3mogjxfuc26xi3ydzkszowd4l32h6zkyhm
+- valory/ledger:0.19.0:bafybeigpltrga4ggf4nejvl7l32zioyk77jzodvhthjwd3uvdkuxedvnz4
 contracts:
 - fetchai/erc1155:0.22.0:bafybeidw2vhsh3ifmg5sxnbxhpu4ygosov5jtzjhilsfkdhoanvwiu7dyi
 protocols:

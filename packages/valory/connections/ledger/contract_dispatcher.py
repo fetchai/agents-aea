@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2022 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ from aea.common import JSONLike
 from aea.contracts import Contract, contract_registry
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import Registry
-from aea.exceptions import AEAException
+from aea.exceptions import AEAException, parse_exception
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -107,7 +107,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     def get_error_message(
         self,
-        e: Exception,
+        exception: Exception,
         api: LedgerApi,
         message: Message,
         dialogue: BaseDialogue,
@@ -115,10 +115,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """
         Build an error message.
 
-        :param e: the exception.
+        :param exception: the exception.
         :param api: the Ledger API.
         :param message: the request message.
-        :param dialogue: the dialogue
+        :param dialogue: the Contract API dialogue.
         :return: an error message response.
         """
         response = cast(
@@ -127,7 +127,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 performative=ContractApiMessage.Performative.ERROR,
                 target_message=message,
                 code=500,
-                message=str(e),
+                message=parse_exception(exception),
                 data=b"",
             ),
         )
@@ -155,14 +155,16 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         try:
             data = self._get_data(ledger_api, message, contract)
             response = response_builder(data, dialogue)
-        except AEAException as e:
-            self.logger.error(f"Exception during contract request: {str(e)}")
-            response = self.get_error_message(e, ledger_api, message, dialogue)
-        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            self.logger.error(
-                f"An error occurred while processing the contract api request: '{str(e)}'."
+        except AEAException as exception:
+            self.logger.debug(
+                f"Whilst processing the contract api request:\n{message}\nthe following exception occured:\n{str(exception)}"
             )
-            response = self.get_error_message(e, ledger_api, message, dialogue)
+            response = self.get_error_message(exception, ledger_api, message, dialogue)
+        except Exception as exception:  # pylint: disable=broad-except  # pragma: nocover
+            self.logger.debug(
+                f"Whilst processing the contract api request:\n{message}\nthe following error occured:\n{parse_exception(exception)}"
+            )
+            response = self.get_error_message(exception, ledger_api, message, dialogue)
         return response
 
     def get_state(
@@ -177,14 +179,14 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: the contract api message
+        :return: None
         """
 
         def build_response(
             data: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
             if not isinstance(data, Mapping):
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     f"Invalid state type, got={type(data)}, expected={JSONLike}."
                 )
             return cast(
@@ -209,21 +211,21 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: the contract api message
+        :return: None
         """
 
         def build_response(
-            tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
+            transaction: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
-            if not isinstance(tx, Mapping):
-                raise ValueError(
-                    f"Invalid transaction type, got={type(tx)}, expected={JSONLike}."
+            if not isinstance(transaction, Mapping):
+                raise ValueError(  # pragma: nocover
+                    f"Invalid transaction type, got={type(transaction)}, expected={JSONLike}."
                 )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
                     performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-                    raw_transaction=RawTransaction(message.ledger_id, tx),
+                    raw_transaction=RawTransaction(message.ledger_id, transaction),
                 ),
             )
 
@@ -241,21 +243,21 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: the contract api message
+        :return: None
         """
 
         def build_response(
-            tx: Union[bytes, JSONLike], dialogue: ContractApiDialogue
+            transaction: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
-            if isinstance(tx, bytes):
-                raise ValueError(
-                    f"Invalid transaction type, got={type(tx)}, expected={JSONLike}."
+            if isinstance(transaction, bytes):
+                raise ValueError(  # pragma: nocover
+                    f"Invalid transaction type, got={type(transaction)}, expected={JSONLike}."
                 )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
                     performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-                    raw_transaction=RawTransaction(message.ledger_id, tx),
+                    raw_transaction=RawTransaction(message.ledger_id, transaction),
                 ),
             )
 
@@ -273,21 +275,21 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         :param ledger_api: the ledger API object.
         :param message: the Ledger API message
         :param dialogue: the contract API dialogue
-        :return: the contract api message
+        :return: None
         """
 
         def build_response(
-            rm: Union[bytes, JSONLike], dialogue: ContractApiDialogue
+            raw_message: Union[bytes, JSONLike], dialogue: ContractApiDialogue
         ) -> ContractApiMessage:
-            if not isinstance(rm, bytes):
-                raise ValueError(
-                    f"Invalid message type, got={type(rm)}, expected=bytes."
+            if not isinstance(raw_message, bytes):
+                raise ValueError(  # pragma: nocover
+                    f"Invalid message type, got={type(raw_message)}, expected=bytes."
                 )
             return cast(
                 ContractApiMessage,
                 dialogue.reply(
                     performative=ContractApiMessage.Performative.RAW_MESSAGE,
-                    raw_message=RawMessage(message.ledger_id, rm),
+                    raw_message=RawMessage(message.ledger_id, raw_message),
                 ),
             )
 
@@ -357,27 +359,36 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         """
         try:
             method_to_call = getattr(contract, message.callable)
-        except AttributeError:
+        except AttributeError as exception:
             raise AEAException(
                 f"Cannot find {message.callable} in contract {type(contract)}"
-            )
+            ) from exception
         full_args_spec = inspect.getfullargspec(method_to_call)
         if message.performative in [
             ContractApiMessage.Performative.GET_STATE,
             ContractApiMessage.Performative.GET_RAW_MESSAGE,
             ContractApiMessage.Performative.GET_RAW_TRANSACTION,
         ]:
-            if len(full_args_spec.args) < 2:
+            if len(full_args_spec.args) < 2:  # pragma: nocover
                 raise AEAException(
                     f"Expected two or more positional arguments, got {len(full_args_spec.args)}"
                 )
+            for arg in ["ledger_api", "contract_address"]:  # pragma: nocover
+                if arg not in full_args_spec.args:
+                    raise AEAException(
+                        f"Missing required argument `{arg}` in {method_to_call}"
+                    )
             return method_to_call(api, message.contract_address, **message.kwargs.body)
         if message.performative in [
             ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
         ]:
-            if len(full_args_spec.args) < 1:
+            if len(full_args_spec.args) < 1:  # pragma: nocover
                 raise AEAException(
                     f"Expected one or more positional arguments, got {len(full_args_spec.args)}"
+                )
+            if "ledger_api" not in full_args_spec.args:  # pragma: nocover
+                raise AEAException(
+                    f"Missing required argument `ledger_api` in {method_to_call}"
                 )
             return method_to_call(api, **message.kwargs.body)
         raise AEAException(  # pragma: nocover
