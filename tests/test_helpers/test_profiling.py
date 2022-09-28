@@ -38,6 +38,7 @@ if platform.system() == "Windows":  # pragma: nocover
     import win32process  # type: ignore  # pylint: disable=import-error,import-outside-toplevel,unsed-import # noqa: F401
 
 MESSAGE_NUMBER = 10
+DUMMIES_NUMBER = 1000
 
 
 class DummyClass:
@@ -61,6 +62,11 @@ def __create_two_return_one() -> MessageContainer:
     # create MessageContainer twice, Messages in them only once (shared)
     # only one of them is stored in memory (gc), as the inner is unbound
     return MessageContainer(MessageContainer())
+
+
+def create_dummies() -> List[DummyClass]:
+    """Create n dummy classes"""
+    return [DummyClass() for _ in range(DUMMIES_NUMBER)]
 
 
 def extract_object_counts(log: str) -> Dict[str, Dict[str, int]]:
@@ -129,7 +135,7 @@ def test_profiling_instance_number():
     result = ""
 
     # Generate some dummy classes to check that they appear in the gc counter
-    dummy_classes_to_count = [DummyClass() for _ in range(1000)]
+    dummy_classes_to_count = create_dummies()
 
     p = Profiling([Message], 1, output_function=output_function)
     p.start()
@@ -236,10 +242,7 @@ def test_profiling_counts_not_equal():
 
     wait_for_condition(lambda: p.is_running, timeout=20)
 
-    # Generate some dummy classes to check that they appear in the gc counter
-    _ = [  # noqa: F841 we need to store the objects so they appear in the gc
-        DummyClass() for _ in range(1000)
-    ]
+    _ = create_dummies()
 
     __reference = __create_two_return_one()
     expected_shared = {'Message': MESSAGE_NUMBER, 'DummyClass': 1000}
