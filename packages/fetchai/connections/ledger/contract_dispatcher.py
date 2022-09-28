@@ -371,7 +371,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 contract_instance.get_function_by_name(message.callable)
             except ValueError:
                 raise AEAException(
-                    f"Contract method {message.callable} not found in ABI of contract {type(contract)}"
+                    f"Contract method {message.callable} not found in ABI of contract"
                 )
 
             method_to_call = contract.default_method_call

@@ -227,7 +227,7 @@ def test_scaffolded_contract_method_call():
     ctx.agent_config.directory = td
 
     contract_name = "IUniswapV2ERC20"
-    contract_abi_path = Path("tests/test_contracts/IUniswapV2ERC20.json")
+    contract_abi_path = Path("tests", "test_contracts", "IUniswapV2ERC20.json")
 
     try:
         # Scaffold a new contract
@@ -326,10 +326,8 @@ def test_default_method_call():
         result = contract.default_method_call(
             ledger_api=ledger_api,
             contract_address=dummy_address,
-            **dict(
-                method_name="getAddress",
-                _addr=dummy_address,
-            )
+            method_name="getAddress",
+            _addr=dummy_address,
         )
 
         assert result == 0
