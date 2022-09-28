@@ -25,34 +25,8 @@ aea scaffold --to-local-registry contract ERC20Contract /path/to/IERC20.json
 ```
 You'll find the contract in the local registry at `packages/john_doe/contracts/ERC20Contract`.
 
-4. Open the contract at `packages/john_doe/contracts/ERC20Contract/contract.py` and add the following imports at the top of the file:
-```python
-from aea_ledger_ethereum import EthereumApi
-from typing import Optional
-```
 
-    Also add a method to retrieve balances to the `ERC20Contract` class
-```python
-    @classmethod
-    def balance_of(
-        cls, ledger_api: EthereumApi, contract_address: str, owner_address: str
-    ) -> Optional[JSONLike]:
-        """Gets an account's balance."""
-        contract_instance = cls.get_instance(ledger_api, contract_address)
-
-        return ledger_api.contract_method_call(
-            contract_instance=contract_instance,
-            method_name="balanceOf",
-            owner=owner_address,
-        )
-```
-
-5. Fingerprint the contract so its hash matches our changes:
-```bash
-aea hash all
-```
-
-6. Now it is time to call the new method from an agent. Let's say that we would like to get the WETH balance for the WETH account itself. In any skill's `behaviour.py` file, first import the contract package and set the target address:
+4. Now it is time to call the new method from an agent. Let's say that we would like to get the WETH balance for the WETH account itself. In any skill's `behaviour.py` file, first import the contract package and set the target address:
 ```python
 from packages.john_doe.contracts.erc20.contract import (
     ContractApiMessage,
@@ -67,7 +41,7 @@ contract_api_msg = yield from self.get_contract_api_response(
     performative=ContractApiMessage.Performative.GET_STATE,  # type: ignore
     contract_address=WETH_ADDRESS,
     contract_id=str(ERC20Contract.contract_id),
-    contract_callable="balance_of",
+    contract_callable="balanceOf",
     address=WETH_ADDRESS,
 )
 
@@ -77,3 +51,35 @@ if contract_api_msg.performative != ContractApiMessage.Performative.STATE:
 
 balance = contract_api_msg.state.body
 ```
+
+At some point we might need to have some custom implementation in our contract package methods. For those cases, proceed as follows:
+
+1. Open the contract at `packages/john_doe/contracts/ERC20Contract/contract.py` and add the following imports at the top of the file:
+```python
+from aea_ledger_ethereum import EthereumApi
+from typing import Optional
+```
+
+    Also add a custom method to retrieve balances to the `ERC20Contract` class
+```python
+    @classmethod
+    def balance_of(
+        cls, ledger_api: EthereumApi, contract_address: str, owner_address: str
+    ) -> Optional[JSONLike]:
+        """Gets an account's balance."""
+        contract_instance = cls.get_instance(ledger_api, contract_address)
+
+        # Implement your custom logic here. This is just an example:
+        return ledger_api.contract_method_call(
+            contract_instance=contract_instance,
+            method_name="balanceOf",
+            owner=owner_address,
+        )
+```
+
+2. Fingerprint the contract so its hash matches our changes:
+```bash
+aea hash all
+```
+
+3. Proceed with the call as we did previously.
