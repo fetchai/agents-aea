@@ -375,14 +375,11 @@ class ContractApiRequestDispatcher(RequestDispatcher):
                 )
 
             default_method_call = contract.default_method_call
-            return (
-                default_method_call(
-                    api,
-                    message.contract_address,
-                    snake_to_camel(message.callable),
-                    **message.kwargs.body,
-                )
-                or {}
+            return default_method_call(  # type: ignore
+                api,
+                message.contract_address,
+                snake_to_camel(message.callable),
+                **message.kwargs.body,
             )
 
         full_args_spec = inspect.getfullargspec(method_to_call)
