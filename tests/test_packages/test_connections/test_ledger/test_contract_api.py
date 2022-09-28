@@ -23,6 +23,7 @@ import logging
 import re
 import unittest.mock
 from typing import cast
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -519,10 +520,12 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         message=request,
     )
 
-    with caplog.at_level(logging.DEBUG, "aea.packages.valory.connections.ledger"):
+    with mock.patch.object(ledger_apis_connection._logger, "debug") as mock_logger:
         await ledger_apis_connection.send(envelope)
         await asyncio.sleep(0.01)
-        assert f"Cannot find {request.callable} in contract" in caplog.text
+        assert (
+            f"Cannot find {request.callable} in contract" in mock_logger.call_args[0][0]
+        )
 
 
 def test_build_response_fails_on_bad_data_type():
