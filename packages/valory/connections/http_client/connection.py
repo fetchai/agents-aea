@@ -295,7 +295,7 @@ class HTTPClientAsyncChannel:  # pylint: disable=too-many-instance-attributes
         self._tasks.remove(task)
         self.logger.debug(f"Task completed: {task}")
 
-    async def get_message(self) -> Union["Envelope", None]:
+    async def get_message(self) -> Optional["Envelope"]:
         """
         Get http response from in-queue.
 
@@ -376,7 +376,11 @@ class HTTPClientConnection(Connection):
     connection_id = PUBLIC_ID
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize a HTTP client connection."""
+        """
+        Initialize a HTTP client connection.
+
+        :param kwargs: keyword arguments
+        """
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
         port = cast(int, self.configuration.config.get("port"))
