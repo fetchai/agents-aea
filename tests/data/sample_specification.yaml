@@ -23,7 +23,6 @@ speech_acts:
     content_set_str: pt:set[pt:str]
     # content_set_ct: pt:set[ct:DataModel] # custom type inside of set isn't allowed.
     content_list_ct: pt:list[ct:DataModel6]
-    content_list_ct2: pt:list[ct:DataModel3]
     content_list_bytes: pt:list[pt:bytes]
     content_list_int: pt:list[pt:int]
     content_list_float: pt:list[pt:float]
@@ -38,7 +37,7 @@ speech_acts:
 #    content_dict_bytes_str: pt:dict[pt:bytes, pt:str]
 #    content_dict_ct_ct: pt:dict[ct:DataModel, ct:DataModel]  # not allowed
     content_dict_int_ct: pt:dict[pt:int, ct:DataModel]
-    content_dict_int_ct2: pt:dict[pt:int, ct:DataModel2]
+    content_dict_str_ct: pt:dict[pt:str, ct:DataModel2]
     content_dict_int_bytes: pt:dict[pt:int, pt:bytes]
     content_dict_int_int: pt:dict[pt:int, pt:int]
     content_dict_int_float: pt:dict[pt:int, pt:float]

@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x10t_protocol.proto\x12)aea.some_author.some_protocol_name.v1_0_0"\xb2N\n\x10TProtocolMessage\x12s\n\x0fperformative_ct\x18\x05 \x01(\x0b\x32X.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Ct_PerformativeH\x00\x12\x8b\x01\n\x1bperformative_empty_contents\x18\x06 \x01(\x0b\x32\x64.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Empty_Contents_PerformativeH\x00\x12s\n\x0fperformative_mt\x18\x07 \x01(\x0b\x32X.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_PerformativeH\x00\x12q\n\x0eperformative_o\x18\x08 \x01(\x0b\x32W.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_O_PerformativeH\x00\x12u\n\x10performative_pct\x18\t \x01(\x0b\x32Y.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pct_PerformativeH\x00\x12u\n\x10performative_pmt\x18\n \x01(\x0b\x32Y.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_PerformativeH\x00\x12s\n\x0fperformative_pt\x18\x0b \x01(\x0b\x32X.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pt_PerformativeH\x00\x1a\xb2\x02\n\tDataModel\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12h\n\ndict_field\x18\x08 \x03(\x0b\x32T.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel2\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel2.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel3\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel3.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel4\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel4.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel5\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel5.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel6\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel6.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel7\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel7.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1az\n\x1cPerformative_Ct_Performative\x12Z\n\ncontent_ct\x18\x01 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel7\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x03\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\xeb\x03\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x03\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12_\n\x0f\x63ontent_list_ct\x18\x06 \x03(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel6\x12`\n\x10\x63ontent_list_ct2\x18\x07 \x03(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel3\x12\x1a\n\x12\x63ontent_list_bytes\x18\x08 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\t \x03(\x03\x12\x1a\n\x12\x63ontent_list_float\x18\n \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\x0b \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\x0c \x03(\t\x1a\xe3\x1c\n\x1dPerformative_Pmt_Performative\x12\x8c\x01\n\x13\x63ontent_dict_int_ct\x18\x01 \x03(\x0b\x32o.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCtEntry\x12\x8e\x01\n\x14\x63ontent_dict_int_ct2\x18\x02 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCt2Entry\x12\x92\x01\n\x16\x63ontent_dict_int_bytes\x18\x03 \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12\x8e\x01\n\x14\x63ontent_dict_int_int\x18\x04 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12\x92\x01\n\x16\x63ontent_dict_int_float\x18\x05 \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12\x90\x01\n\x15\x63ontent_dict_int_bool\x18\x06 \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12\x8e\x01\n\x14\x63ontent_dict_int_str\x18\x07 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12\x94\x01\n\x17\x63ontent_dict_bool_bytes\x18\x08 \x03(\x0b\x32s.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12\x90\x01\n\x15\x63ontent_dict_bool_int\x18\t \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12\x94\x01\n\x17\x63ontent_dict_bool_float\x18\n \x03(\x0b\x32s.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12\x92\x01\n\x16\x63ontent_dict_bool_bool\x18\x0b \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12\x90\x01\n\x15\x63ontent_dict_bool_str\x18\x0c \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12\x92\x01\n\x16\x63ontent_dict_str_bytes\x18\r \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12\x8e\x01\n\x14\x63ontent_dict_str_int\x18\x0e \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12\x92\x01\n\x16\x63ontent_dict_str_float\x18\x0f \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12\x90\x01\n\x15\x63ontent_dict_str_bool\x18\x10 \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12\x8e\x01\n\x14\x63ontent_dict_str_str\x18\x11 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a~\n\x15\x43ontentDictIntCtEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12T\n\x05value\x18\x02 \x01(\x0b\x32\x45.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel:\x02\x38\x01\x1a\x80\x01\n\x16\x43ontentDictIntCt2Entry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12U\n\x05value\x18\x02 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel2:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xef\x0e\n\x1cPerformative_Mt_Performative\x12o\n\x1f\x63ontent_union_1_type_DataModel2\x18\x01 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel2\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x02 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x03 \x01(\x03\x12"\n\x1a\x63ontent_union_1_type_float\x18\x04 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x05 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x06 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x07 \x03(\x03\x12)\n!content_union_1_type_list_of_bool\x18\x08 \x03(\x08\x12\xa9\x01\n$content_union_1_type_dict_of_str_int\x18\t \x03(\x0b\x32{.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\n \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\x0b \x03(\x03\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0c \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\r \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\x0e \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0f \x03(\x0c\x12\xa9\x01\n$content_union_2_type_dict_of_str_int\x18\x10 \x03(\x0b\x32{.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\xad\x01\n&content_union_2_type_dict_of_int_float\x18\x11 \x03(\x0b\x32}.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\xaf\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x12 \x03(\x0b\x32~.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x12o\n\x1f\x63ontent_union_3_type_DataModel3\x18\x13 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel3\x12o\n\x1f\x63ontent_union_3_type_DataModel4\x18\x14 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel4\x12"\n\x1a\x63ontent_union_3_type_bytes\x18\x15 \x01(\x0c\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\xc3\x04\n\x1bPerformative_O_Performative\x12\\\n\x0c\x63ontent_o_ct\x18\x01 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel5\x12\x1b\n\x13\x63ontent_o_ct_is_set\x18\x02 \x01(\x08\x12\x16\n\x0e\x63ontent_o_bool\x18\x03 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x04 \x01(\x08\x12\x19\n\x11\x63ontent_o_set_int\x18\x05 \x03(\x03\x12 \n\x18\x63ontent_o_set_int_is_set\x18\x06 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x07 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x08 \x01(\x08\x12\x8f\x01\n\x16\x63ontent_o_dict_str_int\x18\t \x03(\x0b\x32o.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\n \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
+    b'\n\x10t_protocol.proto\x12)aea.some_author.some_protocol_name.v1_0_0"\xccM\n\x10TProtocolMessage\x12s\n\x0fperformative_ct\x18\x05 \x01(\x0b\x32X.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Ct_PerformativeH\x00\x12\x8b\x01\n\x1bperformative_empty_contents\x18\x06 \x01(\x0b\x32\x64.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Empty_Contents_PerformativeH\x00\x12s\n\x0fperformative_mt\x18\x07 \x01(\x0b\x32X.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_PerformativeH\x00\x12q\n\x0eperformative_o\x18\x08 \x01(\x0b\x32W.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_O_PerformativeH\x00\x12u\n\x10performative_pct\x18\t \x01(\x0b\x32Y.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pct_PerformativeH\x00\x12u\n\x10performative_pmt\x18\n \x01(\x0b\x32Y.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_PerformativeH\x00\x12s\n\x0fperformative_pt\x18\x0b \x01(\x0b\x32X.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pt_PerformativeH\x00\x1a\xb2\x02\n\tDataModel\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12h\n\ndict_field\x18\x08 \x03(\x0b\x32T.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel2\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel2.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel3\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel3.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel4\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel4.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel5\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel5.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel6\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel6.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\xb4\x02\n\nDataModel7\x12\x13\n\x0b\x62ytes_field\x18\x01 \x01(\x0c\x12\x11\n\tint_field\x18\x02 \x01(\x03\x12\x13\n\x0b\x66loat_field\x18\x03 \x01(\x02\x12\x12\n\nbool_field\x18\x04 \x01(\x08\x12\x11\n\tstr_field\x18\x05 \x01(\t\x12\x11\n\tset_field\x18\x06 \x03(\x03\x12\x12\n\nlist_field\x18\x07 \x03(\t\x12i\n\ndict_field\x18\x08 \x03(\x0b\x32U.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel7.DictFieldEntry\x1a\x30\n\x0e\x44ictFieldEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1az\n\x1cPerformative_Ct_Performative\x12Z\n\ncontent_ct\x18\x01 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel7\x1a\x8c\x01\n\x1cPerformative_Pt_Performative\x12\x15\n\rcontent_bytes\x18\x01 \x01(\x0c\x12\x13\n\x0b\x63ontent_int\x18\x02 \x01(\x03\x12\x15\n\rcontent_float\x18\x03 \x01(\x02\x12\x14\n\x0c\x63ontent_bool\x18\x04 \x01(\x08\x12\x13\n\x0b\x63ontent_str\x18\x05 \x01(\t\x1a\x89\x03\n\x1dPerformative_Pct_Performative\x12\x19\n\x11\x63ontent_set_bytes\x18\x01 \x03(\x0c\x12\x17\n\x0f\x63ontent_set_int\x18\x02 \x03(\x03\x12\x19\n\x11\x63ontent_set_float\x18\x03 \x03(\x02\x12\x18\n\x10\x63ontent_set_bool\x18\x04 \x03(\x08\x12\x17\n\x0f\x63ontent_set_str\x18\x05 \x03(\t\x12_\n\x0f\x63ontent_list_ct\x18\x06 \x03(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel6\x12\x1a\n\x12\x63ontent_list_bytes\x18\x07 \x03(\x0c\x12\x18\n\x10\x63ontent_list_int\x18\x08 \x03(\x03\x12\x1a\n\x12\x63ontent_list_float\x18\t \x03(\x02\x12\x19\n\x11\x63ontent_list_bool\x18\n \x03(\x08\x12\x18\n\x10\x63ontent_list_str\x18\x0b \x03(\t\x1a\xdf\x1c\n\x1dPerformative_Pmt_Performative\x12\x8c\x01\n\x13\x63ontent_dict_int_ct\x18\x01 \x03(\x0b\x32o.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCtEntry\x12\x8c\x01\n\x13\x63ontent_dict_str_ct\x18\x02 \x03(\x0b\x32o.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrCtEntry\x12\x92\x01\n\x16\x63ontent_dict_int_bytes\x18\x03 \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry\x12\x8e\x01\n\x14\x63ontent_dict_int_int\x18\x04 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntIntEntry\x12\x92\x01\n\x16\x63ontent_dict_int_float\x18\x05 \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntFloatEntry\x12\x90\x01\n\x15\x63ontent_dict_int_bool\x18\x06 \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBoolEntry\x12\x8e\x01\n\x14\x63ontent_dict_int_str\x18\x07 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntStrEntry\x12\x94\x01\n\x17\x63ontent_dict_bool_bytes\x18\x08 \x03(\x0b\x32s.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBytesEntry\x12\x90\x01\n\x15\x63ontent_dict_bool_int\x18\t \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolIntEntry\x12\x94\x01\n\x17\x63ontent_dict_bool_float\x18\n \x03(\x0b\x32s.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolFloatEntry\x12\x92\x01\n\x16\x63ontent_dict_bool_bool\x18\x0b \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolBoolEntry\x12\x90\x01\n\x15\x63ontent_dict_bool_str\x18\x0c \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictBoolStrEntry\x12\x92\x01\n\x16\x63ontent_dict_str_bytes\x18\r \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBytesEntry\x12\x8e\x01\n\x14\x63ontent_dict_str_int\x18\x0e \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrIntEntry\x12\x92\x01\n\x16\x63ontent_dict_str_float\x18\x0f \x03(\x0b\x32r.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrFloatEntry\x12\x90\x01\n\x15\x63ontent_dict_str_bool\x18\x10 \x03(\x0b\x32q.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrBoolEntry\x12\x8e\x01\n\x14\x63ontent_dict_str_str\x18\x11 \x03(\x0b\x32p.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrStrEntry\x1a~\n\x15\x43ontentDictIntCtEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12T\n\x05value\x18\x02 \x01(\x0b\x32\x45.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel:\x02\x38\x01\x1a\x7f\n\x15\x43ontentDictStrCtEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12U\n\x05value\x18\x02 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel2:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a:\n\x18\x43ontentDictIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictIntBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictIntStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a;\n\x19\x43ontentDictBoolFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a:\n\x18\x43ontentDictBoolBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictBoolStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a:\n\x18\x43ontentDictStrFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x43ontentDictStrBoolEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x08:\x02\x38\x01\x1a\x38\n\x16\x43ontentDictStrStrEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xef\x0e\n\x1cPerformative_Mt_Performative\x12o\n\x1f\x63ontent_union_1_type_DataModel2\x18\x01 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel2\x12"\n\x1a\x63ontent_union_1_type_bytes\x18\x02 \x01(\x0c\x12 \n\x18\x63ontent_union_1_type_int\x18\x03 \x01(\x03\x12"\n\x1a\x63ontent_union_1_type_float\x18\x04 \x01(\x02\x12!\n\x19\x63ontent_union_1_type_bool\x18\x05 \x01(\x08\x12 \n\x18\x63ontent_union_1_type_str\x18\x06 \x01(\t\x12\'\n\x1f\x63ontent_union_1_type_set_of_int\x18\x07 \x03(\x03\x12)\n!content_union_1_type_list_of_bool\x18\x08 \x03(\x08\x12\xa9\x01\n$content_union_1_type_dict_of_str_int\x18\t \x03(\x0b\x32{.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion1TypeDictOfStrIntEntry\x12)\n!content_union_2_type_set_of_bytes\x18\n \x03(\x0c\x12\'\n\x1f\x63ontent_union_2_type_set_of_int\x18\x0b \x03(\x03\x12\'\n\x1f\x63ontent_union_2_type_set_of_str\x18\x0c \x03(\t\x12*\n"content_union_2_type_list_of_float\x18\r \x03(\x02\x12)\n!content_union_2_type_list_of_bool\x18\x0e \x03(\x08\x12*\n"content_union_2_type_list_of_bytes\x18\x0f \x03(\x0c\x12\xa9\x01\n$content_union_2_type_dict_of_str_int\x18\x10 \x03(\x0b\x32{.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfStrIntEntry\x12\xad\x01\n&content_union_2_type_dict_of_int_float\x18\x11 \x03(\x0b\x32}.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfIntFloatEntry\x12\xaf\x01\n\'content_union_2_type_dict_of_bool_bytes\x18\x12 \x03(\x0b\x32~.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Mt_Performative.ContentUnion2TypeDictOfBoolBytesEntry\x12o\n\x1f\x63ontent_union_3_type_DataModel3\x18\x13 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel3\x12o\n\x1f\x63ontent_union_3_type_DataModel4\x18\x14 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel4\x12"\n\x1a\x63ontent_union_3_type_bytes\x18\x15 \x01(\x0c\x1a\x44\n"ContentUnion1TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a\x44\n"ContentUnion2TypeDictOfStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a\x46\n$ContentUnion2TypeDictOfIntFloatEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1aG\n%ContentUnion2TypeDictOfBoolBytesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c:\x02\x38\x01\x1a\xc3\x04\n\x1bPerformative_O_Performative\x12\\\n\x0c\x63ontent_o_ct\x18\x01 \x01(\x0b\x32\x46.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.DataModel5\x12\x1b\n\x13\x63ontent_o_ct_is_set\x18\x02 \x01(\x08\x12\x16\n\x0e\x63ontent_o_bool\x18\x03 \x01(\x08\x12\x1d\n\x15\x63ontent_o_bool_is_set\x18\x04 \x01(\x08\x12\x19\n\x11\x63ontent_o_set_int\x18\x05 \x03(\x03\x12 \n\x18\x63ontent_o_set_int_is_set\x18\x06 \x01(\x08\x12\x1c\n\x14\x63ontent_o_list_bytes\x18\x07 \x03(\x0c\x12#\n\x1b\x63ontent_o_list_bytes_is_set\x18\x08 \x01(\x08\x12\x8f\x01\n\x16\x63ontent_o_dict_str_int\x18\t \x03(\x0b\x32o.aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_O_Performative.ContentODictStrIntEntry\x12%\n\x1d\x63ontent_o_dict_str_int_is_set\x18\n \x01(\x08\x1a\x39\n\x17\x43ontentODictStrIntEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x03:\x02\x38\x01\x1a*\n(Performative_Empty_Contents_PerformativeB\x0e\n\x0cperformativeb\x06proto3'
 )
 
 
@@ -62,8 +62,8 @@ _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE = _TPROTOCOLMESSAGE.nested_types
 _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCTENTRY = _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE.nested_types_by_name[
     "ContentDictIntCtEntry"
 ]
-_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCT2ENTRY = _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE.nested_types_by_name[
-    "ContentDictIntCt2Entry"
+_TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRCTENTRY = _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE.nested_types_by_name[
+    "ContentDictStrCtEntry"
 ]
 _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY = _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE.nested_types_by_name[
     "ContentDictIntBytesEntry"
@@ -304,13 +304,13 @@ TProtocolMessage = _reflection.GeneratedProtocolMessageType(
                         # @@protoc_insertion_point(class_scope:aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCtEntry)
                     },
                 ),
-                "ContentDictIntCt2Entry": _reflection.GeneratedProtocolMessageType(
-                    "ContentDictIntCt2Entry",
+                "ContentDictStrCtEntry": _reflection.GeneratedProtocolMessageType(
+                    "ContentDictStrCtEntry",
                     (_message.Message,),
                     {
-                        "DESCRIPTOR": _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCT2ENTRY,
+                        "DESCRIPTOR": _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRCTENTRY,
                         "__module__": "t_protocol_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCt2Entry)
+                        # @@protoc_insertion_point(class_scope:aea.some_author.some_protocol_name.v1_0_0.TProtocolMessage.Performative_Pmt_Performative.ContentDictStrCtEntry)
                     },
                 ),
                 "ContentDictIntBytesEntry": _reflection.GeneratedProtocolMessageType(
@@ -553,7 +553,7 @@ _sym_db.RegisterMessage(
     TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCtEntry
 )
 _sym_db.RegisterMessage(
-    TProtocolMessage.Performative_Pmt_Performative.ContentDictIntCt2Entry
+    TProtocolMessage.Performative_Pmt_Performative.ContentDictStrCtEntry
 )
 _sym_db.RegisterMessage(
     TProtocolMessage.Performative_Pmt_Performative.ContentDictIntBytesEntry
@@ -642,10 +642,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCTENTRY._serialized_options = (
         b"8\001"
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCT2ENTRY._options = (
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRCTENTRY._options = (
         None
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCT2ENTRY._serialized_options = (
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRCTENTRY._serialized_options = (
         b"8\001"
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY._options = (
@@ -769,7 +769,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
         b"8\001"
     )
     _TPROTOCOLMESSAGE._serialized_start = 64
-    _TPROTOCOLMESSAGE._serialized_end = 10098
+    _TPROTOCOLMESSAGE._serialized_end = 9996
     _TPROTOCOLMESSAGE_DATAMODEL._serialized_start = 931
     _TPROTOCOLMESSAGE_DATAMODEL._serialized_end = 1237
     _TPROTOCOLMESSAGE_DATAMODEL_DICTFIELDENTRY._serialized_start = 1189
@@ -803,145 +803,145 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE._serialized_start = 3230
     _TPROTOCOLMESSAGE_PERFORMATIVE_PT_PERFORMATIVE._serialized_end = 3370
     _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE._serialized_start = 3373
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE._serialized_end = 3864
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE._serialized_start = 3867
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE._serialized_end = 7550
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PCT_PERFORMATIVE._serialized_end = 3766
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE._serialized_start = 3769
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE._serialized_end = 7448
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCTENTRY._serialized_start = (
-        6403
+        6303
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCTENTRY._serialized_end = (
-        6529
+        6429
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCT2ENTRY._serialized_start = (
-        6532
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRCTENTRY._serialized_start = (
+        6431
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTCT2ENTRY._serialized_end = (
-        6660
+    _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRCTENTRY._serialized_end = (
+        6558
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY._serialized_start = (
-        6662
+        6560
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBYTESENTRY._serialized_end = (
-        6720
+        6618
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY._serialized_start = (
-        6722
+        6620
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTINTENTRY._serialized_end = (
-        6778
+        6676
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY._serialized_start = (
-        6780
+        6678
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTFLOATENTRY._serialized_end = (
-        6838
+        6736
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY._serialized_start = (
-        6840
+        6738
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTBOOLENTRY._serialized_end = (
-        6897
+        6795
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY._serialized_start = (
-        6899
+        6797
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTINTSTRENTRY._serialized_end = (
-        6955
+        6853
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY._serialized_start = (
-        6957
+        6855
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBYTESENTRY._serialized_end = (
-        7016
+        6914
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY._serialized_start = (
-        7018
+        6916
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLINTENTRY._serialized_end = (
-        7075
+        6973
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY._serialized_start = (
-        7077
+        6975
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLFLOATENTRY._serialized_end = (
-        7136
+        7034
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY._serialized_start = (
-        7138
+        7036
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLBOOLENTRY._serialized_end = (
-        7196
+        7094
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY._serialized_start = (
-        7198
+        7096
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTBOOLSTRENTRY._serialized_end = (
-        7255
+        7153
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY._serialized_start = (
-        7257
+        7155
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBYTESENTRY._serialized_end = (
-        7315
+        7213
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY._serialized_start = (
-        7317
+        7215
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRINTENTRY._serialized_end = (
-        7373
+        7271
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY._serialized_start = (
-        7375
+        7273
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRFLOATENTRY._serialized_end = (
-        7433
+        7331
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY._serialized_start = (
-        7435
+        7333
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRBOOLENTRY._serialized_end = (
-        7492
+        7390
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY._serialized_start = (
-        7494
+        7392
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_PMT_PERFORMATIVE_CONTENTDICTSTRSTRENTRY._serialized_end = (
-        7550
+        7448
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE._serialized_start = 7553
-    _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE._serialized_end = 9456
+    _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE._serialized_start = 7451
+    _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE._serialized_end = 9354
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY._serialized_start = (
-        9173
+        9071
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION1TYPEDICTOFSTRINTENTRY._serialized_end = (
-        9241
+        9139
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY._serialized_start = (
-        9243
+        9141
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFSTRINTENTRY._serialized_end = (
-        9311
+        9209
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY._serialized_start = (
-        9313
+        9211
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFINTFLOATENTRY._serialized_end = (
-        9383
+        9281
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY._serialized_start = (
-        9385
+        9283
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_MT_PERFORMATIVE_CONTENTUNION2TYPEDICTOFBOOLBYTESENTRY._serialized_end = (
-        9456
+        9354
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE._serialized_start = 9459
-    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE._serialized_end = 10038
+    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE._serialized_start = 9357
+    _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE._serialized_end = 9936
     _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY._serialized_start = (
-        9981
+        9879
     )
     _TPROTOCOLMESSAGE_PERFORMATIVE_O_PERFORMATIVE_CONTENTODICTSTRINTENTRY._serialized_end = (
-        10038
+        9936
     )
-    _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE._serialized_start = 10040
-    _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE._serialized_end = 10082
+    _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE._serialized_start = 9938
+    _TPROTOCOLMESSAGE_PERFORMATIVE_EMPTY_CONTENTS_PERFORMATIVE._serialized_end = 9980
 # @@protoc_insertion_point(module_scope)

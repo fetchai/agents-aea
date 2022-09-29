@@ -102,12 +102,12 @@ class TProtocolMessage(Message):
             "content_dict_int_bool",
             "content_dict_int_bytes",
             "content_dict_int_ct",
-            "content_dict_int_ct2",
             "content_dict_int_float",
             "content_dict_int_int",
             "content_dict_int_str",
             "content_dict_str_bool",
             "content_dict_str_bytes",
+            "content_dict_str_ct",
             "content_dict_str_float",
             "content_dict_str_int",
             "content_dict_str_str",
@@ -116,7 +116,6 @@ class TProtocolMessage(Message):
             "content_list_bool",
             "content_list_bytes",
             "content_list_ct",
-            "content_list_ct2",
             "content_list_float",
             "content_list_int",
             "content_list_str",
@@ -285,15 +284,6 @@ class TProtocolMessage(Message):
         return cast(Dict[int, CustomDataModel], self.get("content_dict_int_ct"))
 
     @property
-    def content_dict_int_ct2(self) -> Dict[int, CustomDataModel2]:
-        """Get the 'content_dict_int_ct2' content from the message."""
-        enforce(
-            self.is_set("content_dict_int_ct2"),
-            "'content_dict_int_ct2' content is not set.",
-        )
-        return cast(Dict[int, CustomDataModel2], self.get("content_dict_int_ct2"))
-
-    @property
     def content_dict_int_float(self) -> Dict[int, float]:
         """Get the 'content_dict_int_float' content from the message."""
         enforce(
@@ -337,6 +327,15 @@ class TProtocolMessage(Message):
             "'content_dict_str_bytes' content is not set.",
         )
         return cast(Dict[str, bytes], self.get("content_dict_str_bytes"))
+
+    @property
+    def content_dict_str_ct(self) -> Dict[str, CustomDataModel2]:
+        """Get the 'content_dict_str_ct' content from the message."""
+        enforce(
+            self.is_set("content_dict_str_ct"),
+            "'content_dict_str_ct' content is not set.",
+        )
+        return cast(Dict[str, CustomDataModel2], self.get("content_dict_str_ct"))
 
     @property
     def content_dict_str_float(self) -> Dict[str, float]:
@@ -399,14 +398,6 @@ class TProtocolMessage(Message):
         """Get the 'content_list_ct' content from the message."""
         enforce(self.is_set("content_list_ct"), "'content_list_ct' content is not set.")
         return cast(Tuple[CustomDataModel6, ...], self.get("content_list_ct"))
-
-    @property
-    def content_list_ct2(self) -> Tuple[CustomDataModel3, ...]:
-        """Get the 'content_list_ct2' content from the message."""
-        enforce(
-            self.is_set("content_list_ct2"), "'content_list_ct2' content is not set."
-        )
-        return cast(Tuple[CustomDataModel3, ...], self.get("content_list_ct2"))
 
     @property
     def content_list_float(self) -> Tuple[float, ...]:
@@ -658,7 +649,7 @@ class TProtocolMessage(Message):
                     ),
                 )
             elif self.performative == TProtocolMessage.Performative.PERFORMATIVE_PCT:
-                expected_nb_of_contents = 12
+                expected_nb_of_contents = 11
                 enforce(
                     isinstance(self.content_set_bytes, frozenset),
                     "Invalid type for content 'content_set_bytes'. Expected 'frozenset'. Found '{}'.".format(
@@ -725,19 +716,6 @@ class TProtocolMessage(Message):
                         for element in self.content_list_ct
                     ),
                     "Invalid type for tuple elements in content 'content_list_ct'. Expected 'DataModel6'.",
-                )
-                enforce(
-                    isinstance(self.content_list_ct2, tuple),
-                    "Invalid type for content 'content_list_ct2'. Expected 'tuple'. Found '{}'.".format(
-                        type(self.content_list_ct2)
-                    ),
-                )
-                enforce(
-                    all(
-                        isinstance(element, CustomDataModel3)
-                        for element in self.content_list_ct2
-                    ),
-                    "Invalid type for tuple elements in content 'content_list_ct2'. Expected 'DataModel3'.",
                 )
                 enforce(
                     isinstance(self.content_list_bytes, tuple),
@@ -822,25 +800,25 @@ class TProtocolMessage(Message):
                         ),
                     )
                 enforce(
-                    isinstance(self.content_dict_int_ct2, dict),
-                    "Invalid type for content 'content_dict_int_ct2'. Expected 'dict'. Found '{}'.".format(
-                        type(self.content_dict_int_ct2)
+                    isinstance(self.content_dict_str_ct, dict),
+                    "Invalid type for content 'content_dict_str_ct'. Expected 'dict'. Found '{}'.".format(
+                        type(self.content_dict_str_ct)
                     ),
                 )
                 for (
-                    key_of_content_dict_int_ct2,
-                    value_of_content_dict_int_ct2,
-                ) in self.content_dict_int_ct2.items():
+                    key_of_content_dict_str_ct,
+                    value_of_content_dict_str_ct,
+                ) in self.content_dict_str_ct.items():
                     enforce(
-                        type(key_of_content_dict_int_ct2) is int,
-                        "Invalid type for dictionary keys in content 'content_dict_int_ct2'. Expected 'int'. Found '{}'.".format(
-                            type(key_of_content_dict_int_ct2)
+                        isinstance(key_of_content_dict_str_ct, str),
+                        "Invalid type for dictionary keys in content 'content_dict_str_ct'. Expected 'str'. Found '{}'.".format(
+                            type(key_of_content_dict_str_ct)
                         ),
                     )
                     enforce(
-                        isinstance(value_of_content_dict_int_ct2, CustomDataModel2),
-                        "Invalid type for dictionary values in content 'content_dict_int_ct2'. Expected 'DataModel2'. Found '{}'.".format(
-                            type(value_of_content_dict_int_ct2)
+                        isinstance(value_of_content_dict_str_ct, CustomDataModel2),
+                        "Invalid type for dictionary values in content 'content_dict_str_ct'. Expected 'DataModel2'. Found '{}'.".format(
+                            type(value_of_content_dict_str_ct)
                         ),
                     )
                 enforce(

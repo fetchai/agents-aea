@@ -304,8 +304,6 @@ def _includes_custom_type(content_type: str) -> bool:
     for type_ in [
         "Union",
         "Optional",
-        "pt:set",
-        "pt:list",
         "Dict",
         "Tuple",
         "FrozenSet",

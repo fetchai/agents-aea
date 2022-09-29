@@ -103,17 +103,16 @@ message TProtocolMessage{
     repeated bool content_set_bool = 4;
     repeated string content_set_str = 5;
     repeated DataModel6 content_list_ct = 6;
-    repeated DataModel3 content_list_ct2 = 7;
-    repeated bytes content_list_bytes = 8;
-    repeated int64 content_list_int = 9;
-    repeated float content_list_float = 10;
-    repeated bool content_list_bool = 11;
-    repeated string content_list_str = 12;
+    repeated bytes content_list_bytes = 7;
+    repeated int64 content_list_int = 8;
+    repeated float content_list_float = 9;
+    repeated bool content_list_bool = 10;
+    repeated string content_list_str = 11;
   }
 
   message Performative_Pmt_Performative{
     map<int64, DataModel> content_dict_int_ct = 1;
-    map<int64, DataModel2> content_dict_int_ct2 = 2;
+    map<string, DataModel2> content_dict_str_ct = 2;
     map<int64, bytes> content_dict_int_bytes = 3;
     map<int64, int64> content_dict_int_int = 4;
     map<int64, float> content_dict_int_float = 5;
