@@ -592,11 +592,11 @@ def test_validate_and_call_callable():
     message.callable = "getAddress"
     message.contract_address = dummy_address
 
-    dispatcher = ContractApiRequestDispatcher(MagicMock(), connection_id="test_id")
-
     # Call a method present in the ABI but not in the contract package
     with mock.patch("web3.contract.ContractFunction.call", return_value=0):
-        result = dispatcher._validate_and_call_callable(ledger_api, message, contract)
+        result = ContractApiRequestDispatcher._validate_and_call_callable(
+            ledger_api, message, contract
+        )
         assert result == 0
 
     # Call an non-existent method
@@ -605,4 +605,6 @@ def test_validate_and_call_callable():
         AEAException,
         match=f"Contract method dummy_method not found in ABI of contract {type(contract)}",
     ):
-        dispatcher._validate_and_call_callable(ledger_api, message, contract)
+        ContractApiRequestDispatcher._validate_and_call_callable(
+            ledger_api, message, contract
+        )
