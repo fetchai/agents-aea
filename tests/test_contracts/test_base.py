@@ -19,11 +19,14 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea.contracts.base."""
-
 import logging
 import os
+import shutil
+from dataclasses import dataclass
 from pathlib import Path
+from tempfile import mkdtemp
 from typing import cast
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
@@ -32,7 +35,13 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_TESTNET_CONFIG
 from aea_ledger_fetchai import FetchAICrypto
 
+from aea.cli.scaffold import add_contract_abi, scaffold_item
+from aea.cli.utils.context import Context
 from aea.configurations.base import ComponentType, ContractConfig
+from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unused-import
+    CONTRACT,
+    CONTRACTS,
+)
 from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
 from aea.contracts.base import Contract
@@ -200,6 +209,57 @@ def test_scaffold():
         scaffold.get_state("ledger_api", "contract_address", **kwargs)
 
 
+def test_scaffolded_contract_method_call():
+    """Tests a contract method call."""
+
+    # Mock the CLI context
+    td = mkdtemp()
+
+    @dataclass
+    class AgentConfig:
+        author = "dummy_author"
+        contracts = ()
+        agent_name = "dummy_agent"
+
+    ctx = Context(cwd=td, verbosity="DEBUG", registry_path=td)
+    ctx.agent_config = AgentConfig()
+    ctx.config["to_local_registry"] = True
+    ctx.agent_config.directory = td
+
+    contract_name = "IUniswapV2ERC20"
+    contract_abi_path = Path("tests", "test_contracts", "IUniswapV2ERC20.json")
+
+    try:
+        # Scaffold a new contract
+        scaffold_item(ctx, CONTRACT, contract_name)
+        add_contract_abi(ctx, contract_name, contract_abi_path)
+
+        # Load the new contract
+        contract_path = Path(td, CONTRACTS, contract_name)
+        contract = Contract.from_dir(str(contract_path))
+        ledger_api = ledger_apis_registry.make(
+            EthereumCrypto.identifier,
+            address=ETHEREUM_DEFAULT_ADDRESS,
+        )
+
+        # Call a contract method: allowance
+        SPENDER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
+        OWNER_ADDRESS = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
+
+        with mock.patch("web3.contract.ContractFunction.call", return_value=0):
+            res = contract.contract_method_call(
+                ledger_api=ledger_api,
+                method_name="allowance",
+                owner=OWNER_ADDRESS,
+                spender=SPENDER_ADDRESS,
+            )
+
+        assert res == 0
+
+    finally:
+        shutil.rmtree(td)
+
+
 def test_contract_method_call():
     """Tests a contract method call."""
     contract = Contract.from_dir(
@@ -246,6 +306,31 @@ def test_build_transaction_2():
     ledger_api.build_transaction.return_value = {}
     result = contract.build_transaction(ledger_api, "dummy_method", {}, {})
     assert result == {}
+
+
+def test_default_method_call():
+    """Tests a default method build."""
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+
+    ledger_api = ledger_apis_registry.make(
+        EthereumCrypto.identifier,
+        address=ETHEREUM_DEFAULT_ADDRESS,
+    )
+
+    # Call a function present in the ABI but not in the contract package
+    with mock.patch("web3.contract.ContractFunction.call", return_value=0):
+        result = contract.default_method_call(
+            ledger_api=ledger_api,
+            contract_address=dummy_address,
+            method_name="getAddress",
+            _addr=dummy_address,
+        )
+
+        assert result == 0
 
 
 def test_get_transaction_transfer_logs():

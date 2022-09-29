@@ -258,6 +258,31 @@ class Contract(Component):
         return tx
 
     @classmethod
+    def default_method_call(
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: str,
+        method_name: str,
+        **kwargs: Any,
+    ) -> Optional[JSONLike]:
+        """
+        Make a contract call.
+
+        :param ledger_api: the ledger apis.
+        :param contract_address: the contract address.
+        :param method_name: the method to call.
+        :param kwargs: keyword arguments.
+        :return: the call result
+        """
+
+        contract_instance = cls.get_instance(ledger_api, contract_address)
+
+        result = ledger_api.contract_method_call(
+            contract_instance, method_name, **kwargs
+        )
+        return result
+
+    @classmethod
     def get_transaction_transfer_logs(
         cls,
         ledger_api: LedgerApi,
