@@ -8,7 +8,7 @@ AEA:
 Packages:
 - Adds support for running local ACN nodes
 - Converts `ledger` and `http_client` connections and `http`, `ledger_api` and `contract_api` protocols to valory packages and syncs them with `open-autonomy` versions of the same packages
-- Extends `contract_api` to automatically handle contract calls to methods not implemented in the contract package, redirecting them to a default contract method.
+- Extends `ledger` connection to automatically handle contract calls to methods not implemented in the contract package, redirecting them to a default contract method.
 
 Plugins:
 - Introduces test tools module for IPFS cli plugin
