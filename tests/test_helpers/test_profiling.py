@@ -136,7 +136,7 @@ def test_profiling_instance_number():
     p.start()
     wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
-    __reference, messages = create_dummies(), create_messages()
+    __reference, messages = create_dummies(), create_messages()  # noqa: F841
 
     try:
         wait_for_condition(lambda: result, timeout=TIMEOUT)
@@ -175,9 +175,9 @@ def test_profiling_cross_reference():
     p.start()
     wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
-    __reference = __create_two_return_one()
-    expected_created = {'Message': MESSAGE_NUMBER, 'MessageContainer': 2}
-    expected_present = {'Message': MESSAGE_NUMBER, 'MessageContainer': 1}
+    __reference = __create_two_return_one()  # noqa: F841
+    expected_created = {"Message": MESSAGE_NUMBER, "MessageContainer": 2}
+    expected_present = {"Message": MESSAGE_NUMBER, "MessageContainer": 1}
 
     try:
         wait_for_condition(lambda: result, timeout=TIMEOUT)
@@ -203,17 +203,17 @@ def test_profiling_counts_not_equal():
     p.start()
     wait_for_condition(lambda: p.is_running, timeout=TIMEOUT)
 
-    __reference = create_dummies(), __create_two_return_one()
-    expected_shared = {'Message': MESSAGE_NUMBER, 'DummyClass': 1000}
-    expected_created = {**expected_shared, 'MessageContainer': 2}
-    expected_present = {**expected_shared, 'MessageContainer': 1}
+    __reference = create_dummies(), __create_two_return_one()  # noqa: F841
+    expected_shared = {"Message": MESSAGE_NUMBER, "DummyClass": DUMMIES_NUMBER}
+    expected_created = {**expected_shared, "MessageContainer": 2}
+    expected_present = {**expected_shared, "MessageContainer": 1}
 
     try:
         wait_for_condition(lambda: result, timeout=TIMEOUT)
         count_dict = extract_object_counts(result)
         assert count_dict["created"] == expected_created
         assert count_dict["present"] == expected_present
-        assert count_dict["gc"].get("DummyClass", 0) == 1000
+        assert count_dict["gc"].get("DummyClass", 0) == DUMMIES_NUMBER
         assert "Message" not in count_dict["gc"]
         assert "MessageContainer" not in count_dict["gc"]
     finally:
