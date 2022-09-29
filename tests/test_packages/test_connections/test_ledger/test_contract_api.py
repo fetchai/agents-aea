@@ -527,13 +527,9 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         message=request,
     )
 
-    with mock.patch.object(ledger_apis_connection._logger, "debug") as mock_logger:
-        await ledger_apis_connection.send(envelope)
-        await asyncio.sleep(0.01)
-        assert (
-            f"Contract method {request.callable} not found in ABI of contract"
-            in mock_logger.call_args[0][0]
-        )
+    await ledger_apis_connection.send(envelope)
+    await asyncio.sleep(0.01)
+    assert f"Contract method {request.callable} not found" in caplog.text, caplog.text
 
 
 def test_build_response_fails_on_bad_data_type():
