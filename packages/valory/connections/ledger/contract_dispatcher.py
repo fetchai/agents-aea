@@ -339,9 +339,8 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         except (AttributeError, NotImplementedError):
             return None
 
-    @staticmethod
     def _validate_and_call_callable(
-        api: LedgerApi, message: ContractApiMessage, contract: Contract
+        self, api: LedgerApi, message: ContractApiMessage, contract: Contract
     ) -> Union[bytes, JSONLike]:
         """
         Validate a Contract callable, given the performative.
@@ -362,7 +361,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         try:
             method_to_call = getattr(contract, message.callable)
         except AttributeError:
-            _default_logger.info(
+            self.logger.info(
                 f"Contract method {message.callable} not found in the contract package {contract.contract_id}. Checking in the ABI..."
             )
 
