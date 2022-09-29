@@ -45,7 +45,7 @@ import (
 )
 
 /*
-	DHTPeer and DHT network routing tests
+  DHTPeer and DHT network routing tests
 */
 
 const (
@@ -114,7 +114,7 @@ var (
 )
 
 /*
-	DHT Network: DHTPeer-to-DHTPeer
+  DHT Network: DHTPeer-to-DHTPeer
 */
 
 // TestRoutingDHTPeerToSelf dht peer with agent attached
@@ -419,7 +419,7 @@ func TestRoutingDHTPeerToDHTPeerFullConnectivity(t *testing.T) {
 }
 
 /*
-	DHT network: DHTClient
+  DHT network: DHTClient
 */
 
 // TestRoutingDHTClientToDHTPeer dht client to its bootstrap peer
@@ -653,7 +653,7 @@ func TestRoutingDHTClientToDHTClientIndirect(t *testing.T) {
 }
 
 /*
-	DHT network: DelegateClient
+  DHT network: DelegateClient
 */
 
 // TestRoutingDelegateClientToDHTPeer
@@ -1281,19 +1281,19 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 }
 
 /*
-	DHT network: all-to-all
+  DHT network: all-to-all
 */
 
 /*
-                                    Network topology
+									  Network topology
 
-   DHTClient -------                                                 -- DelegateClient
-                   |                                                 |
-   DHTClient -------                                                 -- DelegateClient
-                   |                                                 |
-                   |-- DHTPeer --- DHTPeeer -- DHTPeer --- DHTPeer --|
-                   |                                                 |
-   DelegateClient --                                                 ------- DHTClient
+	 DHTClient -------                                                 -- DelegateClient
+					 |                                                 |
+	 DHTClient -------                                                 -- DelegateClient
+					 |                                                 |
+					 |-- DHTPeer --- DHTPeeer -- DHTPeer --- DHTPeer --|
+					 |                                                 |
+	 DelegateClient --                                                 ------- DHTClient
 */
 
 // TestRoutingAlltoAll
@@ -1622,9 +1622,9 @@ func TestRoutingAllToAll(t *testing.T) {
 }
 
 /*
-	Helpers
-	TOFIX(LR) how to share test helpers between packages tests
-	 without having circular dependencies
+  Helpers
+  TOFIX(LR) how to share test helpers between packages tests
+   without having circular dependencies
 */
 
 func randSeq(n int) string {
@@ -2008,17 +2008,17 @@ func TestEthereumCrypto(t *testing.T) {
 	}
 
 	/*
-		ethSig, err := secp256k1.Sign(hashedPublicKey, hexutil.MustDecode(privateKey))
-		if err != nil {
-			t.Error(err.Error())
-		}
-		println(hexutil.Encode(ethSig))
-		hash := sha3.NewLegacyKeccak256()
-		_, err = hash.Write([]byte(publicKey))
-		if err != nil {
-			t.Error(err.Error())
-		}
-		sha3KeccakHash := hash.Sum(nil)
+		  ethSig, err := secp256k1.Sign(hashedPublicKey, hexutil.MustDecode(privateKey))
+		  if err != nil {
+			  t.Error(err.Error())
+		  }
+		  println(hexutil.Encode(ethSig))
+		  hash := sha3.NewLegacyKeccak256()
+		  _, err = hash.Write([]byte(publicKey))
+		  if err != nil {
+			  t.Error(err.Error())
+		  }
+		  sha3KeccakHash := hash.Sum(nil)
 	*/
 
 	valid, err := utils.VerifyEthereumSignatureETH([]byte(publicKey), publicKeySignature, publicKey)

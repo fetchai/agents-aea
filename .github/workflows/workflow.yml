@@ -78,14 +78,14 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.48
+          version: v1.48.0
           working-directory: libs/go/libp2p_node
       - name: Golang code style check (aealite)
         uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.48
+          version: v1.48.0
           working-directory: libs/go/aealite
 
   common_checks_3:
@@ -464,7 +464,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - if: matrix.os == 'macos-latest'
       working-directory: ./libs/go/libp2p_node
       run: |
