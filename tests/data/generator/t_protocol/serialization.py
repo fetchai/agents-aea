@@ -27,7 +27,7 @@ from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.protocols.base import Message, Serializer
 
 from tests.data.generator.t_protocol import t_protocol_pb2
-from tests.data.generator.t_protocol.custom_types import DataModel
+from tests.data.generator.t_protocol.custom_types import DataModel, DataModel2
 from tests.data.generator.t_protocol.message import TProtocolMessage
 
 
@@ -130,123 +130,49 @@ class TProtocolSerializer(Serializer):
             t_protocol_msg.performative_pmt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_MT:
             performative = t_protocol_pb2.TProtocolMessage.Performative_Mt_Performative()  # type: ignore
-            if msg.is_set("content_union_1_type_DataModel"):
-                performative.content_union_1_type_DataModel_is_set = True
-                content_union_1_type_DataModel = msg.content_union_1_type_DataModel
-                DataModel.encode(
-                    performative.content_union_1_type_DataModel,
-                    content_union_1_type_DataModel,
-                )
-            if msg.is_set("content_union_1_type_bytes"):
-                performative.content_union_1_type_bytes_is_set = True
-                content_union_1_type_bytes = msg.content_union_1_type_bytes
-                performative.content_union_1_type_bytes = content_union_1_type_bytes
-            if msg.is_set("content_union_1_type_int"):
-                performative.content_union_1_type_int_is_set = True
-                content_union_1_type_int = msg.content_union_1_type_int
-                performative.content_union_1_type_int = content_union_1_type_int
-            if msg.is_set("content_union_1_type_float"):
-                performative.content_union_1_type_float_is_set = True
-                content_union_1_type_float = msg.content_union_1_type_float
-                performative.content_union_1_type_float = content_union_1_type_float
-            if msg.is_set("content_union_1_type_bool"):
-                performative.content_union_1_type_bool_is_set = True
-                content_union_1_type_bool = msg.content_union_1_type_bool
-                performative.content_union_1_type_bool = content_union_1_type_bool
-            if msg.is_set("content_union_1_type_str"):
-                performative.content_union_1_type_str_is_set = True
-                content_union_1_type_str = msg.content_union_1_type_str
-                performative.content_union_1_type_str = content_union_1_type_str
-            if msg.is_set("content_union_1_type_set_of_int"):
-                performative.content_union_1_type_set_of_int_is_set = True
-                content_union_1_type_set_of_int = msg.content_union_1_type_set_of_int
-                performative.content_union_1_type_set_of_int.extend(
-                    content_union_1_type_set_of_int
-                )
-            if msg.is_set("content_union_1_type_list_of_bool"):
-                performative.content_union_1_type_list_of_bool_is_set = True
-                content_union_1_type_list_of_bool = (
-                    msg.content_union_1_type_list_of_bool
-                )
-                performative.content_union_1_type_list_of_bool.extend(
-                    content_union_1_type_list_of_bool
-                )
-            if msg.is_set("content_union_1_type_dict_of_str_int"):
-                performative.content_union_1_type_dict_of_str_int_is_set = True
-                content_union_1_type_dict_of_str_int = (
-                    msg.content_union_1_type_dict_of_str_int
-                )
-                performative.content_union_1_type_dict_of_str_int.update(
-                    content_union_1_type_dict_of_str_int
-                )
-            if msg.is_set("content_union_2_type_set_of_bytes"):
-                performative.content_union_2_type_set_of_bytes_is_set = True
-                content_union_2_type_set_of_bytes = (
-                    msg.content_union_2_type_set_of_bytes
-                )
-                performative.content_union_2_type_set_of_bytes.extend(
-                    content_union_2_type_set_of_bytes
-                )
-            if msg.is_set("content_union_2_type_set_of_int"):
-                performative.content_union_2_type_set_of_int_is_set = True
-                content_union_2_type_set_of_int = msg.content_union_2_type_set_of_int
-                performative.content_union_2_type_set_of_int.extend(
-                    content_union_2_type_set_of_int
-                )
-            if msg.is_set("content_union_2_type_set_of_str"):
-                performative.content_union_2_type_set_of_str_is_set = True
-                content_union_2_type_set_of_str = msg.content_union_2_type_set_of_str
-                performative.content_union_2_type_set_of_str.extend(
-                    content_union_2_type_set_of_str
-                )
-            if msg.is_set("content_union_2_type_list_of_float"):
-                performative.content_union_2_type_list_of_float_is_set = True
-                content_union_2_type_list_of_float = (
-                    msg.content_union_2_type_list_of_float
-                )
-                performative.content_union_2_type_list_of_float.extend(
-                    content_union_2_type_list_of_float
-                )
-            if msg.is_set("content_union_2_type_list_of_bool"):
-                performative.content_union_2_type_list_of_bool_is_set = True
-                content_union_2_type_list_of_bool = (
-                    msg.content_union_2_type_list_of_bool
-                )
-                performative.content_union_2_type_list_of_bool.extend(
-                    content_union_2_type_list_of_bool
-                )
-            if msg.is_set("content_union_2_type_list_of_bytes"):
-                performative.content_union_2_type_list_of_bytes_is_set = True
-                content_union_2_type_list_of_bytes = (
-                    msg.content_union_2_type_list_of_bytes
-                )
-                performative.content_union_2_type_list_of_bytes.extend(
-                    content_union_2_type_list_of_bytes
-                )
-            if msg.is_set("content_union_2_type_dict_of_str_int"):
-                performative.content_union_2_type_dict_of_str_int_is_set = True
-                content_union_2_type_dict_of_str_int = (
-                    msg.content_union_2_type_dict_of_str_int
-                )
-                performative.content_union_2_type_dict_of_str_int.update(
-                    content_union_2_type_dict_of_str_int
-                )
-            if msg.is_set("content_union_2_type_dict_of_int_float"):
-                performative.content_union_2_type_dict_of_int_float_is_set = True
-                content_union_2_type_dict_of_int_float = (
-                    msg.content_union_2_type_dict_of_int_float
-                )
-                performative.content_union_2_type_dict_of_int_float.update(
-                    content_union_2_type_dict_of_int_float
-                )
-            if msg.is_set("content_union_2_type_dict_of_bool_bytes"):
-                performative.content_union_2_type_dict_of_bool_bytes_is_set = True
-                content_union_2_type_dict_of_bool_bytes = (
-                    msg.content_union_2_type_dict_of_bool_bytes
-                )
-                performative.content_union_2_type_dict_of_bool_bytes.update(
-                    content_union_2_type_dict_of_bool_bytes
-                )
+            if msg.is_set("content_union_1"):
+                if isinstance(msg.content_union_1, DataModel):
+                    performative.content_union_1_type_DataModel_is_set = True
+                    content_union_1_type_DataModel = msg.content_union_1
+                    DataModel.encode(
+                        performative.content_union_1_type_DataModel,
+                        content_union_1_type_DataModel,
+                    )
+                if isinstance(msg.content_union_1, bytes):
+                    performative.content_union_1_type_bytes_is_set = True
+                    content_union_1_type_bytes = msg.content_union_1
+                    performative.content_union_1_type_bytes = content_union_1_type_bytes
+                if isinstance(msg.content_union_1, int):
+                    performative.content_union_1_type_int_is_set = True
+                    content_union_1_type_int = msg.content_union_1
+                    performative.content_union_1_type_int = content_union_1_type_int
+                if isinstance(msg.content_union_1, float):
+                    performative.content_union_1_type_float_is_set = True
+                    content_union_1_type_float = msg.content_union_1
+                    performative.content_union_1_type_float = content_union_1_type_float
+                if isinstance(msg.content_union_1, bool):
+                    performative.content_union_1_type_bool_is_set = True
+                    content_union_1_type_bool = msg.content_union_1
+                    performative.content_union_1_type_bool = content_union_1_type_bool
+                if isinstance(msg.content_union_1, str):
+                    performative.content_union_1_type_str_is_set = True
+                    content_union_1_type_str = msg.content_union_1
+                    performative.content_union_1_type_str = content_union_1_type_str
+            if msg.is_set("content_union_3"):
+                if isinstance(msg.content_union_3, DataModel):
+                    performative.content_union_3_type_DataModel_is_set = True
+                    content_union_3_type_DataModel = msg.content_union_3
+                    DataModel.encode(
+                        performative.content_union_3_type_DataModel,
+                        content_union_3_type_DataModel,
+                    )
+                if isinstance(msg.content_union_3, DataModel2):
+                    performative.content_union_3_type_DataModel2_is_set = True
+                    content_union_3_type_DataModel2 = msg.content_union_3
+                    DataModel2.encode(
+                        performative.content_union_3_type_DataModel2,
+                        content_union_3_type_DataModel2,
+                    )
             t_protocol_msg.performative_mt.CopyFrom(performative)
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_O:
             performative = t_protocol_pb2.TProtocolMessage.Performative_O_Performative()  # type: ignore
@@ -445,62 +371,18 @@ class TProtocolSerializer(Serializer):
             if t_protocol_pb.performative_mt.content_union_1_type_str_is_set:
                 content_union_1 = t_protocol_pb.performative_mt.content_union_1_type_str
                 performative_content["content_union_1"] = content_union_1
-            if t_protocol_pb.performative_mt.content_union_1_type_set_of_int_is_set:
-                content_union_1 = t_protocol_pb.performative_mt.content_union_1
-                content_union_1_frozenset = frozenset(content_union_1)
-                performative_content["content_union_1"] = content_union_1_frozenset
-            if t_protocol_pb.performative_mt.content_union_1_type_list_of_bool_is_set:
-                content_union_1 = t_protocol_pb.performative_mt.content_union_1
-                content_union_1_tuple = tuple(content_union_1)
-                performative_content["content_union_1"] = content_union_1_tuple
-            if (
-                t_protocol_pb.performative_mt.content_union_1_type_dict_of_str_int_is_set
-            ):
-                content_union_1 = t_protocol_pb.performative_mt.content_union_1
-                content_union_1_dict = dict(content_union_1)
-                performative_content["content_union_1"] = content_union_1_dict
-            if t_protocol_pb.performative_mt.content_union_2_type_set_of_bytes_is_set:
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_frozenset = frozenset(content_union_2)
-                performative_content["content_union_2"] = content_union_2_frozenset
-            if t_protocol_pb.performative_mt.content_union_2_type_set_of_int_is_set:
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_frozenset = frozenset(content_union_2)
-                performative_content["content_union_2"] = content_union_2_frozenset
-            if t_protocol_pb.performative_mt.content_union_2_type_set_of_str_is_set:
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_frozenset = frozenset(content_union_2)
-                performative_content["content_union_2"] = content_union_2_frozenset
-            if t_protocol_pb.performative_mt.content_union_2_type_list_of_float_is_set:
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_tuple = tuple(content_union_2)
-                performative_content["content_union_2"] = content_union_2_tuple
-            if t_protocol_pb.performative_mt.content_union_2_type_list_of_bool_is_set:
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_tuple = tuple(content_union_2)
-                performative_content["content_union_2"] = content_union_2_tuple
-            if t_protocol_pb.performative_mt.content_union_2_type_list_of_bytes_is_set:
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_tuple = tuple(content_union_2)
-                performative_content["content_union_2"] = content_union_2_tuple
-            if (
-                t_protocol_pb.performative_mt.content_union_2_type_dict_of_str_int_is_set
-            ):
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_dict = dict(content_union_2)
-                performative_content["content_union_2"] = content_union_2_dict
-            if (
-                t_protocol_pb.performative_mt.content_union_2_type_dict_of_int_float_is_set
-            ):
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_dict = dict(content_union_2)
-                performative_content["content_union_2"] = content_union_2_dict
-            if (
-                t_protocol_pb.performative_mt.content_union_2_type_dict_of_bool_bytes_is_set
-            ):
-                content_union_2 = t_protocol_pb.performative_mt.content_union_2
-                content_union_2_dict = dict(content_union_2)
-                performative_content["content_union_2"] = content_union_2_dict
+            if t_protocol_pb.performative_mt.content_union_3_type_DataModel_is_set:
+                pb2_content_union_3_type_DataModel = (
+                    t_protocol_pb.performative_mt.content_union_3_type_DataModel
+                )
+                content_union_3 = DataModel.decode(pb2_content_union_3_type_DataModel)
+                performative_content["content_union_3"] = content_union_3
+            if t_protocol_pb.performative_mt.content_union_3_type_DataModel2_is_set:
+                pb2_content_union_3_type_DataModel2 = (
+                    t_protocol_pb.performative_mt.content_union_3_type_DataModel2
+                )
+                content_union_3 = DataModel2.decode(pb2_content_union_3_type_DataModel2)
+                performative_content["content_union_3"] = content_union_3
         elif performative_id == TProtocolMessage.Performative.PERFORMATIVE_O:
             if t_protocol_pb.performative_o.content_o_ct_is_set:
                 pb2_content_o_ct = t_protocol_pb.performative_o.content_o_ct

@@ -60,8 +60,9 @@ speech_acts:
     content_dict_str_bool: pt:dict[pt:str, pt:bool]
     content_dict_str_str: pt:dict[pt:str, pt:str]
   performative_mt:
-    content_union_1: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:int], pt:list[pt:bool], pt:dict[pt:str, pt:int]]
-    content_union_2: pt:union[pt:set[pt:bytes], pt:set[pt:int], pt:set[pt:str], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:bool, pt:bytes]]
+    content_union_1: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str]
+    # content_union_2: pt:union[pt:set[pt:bytes], int]: # nested types  not allowed in union for the moment
+    content_union_3: pt:union[ct:DataModel, ct:DataModel2]
   performative_o:
     content_o_ct: pt:optional[ct:DataModel]
     content_o_bool: pt:optional[pt:bool]
@@ -74,6 +75,15 @@ speech_acts:
 ...
 ---
 ct:DataModel: |
+  bytes bytes_field = 1;
+  int64 int_field = 2;
+  float float_field = 3;
+  bool bool_field = 4;
+  string str_field = 5;
+  repeated int64 set_field = 6;
+  repeated string list_field = 7;
+  map<int64, bool> dict_field = 8;
+ct:DataModel2: |
   bytes bytes_field = 1;
   int64 int_field = 2;
   float float_field = 3;

@@ -16,6 +16,17 @@ message TProtocolMessage{
     map<int64, bool> dict_field = 8;
   }
 
+  message DataModel2{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
 
   // Performatives and contents
   message Performative_Ct_Performative{
@@ -63,23 +74,21 @@ message TProtocolMessage{
 
   message Performative_Mt_Performative{
     DataModel content_union_1_type_DataModel = 1;
-    bytes content_union_1_type_bytes = 2;
-    int64 content_union_1_type_int = 3;
-    float content_union_1_type_float = 4;
-    bool content_union_1_type_bool = 5;
-    string content_union_1_type_str = 6;
-    repeated int64 content_union_1_type_set_of_int = 7;
-    repeated bool content_union_1_type_list_of_bool = 8;
-    map<string, int64> content_union_1_type_dict_of_str_int = 9;
-    repeated bytes content_union_2_type_set_of_bytes = 10;
-    repeated int64 content_union_2_type_set_of_int = 11;
-    repeated string content_union_2_type_set_of_str = 12;
-    repeated float content_union_2_type_list_of_float = 13;
-    repeated bool content_union_2_type_list_of_bool = 14;
-    repeated bytes content_union_2_type_list_of_bytes = 15;
-    map<string, int64> content_union_2_type_dict_of_str_int = 16;
-    map<int64, float> content_union_2_type_dict_of_int_float = 17;
-    map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 18;
+    bool content_union_1_type_DataModel_is_set = 2;
+    bytes content_union_1_type_bytes = 3;
+    bool content_union_1_type_bytes_is_set = 4;
+    int64 content_union_1_type_int = 5;
+    bool content_union_1_type_int_is_set = 6;
+    float content_union_1_type_float = 7;
+    bool content_union_1_type_float_is_set = 8;
+    bool content_union_1_type_bool = 9;
+    bool content_union_1_type_bool_is_set = 10;
+    string content_union_1_type_str = 11;
+    bool content_union_1_type_str_is_set = 12;
+    DataModel content_union_3_type_DataModel = 13;
+    bool content_union_3_type_DataModel_is_set = 14;
+    DataModel2 content_union_3_type_DataModel2 = 15;
+    bool content_union_3_type_DataModel2_is_set = 16;
   }
 
   message Performative_O_Performative{

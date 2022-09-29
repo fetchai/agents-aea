@@ -104,7 +104,6 @@ class TProtocolNoCtMessage(Message):
             "content_set_str",
             "content_str",
             "content_union_1",
-            "content_union_2",
             "dialogue_reference",
             "message_id",
             "performative",
@@ -429,57 +428,10 @@ class TProtocolNoCtMessage(Message):
         return cast(str, self.get("content_str"))
 
     @property
-    def content_union_1(
-        self,
-    ) -> Union[
-        bytes, int, float, bool, str, FrozenSet[int], Tuple[bool, ...], Dict[str, int]
-    ]:
+    def content_union_1(self) -> Union[bytes, int, float, bool, str]:
         """Get the 'content_union_1' content from the message."""
         enforce(self.is_set("content_union_1"), "'content_union_1' content is not set.")
-        return cast(
-            Union[
-                bytes,
-                int,
-                float,
-                bool,
-                str,
-                FrozenSet[int],
-                Tuple[bool, ...],
-                Dict[str, int],
-            ],
-            self.get("content_union_1"),
-        )
-
-    @property
-    def content_union_2(
-        self,
-    ) -> Union[
-        FrozenSet[bytes],
-        FrozenSet[int],
-        FrozenSet[str],
-        Tuple[float, ...],
-        Tuple[bool, ...],
-        Tuple[bytes, ...],
-        Dict[str, int],
-        Dict[int, float],
-        Dict[bool, bytes],
-    ]:
-        """Get the 'content_union_2' content from the message."""
-        enforce(self.is_set("content_union_2"), "'content_union_2' content is not set.")
-        return cast(
-            Union[
-                FrozenSet[bytes],
-                FrozenSet[int],
-                FrozenSet[str],
-                Tuple[float, ...],
-                Tuple[bool, ...],
-                Tuple[bytes, ...],
-                Dict[str, int],
-                Dict[int, float],
-                Dict[bool, bytes],
-            ],
-            self.get("content_union_2"),
-        )
+        return cast(Union[bytes, int, float, bool, str], self.get("content_union_1"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the t_protocol_no_ct protocol."""
@@ -1010,101 +962,17 @@ class TProtocolNoCtMessage(Message):
                         ),
                     )
             elif self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_MT:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 1
                 enforce(
                     isinstance(self.content_union_1, bool)
                     or isinstance(self.content_union_1, bytes)
-                    or isinstance(self.content_union_1, dict)
                     or isinstance(self.content_union_1, float)
-                    or isinstance(self.content_union_1, frozenset)
                     or type(self.content_union_1) is int
-                    or isinstance(self.content_union_1, str)
-                    or isinstance(self.content_union_1, tuple),
-                    "Invalid type for content 'content_union_1'. Expected either of '['bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
+                    or isinstance(self.content_union_1, str),
+                    "Invalid type for content 'content_union_1'. Expected either of '['bool', 'bytes', 'float', 'int', 'str']'. Found '{}'.".format(
                         type(self.content_union_1)
                     ),
                 )
-                if isinstance(self.content_union_1, frozenset):
-                    enforce(
-                        all(type(element) is int for element in self.content_union_1),
-                        "Invalid type for elements of content 'content_union_1'. Expected 'int'.",
-                    )
-                if isinstance(self.content_union_1, tuple):
-                    enforce(
-                        all(
-                            isinstance(element, bool)
-                            for element in self.content_union_1
-                        ),
-                        "Invalid type for tuple elements in content 'content_union_1'. Expected 'bool'.",
-                    )
-                if isinstance(self.content_union_1, dict):
-                    for (
-                        key_of_content_union_1,
-                        value_of_content_union_1,
-                    ) in self.content_union_1.items():
-                        enforce(
-                            (
-                                isinstance(key_of_content_union_1, str)
-                                and type(value_of_content_union_1) is int
-                            ),
-                            "Invalid type for dictionary key, value in content 'content_union_1'. Expected 'str', 'int'.",
-                        )
-                enforce(
-                    isinstance(self.content_union_2, dict)
-                    or isinstance(self.content_union_2, frozenset)
-                    or isinstance(self.content_union_2, tuple),
-                    "Invalid type for content 'content_union_2'. Expected either of '['dict', 'frozenset', 'tuple']'. Found '{}'.".format(
-                        type(self.content_union_2)
-                    ),
-                )
-                if isinstance(self.content_union_2, frozenset):
-                    enforce(
-                        all(
-                            isinstance(element, bytes)
-                            for element in self.content_union_2
-                        )
-                        or all(type(element) is int for element in self.content_union_2)
-                        or all(
-                            isinstance(element, str) for element in self.content_union_2
-                        ),
-                        "Invalid type for frozenset elements in content 'content_union_2'. Expected either 'bytes' or 'int' or 'str'.",
-                    )
-                if isinstance(self.content_union_2, tuple):
-                    enforce(
-                        all(
-                            isinstance(element, bool)
-                            for element in self.content_union_2
-                        )
-                        or all(
-                            isinstance(element, bytes)
-                            for element in self.content_union_2
-                        )
-                        or all(
-                            isinstance(element, float)
-                            for element in self.content_union_2
-                        ),
-                        "Invalid type for tuple elements in content 'content_union_2'. Expected either 'bool' or 'bytes' or 'float'.",
-                    )
-                if isinstance(self.content_union_2, dict):
-                    for (
-                        key_of_content_union_2,
-                        value_of_content_union_2,
-                    ) in self.content_union_2.items():
-                        enforce(
-                            (
-                                isinstance(key_of_content_union_2, bool)
-                                and isinstance(value_of_content_union_2, bytes)
-                            )
-                            or (
-                                type(key_of_content_union_2) is int
-                                and isinstance(value_of_content_union_2, float)
-                            )
-                            or (
-                                isinstance(key_of_content_union_2, str)
-                                and type(value_of_content_union_2) is int
-                            ),
-                            "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'.",
-                        )
             elif self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_O:
                 expected_nb_of_contents = 0
                 if self.is_set("content_o_bool"):
