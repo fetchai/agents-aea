@@ -363,7 +363,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
             method_to_call = getattr(contract, message.callable)
         except AttributeError:
             _default_logger.info(
-                f"Contract method {message.callable} not found in the {contract.contract_id} contract package. Checking in the ABI..."
+                f"Contract method {message.callable} not found in the contract package {contract.contract_id}. Checking in the ABI..."
             )
 
         # Check for the method in the ABI
