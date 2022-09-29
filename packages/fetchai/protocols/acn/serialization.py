@@ -35,7 +35,31 @@ class AcnSerializer(Serializer):
     """Serialization for the 'acn' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_AgentRecord(value: AgentRecord) -> acn_pb2.AcnMessage.AgentRecord:  # type: ignore
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = acn_pb2.AcnMessage.AgentRecord()  # type: ignore
+        AgentRecord.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_StatusBody(value: StatusBody) -> acn_pb2.AcnMessage.StatusBody:  # type: ignore
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = acn_pb2.AcnMessage.StatusBody()  # type: ignore
+        StatusBody.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Acn' message into bytes.
 

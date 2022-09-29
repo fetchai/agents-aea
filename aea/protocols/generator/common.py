@@ -164,6 +164,21 @@ def _has_matched_brackets(text: str) -> bool:
     return len(open_bracket_stack) == 0
 
 
+def _is_compositional_type(content_type: str) -> bool:
+    """
+    Checks if content_type is compositional.
+
+    :param content_type: the type string.
+    :return: bool.
+    """
+    for valid_compositional_type in (
+        SPECIFICATION_COMPOSITIONAL_TYPES + PYTHON_COMPOSITIONAL_TYPES
+    ):
+        if content_type.startswith(valid_compositional_type):
+            return True
+    return False
+
+
 def _get_sub_types_of_compositional_types(compositional_type: str) -> Tuple[str, ...]:
     """
     Extract the sub-types of compositional types.
@@ -286,25 +301,21 @@ def _includes_custom_type(content_type: str) -> bool:
     :param content_type: the content type
     :return: Boolean result
     """
-    if content_type.startswith("Optional"):
-        sub_type = _get_sub_types_of_compositional_types(content_type)[0]
-        result = _includes_custom_type(sub_type)
-    elif content_type.startswith("Union"):
-        sub_types = _get_sub_types_of_compositional_types(content_type)
-        result = False
-        for sub_type in sub_types:
-            if _includes_custom_type(sub_type):
-                result = True
-                break
-    elif (
-        content_type.startswith("FrozenSet")
-        or content_type.startswith("Tuple")
-        or content_type.startswith("Dict")
-        or content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys()
-    ):
-        result = False
-    else:
-        result = True
+    for type_ in [
+        "Union",
+        "Optional",
+        "Dict",
+        "Tuple",
+        "FrozenSet",
+    ]:
+        if content_type.startswith(type_):
+            sub_types = _get_sub_types_of_compositional_types(content_type)
+            for sub_type in sub_types:
+                if _includes_custom_type(sub_type):
+                    return True
+            return False
+
+    result = content_type not in PYTHON_TYPE_TO_PROTO_TYPE.keys()
     return result
 
 

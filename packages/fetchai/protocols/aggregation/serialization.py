@@ -33,8 +33,8 @@ from packages.fetchai.protocols.aggregation.message import AggregationMessage
 class AggregationSerializer(Serializer):
     """Serialization for the 'aggregation' protocol."""
 
-    @staticmethod
-    def encode(msg: Message) -> bytes:
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'Aggregation' message into bytes.
 

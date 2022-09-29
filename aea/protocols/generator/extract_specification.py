@@ -28,6 +28,7 @@ from aea.configurations.base import (
 from aea.protocols.generator.common import (
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
+    _is_compositional_type,
 )
 
 
@@ -192,25 +193,34 @@ def extract(
     ) in protocol_specification.speech_acts.read_all():
         all_performatives_set.add(performative)
         spec.speech_acts[performative] = {}
-        for content_name, content_type in speech_act_content_config.args.items():
+        for content_name, base_content_type in speech_act_content_config.args.items():
 
-            # determine necessary imports from typing
-            if len(re.findall("pt:set\\[", content_type)) >= 1:
-                spec.typing_imports["FrozenSet"] = True
-            if len(re.findall("pt:dict\\[", content_type)) >= 1:
-                spec.typing_imports["Dict"] = True
-            if len(re.findall("pt:union\\[", content_type)) >= 1:
-                spec.typing_imports["Union"] = True
-            if len(re.findall("pt:optional\\[", content_type)) >= 1:
-                spec.typing_imports["Optional"] = True
+            for content_type in (
+                list(_get_sub_types_of_compositional_types(base_content_type))
+                if _is_compositional_type(base_content_type)
+                else []
+            ) + [base_content_type]:
+                # check nested
+                # determine necessary imports from typing
+                if len(re.findall("pt:set\\[", content_type)) >= 1:
+                    spec.typing_imports["FrozenSet"] = True
+                if len(re.findall("pt:dict\\[", content_type)) >= 1:
+                    spec.typing_imports["Dict"] = True
+                if len(re.findall("pt:union\\[", content_type)) >= 1:
+                    spec.typing_imports["Union"] = True
+                if len(re.findall("pt:optional\\[", content_type)) >= 1:
+                    spec.typing_imports["Optional"] = True
 
-            # specification type --> python type
-            pythonic_content_type = _specification_type_to_python_type(content_type)
+                pythonic_content_type = _specification_type_to_python_type(content_type)
+                if content_type.startswith("ct:"):
+                    all_custom_types_set.add(pythonic_content_type)
 
+            # top level specification type --> python type
+            pythonic_content_type = _specification_type_to_python_type(
+                base_content_type
+            )
             spec.all_unique_contents[content_name] = pythonic_content_type
             spec.speech_acts[performative][content_name] = pythonic_content_type
-            if content_type.startswith("ct:"):
-                all_custom_types_set.add(pythonic_content_type)
 
     # sort the sets
     spec.all_performatives = sorted(all_performatives_set)

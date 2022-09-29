@@ -14,7 +14,7 @@ fingerprint:
   message.py: QmXoPS4T5Vg4abwLMJtMM3MyQwVhAPMD9HmhMnHXG8rMu7
   oef_search.proto: QmaYkawAXEeeNuCcjmwcvdsttnE3owtuP9ouAYVyRu7M2J
   oef_search_pb2.py: QmaSXn3irhKQH7cVT4A1F38dNTwB9XhF41y5gZqA52ANGd
-  serialization.py: QmW1wJmEYax9eaxMUEQZKTxnMhodwArrNSMvNXho9UWCTJ
+  serialization.py: QmZ36Fx11mFUGbjQyNmmULBcHR3UJ2AqJXRWfywTFiLfWH
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

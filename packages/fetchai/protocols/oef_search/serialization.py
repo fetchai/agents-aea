@@ -40,7 +40,55 @@ class OefSearchSerializer(Serializer):
     """Serialization for the 'oef_search' protocol."""
 
     @staticmethod
-    def encode(msg: Message) -> bytes:
+    def _encode_AgentsInfo(value: AgentsInfo) -> oef_search_pb2.OefSearchMessage.AgentsInfo:  # type: ignore
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = oef_search_pb2.OefSearchMessage.AgentsInfo()  # type: ignore
+        AgentsInfo.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_Description(value: Description) -> oef_search_pb2.OefSearchMessage.Description:  # type: ignore
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = oef_search_pb2.OefSearchMessage.Description()  # type: ignore
+        Description.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_OefErrorOperation(value: OefErrorOperation) -> oef_search_pb2.OefSearchMessage.OefErrorOperation:  # type: ignore
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = oef_search_pb2.OefSearchMessage.OefErrorOperation()  # type: ignore
+        OefErrorOperation.encode(result, value)
+        return result
+
+    @staticmethod
+    def _encode_Query(value: Query) -> oef_search_pb2.OefSearchMessage.Query:  # type: ignore
+        """
+        Encode custom_type {custom_type}.
+
+        :param value: the custom type object.
+        :return: protobuf encoded message of custom type.
+        """
+        result = oef_search_pb2.OefSearchMessage.Query()  # type: ignore
+        Query.encode(result, value)
+        return result
+
+    @classmethod
+    def encode(cls, msg: Message) -> bytes:
         """
         Encode a 'OefSearch' message into bytes.
 
