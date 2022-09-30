@@ -177,7 +177,9 @@ class InitConfigFolderTestCase(TestCase):
         self, open_mock, makedirs_mock, exists_mock, dirname_mock
     ):
         """Test for write_cli_config method positive result."""
-        write_cli_config()
+        user_config = get_or_create_cli_config()
+        write_cli_config(user_config)
+
         dirname_mock.assert_called_once()
         exists_mock.assert_called_once_with("dir-name")
         makedirs_mock.assert_called_once_with("dir-name")
