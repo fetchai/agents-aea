@@ -276,10 +276,10 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
             hash_mismatches = True
 
             if fix:
-                new_content = content.replace(doc_full_cmd, new_command)
+                content = content.replace(doc_full_cmd, new_command)
 
                 with open(str(md_file), "w", encoding="utf-8") as qs_file:
-                    qs_file.write(new_content)
+                    qs_file.write(content)
                 print(f"Fixed an IPFS hash in doc file {md_file}")
                 old_to_new_hashes[doc_hash] = expected_hash
             else:
@@ -314,10 +314,10 @@ def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-lo
             hash_mismatches = True
 
             if fix:
-                new_content = content.replace(full_package, new_package)
+                content = content.replace(full_package, new_package)
 
                 with open(str(py_file), "w", encoding="utf-8") as qs_file:
-                    qs_file.write(new_content)
+                    qs_file.write(content)
                 print(f"Fixed an IPFS hash in doc file {py_file}")
                 old_to_new_hashes[py_hash] = expected_hash
             else:
