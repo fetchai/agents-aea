@@ -230,7 +230,9 @@ class PackageHashManager:
         return self.package_tree[vendor][package_type][package_name].hash
 
 
-def check_ipfs_hashes(fix: bool = False) -> None:  # pylint: disable=too-many-locals
+def check_ipfs_hashes(  # pylint: disable=too-many-locals,too-many-statements
+    fix: bool = False,
+) -> None:
     """Fix ipfs hashes in the docs"""
 
     all_md_files_docs = Path("docs").rglob("*.md")

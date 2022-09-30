@@ -30,7 +30,9 @@ def generate_table() -> None:
     """Generates a markdown table containing a package list"""
 
     # Load packages.json
-    with open(Path("packages", "packages.json"), "r") as packages_file:
+    with open(
+        Path("packages", "packages.json"), mode="r", encoding="utf-8"
+    ) as packages_file:
         data = json.load(packages_file)
 
     # Table header
@@ -46,7 +48,9 @@ def generate_table() -> None:
         content += f"| {package_cell} | {hash_cell} |\n"
 
     # Write table
-    with open(Path("docs", "package_list.md"), "w") as packages_list:
+    with open(
+        Path("docs", "package_list.md"), mode="w", encoding="utf-8"
+    ) as packages_list:
         packages_list.write(content)
 
 
