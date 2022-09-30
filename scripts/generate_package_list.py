@@ -23,7 +23,7 @@ import json
 from pathlib import Path
 
 
-COL_WIDTH = 60
+COL_WIDTH = 61
 
 
 def generate_table() -> None:
@@ -44,7 +44,7 @@ def generate_table() -> None:
     # Table rows
     for package, package_hash in data.items():
         package_cell = package.ljust(COL_WIDTH, " ")
-        hash_cell = package_hash.ljust(COL_WIDTH, " ")
+        hash_cell = f"`{package_hash}`".ljust(COL_WIDTH, " ")
         content += f"| {package_cell} | {hash_cell} |\n"
 
     # Write table
