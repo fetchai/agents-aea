@@ -28,13 +28,13 @@ from unittest.mock import patch
 from aea.helpers.search.models import Description
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_seller.behaviours import (
     GenericServiceRegistrationBehaviour,
     LEDGER_API_ADDRESS,
 )
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 PACKAGE_ROOT = Path(__file__).parent.parent

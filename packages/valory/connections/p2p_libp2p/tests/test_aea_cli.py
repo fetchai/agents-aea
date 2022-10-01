@@ -65,7 +65,6 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
     @classmethod
     def teardown_class(cls) -> None:
         """Tear down the test"""
-        cls.terminate_agents()
         cls.log_files.clear()
         super().teardown_class()
 
@@ -88,9 +87,6 @@ class BaseP2PLibp2pConnectionAEATest(AEATestCaseEmpty):
         check_strings = "Peer running in "
         missing_strings = self.missing_from_output(process, check_strings)
         assert not missing_strings
-
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
 
 
 @libp2p_log_on_failure_all

@@ -8,7 +8,7 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: bafybeifecg7n3shhpaz7icimzm5r63aduk2cob73rg6ycihpwnt5du6jre
+  README.md: bafybeiabkdibf7iv3y33xkaemvuwiuhrjedrlvuklgjgty3gzggkgr5d5q
   __init__.py: bafybeibtknmpggpj77fflwndllcqvvbolpds7doymdp4fjd277metq6oxy
   check_dependencies.py: bafybeia3tx5v2mvoahoyz5hrrbczxh3zklll6xd57cainnucmtrxmzuu7u
   connection.py: bafybeid3g43y7wryyngns4dy2vjrx37xum2cmif2ovvsoycclny6mlrt6u
@@ -56,8 +56,8 @@ fingerprint:
   libp2p_node/utils/utils_test.go: bafybeig2kkgqy7miml66w2byomeqjp4czzv45gb4jas76cxildo3lxi4xq
   tests/__init__.py: bafybeieftcbmxxpe7okvm3ycualpyec6xys4nx5tihcjii7lqxd3w5lx7e
   tests/base.py: bafybeibn5afb3fiy2lakt7j53kalfbi22vfd35ls25iqzddm7etwvqmiry
-  tests/test_aea_cli.py: bafybeihieiiesgcoumk7w7l7pokfzklzj4syn7r4efe326xlmuhiwetntu
-  tests/test_build.py: bafybeievrnqdmg5qa6kmgjsjzxqx47vgxkf7rrhtw4gkf5y4w76n34idmm
+  tests/test_aea_cli.py: bafybeicyqnu4pzdl26pd765qcommyqccwvge7uh3keuk6cswpnbc47ovii
+  tests/test_build.py: bafybeih6px2jv5u3it5dccctb3gj2z47djr62szjbg6gdb4pij6ksuruua
   tests/test_errors.py: bafybeigfwg7cmxbgo7j2pce5vy55wvqze7wv67d4v37k3wpcflwbgzege4
   tests/test_go_code_matching_acn.py: bafybeig3mxp6l5g2fokkireopfxc6j3rvmxgo6nomy25fvoa3a6ozgk2ay
 fingerprint_ignore_patterns: []
@@ -65,7 +65,7 @@ build_entrypoint: check_dependencies.py
 connections: []
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
-- valory/acn:1.1.0:bafybeih5pz5re4kycou46xbzgguantxzj46aqtc575pgvej3m6bfg4xpfy
+- valory/acn:1.1.0:bafybeifontek6tvaecatoauiule3j3id6xoktpjubvuqi3h2jkzqg7zh7a
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000

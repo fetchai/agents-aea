@@ -30,9 +30,7 @@ import pytest
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.connections.ledger.connection import PUBLIC_ID as LEDGER_PUBLIC_ID
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.behaviours import (
     GenericSearchBehaviour,
@@ -46,6 +44,8 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     LedgerApiDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
+from packages.valory.connections.ledger.connection import PUBLIC_ID as LEDGER_PUBLIC_ID
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 FETCHAI = "fetchai"

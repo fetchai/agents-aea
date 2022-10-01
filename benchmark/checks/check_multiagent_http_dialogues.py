@@ -52,8 +52,8 @@ from packages.fetchai.connections.local.connection import (  # noqa: E402 # pyli
     LocalNode,
     OEFLocalConnection,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.dialogues import HttpDialogue, HttpDialogues
+from packages.valory.protocols.http.message import HttpMessage
 
 
 ROOT_PATH = os.path.join(os.path.abspath(__file__), "..", "..")

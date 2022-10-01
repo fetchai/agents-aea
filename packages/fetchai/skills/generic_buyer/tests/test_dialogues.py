@@ -32,7 +32,6 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDR
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogue,
@@ -47,6 +46,7 @@ from packages.fetchai.skills.generic_buyer.dialogues import (
     SigningDialogues,
 )
 from packages.open_aea.protocols.signing.message import SigningMessage
+from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
 PACKAGE_ROOT = Path(__file__).parent.parent

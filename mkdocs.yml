@@ -45,6 +45,7 @@ nav:
       - Build an AEA with the CLI: 'build-aea-step-by-step.md'
       - Scaffolding packages: 'scaffolding.md'
       - Generating protocols: 'protocol-generator.md'
+      - Developing contracts: 'creating-contracts.md'
     - Architecture & component deep-dives:
       - Design principles: 'design-principles.md'
       - Architectural diagram: 'diagram.md'

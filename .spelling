@@ -290,6 +290,7 @@ abci
 metaclass
 api
 gitleaks
+valory
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -352,3 +353,7 @@ output_file
 gitleaks
 1.18.0.post1
 aea-cli-ipfs
+ - docs/creating-contracts.md
+ABI
+ERC20
+WETH

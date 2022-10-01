@@ -69,7 +69,7 @@ from packages.fetchai.connections.http_server.connection import (
 )
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.valory.protocols.http.message import HttpMessage
 
 from tests.conftest import (
     CUR_PATH,
@@ -901,7 +901,7 @@ class TestExtraDeps(AEATestCaseEmpty):
     def test_check_dependencies_correct(self):
         """Test dependencies properly listed."""
         self.run_cli_command(
-            "add", "--local", "connection", "fetchai/http_client", cwd=self._get_cwd()
+            "add", "--local", "connection", "valory/http_client", cwd=self._get_cwd()
         )
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         assert "aiohttp" in builder._package_dependency_manager.pypi_dependencies

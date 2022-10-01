@@ -33,8 +33,8 @@ aea add connection fetchai/http_server:0.22.0:bafybeifpqp4uczojoczhjgl3yle3ojum7
 aea push connection fetchai/http_server --local
 aea add protocol fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy --remote
 aea push protocol fetchai/default --local
-aea add protocol fetchai/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e --remote
-aea push protocol fetchai/http --local
+aea add protocol valory/http:1.0.0:bafybeig7ilrz5b5a62kweohjoexdpdqmlw3zytwoyrlnqmpomgttf7f33e --remote
+aea push protocol valory/http --local
 cd ..
 aea delete my_aea
 ```
@@ -92,12 +92,12 @@ from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.protocols.default import DefaultMessage
-from packages.fetchai.protocols.http.message import HttpMessage
 from packages.YOUR_USERNAME.skills.http_echo.dialogues import (
     DefaultDialogues,
     HttpDialogue,
     HttpDialogues,
 )
+from packages.valory.protocols.http.message import HttpMessage
 
 
 class HttpHandler(Handler):
@@ -240,8 +240,8 @@ from packages.fetchai.protocols.default.dialogues import (
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogues as BaseDefaultDialogues,
 )
-from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
-from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+from packages.valory.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
+from packages.valory.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
 
 
 DefaultDialogue = BaseDefaultDialogue

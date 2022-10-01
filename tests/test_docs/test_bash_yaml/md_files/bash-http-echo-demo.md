@@ -1,14 +1,14 @@
 ``` bash
 pipenv shell
-aea fetch open_aea/http_echo:0.1.0:bafybeig72o4bbkc3pxf3fkokpp4v5lebpsostcxdgeqhq3tt5vwxet3nk4 --remote
+aea fetch open_aea/http_echo:0.1.0:bafybeihxe5mk2gs6k3xxf5rgaqqa5ij2ff74gebcwxskc2dpxvt5rcnyxi --remote
 cd http_echo
 aea generate-key ethereum; aea add-key ethereum
 aea install
 aea run --aev
 Adding protocol 'open_aea/signing:1.0.0'...
 Successfully added protocol 'open_aea/signing:1.0.0'.
-Adding protocol 'fetchai/http:1.0.0'...
-Successfully added protocol 'fetchai/http:1.0.0'.
+Adding protocol 'valory/http:1.0.0'...
+Successfully added protocol 'valory/http:1.0.0'.
 Adding protocol 'fetchai/default:1.0.0'...
 Successfully added protocol 'fetchai/default:1.0.0'.
 Adding connection 'fetchai/http_server:0.22.0'...

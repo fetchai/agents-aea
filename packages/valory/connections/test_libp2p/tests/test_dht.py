@@ -23,44 +23,38 @@
 # pylint: skip-file
 
 import itertools
-import json
+import logging
 import os
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.mail.base import Envelope
 
-from packages.valory.connections import p2p_libp2p, p2p_libp2p_client
-from packages.valory.connections.p2p_libp2p.connection import (
-    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
-)
+from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.valory.connections.p2p_libp2p.tests.base import libp2p_log_on_failure_all
-from packages.valory.connections.p2p_libp2p_client.connection import (
-    PUBLIC_ID as P2P_CLIENT_CONNECTION_PUBLIC_ID,
-)
 from packages.valory.connections.test_libp2p.tests.base import (
+    BaseP2PLibp2pAEATestCaseMany,
     BaseP2PLibp2pTest,
-    LIBP2P_LEDGER,
     LOCALHOST,
-    load_client_connection_yaml_config,
-    make_cert_request,
     ports,
+    wait_for_condition,
 )
 from packages.valory.connections.test_libp2p.tests.conftest import (
     ACNWithBootstrappedEntryNodes,
-    META_ADDRESS,
+    NodeConfig,
+    local_nodes,
+    public_nodes,
 )
 
 
 AEA_DEFAULT_LAUNCH_TIMEOUT = 30
 AEA_LIBP2P_LAUNCH_TIMEOUT = 30
-
-p2p_libp2p_path = f"vendor.{p2p_libp2p.__name__.split('.', 1)[-1]}"
-p2p_libp2p_client_path = f"vendor.{p2p_libp2p_client.__name__.split('.', 1)[-1]}"
 
 skip_if_ci_marker = [
     pytest.Mark(
@@ -68,32 +62,6 @@ skip_if_ci_marker = [
         args=(bool(os.environ.get("IS_CI_WORKFLOW")),),
         kwargs={"reason": "public ACN node tests flaky on CI"},
     )
-]
-
-
-@dataclass
-class NodeConfig:
-    """Node configuration"""
-
-    uri: str
-    maddr: str
-    public_key: str
-
-
-local_nodes = [
-    NodeConfig(
-        "localhost:11001",
-        f"/dns4/{META_ADDRESS}/tcp/9001/p2p/16Uiu2HAkw99FW2GKb2qs24eLgfXSSUjke1teDaV9km63Fv3UGdnF",
-        "02197b55d736bd242311aaabb485f9db40881349873bb13e8b60c8a130ecb341d8",
-    ),
-    NodeConfig(
-        "localhost:11002",
-        f"/dns4/{META_ADDRESS}/tcp/9002/p2p/16Uiu2HAm4aHr1iKR323tca8Zu8hKStEEVwGkE2gtCJw49S3gbuVj",
-        "0287ee61e8f939aeaa69bd7156463d698f8e74a3e1d5dd20cce997970f13ad4f12",
-    ),
-]
-public_nodes = [
-    NodeConfig(**kw) for kw in load_client_connection_yaml_config()["nodes"]
 ]
 
 
@@ -178,58 +146,30 @@ class Libp2pConnectionDHTDelegate(Libp2pConnectionDHTRelay):
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
+class Libp2pConnectionDHTRelayAEACli(BaseP2PLibp2pAEATestCaseMany):
     """Test that public DHT's relay service is working properly, using aea cli"""
 
-    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
+    def set_libp2p_connection_config(self):
+        """Set libp2p connection config"""
 
-    def test_connectivity(self):
-        """Test connectivity."""
-        self.log_files = []
-        self.agent_name = "some"
-        self.create_agents(self.agent_name)
-        self.set_agent_context(self.agent_name)
-        self.conn_key_file = os.path.join(
-            os.path.abspath(os.getcwd()), "./conn_key.txt"
-        )
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
-        # set config
-        self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config(
-            "agent.required_ledgers",
-            json.dumps([agent_ledger_id, node_ledger_id]),
-            "list",
-        )
-        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
-        # agent keys
-        self.generate_private_key(agent_ledger_id)
-        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
-        # libp2p node keys
-        self.generate_private_key(node_ledger_id, private_key_file=self.conn_key_file)
-        self.add_private_key(
-            node_ledger_id, private_key_filepath=self.conn_key_file, connection=True
-        )
-        # add connection and build
-        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
-        self.run_cli_command("build", cwd=self._get_cwd())
-        # for logging
-        log_file = f"libp2p_node_{self.agent_name}.log"
-        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
-
-        config_path = f"{p2p_libp2p_path}.config"
+        log_file = str(Path(f"libp2p_node_{self.agent_name}.log").absolute())
+        self.log_files.append(log_file)
         self.nested_set_config(
-            config_path,
+            f"{self.p2p_libp2p_path}.config",
             {
                 "local_uri": f"{LOCALHOST.netloc}:{next(ports)}",
                 "entry_peers": [node.maddr for node in self.nodes],
                 "log_file": log_file,
-                "ledger_id": node_ledger_id,
+                "ledger_id": self.node_ledger_id,
             },
         )
-
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
-        self.log_files = [log_file]
+    def test_connectivity(self):
+        """Test connectivity."""
+
+        self.add_libp2p_connection()
+        self.set_libp2p_connection_config()
         process = self.run_agent()
 
         is_running = self.is_running(process, timeout=AEA_LIBP2P_LAUNCH_TIMEOUT)
@@ -239,72 +179,30 @@ class Libp2pConnectionDHTRelayAEACli(AEATestCaseMany):
         missing_strings = self.missing_from_output(process, check_strings)
         assert not missing_strings
 
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
-
-    def teardown(self):
-        """Clean up after test case run."""
-        self.unset_agent_context()
-        self.run_cli_command("delete", self.agent_name)
-
 
 @pytest.mark.integration
 @libp2p_log_on_failure_all
-class Libp2pConnectionDHTDelegateAEACli(AEATestCaseMany):
+class Libp2pConnectionDHTDelegateAEACli(BaseP2PLibp2pAEATestCaseMany):
     """Test that public DHT's delegate service is working properly, using aea cli"""
 
-    package_registry_src_rel: Path = Path(__file__).parent.parent.parent.parent.parent
+    def set_libp2p_client_connection_config(self):
+        """Set libp2p client connection config"""
+
+        path = self.p2p_libp2p_client_path
+        nodes = [{"uri": n.uri, "public_key": n.public_key} for n in self.nodes]
+        cert_requests = [self.make_node_cert_request(n.public_key) for n in self.nodes]
+        self.nested_set_config(f"{path}.config", {"nodes": nodes})
+        self.nested_set_config(f"{path}.cert_requests", cert_requests)
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
     def test_connectivity(self):
         """Test connectivity."""
-        self.agent_name = "some"
-        self.create_agents(self.agent_name)
-        self.set_agent_context(self.agent_name)
 
-        agent_ledger_id, node_ledger_id = DEFAULT_LEDGER, LIBP2P_LEDGER
-        self.set_config("agent.default_ledger", agent_ledger_id)
-        self.set_config(
-            "agent.required_ledgers",
-            json.dumps([agent_ledger_id, node_ledger_id]),
-            "list",
-        )
-        # agent keys
-        self.generate_private_key(agent_ledger_id)
-        self.add_private_key(agent_ledger_id, f"{agent_ledger_id}_private_key.txt")
-
-        self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
-        config_path = f"{p2p_libp2p_client_path}.config"
-        self.nested_set_config(
-            config_path,
-            {"nodes": [{"uri": node.uri} for node in self.nodes]},
-        )
-        nodes = [
-            {"uri": node.uri, "public_key": node.public_key} for node in self.nodes
-        ]
-        self.nested_set_config(p2p_libp2p_client_path + ".config", {"nodes": nodes})
-
-        # generate certificates for connection
-        self.nested_set_config(
-            p2p_libp2p_client_path + ".cert_requests",
-            [
-                make_cert_request(
-                    node.public_key, agent_ledger_id, f"./cli_test_{node.public_key}"
-                )
-                for node in self.nodes
-            ],
-        )
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
-
+        self.add_libp2p_client_connection()
+        self.set_libp2p_client_connection_config()
         process = self.run_agent()
         is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
         assert is_running, "AEA not running within timeout!"
-        self.terminate_agents(process)
-        assert self.is_successfully_terminated(process)
-
-    def teardown(self):
-        """Clean up after test case run."""
-        self.unset_agent_context()
-        self.run_cli_command("delete", self.agent_name)
 
 
 test_classes = [
@@ -342,3 +240,102 @@ for base_cls in test_classes:
         test_cls.__name__ = name
         test_cls.nodes = test_case.nodes
         globals()[test_cls.__name__] = test_cls
+
+
+RANGE_32_BIT = -1 << 31, (1 << 31) - 1
+
+base_message_strategy = dict(
+    dialogue_reference=st.tuples(st.text(), st.text()),
+    message_id=st.integers(*RANGE_32_BIT),
+    target=st.integers(*RANGE_32_BIT),
+)
+default_message_strategy = dict(
+    **base_message_strategy,
+    content=st.binary(),
+    performative=st.just(DefaultMessage.Performative.BYTES),
+)
+
+
+class TestDHTRobustness(BaseP2PLibp2pTest, ACNWithBootstrappedEntryNodes):
+    """Test DHT Robustness"""
+
+    nodes = local_nodes
+    pytestmark = skip_if_ci_marker
+
+    def setup(self):
+        """Setup"""
+
+        for node in self.nodes:
+            self.make_connection(relay=False, entry_peers=[node.maddr])
+            self.make_client_connection(uri=node.uri, peer_public_key=node.public_key)
+
+    def teardown(self):
+        """Teardown"""
+
+        self._disconnect()
+        self.multiplexers.clear()
+        self.log_files.clear()
+
+    @pytest.mark.parametrize("exponent", [2, 3, 4])
+    def test_prolonged_message_exchange(self, exponent: int):
+        """Test prolonged message exchange"""
+
+        n_messages = 10**exponent
+        for _ in range(n_messages):
+            mux_pair = random.sample(self.multiplexers, 2)
+            sender, to = (c.address for m in mux_pair for c in m.connections)
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            mux_pair[0].put(envelope)
+            delivered_envelope = mux_pair[1].get(block=True, timeout=5)
+            assert self.sent_is_delivered_envelope(envelope, delivered_envelope)
+
+    @pytest.mark.parametrize("exponent", [2, 3, 4])
+    def test_ship_first_check_later(self, exponent: int):
+        """Ship first check later"""
+
+        shipped, delivered = [], []
+        n_messages = 10**exponent
+        for _ in range(n_messages):
+            mux_pair = random.sample(self.multiplexers, 2)
+            sender, to = (c.address for m in mux_pair for c in m.connections)
+            envelope = self.enveloped_default_message(to=to, sender=sender)
+            mux_pair[0].put(envelope)
+            shipped.append(envelope)
+
+        def check():
+            for mux in self.multiplexers:
+                while not mux.in_queue.empty():
+                    delivered.append(mux.get())
+            logging.info(f"{len(delivered)} / {len(shipped)}")
+            return len(delivered) >= n_messages
+
+        timeout = max(2, n_messages // 10)
+        try:
+            wait_for_condition(lambda: check(), timeout, period=1.0)
+        except TimeoutError:
+            raise TimeoutError(f"Found only {len(delivered)} / {len(shipped)} messages")
+
+        assert {e.encode() for e in shipped} == {e.encode() for e in delivered}
+
+    def send_message_via_random_multiplexer_pair(self, message) -> bool:
+        """Send message via random multiplexers"""
+
+        mux_pair = random.sample(self.multiplexers, 2)
+        sender, to = (c.address for m in mux_pair for c in m.connections)
+        envelope = Envelope(
+            to=to,
+            sender=sender,
+            protocol_specification_id=message.protocol_specification_id,
+            message=message,
+        )
+        logging.debug(envelope)
+        mux_pair[0].put(envelope)
+        delivered_envelope = mux_pair[1].get(block=True, timeout=5)
+        return self.sent_is_delivered_envelope(envelope, delivered_envelope)
+
+    @settings(deadline=2000)
+    @given(st.builds(DefaultMessage, **default_message_strategy))
+    def test_randomized_default_message_exchange(self, message):
+        """Test randomized default message strategy"""
+
+        assert self.send_message_via_random_multiplexer_pair(message)

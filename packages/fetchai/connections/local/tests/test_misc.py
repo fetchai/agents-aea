@@ -39,6 +39,9 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 
+TIMEOUT = 5
+
+
 def make_local_connection(
     address: Address,
     public_key: str,
@@ -220,32 +223,32 @@ def test_communication():
         )
         multiplexer1.put(envelope)
 
-        envelope = multiplexer2.get(block=True, timeout=1.0)
+        envelope = multiplexer2.get(block=True, timeout=TIMEOUT)
         msg = envelope.message
         assert (
             envelope.protocol_specification_id
             == DefaultMessage.protocol_specification_id
         )
         assert msg.content == b"hello"
-        envelope = multiplexer2.get(block=True, timeout=1.0)
+        envelope = multiplexer2.get(block=True, timeout=TIMEOUT)
         msg = envelope.message
         assert (
             envelope.protocol_specification_id == FipaMessage.protocol_specification_id
         )
         assert msg.performative == FipaMessage.Performative.CFP
-        envelope = multiplexer2.get(block=True, timeout=1.0)
+        envelope = multiplexer2.get(block=True, timeout=TIMEOUT)
         msg = envelope.message
         assert (
             envelope.protocol_specification_id == FipaMessage.protocol_specification_id
         )
         assert msg.performative == FipaMessage.Performative.PROPOSE
-        envelope = multiplexer2.get(block=True, timeout=1.0)
+        envelope = multiplexer2.get(block=True, timeout=TIMEOUT)
         msg = envelope.message
         assert (
             envelope.protocol_specification_id == FipaMessage.protocol_specification_id
         )
         assert msg.performative == FipaMessage.Performative.ACCEPT
-        envelope = multiplexer2.get(block=True, timeout=1.0)
+        envelope = multiplexer2.get(block=True, timeout=TIMEOUT)
         msg = envelope.message
         assert (
             envelope.protocol_specification_id == FipaMessage.protocol_specification_id
