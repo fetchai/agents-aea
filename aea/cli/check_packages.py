@@ -219,12 +219,15 @@ class WrongPublicIdError(CustomException):
         print("=" * 50)
 
 
-def find_all_configuration_files(packages_dir: Path) -> List:
+def find_all_configuration_files(
+    packages_dir: Path, vendor: Optional[str] = None
+) -> List:
     """Find all configuration files."""
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
         if any([file in str(path) for file in CONFIG_FILE_NAMES])
+        and path.parent.parent.parent.name == vendor
     ]
     return config_files
 
@@ -597,7 +600,8 @@ def check_pypi_dependencies(configuration_file: Path) -> None:
     type=click.Path(dir_okay=True, exists=True),
     default=Path.cwd() / "packages",
 )
-def check_packages(packages_dir: Path) -> None:
+@click.option("--vendor", type=str, default=None, required=False)
+def check_packages(packages_dir: Path, vendor: Optional[str]) -> None:
     """
     Run different checks on AEA packages.
 
@@ -606,12 +610,13 @@ def check_packages(packages_dir: Path) -> None:
     - Check that every package has non-empty description
 
     :param packages_dir: Path to packages dir.
+    :param vendor: filter by author name
     """
     packages_dir = Path(packages_dir).absolute()
     all_packages_ids_ = find_all_packages_ids(packages_dir)
     failed: bool = False
 
-    for file in find_all_configuration_files(packages_dir):
+    for file in find_all_configuration_files(packages_dir, vendor=vendor):
         try:
             expected_author = file.parent.parent.parent.name
             click.echo("Processing " + str(file))
