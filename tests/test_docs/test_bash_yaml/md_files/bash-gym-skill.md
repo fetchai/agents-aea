@@ -8,7 +8,7 @@ aea create my_gym_aea
 cd my_gym_aea
 ```
 ``` bash
-aea add skill fetchai/gym:0.20.0:bafybeif774uxl33jeg6lk5rov4bkmq5vn6ryvtochyah3czvo56rgvfnzu --remote
+aea add skill fetchai/gym:0.20.0:bafybeiexgdek5fajc5od4irk4haj4v22iy4gjbjaqbp3rm6624xhxxsj3q --remote
 ```
 ``` bash
 aea config set agent.default_connection fetchai/gym:0.19.0

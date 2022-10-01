@@ -46,7 +46,7 @@ contract_api_msg = yield from self.get_contract_api_response(
 )
 
 if contract_api_msg.performative != ContractApiMessage.Performative.STATE:
-    self.context.logger.info("Error retrieving the nalance")
+    self.context.logger.info("Error retrieving the balance")
     return
 
 balance = contract_api_msg.state.body

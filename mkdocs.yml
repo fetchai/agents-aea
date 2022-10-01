@@ -290,6 +290,7 @@ nav:
             - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Registries:
     - IPFS: ipfs_registry.md
+    - Package list: 'package_list.md'
   - Glossary: 'glossary.md'
   - FAQ: 'faq.md'
 
