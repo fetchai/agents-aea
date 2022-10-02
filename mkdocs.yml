@@ -1,7 +1,7 @@
 site_name: aea
-site_url: https://docs.fetch.ai/
+site_url: https://docs.fetch.ai/aea/
 site_description: Everything you need to know about AEAs.
-repo_url: https://github.com/agents-aea/docs
+repo_url: https://github.com/fetchai/agents-aea
 site_author: developer@fetch.ai
 
 theme:
