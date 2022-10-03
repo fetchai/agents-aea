@@ -953,7 +953,7 @@ class CertRequest:
             not_after=self._not_after_string,
             public_key=self.public_key_or_identifier,
             message_format=self.message_format,
-            save_path=str(self.save_path),
+            save_path=str(self.save_path.as_posix()),
         )
         return result
 
