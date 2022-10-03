@@ -20,6 +20,7 @@
 
 """Implementation of the 'aea init' subcommand."""
 
+from pathlib import Path
 from typing import Dict, Optional
 
 import click
@@ -39,7 +40,7 @@ from aea.cli.registry.settings import (
 from aea.cli.registry.utils import check_is_author_logged_in, is_auth_token_present
 from aea.cli.utils.click_utils import registry_flag, remote_registry_flag
 from aea.cli.utils.config import get_or_create_cli_config, update_cli_config
-from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY
+from aea.cli.utils.constants import AEA_LOGO, AUTHOR_KEY, CLI_CONFIG_PATH
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.cli.utils.package_utils import validate_author_name
@@ -93,8 +94,8 @@ def do_init(
     :param default_remote_registry: Default remote registry
     :param ipfs_node: URL to ipfs node
     """
-    config = get_or_create_cli_config()
-    if reset or config.get(AUTHOR_KEY, None) is None:
+
+    if reset or not Path(CLI_CONFIG_PATH).exists():
         author = validate_author_name(author)
         update_cli_config({AUTHOR_KEY: author})
 
@@ -109,6 +110,7 @@ def do_init(
         config.pop(REGISTRY_CONFIG_KEY, None)  # for security reasons
         success_msg = "AEA configurations successfully initialized: {}".format(config)
     else:
+        config = get_or_create_cli_config()
         config.pop(REGISTRY_CONFIG_KEY, None)  # for security reasons
         success_msg = "AEA configurations already initialized: {}. To reset use '--reset'.".format(
             config

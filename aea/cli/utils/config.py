@@ -117,13 +117,14 @@ def validate_cli_config(config: Dict) -> None:
     validator.validate(config)
 
 
-def _init_cli_config() -> None:
+def _init_cli_config(config: Optional[Dict] = None) -> None:
     """Create cli config folder and file."""
+    config = config or DEFAULT_CLI_CONFIG
     conf_dir = os.path.dirname(CLI_CONFIG_PATH)
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
     with open_file(CLI_CONFIG_PATH, "w+") as f:
-        yaml.dump(DEFAULT_CLI_CONFIG, f, default_flow_style=False)
+        yaml.dump(config, f, default_flow_style=False)
 
 
 def update_cli_config(dict_conf: Dict) -> None:
@@ -136,9 +137,7 @@ def update_cli_config(dict_conf: Dict) -> None:
     config.update(dict_conf)
 
     validate_cli_config(config)
-
-    with open_file(CLI_CONFIG_PATH, "w") as f:
-        yaml.dump(config, f, default_flow_style=False)
+    _init_cli_config(config)
 
 
 def get_or_create_cli_config() -> Dict:
@@ -150,8 +149,12 @@ def get_or_create_cli_config() -> Dict:
     try:
         config = load_yaml(CLI_CONFIG_PATH)
     except FileNotFoundError:
-        _init_cli_config()
-        config = load_yaml(CLI_CONFIG_PATH)
+        # We cannnot use _init_cli_config() anymore since it wiil inturrupt with
+        # aea init command. Since we load registry info at top of the command group
+        # with this function call it'll create a default ~/.aea/cli_config.yaml file
+        # before reaching to the do_init function call and leading to the command
+        # failing saying the config already exists.
+        config = DEFAULT_CLI_CONFIG.copy()
 
     validate_cli_config(config)
     return config
