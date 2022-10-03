@@ -117,8 +117,9 @@ def validate_cli_config(config: Dict) -> None:
     validator.validate(config)
 
 
-def write_cli_config(config: Dict) -> None:
+def _init_cli_config(config: Optional[Dict] = None) -> None:
     """Create cli config folder and file."""
+    config = config or DEFAULT_CLI_CONFIG
     conf_dir = os.path.dirname(CLI_CONFIG_PATH)
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
@@ -136,7 +137,7 @@ def update_cli_config(dict_conf: Dict) -> None:
     config.update(dict_conf)
 
     validate_cli_config(config)
-    write_cli_config(config)
+    _init_cli_config(config)
 
 
 def get_or_create_cli_config() -> Dict:

@@ -36,10 +36,10 @@ from yaml import YAMLError
 
 from aea.cli.utils.click_utils import PublicIdParameter, password_option
 from aea.cli.utils.config import (
+    _init_cli_config,
     get_or_create_cli_config,
     set_cli_author,
     update_cli_config,
-    write_cli_config,
 )
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import _validate_config_consistency, clean_after
@@ -171,14 +171,14 @@ class PublicIdParameterTestCase(TestCase):
 @mock.patch("aea.cli.utils.config.os.makedirs")
 @mock.patch("aea.cli.utils.click_utils.open_file")
 class InitConfigFolderTestCase(TestCase):
-    """Test case for write_cli_config method."""
+    """Test case for _init_cli_config method."""
 
-    def test_write_cli_config_positive(
+    def test_init_cli_config_positive(
         self, open_mock, makedirs_mock, exists_mock, dirname_mock
     ):
-        """Test for write_cli_config method positive result."""
+        """Test for _init_cli_config method positive result."""
         user_config = get_or_create_cli_config()
-        write_cli_config(user_config)
+        _init_cli_config(user_config)
 
         dirname_mock.assert_called_once()
         exists_mock.assert_called_once_with("dir-name")
