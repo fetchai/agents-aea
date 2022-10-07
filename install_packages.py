@@ -25,11 +25,11 @@ import sys
 from pathlib import Path
 from typing import List
 
-import toml
+from tomlkit import loads as loads_toml
 
 
 def _load_groups():
-    data = toml.loads(Path("pyproject.toml").read_text())
+    data = loads_toml(Path("pyproject.toml").read_text())
     return list(data["tool"]["poetry"]["group"].keys())
 
 

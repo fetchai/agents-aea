@@ -32,9 +32,8 @@ setup(
     packages=find_packages(include=["aea_ledger_ethereum*"]),
     install_requires=[
         "aea>=1.0.0, <2.0.0",
-        "web3==5.12.0",
-        "ipfshttpclient==0.6.1",
-        "eth-account==0.5.2",
+        "web3>=5.31.0,<6.0.0",
+        "ipfshttpclient==0.8.0a2",
     ],
     tests_require=["pytest"],
     entry_points={

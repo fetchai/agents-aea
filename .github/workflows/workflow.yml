@@ -57,7 +57,7 @@ jobs:
           sudo apt-get install libmbedtls-dev
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox poetry
+          pip install tox
       - name: Security Check
         run: tox -e bandit
       - name: Safety Check
@@ -103,7 +103,7 @@ jobs:
           sudo apt-get install libmbedtls-dev
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox poetry
+          pip install tox
       - name: Pylint check
         run: |
           tox -e pylint
@@ -126,7 +126,7 @@ jobs:
           sudo apt-get install libmbedtls-dev
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox poetry
+          pip install tox
           pip install --user --upgrade setuptools
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
@@ -178,7 +178,7 @@ jobs:
           sudo apt-get install libmbedtls-dev
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox poetry
+          pip install tox
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links
@@ -215,7 +215,7 @@ jobs:
           sudo apt-get autoclean
       - name: Install tox
         run : |
-          pip install tox poetry
+          pip install tox
       - name: Check plugin aea-ledger-cosmos
         run : |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && aea generate-key cosmos && echo aea-ledger-cosmos checked!"
@@ -280,7 +280,7 @@ jobs:
         sudo apt-get install libmbedtls-dev
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install tox poetry
+        pip install tox
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
         unzip protoc-3.19.4-linux-x86_64.zip -d protoc
@@ -322,7 +322,7 @@ jobs:
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
-          pip install tox poetry
+          pip install tox
       - name: Configure Docker
         run: |
           gcloud auth configure-docker 
@@ -361,7 +361,7 @@ jobs:
         sudo apt-get install libmbedtls-dev
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install tox poetry
+        pip install tox
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
         unzip protoc-3.19.4-linux-x86_64.zip -d protoc
@@ -373,7 +373,7 @@ jobs:
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
-        pip install tox poetry
+        pip install tox
         brew install gcc
         # brew install protobuf
         # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
@@ -394,7 +394,7 @@ jobs:
         choco install make -y
         # to check make was installed
         make --version
-        pip install tox poetry
+        pip install tox
         # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
         # unzip protoc-3.19.4-win64.zip -d protoc
         # sudo mv protoc/bin/protoc /usr/local/bin/protoc
@@ -434,7 +434,7 @@ jobs:
         sudo apt-get install libmbedtls-dev
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install tox poetry
+        pip install tox
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
         unzip protoc-3.19.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
@@ -534,7 +534,7 @@ jobs:
         sudo apt-get install libmbedtls-dev
         sudo apt-get autoremove
         sudo apt-get autoclean
-        pip install tox poetry
+        pip install tox
         pip install coverage
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip

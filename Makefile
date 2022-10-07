@@ -106,7 +106,7 @@ test-all:
 
 .PHONY: install
 install: clean
-	ppip install .[all]
+	pip install .[all]
 
 .PHONY: dist
 dist: clean
@@ -132,7 +132,7 @@ v := $(shell pip -V | grep virtualenvs)
 new_env: clean
 	if [ -z "$v" ];\
 	then\
-		poetry install;\
+		poetry install --with dev,docs,packages,tools,testing;\
 		poetry run pip install -e .[all];\
 		poetry run pip install --no-deps file:plugins/aea-ledger-ethereum;\
 		poetry run pip install --no-deps file:plugins/aea-ledger-cosmos;\
