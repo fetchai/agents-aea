@@ -592,6 +592,23 @@ class TestCertRequestInstantiationWithKeyHex(BaseTestCertRequestInstantiation):
     EXPECTED_KEY_IDENTIFIER = None
 
 
+def test_cert_request_path_dumping() -> None:
+    """Test if the path is being dumped correctly."""
+
+    test_path = ".cert_requests/cert.txt"
+    cert_request = CertRequest(
+        public_key="public_key",
+        identifier="identifier",
+        ledger_id="ledger_id",
+        not_before=NOT_BEFORE,
+        not_after=NOT_AFTER,
+        message_format="{public_key}",
+        save_path=test_path,
+    )
+
+    assert cert_request.json["save_path"] == test_path
+
+
 def test_compute_specifier_from_version():
     """Test function 'compute_specifier_from_version'."""
 

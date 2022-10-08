@@ -36,7 +36,7 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.20.0:bafybeif774uxl33jeg6lk5rov4bkmq5vn6ryvtochyah3czvo56rgvfnzu --remote
+aea add skill fetchai/gym:0.20.0:bafybeid53vlpk2jwdzqf7a5xh4q5653wg46h7eg7pq66c3pmmgwnwjnsja --remote
 ```
 
 ### Set gym connection as default
