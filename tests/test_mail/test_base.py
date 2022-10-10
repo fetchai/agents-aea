@@ -189,7 +189,9 @@ def test_outbox_put():
     )
     outbox.put(envelope)
     wait_for_condition(
-        lambda: inbox.empty(), TIMEOUT, "Inbox must not be empty after putting an envelope"
+        lambda: inbox.empty(),
+        TIMEOUT,
+        "Inbox must not be empty after putting an envelope",
     )
     multiplexer.disconnect()
 
@@ -217,7 +219,9 @@ def test_outbox_put_message():
     )
     outbox.put_message(msg)
     wait_for_condition(
-        lambda: not inbox.empty(), TIMEOUT, "Inbox must not be empty after putting a message"
+        lambda: not inbox.empty(),
+        TIMEOUT,
+        "Inbox must not be empty after putting a message",
     )
     envelope = inbox.get(block=True, timeout=TIMEOUT)
     assert envelope.message == msg
