@@ -6,9 +6,9 @@ First, get the required packages from IPFS.
 mkdir packages
 aea create my_aea
 cd my_aea
-aea add protocol fetchai/default:1.0.0:bafybeide4cvhzwohrzuk44zpnie64gjm3rwem7xrwdufvnrusgggmwe2dy --remote
+aea add protocol fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu --remote
 aea push connection fetchai/default --local
-aea add connection fetchai/stub:0.21.0:bafybeieyoxxddnyqn7mibgeeld3bdkk32bspahqob7gfpqh4cbjopwh5jy --remote
+aea add connection fetchai/stub:0.21.0:bafybeieqlozydyvdxmjxhqygwq27djecpiftoqwlcpcr4qpotomwnh66yy --remote
 aea push connection fetchai/stub --local
 cd ..
 aea delete my_aea

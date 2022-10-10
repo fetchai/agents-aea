@@ -20,6 +20,7 @@
 """This module contains the tests of the ledger API connection for the contract APIs."""
 import asyncio
 import logging
+import os
 import re
 import unittest.mock
 from typing import cast
@@ -31,6 +32,10 @@ from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_ADDRESS_ONE
 
 from aea.common import Address
+from aea.contracts.base import Contract
+from aea.crypto.ledger_apis import ETHEREUM_DEFAULT_ADDRESS
+from aea.crypto.registries import ledger_apis_registry
+from aea.exceptions import AEAException
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State
 from aea.mail.base import Envelope
 from aea.multiplexer import MultiplexerStatus
@@ -46,6 +51,8 @@ from packages.valory.protocols.contract_api.dialogues import (
     ContractApiDialogues as BaseContractApiDialogues,
 )
 from packages.valory.protocols.contract_api.message import ContractApiMessage
+
+from tests.conftest import ROOT_DIR
 
 
 SOME_SKILL_ID = "some/skill:0.1.0"
@@ -520,12 +527,9 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
         message=request,
     )
 
-    with mock.patch.object(ledger_apis_connection._logger, "debug") as mock_logger:
-        await ledger_apis_connection.send(envelope)
-        await asyncio.sleep(0.01)
-        assert (
-            f"Cannot find {request.callable} in contract" in mock_logger.call_args[0][0]
-        )
+    await ledger_apis_connection.send(envelope)
+    await asyncio.sleep(0.01)
+    assert f"Contract method {request.callable} not found" in caplog.text, caplog.text
 
 
 def test_build_response_fails_on_bad_data_type():
@@ -562,3 +566,41 @@ def test_build_response_fails_on_bad_data_type():
             match=r"Invalid transaction type, got=<class '.+'>, expected=typing.Dict",
         ):
             dispatcher.get_raw_transaction(MagicMock(), MagicMock(), MagicMock())
+
+
+def test_validate_and_call_callable():
+    """Tests a default method call through ContractApiRequestDispatcher."""
+
+    dummy_address = "0x0000000000000000000000000000000000000000"
+
+    contract = Contract.from_dir(
+        os.path.join(ROOT_DIR, "tests", "data", "dummy_contract")
+    )
+
+    ledger_api = ledger_apis_registry.make(
+        EthereumCrypto.identifier,
+        address=ETHEREUM_DEFAULT_ADDRESS,
+    )
+
+    message = MagicMock()
+    message.performative = ContractApiMessage.Performative.GET_STATE
+    message.kwargs.body = {"_addr": dummy_address}
+    message.callable = "getAddress"
+    message.contract_address = dummy_address
+
+    # Call a method present in the ABI but not in the contract package
+    with mock.patch("web3.contract.ContractFunction.call", return_value=0):
+        result = ContractApiRequestDispatcher._validate_and_call_callable(
+            ledger_api, message, contract
+        )
+        assert result == 0
+
+    # Call an non-existent method
+    message.callable = "dummy_method"
+    with pytest.raises(
+        AEAException,
+        match=f"Contract method dummy_method not found in ABI of contract {type(contract)}",
+    ):
+        ContractApiRequestDispatcher._validate_and_call_callable(
+            ledger_api, message, contract
+        )

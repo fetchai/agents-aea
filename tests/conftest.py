@@ -73,6 +73,8 @@ from aea import AEA_DIR
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.cli.utils.config import _init_cli_config
+from aea.cli.utils.constants import CLI_CONFIG_PATH, DEFAULT_CLI_CONFIG
+from aea.cli.utils.generic import load_yaml
 from aea.common import Address
 from aea.configurations.base import ComponentType, ConnectionConfig, ContractConfig
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE as AGENT_YAML
@@ -700,9 +702,20 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
 
 
 @pytest.fixture(scope="session", autouse=True)
-def reset_aea_cli_config() -> None:
+def reset_aea_cli_config() -> Generator:
     """Reset the cli config for each test."""
-    _init_cli_config()
+
+    user_config = {}
+    user_config_exist = Path(CLI_CONFIG_PATH).exists()
+    if user_config_exist:
+        user_config = load_yaml(CLI_CONFIG_PATH)
+
+    _init_cli_config(DEFAULT_CLI_CONFIG)
+
+    yield
+
+    if user_config_exist:
+        _init_cli_config(user_config)
 
 
 def get_unused_tcp_port():
