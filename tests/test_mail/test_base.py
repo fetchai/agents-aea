@@ -214,8 +214,10 @@ def test_outbox_put_message():
     )
     outbox.put_message(msg)
     wait_for_condition(
-        lambda: inbox.empty(), 30, "Inbox must not be empty after putting a message"
+        lambda: not inbox.empty(), 30, "Inbox must not be empty after putting a message"
     )
+    envelope = inbox.get(block=True, timeout=30)
+    assert envelope.message == msg
     multiplexer.disconnect()
 
 
