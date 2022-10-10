@@ -71,7 +71,7 @@ class AgentContext:
         data_dir: str,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         send_to_skill: Optional[Callable] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Initialize an agent context.

@@ -100,7 +100,10 @@ def add(
 
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.pass_context
 def remove(click_context: click.Context, hash_: str) -> None:
@@ -115,7 +118,10 @@ def remove(click_context: click.Context, hash_: str) -> None:
 
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.argument(
     "target_dir",

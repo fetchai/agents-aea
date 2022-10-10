@@ -99,7 +99,9 @@ class TestSearchContractsLocal(TestCase):
     def test_search_contracts_registry_positive(self, *mocks):
         """Test search contracts in registry command positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "search", "contracts"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "search", "contracts"],
+            standalone_mode=False,
         )
         assert result.output == (
             'Searching for ""...\n'
@@ -351,7 +353,9 @@ class TestSearchWithRegistryInSubfolderLocal:
         """Test that the exit code is equal to 0 (i.e. success)."""
         assert self.result.exit_code == 0
 
-    def test_correct_output(self,):
+    def test_correct_output(
+        self,
+    ):
         """Test that the command has printed the correct output.."""
         public_id_echo = ECHO_SKILL_PUBLIC_ID
         public_id_error = ERROR_SKILL_PUBLIC_ID
@@ -374,7 +378,10 @@ class TestSearchWithRegistryInSubfolderLocal:
                 "Author: fetchai\n"
                 "Version: {}\n"
                 "------------------------------\n\n"
-            ).format(str(public_id_error), str(public_id_error.version),),
+            ).format(
+                str(public_id_error),
+                str(public_id_error.version),
+            ),
         ]
         assert [strings in self.result.output for strings in expected]
 
@@ -429,7 +436,9 @@ class TestSearchInAgentDirectoryLocal:
         """Test that the exit code is equal to 0 (i.e. success)."""
         assert self.result.exit_code == 0
 
-    def test_correct_output(self,):
+    def test_correct_output(
+        self,
+    ):
         """Test that the command has printed the correct output.."""
         public_id_echo = ECHO_SKILL_PUBLIC_ID
         public_id_error = ERROR_SKILL_PUBLIC_ID
@@ -452,7 +461,10 @@ class TestSearchInAgentDirectoryLocal:
                 "Author: fetchai\n"
                 "Version: {}\n"
                 "------------------------------\n\n"
-            ).format(str(public_id_error), str(public_id_error.version),),
+            ).format(
+                str(public_id_error),
+                str(public_id_error.version),
+            ),
         ]
         assert [strings in self.result.output for strings in expected]
 

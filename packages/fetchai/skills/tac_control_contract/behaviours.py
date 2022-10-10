@@ -72,7 +72,10 @@ class TacBehaviour(BaseTacBehaviour):
             callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
             kwargs=ContractApiMessage.Kwargs(kwargs),  # type: ignore
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = parameters.get_deploy_terms()
         contract_api_dialogue.callable = (
             ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
@@ -106,7 +109,8 @@ class TacBehaviour(BaseTacBehaviour):
             if game.registration.nb_agents < parameters.min_nb_agents:
                 self.context.logger.info(
                     "registered agents={}, minimum agents required={}".format(
-                        game.registration.nb_agents, parameters.min_nb_agents,
+                        game.registration.nb_agents,
+                        parameters.min_nb_agents,
                     )
                 )
                 self._cancel_tac(game)

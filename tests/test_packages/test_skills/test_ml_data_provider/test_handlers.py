@@ -214,7 +214,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         ml_dialogue = cast(
             MlTradeDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.ml_dialogues, messages=self.list_of_messages[:2],
+                dialogues=self.ml_dialogues,
+                messages=self.list_of_messages[:2],
             ),
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -259,7 +260,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         ml_dialogue = cast(
             MlTradeDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.ml_dialogues, messages=self.list_of_messages[:2],
+                dialogues=self.ml_dialogues,
+                messages=self.list_of_messages[:2],
             ),
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -287,7 +289,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         """Test the _handle_invalid method of the ml handler."""
         # setup
         ml_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.ml_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.ml_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ml_dialogue,
@@ -620,7 +623,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_service",
+                self.service_registration_behaviour,
+                "register_service",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -647,7 +651,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_genus",
+                self.service_registration_behaviour,
+                "register_genus",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -674,7 +679,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_classification",
+                self.service_registration_behaviour,
+                "register_classification",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -772,7 +778,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler where the oef error does NOT target register_service."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages_unregister[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_unregister[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,

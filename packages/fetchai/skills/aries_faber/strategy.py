@@ -66,13 +66,10 @@ class Strategy(Model):
         self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
         self._ledger_url = kwargs.pop("ledger_url", DEFAULT_LEDGER_URL)
 
-        self._seed = (
-            kwargs.pop("seed", None,)
-            or (
-                "my_seed_000000000000000000000000"
-                + str(random.randint(100_000, 999_999))  # nosec
-            )[-32:]
-        )
+        self._seed = kwargs.pop("seed", None,) or (
+            "my_seed_000000000000000000000000"
+            + str(random.randint(100_000, 999_999))  # nosec
+        )[-32:]
 
         # derived config
         self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
@@ -150,5 +147,7 @@ class Strategy(Model):
                 self._search_query["search_value"],
             ),
         )
-        query = Query([close_to_my_service, service_key_filter],)
+        query = Query(
+            [close_to_my_service, service_key_filter],
+        )
         return query

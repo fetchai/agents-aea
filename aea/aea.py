@@ -131,7 +131,8 @@ class AEA(Agent):
         self._connection_exception_policy = connection_exception_policy
 
         aea_logger = AgentLoggerAdapter(
-            logger=get_logger(__name__, identity.name), agent_name=identity.name,
+            logger=get_logger(__name__, identity.name),
+            agent_name=identity.name,
         )
 
         self._resources = resources
@@ -407,7 +408,10 @@ class AEA(Agent):
         :return: List of tuples of callables: handler and coroutine to get a message
         """
         return super().get_message_handlers() + [
-            (self.filter.handle_internal_message, self.filter.get_internal_message,),
+            (
+                self.filter.handle_internal_message,
+                self.filter.get_internal_message,
+            ),
             (self.handle_envelope, self.runtime.agent_loop.skill2skill_queue.get),
         ]
 

@@ -127,7 +127,8 @@ class Strategy(Model):
         registration_db = cast(RegistrationDB, self.context.registration_db)
         if self.developer_handle_only:
             registration_db.set_registered_developer_only(
-                address=address, developer_handle=info["developer_handle"],
+                address=address,
+                developer_handle=info["developer_handle"],
             )
         else:
             registration_db.set_registered(

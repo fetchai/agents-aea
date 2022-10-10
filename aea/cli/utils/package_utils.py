@@ -77,7 +77,9 @@ ROOT = Path(".")
 
 
 def verify_private_keys_ctx(
-    ctx: Context, aea_project_path: Path = ROOT, password: Optional[str] = None,
+    ctx: Context,
+    aea_project_path: Path = ROOT,
+    password: Optional[str] = None,
 ) -> None:
     """
     Verify private keys with ctx provided.
@@ -94,7 +96,9 @@ def verify_private_keys_ctx(
             password=password,
         ).dump_config()
         agent_config = AgentConfigManager.verify_private_keys(
-            aea_project_path, private_key_helper=private_key_verify, password=password,
+            aea_project_path,
+            private_key_helper=private_key_verify,
+            password=password,
         ).agent_config
         if ctx is not None:
             ctx.agent_config = agent_config

@@ -211,7 +211,8 @@ class TestAddManyKeys:
         """Test that the keys are added correctly."""
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
+            cli,
+            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
         )
         assert result.exit_code == 0
         result = self.runner.invoke(

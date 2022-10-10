@@ -156,7 +156,8 @@ class TestStrategy(BaseSkillTestCase):
         )
 
         mock_set.assert_any_call(
-            address=self.address, developer_handle=self.info["developer_handle"],
+            address=self.address,
+            developer_handle=self.info["developer_handle"],
         )
 
     def test_unlock_registration(self):
@@ -480,7 +481,8 @@ class TestStrategy(BaseSkillTestCase):
         # after
         mock_recover.assert_called_once()
         mock_logger.assert_any_call(
-            logging.WARNING, f"Signing exception: {exception_message}",
+            logging.WARNING,
+            f"Signing exception: {exception_message}",
         )
         assert not is_valid
 

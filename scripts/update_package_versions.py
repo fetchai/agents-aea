@@ -224,10 +224,15 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
     """
     runner = CliRunner()
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "search", type_, "--query", name], standalone_mode=False,
+        cli,
+        [*CLI_LOG_OPTION, "search", type_, "--query", name],
+        standalone_mode=False,
     )
     reg = r"({}/{}:{})".format("fetchai", name, PublicId.VERSION_REGEX)
-    ids = re.findall(reg, result.output,)
+    ids = re.findall(
+        reg,
+        result.output,
+    )
     p_ids = []
     highest = PublicId.from_str("fetchai/{}:0.1.0".format(name))
     for id_ in ids:
@@ -402,11 +407,11 @@ def _can_disambiguate_from_context(
     :return: if True/False, the old string can/cannot be replaced. If None, we don't know.
     """
     match = re.search(
-        fr"aea +add +(skill|protocol|connection|contract) +{old_string}", line
+        rf"aea +add +(skill|protocol|connection|contract) +{old_string}", line
     )
     if match is not None:
         return match.group(1) == type_[:-1]
-    if re.search(fr"aea +fetch +{old_string}", line) is not None:
+    if re.search(rf"aea +fetch +{old_string}", line) is not None:
         return type_ == "agents"
     match = re.search(
         "(skill|SKILL|"
@@ -441,7 +446,9 @@ def _ask_user(
     print("".join(above_rows))
     print(line.rstrip().replace(old_string, "\033[91m" + old_string + "\033[0m"))
     print("".join(below_rows))
-    answer = input(f"Replace for component ({type_}, {old_string})? [y/N]: ",)  # nosec
+    answer = input(
+        f"Replace for component ({type_}, {old_string})? [y/N]: ",
+    )  # nosec
     return answer
 
 
@@ -451,7 +458,7 @@ def replace_aea_fetch_statements(
     """Replace statements of the type: 'aea fetch <old_string>'."""
     if type_ == "agents":
         content = re.sub(
-            fr"aea +fetch +{old_string}", f"aea fetch {new_string}", content
+            rf"aea +fetch +{old_string}", f"aea fetch {new_string}", content
         )
     return content
 
@@ -462,7 +469,7 @@ def replace_aea_add_statements(
     """Replace statements of the type: 'aea add <type> <old_string>'."""
     if type_ != "agents":
         content = re.sub(
-            fr"aea +add +{type_} +{old_string}",
+            rf"aea +add +{type_} +{old_string}",
             f"aea add {type_} {new_string}",
             content,
         )
@@ -634,7 +641,9 @@ class Updater:
             ambiguous_public_ids
         )
         print(f"Ambiguous public ids: {ambiguous_public_ids}")
-        print(f"Conflicts with public ids to update: {conflicts}",)
+        print(
+            f"Conflicts with public ids to update: {conflicts}",
+        )
 
         print("*" * 100)
         print("Start processing.")
@@ -728,7 +737,11 @@ class Updater:
                     (".py", ".yaml", ".md", ".sh")
                 ):
                     self.inplace_change(
-                        path, current_public_id, new_public_id, type_, is_ambiguous,
+                        path,
+                        current_public_id,
+                        new_public_id,
+                        type_,
+                        is_ambiguous,
                     )
 
         bump_version_in_yaml(configuration_file_path, type_, new_public_id.version)

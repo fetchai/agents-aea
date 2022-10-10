@@ -149,7 +149,8 @@ class ProxyEnv(gym.Env):
         if not self._agent.runtime.multiplexer.is_connected:
             self._connect()
         gym_msg, gym_dialogue = self.gym_dialogues.create(
-            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
+            counterparty=self.gym_address,
+            performative=GymMessage.Performative.RESET,
         )
         gym_dialogue = cast(GymDialogue, gym_dialogue)
         self._active_dialogue = gym_dialogue
@@ -166,7 +167,8 @@ class ProxyEnv(gym.Env):
         if last_msg is None:
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_dialogue.reply(
-            performative=GymMessage.Performative.CLOSE, target_message=last_msg,
+            performative=GymMessage.Performative.CLOSE,
+            target_message=last_msg,
         )
         self._agent.outbox.put_message(message=gym_msg)
 

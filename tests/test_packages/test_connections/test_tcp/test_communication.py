@@ -54,13 +54,22 @@ class TestTCPCommunication:
         cls.client_public_key_2 = "client_public_key_2"
 
         cls.server_conn = _make_tcp_server_connection(
-            cls.server_addr, cls.server_public_key, cls.host, cls.port,
+            cls.server_addr,
+            cls.server_public_key,
+            cls.host,
+            cls.port,
         )
         cls.client_conn_1 = _make_tcp_client_connection(
-            cls.client_addr_1, cls.client_public_key_1, cls.host, cls.port,
+            cls.client_addr_1,
+            cls.client_public_key_1,
+            cls.host,
+            cls.port,
         )
         cls.client_conn_2 = _make_tcp_client_connection(
-            cls.client_addr_2, cls.client_public_key_2, cls.host, cls.port,
+            cls.client_addr_2,
+            cls.client_public_key_2,
+            cls.host,
+            cls.port,
         )
 
         cls.server_multiplexer = Multiplexer([cls.server_conn])
@@ -91,7 +100,9 @@ class TestTCPCommunication:
             content=b"hello",
         )
         expected_envelope = Envelope(
-            to=self.server_addr, sender=self.client_addr_1, message=msg,
+            to=self.server_addr,
+            sender=self.client_addr_1,
+            message=msg,
         )
         self.client_1_multiplexer.put(expected_envelope)
         actual_envelope = self.server_multiplexer.get(block=True, timeout=5.0)
@@ -118,7 +129,9 @@ class TestTCPCommunication:
             content=b"hello",
         )
         expected_envelope = Envelope(
-            to=self.client_addr_1, sender=self.server_addr, message=msg,
+            to=self.client_addr_1,
+            sender=self.server_addr,
+            message=msg,
         )
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_1_multiplexer.get(block=True, timeout=5.0)
@@ -143,7 +156,9 @@ class TestTCPCommunication:
             content=b"hello",
         )
         expected_envelope = Envelope(
-            to=self.client_addr_2, sender=self.server_addr, message=msg,
+            to=self.client_addr_2,
+            sender=self.server_addr,
+            message=msg,
         )
         self.server_multiplexer.put(expected_envelope)
         actual_envelope = self.client_2_multiplexer.get(block=True, timeout=5.0)
@@ -176,10 +191,16 @@ class TestTCPClientConnection:
         """Test that cancelling a receive task works correctly."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection(
-            "address_server", "public_key_server", "127.0.0.1", port,
+            "address_server",
+            "public_key_server",
+            "127.0.0.1",
+            port,
         )
         tcp_client = _make_tcp_client_connection(
-            "address_client", "public_key_client", "127.0.0.1", port,
+            "address_client",
+            "public_key_client",
+            "127.0.0.1",
+            port,
         )
 
         await tcp_server.connect()
@@ -203,10 +224,16 @@ class TestTCPClientConnection:
         """Test the case when a receive raises a struct error."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection(
-            "address_server", "public_key_server", "127.0.0.1", port,
+            "address_server",
+            "public_key_server",
+            "127.0.0.1",
+            port,
         )
         tcp_client = _make_tcp_client_connection(
-            "address_client", "public_key_client", "127.0.0.1", port,
+            "address_client",
+            "public_key_client",
+            "127.0.0.1",
+            port,
         )
 
         await tcp_server.connect()
@@ -229,10 +256,16 @@ class TestTCPClientConnection:
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection(
-            "address_server", "public_key_server", "127.0.0.1", port,
+            "address_server",
+            "public_key_server",
+            "127.0.0.1",
+            port,
         )
         tcp_client = _make_tcp_client_connection(
-            "address_client", "public_key_client", "127.0.0.1", port,
+            "address_client",
+            "public_key_client",
+            "127.0.0.1",
+            port,
         )
 
         await tcp_server.connect()
@@ -258,10 +291,16 @@ class TestTCPServerConnection:
         """Test the case when a receive raises a generic exception."""
         port = get_unused_tcp_port()
         tcp_server = _make_tcp_server_connection(
-            "address_server", "public_key_server", "127.0.0.1", port,
+            "address_server",
+            "public_key_server",
+            "127.0.0.1",
+            port,
         )
         tcp_client = _make_tcp_client_connection(
-            "address_client", "public_key_client", "127.0.0.1", port,
+            "address_client",
+            "public_key_client",
+            "127.0.0.1",
+            port,
         )
 
         await tcp_server.connect()

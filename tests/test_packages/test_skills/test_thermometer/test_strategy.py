@@ -39,7 +39,8 @@ class TestStrategy(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.strategy = Strategy(
-            name="strategy", skill_context=cls._skill.skill_context,
+            name="strategy",
+            skill_context=cls._skill.skill_context,
         )
         cls.logger = cls._skill.skill_context.logger
 

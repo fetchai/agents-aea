@@ -262,7 +262,8 @@ class TestDetectionDatabase(BaseSkillTestCase):
         mock_conn.assert_called_once()
         mock_curs.assert_called_once()
         mock_exe.assert_any_call(
-            command, variables,
+            command,
+            variables,
         )
         mock_fetchall.assert_called_once()
         mock_commit.assert_called_once()
@@ -308,11 +309,14 @@ class TestDetectionDatabase(BaseSkillTestCase):
         mock_conn.assert_called_once()
         mock_curs.assert_called_once()
         mock_exe.assert_any_call(
-            command, variables,
+            command,
+            variables,
         )
         mock_fetchall.assert_called_once()
         mock_commit.assert_called_once()
-        mock_logger.assert_any_call(f"Exception in database: {exception_message}",)
+        mock_logger.assert_any_call(
+            f"Exception in database: {exception_message}",
+        )
         mock_con_close.assert_called_once()
         assert actual_result == result
 
@@ -343,7 +347,8 @@ class TestDetectionDatabase(BaseSkillTestCase):
 
         # after
         mock_exe.assert_any_call(
-            command, (max_num_rows,),
+            command,
+            (max_num_rows,),
         )
         assert actual_result == expected_result
 
@@ -362,7 +367,8 @@ class TestDetectionDatabase(BaseSkillTestCase):
 
         # after
         mock_exe.assert_any_call(
-            command, (max_num_rows,),
+            command,
+            (max_num_rows,),
         )
         assert actual_result is None
 

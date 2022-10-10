@@ -54,7 +54,8 @@ def test_replace_with_env_var():
     assert replace_with_env_var("${var}", {}, default_value=100) == 100
 
     with pytest.raises(
-        ValueError, match=r"`var` not found in env variables and no default value set!",
+        ValueError,
+        match=r"`var` not found in env variables and no default value set!",
     ):
         replace_with_env_var("${var}", {})
 

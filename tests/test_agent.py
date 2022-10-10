@@ -103,7 +103,10 @@ def test_runtime_modes():
     agent_address = "some_address"
     agent_public_key = "some_public_key"
     identity = Identity(agent_name, address=agent_address, public_key=agent_public_key)
-    agent = DummyAgent(identity, [],)
+    agent = DummyAgent(
+        identity,
+        [],
+    )
 
     assert not agent.is_running
     assert agent.is_stopped

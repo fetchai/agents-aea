@@ -49,7 +49,7 @@ class CliRunner(ClickCliRunner):
         env=None,
         catch_exceptions=True,
         color=False,
-        **extra
+        **extra,
     ) -> Result:
         """Call a cli command with click.testing.CliRunner.invoke."""
         exc_info = None

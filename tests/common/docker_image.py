@@ -357,7 +357,10 @@ class SOEFDockerImage(DockerImage):
     SOEF_CONFIG_FILE_NAME = "soef.conf"
 
     def __init__(
-        self, client: DockerClient, addr: str, port: int = PORT,
+        self,
+        client: DockerClient,
+        addr: str,
+        port: int = PORT,
     ):
         """
         Initialize the SOEF Docker image.

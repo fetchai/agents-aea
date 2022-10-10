@@ -200,7 +200,8 @@ class TestLaunch(BaseLaunchTestCase):
             )
             process_launch.control_c()
             process_launch.expect_all(
-                ["Exit cli. code: 0"], timeout=DEFAULT_EXPECT_TIMEOUT,
+                ["Exit cli. code: 0"],
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
 
 
@@ -250,7 +251,8 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
                 timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.expect(
-                EOF, timeout=DEFAULT_EXPECT_TIMEOUT,
+                EOF,
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
             process_launch.wait_to_complete(10)
             assert process_launch.returncode == 1
@@ -304,7 +306,8 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
             )
             process_launch.control_c()
             process_launch.expect_all(
-                ["Exit cli. code: 0"], timeout=DEFAULT_EXPECT_TIMEOUT,
+                ["Exit cli. code: 0"],
+                timeout=DEFAULT_EXPECT_TIMEOUT,
             )
 
 

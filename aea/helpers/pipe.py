@@ -571,7 +571,8 @@ class TCPSocketChannelClient(IPCChannelClient):
 
     async def _open_connection(self) -> TCPSocketProtocol:
         reader, writer = await asyncio.open_connection(
-            self._host, self._port,  # pylint: disable=protected-access
+            self._host,
+            self._port,  # pylint: disable=protected-access
         )
         return TCPSocketProtocol(reader, writer, logger=self.logger, loop=self._loop)
 

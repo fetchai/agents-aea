@@ -295,7 +295,9 @@ class TestFipaHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "get_proposal_for_query", return_value=mocked_proposal,
+            self.strategy,
+            "get_proposal_for_query",
+            return_value=mocked_proposal,
         ):
             with patch.object(self.logger, "log") as mock_logger:
                 self.fipa_handler.handle(incoming_message)
@@ -480,7 +482,8 @@ class TestFipaHandler(BaseSkillTestCase):
             messages=self.list_of_messages_self_initiated[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.DECLINE,
         )
 
         # before
@@ -508,7 +511,8 @@ class TestFipaHandler(BaseSkillTestCase):
             messages=self.list_of_messages_other_initiated[:2],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.DECLINE,
         )
 
         # before
@@ -539,7 +543,8 @@ class TestFipaHandler(BaseSkillTestCase):
             messages=self.list_of_messages_self_initiated[:3],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.DECLINE,
         )
 
         # before
@@ -582,7 +587,8 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         fipa_dialogue._terms = self.terms
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # operation
@@ -663,7 +669,8 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         fipa_dialogue._terms = self.terms
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # operation
@@ -726,7 +733,8 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         fipa_dialogue._terms = self.terms
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # operation
@@ -783,7 +791,8 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         fipa_dialogue._terms = self.terms
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # operation
@@ -817,7 +826,8 @@ class TestFipaHandler(BaseSkillTestCase):
         mock_pending.assert_called_once()
 
         mock_logger.assert_any_call(
-            logging.INFO, f"Agent has no public key for {self.strategy.ledger_id}.",
+            logging.INFO,
+            f"Agent has no public key for {self.strategy.ledger_id}.",
         )
 
     def test_handle_accept_v(self):
@@ -836,7 +846,8 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         fipa_dialogue._terms = self.terms
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # operation
@@ -872,7 +883,8 @@ class TestFipaHandler(BaseSkillTestCase):
         )
         fipa_dialogue._terms = self.terms
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
 
         # before
@@ -1443,7 +1455,8 @@ class TestCosmTradeHandler(BaseSkillTestCase):
         )
 
         raw_tx = RawTransaction(
-            ledger_id=self.signed_tx.ledger_id, body=self.signed_tx.body,
+            ledger_id=self.signed_tx.ledger_id,
+            body=self.signed_tx.body,
         )
 
         # operation
@@ -1454,7 +1467,8 @@ class TestCosmTradeHandler(BaseSkillTestCase):
         self.assert_quantity_in_decision_making_queue(1)
 
         mock_logger.assert_any_call(
-            logging.INFO, f"received inform_signed_tx with signed_tx={self.signed_tx}",
+            logging.INFO,
+            f"received inform_signed_tx with signed_tx={self.signed_tx}",
         )
 
         message = self.get_message_from_decision_maker_inbox()
@@ -1516,11 +1530,13 @@ class TestCosmTradeHandler(BaseSkillTestCase):
         self.assert_quantity_in_decision_making_queue(0)
 
         mock_logger.assert_any_call(
-            logging.INFO, f"received inform_signed_tx with signed_tx={self.signed_tx}",
+            logging.INFO,
+            f"received inform_signed_tx with signed_tx={self.signed_tx}",
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, "inform_signed_tx must contain fipa dialogue reference.",
+            logging.INFO,
+            "inform_signed_tx must contain fipa dialogue reference.",
         )
 
     def test_handle_error(self):
@@ -2316,7 +2332,8 @@ class TestSigningHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.logger, "log") as mock_logger:
             with pytest.raises(
-                AEAEnforceError, match=f"Unidentified ledger id: {self.ledger_id}",
+                AEAEnforceError,
+                match=f"Unidentified ledger id: {self.ledger_id}",
             ):
                 self.signing_handler.handle(incoming_message)
 
@@ -2975,7 +2992,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_service",
+                self.service_registration_behaviour,
+                "register_service",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -3006,7 +3024,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_genus",
+                self.service_registration_behaviour,
+                "register_genus",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -3037,7 +3056,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_classification",
+                self.service_registration_behaviour,
+                "register_classification",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -3147,7 +3167,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler where the oef error does NOT target register_service."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages_unregister[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_unregister[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,
@@ -3175,7 +3196,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         oef_dialogue = cast(
             OefSearchDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+                dialogues=self.oef_dialogues,
+                messages=self.list_of_messages[:1],
             ),
         )
         oef_dialogue._is_seller_search = True
@@ -3210,7 +3232,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         for agent in self.found_agents_less_self:
             mock_logger.assert_any_call(
-                logging.INFO, f"sending CFP to agent={agent[-5:]}",
+                logging.INFO,
+                f"sending CFP to agent={agent[-5:]}",
             )
             has_attributes, error_str = self.message_has_attributes(
                 actual_message=self.get_message_from_outbox(),
@@ -3228,7 +3251,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         oef_dialogue = cast(
             OefSearchDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+                dialogues=self.oef_dialogues,
+                messages=self.list_of_messages[:1],
             ),
         )
         oef_dialogue._is_seller_search = False
@@ -3401,7 +3425,8 @@ class TestContractApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:1],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:1],
             ),
         )
         fipa_dialogue.terms = self.terms
@@ -3445,7 +3470,9 @@ class TestContractApiHandler(BaseSkillTestCase):
             sender=str(self.skill.skill_context.skill_id),
             terms=self.terms,
             raw_message=RawMessage(
-                self.ledger_id, self.body_bytes, is_deprecated_mode=True,
+                self.ledger_id,
+                self.body_bytes,
+                is_deprecated_mode=True,
             ),
         )
         assert has_attributes, error_str
@@ -3468,7 +3495,8 @@ class TestContractApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:1],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:1],
             ),
         )
         fipa_dialogue.terms = self.terms

@@ -347,7 +347,8 @@ class Preferences(BasePreferences):
         """
         enforce(self.is_initialized, "Preferences params not set!")
         result = logarithmic_utility(
-            self.utility_params_by_good_id, quantities_by_good_id,
+            self.utility_params_by_good_id,
+            quantities_by_good_id,
         )
         return result
 
@@ -695,7 +696,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                     signing_msg.raw_message.is_deprecated_mode,
                 )
         signing_msg_response = signing_dialogue.reply(
-            performative=performative, target_message=signing_msg, **kwargs,
+            performative=performative,
+            target_message=signing_msg,
+            **kwargs,
         )
         self.message_out_queue.put(signing_msg_response)
 
@@ -723,7 +726,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                     signing_msg.raw_transaction.ledger_id, signed_tx
                 )
         signing_msg_response = signing_dialogue.reply(
-            performative=performative, target_message=signing_msg, **kwargs,
+            performative=performative,
+            target_message=signing_msg,
+            **kwargs,
         )
         self.message_out_queue.put(signing_msg_response)
 

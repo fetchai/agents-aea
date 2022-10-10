@@ -59,7 +59,9 @@ def test_check_versions_negative_binary_not_found():
 def test_check_versions_negative_version_too_low():
     """Test check_versions - negative case, version too low."""
     with mock.patch.object(
-        check_dependencies, "get_version", return_value=(0, 0, 0),
+        check_dependencies,
+        "get_version",
+        return_value=(0, 0, 0),
     ):
         with pytest.raises(
             AEAException,

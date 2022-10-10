@@ -277,7 +277,11 @@ class CosmosHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: JSONLike,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -368,7 +372,10 @@ class CosmosHelper(Helper):
         """
         signature_b64 = base64.b64decode(signature)
         verifying_keys = VerifyingKey.from_public_key_recovery(
-            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
+            signature_b64,
+            message,
+            SECP256k1,
+            hashfunc=hashlib.sha256,
         )
         public_keys = [
             verifying_key.to_string("compressed").hex()
@@ -502,7 +509,9 @@ class CosmosCrypto(Crypto[SigningKey]):
         :return: signature of the message in string form
         """
         signature_compact = self.entity.sign_deterministic(
-            message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
+            message,
+            hashfunc=hashlib.sha256,
+            sigencode=sigencode_string_canonize,
         )
         signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
         return signature_base64_str
@@ -1224,7 +1233,9 @@ class _CosmosApi(LedgerApi):
             single = ModeInfo.Single(mode=SignMode.SIGN_MODE_DIRECT)
             mode_info = ModeInfo(single=single)
             signer_info = SignerInfo(
-                public_key=from_pub_key_packed, mode_info=mode_info, sequence=sequence,
+                public_key=from_pub_key_packed,
+                mode_info=mode_info,
+                sequence=sequence,
             )
             signer_infos.append(signer_info)
 
@@ -1235,7 +1246,8 @@ class _CosmosApi(LedgerApi):
 
         # Prepare auth info
         auth_info = AuthInfo(
-            signer_infos=signer_infos, fee=Fee(amount=tx_fee, gas_limit=gas),
+            signer_infos=signer_infos,
+            fee=Fee(amount=tx_fee, gas_limit=gas),
         )
 
         # Prepare Tx body
@@ -1502,7 +1514,10 @@ class CosmosFaucetApi(FaucetApi):
         if "txStatus" in data["claim"]:
             tx_digest = data["claim"]["txStatus"]["hash"]
 
-        return CosmosFaucetStatus(tx_digest=tx_digest, status=data["claim"]["status"],)
+        return CosmosFaucetStatus(
+            tx_digest=tx_digest,
+            status=data["claim"]["status"],
+        )
 
     @classmethod
     def _faucet_request_uri(cls, url: Optional[str] = None) -> str:

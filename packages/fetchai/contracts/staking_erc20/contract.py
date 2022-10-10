@@ -43,7 +43,10 @@ class StakingERC20(Contract):
 
     @classmethod
     def get_stake(
-        cls, ledger_api: LedgerApi, contract_address: Address, address: Address,
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: Address,
+        address: Address,
     ) -> JSONLike:
         """
         Get the balance for a specific token id.

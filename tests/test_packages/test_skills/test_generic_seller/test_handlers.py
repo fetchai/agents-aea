@@ -153,7 +153,9 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "is_matching_supply", return_value=True,
+            self.strategy,
+            "is_matching_supply",
+            return_value=True,
         ):
             with patch.object(
                 self.strategy,
@@ -227,10 +229,12 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         """Test the _handle_decline method of the fipa handler."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:2],
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages[:2],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.DECLINE,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.DECLINE,
         )
 
         # before
@@ -272,7 +276,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_messages[:2],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages[:2],
             ),
         )
         fipa_dialogue.terms = Terms(
@@ -284,7 +289,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             "some_nonce",
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=fipa_dialogue, performative=FipaMessage.Performative.ACCEPT,
+            dialogue=fipa_dialogue,
+            performative=FipaMessage.Performative.ACCEPT,
         )
         info = {"address": fipa_dialogue.terms.sender_address}
 
@@ -321,7 +327,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         ledger_id = "some_ledger_id"
 
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:4],
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages[:4],
         )
         fipa_dialogue.terms = Terms(
             ledger_id,
@@ -370,7 +377,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         self.strategy._is_ledger_tx = True
 
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:4],
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages[:4],
         )
         fipa_dialogue.terms = Terms(
             "some_ledger_id",
@@ -412,7 +420,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_messages[:4],
             ),
         )
         fipa_dialogue.data_for_sale = data
@@ -481,7 +490,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         self.strategy._is_ledger_tx = False
 
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:4],
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages[:4],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue,
@@ -507,7 +517,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         """Test the _handle_invalid method of the fipa handler."""
         # setup
         fipa_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.fipa_dialogues, messages=self.list_of_messages[:2],
+            dialogues=self.fipa_dialogues,
+            messages=self.list_of_messages[:2],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=fipa_dialogue,
@@ -793,7 +804,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             f"transaction confirmed, sending data={fipa_dialogue.data_for_sale} to buyer={COUNTERPARTY_AGENT_ADDRESS[-5:]}.",
         )
 
-    def test_handle_transaction_receipt_not_is_settled_or_not_is_valid(self,):
+    def test_handle_transaction_receipt_not_is_settled_or_not_is_valid(
+        self,
+    ):
         """Test the _handle_transaction_receipt method of the ledger_api handler where is_settled or is_valid is False."""
         # setup
         ledger_api_dialogue = cast(
@@ -1049,7 +1062,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_service",
+                self.service_registration_behaviour,
+                "register_service",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -1076,7 +1090,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_genus",
+                self.service_registration_behaviour,
+                "register_genus",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -1103,7 +1118,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_classification",
+                self.service_registration_behaviour,
+                "register_classification",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -1201,7 +1217,8 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler where the oef error does NOT target register_service."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages_unregister[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_unregister[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,

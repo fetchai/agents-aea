@@ -111,7 +111,9 @@ class BaseSkillTestCase:
 
     @staticmethod
     def message_has_attributes(
-        actual_message: Message, message_type: Type[Message], **kwargs: Any,
+        actual_message: Message,
+        message_type: Type[Message],
+        **kwargs: Any,
     ) -> Tuple[bool, str]:
         """
         Evaluates whether a message's attributes match the expected attributes provided.
@@ -324,7 +326,10 @@ class BaseSkillTestCase:
         return dialogue_reference
 
     def _extract_message_fields(
-        self, message: DialogueMessage, index: int, last_is_incoming: bool,
+        self,
+        message: DialogueMessage,
+        index: int,
+        last_is_incoming: bool,
     ) -> Tuple[Message.Performative, Dict, int, bool, Optional[int]]:
         """
         Extracts message attributes from a dialogue message.
@@ -423,8 +428,8 @@ class BaseSkillTestCase:
                 target = cast(Message, dialogue.last_message).message_id
 
             if is_incoming:  # messages from the opponent
-                dialogue_reference = self._non_initial_incoming_message_dialogue_reference(
-                    dialogue
+                dialogue_reference = (
+                    self._non_initial_incoming_message_dialogue_reference(dialogue)
                 )
                 message_id = dialogue.get_incoming_next_message_id()
 

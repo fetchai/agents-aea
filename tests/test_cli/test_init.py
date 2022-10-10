@@ -54,7 +54,8 @@ class TestDoInit:
         assert not os.path.exists(self.cli_config_file)
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", author],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", author],
         )
 
         assert result.exit_code == 0
@@ -73,7 +74,8 @@ class TestDoInit:
     def test_already_registered(self):
         """Test author already registered."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", "author"],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", "author"],
         )
         assert result.exit_code == 0
         result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local"])
@@ -114,7 +116,8 @@ class TestDoInit:
     def test_already_logged_in(self, *mocks):
         """Registered and logged in (has token)."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", "test_author"],
+            cli,
+            [*CLI_LOG_OPTION, "init", "--author", "test_author"],
         )
         assert result.exit_code == 0
 

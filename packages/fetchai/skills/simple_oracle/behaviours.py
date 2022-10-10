@@ -122,7 +122,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
             callable="get_deploy_transaction",
             kwargs=strategy.get_deploy_kwargs(),
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
@@ -238,7 +241,11 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
-        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
+        self,
+        metric_name: str,
+        update_func: str,
+        value: float,
+        labels: Dict[str, str],
     ) -> None:
         """
         Update a prometheus metric.

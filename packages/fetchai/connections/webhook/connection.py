@@ -208,7 +208,9 @@ class WebhookChannel:
             body=payload_bytes if payload_bytes is not None else b"",
         )
         envelope = Envelope(
-            to=http_message.to, sender=http_message.sender, message=http_message,
+            to=http_message.to,
+            sender=http_message.sender,
+            message=http_message,
         )
         return envelope
 

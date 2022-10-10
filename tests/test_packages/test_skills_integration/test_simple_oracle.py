@@ -52,7 +52,8 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
     @pytest.mark.ledger
     # @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_oracle(
-        self, fund_fetchai_accounts,
+        self,
+        fund_fetchai_accounts,
     ):
         """Run the oracle skills sequence."""
         oracle_agent_name = "oracle_aea"
@@ -84,7 +85,8 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             self.set_config("agent.default_connection", "fetchai/ledger:0.21.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
-                "agent.required_ledgers", [FetchAICrypto.identifier],
+                "agent.required_ledgers",
+                [FetchAICrypto.identifier],
             )
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -160,7 +162,8 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             self.set_config("agent.default_connection", "fetchai/ledger:0.21.1")
             self.set_config("agent.default_ledger", ledger_id)
             self.nested_set_config(
-                "agent.required_ledgers", [FetchAICrypto.identifier],
+                "agent.required_ledgers",
+                [FetchAICrypto.identifier],
             )
 
             default_routing = {
@@ -218,7 +221,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "Oracle value successfully updated!",
             )
             missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
+                oracle_aea_process,
+                check_strings,
+                timeout=60,
+                is_terminating=False,
             )
             assert (
                 missing_strings == []
@@ -249,7 +255,10 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
                 "Oracle value successfully requested!",
             )
             missing_strings = self.missing_from_output(
-                client_aea_process, check_strings, timeout=60, is_terminating=False,
+                client_aea_process,
+                check_strings,
+                timeout=60,
+                is_terminating=False,
             )
             assert (
                 missing_strings == []
@@ -271,7 +280,9 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_oracle(
-        self, erc20_contract, oracle_contract,
+        self,
+        erc20_contract,
+        oracle_contract,
     ):
         """Run the oracle skills sequence."""
         oracle_agent_name = "oracle_aea"
@@ -414,7 +425,10 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
                 "Oracle value successfully updated!",
             )
             missing_strings = self.missing_from_output(
-                oracle_aea_process, check_strings, timeout=60, is_terminating=False,
+                oracle_aea_process,
+                check_strings,
+                timeout=60,
+                is_terminating=False,
             )
             assert (
                 missing_strings == []
@@ -446,7 +460,10 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
                 "Oracle value successfully requested!",
             )
             missing_strings = self.missing_from_output(
-                client_aea_process, check_strings, timeout=60, is_terminating=False,
+                client_aea_process,
+                check_strings,
+                timeout=60,
+                is_terminating=False,
             )
             assert (
                 missing_strings == []

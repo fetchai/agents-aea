@@ -76,7 +76,8 @@ class TestPrometheusConnection:
         """Initialise the class."""
         self.metrics = {}
         configuration = ConnectionConfig(
-            connection_id=PrometheusConnection.connection_id, port=9090,
+            connection_id=PrometheusConnection.connection_id,
+            port=9090,
         )
         self.some_skill = "some/skill:0.1.0"
         self.agent_address = "my_address"
@@ -104,7 +105,11 @@ class TestPrometheusConnection:
         )
         assert sending_dialogue is not None
 
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self.prometheus_con.send(envelope)
 
     async def send_update_metric(self, title: str, update_func: str) -> None:
@@ -120,7 +125,11 @@ class TestPrometheusConnection:
         assert sending_dialogue is not None
         assert sending_dialogue.last_message is not None
 
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self.prometheus_con.send(envelope)
 
     def teardown(self):
@@ -208,7 +217,9 @@ class TestPrometheusConnection:
         # Test that invalid message is rejected.
         with pytest.raises(AEAEnforceError):
             envelope = Envelope(
-                to="some_address", sender="me", message=Mock(spec=Message),
+                to="some_address",
+                sender="me",
+                message=Mock(spec=Message),
             )
             await self.prometheus_con.channel.send(envelope)
 
@@ -217,7 +228,9 @@ class TestPrometheusConnection:
             PrometheusMessage.Performative.RESPONSE, code=0, message=""
         )
         envelope = Envelope(
-            to=self.prometheus_address, sender=self.some_skill, message=msg,
+            to=self.prometheus_address,
+            sender=self.some_skill,
+            message=msg,
         )
         await self.prometheus_con.channel.send(envelope)
 
@@ -232,7 +245,9 @@ class TestPrometheusConnection:
                 labels={},
             )
             envelope = Envelope(
-                to=self.prometheus_address, sender=self.some_skill, message=msg,
+                to=self.prometheus_address,
+                sender=self.some_skill,
+                message=msg,
             )
             envelope._protocol_specification_id = "bad_id"
             await self.prometheus_con.channel.send(envelope)

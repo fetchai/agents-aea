@@ -101,7 +101,10 @@ def _load_packages(agent_identity: Identity) -> None:
     stub_connection_id = PublicId.from_str(STUB_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            VENDOR, stub_connection_id.author, CONNECTIONS, stub_connection_id.name,
+            VENDOR,
+            stub_connection_id.author,
+            CONNECTIONS,
+            stub_connection_id.name,
         ),
         agent_identity,
         CryptoStore(),
@@ -247,9 +250,15 @@ def _try_construct_envelope(
         )
         message = message_decoded.encode("utf-8")  # type: Union[str, bytes]
         msg, _ = dialogues.create(
-            counterparty=agent_name, performative=performative, content=message,
+            counterparty=agent_name,
+            performative=performative,
+            content=message,
         )
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")
     except KeyboardInterrupt:

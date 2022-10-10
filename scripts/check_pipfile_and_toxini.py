@@ -83,7 +83,9 @@ def check_versions_in_tox_correct(file: str = "tox.ini") -> None:
             name_part = m.groups()[0]
             version_part = line.replace(name_part, "").strip()
             check_match(
-                name_part.strip(" "), version_part.strip("\n"), dependencies,
+                name_part.strip(" "),
+                version_part.strip("\n"),
+                dependencies,
             )
 
 

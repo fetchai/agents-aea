@@ -240,7 +240,8 @@ def generate_currency_endowments(
 
 
 def generate_exchange_params(
-    agent_addresses: List[str], currency_ids: List[str],
+    agent_addresses: List[str],
+    currency_ids: List[str],
 ) -> Dict[str, Dict[str, float]]:
     """
     Compute the exchange parameters for each agent.

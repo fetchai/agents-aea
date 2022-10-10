@@ -61,7 +61,11 @@ def make_test_envelope() -> Envelope:
         content=b"hello",
     )
     msg.to = "any"
-    envelope = Envelope(to="any", sender="any", message=msg,)
+    envelope = Envelope(
+        to="any",
+        sender="any",
+        message=msg,
+    )
     return envelope
 
 
@@ -93,7 +97,11 @@ class TestStubConnectionReception:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_envelope = Envelope(to="any", sender="anys", message=msg,)
+        expected_envelope = Envelope(
+            to="any",
+            sender="anys",
+            message=msg,
+        )
 
         with open(self.input_file_path, "ab+") as f:
             write_envelope(expected_envelope, f)
@@ -219,7 +227,11 @@ class TestStubConnectionSending:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_envelope = Envelope(to="any", sender="anys", message=msg,)
+        expected_envelope = Envelope(
+            to="any",
+            sender="anys",
+            message=msg,
+        )
 
         self.multiplexer.put(expected_envelope)
         time.sleep(0.1)

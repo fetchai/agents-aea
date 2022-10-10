@@ -147,7 +147,9 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "valid_registration", return_value=(True, 0, "all good!"),
+            self.strategy,
+            "valid_registration",
+            return_value=(True, 0, "all good!"),
         ) as mock_valid:
             with patch.object(
                 self.strategy, "lock_registration_temporarily"
@@ -214,7 +216,9 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "valid_registration", return_value=(True, 0, "all good!"),
+            self.strategy,
+            "valid_registration",
+            return_value=(True, 0, "all good!"),
         ) as mock_valid:
             with patch.object(
                 self.strategy, "lock_registration_temporarily"
@@ -277,7 +281,8 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
         mock_valid.called_once()
 
         mock_logger.assert_any_call(
-            logging.INFO, f"invalid registration={incoming_message.info}. Rejecting.",
+            logging.INFO,
+            f"invalid registration={incoming_message.info}. Rejecting.",
         )
 
         message = self.get_message_from_outbox()
@@ -419,7 +424,9 @@ class TestContractApiHandler(BaseSkillTestCase):
             f"received invalid contract_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_state_staked(self,):
+    def test_handle_state_staked(
+        self,
+    ):
         """Test the _handle_state method of the contract_api handler where has_staked is True."""
         # setup
         register_dialogue = cast(
@@ -470,7 +477,9 @@ class TestContractApiHandler(BaseSkillTestCase):
 
         assert register_dialogue in self.tx_behaviour.waiting
 
-    def test_handle_state_not_staked(self,):
+    def test_handle_state_not_staked(
+        self,
+    ):
         """Test the _handle_state method of the contract_api handler where has_staked is False."""
         # setup
         register_dialogue = cast(
@@ -530,7 +539,9 @@ class TestContractApiHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_handle_state_register_msg_is_none(self,):
+    def test_handle_state_register_msg_is_none(
+        self,
+    ):
         """Test the _handle_state method of the contract_api handler where register_msg is None."""
         # setup
         register_dialogue = cast(
@@ -778,7 +789,9 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction_last_ledger_api_message_is_none(self,):
+    def test_handle_signed_transaction_last_ledger_api_message_is_none(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_dialogue = cast(
@@ -815,7 +828,9 @@ class TestSigningHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
 
-    def test_handle_signed_transaction_last_ledger_api_message_is_not_none(self,):
+    def test_handle_signed_transaction_last_ledger_api_message_is_not_none(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler where the last ledger_api message is not None."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -1219,7 +1234,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, "checking transaction is settled.",
+            logging.INFO,
+            "checking transaction is settled.",
         )
 
     def test_handle_transaction_receipt_i(self):

@@ -79,7 +79,9 @@ def make_multiplexer_and_dialogues() -> Tuple[
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(
-        configuration=configuration, data_dir=MagicMock(), identity=identity,
+        configuration=configuration,
+        data_dir=MagicMock(),
+        identity=identity,
     )
     multiplexer = Multiplexer([soef_connection])
     return multiplexer, oef_search_dialogues, crypto, soef_connection
@@ -130,10 +132,16 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         logger.info(
             "Registering agent at location=({},{}) by agent={}".format(
-                self.location.latitude, self.location.longitude, self.crypto.address,
+                self.location.latitude,
+                self.location.longitude,
+                self.crypto.address,
             )
         )
         self.multiplexer.put(envelope)
@@ -163,7 +171,11 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         logger.info("Registering agent personality")
         self.multiplexer.put(envelope)
         # check for register results
@@ -184,7 +196,11 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         logger.info("Registering agent service key")
         self.multiplexer.put(envelope)
         # check for register results
@@ -202,7 +218,9 @@ class Instance:
             query=query,
         )
         search_envelope = Envelope(
-            to=message.to, sender=message.sender, message=message,
+            to=message.to,
+            sender=message.sender,
+            message=message,
         )
         logger.info(f"Searching for agents with query: {query}")
         self.multiplexer.put(search_envelope)
@@ -235,7 +253,11 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         logger.info(f"Send generic command {command} {parameters}")
         self.multiplexer.put(envelope)
 
@@ -319,7 +341,9 @@ class TestRealNetwork:
             closeness_query = Query(constraints)
             logger.info(
                 "Searching for agents in radius={} of myself at location=({},{}) with personality filters".format(
-                    radius, agent_location.latitude, agent_location.longitude,
+                    radius,
+                    agent_location.latitude,
+                    agent_location.longitude,
                 )
             )
             message = agent.search(closeness_query)
@@ -359,7 +383,9 @@ class TestRealNetwork:
                 service_description=service_description,
             )
             envelope = Envelope(
-                to=message.to, sender="some/skill:0.1.0", message=message,
+                to=message.to,
+                sender="some/skill:0.1.0",
+                message=message,
             )
             logger.info("Pinging")
             agent.multiplexer.put(envelope)
@@ -420,7 +446,11 @@ class TestRealNetwork:
                 counterparty=str(SOEFConnection.connection_id.to_any()),
             )
 
-            envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+            envelope = Envelope(
+                to=message.to,
+                sender=message.sender,
+                message=message,
+            )
             agent1.multiplexer.put(envelope)
 
             envelope = agent1.get()

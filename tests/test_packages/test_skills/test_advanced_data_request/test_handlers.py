@@ -106,7 +106,8 @@ class TestHttpHandler(BaseSkillTestCase):
         """Test the _handle_response method of the http handler to a valid response."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
@@ -167,7 +168,8 @@ class TestHttpHandler(BaseSkillTestCase):
         """Test the _handle_response method of the http handler to an unexpected response."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
@@ -187,14 +189,16 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, "No valid output for output1 found in response.",
+            logging.WARNING,
+            "No valid output for output1 found in response.",
         )
 
     def test_handle_response_missing_output(self):
         """Test the _handle_response method of the http handler to a response with a missing output."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
@@ -214,17 +218,20 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, "No valid output for output1 found in response.",
+            logging.WARNING,
+            "No valid output for output1 found in response.",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Observation: {'output2': {'value': 'XXX'}}",
+            logging.INFO,
+            "Observation: {'output2': {'value': 'XXX'}}",
         )
 
     def test_handle_response_bad_response_code(self):
         """Test the _handle_response method of the http handler to a response with a code that is not 200."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
@@ -244,7 +251,8 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "got unexpected http message: code = 999",
+            logging.INFO,
+            "got unexpected http message: code = 999",
         )
 
     def test_handle_request_get(self):
@@ -295,7 +303,8 @@ class TestHttpHandler(BaseSkillTestCase):
             self.http_handler.handle(incoming_message)
 
         mock_logger.assert_any_call(
-            logging.INFO, "method 'post' is not supported.",
+            logging.INFO,
+            "method 'post' is not supported.",
         )
         # check that outbox is empty
         self.assert_quantity_in_outbox(0)
@@ -324,7 +333,8 @@ class TestHttpHandler(BaseSkillTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, "http server is not enabled.",
+            logging.INFO,
+            "http server is not enabled.",
         )
         # check that outbox is empty
         self.assert_quantity_in_outbox(0)
@@ -382,7 +392,8 @@ class TestPrometheusHandler(BaseSkillTestCase):
         """Test the _handle_response method of the prometheus handler to a valid response."""
         # setup
         prometheus_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.prometheus_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.prometheus_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=prometheus_dialogue,

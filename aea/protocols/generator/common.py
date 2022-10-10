@@ -128,7 +128,8 @@ def _match_brackets(text: str, index_of_open_bracket: int) -> int:
     if text[index_of_open_bracket] != "[":
         raise SyntaxError(
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_of_open_bracket, text[index_of_open_bracket],
+                index_of_open_bracket,
+                text[index_of_open_bracket],
             )
         )
 
@@ -467,7 +468,8 @@ def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> Non
     """
     # path to proto file
     path_to_proto_file = os.path.join(
-        path_to_generated_protocol_package, f"{name}.proto",
+        path_to_generated_protocol_package,
+        f"{name}.proto",
     )
 
     # Dump protolint configuration into a temporary file

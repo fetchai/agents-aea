@@ -309,7 +309,8 @@ class OEFSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )
 
@@ -388,7 +389,8 @@ class LedgerApiHandler(Handler):
         if ledger_api_msg.balance > 0:
             self.context.logger.info(
                 "starting balance on {} ledger={}.".format(
-                    strategy.ledger_id, ledger_api_msg.balance,
+                    strategy.ledger_id,
+                    ledger_api_msg.balance,
                 )
             )
             strategy.is_searching = True
@@ -488,7 +490,8 @@ class LedgerApiHandler(Handler):
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info(
                 "informing counterparty={} of transaction digest={}.".format(
-                    ml_trade_msg.sender[-5:], ledger_api_msg_.transaction_digest,
+                    ml_trade_msg.sender[-5:],
+                    ledger_api_msg_.transaction_digest,
                 )
             )
         else:
@@ -537,7 +540,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 

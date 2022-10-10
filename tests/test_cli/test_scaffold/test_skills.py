@@ -129,7 +129,7 @@ class TestScaffoldSkill:
         init_module_content = p.read_text()
         expected_public_id = f"{AUTHOR}/{self.resource_name}:{DEFAULT_VERSION}"
         matches = re.findall(
-            fr'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
+            rf'^PUBLIC_ID = PublicId\.from_str\("{expected_public_id}"\)$',
             init_module_content,
             re.MULTILINE,
         )
@@ -315,7 +315,8 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
 
         # change the dumping of yaml module to raise an exception.
         cls.patch = unittest.mock.patch(
-            "yaml.dump", side_effect=ValidationError("test error message"),
+            "yaml.dump",
+            side_effect=ValidationError("test error message"),
         )
         cls.patch.start()
 

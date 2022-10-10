@@ -171,7 +171,10 @@ class TestHTTPServer:
         )
         await self.http_connection.send(response_envelope)
 
-        response = await asyncio.wait_for(request_task, timeout=20,)
+        response = await asyncio.wait_for(
+            request_task,
+            timeout=20,
+        )
 
         assert (
             response.status == 200
@@ -204,7 +207,10 @@ class TestHTTPServer:
         )
         await self.http_connection.send(response_envelope)
 
-        response = await asyncio.wait_for(request_task, timeout=20,)
+        response = await asyncio.wait_for(
+            request_task,
+            timeout=20,
+        )
         assert (
             response.status == 200
             and response.reason == "Success"
@@ -298,7 +304,12 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_post_201(self):
         """Test send get request w/ 200 response."""
-        request_task = self.loop.create_task(self.request("post", "/pets",))
+        request_task = self.loop.create_task(
+            self.request(
+                "post",
+                "/pets",
+            )
+        )
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
@@ -319,7 +330,10 @@ class TestHTTPServer:
 
         await self.http_connection.send(response_envelope)
 
-        response = await asyncio.wait_for(request_task, timeout=20,)
+        response = await asyncio.wait_for(
+            request_task,
+            timeout=20,
+        )
         assert (
             response.status == 201
             and response.reason == "Created"
@@ -395,7 +409,11 @@ class TestHTTPServer:
         )
         message.to = str(HTTPServerConnection.connection_id)
         message.sender = self.target_skill_id
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         await self.http_connection.send(envelope)
 
     @pytest.mark.asyncio
@@ -421,7 +439,12 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_server_error_on_send_response(self):
         """Test exception raised on response sending to the client."""
-        request_task = self.loop.create_task(self.request("post", "/pets",))
+        request_task = self.loop.create_task(
+            self.request(
+                "post",
+                "/pets",
+            )
+        )
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=20)
         assert envelope
         incoming_message, dialogue = self._get_message_and_dialogue(envelope)
@@ -443,7 +466,10 @@ class TestHTTPServer:
 
         with patch.object(Response, "from_message", side_effect=Exception("expected")):
             await self.http_connection.send(response_envelope)
-            response = await asyncio.wait_for(request_task, timeout=20,)
+            response = await asyncio.wait_for(
+                request_task,
+                timeout=20,
+            )
 
         assert response and response.status == 500 and response.reason == "Server Error"
 
@@ -548,7 +574,10 @@ class TestHTTPSServer:
         )
         await self.http_connection.send(response_envelope)
 
-        response = await asyncio.wait_for(request_task, timeout=20,)
+        response = await asyncio.wait_for(
+            request_task,
+            timeout=20,
+        )
 
         assert (
             response.status == 200

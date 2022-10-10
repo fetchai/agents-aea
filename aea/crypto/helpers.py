@@ -36,7 +36,9 @@ _ = PRIVATE_KEY_PATH_SCHEMA  # some modules expect this here
 
 
 def try_validate_private_key_path(
-    ledger_id: str, private_key_path: str, password: Optional[str] = None,
+    ledger_id: str,
+    private_key_path: str,
+    password: Optional[str] = None,
 ) -> None:
     """
     Try validate a private key path.
@@ -51,8 +53,10 @@ def try_validate_private_key_path(
         # with private_key_path as parameter
         make_crypto(ledger_id, private_key_path=private_key_path, password=password)
     except Exception as e:  # pylint: disable=broad-except  # thats ok, reraise
-        error_msg = "This is not a valid private key file: '{}'\n Exception: '{}'".format(
-            private_key_path, e
+        error_msg = (
+            "This is not a valid private key file: '{}'\n Exception: '{}'".format(
+                private_key_path, e
+            )
         )
         _default_logger.error(error_msg)
         raise
@@ -90,7 +94,9 @@ def try_generate_testnet_wealth(
 
 
 def private_key_verify(
-    aea_conf: AgentConfig, aea_project_path: Path, password: Optional[str] = None,
+    aea_conf: AgentConfig,
+    aea_project_path: Path,
+    password: Optional[str] = None,
 ) -> None:
     """
     Check key.
@@ -125,7 +131,8 @@ def private_key_verify(
         except FileNotFoundError:  # pragma: no cover
             raise ValueError(
                 "File {} for private key {} not found.".format(
-                    repr(config_private_key_path), identifier,
+                    repr(config_private_key_path),
+                    identifier,
                 )
             )
 

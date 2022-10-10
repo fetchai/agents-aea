@@ -54,7 +54,6 @@ if platform.system() == "Windows":  # pragma: nocover
         d = win32process.GetProcessTimes(win32process.GetCurrentProcess())  # type: ignore
         return d["UserTime"] / WIN32_PROCESS_TIMES_TICKS_PER_SECOND
 
-
 else:
     import resource
 

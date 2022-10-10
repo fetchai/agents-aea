@@ -1212,7 +1212,8 @@ class TestDialoguesBase:
         opponent_dialogue_1 = self.opponent_dialogues.update(msg_1)
 
         msg_2 = dialogue.reply(
-            performative=DefaultMessage.Performative.BYTES, content=b"Hello again",
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"Hello again",
         )
 
         opponent_dialogue_2 = self.opponent_dialogues.update(msg_2)
@@ -1397,7 +1398,9 @@ class TestDialoguesBase:
             == b"Hello"
         )
 
-    def test_complete_dialogue_reference_positive(self,):
+    def test_complete_dialogue_reference_positive(
+        self,
+    ):
         """Positive test for the '_complete_dialogue_reference' method."""
         msg, dialogue = self.own_dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
@@ -1425,7 +1428,9 @@ class TestDialoguesBase:
             == valid_message_2_by_other.dialogue_reference
         )
 
-    def test_complete_dialogue_reference_negative_incorrect_reference(self,):
+    def test_complete_dialogue_reference_negative_incorrect_reference(
+        self,
+    ):
         """Negative test for the '_complete_dialogue_reference' method: the input message has invalid dialogue reference."""
         msg, dialogue = self.own_dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"

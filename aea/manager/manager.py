@@ -199,7 +199,9 @@ class AgentRunThreadTask(AgentRunAsyncTask):
         )
         self._thread.start()
 
-    def stop(self,) -> None:
+    def stop(
+        self,
+    ) -> None:
         """Stop the task."""
         super().stop()
         if self._thread is not None:
@@ -258,7 +260,9 @@ class AgentRunProcessTask(BaseAgentRunTask):
 
     @staticmethod
     def _run_agent(
-        agent_alias: AgentAlias, stop_event: Event, result_queue: multiprocessing.Queue,
+        agent_alias: AgentAlias,
+        stop_event: Event,
+        result_queue: multiprocessing.Queue,
     ) -> None:
         """Start an agent in a child process."""
         t: Optional[Thread] = None
@@ -515,7 +519,9 @@ class MultiAgentManager:
     def last_start_status(
         self,
     ) -> Tuple[
-        bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+        bool,
+        Dict[PublicId, List[Dict]],
+        List[Tuple[PublicId, List[Dict], Exception]],
     ]:
         """Get status of the last agents start loading state."""
         if self._last_start_status is None:
@@ -725,7 +731,10 @@ class MultiAgentManager:
         return self
 
     def add_agent_with_config(
-        self, public_id: PublicId, config: List[dict], agent_name: Optional[str] = None,
+        self,
+        public_id: PublicId,
+        config: List[dict],
+        agent_name: Optional[str] = None,
     ) -> "MultiAgentManager":
         """
         Create new agent configuration based on project with config provided.
@@ -1024,7 +1033,9 @@ class MultiAgentManager:
     def _load_state(
         self, local: bool, remote: bool
     ) -> Tuple[
-        bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+        bool,
+        Dict[PublicId, List[Dict]],
+        List[Tuple[PublicId, List[Dict], Exception]],
     ]:
         """
         Load saved state from file.
@@ -1063,7 +1074,10 @@ class MultiAgentManager:
         for project_public_id, agents_settings in projects_agents.items():
             try:
                 self.add_project(
-                    project_public_id, local=local, remote=remote, restore=True,
+                    project_public_id,
+                    local=local,
+                    remote=remote,
+                    restore=True,
                 )
             except ProjectCheckError as e:
                 failed_to_load.append((project_public_id, agents_settings, e))

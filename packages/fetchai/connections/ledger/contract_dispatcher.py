@@ -105,7 +105,11 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         return message.ledger_id
 
     def get_error_message(
-        self, e: Exception, api: LedgerApi, message: Message, dialogue: BaseDialogue,
+        self,
+        e: Exception,
+        api: LedgerApi,
+        message: Message,
+        dialogue: BaseDialogue,
     ) -> ContractApiMessage:
         """
         Build an error message.
@@ -289,7 +293,10 @@ class ContractApiRequestDispatcher(RequestDispatcher):
         return self.dispatch_request(ledger_api, message, dialogue, build_response)
 
     def _get_data(
-        self, api: LedgerApi, message: ContractApiMessage, contract: Contract,
+        self,
+        api: LedgerApi,
+        message: ContractApiMessage,
+        contract: Contract,
     ) -> Union[bytes, JSONLike]:
         """Get the data from the contract method, either from the stub or from the callable specified by the message."""
         # first, check if the custom handler for this type of request has been implemented.

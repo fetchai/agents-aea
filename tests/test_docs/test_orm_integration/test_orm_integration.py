@@ -159,11 +159,15 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         )
         # Replace the seller strategy
         seller_stategy_path = Path(
-            seller_aea_name, "skills", "thermometer", "strategy.py",
+            seller_aea_name,
+            "skills",
+            "thermometer",
+            "strategy.py",
         )
         self.replace_file_content(ORM_SELLER_STRATEGY_PATH, seller_stategy_path)
         self.fingerprint_item(
-            "skill", "{}/thermometer:0.1.0".format(self.author),
+            "skill",
+            "{}/thermometer:0.1.0".format(self.author),
         )
         self.run_install()
 
@@ -260,7 +264,10 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=30, is_terminating=False,
+            buyer_aea_process,
+            check_strings,
+            timeout=30,
+            is_terminating=False,
         )
         assert (
             missing_strings == []

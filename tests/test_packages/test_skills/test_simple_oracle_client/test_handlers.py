@@ -235,7 +235,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"starting balance on {ETHEREUM_LEDGER_ID} ledger={balance}.",
+            logging.INFO,
+            f"starting balance on {ETHEREUM_LEDGER_ID} ledger={balance}.",
         )
 
         self.assert_quantity_in_outbox(0)
@@ -506,7 +507,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle client transactions approved!",
+            logging.INFO,
+            "Oracle client transactions approved!",
         )
 
         assert (
@@ -558,7 +560,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle value successfully requested!",
+            logging.INFO,
+            "Oracle value successfully requested!",
         )
 
         self.assert_quantity_in_outbox(0)
@@ -570,7 +573,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=dialogue, performative=LedgerApiMessage.Performative.ERROR, code=1,
+            dialogue=dialogue,
+            performative=LedgerApiMessage.Performative.ERROR,
+            code=1,
         )
 
         # operation
@@ -716,7 +721,8 @@ class TestContractApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received raw transaction={incoming_message}",
+            logging.INFO,
+            f"received raw transaction={incoming_message}",
         )
         mock_logger.assert_any_call(
             logging.INFO,
@@ -855,7 +861,9 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction(self,):
+    def test_handle_signed_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address

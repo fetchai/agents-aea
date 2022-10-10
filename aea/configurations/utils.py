@@ -49,7 +49,8 @@ def replace_component_ids(
 
 @replace_component_ids.register(AgentConfig)  # type: ignore
 def _(
-    arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
+    arg: AgentConfig,
+    replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
 ) -> None:
     """
     Replace references in agent configuration.
@@ -111,14 +112,16 @@ def _(
 
 @replace_component_ids.register(ProtocolConfig)  # type: ignore
 def _(
-    _arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
+    _arg: ProtocolConfig,
+    _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
 ) -> None:
     """Do nothing - protocols have no references."""
 
 
 @replace_component_ids.register(ConnectionConfig)  # type: ignore
 def _(
-    arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
+    arg: ConnectionConfig,
+    replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
 ) -> None:
     """Replace references in a connection configuration."""
     _replace_component_id(
@@ -139,14 +142,16 @@ def _(
 
 @replace_component_ids.register(ContractConfig)  # type: ignore
 def _(  # type: ignore
-    _arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
+    _arg: ContractConfig,
+    _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
 ) -> None:
     """Do nothing - contracts have no references."""
 
 
 @replace_component_ids.register(SkillConfig)  # type: ignore
 def _(
-    arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
+    arg: SkillConfig,
+    replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
 ) -> None:
     """Replace references in a skill configuration."""
     _replace_component_id(

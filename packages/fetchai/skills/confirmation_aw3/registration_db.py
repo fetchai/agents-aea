@@ -64,7 +64,10 @@ class RegistrationDB(Model):
         )
 
     def set_trade(
-        self, address: str, timestamp: datetime.datetime, data: Dict[str, str],
+        self,
+        address: str,
+        timestamp: datetime.datetime,
+        data: Dict[str, str],
     ) -> None:
         """Record a registration."""
         command = "INSERT INTO trades_table(address, created_at, data) values(?, ?, ?)"

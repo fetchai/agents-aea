@@ -9,11 +9,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmX9HuMvkRptLc4QnuagUGmN4HzxH5jnxXJYtw565dMnXg
   __init__.py: QmZbqix1H5WKfsFhEbhoGxRWVDCgjSyEsqSJNotQscoWxh
-  behaviours.py: QmekFp4Y2ssXxsPRzNZ8Dx2euAppUeKT8LScYQBPavgbEu
+  behaviours.py: QmckJcxgpL3AbyDahg7PArzT46ZUFsXbyqezQJaL6GyBhr
   dialogues.py: QmV4V7MxSHQaAsN3MA3ybQkfZ8WYgoymqQkf6byz1GkiBe
   game.py: QmSFZKLLqSjcoWqF9skD8zjd1SwDvUwNro77zk4QWEY49J
-  handlers.py: QmXoh3h5Xj2A3iFC4ur3CQethP3EYphG2x2U7AzWHvjQBy
-  helpers.py: QmXoom8vfe4dspKrSMnn3uUvxZRmvUFR5vGChUv4nddehb
+  handlers.py: QmeyAguBbjSfEjXRpUzkMm271xf6ibmMm75imHyfyVL73B
+  helpers.py: QmPov2VdtXWBPTypkB2BHDXEmZhJcFF64PpRt7dA6dvWEE
   parameters.py: QmQDgHpapxWQgLRza1dNgi79z5dBxhWsnTgnznTf1zmjPR
 fingerprint_ignore_patterns: []
 connections:

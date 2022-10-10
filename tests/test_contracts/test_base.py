@@ -135,7 +135,8 @@ def dummy_contract(request):
 def test_get_instance_no_address_ethereum(dummy_contract):
     """Tests get instance method with no address for ethereum."""
     ledger_api = ledger_apis_registry.make(
-        EthereumCrypto.identifier, address=ETHEREUM_DEFAULT_ADDRESS,
+        EthereumCrypto.identifier,
+        address=ETHEREUM_DEFAULT_ADDRESS,
     )
     instance = dummy_contract.get_instance(ledger_api)
     assert type(instance) == web3._utils.datatypes.PropertyCheckingFactory
@@ -168,7 +169,8 @@ def test_get_deploy_transaction_ethereum(
 def test_get_instance_no_address_cosmwasm(dummy_contract):
     """Tests get instance method with no address for fetchai."""
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     instance = dummy_contract.get_instance(ledger_api)
     assert instance is None
@@ -178,7 +180,8 @@ def test_get_deploy_transaction_cosmwasm(dummy_contract):
     """Tests the deploy transaction classmethod for fetchai."""
     aea_ledger_fetchai = crypto_registry.make(FetchAICrypto.identifier)
     ledger_api = ledger_apis_registry.make(
-        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+        FetchAICrypto.identifier,
+        address=FETCHAI_DEFAULT_ADDRESS,
     )
     deploy_tx = dummy_contract.get_deploy_transaction(
         ledger_api, aea_ledger_fetchai.address, account_number=1, sequence=0
