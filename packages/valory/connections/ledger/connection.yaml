@@ -51,7 +51,5 @@ excluded_protocols: []
 restricted_to_protocols:
 - valory/contract_api:1.0.0
 - valory/ledger_api:1.0.0
-dependencies:
-  open-aea-test-autonomy:
-    version: ==0.3.1
+dependencies: {}
 is_abstract: false
