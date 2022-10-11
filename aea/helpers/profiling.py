@@ -47,7 +47,7 @@ if platform.system() == "Windows":  # pragma: nocover
     def get_current_process_memory_usage() -> float:
         """Get current process memory usage in MB."""
         d = win32process.GetProcessMemoryInfo(win32process.GetCurrentProcess())  # type: ignore
-        return 1.0 * d["WorkingSetSize"] / 1024 ** 2
+        return 1.0 * d["WorkingSetSize"] / 1024**2
 
     def get_current_process_cpu_time() -> float:
         """Get current process cpu time in seconds."""
@@ -57,7 +57,7 @@ if platform.system() == "Windows":  # pragma: nocover
 else:
     import resource
 
-    _MAC_MEM_STATS_MB = 1024 ** 2
+    _MAC_MEM_STATS_MB = 1024**2
     _LINUX_MEM_STATS_MB = 1024
 
     def get_current_process_memory_usage() -> float:

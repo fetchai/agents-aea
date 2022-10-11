@@ -21,7 +21,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, List, Mapping, Optional, Tuple
 
 import click
 from click import Context, Option, UsageError, option
@@ -182,7 +182,7 @@ class MutuallyExclusiveOption(Option):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(
-        self, ctx: Context, opts: Dict[str, Any], args: List[Any]
+        self, ctx: Context, opts: Mapping[str, Any], args: List[Any]
     ) -> Tuple[Any, List[str]]:
         """
         Handle parse result.

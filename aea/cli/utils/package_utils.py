@@ -21,7 +21,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple, Union
 
 import click
 from jsonschema import ValidationError
@@ -151,6 +151,18 @@ def _is_permitted_author_handle(author: str) -> bool:
     return result
 
 
+# mostly for tests
+def is_path_exist(path: Union[str, Path]) -> bool:
+    """
+    Check path provided exists.
+
+    :param path: str or Path
+
+    :return: bool
+    """
+    return os.path.exists(path)
+
+
 def try_get_item_source_path(
     path: str, author_name: Optional[str], item_type_plural: str, item_name: str
 ) -> str:
@@ -168,7 +180,7 @@ def try_get_item_source_path(
         source_path = os.path.join(path, item_type_plural, item_name)
     else:
         source_path = os.path.join(path, author_name, item_type_plural, item_name)
-    if not os.path.exists(source_path):
+    if not is_path_exist(source_path):
         raise click.ClickException(
             f'Item "{author_name}/{item_name}" not found in source folder "{source_path}".'
         )
@@ -189,7 +201,7 @@ def try_get_item_target_path(
     :return: the item target path
     """
     target_path = os.path.join(path, author_name, item_type_plural, item_name)
-    if os.path.exists(target_path):
+    if is_path_exist(target_path):
         path_ = Path(target_path)
         raise click.ClickException(
             f'Item "{path_.name}" already exists in target folder "{path_.parent}".'

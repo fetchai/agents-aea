@@ -131,7 +131,7 @@ class HttpHandler(Handler):
             # if value is a numeric type, store it as fixed-point with number of decimals
             if is_number(value):
                 float_value = float(value)
-                int_value = int(float_value * 10 ** model.decimals)
+                int_value = int(float_value * 10**model.decimals)
                 observation = {
                     output["name"]: {"value": int_value, "decimals": model.decimals}
                 }

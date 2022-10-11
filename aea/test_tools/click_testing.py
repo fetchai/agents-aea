@@ -33,7 +33,6 @@ import shlex
 import sys
 from typing import Optional
 
-from click._compat import string_types  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
@@ -57,7 +56,7 @@ class CliRunner(ClickCliRunner):
         exit_code = 0
 
         with self.isolation(input=input, env=env, color=color) as outstreams:
-            if isinstance(args, string_types):
+            if isinstance(args, str):
                 args = shlex.split(args)
 
             try:
@@ -104,5 +103,6 @@ class CliRunner(ClickCliRunner):
             stderr_bytes=stderr,  # type: ignore
             exit_code=exit_code,
             exception=exception,
-            exc_info=exc_info,
+            exc_info=exc_info,  # type: ignore
+            return_value=None,
         )

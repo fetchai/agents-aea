@@ -55,7 +55,7 @@ def ipfs(click_context: click.Context) -> None:
             ) from e
 
 
-@ipfs.resultcallback()
+@ipfs.result_callback()
 @click.pass_context
 def process_result(click_context: click.Context, *_: Any) -> None:
     """Tear down command group."""

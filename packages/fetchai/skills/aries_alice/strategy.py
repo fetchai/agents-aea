@@ -82,10 +82,16 @@ class Strategy(Model):
 
         self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
 
-        self._seed = kwargs.pop("seed", None,) or (
-            "my_seed_000000000000000000000000"
-            + str(random.randint(100_000, 999_999))  # nosec
-        )[-32:]
+        self._seed = (
+            kwargs.pop(
+                "seed",
+                None,
+            )
+            or (
+                "my_seed_000000000000000000000000"
+                + str(random.randint(100_000, 999_999))  # nosec
+            )[-32:]
+        )
 
         # search
         location = kwargs.pop("location", DEFAULT_LOCATION)

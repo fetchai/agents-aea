@@ -160,7 +160,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
     @staticmethod
     def _get_tx_expriration_block() -> int:
         """Return max block number for no expiration."""
-        return 2 ** 256 - 1
+        return 2**256 - 1
 
     def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
         """Request transaction that updates value in Fetch oracle contract."""

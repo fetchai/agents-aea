@@ -89,7 +89,10 @@ class TestPushLocally(AEATestCaseEmpty):
         copy_tree_mock,
     ):
         """Test ok for vendor's item."""
-        with mock.patch("os.path.exists", side_effect=[False, True, False]):
+        with mock.patch(
+            "aea.cli.utils.package_utils.is_path_exist",
+            side_effect=[False, True, False],
+        ):
             self.invoke("push", "--local", "skill", "fetchai/echo")
         copy_tree_mock.assert_called_once()
         src_path, dst_path = copy_tree_mock.mock_calls[0][1]
