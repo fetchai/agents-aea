@@ -70,7 +70,7 @@ bandit = "==1.7.0"
 vulture = "==2.3"
 isort = "==5.7.0"
 safety = "==1.10.3"
-mypy = "==0.761"
+mypy = "==0.982"
 darglint = "==1.8.1"
 flake8 = "==3.7.9"
 flake8-bugbear = "==20.1.4"
@@ -136,7 +136,16 @@ optional = true
 matplotlib = ">=3.3.0,<3.4"
 psutil = "==5.7.0"
 memory-profiler = "==0.57.0"
-
 # scripts
 gitpython = ">=3.1.14"
 ipfshttpclient = "==0.8.0a2"
+
+
+[tool.poetry.group.types.dependencies]
+# types defenitions for mypy
+types-certifi = "*"
+types-requests = "*"
+types-setuptools = "*"
+types-urllib3 = "*"
+types-click = "*"
+types-PyYAML = "*"

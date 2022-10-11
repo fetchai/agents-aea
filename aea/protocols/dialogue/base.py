@@ -213,7 +213,7 @@ class _DialogueMeta(type):
     def __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta":
         """Construct a new type."""
         # set class level `_rules`
-        dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
+        dialogue_cls = cast(Type["Dialogue"], super().__new__(cls, name, bases, dct))
         dialogue_cls._rules = dialogue_cls.Rules(
             dialogue_cls.INITIAL_PERFORMATIVES,
             dialogue_cls.TERMINAL_PERFORMATIVES,

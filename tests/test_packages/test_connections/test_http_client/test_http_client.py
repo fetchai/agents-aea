@@ -20,7 +20,7 @@
 import asyncio
 import logging
 from asyncio import CancelledError
-from typing import cast
+from typing import Any, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
@@ -51,7 +51,7 @@ class _MockRequest:
         """Init with mock response."""
         self.response = response
 
-    async def __aenter__(self) -> None:
+    async def __aenter__(self) -> Any:
         """Enter async context."""
         return self.response
 

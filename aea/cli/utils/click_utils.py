@@ -198,7 +198,7 @@ class MutuallyExclusiveOption(Option):
                 f"arguments `{', '.join(self.mutually_exclusive)}`."
             )
 
-        return super().handle_parse_result(ctx, opts, args)
+        return super().handle_parse_result(ctx, opts, args)  # type: ignore
 
 
 def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  # type: ignore

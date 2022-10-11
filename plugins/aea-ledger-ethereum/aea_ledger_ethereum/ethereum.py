@@ -107,7 +107,7 @@ def get_gas_price_strategy(
             raise ValueError(f"Invalid return value for `{gas_price_strategy}`!")
         gwei_result = result / 10  # adjustment (see api documentation)
         wei_result = web3.toWei(gwei_result, "gwei")
-        return wei_result
+        return Wei(wei_result)
 
     return gas_station_gas_price_strategy
 
@@ -778,7 +778,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
-            instance = self.api.eth.contract(
+            instance = self.api.eth.contract(  # type: ignore
                 address=_contract_address,
                 abi=contract_interface[_ABI],
                 bytecode=contract_interface[_BYTECODE],

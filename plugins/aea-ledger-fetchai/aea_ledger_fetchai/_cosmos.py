@@ -256,7 +256,7 @@ class CosmosHelper(Helper):
         """
         return {
             i["key"]: i["value"]
-            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])
+            for i in chain(*[i["attributes"] for i in tx_receipt["logs"][0]["events"]])  # type: ignore
         }
 
     @classmethod

@@ -240,7 +240,7 @@ jobs:
           python-version: 3.8
       - uses: actions/setup-go@v3
         with:
-          go-version: '^1.14.0'
+          go-version: '^1.17.0'
       - name: Install protolint (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -268,7 +268,7 @@ jobs:
         python-version: 3.8
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - name: Setup GCloud - production
       uses: google-github-actions/setup-gcloud@v0
       with:
@@ -353,7 +353,7 @@ jobs:
         python-version: ${{ matrix.python_version }}
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - if: matrix.os == 'ubuntu-latest'
       name: Install dependencies (ubuntu-latest)
       run: |
@@ -427,7 +427,7 @@ jobs:
         python-version: 3.8
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - name: Install dependencies (ubuntu-latest)
       run: |
         sudo apt-get update --fix-missing
@@ -473,11 +473,11 @@ jobs:
          sudo cp $LINKPATH ${LINKPATH}_orig
          sudo cp link $LINKPATH
          sudo chmod a+x $LINKPATH
-    - if: matrix.python-version == '3.6'
+    - if: matrix.python-version == '3.8'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
       run: make test
-    - if: matrix.python-version == '3.6'
+    - if: matrix.python-version == '3.8'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
