@@ -189,7 +189,7 @@ def test_outbox_put():
     )
     outbox.put(envelope)
     wait_for_condition(
-        lambda: inbox.empty(),
+        lambda: not inbox.empty(),
         TIMEOUT,
         "Inbox must not be empty after putting an envelope",
     )
