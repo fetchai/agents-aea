@@ -123,7 +123,7 @@ class TestSoefTokenStorage:
         self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
 
         # create the connection and multiplexer objects
-        self.token_storage_path = "test.storage"
+        self.token_storage_path = "test.storage"  # nosec
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="s-oef.fetch.ai",

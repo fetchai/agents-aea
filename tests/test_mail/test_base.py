@@ -50,7 +50,7 @@ def test_uri():
     assert uri.host == "netloc"
     assert uri.port == 80
     assert uri.username == "user"
-    assert uri.password == "pwd"
+    assert uri.password == "pwd"  # nosec
 
 
 def test_uri_eq():

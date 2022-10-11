@@ -63,7 +63,7 @@ class TestStrategy(ConfirmationAW3TestCase):
             },
         }
         cls.leaderboard_url = "some_url"
-        cls.leaderboard_token = "some_token"
+        cls.leaderboard_token = "some_token"  # nosec
 
         cls.strategy = Strategy(
             aw1_aea="some_aw1_aea",

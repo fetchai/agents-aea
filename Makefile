@@ -60,7 +60,7 @@ security:
         plugins/aea-ledger-cosmos/aea_ledger_cosmos \
         plugins/aea-cli-ipfs/aea_cli_ipfs
 	bandit -s B101 -r tests scripts
-	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706
+	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706 -i 44610 -i 50473
 
 .PHONY: static
 static:

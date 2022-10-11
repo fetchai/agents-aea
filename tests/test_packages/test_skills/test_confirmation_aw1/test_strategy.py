@@ -47,7 +47,7 @@ class TestStrategy(BaseSkillTestCase):
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.token_denomination = "atestfet"
+        cls.token_denomination = "atestfet"  # nosec
         cls.token_dispense_amount = 100000
         cls.fetchai_staking_contract_address = (
             "0x351bac612b50e87b46e4b10a282f632d41397de2"
