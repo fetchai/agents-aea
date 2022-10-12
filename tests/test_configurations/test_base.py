@@ -716,6 +716,13 @@ def test_public_id_comparator_when_name_is_different():
         assert pid1 < pid2
 
 
+def test_public_id_no_package_hash_raises():
+    """Test PublicId.__lt__ when author is different."""
+    pid = PublicId("author", "name_1", "0.1.0")
+    with pytest.raises(ValueError, match="Package hash was not provided."):
+        assert pid.hash
+
+
 def test_package_id_version():
     """Test PackageId.version"""
     package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
