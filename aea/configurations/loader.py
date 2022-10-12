@@ -31,6 +31,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    Callable,
 )
 
 import yaml
@@ -199,13 +200,13 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         :param file_pointer: the file pointer to the configuration file
         :return: the configuration object.
         """
-        if self.configuration_class.package_type == PackageType.AGENT:
-            return cast(T, self._load_agent_config(file_pointer))
 
-        if self.configuration_class.package_type == PackageType.SERVICE:
-            return cast(T, self._load_service_config(file_pointer))
+        loader: Callable = {
+            PackageType.AGENT: self._load_agent_config,
+            PackageType.SERVICE: self._load_service_config,
+        }.get(self.configuration_class.package_type, self._load_component_config)
 
-        return self._load_component_config(file_pointer)
+        return cast(T, loader(file_pointer))
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.
