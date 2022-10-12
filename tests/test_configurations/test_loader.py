@@ -32,13 +32,13 @@ import pytest
 import yaml
 
 import aea
-from aea.configurations.base import PackageType, ProtocolSpecification
+from aea.configurations.base import PackageType, ProtocolSpecification, AgentConfig
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.validation import make_jsonschema_base_uri
 from aea.exceptions import AEAEnforceError
 from aea.protocols.generator.common import load_protocol_specification
 
-from tests.conftest import protocol_specification_files
+from tests.conftest import protocol_specification_files, ROOT_DIR
 
 
 def test_windows_uri_path():
@@ -50,6 +50,13 @@ def test_windows_uri_path():
         assert output == f"file:///{'/'.join(path.parts)}/"
     else:
         assert output == f"file:/{'/'.join(path.parts)}/"
+
+
+@pytest.mark.parametrize("aea_config_yaml", Path(ROOT_DIR).rglob("**/aea-config.yaml"))
+def test_load_aea_config(aea_config_yaml):
+    """Test loading aea-config.yaml file"""
+    config_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
+    config_loader.load(open(aea_config_yaml))
 
 
 def test_config_loader_get_required_fields():
