@@ -441,17 +441,11 @@ class TestAgentConfigUpdate:
         assert self.aea_config.json
 
 
-class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
-    """Test case for _get_default_configuration_file_name_from_type method."""
+@pytest.mark.parametrize("package_type", PackageType)
+def test__get_default_configuration_file_name_from_type_positive(package_type):
+    """Test for _get_default_configuration_file_name_from_type method positive result."""
 
-    def test__get_default_configuration_file_name_from_type_positive(self):
-        """Test for _get_default_configuration_file_name_from_type method positive result."""
-        _get_default_configuration_file_name_from_type("agent")
-        _get_default_configuration_file_name_from_type("connection")
-        _get_default_configuration_file_name_from_type("protocol")
-        _get_default_configuration_file_name_from_type("skill")
-        _get_default_configuration_file_name_from_type("contract")
-        _get_default_configuration_file_name_from_type("service")
+    _get_default_configuration_file_name_from_type(str(package_type))
 
 
 class PublicIdTestCase(TestCase):
