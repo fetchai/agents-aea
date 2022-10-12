@@ -438,7 +438,7 @@ class TestAgentConfigUpdate:
         )
 
         # to json
-        self.aea_config.json
+        assert self.aea_config.json
 
 
 class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
@@ -451,6 +451,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
         _get_default_configuration_file_name_from_type("protocol")
         _get_default_configuration_file_name_from_type("skill")
         _get_default_configuration_file_name_from_type("contract")
+        _get_default_configuration_file_name_from_type("service")
 
 
 class PublicIdTestCase(TestCase):
