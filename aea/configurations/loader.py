@@ -214,14 +214,13 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         :param configuration: the configuration to be dumped.
         :param file_pointer: the file pointer to the configuration file
         """
-        if self.configuration_class.package_type == PackageType.AGENT:
-            self._dump_agent_config(cast(AgentConfig, configuration), file_pointer)
-        elif self.configuration_class.package_type == PackageType.SERVICE:
-            self._dump_service_config(
-                cast(PackageConfiguration, configuration), file_pointer
-            )
-        else:
-            self._dump_component_config(configuration, file_pointer)
+
+        dumper: Callable = {
+            PackageType.AGENT: self._dump_agent_config,
+            PackageType.SERVICE: self._dump_service_config,
+        }.get(self.configuration_class.package_type, self._dump_component_config)
+
+        dumper(configuration, file_pointer)
 
     @classmethod
     def from_configuration_type(
