@@ -730,6 +730,13 @@ def test_public_id_package_hash_in_json():
     assert pid.json.get("package_hash") == package_hash
 
 
+def test_public_id_with_package_hash():
+    """Test PublicId.__lt__ when author is different."""
+    package_hash = "ba" + "a" * 57
+    pid = PublicId("author", "name_1", "0.1.0")
+    assert pid.with_hash(package_hash) == PublicId("author", "name_1", "0.1.0", package_hash)
+
+
 def test_package_id_version():
     """Test PackageId.version"""
     package_id = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
