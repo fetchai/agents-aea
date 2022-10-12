@@ -24,7 +24,7 @@ import os
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import OrderedDict
+from collections import OrderedDict
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -116,14 +116,14 @@ def test_config_loader_load_service_config(*_mocks):
 
         config_loader.dump(dummy_obj, config_file.open("w+"))
         service_config = config_loader.load(config_file.open("r"))
-        assert any([getattr(service_config, key) == val for key, val in config.items()])
+        assert any(getattr(service_config, key) == val for key, val in config.items())
 
 
 @pytest.mark.parametrize("spec_file_path", protocol_specification_files)
 def test_load_protocol_specification(spec_file_path):
     """Test for the utility function 'load_protocol_specification'"""
     result = load_protocol_specification(spec_file_path)
-    assert type(result) == ProtocolSpecification
+    assert isinstance(result, ProtocolSpecification)
 
 
 @mock.patch("aea.protocols.generator.common.open_file")
