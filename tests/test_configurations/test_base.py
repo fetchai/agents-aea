@@ -733,8 +733,8 @@ def test_public_id_package_hash_in_json():
 def test_public_id_with_package_hash():
     """Test PublicId with package hash."""
     package_hash = "ba" + "a" * 57
-    pid = PublicId("author", "name_1", "0.1.0")
-    assert pid.with_hash(package_hash) == PublicId("author", "name_1", "0.1.0", package_hash)
+    package_id = PublicId("author", "name_1", "0.1.0")
+    assert package_id.with_hash(package_hash)
 
 
 def test_package_id_version():
@@ -755,11 +755,18 @@ def test_package_id_repr():
     assert repr(package_id) == "PackageId(protocol, author/name:0.1.0)"
 
 
+def test_package_id_without_hash():
+    """Test PackageId without hash"""
+    package_hash = "ba" + "a" * 57
+    public_id = PublicId("author", "name", "0.1.0", package_hash)
+    package_id = PackageId(PackageType.PROTOCOL, public_id)
+    assert repr(package_id.without_hash()) == "PackageId(protocol, author/name:0.1.0)"
+
+
 def test_package_id_lt():
     """Test PackageId.__lt__"""
     package_id_1 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
     package_id_2 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.2.0"))
-
     assert package_id_1 < package_id_2
 
 
