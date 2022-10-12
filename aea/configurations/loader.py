@@ -22,6 +22,7 @@ from io import StringIO
 from pathlib import Path
 from typing import (
     Any,
+    Callable,
     Dict,
     Generic,
     List,
@@ -31,7 +32,6 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    Callable,
 )
 
 import yaml

@@ -21,10 +21,10 @@
 
 """This module contains the tests for the aea.configurations.loader module."""
 import os
+from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from collections import OrderedDict
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -32,13 +32,13 @@ import pytest
 import yaml
 
 import aea
-from aea.configurations.base import PackageType, ProtocolSpecification, AgentConfig
+from aea.configurations.base import AgentConfig, PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.validation import make_jsonschema_base_uri
 from aea.exceptions import AEAEnforceError
 from aea.protocols.generator.common import load_protocol_specification
 
-from tests.conftest import protocol_specification_files, ROOT_DIR
+from tests.conftest import ROOT_DIR, protocol_specification_files
 
 
 def test_windows_uri_path():
