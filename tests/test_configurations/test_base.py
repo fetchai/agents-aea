@@ -465,7 +465,7 @@ class PublicIdTestCase(TestCase):
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
         obj = PublicId(AUTHOR, "name", "0.1.0")
-        obj.json
+        assert obj.json
 
     def test_public_id_eq_positive(self):
         """Test case for json __eq__ method positive result."""
@@ -502,7 +502,7 @@ class AgentConfigTestCase(TestCase):
         agent_config = AgentConfig(agent_name="my_agent", author="fetchai")
         agent_config.default_connection = None
         agent_config.default_connection = 1
-        agent_config.public_id
+        assert agent_config.public_id
 
     def test_name_and_author(self):
         """Test case for default_connection setter positive result."""
@@ -521,7 +521,7 @@ class SpeechActContentConfigTestCase(TestCase):
     def test_json_positive(self):
         """Test case for json property positive result."""
         config = SpeechActContentConfig()
-        config.json
+        assert config.json == {}
 
     def test_from_json_positive(self):
         """Test case for from_json method positive result."""
@@ -546,7 +546,7 @@ class ProtocolSpecificationTestCase(TestCase):
             author="fetchai",
             protocol_specification_id="some/author:0.1.0",
         )
-        obj.json
+        assert obj.json
 
     @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
     def test_from_json_positive(self, *mocks):
@@ -595,7 +595,7 @@ def test_configuration_ordered_json():
         "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
     )
     configuration._key_order = ["aea_version"]
-    configuration.ordered_json
+    assert configuration.ordered_json
 
 
 def test_public_id_versions():
@@ -702,7 +702,7 @@ def test_public_id_comparator_when_author_is_different():
         ValueError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
-        pid1 < pid2
+        assert pid1 < pid2
 
 
 def test_public_id_comparator_when_name_is_different():
@@ -713,7 +713,7 @@ def test_public_id_comparator_when_name_is_different():
         ValueError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
-        pid1 < pid2
+        assert pid1 < pid2
 
 
 def test_package_id_version():
@@ -921,7 +921,7 @@ def test_agent_config_to_json_with_optional_configurations():
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER
-    agent_config.json
+    assert agent_config.json
     assert agent_config.package_id == PackageId.from_uri_path("agent/author/name/0.1.0")
 
 
