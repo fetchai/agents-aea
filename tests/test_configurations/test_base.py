@@ -717,21 +717,21 @@ def test_public_id_comparator_when_name_is_different():
 
 
 def test_public_id_no_package_hash_raises():
-    """Test PublicId.__lt__ when author is different."""
+    """Test PublicId no package hash raises."""
     pid = PublicId("author", "name_1", "0.1.0")
     with pytest.raises(ValueError, match="Package hash was not provided."):
         assert pid.hash
 
 
 def test_public_id_package_hash_in_json():
-    """Test PublicId.__lt__ when author is different."""
+    """Test PublicId package hash in json."""
     package_hash = "ba" + "a" * 57
     pid = PublicId("author", "name_1", "0.1.0", package_hash)
     assert pid.json.get("package_hash") == package_hash
 
 
 def test_public_id_with_package_hash():
-    """Test PublicId.__lt__ when author is different."""
+    """Test PublicId with package hash."""
     package_hash = "ba" + "a" * 57
     pid = PublicId("author", "name_1", "0.1.0")
     assert pid.with_hash(package_hash) == PublicId("author", "name_1", "0.1.0", package_hash)
@@ -805,6 +805,16 @@ def test_component_id_same_prefix():
         ComponentType.PROTOCOL, PublicId("author", "name", "0.2.0")
     )
     assert component_id_1.same_prefix(component_id_2)
+
+
+def test_component_id_package_hash():
+    """Test ComponentId package hash"""
+    package_hash = "ba" + "a" * 57
+    public_id = PublicId("author", "name_1", "0.1.0", package_hash)
+    component_id = ComponentId(ComponentType.PROTOCOL, public_id)
+    assert component_id.package_hash
+    assert component_id.without_hash()
+    assert component_id.with_hash(package_hash)
 
 
 def test_component_configuration_load_file_not_found():
