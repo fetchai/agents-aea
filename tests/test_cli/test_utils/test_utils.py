@@ -176,7 +176,7 @@ class TestInitConfigFolder:
         """Test for _init_cli_config method positive result."""
         user_config = get_or_create_cli_config()
 
-        with mock.patch("aea.cli.utils.click_utils.open_file"):
+        with mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open()):
             _init_cli_config(user_config)
 
         dirname_mock.assert_called_once()
@@ -216,10 +216,9 @@ class TestGetOrCreateCLIConfig:
         """Test for get_or_create_cli_config method positive result."""
 
         with mock.patch(
-            "yaml.safe_load", return_value={"correct": "output"}
-        ) as safe_mock:
+            "aea.cli.utils.config.load_yaml", return_value={"correct": "output"}
+        ):
             result = get_or_create_cli_config()
-            safe_mock.assert_called_once()
 
         expected_result = {"correct": "output"}
         assert result == expected_result
@@ -228,8 +227,8 @@ class TestGetOrCreateCLIConfig:
     def test_get_or_create_cli_config_bad_yaml(self, validate_mock):
         """Test for rget_or_create_cli_config method bad yaml behavior."""
 
-        with mock.patch("yaml.safe_load", _raise_yamlerror):
-            with pytest.raises(ClickException):
+        with pytest.raises(ClickException):
+            with mock.patch("yaml.safe_load", _raise_yamlerror):
                 get_or_create_cli_config()
 
 
