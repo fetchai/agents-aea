@@ -134,7 +134,7 @@ def test_config_loader_load_service_config(*_mocks):
         )
 
         config_file.touch()
-        with pytest.raises(ValueError, match="Agent configuration file was empty."):
+        with pytest.raises(ValueError, match="Service configuration file was empty."):
             config_loader.load(config_file.open("r"))
 
         config_loader.dump(dummy_service_config, config_file.open("w+"))

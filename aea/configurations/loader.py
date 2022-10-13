@@ -266,11 +266,11 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         Load agent configuration from configuration json data.
 
         :param configuration_json: list of dicts with agent configuration
-        :param validate: whether or not to validate
+        :param validate: whether to validate or not
 
         :return: AgentConfig instance
         """
-        if len(configuration_json) == 0:
+        if not configuration_json:
             raise ValueError("Agent configuration file was empty.")
         agent_config_json = configuration_json[0]
         if validate:
@@ -321,8 +321,8 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
     def _load_service_config(self, file_pointer: TextIO) -> PackageConfiguration:
         """Load a service configuration."""
         configuration_data = yaml_load_all(file_pointer)
-        if len(configuration_data) == 0:
-            raise ValueError("Agent configuration file was empty.")
+        if not configuration_data:
+            raise ValueError("Service configuration file was empty.")
 
         service_config, *overrides = configuration_data
         self.validate(service_config)
