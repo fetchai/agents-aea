@@ -28,6 +28,7 @@ from uuid import uuid4
 
 import click
 import pytest
+import yaml
 from aea_ledger_fetchai import FetchAICrypto
 from click import BadParameter, ClickException
 from click.testing import CliRunner
@@ -176,7 +177,7 @@ class TestInitConfigFolder:
         """Test for _init_cli_config method positive result."""
         user_config = get_or_create_cli_config()
 
-        with mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open()):
+        with mock.patch("aea.helpers.io.open_file", mock.mock_open()):
             _init_cli_config(user_config)
 
         dirname_mock.assert_called_once()
@@ -228,7 +229,7 @@ class TestGetOrCreateCLIConfig:
         """Test for rget_or_create_cli_config method bad yaml behavior."""
 
         with pytest.raises(ClickException):
-            with mock.patch("yaml.safe_load", _raise_yamlerror):
+            with mock.patch.object(yaml, "safe_load", new=_raise_yamlerror):
                 get_or_create_cli_config()
 
 
