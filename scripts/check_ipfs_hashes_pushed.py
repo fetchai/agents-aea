@@ -31,6 +31,7 @@ import requests
 
 IPFS_ENDPOINT = "https://gateway.autonolas.tech/ipfs"
 MAX_WORKERS = 10
+REQUEST_TIMEOUT = 5  # seconds
 
 
 def check_ipfs_hash_pushed(ipfs_hash: str) -> Tuple[str, bool]:
@@ -38,7 +39,7 @@ def check_ipfs_hash_pushed(ipfs_hash: str) -> Tuple[str, bool]:
 
     try:
         url = f"{IPFS_ENDPOINT}/{ipfs_hash.strip()}"
-        res = requests.get(url, timeout=5)
+        res = requests.get(url, timeout=REQUEST_TIMEOUT)
         return ipfs_hash, res.status_code == 200
     except requests.RequestException:
         return ipfs_hash, False
@@ -91,6 +92,7 @@ if __name__ == "__main__":
 
         errors = []
         for future_result in future_results:
+            # future_results is of the form [(checked_hash, check_result),]
             if not future_result[1]:
                 errors.append(future_result[0])
 
