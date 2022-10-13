@@ -26,7 +26,22 @@ from typing import Dict
 
 
 # specified in setup.py
-WHITELIST = {"base58": ">=1.0.3"}
+WHITELIST = {
+    "base58": ">=1.0.3",
+    "tomte[tests]": "==0.1.5",
+    "tomte[bandit]": "==0.1.5",
+    "tomte[black]": "==0.1.5",
+    "tomte[isort]": "==0.1.5",
+    "tomte[docs]": "==0.1.5",
+    "tomte[flake8]": "==0.1.5",
+    "tomte[mypy]": "==0.1.5",
+    "tomte[pylint]": "==0.1.5",
+    "tomte[safety]": "==0.1.5",
+    "tomte[vulture]": "==0.1.5",
+    "tomte[darglint]": "==0.1.5",
+    "open-aea[all]": "==1.21.0.post1",
+    "open-aea-cli-ipfs": "==1.21.0",
+}
 
 
 def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:

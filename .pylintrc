@@ -2,7 +2,8 @@
 ignore-patterns=__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611
+# Skips after C0209 are temporary
+disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611,C0209,R1710,R1729,C0206,W0237,R1735,W1505,R1732,W1514,R0402,R1714,R1734,W0640,W0621,E0401,R1733
 
 # See here for more options: https://www.codeac.io/documentation/pylint-configuration.html
 ## Eventually resolve these:
@@ -22,7 +23,7 @@ disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611
 # W0212: protected-access
 
 [IMPORTS]
-ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto,asn1crypto,cosmpy,google,coverage
+ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto,asn1crypto,cosmpy,google,coverage,pylint,pytest,gitpython,protobuf
 
 [DESIGN]
 min-public-methods=1

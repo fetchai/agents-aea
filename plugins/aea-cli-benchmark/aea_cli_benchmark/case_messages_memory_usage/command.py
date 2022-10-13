@@ -36,7 +36,7 @@ PACKAGES = [("protocol", "fetchai/default")]
 @click.command(name="messages_mem_usage")
 @click.option(
     "--messages",
-    default=10**6,
+    default=10 ** 6,
     help="Amount of messages.",
     show_default=True,
 )
