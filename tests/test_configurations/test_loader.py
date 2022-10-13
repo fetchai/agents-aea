@@ -21,18 +21,20 @@
 
 """This module contains the tests for the aea.configurations.loader module."""
 import os
+import tempfile
 from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 from unittest.mock import MagicMock
+from typing import Dict
 
 import pytest
 import yaml
 
 import aea
-from aea.configurations.base import AgentConfig, PackageType, ProtocolSpecification
+from aea.configurations.base import AgentConfig, PackageType, ProtocolSpecification, PackageConfiguration
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.validation import make_jsonschema_base_uri
 from aea.exceptions import AEAEnforceError
@@ -54,7 +56,7 @@ def test_windows_uri_path():
 
 @pytest.mark.parametrize("aea_config_yaml", Path(ROOT_DIR).rglob("**/aea-config.yaml"))
 def test_load_aea_config(aea_config_yaml):
-    """Test loading aea-config.yaml file"""
+    """Test loading aea_config.yaml file"""
     config_loader = ConfigLoader("aea-config_schema.json", AgentConfig)
     config_loader.load(open(aea_config_yaml))
 
@@ -85,8 +87,6 @@ def test_config_loader_dump_agent_config(*_mocks):
     config_loader.dump(configuration, open("foo"))
 
 
-@mock.patch.object(aea.configurations.loader, "yaml_dump_all")
-@mock.patch.object(ConfigLoader, "validate")
 def test_config_loader_load_service_config(*_mocks):
     """Test ConfigLoader.dump"""
 
@@ -101,27 +101,37 @@ def test_config_loader_load_service_config(*_mocks):
             "agent": "agent",
             "network": "hardhat",
             "number_of_agents": "4",
+            "overrides": [],
         }
     )
+
+    class DummyServiceConfig(PackageConfiguration):
+
+        package_type = PackageType.SERVICE
+        json = property(lambda self: config)
+
+        def pop(self, item):
+            return self.json.pop(item)
+
+    dummy_service_config = DummyServiceConfig(name="Service", author="valory")
 
     with TemporaryDirectory() as temp_dir:
         schema_file = Path(temp_dir, "schema.json").absolute()
         config_file = Path(temp_dir, "service.yaml")
         schema_file.write_text("{}")
 
-        config_loader_cls = MagicMock()
+        config_loader_cls = DummyServiceConfig
         config_loader_cls.schema = str(schema_file)
-        config_loader_cls.from_json = lambda x: MagicMock(**x)
-
+        config_loader_cls.from_json = lambda x: dummy_service_config
         config_loader = ConfigLoader.from_configuration_type(
             PackageType.SERVICE, {PackageType.SERVICE: config_loader_cls}
         )
 
-        dummy_obj = MagicMock()
-        dummy_obj.package_type = PackageType.SERVICE
-        dummy_obj.ordered_json = config
+        config_file.touch()
+        with pytest.raises(ValueError, match="Agent configuration file was empty."):
+            config_loader.load(config_file.open("r"))
 
-        config_loader.dump(dummy_obj, config_file.open("w+"))
+        config_loader.dump(dummy_service_config, config_file.open("w+"))
         service_config = config_loader.load(config_file.open("r"))
         assert any(getattr(service_config, key) == val for key, val in config.items())
 
