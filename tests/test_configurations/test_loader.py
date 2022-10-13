@@ -21,21 +21,27 @@
 
 """This module contains the tests for the aea.configurations.loader module."""
 import os
-import tempfile
 from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 from unittest.mock import MagicMock
-from typing import Dict
 
 import pytest
 import yaml
 
 import aea
-from aea.configurations.base import AgentConfig, PackageType, ProtocolSpecification, PackageConfiguration
-from aea.configurations.loader import ConfigLoader, load_protocol_specification_from_string
+from aea.configurations.base import (
+    AgentConfig,
+    PackageConfiguration,
+    PackageType,
+    ProtocolSpecification,
+)
+from aea.configurations.loader import (
+    ConfigLoader,
+    load_protocol_specification_from_string,
+)
 from aea.configurations.validation import make_jsonschema_base_uri
 from aea.exceptions import AEAEnforceError
 from aea.protocols.generator.common import load_protocol_specification
@@ -64,7 +70,7 @@ def test_load_aea_config(aea_config_yaml):
 def test_config_loader_get_required_fields():
     """Test required fields of ConfigLoader."""
     config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
-    config_loader.required_fields
+    assert config_loader.required_fields
 
 
 @mock.patch.object(aea.configurations.loader, "yaml_dump")
