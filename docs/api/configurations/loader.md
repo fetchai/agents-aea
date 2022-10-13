@@ -217,7 +217,7 @@ Load agent configuration from configuration json data.
 **Arguments**:
 
 - `configuration_json`: list of dicts with agent configuration
-- `validate`: whether or not to validate
+- `validate`: whether to validate or not
 
 **Returns**:
 
