@@ -23,22 +23,25 @@
 import json
 import subprocess  # nosec
 import sys
-from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional, Tuple
 
 import requests
 
 
 IPFS_ENDPOINT = "https://gateway.autonolas.tech/ipfs"
+MAX_WORKERS = 10
 
 
-def check_ipfs_hash_pushed(ipfs_hash: str) -> bool:
+def check_ipfs_hash_pushed(ipfs_hash: str) -> Tuple[str, bool]:
     """Check that the given ipfs hash exists in the registry"""
+
     try:
         url = f"{IPFS_ENDPOINT}/{ipfs_hash.strip()}"
-        res = requests.get(url, timeout=120)
-        return res.status_code == 200
+        res = requests.get(url, timeout=5)
+        return ipfs_hash, res.status_code == 200
     except requests.RequestException:
-        return False
+        return ipfs_hash, False
 
 
 def get_latest_git_tag() -> str:
@@ -73,16 +76,25 @@ def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
 
 if __name__ == "__main__":
     # Get all hashes from the latest tag, excluding the scaffold ones (that are not pushed)
-    hashes_file = get_file_from_tag("packages/packages.json")
-    hashes = json.loads(hashes_file)
 
-    errors = []
-    for p, h in hashes.items():
-        print(f"Checking package {p} with hash {h}")
-        if not check_ipfs_hash_pushed(h):
-            errors.append(h)
+    packages_json = json.loads(get_file_from_tag("packages/packages.json"))
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = []
 
-    if errors:
-        print(f"The following hashes were not found in IPFS registry: {errors}")
-        sys.exit(1)
-    print("OK")
+        for k, v in packages_json.items():
+            print(f"Checking {k}:{v}...")
+            futures.append(executor.submit(check_ipfs_hash_pushed, v))
+
+        # Awaiting for results is blocking
+        print("Awaiting for results...")
+        future_results = [future.result() for future in futures]
+
+        errors = []
+        for future_result in future_results:
+            if not future_result[1]:
+                errors.append(future_result[0])
+
+        if errors:
+            print(f"The following hashes were not found in IPFS registry: {errors}")
+            sys.exit(1)
+        print("OK")
