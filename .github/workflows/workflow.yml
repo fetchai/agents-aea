@@ -193,8 +193,6 @@ jobs:
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links and IPFS hashes
         run: tox -e check-doc-links-hashes
-      - name: Check API Docs updated
-        run: tox -e check-api-docs
       - name: Check spelling
         run: tox -e spell-check
 
