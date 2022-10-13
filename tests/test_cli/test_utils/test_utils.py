@@ -166,6 +166,7 @@ class PublicIdParameterTestCase(TestCase):
         self.assertEqual(result, expected_result)
 
 
+@pytest.mark.skip
 @mock.patch("aea.cli.utils.config.os.path.dirname", return_value="dir-name")
 @mock.patch("aea.cli.utils.config.os.path.exists", return_value=False)
 @mock.patch("aea.cli.utils.config.os.makedirs")
