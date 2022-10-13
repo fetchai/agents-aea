@@ -49,6 +49,7 @@ if os.name == "nt":  # pragma: nocover  # cause platform dependent!
         )
         win32file.UnlockFileEx(hfile, 0, 0xFFFF0000, __overlapped)
 
+
 elif os.name == "posix":  # pragma: nocover  # cause platform dependent!
     import fcntl
     from fcntl import LOCK_EX, LOCK_NB, LOCK_SH  # noqa # pylint: disable=unused-import
@@ -60,6 +61,7 @@ elif os.name == "posix":  # pragma: nocover  # cause platform dependent!
     def unlock(file: IO) -> None:
         """Unlock a file."""
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+
 
 else:  # pragma: nocover
     raise RuntimeError("This module only works for nt and posix platforms")
