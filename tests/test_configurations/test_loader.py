@@ -35,7 +35,7 @@ import yaml
 
 import aea
 from aea.configurations.base import AgentConfig, PackageType, ProtocolSpecification, PackageConfiguration
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, load_protocol_specification_from_string
 from aea.configurations.validation import make_jsonschema_base_uri
 from aea.exceptions import AEAEnforceError
 from aea.protocols.generator.common import load_protocol_specification
@@ -141,6 +141,13 @@ def test_load_protocol_specification(spec_file_path):
     """Test for the utility function 'load_protocol_specification'"""
     result = load_protocol_specification(spec_file_path)
     assert isinstance(result, ProtocolSpecification)
+
+
+@pytest.mark.parametrize("spec_file_path", protocol_specification_files)
+def test_load_protocol_specification_from_string(spec_file_path):
+    """Test for the utility function 'load_protocol_specification_from_string'"""
+    with open(spec_file_path, "r") as f:
+        load_protocol_specification_from_string(f.read())
 
 
 @mock.patch("aea.protocols.generator.common.open_file")
