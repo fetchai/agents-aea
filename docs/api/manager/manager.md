@@ -49,9 +49,7 @@ Check consistency of package versions against already added project.
 #### `__`init`__`
 
 ```python
-def __init__(agent_project_id: PublicId,
-             conflicting_packages: List[Tuple[PackageIdPrefix, str, str,
-                                              Set[PublicId]]])
+def __init__(agent_project_id: PublicId, conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]])
 ```
 
 Initialize the exception.
@@ -323,11 +321,7 @@ Multi agents manager.
 #### `__`init`__`
 
 ```python
-def __init__(working_dir: str,
-             mode: str = "async",
-             registry_path: str = DEFAULT_REGISTRY_NAME,
-             auto_add_remove_project: bool = False,
-             password: Optional[str] = None) -> None
+def __init__(working_dir: str, mode: str = "async", registry_path: str = DEFAULT_REGISTRY_NAME, auto_add_remove_project: bool = False, password: Optional[str] = None) -> None
 ```
 
 Initialize manager.
@@ -399,9 +393,7 @@ Get all projects.
 #### add`_`error`_`callback
 
 ```python
-def add_error_callback(
-    error_callback: Callable[[str, BaseException],
-                             None]) -> "MultiAgentManager"
+def add_error_callback(error_callback: Callable[[str, BaseException], None]) -> "MultiAgentManager"
 ```
 
 Add error callback to call on error raised.
@@ -411,8 +403,7 @@ Add error callback to call on error raised.
 #### start`_`manager
 
 ```python
-def start_manager(local: bool = False,
-                  remote: bool = False) -> "MultiAgentManager"
+def start_manager(local: bool = False, remote: bool = False) -> "MultiAgentManager"
 ```
 
 Start manager.
@@ -422,6 +413,7 @@ are fetched in mixed mode (i.e. first try from local
 registry, and then from remote registry in case of failure).
 
 **Arguments**:
+
 
 - `local`: whether or not to fetch from local registry.
 - `remote`: whether or not to fetch from remote registry.
@@ -436,8 +428,11 @@ the MultiAgentManager instance.
 
 ```python
 @property
-def last_start_status() -> Tuple[bool, Dict[PublicId, List[Dict]], List[Tuple[
-    PublicId, List[Dict], Exception]], ]
+def last_start_status() -> Tuple[
+        bool,
+        Dict[PublicId, List[Dict]],
+        List[Tuple[PublicId, List[Dict], Exception]],
+    ]
 ```
 
 Get status of the last agents start loading state.
@@ -447,8 +442,7 @@ Get status of the last agents start loading state.
 #### stop`_`manager
 
 ```python
-def stop_manager(cleanup: bool = True,
-                 save: bool = False) -> "MultiAgentManager"
+def stop_manager(cleanup: bool = True, save: bool = False) -> "MultiAgentManager"
 ```
 
 Stop manager.
@@ -456,6 +450,7 @@ Stop manager.
 Stops all running agents and stop agent.
 
 **Arguments**:
+
 
 - `cleanup`: bool is cleanup on stop.
 - `save`: bool is save state to file on stop.
@@ -469,10 +464,7 @@ None
 #### add`_`project
 
 ```python
-def add_project(public_id: PublicId,
-                local: bool = False,
-                remote: bool = False,
-                restore: bool = False) -> "MultiAgentManager"
+def add_project(public_id: PublicId, local: bool = False, remote: bool = False, restore: bool = False) -> "MultiAgentManager"
 ```
 
 Fetch agent project and all dependencies to working_dir.
@@ -497,8 +489,7 @@ self
 #### remove`_`project
 
 ```python
-def remove_project(public_id: PublicId,
-                   keep_files: bool = False) -> "MultiAgentManager"
+def remove_project(public_id: PublicId, keep_files: bool = False) -> "MultiAgentManager"
 ```
 
 Remove agent project.
@@ -522,13 +513,7 @@ list of public ids of projects
 #### add`_`agent
 
 ```python
-def add_agent(public_id: PublicId,
-              agent_name: Optional[str] = None,
-              agent_overrides: Optional[dict] = None,
-              component_overrides: Optional[List[dict]] = None,
-              local: bool = False,
-              remote: bool = False,
-              restore: bool = False) -> "MultiAgentManager"
+def add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None, local: bool = False, remote: bool = False, restore: bool = False) -> "MultiAgentManager"
 ```
 
 Create new agent configuration based on project with config overrides applied.
@@ -554,10 +539,7 @@ self
 #### add`_`agent`_`with`_`config
 
 ```python
-def add_agent_with_config(
-        public_id: PublicId,
-        config: List[dict],
-        agent_name: Optional[str] = None) -> "MultiAgentManager"
+def add_agent_with_config(public_id: PublicId, config: List[dict], agent_name: Optional[str] = None) -> "MultiAgentManager"
 ```
 
 Create new agent configuration based on project with config provided.
@@ -565,6 +547,7 @@ Create new agent configuration based on project with config provided.
 Alias is stored in memory only!
 
 **Arguments**:
+
 
 - `public_id`: base agent project public id
 - `agent_name`: unique name for the agent
@@ -586,6 +569,7 @@ Get agent config  overridables.
 
 **Arguments**:
 
+
 - `agent_name`: str
 
 **Returns**:
@@ -597,9 +581,7 @@ Tuple of agent overridables dict and  and list of component overridables dict.
 #### set`_`agent`_`overrides
 
 ```python
-def set_agent_overrides(
-        agent_name: str, agent_overides: Optional[Dict],
-        components_overrides: Optional[List[Dict]]) -> "MultiAgentManager"
+def set_agent_overrides(agent_name: str, agent_overides: Optional[Dict], components_overrides: Optional[List[Dict]]) -> "MultiAgentManager"
 ```
 
 Set agent overrides.
@@ -640,6 +622,7 @@ List all agents.
 
 **Arguments**:
 
+
 - `running_only`: returns only running if set to True
 
 **Returns**:
@@ -651,14 +634,13 @@ list of agents names
 #### remove`_`agent
 
 ```python
-def remove_agent(
-        agent_name: str,
-        skip_project_auto_remove: bool = False) -> "MultiAgentManager"
+def remove_agent(agent_name: str, skip_project_auto_remove: bool = False) -> "MultiAgentManager"
 ```
 
 Remove agent alias definition from registry.
 
 **Arguments**:
+
 
 - `agent_name`: agent name to remove
 - `skip_project_auto_remove`: disable auto project remove on last agent removed.
@@ -678,6 +660,7 @@ def start_agent(agent_name: str) -> "MultiAgentManager"
 Start selected agent.
 
 **Arguments**:
+
 
 - `agent_name`: agent name to start
 
@@ -710,6 +693,7 @@ def stop_agent(agent_name: str) -> "MultiAgentManager"
 Stop running agent.
 
 **Arguments**:
+
 
 - `agent_name`: agent name to stop
 

@@ -39,13 +39,13 @@ Execute the task.
 - `args`: positional arguments forwarded to the 'execute' method.
 - `kwargs`: keyword arguments forwarded to the 'execute' method.
 
-**Raises**:
-
-- `ValueError`: if the task has already been executed.
-
 **Returns**:
 
 the task instance
+
+**Raises**:
+
+- `ValueError`: if the task has already been executed.
 
 <a id="aea.skills.tasks.Task.is_executed"></a>
 
@@ -69,13 +69,13 @@ def result() -> Any
 
 Get the result.
 
-**Raises**:
-
-- `ValueError`: if the task has not been executed yet.
-
 **Returns**:
 
 the result from the execute method.
+
+**Raises**:
+
+- `ValueError`: if the task has not been executed yet.
 
 <a id="aea.skills.tasks.Task.setup"></a>
 
@@ -145,10 +145,7 @@ A Task manager.
 #### `__`init`__`
 
 ```python
-def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT,
-             is_lazy_pool_start: bool = True,
-             logger: Optional[logging.Logger] = None,
-             pool_mode: str = THREAD_POOL_MODE) -> None
+def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None, pool_mode: str = THREAD_POOL_MODE) -> None
 ```
 
 Initialize the task manager.
@@ -195,9 +192,7 @@ int
 #### enqueue`_`task
 
 ```python
-def enqueue_task(func: Callable,
-                 args: Sequence = (),
-                 kwargs: Optional[Dict[str, Any]] = None) -> int
+def enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the executor.
@@ -208,13 +203,13 @@ Enqueue a task with the executor.
 - `args`: the positional arguments to be passed to the function.
 - `kwargs`: the keyword arguments to be passed to the function.
 
-**Raises**:
-
-- `ValueError`: if the task manager is not running.
-
 **Returns**:
 
 the task id to get the the result.
+
+**Raises**:
+
+- `ValueError`: if the task manager is not running.
 
 <a id="aea.skills.tasks.TaskManager.get_task_result"></a>
 
@@ -269,9 +264,7 @@ A threaded task manager.
 #### `__`init`__`
 
 ```python
-def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT,
-             is_lazy_pool_start: bool = True,
-             logger: Optional[logging.Logger] = None) -> None
+def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
 ```
 
 Initialize the task manager.
@@ -297,9 +290,7 @@ A multiprocess task manager.
 #### `__`init`__`
 
 ```python
-def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT,
-             is_lazy_pool_start: bool = True,
-             logger: Optional[logging.Logger] = None) -> None
+def __init__(nb_workers: int = DEFAULT_WORKERS_AMOUNT, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
 ```
 
 Initialize the task manager.

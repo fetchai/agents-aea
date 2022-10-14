@@ -3,7 +3,7 @@ ignore-patterns=__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
 # Skips after C0209 are temporary
-disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611,C0209,R1710,R1729,C0206,W0237,R1735,W1505,R1732,W1514,R0402,R1714,R1734,W0640,W0621,E0401,R1733
+disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611,C0209,R1710,R1729,C0206,W0237,R1735,R1732,W1514,R0402,R1714,R1734,W0640,R1733
 
 # See here for more options: https://www.codeac.io/documentation/pylint-configuration.html
 ## Eventually resolve these:
@@ -21,6 +21,19 @@ disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801,E1136,E0611,C0209,
 # W0105: pointless-string-statement, # kept as no harm
 # R0801: similar lines, # too granular
 # W0212: protected-access
+# C0209: consider-using-fstring, # kept as no harm
+# W1514: unspecified-encoding, # kept as no harm
+# R1734: use-list-literal, # kept as no harm
+# R1735: use-dict-literal, # kept as no harm
+# R1732: consider-using-with
+# W0237: arguments-renamed
+# R1733: unnecessary-dict-index-lookup
+# R1710: inconsistent-return-statements
+# R1714: consider-using-in
+# R1729: use-a-generator
+# R0402: consider-using-from-import
+# W0640: cell-var-from-loop
+# C0206: consider-using-dict-items
 
 [IMPORTS]
 ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes,Crypto,asn1crypto,cosmpy,google,coverage,pylint,pytest,gitpython,protobuf

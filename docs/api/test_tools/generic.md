@@ -31,6 +31,7 @@ Read an envelope from a file.
 
 **Arguments**:
 
+
 - `file_path`: the file path.
 
 **Returns**:
@@ -42,9 +43,7 @@ envelope
 #### nested`_`set`_`config
 
 ```python
-def nested_set_config(dotted_path: str,
-                      value: Any,
-                      author: str = DEFAULT_AUTHOR) -> None
+def nested_set_config(dotted_path: str, value: Any, author: str = DEFAULT_AUTHOR) -> None
 ```
 
 Set an AEA config with nested values.

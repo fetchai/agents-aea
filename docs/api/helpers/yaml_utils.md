@@ -127,8 +127,7 @@ Dump YAML data to a yaml file in an ordered way.
 #### yaml`_`dump`_`all
 
 ```python
-def yaml_dump_all(data: Sequence[Dict],
-                  stream: Optional[TextIO] = None) -> None
+def yaml_dump_all(data: Sequence[Dict], stream: Optional[TextIO] = None) -> None
 ```
 
 Dump YAML data to a yaml file in an ordered way.

@@ -259,8 +259,8 @@ if __name__ == "__main__":
         for file_ in docs_files:
             print("Processing " + str(file_))
             check_file(file_, all_docs_files)
-    except Exception as e:  # pylint: disable=broad-except
-        print(e)
+    except Exception as exc:  # pylint: disable=broad-except
+        print(exc)
         sys.exit(1)
 
     print("Done!")

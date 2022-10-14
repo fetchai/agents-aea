@@ -9,9 +9,7 @@ Logging helpers.
 #### setup`_`logger
 
 ```python
-def setup_logger(name: str,
-                 level: int = logging.INFO,
-                 log_format: str = DEFAULT_FORMAT) -> Logger
+def setup_logger(name: str, level: int = logging.INFO, log_format: str = DEFAULT_FORMAT) -> Logger
 ```
 
 Set up the logger.
@@ -56,10 +54,7 @@ Initialize the logger adapter.
 #### process
 
 ```python
-def process(
-        msg: Any,
-        kwargs: MutableMapping[str,
-                               Any]) -> Tuple[Any, MutableMapping[str, Any]]
+def process(msg: Any, kwargs: MutableMapping[str, Any]) -> Tuple[Any, MutableMapping[str, Any]]
 ```
 
 Prepend the agent name to every log message.
@@ -79,8 +74,7 @@ Interface to endow subclasses with a logger.
 #### `__`init`__`
 
 ```python
-def __init__(logger: Optional[Logger] = None,
-             default_logger_name: str = "aea") -> None
+def __init__(logger: Optional[Logger] = None, default_logger_name: str = "aea") -> None
 ```
 
 Initialize the logger.

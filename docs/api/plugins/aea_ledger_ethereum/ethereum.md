@@ -39,11 +39,7 @@ Returns multiplier value.
 #### estimate`_`priority`_`fee
 
 ```python
-def estimate_priority_fee(
-        web3_object: Web3, base_fee_gwei: int, block_number: int,
-        priority_fee_estimation_trigger: int, default_priority_fee: int,
-        fee_history_blocks: int, fee_history_percentile: int,
-        priority_fee_increase_boundary: int) -> Optional[int]
+def estimate_priority_fee(web3_object: Web3, base_fee_gwei: int, block_number: int, priority_fee_estimation_trigger: int, default_priority_fee: int, fee_history_blocks: int, fee_history_percentile: int, priority_fee_increase_boundary: int) -> Optional[int]
 ```
 
 Estimate priority fee from base fee.
@@ -53,12 +49,7 @@ Estimate priority fee from base fee.
 #### get`_`gas`_`price`_`strategy`_`eip1559
 
 ```python
-def get_gas_price_strategy_eip1559(
-    max_gas_fast: int, fee_history_blocks: int, fee_history_percentile: int,
-    priority_fee_estimation_trigger: int, default_priority_fee: int,
-    fallback_estimate: Dict[str,
-                            Optional[int]], priority_fee_increase_boundary: int
-) -> Callable[[Web3, TxParams], Dict[str, Wei]]
+def get_gas_price_strategy_eip1559(max_gas_fast: int, fee_history_blocks: int, fee_history_percentile: int, priority_fee_estimation_trigger: int, default_priority_fee: int, fallback_estimate: Dict[str, Optional[int]], priority_fee_increase_boundary: int) -> Callable[[Web3, TxParams], Dict[str, Wei]]
 ```
 
 Get the gas price strategy.
@@ -68,11 +59,7 @@ Get the gas price strategy.
 #### get`_`gas`_`price`_`strategy`_`eip1559`_`polygon
 
 ```python
-def get_gas_price_strategy_eip1559_polygon(
-        gas_endpoint: str,
-        fallback_estimate: Dict[str, Optional[int]],
-        speed: Optional[str] = SPEED_FAST
-) -> Callable[[Any, Any], Dict[str, Wei]]
+def get_gas_price_strategy_eip1559_polygon(gas_endpoint: str, fallback_estimate: Dict[str, Optional[int]], speed: Optional[str] = SPEED_FAST) -> Callable[[Any, Any], Dict[str, Wei]]
 ```
 
 Get the gas price strategy.
@@ -82,8 +69,7 @@ Get the gas price strategy.
 #### rpc`_`gas`_`price`_`strategy`_`wrapper
 
 ```python
-def rpc_gas_price_strategy_wrapper(
-        web3: Web3, transaction_params: TxParams) -> Dict[str, Wei]
+def rpc_gas_price_strategy_wrapper(web3: Web3, transaction_params: TxParams) -> Dict[str, Wei]
 ```
 
 RPC gas price strategy wrapper.
@@ -93,10 +79,7 @@ RPC gas price strategy wrapper.
 #### get`_`gas`_`price`_`strategy
 
 ```python
-def get_gas_price_strategy(
-    gas_price_strategy: Optional[str] = None,
-    gas_price_api_key: Optional[str] = None
-) -> Callable[[Web3, TxParams], Dict[str, Wei]]
+def get_gas_price_strategy(gas_price_strategy: Optional[str] = None, gas_price_api_key: Optional[str] = None) -> Callable[[Web3, TxParams], Dict[str, Wei]]
 ```
 
 Get the gas price strategy.
@@ -117,8 +100,7 @@ Translator for SignedTransaction.
 
 ```python
 @staticmethod
-def to_dict(
-        signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]
+def to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]
 ```
 
 Write SignedTransaction to dict.
@@ -150,8 +132,7 @@ Translator for AttributeDict.
 
 ```python
 @classmethod
-def to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt,
-                                  TxData]) -> JSONLike
+def to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike
 ```
 
 Simplify to dict.
@@ -182,9 +163,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
-def __init__(private_key_path: Optional[str] = None,
-             password: Optional[str] = None,
-             extra_entropy: Union[str, bytes, int] = "") -> None
+def __init__(private_key_path: Optional[str] = None, password: Optional[str] = None, extra_entropy: Union[str, bytes, int] = "") -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -252,9 +231,7 @@ an address string in hex format
 
 ```python
 @classmethod
-def load_private_key_from_path(cls,
-                               file_name: str,
-                               password: Optional[str] = None) -> LocalAccount
+def load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> LocalAccount
 ```
 
 Load a private key in hex format from a file.
@@ -311,9 +288,7 @@ signed transaction
 
 ```python
 @classmethod
-def generate_private_key(cls,
-                         extra_entropy: Union[str, bytes,
-                                              int] = "") -> LocalAccount
+def generate_private_key(cls, extra_entropy: Union[str, bytes, int] = "") -> LocalAccount
 ```
 
 Generate a key pair for ethereum network.
@@ -418,8 +393,7 @@ the contract address, if present
 
 ```python
 @staticmethod
-def is_transaction_valid(tx: dict, seller: Address, client: Address,
-                         tx_nonce: str, amount: int) -> bool
+def is_transaction_valid(tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -481,10 +455,7 @@ str
 
 ```python
 @classmethod
-def recover_message(cls,
-                    message: bytes,
-                    signature: str,
-                    is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+def recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.
@@ -505,11 +476,7 @@ the recovered addresses
 
 ```python
 @classmethod
-def recover_public_keys_from_message(
-        cls,
-        message: bytes,
-        signature: str,
-        is_deprecated_mode: bool = False) -> Tuple[str, ...]
+def recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
 ```
 
 Get the public key used to produce the `signature` of the `message`
@@ -567,7 +534,7 @@ the interface
 ## EthereumApi Objects
 
 ```python
-class EthereumApi(LedgerApi, EthereumHelper)
+class EthereumApi(LedgerApi,  EthereumHelper)
 ```
 
 Class to interact with the Ethereum Web3 APIs.
@@ -612,10 +579,7 @@ Get the balance of a given account.
 #### get`_`state
 
 ```python
-def get_state(callable_name: str,
-              *args: Any,
-              raise_on_try: bool = False,
-              **kwargs: Any) -> Optional[JSONLike]
+def get_state(callable_name: str, *args: Any, *, raise_on_try: bool = False, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the ledger API.
@@ -625,20 +589,7 @@ Call a specified function on the ledger API.
 #### get`_`transfer`_`transaction
 
 ```python
-def get_transfer_transaction(
-        sender_address: Address,
-        destination_address: Address,
-        amount: int,
-        tx_fee: int,
-        tx_nonce: str,
-        chain_id: Optional[int] = None,
-        max_fee_per_gas: Optional[int] = None,
-        max_priority_fee_per_gas: Optional[str] = None,
-        gas_price: Optional[str] = None,
-        gas_price_strategy: Optional[str] = None,
-        gas_price_strategy_extra_config: Optional[Dict] = None,
-        raise_on_try: bool = False,
-        **kwargs: Any) -> Optional[JSONLike]
+def get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, max_fee_per_gas: Optional[int] = None, max_priority_fee_per_gas: Optional[str] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, gas_price_strategy_extra_config: Optional[Dict] = None, raise_on_try: bool = False, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -669,22 +620,19 @@ the transfer transaction
 
 ```python
 @try_decorator("Unable to retrieve gas price: {}", logger_method="warning")
-def try_get_gas_pricing(gas_price_strategy: Optional[str] = None,
-                        extra_config: Optional[Dict] = None,
-                        old_price: Optional[Dict[str, Wei]] = None,
-                        **_kwargs: Any) -> Optional[Dict[str, Wei]]
+def try_get_gas_pricing(gas_price_strategy: Optional[str] = None, extra_config: Optional[Dict] = None, old_price: Optional[Dict[str, Wei]] = None, **_kwargs: Any, ,) -> Optional[Dict[str, Wei]]
 ```
 
 Try get the gas price based on the provided strategy.
 
 **Arguments**:
 
+    Can be either `eip1559` or `gas_station`.
+    `raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
 - `gas_price_strategy`: the gas price strategy to use, e.g., the EIP-1559 strategy.
-Can be either `eip1559` or `gas_station`.
 - `extra_config`: gas price strategy getter parameters.
 - `old_price`: the old gas price params in case that we are trying to resubmit a transaction.
 - `_kwargs`: the keyword arguments. Possible kwargs are:
-`raise_on_try`: bool flag specifying whether the method will raise or log on error (used by `try_decorator`)
 
 **Returns**:
 
@@ -713,8 +661,7 @@ the updated transaction
 #### send`_`signed`_`transaction
 
 ```python
-def send_signed_transaction(tx_signed: JSONLike,
-                            raise_on_try: bool = False) -> Optional[str]
+def send_signed_transaction(tx_signed: JSONLike, raise_on_try: bool = False) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -733,8 +680,7 @@ tx_digest, if present
 #### get`_`transaction`_`receipt
 
 ```python
-def get_transaction_receipt(tx_digest: str,
-                            raise_on_try: bool = False) -> Optional[JSONLike]
+def get_transaction_receipt(tx_digest: str, raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -753,8 +699,7 @@ the tx receipt, if present
 #### get`_`transaction
 
 ```python
-def get_transaction(tx_digest: str,
-                    raise_on_try: bool = False) -> Optional[JSONLike]
+def get_transaction(tx_digest: str, raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -773,8 +718,7 @@ the tx, if present
 #### get`_`contract`_`instance
 
 ```python
-def get_contract_instance(contract_interface: Dict[str, str],
-                          contract_address: Optional[str] = None) -> Any
+def get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
 ```
 
 Get the instance of a contract.
@@ -793,10 +737,7 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
-def get_deploy_transaction(contract_interface: Dict[str, str],
-                           deployer_address: Address,
-                           raise_on_try: bool = False,
-                           **kwargs: Any) -> Optional[JSONLike]
+def get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, raise_on_try: bool = False, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -837,8 +778,7 @@ whether the address is valid
 
 ```python
 @classmethod
-def contract_method_call(cls, contract_instance: Any, method_name: str,
-                         **method_args: Any) -> Optional[JSONLike]
+def contract_method_call(cls, contract_instance: Any, method_name: str, **method_args: Any, ,) -> Optional[JSONLike]
 ```
 
 Call a contract's method
@@ -858,11 +798,7 @@ the call result
 #### build`_`transaction
 
 ```python
-def build_transaction(contract_instance: Any,
-                      method_name: str,
-                      method_args: Optional[Dict[Any, Any]],
-                      tx_args: Optional[Dict[Any, Any]],
-                      raise_on_try: bool = False) -> Optional[JSONLike]
+def build_transaction(contract_instance: Any, method_name: str, method_args: Optional[Dict[Any, Any]], tx_args: Optional[Dict[Any, Any]], raise_on_try: bool = False) -> Optional[JSONLike]
 ```
 
 Prepare a transaction
@@ -884,10 +820,7 @@ the transaction
 #### get`_`transaction`_`transfer`_`logs
 
 ```python
-def get_transaction_transfer_logs(
-        contract_instance: Any,
-        tx_hash: str,
-        target_address: Optional[str] = None) -> Optional[JSONLike]
+def get_transaction_transfer_logs(contract_instance: Any, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Get all transfer events derived from a transaction.

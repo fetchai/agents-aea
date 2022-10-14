@@ -135,10 +135,7 @@ Posix named pipes async wrapper communication protocol.
 #### `__`init`__`
 
 ```python
-def __init__(in_path: str,
-             out_path: str,
-             logger: logging.Logger = _default_logger,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Initialize a new posix named pipe.
@@ -221,10 +218,7 @@ TCP socket communication protocol.
 #### `__`init`__`
 
 ```python
-def __init__(reader: asyncio.StreamReader,
-             writer: asyncio.StreamWriter,
-             logger: logging.Logger = _default_logger,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(reader: asyncio.StreamReader, writer: asyncio.StreamWriter, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Initialize the tcp socket protocol.
@@ -300,8 +294,7 @@ Interprocess communication channel implementation using tcp sockets.
 #### `__`init`__`
 
 ```python
-def __init__(logger: logging.Logger = _default_logger,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Initialize tcp socket interprocess communication channel.
@@ -399,8 +392,7 @@ Interprocess communication channel implementation using Posix named pipes.
 #### `__`init`__`
 
 ```python
-def __init__(logger: logging.Logger = _default_logger,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Initialize posix named pipe interprocess communication channel.
@@ -498,10 +490,7 @@ Interprocess communication channel client using tcp sockets.
 #### `__`init`__`
 
 ```python
-def __init__(in_path: str,
-             out_path: str,
-             logger: logging.Logger = _default_logger,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Initialize a tcp socket communication channel client.
@@ -584,10 +573,7 @@ Interprocess communication channel client using Posix named pipes.
 #### `__`init`__`
 
 ```python
-def __init__(in_path: str,
-             out_path: str,
-             logger: logging.Logger = _default_logger,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Initialize a posix named pipe communication channel client.
@@ -660,8 +646,7 @@ Disconnect from communication channel.
 #### make`_`ipc`_`channel
 
 ```python
-def make_ipc_channel(logger: logging.Logger = _default_logger,
-                     loop: Optional[AbstractEventLoop] = None) -> IPCChannel
+def make_ipc_channel(logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> IPCChannel
 ```
 
 Build a portable bidirectional InterProcess Communication channel
@@ -680,11 +665,7 @@ IPCChannel
 #### make`_`ipc`_`channel`_`client
 
 ```python
-def make_ipc_channel_client(
-        in_path: str,
-        out_path: str,
-        logger: logging.Logger = _default_logger,
-        loop: Optional[AbstractEventLoop] = None) -> IPCChannelClient
+def make_ipc_channel_client(in_path: str, out_path: str, logger: logging.Logger = _default_logger, loop: Optional[AbstractEventLoop] = None) -> IPCChannelClient
 ```
 
 Build a portable bidirectional InterProcess Communication client channel
