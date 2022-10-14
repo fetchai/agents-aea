@@ -29,7 +29,7 @@
 | `issue-certificates`                        | Issue the connection certificates.                                           |
 | `launch [path_to_agent_project]...`         | Launch many agents at the same time.                                         |
 | `list [package_type]`                       | List the installed resources.                                                |
-| `local-registry-sync`                       | Upgrade the local package registry.                                          |
+| `local-registry-sync`                       | Sync packages between packages.json and a local registry.                    |
 | `login USERNAME [--password password]`      | Login to a registry account with credentials.                                |
 | `logout`                                    | Logout from registry account.                                                |
 | `packages`                                  | Local package manager.                                                       |
