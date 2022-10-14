@@ -48,7 +48,7 @@ from aea.crypto.registries import crypto_registry
 @click.option(
     "--add-key",
     is_flag=True,
-    help="Add key generated.",
+    help="Add generated key.",
 )
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
