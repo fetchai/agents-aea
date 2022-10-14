@@ -20,7 +20,7 @@ Check amount of time for acn connection start.
 @click.option(
     "--connect-times",
     default=10,
-    help="How many times to perform connection.",
+    help="How many connection attempts.",
     show_default=True,
 )
 @number_of_runs_deco
