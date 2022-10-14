@@ -53,7 +53,7 @@ from aea.crypto.registries import (  # noqa # pylint: disable=wrong-import-posit
 )
 
 
-IGNORE: Set[str] = {"pkg_resources"}
+IGNORE: Set[str] = {"pkg_resources", "pip._internal.commands.show"}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 

@@ -38,4 +38,5 @@ dependencies:
     version: ==0.13.2
   openapi-spec-validator:
     version: ==0.2.8
+  werkzeug: {}
 is_abstract: false

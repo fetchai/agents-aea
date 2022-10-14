@@ -19,16 +19,21 @@
 # ------------------------------------------------------------------------------
 """Run different checks on AEA packages."""
 
+import dis
+import importlib
+import os
 import pprint
 import re
 import sys
 from abc import abstractmethod
-from functools import partial
+from collections import defaultdict
+from functools import partial, wraps
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import click
 import yaml
+from pip._internal.commands.show import search_packages_info
 
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.constants import (
@@ -49,6 +54,10 @@ CONFIG_FILE_NAMES = [
     DEFAULT_PROTOCOL_CONFIG_FILE,
 ]  # type: List[str]
 
+IGNORE_PACKAGES: Set[str] = {"pkg_resources"}
+IGNORE_PACKAGE_SUBFOLDERS: Set[Path] = {Path("tests")}
+DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
+
 
 class CustomException(Exception):
     """A custom exception class for this script."""
@@ -56,6 +65,16 @@ class CustomException(Exception):
     @abstractmethod
     def print_error(self) -> None:
         """Print the error message."""
+
+
+def list_decorator(fn: Callable) -> Callable:
+    """Wraps generator to return list."""
+
+    @wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> List[Any]:
+        return list(fn(*args, **kwargs))
+
+    return wrapper
 
 
 class DependencyNotFound(CustomException):
@@ -169,7 +188,8 @@ class PublicIdDefinitionError(CustomException):
         """Print the error message."""
         print("=" * 50)
         print(
-            f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; found {self.actual_nb_definitions}"
+            f"expected unique definition of PUBLIC_ID for package {self.public_id} of type {self.package_type.value}; "
+            f"found {self.actual_nb_definitions}"
         )
         print("=" * 50)
 
@@ -199,12 +219,15 @@ class WrongPublicIdError(CustomException):
         print("=" * 50)
 
 
-def find_all_configuration_files(packages_dir: Path) -> List:
+def find_all_configuration_files(
+    packages_dir: Path, vendor: Optional[str] = None
+) -> List:
     """Find all configuration files."""
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
         if any([file in str(path) for file in CONFIG_FILE_NAMES])
+        and path.parent.parent.parent.name == vendor
     ]
     return config_files
 
@@ -324,13 +347,251 @@ def check_public_id(configuration_file: Path) -> None:
         return
     module_path_to_load = configuration_file.parent / module_name_to_load
     content = module_path_to_load.read_text()
-    matches = re.findall("^PUBLIC_ID = (.*)", content, re.MULTILINE)
-    if len(matches) != 1:
-        raise PublicIdDefinitionError(package_type, expected_public_id, len(matches))
+
+    # check number of definitions of PUBLIC_ID. Required exactly one match.
+    assignments_to_public_id = re.findall("^PUBLIC_ID = (.*)", content, re.MULTILINE)
+    if len(assignments_to_public_id) != 1:
+        raise PublicIdDefinitionError(
+            package_type, expected_public_id, len(assignments_to_public_id)
+        )
+
+    # check first pattern of public id: PublicId.from_str(...)
+    matches = re.findall(
+        r"^PUBLIC_ID = PublicId.from_str\( *(\"(.*)\"|'(.*)') *\)$",
+        content,
+        re.MULTILINE,
+    )
+    if len(matches) == 1:
+        # process the result
+        _, match1, match2 = matches[0]
+        match = match1 if match1 != "" else match2
+        if str(expected_public_id) != match:
+            raise WrongPublicIdError(package_type, expected_public_id, match)
+        return
+
+    # check second pattern of public id: PublicId('...', '...', '...')
+    matches = re.findall(
+        r"^PUBLIC_ID = PublicId\( *['\"](.*)['\"] *, *['\"](.*)['\"] *, *['\"](.*)['\"] *\)$",
+        content,
+        re.MULTILINE,
+    )
+    if len(matches) == 1:
+        # process the result
+        author, name, version = matches[0]
+        actual_public_id_str = f"{author}/{name}:{version}"
+        if str(expected_public_id) != actual_public_id_str:
+            raise WrongPublicIdError(
+                package_type, expected_public_id, actual_public_id_str
+            )
+        return
 
     public_id_code = matches[0]
     if str(expected_public_id) not in public_id_code:
         raise WrongPublicIdError(package_type, expected_public_id, public_id_code)
+
+
+class DependenciesTool:
+    """Tool to work with setup.py dependencies."""
+
+    @staticmethod
+    def get_package_files(package_name: str) -> List[Path]:
+        """Get package files list."""
+        packages_info = list(search_packages_info([package_name]))
+        if len(packages_info) == 0:
+            raise Exception(f"package {package_name} not found")
+        if isinstance(packages_info[0], dict):
+            files = packages_info[0]["files"]
+            location = packages_info[0]["location"]
+        else:
+            files = packages_info[0].files  # type: ignore
+            location = packages_info[0].location  # type: ignore
+        return [Path(location) / i for i in files]  # type: ignore
+
+    @staticmethod
+    def clean_dependency_name(dependecy_specification: str) -> str:
+        """Get dependency name from dependency specification."""
+        match = DEP_NAME_RE.match(dependecy_specification)
+        if not match:
+            raise ValueError(f"Bad dependency specification: {dependecy_specification}")
+        return match.groups()[0]
+
+
+class ImportsTool:
+    """Tool to work with 3rd part imports in source code."""
+
+    @staticmethod
+    def get_imports_for_file(pyfile: Union[str, Path]) -> List[str]:
+        """Get all imported modules for python source file."""
+        with open(pyfile, "r") as f:
+            statements = f.read()
+        instructions = dis.get_instructions(statements)  # type: ignore
+        imports = []
+        is_try_except_block = False
+        for im in instructions:
+            if "SETUP_FINALLY" in im.opname:
+                is_try_except_block = True
+
+            if "POP_EXCEPT" in im.opname:
+                is_try_except_block = False
+
+            if is_try_except_block:
+                continue
+
+            if "IMPORT" in im.opname:
+                imports.append(im)
+
+        grouped: Dict[str, List[str]] = defaultdict(list)
+        for instr in imports:
+            grouped[instr.opname].append(instr.argval)
+
+        return grouped["IMPORT_NAME"]
+
+    @staticmethod
+    def get_module_file(module_name: str) -> str:
+        """Get module source file name."""
+        try:
+            mod = importlib.import_module(module_name)
+            return getattr(mod, "__file__", "")
+        except (AttributeError, ModuleNotFoundError):
+            return ""
+
+    @staticmethod
+    @list_decorator
+    def list_all_pyfiles(
+        root_path: Union[Path, str],
+        pattern: str = "**/*.py",
+        ignores: Optional[Set[Path]] = None,
+    ) -> Generator:
+        """List all python files in directory."""
+        ignores = ignores or set()
+        root_path = Path(root_path)
+        for path in root_path.glob(pattern):
+            # check if path is a subpath of an ignore path
+            relative_path = path.relative_to(root_path)
+            if any(os.path.commonprefix([relative_path, p]) != "" for p in ignores):
+                continue
+            yield path.relative_to(root_path)
+
+    @classmethod
+    @list_decorator
+    def get_third_part_imports_for_file(cls, pyfile: str) -> Generator:
+        """Get list of third part modules imported for source file."""
+        imports = cls.get_imports_for_file(pyfile)
+        for module_name in imports:
+            pyfile = cls.get_module_file(module_name)
+            if not pyfile:
+                continue
+            if "site-packages" not in Path(pyfile).parts:
+                continue
+            yield module_name, Path(pyfile)
+
+    @classmethod
+    @list_decorator
+    def list_all_pyfiles_with_third_party_imports(
+        cls, root_path: Union[str, Path], pattern: str = "**/*.py"
+    ) -> Generator:
+        """Get list of all python sources with 3rd party modules imported."""
+        for pyfile in cls.list_all_pyfiles(
+            root_path, pattern=pattern, ignores=IGNORE_PACKAGE_SUBFOLDERS
+        ):
+            mods = list(cls.get_third_part_imports_for_file(root_path / pyfile))
+            if not mods:
+                continue
+            yield Path(pyfile), list(set(mods))
+
+
+class PyPIDependenciesCheckTool:
+    """Tool to check imports in sources match dependencies in package configuration file."""
+
+    def __init__(self, configuration_file: Path) -> None:
+        """Init the checker for PyPI dependencies."""
+        self.configuration_file = configuration_file
+        self.config = unified_yaml_load(configuration_file)
+
+    @staticmethod
+    def make_third_party_imports(
+        files_and_modules: List[Tuple[str, List[Tuple[str, Path]]]],
+    ) -> Dict[str, Path]:
+        """Make list of third party imports."""
+        third_party_imports: Dict[str, Path] = {}
+        for _pyfile, name_modules_pairs in files_and_modules:
+            for package_name, modules in name_modules_pairs:
+                third_party_imports[package_name] = modules
+
+        return third_party_imports
+
+    def get_dependencies(self) -> Dict[str, List[Path]]:
+        """Get sections with dependencies with files lists."""
+        dependencies = self.config.get("dependencies", set())
+        result: Dict[str, List[Path]] = defaultdict(list)
+        for dep in dependencies:
+            dep = DependenciesTool.clean_dependency_name(dep)
+            result[dep] = DependenciesTool.get_package_files(dep)
+        return result
+
+    def run(self) -> None:
+        """Run dependency check."""
+        files_and_modules = ImportsTool.list_all_pyfiles_with_third_party_imports(
+            self.configuration_file.parent
+        )
+        package_dependencies = self.get_dependencies()
+        third_party_imports = self.make_third_party_imports(files_and_modules)
+        missed_deps_for_imports, deps_not_imported_directly = self.check_imports(
+            third_party_imports, package_dependencies
+        )
+
+        if missed_deps_for_imports:
+            print(f"unresolved imports: {', '.join(missed_deps_for_imports)}")
+
+        if deps_not_imported_directly:
+            if missed_deps_for_imports:
+                print()
+            print(
+                f"Dependencies not imported in code directly: {', '.join(deps_not_imported_directly)}"
+            )
+
+        if missed_deps_for_imports or deps_not_imported_directly:
+            sys.exit(1)
+        else:
+            print("All good!")
+
+    @staticmethod
+    def check_imports(
+        third_party_imports: Dict[str, Path],
+        pypi_dependencies: Dict[str, List[Path]],
+    ) -> Tuple[Set[str], Set[str]]:
+        """Find missing dependencies for imports and not imported dependencies."""
+
+        def _find_dependency_for_module(
+            dependencies: Dict[str, List[Path]], pyfile: Path
+        ) -> Optional[str]:
+            for package, files in dependencies.items():
+                if pyfile in files:
+                    return package
+            return None
+
+        imports_packages: Dict[str, Optional[str]] = {}
+        for module, pyfile in third_party_imports.items():
+            package_or_none = _find_dependency_for_module(pypi_dependencies, pyfile)
+            if module not in IGNORE_PACKAGES:
+                imports_packages[module] = package_or_none
+
+        all_dependencies_set = set(third_party_imports.keys())
+        used_dependencies_set = {
+            k for k, v in imports_packages.items() if v is not None
+        }
+        deps_not_imported_directly: Set[str] = (
+            all_dependencies_set - used_dependencies_set
+        )
+        missed_deps_for_imports: Set[str] = {
+            k for k, v in imports_packages.items() if v is None
+        }
+        return missed_deps_for_imports, deps_not_imported_directly
+
+
+def check_pypi_dependencies(configuration_file: Path) -> None:
+    """Check PyPI dependencies of the AEA package."""
+    PyPIDependenciesCheckTool(configuration_file).run()
 
 
 @click.command(name="check-packages")
@@ -339,7 +600,8 @@ def check_public_id(configuration_file: Path) -> None:
     type=click.Path(dir_okay=True, exists=True),
     default=Path.cwd() / "packages",
 )
-def check_packages(packages_dir: Path) -> None:
+@click.option("--vendor", type=str, default=None, required=False)
+def check_packages(packages_dir: Path, vendor: Optional[str]) -> None:
     """
     Run different checks on AEA packages.
 
@@ -348,12 +610,13 @@ def check_packages(packages_dir: Path) -> None:
     - Check that every package has non-empty description
 
     :param packages_dir: Path to packages dir.
+    :param vendor: filter by author name
     """
     packages_dir = Path(packages_dir).absolute()
     all_packages_ids_ = find_all_packages_ids(packages_dir)
     failed: bool = False
 
-    for file in find_all_configuration_files(packages_dir):
+    for file in find_all_configuration_files(packages_dir, vendor=vendor):
         try:
             expected_author = file.parent.parent.parent.name
             click.echo("Processing " + str(file))
@@ -361,6 +624,7 @@ def check_packages(packages_dir: Path) -> None:
             check_dependencies(file, all_packages_ids_)
             check_description(file)
             check_public_id(file)
+            check_pypi_dependencies(file)
         except CustomException as exception:
             exception.print_error()
             failed = True

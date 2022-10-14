@@ -44,4 +44,5 @@ models:
     class_name: GymDialogues
 dependencies:
   gym: {}
+  numpy: {}
 is_abstract: false
