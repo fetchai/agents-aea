@@ -27,9 +27,9 @@ _GYMMESSAGE_PERCEPT_PERFORMATIVE = _GYMMESSAGE.nested_types_by_name[
 _GYMMESSAGE_STATUS_PERFORMATIVE = _GYMMESSAGE.nested_types_by_name[
     "Status_Performative"
 ]
-_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY = _GYMMESSAGE_STATUS_PERFORMATIVE.nested_types_by_name[
-    "ContentEntry"
-]
+_GYMMESSAGE_STATUS_PERFORMATIVE_CONTENTENTRY = (
+    _GYMMESSAGE_STATUS_PERFORMATIVE.nested_types_by_name["ContentEntry"]
+)
 _GYMMESSAGE_RESET_PERFORMATIVE = _GYMMESSAGE.nested_types_by_name["Reset_Performative"]
 _GYMMESSAGE_CLOSE_PERFORMATIVE = _GYMMESSAGE.nested_types_by_name["Close_Performative"]
 GymMessage = _reflection.GeneratedProtocolMessageType(

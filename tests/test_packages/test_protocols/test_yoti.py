@@ -39,7 +39,10 @@ def test_encode_decode_get_profile():
 
 def test_encode_decode_profile():
     """Test encode decode profile."""
-    msg = YotiMessage(performative=YotiMessage.Performative.PROFILE, info={},)
+    msg = YotiMessage(
+        performative=YotiMessage.Performative.PROFILE,
+        info={},
+    )
     assert YotiMessage.decode(msg.encode()) == msg
 
 
@@ -53,7 +56,10 @@ def test_encode_decode_error():
 
 def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = YotiMessage(performative=YotiMessage.Performative.PROFILE, info={},)
+    msg = YotiMessage(
+        performative=YotiMessage.Performative.PROFILE,
+        info={},
+    )
 
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(YotiMessage.Performative, "__eq__", return_value=False):
@@ -62,7 +68,10 @@ def test_encoding_unknown_performative():
 
 def test_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
-    msg = YotiMessage(performative=YotiMessage.Performative.PROFILE, info={},)
+    msg = YotiMessage(
+        performative=YotiMessage.Performative.PROFILE,
+        info={},
+    )
 
     encoded_msg = YotiMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):

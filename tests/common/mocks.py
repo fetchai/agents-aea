@@ -21,6 +21,7 @@
 import re
 import unittest
 from contextlib import contextmanager
+from typing import Any, Generator
 from unittest.mock import MagicMock
 
 
@@ -51,7 +52,7 @@ class RegexComparator(str):
 
 
 @contextmanager
-def ctx_mock_Popen() -> MagicMock:
+def ctx_mock_Popen() -> Generator[Any, Any, Any]:
     """
     Mock subprocess.Popen.
 

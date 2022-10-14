@@ -210,7 +210,10 @@ def find_item_locally_or_distributed(
 
 
 def fetch_item_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId, dest_path: str,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    dest_path: str,
 ) -> Path:
     """
     Find item, mixed mode.

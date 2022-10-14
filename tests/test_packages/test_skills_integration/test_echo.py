@@ -86,7 +86,11 @@ class TestEchoSkill(AEATestCaseEmpty):
             dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             content=message_content,
         )
-        sent_envelope = Envelope(to=self.agent_name, sender=sender, message=message,)
+        sent_envelope = Envelope(
+            to=self.agent_name,
+            sender=sender,
+            message=message,
+        )
 
         self.send_envelope_to_agent(sent_envelope, self.agent_name)
 

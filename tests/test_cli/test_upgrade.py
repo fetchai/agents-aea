@@ -894,7 +894,8 @@ class TestUpdateReferences(AEATestCaseEmpty):
             {cls.OLD_DEFAULT_PROTOCOL_PUBLIC_ID: cls.OLD_STUB_CONNECTION_PUBLIC_ID},
         )
         cls.nested_set_config(
-            "agent.default_connection", cls.OLD_STUB_CONNECTION_PUBLIC_ID,
+            "agent.default_connection",
+            cls.OLD_STUB_CONNECTION_PUBLIC_ID,
         )
         cls.run_cli_command(
             "--skip-consistency-check",

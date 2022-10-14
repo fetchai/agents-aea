@@ -245,7 +245,8 @@ class OefSearchHandler(Handler):
             description = target_message.service_description
             data_model_name = description.data_model.name
             registration_behaviour = cast(
-                SearchBehaviour, self.context.behaviours.search,
+                SearchBehaviour,
+                self.context.behaviours.search,
             )
             if "location_agent" in data_model_name:
                 registration_behaviour.register_service()
@@ -293,7 +294,8 @@ class OefSearchHandler(Handler):
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
             registration_behaviour = cast(
-                SearchBehaviour, self.context.behaviours.search,
+                SearchBehaviour,
+                self.context.behaviours.search,
             )
             registration_behaviour.failed_registration_msg = target_message
 
@@ -330,6 +332,7 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )

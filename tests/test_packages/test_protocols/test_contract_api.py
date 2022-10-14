@@ -64,7 +64,11 @@ def test_get_deploy_transaction_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -99,7 +103,11 @@ def test_get_raw_transaction_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -134,7 +142,11 @@ def test_get_raw_message_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -169,7 +181,11 @@ def test_get_state_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -200,7 +216,11 @@ def test_state_serialization():
         state=state_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -232,7 +252,11 @@ def test_raw_transaction_serialization():
         raw_transaction=raw_transaction_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -260,7 +284,11 @@ def test_raw_message_serialization():
         raw_message=raw_message_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -289,7 +317,11 @@ def test_error_serialization():
         data=b"some_error_data",
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)

@@ -78,7 +78,8 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky, UseSOEF):
             self.add_item("connection", "fetchai/prometheus:0.9.2")
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.27.1")
             self.nested_set_config(
-                "agent.required_ledgers", [FetchAICrypto.identifier],
+                "agent.required_ledgers",
+                [FetchAICrypto.identifier],
             )
             self.add_item("skill", "fetchai/advanced_data_request:0.7.2")
             self.add_item("skill", "fetchai/simple_aggregation:0.3.2")

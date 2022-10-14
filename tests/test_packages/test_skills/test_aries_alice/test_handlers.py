@@ -70,7 +70,8 @@ class TestDefaultHandler(AriesAliceTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"Received message content:{content}",
+            logging.INFO,
+            f"Received message content:{content}",
         )
         mock_send.assert_any_call(
             method="POST",
@@ -325,7 +326,8 @@ class TestHttpHandler(AriesAliceTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -364,7 +366,8 @@ class TestHttpHandler(AriesAliceTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -481,7 +484,10 @@ class TestOefSearchHandler(AriesAliceTestCase):
 
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
-            with patch.object(self.alice_behaviour, "register_service",) as mock_reg:
+            with patch.object(
+                self.alice_behaviour,
+                "register_service",
+            ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
         # after
@@ -506,7 +512,10 @@ class TestOefSearchHandler(AriesAliceTestCase):
 
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
-            with patch.object(self.alice_behaviour, "register_genus",) as mock_reg:
+            with patch.object(
+                self.alice_behaviour,
+                "register_genus",
+            ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
         # after
@@ -532,7 +541,8 @@ class TestOefSearchHandler(AriesAliceTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.alice_behaviour, "register_classification",
+                self.alice_behaviour,
+                "register_classification",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 

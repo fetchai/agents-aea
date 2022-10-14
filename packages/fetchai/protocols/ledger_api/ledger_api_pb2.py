@@ -37,27 +37,27 @@ _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT = _LEDGERAPIMESSAGE.nested_types_by_name[
 _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
     "Get_Balance_Performative"
 ]
-_LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
-    "Get_Raw_Transaction_Performative"
-]
-_LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
-    "Send_Signed_Transaction_Performative"
-]
-_LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
-    "Get_Transaction_Receipt_Performative"
-]
+_LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = (
+    _LEDGERAPIMESSAGE.nested_types_by_name["Get_Raw_Transaction_Performative"]
+)
+_LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE = (
+    _LEDGERAPIMESSAGE.nested_types_by_name["Send_Signed_Transaction_Performative"]
+)
+_LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE = (
+    _LEDGERAPIMESSAGE.nested_types_by_name["Get_Transaction_Receipt_Performative"]
+)
 _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
     "Balance_Performative"
 ]
 _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
     "Raw_Transaction_Performative"
 ]
-_LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
-    "Transaction_Digest_Performative"
-]
-_LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
-    "Transaction_Receipt_Performative"
-]
+_LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE = (
+    _LEDGERAPIMESSAGE.nested_types_by_name["Transaction_Digest_Performative"]
+)
+_LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE = (
+    _LEDGERAPIMESSAGE.nested_types_by_name["Transaction_Receipt_Performative"]
+)
 _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _LEDGERAPIMESSAGE.nested_types_by_name[
     "Get_State_Performative"
 ]

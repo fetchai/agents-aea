@@ -118,7 +118,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
 
@@ -284,7 +285,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 
@@ -404,7 +406,8 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
+                contract_api_msg.performative,
+                contract_api_dialogue,
             )
         )
 

@@ -175,7 +175,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         """Test the _handle_propose method of the ml_trade handler where terms is not affordable nor acceptable."""
         # setup
         ml_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.ml_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.ml_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ml_dialogue,
@@ -185,10 +186,14 @@ class TestMlTradeHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "is_acceptable_terms", return_value=False,
+            self.strategy,
+            "is_acceptable_terms",
+            return_value=False,
         ) as mocked_acceptable:
             with patch.object(
-                self.strategy, "is_affordable_terms", return_value=False,
+                self.strategy,
+                "is_affordable_terms",
+                return_value=False,
             ) as mocked_affordable:
                 with patch.object(self.logger, "log") as mock_logger:
                     self.ml_handler.handle(incoming_message)
@@ -204,7 +209,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         mocked_affordable.assert_called_once()
 
         mock_logger.assert_any_call(
-            logging.INFO, "rejecting, terms are not acceptable and/or affordable",
+            logging.INFO,
+            "rejecting, terms are not acceptable and/or affordable",
         )
 
         self.assert_quantity_in_outbox(0)
@@ -214,7 +220,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         # setup
         self.strategy._is_ledger_tx = False
         ml_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.ml_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.ml_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ml_dialogue,
@@ -224,10 +231,14 @@ class TestMlTradeHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "is_acceptable_terms", return_value=True,
+            self.strategy,
+            "is_acceptable_terms",
+            return_value=True,
         ) as mocked_acceptable:
             with patch.object(
-                self.strategy, "is_affordable_terms", return_value=True,
+                self.strategy,
+                "is_affordable_terms",
+                return_value=True,
             ) as mocked_affordable:
                 with patch.object(self.logger, "log") as mock_logger:
                     self.ml_handler.handle(incoming_message)
@@ -257,7 +268,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, "sending dummy transaction digest ...",
+            logging.INFO,
+            "sending dummy transaction digest ...",
         )
 
     def test_handle_terms_is_affordable_and_acceptable_is_ledger(self):
@@ -267,7 +279,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         ml_dialogue = cast(
             MlTradeDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.ml_dialogues, messages=self.list_of_messages[:1],
+                dialogues=self.ml_dialogues,
+                messages=self.list_of_messages[:1],
             ),
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -279,10 +292,14 @@ class TestMlTradeHandler(BaseSkillTestCase):
 
         # operation
         with patch.object(
-            self.strategy, "is_acceptable_terms", return_value=True,
+            self.strategy,
+            "is_acceptable_terms",
+            return_value=True,
         ) as mocked_acceptable:
             with patch.object(
-                self.strategy, "is_affordable_terms", return_value=True,
+                self.strategy,
+                "is_affordable_terms",
+                return_value=True,
             ) as mocked_affordable:
                 with patch.object(
                     self.strategy,
@@ -315,7 +332,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         ml_dialogue = cast(
             MlTradeDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.ml_dialogues, messages=self.list_of_messages[:3],
+                dialogues=self.ml_dialogues,
+                messages=self.list_of_messages[:3],
             ),
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -348,7 +366,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         ml_dialogue = cast(
             MlTradeDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.ml_dialogues, messages=self.list_of_messages[:3],
+                dialogues=self.ml_dialogues,
+                messages=self.list_of_messages[:3],
             ),
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -372,7 +391,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
         """Test the _handle_invalid method of the ml_trade handler."""
         # setup
         ml_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.ml_dialogues, messages=self.list_of_messages[:2],
+            dialogues=self.ml_dialogues,
+            messages=self.list_of_messages[:2],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ml_dialogue,
@@ -450,7 +470,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,
@@ -472,7 +493,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,
@@ -498,7 +520,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         self.strategy._is_searching = True
 
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         agents = ("agnt1", "agnt2")
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -542,7 +565,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         self.strategy._is_searching = True
 
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         agents = ()
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -569,7 +593,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # setup
         self.strategy._max_negotiations = 1
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         agents = ("agnt1", "agnt2")
         incoming_message = self.build_incoming_message_for_skill_dialogue(
@@ -743,7 +768,9 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction_last_ledger_api_message_is_none(self,):
+    def test_handle_signed_transaction_last_ledger_api_message_is_none(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_dialogue = cast(
@@ -782,7 +809,9 @@ class TestSigningHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
 
-    def test_handle_signed_transaction_last_ledger_api_message_is_not_none(self,):
+    def test_handle_signed_transaction_last_ledger_api_message_is_not_none(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler where the last ledger_api message is not None."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -1239,7 +1268,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, "checking transaction is settled.",
+            logging.INFO,
+            "checking transaction is settled.",
         )
 
     def test_handle_transaction_receipt_i(self):

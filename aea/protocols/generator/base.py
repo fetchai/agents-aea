@@ -241,7 +241,9 @@ class ProtocolGenerator:
         else:
             for custom_class in self.spec.all_custom_types:
                 import_str += "from {}.custom_types import {} as Custom{}\n".format(
-                    self.dotted_path_to_protocol_package, custom_class, custom_class,
+                    self.dotted_path_to_protocol_package,
+                    custom_class,
+                    custom_class,
                 )
             import_str = import_str[:-1]
         return import_str
@@ -897,7 +899,8 @@ class ProtocolGenerator:
             else:
                 cls_str += self.indent + "elif "
             cls_str += "self.performative == {}Message.Performative.{}:\n".format(
-                self.protocol_specification_in_camel_case, performative.upper(),
+                self.protocol_specification_in_camel_case,
+                performative.upper(),
             )
             self._change_indent(1)
             nb_of_non_optional_contents = 0
@@ -1299,7 +1302,8 @@ class ProtocolGenerator:
             cls_str += (
                 self.indent
                 + 'def decode(cls, {}_protobuf_object) -> "{}":\n'.format(
-                    _camel_case_to_snake_case(custom_type), custom_type,
+                    _camel_case_to_snake_case(custom_type),
+                    custom_type,
                 )
             )
             self._change_indent(1)
@@ -1337,7 +1341,9 @@ class ProtocolGenerator:
         return cls_str
 
     def _encoding_message_content_from_python_to_protobuf(
-        self, content_name: str, content_type: str,
+        self,
+        content_name: str,
+        content_type: str,
     ) -> str:
         """
         Produce the encoding of message contents for the serialisation class.
@@ -1530,7 +1536,9 @@ class ProtocolGenerator:
                 variable_name,
             )
             decoding_str += self.indent + "{} = {}.decode(pb2_{})\n".format(
-                content_name, content_type, variable_name,
+                content_name,
+                content_type,
+                variable_name,
             )
             decoding_str += self.indent + 'performative_content["{}"] = {}\n'.format(
                 content_name, content_name
@@ -1567,13 +1575,15 @@ class ProtocolGenerator:
         cls_str += MESSAGE_IMPORT + "\n"
         cls_str += SERIALIZER_IMPORT + "\n\n"
         cls_str += self.indent + "from {} import (\n    {}_pb2,\n)\n".format(
-            self.dotted_path_to_protocol_package, self.protocol_specification.name,
+            self.dotted_path_to_protocol_package,
+            self.protocol_specification.name,
         )
         for custom_type in self.spec.all_custom_types:
             cls_str += (
                 self.indent
                 + "from {}.custom_types import (\n    {},\n)\n".format(
-                    self.dotted_path_to_protocol_package, custom_type,
+                    self.dotted_path_to_protocol_package,
+                    custom_type,
                 )
             )
         cls_str += self.indent + "from {}.message import (\n    {}Message,\n)\n".format(
@@ -1765,7 +1775,10 @@ class ProtocolGenerator:
         return cls_str
 
     def _content_to_proto_field_str(
-        self, content_name: str, content_type: str, tag_no: int,
+        self,
+        content_name: str,
+        content_type: str,
+        tag_no: int,
     ) -> Tuple[str, int]:
         """
         Convert a message content to its representation in a protocol buffer schema.
@@ -1969,7 +1982,9 @@ class ProtocolGenerator:
         return init_str
 
     def generate_protobuf_only_mode(
-        self, language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = True,
+        self,
+        language: str = PROTOCOL_LANGUAGE_PYTHON,
+        run_protolint: bool = True,
     ) -> Optional[str]:
         """
         Run the generator in "protobuf only" mode:

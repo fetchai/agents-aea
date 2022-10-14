@@ -30,7 +30,7 @@ BanditId = int
 Price = int
 
 Action = Tuple[BanditId, Price]
-Observation = None
+Observation = type(None)
 Reward = float
 Done = bool
 Info = dict

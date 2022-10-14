@@ -48,7 +48,8 @@ class ValidateItemConfigTestCase(TestCase):
         validate_item_config(item_type="agent", package_path="file/path")
 
     @mock.patch(
-        "aea.cli.utils.config.load_item_config", return_value=FaultyAgentConfigMock(),
+        "aea.cli.utils.config.load_item_config",
+        return_value=FaultyAgentConfigMock(),
     )
     @mock.patch(
         "aea.cli.utils.config.ConfigLoaders.from_package_type",

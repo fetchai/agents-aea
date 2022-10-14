@@ -87,7 +87,11 @@ class DependencyNotFound(Exception):
 class EmptyPackageDescription(Exception):
     """Custom exception for empty description field."""
 
-    def __init__(self, configuration_file: Path, *args: Any,) -> None:
+    def __init__(
+        self,
+        configuration_file: Path,
+        *args: Any,
+    ) -> None:
         """
         Initialize EmptyPackageDescription exception.
 

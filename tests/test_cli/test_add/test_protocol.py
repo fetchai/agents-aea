@@ -195,7 +195,9 @@ class TestAddProtocolFailsWhenProtocolWithSameAuthorAndNameButDifferentVersion:
         public_id = "{}/{}:{}".format(AUTHOR, self.protocol_name, self.protocol_version)
         obj_type = "protocol"
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", obj_type, public_id], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "add", obj_type, public_id],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
         public_id_obj = PublicId.from_str(public_id)

@@ -69,7 +69,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
-        *_
+        *_,
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
@@ -103,7 +103,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
-        *_
+        *_,
     ):
         """Test for push_item fails cause dependencies check."""
         public_id = PublicIdMock(
@@ -156,7 +156,7 @@ class PushItemTestCase(TestCase):
         getcwd_mock,
         rm_tarfiles_mock,
         check_is_author_logged_in_mock,
-        *_
+        *_,
     ):
         """Test for push_item - item not found."""
         with self.assertRaises(ClickException):

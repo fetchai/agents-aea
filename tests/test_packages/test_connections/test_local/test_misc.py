@@ -68,7 +68,11 @@ async def test_connection_twice_return_none():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_envelope = Envelope(to=address, sender=address, message=message,)
+        expected_envelope = Envelope(
+            to=address,
+            sender=address,
+            message=message,
+        )
         await connection.send(expected_envelope)
         actual_envelope = await connection.receive()
 
@@ -127,7 +131,11 @@ def test_communication():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
+        envelope = Envelope(
+            to="multiplexer2",
+            sender="multiplexer1",
+            message=msg,
+        )
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -137,7 +145,11 @@ def test_communication():
             target=0,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
+        envelope = Envelope(
+            to="multiplexer2",
+            sender="multiplexer1",
+            message=msg,
+        )
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -148,7 +160,11 @@ def test_communication():
             proposal=Description({}),
         )
 
-        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
+        envelope = Envelope(
+            to="multiplexer2",
+            sender="multiplexer1",
+            message=msg,
+        )
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -157,7 +173,11 @@ def test_communication():
             message_id=1,
             target=0,
         )
-        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
+        envelope = Envelope(
+            to="multiplexer2",
+            sender="multiplexer1",
+            message=msg,
+        )
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -166,7 +186,11 @@ def test_communication():
             message_id=1,
             target=0,
         )
-        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
+        envelope = Envelope(
+            to="multiplexer2",
+            sender="multiplexer1",
+            message=msg,
+        )
         multiplexer1.put(envelope)
 
         envelope = multiplexer2.get(block=True, timeout=1.0)

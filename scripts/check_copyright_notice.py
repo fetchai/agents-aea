@@ -38,7 +38,7 @@ from pathlib import Path
 SUPPORTED_YEARS = [str(i) for i in range(2018, datetime.datetime.now().year + 1)]
 
 
-HEADER_REGEX = fr"""(#!/usr/bin/env python3
+HEADER_REGEX = rf"""(#!/usr/bin/env python3
 )?# -\*- coding: utf-8 -\*-
 # ------------------------------------------------------------------------------
 #

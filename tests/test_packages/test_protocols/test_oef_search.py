@@ -56,7 +56,11 @@ def test_register_service_serialization():
         service_description=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -85,7 +89,11 @@ def test_unregister_service_serialization():
         service_description=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -112,7 +120,11 @@ def test_search_services_serialization():
         query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -145,7 +157,11 @@ def test_search_result_serialization():
         ),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -177,7 +193,11 @@ def test_success_serialization():
         ),
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -204,7 +224,11 @@ def test_oef_error_serialization():
         oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
