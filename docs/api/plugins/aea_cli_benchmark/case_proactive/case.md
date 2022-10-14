@@ -49,8 +49,7 @@ Perform action on periodic basis.
 #### run
 
 ```python
-def run(duration: int,
-        runtime_mode: str) -> List[Tuple[str, Union[int, float]]]
+def run(duration: int, runtime_mode: str) -> List[Tuple[str, Union[int, float]]]
 ```
 
 Test act message generate performance.

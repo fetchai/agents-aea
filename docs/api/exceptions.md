@@ -156,9 +156,7 @@ Init _StopRuntime exception.
 #### enforce
 
 ```python
-def enforce(is_valid_condition: bool,
-            exception_text: str,
-            exception_class: Type[Exception] = AEAEnforceError) -> None
+def enforce(is_valid_condition: bool, exception_text: str, exception_class: Type[Exception] = AEAEnforceError) -> None
 ```
 
 Evaluate a condition and raise an exception with the provided text if it is not satisfied.

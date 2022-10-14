@@ -9,10 +9,7 @@ Helper tools for fingerprinting packages.
 #### compute`_`fingerprint
 
 ```python
-def compute_fingerprint(
-        package_path: Path,
-        fingerprint_ignore_patterns: Optional[Collection[str]]
-) -> Dict[str, str]
+def compute_fingerprint(package_path: Path, fingerprint_ignore_patterns: Optional[Collection[str]]) -> Dict[str, str]
 ```
 
 Compute the fingerprint of a package.

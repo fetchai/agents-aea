@@ -139,10 +139,7 @@ Implements an attribute for an OEF data model.
 #### `__`init`__`
 
 ```python
-def __init__(name: str,
-             type_: Type[ATTRIBUTE_TYPES],
-             is_required: bool,
-             description: str = "") -> None
+def __init__(name: str, type_: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "") -> None
 ```
 
 Initialize an attribute.
@@ -222,9 +219,7 @@ Implements an OEF data model.
 #### `__`init`__`
 
 ```python
-def __init__(name: str,
-             attributes: List[Attribute],
-             description: str = "") -> None
+def __init__(name: str, attributes: List[Attribute], description: str = "") -> None
 ```
 
 Initialize a data model.
@@ -304,9 +299,7 @@ A new instance of this class matching the protocol buffer object
 #### generate`_`data`_`model
 
 ```python
-def generate_data_model(
-        model_name: str,
-        attribute_values: Mapping[str, ATTRIBUTE_TYPES]) -> DataModel
+def generate_data_model(model_name: str, attribute_values: Mapping[str, ATTRIBUTE_TYPES]) -> DataModel
 ```
 
 Generate a data model that matches the values stored in this description.
@@ -338,9 +331,7 @@ Implements an OEF description.
 #### `__`init`__`
 
 ```python
-def __init__(values: Mapping[str, ATTRIBUTE_TYPES],
-             data_model: Optional[DataModel] = None,
-             data_model_name: str = "") -> None
+def __init__(values: Mapping[str, ATTRIBUTE_TYPES], data_model: Optional[DataModel] = None, data_model_name: str = "") -> None
 ```
 
 Initialize the description object.
@@ -490,9 +481,9 @@ Initialize a constraint type.
 
 **Arguments**:
 
+           | Either an instance of the ConstraintTypes enum,
+           | or a string representation associated with the type.
 - `type_`: the type of the constraint.
-| Either an instance of the ConstraintTypes enum,
-| or a string representation associated with the type.
 - `value`: the value that defines the constraint.
 
 **Raises**:
@@ -509,13 +500,13 @@ def check_validity() -> bool
 
 Check the validity of the input provided.
 
-**Raises**:
-
-- `AEAEnforceError`: if the value is not valid wrt the constraint type.  # noqa: DAR402
-
 **Returns**:
 
 boolean to indicate validity
+
+**Raises**:
+
+- `AEAEnforceError`: if the value is not valid wrt the constraint type.  # noqa: DAR402
 
 <a id="aea.helpers.search.models.ConstraintType.is_valid"></a>
 
@@ -589,13 +580,13 @@ The implementation depends on the constraint type.
 
 - `value`: the value to check.
 
-**Raises**:
-
-- `ValueError`: if the constraint type is not recognized.
-
 **Returns**:
 
 True if the value satisfy the constraint, False otherwise.
+
+**Raises**:
+
+- `ValueError`: if the constraint type is not recognized.
 
 <a id="aea.helpers.search.models.ConstraintType.__eq__"></a>
 
@@ -643,6 +634,7 @@ def decode(cls, constraint_type_pb: Any, category: str) -> "ConstraintType"
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
 **Arguments**:
+
 
 - `constraint_type_pb`: the protocol buffer object corresponding with this class.
 - `category`: the category of the constraint ('relation', 'set', 'range', 'distance).
@@ -1095,40 +1087,6 @@ Check if a description satisfies the constraint. The implementation depends on t
 **Returns**:
 
 True if the description satisfies the constraint, False otherwise.
-Examples:
-    >>> attr_author = Attribute("author" , str, True, "The author of the book.")
-    >>> attr_year   = Attribute("year",    int, True, "The year of publication of the book.")
-    >>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
-    >>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
-    >>> c2 = Constraint("year", ConstraintType(">", 1990))
-    >>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
-    >>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
-    >>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
-
-    The "author" attribute instantiation satisfies the constraint, so the result is True.
-
-    >>> c1.check(book_1)
-    True
-
-    Here, the "author" does not satisfy the constraints. Hence, the result is False.
-
-    >>> c1.check(book_2)
-    False
-
-    In this case, there is a missing field specified by the query, that is "year"
-    So the result is False, even in the case it is not required by the schema:
-
-    >>> c2.check(Description({"author": "Stephen King"}))
-    False
-
-    If the type of some attribute of the description is not correct, the result is False.
-    In this case, the field "year" has a string instead of an integer:
-
-    >>> c2.check(Description({"author": "Stephen King", "year": "1991"}))
-    False
-
-    >>> c3.check(Description({"author": "Stephen King", "genre": False}))
-    False
 
 <a id="aea.helpers.search.models.Constraint.is_valid"></a>
 
@@ -1216,8 +1174,7 @@ This class lets you build a query for the OEF.
 #### `__`init`__`
 
 ```python
-def __init__(constraints: List[ConstraintExpr],
-             model: Optional[DataModel] = None) -> None
+def __init__(constraints: List[ConstraintExpr], model: Optional[DataModel] = None) -> None
 ```
 
 Initialize a query.

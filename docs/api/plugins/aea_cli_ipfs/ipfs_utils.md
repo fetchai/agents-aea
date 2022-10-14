@@ -205,6 +205,7 @@ It wraps into directory.
 
 **Arguments**:
 
+
 - `dir_path`: str, path to dir to publish
 - `pin`: bool, pin object or not
 
@@ -233,6 +234,7 @@ def remove(hash_id: str) -> Dict
 Remove dir added by it's hash.
 
 **Arguments**:
+
 
 - `hash_id`: str. hash of dir to remove
 
@@ -281,6 +283,7 @@ def publish(hash_id: str) -> Dict
 Publish directory by it's hash id.
 
 **Arguments**:
+
 
 - `hash_id`: hash of the directory to publish.
 

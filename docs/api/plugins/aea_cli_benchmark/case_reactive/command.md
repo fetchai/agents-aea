@@ -26,8 +26,7 @@ Latency and throughput check.
 )
 @number_of_runs_deco
 @output_format_deco
-def main(duration: int, runtime_mode: str, connection_mode: str,
-         number_of_runs: int, output_format: str) -> Any
+def main(duration: int, runtime_mode: str, connection_mode: str, number_of_runs: int, output_format: str) -> Any
 ```
 
 Check envelopes send/received rate within connection.
