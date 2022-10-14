@@ -10,9 +10,7 @@ AEA configuration utils.
 
 ```python
 @singledispatch
-def replace_component_ids(
-        _arg: PackageConfiguration,
-        _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def replace_component_ids(_arg: PackageConfiguration, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Update public id references in a package configuration.
@@ -25,8 +23,7 @@ This depends on the actual configuration being considered.
 
 ```python
 @replace_component_ids.register(AgentConfig)  # type: ignore
-def _(arg: AgentConfig, replacements: Dict[ComponentType,
-                                           Dict[PublicId, PublicId]]) -> None
+def _(arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in agent configuration.
@@ -48,8 +45,7 @@ It breaks down in:
 
 ```python
 @replace_component_ids.register(ProtocolConfig)  # type: ignore
-def _(_arg: ProtocolConfig,
-      _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(_arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Do nothing - protocols have no references.
@@ -60,8 +56,7 @@ Do nothing - protocols have no references.
 
 ```python
 @replace_component_ids.register(ConnectionConfig)  # type: ignore
-def _(arg: ConnectionConfig,
-      replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in a connection configuration.
@@ -72,8 +67,7 @@ Replace references in a connection configuration.
 
 ```python
 @replace_component_ids.register(ContractConfig)  # type: ignore
-def _(_arg: ContractConfig,
-      _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
+def _(_arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Do nothing - contracts have no references.
@@ -84,8 +78,7 @@ Do nothing - contracts have no references.
 
 ```python
 @replace_component_ids.register(SkillConfig)  # type: ignore
-def _(arg: SkillConfig, replacements: Dict[ComponentType,
-                                           Dict[PublicId, PublicId]]) -> None
+def _(arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in a skill configuration.
@@ -95,9 +88,7 @@ Replace references in a skill configuration.
 #### get`_`latest`_`component`_`id`_`from`_`prefix
 
 ```python
-def get_latest_component_id_from_prefix(
-        agent_config: AgentConfig,
-        component_prefix: PackageIdPrefix) -> Optional[ComponentId]
+def get_latest_component_id_from_prefix(agent_config: AgentConfig, component_prefix: PackageIdPrefix) -> Optional[ComponentId]
 ```
 
 Get component id with the greatest version in an agent configuration given its prefix.

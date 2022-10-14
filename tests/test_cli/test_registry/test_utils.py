@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -277,7 +277,7 @@ class ExtractTestCase(TestCase):
         """Test for extract method wrong file type."""
         source = "file.wrong"
         target = "target-folder"
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             extract(source, target)
 
 

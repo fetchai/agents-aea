@@ -130,8 +130,7 @@ a matching protocol, if present, else None
 #### get`_`protocol`_`by`_`specification`_`id
 
 ```python
-def get_protocol_by_specification_id(
-        protocol_specification_id: PublicId) -> Optional[Protocol]
+def get_protocol_by_specification_id(protocol_specification_id: PublicId) -> Optional[Protocol]
 ```
 
 Get protocol for given protocol_specification_id.
@@ -357,8 +356,7 @@ Remove a skill from the set of resources.
 #### get`_`handler
 
 ```python
-def get_handler(protocol_id: PublicId,
-                skill_id: PublicId) -> Optional[Handler]
+def get_handler(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
 ```
 
 Get a specific handler.
@@ -409,8 +407,7 @@ the list of handlers
 #### get`_`behaviour
 
 ```python
-def get_behaviour(skill_id: PublicId,
-                  behaviour_name: str) -> Optional[Behaviour]
+def get_behaviour(skill_id: PublicId, behaviour_name: str) -> Optional[Behaviour]
 ```
 
 Get a specific behaviours for a given skill.

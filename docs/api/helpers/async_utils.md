@@ -29,8 +29,7 @@ Awaitable state.
 #### `__`init`__`
 
 ```python
-def __init__(initial_state: Any = None,
-             states_enum: Optional[Container[Any]] = None) -> None
+def __init__(initial_state: Any = None, states_enum: Optional[Container[Any]] = None) -> None
 ```
 
 Init async state.
@@ -86,6 +85,7 @@ Wait state to be set.
 
 **Arguments**:
 
+
 - `state_or_states`: state or list of states.
 
 **Returns**:
@@ -98,22 +98,17 @@ tuple of previous state and new state.
 
 ```python
 @contextmanager
-def transit(initial: Any = not_set,
-            success: Any = not_set,
-            fail: Any = not_set) -> Generator
+def transit(initial: Any = not_set, success: Any = not_set, fail: Any = not_set) -> Generator
 ```
 
 Change state context according to success or not.
 
 **Arguments**:
 
+:yield: generator
 - `initial`: set state on context enter, not_set by default
 - `success`: set state on context block done, not_set by default
 - `fail`: set state on context block raises exception, not_set by default
-
-**Returns**:
-
-generator
 
 <a id="aea.helpers.async_utils.PeriodicCaller"></a>
 
@@ -132,12 +127,7 @@ Used for periodic function run using asyncio.
 #### `__`init`__`
 
 ```python
-def __init__(callback: Callable,
-             period: float,
-             start_at: Optional[datetime.datetime] = None,
-             exception_callback: Optional[Callable[[Callable, Exception],
-                                                   None]] = None,
-             loop: Optional[AbstractEventLoop] = None) -> None
+def __init__(callback: Callable, period: float, start_at: Optional[datetime.datetime] = None, exception_callback: Optional[Callable[[Callable, Exception], None]] = None, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init periodic caller.
@@ -326,8 +316,7 @@ Use wait_completed to await task was completed.
 #### `__`init`__`
 
 ```python
-def __init__(loop: asyncio.AbstractEventLoop = None,
-             threaded: bool = False) -> None
+def __init__(loop: asyncio.AbstractEventLoop = None, threaded: bool = False) -> None
 ```
 
 Init runnable.
@@ -378,14 +367,13 @@ Implement run logic respectful to CancelError on termination.
 #### wait`_`completed
 
 ```python
-def wait_completed(sync: bool = False,
-                   timeout: float = None,
-                   force_result: bool = False) -> Awaitable
+def wait_completed(sync: bool = False, timeout: float = None, force_result: bool = False) -> Awaitable
 ```
 
 Wait runnable execution completed.
 
 **Arguments**:
+
 
 - `sync`: bool. blocking wait
 - `timeout`: float seconds

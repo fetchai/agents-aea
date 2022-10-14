@@ -172,8 +172,7 @@ the marginal utility score
 
 ```python
 @abstractmethod
-def utility_diff_from_transaction(ownership_state: OwnershipState,
-                                  terms: Terms) -> float
+def utility_diff_from_transaction(ownership_state: OwnershipState, terms: Terms) -> float
 ```
 
 Simulate a transaction and get the resulting utility difference (taking into account the fee).
@@ -227,9 +226,7 @@ Initialize the protected queue.
 #### put
 
 ```python
-def put(internal_message: Optional[Message],
-        block: bool = True,
-        timeout: Optional[float] = None) -> None
+def put(internal_message: Optional[Message], block: bool = True, timeout: Optional[float] = None) -> None
 ```
 
 Put an internal message on the queue.
@@ -310,9 +307,7 @@ Inaccessible get_nowait method.
 #### protected`_`get
 
 ```python
-def protected_get(access_code: str,
-                  block: bool = True,
-                  timeout: Optional[float] = None) -> Optional[Message]
+def protected_get(access_code: str, block: bool = True, timeout: Optional[float] = None) -> Optional[Message]
 ```
 
 Access protected get method.
@@ -336,7 +331,7 @@ internal message
 ## DecisionMakerHandler Objects
 
 ```python
-class DecisionMakerHandler(WithLogger, ABC)
+class DecisionMakerHandler(WithLogger,  ABC)
 ```
 
 This class implements the decision maker.
@@ -346,8 +341,7 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
-def __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any],
-             **kwargs: Any) -> None
+def __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any], **kwargs: Any) -> None
 ```
 
 Initialize the decision maker handler.

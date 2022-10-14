@@ -67,9 +67,7 @@ Get the configuration.
 
 ```python
 @classmethod
-def get_instance(cls,
-                 ledger_api: LedgerApi,
-                 contract_address: Optional[str] = None) -> Any
+def get_instance(cls, ledger_api: LedgerApi, contract_address: Optional[str] = None) -> Any
 ```
 
 Get the instance.
@@ -109,8 +107,7 @@ the contract object.
 
 ```python
 @classmethod
-def from_config(cls, configuration: ContractConfig,
-                **kwargs: Any) -> "Contract"
+def from_config(cls, configuration: ContractConfig, **kwargs: Any) -> "Contract"
 ```
 
 Load contract from configuration.
@@ -130,8 +127,7 @@ the contract object.
 
 ```python
 @classmethod
-def get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str,
-                           **kwargs: Any) -> Optional[JSONLike]
+def get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -155,8 +151,7 @@ the tx
 
 ```python
 @classmethod
-def get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str,
-                        **kwargs: Any) -> Optional[JSONLike]
+def get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -180,8 +175,7 @@ the tx  # noqa: DAR202
 
 ```python
 @classmethod
-def get_raw_message(cls, ledger_api: LedgerApi, contract_address: str,
-                    **kwargs: Any) -> Optional[bytes]
+def get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[bytes]
 ```
 
 Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -205,8 +199,7 @@ the tx  # noqa: DAR202
 
 ```python
 @classmethod
-def get_state(cls, ledger_api: LedgerApi, contract_address: str,
-              **kwargs: Any) -> Optional[JSONLike]
+def get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_STATE' requests.
@@ -230,8 +223,7 @@ the tx  # noqa: DAR202
 
 ```python
 @classmethod
-def contract_method_call(cls, ledger_api: LedgerApi, method_name: str,
-                         **kwargs: Any) -> Optional[JSONLike]
+def contract_method_call(cls, ledger_api: LedgerApi, method_name: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Make a contract call.
@@ -252,9 +244,7 @@ the call result
 
 ```python
 @classmethod
-def build_transaction(cls, ledger_api: LedgerApi, method_name: str,
-                      method_args: Optional[Dict],
-                      tx_args: Optional[Dict]) -> Optional[JSONLike]
+def build_transaction(cls, ledger_api: LedgerApi, method_name: str, method_args: Optional[Dict], tx_args: Optional[Dict]) -> Optional[JSONLike]
 ```
 
 Build a transaction.
@@ -276,8 +266,7 @@ the transaction
 
 ```python
 @classmethod
-def default_method_call(cls, ledger_api: LedgerApi, contract_address: str,
-                        method_name: str, **kwargs: Any) -> Optional[JSONLike]
+def default_method_call(cls, ledger_api: LedgerApi, contract_address: str, method_name: str, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Make a contract call.
@@ -299,11 +288,7 @@ the call result
 
 ```python
 @classmethod
-def get_transaction_transfer_logs(
-        cls,
-        ledger_api: LedgerApi,
-        tx_hash: str,
-        target_address: Optional[str] = None) -> Optional[JSONLike]
+def get_transaction_transfer_logs(cls, ledger_api: LedgerApi, tx_hash: str, target_address: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Retrieve the logs from a transaction.
@@ -324,8 +309,7 @@ the tx logs
 
 ```python
 @classmethod
-def get_method_data(cls, ledger_api: LedgerApi, contract_address: str,
-                    method_name: str, **kwargs: Any) -> Optional[JSONLike]
+def get_method_data(cls, ledger_api: LedgerApi, contract_address: str, method_name: str, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get a contract call encoded data.

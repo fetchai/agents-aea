@@ -22,6 +22,7 @@ from io import StringIO
 from pathlib import Path
 from typing import (
     Any,
+    Callable,
     Dict,
     Generic,
     List,
@@ -199,13 +200,13 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         :param file_pointer: the file pointer to the configuration file
         :return: the configuration object.
         """
-        if self.configuration_class.package_type == PackageType.AGENT:
-            return cast(T, self._load_agent_config(file_pointer))
 
-        if self.configuration_class.package_type == PackageType.SERVICE:
-            return cast(T, self._load_service_config(file_pointer))
+        loader: Callable = {
+            PackageType.AGENT: self._load_agent_config,
+            PackageType.SERVICE: self._load_service_config,
+        }.get(self.configuration_class.package_type, self._load_component_config)
 
-        return self._load_component_config(file_pointer)
+        return cast(T, loader(file_pointer))
 
     def dump(self, configuration: T, file_pointer: TextIO) -> None:
         """Dump a configuration.
@@ -213,14 +214,13 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         :param configuration: the configuration to be dumped.
         :param file_pointer: the file pointer to the configuration file
         """
-        if self.configuration_class.package_type == PackageType.AGENT:
-            self._dump_agent_config(cast(AgentConfig, configuration), file_pointer)
-        elif self.configuration_class.package_type == PackageType.SERVICE:
-            self._dump_service_config(
-                cast(PackageConfiguration, configuration), file_pointer
-            )
-        else:
-            self._dump_component_config(configuration, file_pointer)
+
+        dumper: Callable = {
+            PackageType.AGENT: self._dump_agent_config,
+            PackageType.SERVICE: self._dump_service_config,
+        }.get(self.configuration_class.package_type, self._dump_component_config)
+
+        dumper(configuration, file_pointer)
 
     @classmethod
     def from_configuration_type(
@@ -266,11 +266,11 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         Load agent configuration from configuration json data.
 
         :param configuration_json: list of dicts with agent configuration
-        :param validate: whether or not to validate
+        :param validate: whether to validate or not
 
         :return: AgentConfig instance
         """
-        if len(configuration_json) == 0:
+        if not configuration_json:
             raise ValueError("Agent configuration file was empty.")
         agent_config_json = configuration_json[0]
         if validate:
@@ -321,8 +321,8 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
     def _load_service_config(self, file_pointer: TextIO) -> PackageConfiguration:
         """Load a service configuration."""
         configuration_data = yaml_load_all(file_pointer)
-        if len(configuration_data) == 0:
-            raise ValueError("Agent configuration file was empty.")
+        if not configuration_data:
+            raise ValueError("Service configuration file was empty.")
 
         service_config, *overrides = configuration_data
         self.validate(service_config)

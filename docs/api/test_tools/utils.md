@@ -9,10 +9,7 @@ Helpful utilities.
 #### wait`_`for`_`condition
 
 ```python
-def wait_for_condition(condition_checker: Callable,
-                       timeout: int = 2,
-                       error_msg: str = "Timeout",
-                       period: float = 0.001) -> None
+def wait_for_condition(condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout", period: float = 0.001) -> None
 ```
 
 Wait for condition to occur in selected timeout.

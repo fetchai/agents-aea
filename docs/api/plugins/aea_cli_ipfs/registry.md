@@ -23,8 +23,7 @@ Validate local registry data.
 #### write`_`local`_`registry
 
 ```python
-def write_local_registry(registry_data: LocalRegistry,
-                         registry_path: str = LOCAL_REGISTRY_PATH) -> None
+def write_local_registry(registry_data: LocalRegistry, registry_path: str = LOCAL_REGISTRY_PATH) -> None
 ```
 
 Write registry data to file.
@@ -39,8 +38,7 @@ Write registry data to file.
 #### load`_`local`_`registry
 
 ```python
-def load_local_registry(
-        registry_path: str = LOCAL_REGISTRY_PATH) -> LocalRegistry
+def load_local_registry(registry_path: str = LOCAL_REGISTRY_PATH) -> LocalRegistry
 ```
 
 Returns local registry data.
@@ -50,10 +48,7 @@ Returns local registry data.
 #### get`_`ipfs`_`hash`_`from`_`public`_`id
 
 ```python
-def get_ipfs_hash_from_public_id(
-        item_type: str,
-        public_id: PublicId,
-        registry_path: str = LOCAL_REGISTRY_PATH) -> Optional[str]
+def get_ipfs_hash_from_public_id(item_type: str, public_id: PublicId, registry_path: str = LOCAL_REGISTRY_PATH) -> Optional[str]
 ```
 
 Get IPFS hash from local registry.
@@ -63,11 +58,7 @@ Get IPFS hash from local registry.
 #### register`_`item`_`to`_`local`_`registry
 
 ```python
-def register_item_to_local_registry(
-        item_type: str,
-        public_id: Union[str, PublicId],
-        package_hash: str,
-        registry_path: str = LOCAL_REGISTRY_PATH) -> None
+def register_item_to_local_registry(item_type: str, public_id: Union[str, PublicId], package_hash: str, registry_path: str = LOCAL_REGISTRY_PATH) -> None
 ```
 
 Add PublicId to hash mapping in the local registry.
@@ -84,10 +75,7 @@ Add PublicId to hash mapping in the local registry.
 #### fetch`_`ipfs
 
 ```python
-def fetch_ipfs(item_type: str,
-               public_id: PublicId,
-               dest: str,
-               remote: bool = True) -> Optional[Path]
+def fetch_ipfs(item_type: str, public_id: PublicId, dest: str, remote: bool = True) -> Optional[Path]
 ```
 
 Fetch a package from IPFS node.

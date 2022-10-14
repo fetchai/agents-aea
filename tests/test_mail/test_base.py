@@ -37,6 +37,9 @@ from tests.common.utils import wait_for_condition
 from tests.conftest import _make_dummy_connection, _make_local_connection
 
 
+TIMEOUT = 30
+
+
 def test_uri():
     """Testing the uri initialisation."""
     uri_raw = "http://user:pwd@NetLoc:80/path;param?query=arg#frag"
@@ -177,7 +180,7 @@ def test_outbox_put():
     inbox = InBox(multiplexer)
     multiplexer.connect()
     wait_for_condition(
-        lambda: dummy_connection.is_connected, 15, "Connection is not connected"
+        lambda: dummy_connection.is_connected, TIMEOUT, "Connection is not connected"
     )
     envelope = Envelope(
         to=receiver_address,
@@ -186,7 +189,9 @@ def test_outbox_put():
     )
     outbox.put(envelope)
     wait_for_condition(
-        lambda: inbox.empty(), 15, "Inbox must not be empty after putting an envelope"
+        lambda: not inbox.empty(),
+        TIMEOUT,
+        "Inbox must not be empty after putting an envelope",
     )
     multiplexer.disconnect()
 
@@ -210,12 +215,16 @@ def test_outbox_put_message():
     inbox = InBox(multiplexer)
     multiplexer.connect()
     wait_for_condition(
-        lambda: multiplexer.is_connected, 30, "Multiplexer is not connected"
+        lambda: multiplexer.is_connected, TIMEOUT, "Multiplexer is not connected"
     )
     outbox.put_message(msg)
     wait_for_condition(
-        lambda: inbox.empty(), 30, "Inbox must not be empty after putting a message"
+        lambda: not inbox.empty(),
+        TIMEOUT,
+        "Inbox must not be empty after putting a message",
     )
+    envelope = inbox.get(block=True, timeout=TIMEOUT)
+    assert envelope.message == msg
     multiplexer.disconnect()
 
 

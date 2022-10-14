@@ -44,8 +44,7 @@ Initialize dialogues.
 #### `__`init`__`
 
 ```python
-def __init__(identity: Identity, wallet: Wallet, config: Dict[str,
-                                                              Any]) -> None
+def __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any]) -> None
 ```
 
 Initialize the decision maker.

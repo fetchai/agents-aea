@@ -52,7 +52,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, cast
 
-from git import Repo
+from git import Repo  # pylint: disable=import-error
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
