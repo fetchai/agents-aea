@@ -40,7 +40,7 @@ from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
 @click.argument("url", metavar="URL", type=str, required=False, default=None)
 @password_option()
 @click.option(
-    "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
+    "--sync", is_flag=True, help="Wait until the faucet has released the funds."
 )
 @click.pass_context
 @check_aea_project

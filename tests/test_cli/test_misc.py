@@ -86,7 +86,7 @@ Commands:
   issue-certificates      Issue certificates for connections that require...
   launch                  Launch many agents at the same time.
   list                    List the installed packages of the agent.
-  local-registry-sync     Upgrade the local package registry.
+  local-registry-sync     Sync packages between packages.json and a local registry.
   login                   Login to the registry account.
   logout                  Logout from the registry account.
   packages                Local package manager.
