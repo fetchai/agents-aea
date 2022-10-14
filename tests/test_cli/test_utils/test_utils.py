@@ -209,7 +209,7 @@ def _raise_file_not_found_error(*args):
     raise FileNotFoundError()
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="flaky test addressed in PR #369")
 @mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 @mock.patch("aea.cli.utils.config.validate_cli_config")
 class GetOrCreateCLIConfigTestCase(TestCase):

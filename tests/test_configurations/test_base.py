@@ -438,19 +438,14 @@ class TestAgentConfigUpdate:
         )
 
         # to json
-        self.aea_config.json
+        assert self.aea_config.json
 
 
-class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
-    """Test case for _get_default_configuration_file_name_from_type method."""
+@pytest.mark.parametrize("package_type", PackageType)
+def test__get_default_configuration_file_name_from_type_positive(package_type):
+    """Test for _get_default_configuration_file_name_from_type method positive result."""
 
-    def test__get_default_configuration_file_name_from_type_positive(self):
-        """Test for _get_default_configuration_file_name_from_type method positive result."""
-        _get_default_configuration_file_name_from_type("agent")
-        _get_default_configuration_file_name_from_type("connection")
-        _get_default_configuration_file_name_from_type("protocol")
-        _get_default_configuration_file_name_from_type("skill")
-        _get_default_configuration_file_name_from_type("contract")
+    _get_default_configuration_file_name_from_type(str(package_type))
 
 
 class PublicIdTestCase(TestCase):
@@ -470,7 +465,7 @@ class PublicIdTestCase(TestCase):
     def test_public_id_json_positive(self):
         """Test case for json property positive result."""
         obj = PublicId(AUTHOR, "name", "0.1.0")
-        obj.json
+        assert obj.json
 
     def test_public_id_eq_positive(self):
         """Test case for json __eq__ method positive result."""
@@ -507,7 +502,7 @@ class AgentConfigTestCase(TestCase):
         agent_config = AgentConfig(agent_name="my_agent", author="fetchai")
         agent_config.default_connection = None
         agent_config.default_connection = 1
-        agent_config.public_id
+        assert agent_config.public_id
 
     def test_name_and_author(self):
         """Test case for default_connection setter positive result."""
@@ -526,7 +521,7 @@ class SpeechActContentConfigTestCase(TestCase):
     def test_json_positive(self):
         """Test case for json property positive result."""
         config = SpeechActContentConfig()
-        config.json
+        assert config.json == {}
 
     def test_from_json_positive(self):
         """Test case for from_json method positive result."""
@@ -551,7 +546,7 @@ class ProtocolSpecificationTestCase(TestCase):
             author="fetchai",
             protocol_specification_id="some/author:0.1.0",
         )
-        obj.json
+        assert obj.json
 
     @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
     def test_from_json_positive(self, *mocks):
@@ -600,7 +595,7 @@ def test_configuration_ordered_json():
         "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
     )
     configuration._key_order = ["aea_version"]
-    configuration.ordered_json
+    assert configuration.ordered_json
 
 
 def test_public_id_versions():
@@ -707,7 +702,7 @@ def test_public_id_comparator_when_author_is_different():
         ValueError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
-        pid1 < pid2
+        assert pid1 < pid2
 
 
 def test_public_id_comparator_when_name_is_different():
@@ -718,7 +713,28 @@ def test_public_id_comparator_when_name_is_different():
         ValueError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
-        pid1 < pid2
+        assert pid1 < pid2
+
+
+def test_public_id_no_package_hash_raises():
+    """Test PublicId no package hash raises."""
+    pid = PublicId("author", "name_1", "0.1.0")
+    with pytest.raises(ValueError, match="Package hash was not provided."):
+        assert pid.hash
+
+
+def test_public_id_package_hash_in_json():
+    """Test PublicId package hash in json."""
+    package_hash = "ba" + "a" * 57
+    pid = PublicId("author", "name_1", "0.1.0", package_hash)
+    assert pid.json.get("package_hash") == package_hash
+
+
+def test_public_id_with_package_hash():
+    """Test PublicId with package hash."""
+    package_hash = "ba" + "a" * 57
+    package_id = PublicId("author", "name_1", "0.1.0")
+    assert package_id.with_hash(package_hash)
 
 
 def test_package_id_version():
@@ -739,11 +755,18 @@ def test_package_id_repr():
     assert repr(package_id) == "PackageId(protocol, author/name:0.1.0)"
 
 
+def test_package_id_without_hash():
+    """Test PackageId without hash"""
+    package_hash = "ba" + "a" * 57
+    public_id = PublicId("author", "name", "0.1.0", package_hash)
+    package_id = PackageId(PackageType.PROTOCOL, public_id)
+    assert repr(package_id.without_hash()) == "PackageId(protocol, author/name:0.1.0)"
+
+
 def test_package_id_lt():
     """Test PackageId.__lt__"""
     package_id_1 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.1.0"))
     package_id_2 = PackageId(PackageType.PROTOCOL, PublicId("author", "name", "0.2.0"))
-
     assert package_id_1 < package_id_2
 
 
@@ -789,6 +812,16 @@ def test_component_id_same_prefix():
         ComponentType.PROTOCOL, PublicId("author", "name", "0.2.0")
     )
     assert component_id_1.same_prefix(component_id_2)
+
+
+def test_component_id_package_hash():
+    """Test ComponentId package hash"""
+    package_hash = "ba" + "a" * 57
+    public_id = PublicId("author", "name_1", "0.1.0", package_hash)
+    component_id = ComponentId(ComponentType.PROTOCOL, public_id)
+    assert component_id.package_hash
+    assert component_id.without_hash()
+    assert component_id.with_hash(package_hash)
 
 
 def test_component_configuration_load_file_not_found():
@@ -926,7 +959,7 @@ def test_agent_config_to_json_with_optional_configurations():
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER
-    agent_config.json
+    assert agent_config.json
     assert agent_config.package_id == PackageId.from_uri_path("agent/author/name/0.1.0")
 
 
