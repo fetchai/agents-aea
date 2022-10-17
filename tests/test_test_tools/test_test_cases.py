@@ -169,6 +169,11 @@ class TestGenericCases(AEATestCaseEmpty):
         """Call logging disable."""
         self.disable_aea_logging()
 
+    def test_run_install(self):
+        """Test run_interaction"""
+        result = self.run_install()
+        assert result.exit_code == 0
+
     def test_start_subprocess(self):
         """Start a python subprocess and check output."""
         proc = self.start_subprocess("-c", "print('hi')")
