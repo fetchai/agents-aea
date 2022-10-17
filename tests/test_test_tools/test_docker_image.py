@@ -17,6 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
+"""This module contains a test for aea.test_tools.docker_image."""
+
 import subprocess
 from contextlib import contextmanager
 from unittest import mock
@@ -71,11 +73,11 @@ class TestHelloWorldImage:
     image = HelloWorldImage(mock.Mock())
 
     @pytest.fixture(autouse=True)
-    def _start_hello_world(self, hello_world):
+    def _start_hello_world(self, hello_world) -> None:
         """Start the Hello World image."""
 
     @mock.patch("shutil.which", return_value=None)
-    def test_docker_binary_not_available(self, _):
+    def test_docker_binary_not_available(self, _) -> None:
         """Test skip when docker binary not available"""
 
         self.image._check_docker_binary_available()
@@ -88,13 +90,13 @@ class TestHelloWorldImage:
             subprocess.CompletedProcess("", 0, stdout=b"Docker version 0.0.0,"),
         ],
     )
-    def test_correct_docker_binary_not_available(self, proc_result):
+    def test_correct_docker_binary_not_available(self, proc_result) -> None:
         """Test skip when docker binary not available"""
 
         with mock.patch("subprocess.run", return_value=proc_result):
             self.image._check_docker_binary_available()
 
-    def test_stop_if_already_running(self):
+    def test_stop_if_already_running(self) -> None:
         """Test stop if already running"""
 
         magic_mock = mock.MagicMock()
@@ -104,8 +106,8 @@ class TestHelloWorldImage:
             any(launch_image(self.image))
 
     @mock.patch.object(HelloWorldImage, "wait", return_value=False)
-    def test_wait_returns_false(self, _):
+    def test_wait_returns_false(self, _) -> None:
         """Test wait returns False"""
-        
+
         with pytest.raises(DockerException, match=f"{self.image.tag} doesn't work."):
             any(launch_image(self.image))
