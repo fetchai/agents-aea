@@ -70,8 +70,8 @@ class TestSkillTestCase(BaseSkillTestCase):
             dm_context_kwargs={},
         )
 
-    def test_setup(self):
-        """Test the setup() class method."""
+    def test_setup_class(self):
+        """Test the setup_class() method."""
         assert self.skill.skill_context.agent_address == "test_agent_address"
         assert self.skill.skill_context.agent_name == "test_agent_name"
         assert (
