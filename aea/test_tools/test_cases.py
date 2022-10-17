@@ -995,7 +995,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 error_msg="Not all subprocesses terminated successfully.",
                 timeout=TERMINATION_TIMEOUT,
             )
-        except TimeoutError as e:
+        except TimeoutError as e:  # pragma: no cover
             nonzero = [p.returncode for p in cls.subprocesses if p.returncode]
             logging.error(f"{e} Non-zero returncodes: {nonzero}")
         cls.subprocesses.clear()
