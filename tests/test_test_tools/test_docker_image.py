@@ -24,11 +24,11 @@ from contextlib import contextmanager
 from unittest import mock
 
 import docker
+from docker.models.containers import Model
 import pytest
 
 from aea.test_tools.docker_image import (
     Container,
-    DockerException,
     DockerImage,
     launch_image,
 )
@@ -72,15 +72,12 @@ class TestHelloWorldImage:
 
     image = HelloWorldImage(mock.Mock())
 
-    @pytest.fixture(autouse=True)
-    def _start_hello_world(self, hello_world) -> None:
-        """Start the Hello World image."""
-
-    @mock.patch("shutil.which", return_value=None)
-    def test_docker_binary_not_available(self, _) -> None:
+    @pytest.mark.parametrize("result", [None, not None])
+    def test_docker_binary_not_available(self, result) -> None:
         """Test skip when docker binary not available"""
 
-        self.image._check_docker_binary_available()
+        with mock.patch("shutil.which", return_value=result):
+            self.image._check_docker_binary_available()
 
     @pytest.mark.parametrize(
         "proc_result",
@@ -94,7 +91,9 @@ class TestHelloWorldImage:
         """Test skip when docker binary not available"""
 
         with mock.patch("subprocess.run", return_value=proc_result):
-            self.image._check_docker_binary_available()
+            with mock.patch("pytest.skip") as m:
+                self.image._check_docker_binary_available()
+                m.assert_called_once()
 
     def test_stop_if_already_running(self) -> None:
         """Test stop if already running"""
@@ -103,11 +102,6 @@ class TestHelloWorldImage:
         magic_mock.image.tags = [self.image.tag]
         ContainerCollection = docker.models.containers.ContainerCollection
         with mock.patch.object(ContainerCollection, "list", return_value=[magic_mock]):
-            any(launch_image(self.image))
-
-    @mock.patch.object(HelloWorldImage, "wait", return_value=False)
-    def test_wait_returns_false(self, _) -> None:
-        """Test wait returns False"""
-
-        with pytest.raises(DockerException, match=f"{self.image.tag} doesn't work."):
-            any(launch_image(self.image))
+            with mock.patch.object(magic_mock, "stop"):
+                any(launch_image(self.image))
+                assert magic_mock.stop.call_count == 1
