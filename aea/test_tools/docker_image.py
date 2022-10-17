@@ -30,12 +30,8 @@ from typing import Any, Generator
 import pytest
 
 
-try:
-    from docker import DockerClient
-    from docker.models.containers import Container
-except ImportError:
-    DockerClient = Any
-    Container = Any
+from docker import DockerClient  # pylint: disable=import-error
+from docker.models.containers import Container  # pylint: disable=import-error
 
 
 logger = logging.getLogger(__name__)
@@ -62,7 +58,7 @@ class DockerImage(ABC):
         """Check the 'Docker' CLI tool is in the OS PATH."""
         result = shutil.which("docker")
         if result is None:
-            pytest.skip("Docker not in the OS Path; skipping the test")
+            pytest.skip("Docker not in the OS Path; skipping the test")  # pragma: no cover
 
         proc_result = subprocess.run(  # pylint: disable=subprocess-run-check # nosec
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
