@@ -30,7 +30,7 @@ plugin_dir = os.path.abspath(os.path.join(here, ".."))
 
 setup(
     name="aea-ledger-fetchai",
-    version="1.2.1",
+    version="1.2.2",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
