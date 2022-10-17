@@ -19,7 +19,7 @@
 
 """This module contains a test for aea.test_tools.docker_image."""
 
-import subprocess
+import subprocess  # nosec
 from contextlib import contextmanager
 from unittest import mock
 
