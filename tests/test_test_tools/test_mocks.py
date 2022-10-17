@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for mocking utils."""
-import subprocess
+import subprocess  # nosec
 from typing import Any
 
 import pytest
@@ -48,8 +48,8 @@ def test_ctx_mock_popen() -> None:
 
     filename = "..."
     with pytest.raises(FileNotFoundError):
-        subprocess.Popen([filename])
+        subprocess.Popen([filename])  # nosec
 
     with ctx_mock_Popen():
-        popen = subprocess.Popen([filename])
+        popen = subprocess.Popen([filename])  # nosec
         popen.communicate()
