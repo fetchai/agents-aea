@@ -25,13 +25,18 @@ import shutil
 import subprocess  # nosec
 import time
 from abc import ABC, abstractmethod
-from typing import Generator, cast
+from typing import Any, Generator, cast
 
-import docker
 import pytest
-from docker import DockerClient
-from docker.errors import DockerException
-from docker.models.containers import Container
+
+
+try:
+    import docker
+    from docker import DockerClient
+    from docker.models.containers import Container
+except ImportError:  # pragma: no cover
+    # to avoid having to make docker a framework dependency
+    docker = DockerClient = Container = Any
 
 
 logger = logging.getLogger(__name__)
@@ -109,6 +114,7 @@ class DockerImage(ABC):
         :param sleep_rate: the amount of time to sleep between different requests.
         :return: True if the wait was successful, False otherwise.
         """
+        return True  # pragma: no cover
 
 
 def launch_image(
@@ -122,10 +128,10 @@ def launch_image(
     container.start()
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
-    if not success:
+    if not success:  # pragma: no cover
         container.stop()
         container.remove()
-        raise DockerException(f"{image.tag} doesn't work. Exiting...")
+        pytest.fail(f"{image.tag} doesn't work. Exiting...")
 
     try:
         logger.info("Done!")
