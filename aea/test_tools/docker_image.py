@@ -25,13 +25,13 @@ import shutil
 import subprocess  # nosec
 import time
 from abc import ABC, abstractmethod
-from typing import Generator
+from typing import Generator, cast
 
-import docker  # pylint: disable=import-error
+import docker
 import pytest
-from docker import DockerClient  # pylint: disable=import-error
-from docker.errors import DockerException  # pylint: disable=import-error
-from docker.models.containers import Container  # pylint: disable=import-error
+from docker import DockerClient
+from docker.errors import DockerException
+from docker.models.containers import Container
 
 
 logger = logging.getLogger(__name__)
@@ -75,6 +75,7 @@ class DockerImage(ABC):
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
 
+        match = cast(re.Match, match)
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(
