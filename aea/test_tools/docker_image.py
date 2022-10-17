@@ -28,6 +28,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Generator
 
 import pytest
+import docker  # pylint: disable=import-error
 from docker import DockerClient  # pylint: disable=import-error
 from docker.errors import DockerException  # pylint: disable=import-error
 from docker.models.containers import Container  # pylint: disable=import-error
@@ -87,7 +88,6 @@ class DockerImage(ABC):
 
     def stop_if_already_running(self) -> None:
         """Stop the running images with the same tag, if any."""
-        import docker  # pylint: disable=import-outside-toplevel,import-error
 
         client = docker.from_env()
         for container in client.containers.list():
