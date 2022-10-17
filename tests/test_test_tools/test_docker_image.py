@@ -24,14 +24,9 @@ from contextlib import contextmanager
 from unittest import mock
 
 import docker
-from docker.models.containers import Model
 import pytest
 
-from aea.test_tools.docker_image import (
-    Container,
-    DockerImage,
-    launch_image,
-)
+from aea.test_tools.docker_image import Container, DockerImage, launch_image
 
 
 class HelloWorldImage(DockerImage):
