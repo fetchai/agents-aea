@@ -707,6 +707,25 @@ class TestSkillTestCase(BaseSkillTestCase):
                 "counterparty",
             )
 
+    def test_reset_all_dialogues(self):
+        """Test reset_all_dialogues"""
+
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+
+        for handler in self.skill.handlers.values():
+            name = handler.SUPPORTED_PROTOCOL.name + "_dialogues"
+            setattr(handler.context, name, fipa_dialogues)
+            dialogue_stats = fipa_dialogues.dialogue_stats
+            for end_state in dialogue_stats.self_initiated:
+                dialogue_stats.add_dialogue_endstate(end_state, True)
+                dialogue_stats.add_dialogue_endstate(end_state, False)
+
+        assert all(fipa_dialogues.dialogue_stats.self_initiated.values())
+        self.reset_all_dialogues()
+        assert not any(fipa_dialogues.dialogue_stats.self_initiated.values())
+
 
 class FipaDialogues(BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
