@@ -19,6 +19,7 @@
 
 from contextlib import contextmanager
 from typing import Dict, Optional
+from unittest import mock
 
 import docker
 import pytest
@@ -91,3 +92,19 @@ def _context(
     client = docker.from_env()
     image = HelloWorldImage(client, config=configuration)
     yield from launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+class TestHelloWorldImage:
+    """Test Hello World"""
+
+    image = HelloWorldImage(mock.Mock())
+
+    @pytest.fixture(autouse=True)
+    def _start_hello_world(self, hello_world):
+        """Start the Hello World image."""
+
+    @mock.patch("shutil.which", return_value=None)
+    def test_docker_binary_not_available(self, _):
+        """Test skip when docker binary not available"""
+
+        self.image._check_docker_binary_available()
