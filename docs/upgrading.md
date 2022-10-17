@@ -10,7 +10,7 @@ Ensure you update the plugins to their latest version (all plugins are changed i
 
 Update the packages to the latest versions (especially protocols).
 
-Regenreated your own written protocols (protocol generator was updated)
+Regenerate your own written protocols (protocol generator was updated)
 
 
 ## `v1.1.1` to `v1.2.0`

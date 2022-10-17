@@ -12,10 +12,10 @@ AEA:
 Plugins:
 - Update web3 to version 5.31
 - Small code format improvements
-- ipfshttpclient depdendency version updated to 0.8.0a2
+- ipfshttpclient dependency version updated to 0.8.0a2
 
 Packages:
-- Protocols regenrateed according to the latest protocol generator improvements: Union support
+- Protocols regenerated according to the latest protocol generator improvements: Union support
 - Small code format improvements
 
 ## 1.2.1 (2022-07-12)
