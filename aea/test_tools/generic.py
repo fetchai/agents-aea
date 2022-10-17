@@ -119,11 +119,11 @@ def _nested_set(
     root_key = keys[0]
     if (
         isinstance(configuration_obj, SkillConfig)
-        and root_key in SkillConfig.FIELDS_WITH_NESTED_FIELDS
+        and root_key in SkillConfig.OVERRIDABLE_FIELDS
     ):
         root_attr = getattr(configuration_obj, root_key)
         length = len(keys)
-        if length < 3 or keys[2] not in SkillConfig.NESTED_FIELDS_ALLOWED_TO_UPDATE:
+        if length < 3:
             raise ValueError(f"Invalid keys={keys}.")  # pragma: nocover
         skill_component_id = keys[1]
         skill_component_config = root_attr.read(skill_component_id)
