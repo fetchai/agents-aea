@@ -27,6 +27,7 @@ import pytest
 
 from aea.test_tools.docker_image import (
     Container,
+    DockerException,
     DockerClient,
     DockerImage,
     launch_image,
@@ -131,4 +132,10 @@ class TestHelloWorldImage:
         magic_mock.image.tags = [self.image.tag]
         ContainerCollection = docker.models.containers.ContainerCollection
         with mock.patch.object(ContainerCollection, "list", return_value=[magic_mock]):
+            any(launch_image(self.image))
+
+    @mock.patch.object(HelloWorldImage, "wait", return_value=False)
+    def test_wait_returns_false(self, _):
+        """Test wait returns False"""
+        with pytest.raises(DockerException, match=f"{self.image.tag} doesn't work. Exiting..."):
             any(launch_image(self.image))
