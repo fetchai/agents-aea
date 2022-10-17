@@ -28,9 +28,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Generator
 
 import pytest
-
-
 from docker import DockerClient  # pylint: disable=import-error
+from docker.errors import DockerException  # pylint: disable=import-error
 from docker.models.containers import Container  # pylint: disable=import-error
 
 
@@ -58,7 +57,7 @@ class DockerImage(ABC):
         """Check the 'Docker' CLI tool is in the OS PATH."""
         result = shutil.which("docker")
         if result is None:
-            pytest.skip("Docker not in the OS Path; skipping the test")  # pragma: no cover
+            pytest.skip("Docker not in the OS Path; skipping the test")
 
         proc_result = subprocess.run(  # pylint: disable=subprocess-run-check # nosec
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -126,7 +125,7 @@ def launch_image(
     if not success:
         container.stop()
         container.remove()
-        pytest.fail(f"{image.tag} doesn't work. Exiting...")
+        raise DockerException(f"{image.tag} doesn't work. Exiting...")
 
     try:
         logger.info("Done!")
