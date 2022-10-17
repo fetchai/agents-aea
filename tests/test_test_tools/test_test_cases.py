@@ -141,7 +141,7 @@ class TestConfigCases(AEATestCaseEmpty):
         """Test agent test set from path."""
         value = True
         key_name = "agent.logging_config.disable_existing_loggers"
-        self.set_config(key_name, value)
+        self.set_config(key_name, value, aev=True)
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
         assert str(value) in str(result.stdout_bytes)
 
