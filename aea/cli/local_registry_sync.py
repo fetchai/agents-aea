@@ -42,7 +42,7 @@ PACKAGES_DIRS = [i.to_plural() for i in PackageType]
 @click.command()
 @pass_ctx
 def local_registry_sync(ctx: Context) -> None:
-    """Upgrade the local package registry."""
+    """Sync packages between packages.json and a local registry."""
     skip_consistency_check = ctx.config["skip_consistency_check"]
     do_local_registry_update(ctx.cwd, skip_consistency_check)
 

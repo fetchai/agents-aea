@@ -52,8 +52,7 @@ Get the body.
 
 ```python
 @staticmethod
-def encode(raw_transaction_protobuf_object: Any,
-           raw_transaction_object: "RawTransaction") -> None
+def encode(raw_transaction_protobuf_object: Any, raw_transaction_object: "RawTransaction") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -121,9 +120,7 @@ This class represents an instance of RawMessage.
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str,
-             body: bytes,
-             is_deprecated_mode: bool = False) -> None
+def __init__(ledger_id: str, body: bytes, is_deprecated_mode: bool = False) -> None
 ```
 
 Initialise an instance of RawMessage.
@@ -167,8 +164,7 @@ Get the is_deprecated_mode.
 
 ```python
 @staticmethod
-def encode(raw_message_protobuf_object: Any,
-           raw_message_object: "RawMessage") -> None
+def encode(raw_message_protobuf_object: Any, raw_message_object: "RawMessage") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -269,8 +265,7 @@ Get the body.
 
 ```python
 @staticmethod
-def encode(signed_transaction_protobuf_object: Any,
-           signed_transaction_object: "SignedTransaction") -> None
+def encode(signed_transaction_protobuf_object: Any, signed_transaction_object: "SignedTransaction") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -288,8 +283,7 @@ The protocol buffer object in the signed_transaction_protobuf_object argument mu
 
 ```python
 @classmethod
-def decode(cls,
-           signed_transaction_protobuf_object: Any) -> "SignedTransaction"
+def decode(cls, signed_transaction_protobuf_object: Any) -> "SignedTransaction"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -339,9 +333,7 @@ This class represents an instance of RawMessage.
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str,
-             body: str,
-             is_deprecated_mode: bool = False) -> None
+def __init__(ledger_id: str, body: str, is_deprecated_mode: bool = False) -> None
 ```
 
 Initialise an instance of SignedMessage.
@@ -385,8 +377,7 @@ Get the is_deprecated_mode.
 
 ```python
 @staticmethod
-def encode(signed_message_protobuf_object: Any,
-           signed_message_object: "SignedMessage") -> None
+def encode(signed_message_protobuf_object: Any, signed_message_object: "SignedMessage") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -555,16 +546,7 @@ Class to represent the terms of a multi-currency & multi-token ledger transactio
 #### `__`init`__`
 
 ```python
-def __init__(ledger_id: str,
-             sender_address: Address,
-             counterparty_address: Address,
-             amount_by_currency_id: Dict[str, int],
-             quantities_by_good_id: Dict[str, int],
-             nonce: str,
-             is_sender_payable_tx_fee: bool = True,
-             fee_by_currency_id: Optional[Dict[str, int]] = None,
-             is_strict: bool = False,
-             **kwargs: Any) -> None
+def __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], nonce: str, is_sender_payable_tx_fee: bool = True, fee_by_currency_id: Optional[Dict[str, int]] = None, is_strict: bool = False, **kwargs: Any, ,) -> None
 ```
 
 Instantiate terms of a transaction.
@@ -896,11 +878,7 @@ Get is_strict.
 
 ```python
 @staticmethod
-def get_hash(ledger_id: str, sender_address: str, counterparty_address: str,
-             good_ids: List[str], sender_supplied_quantities: List[int],
-             counterparty_supplied_quantities: List[int],
-             sender_payable_amount: int, counterparty_payable_amount: int,
-             nonce: str) -> str
+def get_hash(ledger_id: str, sender_address: str, counterparty_address: str, good_ids: List[str], sender_supplied_quantities: List[int], counterparty_supplied_quantities: List[int], sender_payable_amount: int, counterparty_payable_amount: int, nonce: str) -> str
 ```
 
 Generate a hash from transaction information.
@@ -1028,8 +1006,7 @@ Get the receipt.
 
 ```python
 @staticmethod
-def encode(transaction_digest_protobuf_object: Any,
-           transaction_digest_object: "TransactionDigest") -> None
+def encode(transaction_digest_protobuf_object: Any, transaction_digest_object: "TransactionDigest") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -1047,8 +1024,7 @@ The protocol buffer object in the transaction_digest_protobuf_object argument mu
 
 ```python
 @classmethod
-def decode(cls,
-           transaction_digest_protobuf_object: Any) -> "TransactionDigest"
+def decode(cls, transaction_digest_protobuf_object: Any) -> "TransactionDigest"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -1142,8 +1118,7 @@ Get the transaction.
 
 ```python
 @staticmethod
-def encode(transaction_receipt_protobuf_object: Any,
-           transaction_receipt_object: "TransactionReceipt") -> None
+def encode(transaction_receipt_protobuf_object: Any, transaction_receipt_object: "TransactionReceipt") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -1161,8 +1136,7 @@ The protocol buffer object in the transaction_receipt_protobuf_object argument m
 
 ```python
 @classmethod
-def decode(cls,
-           transaction_receipt_protobuf_object: Any) -> "TransactionReceipt"
+def decode(cls, transaction_receipt_protobuf_object: Any) -> "TransactionReceipt"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.

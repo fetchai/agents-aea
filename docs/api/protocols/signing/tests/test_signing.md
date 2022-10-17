@@ -120,9 +120,7 @@ The dialogue class maintains state of a dialogue and manages it.
 #### `__`init`__`
 
 ```python
-def __init__(dialogue_label: DialogueLabel, self_address: Address,
-             role: BaseDialogue.Role,
-             message_class: Type[SigningMessage]) -> None
+def __init__(dialogue_label: DialogueLabel, self_address: Address, role: BaseDialogue.Role, message_class: Type[SigningMessage]) -> None
 ```
 
 Initialize a dialogue.

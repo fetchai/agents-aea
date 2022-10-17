@@ -93,7 +93,7 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
     cls=ConnectionsOption,
     required=False,
     default=None,
-    help="The connection names to disable for running the agent. Must be declared in the agent's configuration file.",
+    help="The connection names to disable while running the agent. Must be declared in the agent's configuration file.",
 )
 @click.option(
     "--aev",

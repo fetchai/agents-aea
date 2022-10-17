@@ -233,7 +233,7 @@ class TestLedgerDispatcher:
         ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
 
         amount = 40000
-        fee = 10**7
+        fee = 10 ** 7
 
         # Create ledger_api dialogue: get raw transaction
         request, ledger_api_dialogue = ledger_api_dialogues.create(
@@ -291,7 +291,7 @@ class TestLedgerDispatcher:
 
         # First, send a transaction so we can get a digest at the end
         amount = 40000
-        fee = 10**7
+        fee = 10 ** 7
 
         request, ledger_api_dialogue = ledger_api_dialogues.create(
             counterparty=str(ledger_apis_connection.connection_id),

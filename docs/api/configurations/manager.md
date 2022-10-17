@@ -19,11 +19,7 @@ Variable does not exist in a config exception.
 #### handle`_`dotted`_`path
 
 ```python
-def handle_dotted_path(
-    value: str,
-    author: str,
-    aea_project_path: Union[str, Path] = "."
-) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]
+def handle_dotted_path(value: str, author: str, aea_project_path: Union[str, Path] = ".") -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]
 ```
 
 Separate the path between path to resource and json path to attribute.
@@ -43,6 +39,7 @@ we will filter with only the component prefix (i.e. the triple type, author and 
 
 **Arguments**:
 
+
 - `value`: dotted path.
 - `author`: the author string.
 - `aea_project_path`: project path
@@ -56,8 +53,7 @@ Tuple[list of settings dict keys, filepath, config loader, component id].
 #### find`_`component`_`directory`_`from`_`component`_`id
 
 ```python
-def find_component_directory_from_component_id(
-        aea_project_directory: Path, component_id: ComponentId) -> Path
+def find_component_directory_from_component_id(aea_project_directory: Path, component_id: ComponentId) -> Path
 ```
 
 Find a component directory from component id.
@@ -77,9 +73,7 @@ AeaConfig manager.
 #### `__`init`__`
 
 ```python
-def __init__(agent_config: AgentConfig,
-             aea_project_directory: Union[str, Path],
-             env_vars_friendly: bool = False) -> None
+def __init__(agent_config: AgentConfig, aea_project_directory: Union[str, Path], env_vars_friendly: bool = False) -> None
 ```
 
 Init manager.
@@ -95,14 +89,13 @@ Init manager.
 #### load`_`component`_`configuration
 
 ```python
-def load_component_configuration(
-        component_id: ComponentId,
-        skip_consistency_check: bool = True) -> ComponentConfiguration
+def load_component_configuration(component_id: ComponentId, skip_consistency_check: bool = True) -> ComponentConfiguration
 ```
 
 Load component configuration from the project directory.
 
 **Arguments**:
+
 
 - `component_id`: Id of the component to load config for.
 - `skip_consistency_check`: bool.
@@ -128,9 +121,7 @@ Return agent config file path.
 
 ```python
 @classmethod
-def load(cls,
-         aea_project_path: Union[Path, str],
-         substitude_env_vars: bool = False) -> "AgentConfigManager"
+def load(cls, aea_project_path: Union[Path, str], substitude_env_vars: bool = False) -> "AgentConfigManager"
 ```
 
 Create AgentConfigManager instance from agent project path.
@@ -162,6 +153,7 @@ Set config variable.
 
 **Arguments**:
 
+
 - `path`: str dotted path or List[Union[ComponentId, str]]
 
 **Returns**:
@@ -173,8 +165,7 @@ json friendly value.
 #### update`_`config
 
 ```python
-def update_config(overrides: Dict,
-                  dict_overrides: Optional[Dict] = None) -> None
+def update_config(overrides: Dict, dict_overrides: Optional[Dict] = None) -> None
 ```
 
 Apply overrides for agent config.
@@ -183,6 +174,7 @@ Validates and applies agent config and component overrides.
 Does not save it on the disc!
 
 **Arguments**:
+
 
 - `overrides`: overridden values dictionary
 - `dict_overrides`: A dictionary containing mapping for Component ID -> List of paths
@@ -228,12 +220,7 @@ Save agent config on the disc.
 
 ```python
 @classmethod
-def verify_private_keys(
-        cls,
-        aea_project_path: Union[Path, str],
-        private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None],
-        substitude_env_vars: bool = False,
-        password: Optional[str] = None) -> "AgentConfigManager"
+def verify_private_keys(cls, aea_project_path: Union[Path, str], private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None], substitude_env_vars: bool = False, password: Optional[str] = None) -> "AgentConfigManager"
 ```
 
 Verify private keys.
@@ -241,6 +228,7 @@ Verify private keys.
 Does not saves the config! Use AgentConfigManager.dump_config()
 
 **Arguments**:
+
 
 - `aea_project_path`: path to an AEA project.
 - `private_key_helper`: private_key_helper is a function that use agent config to check the keys

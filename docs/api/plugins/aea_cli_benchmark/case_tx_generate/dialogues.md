@@ -47,10 +47,7 @@ The dialogue class maintains state of a dialogue and manages it.
 #### `__`init`__`
 
 ```python
-def __init__(dialogue_label: BaseDialogueLabel,
-             self_address: Address,
-             role: BaseDialogue.Role,
-             message_class: Type[FipaMessage] = FipaMessage) -> None
+def __init__(dialogue_label: BaseDialogueLabel, self_address: Address, role: BaseDialogue.Role, message_class: Type[FipaMessage] = FipaMessage) -> None
 ```
 
 Initialize a dialogue.
@@ -89,7 +86,7 @@ Set terms.
 ## FipaDialogues Objects
 
 ```python
-class FipaDialogues(Model, BaseFipaDialogues)
+class FipaDialogues(Model,  BaseFipaDialogues)
 ```
 
 The dialogues class keeps track of all dialogues.
@@ -123,10 +120,7 @@ The dialogue class maintains state of a dialogue and manages it.
 #### `__`init`__`
 
 ```python
-def __init__(dialogue_label: BaseDialogueLabel,
-             self_address: Address,
-             role: BaseDialogue.Role,
-             message_class: Type[LedgerApiMessage] = LedgerApiMessage) -> None
+def __init__(dialogue_label: BaseDialogueLabel, self_address: Address, role: BaseDialogue.Role, message_class: Type[LedgerApiMessage] = LedgerApiMessage) -> None
 ```
 
 Initialize a dialogue.
@@ -165,7 +159,7 @@ Set associated_fipa_dialogue
 ## LedgerApiDialogues Objects
 
 ```python
-class LedgerApiDialogues(Model, BaseLedgerApiDialogues)
+class LedgerApiDialogues(Model,  BaseLedgerApiDialogues)
 ```
 
 The dialogues class keeps track of all dialogues.

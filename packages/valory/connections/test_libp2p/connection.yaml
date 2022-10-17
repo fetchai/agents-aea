@@ -15,7 +15,7 @@ fingerprint:
   tests/base.py: bafybeifetr4vll34azapap52cwnhrwgvsgs4veld263vb277z6lzcti2si
   tests/conftest.py: bafybeifkjrvsysdb7ujp2wxurzgytzy3ecu6fv247zfszfymdvb7y7klpu
   tests/test_certificate_dates.py: bafybeif4t76wsvsfvvplkmi4gecgod6ijff3bbqgtaqmpep6ywfapfptfm
-  tests/test_dht.py: bafybeibsitro6ee73fyvbo7jnqkskmltb5qjnnhfn5grnoon2ky2ajapue
+  tests/test_dht.py: bafybeifbnvlt7ts4ol5ygs3f3ype2iyallcvnv6scjooypngov2quoqrfy
   tests/test_p2p_libp2p/__init__.py: bafybeig7f7s5ptqtscf74y25dtqvhp75joekcxi6qnuzxgxyzictpsp4dm
   tests/test_p2p_libp2p/test_aea_cli.py: bafybeiej55kwbxuqjvjjz4tc7we54pxur7kvsh5o36lau7b7utltzwkc34
   tests/test_p2p_libp2p/test_communication.py: bafybeihnkle2pokfzfkguegmq4ptatvpcaezxrv564l76atjnuec57b2am
@@ -35,8 +35,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections:
 - valory/p2p_libp2p:0.1.0:bafybeibjirmffnyih5gplt2uu6ojvta25w7up6yt447unungn4xpgqn5ca
-- valory/p2p_libp2p_client:0.1.0:bafybeihf35zfr35qsvfte4vbi7njvuzfx4httysw7owmlux53gvxh2or54
-- valory/p2p_libp2p_mailbox:0.1.0:bafybeibptb6lzhyknd265jc2n33r25g4a6fuhmh4pdmkmf4dy4o5pkv6vi
+- valory/p2p_libp2p_client:0.1.0:bafybeidkk33xbga54szmitk6uwsi3ef56hbbdbuasltqtiyki34hgfpnxa
+- valory/p2p_libp2p_mailbox:0.1.0:bafybeihjjsenbsgh6x2vukea7mqzsbcbqqbog6xa43raen24ewqf4qq3pm
 protocols:
 - fetchai/default:1.0.0:bafybeihzesahyayexkhk26fg7rqnjuqaab3bmcijtjekvskvs4xw6ecyuu
 - valory/acn:1.1.0:bafybeifontek6tvaecatoauiule3j3id6xoktpjubvuqi3h2jkzqg7zh7a

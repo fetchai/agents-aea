@@ -9,7 +9,7 @@ This module contains the implementation of a generic agent.
 ## Agent Objects
 
 ```python
-class Agent(AbstractAgent, WithLogger)
+class Agent(AbstractAgent,  WithLogger)
 ```
 
 This class provides an abstract base class for a generic agent.
@@ -19,15 +19,7 @@ This class provides an abstract base class for a generic agent.
 #### `__`init`__`
 
 ```python
-def __init__(identity: Identity,
-             connections: List[Connection],
-             loop: Optional[AbstractEventLoop] = None,
-             period: float = 1.0,
-             loop_mode: Optional[str] = None,
-             runtime_mode: Optional[str] = None,
-             storage_uri: Optional[str] = None,
-             logger: Logger = _default_logger,
-             task_manager_mode: Optional[str] = None) -> None
+def __init__(identity: Identity, connections: List[Connection], loop: Optional[AbstractEventLoop] = None, period: float = 1.0, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, storage_uri: Optional[str] = None, logger: Logger = _default_logger, task_manager_mode: Optional[str] = None) -> None
 ```
 
 Instantiate the agent.
@@ -41,9 +33,8 @@ Instantiate the agent.
 - `loop_mode`: loop_mode to choose agent run loop.
 - `runtime_mode`: runtime mode to up agent.
 - `storage_uri`: optional uri to set generic storage
-- `task_manager_mode`: task manager mode.
-- `logger`: the logger.
 - `task_manager_mode`: mode of the task manager.
+- `logger`: the logger.
 
 <a id="aea.agent.Agent.storage_uri"></a>
 
@@ -269,8 +260,7 @@ Tear down the agent.
 #### get`_`periodic`_`tasks
 
 ```python
-def get_periodic_tasks(
-) -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
+def get_periodic_tasks() -> Dict[Callable, Tuple[float, Optional[datetime.datetime]]]
 ```
 
 Get all periodic tasks for agent.
@@ -304,6 +294,7 @@ def exception_handler(exception: Exception, function: Callable) -> bool
 Handle exception raised during agent main loop execution.
 
 **Arguments**:
+
 
 - `exception`: exception raised
 - `function`: a callable exception raised in.

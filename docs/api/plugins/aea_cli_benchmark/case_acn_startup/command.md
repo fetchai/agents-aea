@@ -20,13 +20,12 @@ Check amount of time for acn connection start.
 @click.option(
     "--connect-times",
     default=10,
-    help="How many time perform connection.",
+    help="How many connection attempts.",
     show_default=True,
 )
 @number_of_runs_deco
 @output_format_deco
-def main(connection: str, connect_times: int, number_of_runs: int,
-         output_format: str) -> Any
+def main(connection: str, connect_times: int, number_of_runs: int, output_format: str) -> Any
 ```
 
 Check connection connect time.

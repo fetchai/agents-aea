@@ -445,7 +445,7 @@ def _process_packages_protocol(
 @click.option(
     "--check-clean",
     is_flag=True,
-    help="Check if git tree is clean..",
+    help="Check if Git tree is clean.",
 )
 def generate_all_protocols(
     packages_dir: Path,

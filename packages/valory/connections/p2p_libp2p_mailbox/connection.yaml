@@ -45,6 +45,7 @@ dependencies:
     version: <3.8,>=3.7.4
   asn1crypto:
     version: <1.5.0,>=1.4.0
+  ecdsa: {}
   open-aea-ledger-cosmos: {}
   open-aea-ledger-ethereum: {}
 is_abstract: false

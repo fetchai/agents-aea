@@ -291,7 +291,7 @@ metaclass
 api
 gitleaks
 valory
-abis
+ABIs
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

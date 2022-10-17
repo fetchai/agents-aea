@@ -65,7 +65,7 @@ from aea.helpers.io import open_file
     help="Add the author to run `init` before `create` execution.",
 )
 @registry_flag()
-@click.option("--empty", is_flag=True, help="Not adding default dependencies.")
+@click.option("--empty", is_flag=True, help="Do not add default dependencies.")
 @click.pass_context
 def create(
     click_context: click.core.Context,

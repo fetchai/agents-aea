@@ -66,15 +66,15 @@ def package_manager(
 @click.option(
     "--update-packages",
     is_flag=True,
-    help="Update packages if the calculated hash for a package does not match the one in the packages.json.",
+    help="Download packages from a remote registry so that local packages match the hashes in packages.json.",
 )
 @click.option(
     "--update-hashes",
     is_flag=True,
-    help="Update hashes in the packages.json if the calculated hash for a package does not match the one in the packages.json",
+    help="Recalculate hashes in packages.json so that they match the local packages.",
 )
 def sync(ctx: Context, update_packages: bool, update_hashes: bool) -> None:
-    """Sync local packages."""
+    """Sync packages between packages.json and a local registry."""
 
     if not IS_IPFS_PLUGIN_INSTALLED:
         raise click.ClickException(
@@ -104,7 +104,7 @@ def sync(ctx: Context, update_packages: bool, update_hashes: bool) -> None:
 )
 @pass_ctx
 def lock_packages(ctx: Context, check: bool) -> None:
-    """Lock packages"""
+    """Lock packages. Updates hashes in packages.json so that they match the local packages."""
 
     packages_dir = Path(ctx.registry_path)
 
