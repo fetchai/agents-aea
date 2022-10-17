@@ -192,14 +192,16 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
         """Test the validate_mint_quantities method of the ERC1155 contract."""
         # Valid NFTs
         self.contract.validate_mint_quantities(
-            token_ids=self.token_ids_a, mint_quantities=[1] * len(self.token_ids_a),
+            token_ids=self.token_ids_a,
+            mint_quantities=[1] * len(self.token_ids_a),
         )
 
         # Valid FTs
         token_id = 680564733841876926926749214863536422912
         mint_quantity = 1
         self.contract.validate_mint_quantities(
-            token_ids=[token_id], mint_quantities=[mint_quantity],
+            token_ids=[token_id],
+            mint_quantities=[mint_quantity],
         )
 
         # Invalid NFTs
@@ -212,7 +214,8 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             ),
         ):
             self.contract.validate_mint_quantities(
-                token_ids=[token_id], mint_quantities=[mint_quantity],
+                token_ids=[token_id],
+                mint_quantities=[mint_quantity],
             )
 
         # Invalid: neither NFT nor FT
@@ -225,7 +228,8 @@ class TestERC1155ContractEthereum(BaseContractTestCase, UseGanache):
             ),
         ):
             self.contract.validate_mint_quantities(
-                token_ids=[token_id], mint_quantities=[mint_quantity],
+                token_ids=[token_id],
+                mint_quantities=[mint_quantity],
             )
 
     def test_decode_id(self):

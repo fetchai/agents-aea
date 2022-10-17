@@ -138,7 +138,12 @@ class LedgerApis:
         )
         api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx = api.get_transfer_transaction(
-            sender_address, destination_address, amount, tx_fee, tx_nonce, **kwargs,
+            sender_address,
+            destination_address,
+            amount,
+            tx_fee,
+            tx_nonce,
+            **kwargs,
         )
         return tx
 

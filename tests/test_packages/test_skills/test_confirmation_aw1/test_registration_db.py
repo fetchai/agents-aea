@@ -97,13 +97,17 @@ class TestStrategy(BaseSkillTestCase):
         # operation
         with patch.object(self.db, "_execute_single_sql") as mock_exe:
             self.db.set_registered_developer_only(
-                self.address, developer_handle,
+                self.address,
+                developer_handle,
             )
 
         # after
         mock_exe.assert_any_call(
             "INSERT OR REPLACE INTO registered_table(address, developer_handle) values(?, ?)",
-            (self.address, developer_handle,),
+            (
+                self.address,
+                developer_handle,
+            ),
         )
 
     def test_is_registered_i(self):

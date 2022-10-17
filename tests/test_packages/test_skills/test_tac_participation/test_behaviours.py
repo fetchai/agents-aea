@@ -220,7 +220,8 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
             "transactions": self.txs
         }
         tac_dialogue = self.prepare_skill_dialogue(
-            self.tac_dialogues, self.list_of_tac_messages,
+            self.tac_dialogues,
+            self.list_of_tac_messages,
         )
         self.game._tac_dialogue = tac_dialogue
 
@@ -268,7 +269,8 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         }
 
         tac_dialogue = self.prepare_skill_dialogue(
-            self.tac_dialogues, self.list_of_tac_messages,
+            self.tac_dialogues,
+            self.list_of_tac_messages,
         )
 
         tac_dialogue._incoming_messages = []
@@ -289,7 +291,8 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         }
 
         tac_dialogue = self.prepare_skill_dialogue(
-            self.tac_dialogues, self.list_of_tac_messages,
+            self.tac_dialogues,
+            self.list_of_tac_messages,
         )
         self.game._tac_dialogue = tac_dialogue
 

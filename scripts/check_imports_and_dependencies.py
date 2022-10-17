@@ -153,6 +153,7 @@ class CheckTool:
         spec = importlib.util.spec_from_file_location(
             "setup", str(AEA_ROOT_DIR / "setup.py")
         )
+        assert spec
         setup = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = setup
         spec.loader.exec_module(setup)  # type: ignore
@@ -237,7 +238,7 @@ class CheckTool:
 
     @staticmethod
     def check_imports(
-        sections_imports: Dict[str, Set[str]],
+        sections_imports: Dict[str, Set[Tuple[str, Path]]],
         sections_dependencies: Dict[str, Dict[str, List[str]]],
     ) -> Tuple[Dict[str, List[str]], List[str]]:
         """Find missing dependencies for imports and not imported dependencies."""
@@ -256,7 +257,7 @@ class CheckTool:
         for section, modules in sections_imports.items():
             for module, pyfile in modules:
                 package = _find_dependency_for_module(
-                    sections_dependencies.get(section, {}), pyfile
+                    sections_dependencies.get(section, {}), pyfile  # type: ignore
                 )
                 if module not in IGNORE:
                     sections_imports_packages[section][module] = package

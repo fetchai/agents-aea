@@ -34,7 +34,7 @@ class ConfirmationAW3TestCase(BaseSkillTestCase):
         """Setup the test class."""
         cls.aw1_aea = "some_aw1_aea"
         cls.leaderboard_url = "some_leaderboard_url"
-        cls.leaderboard_token = "some_leaderboard_token"
+        cls.leaderboard_token = "some_leaderboard_token"  # nosec
         config_overrides = {
             "models": {
                 "strategy": {

@@ -83,7 +83,10 @@ class Strategy(Model):
         self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
 
         self._seed = (
-            kwargs.pop("seed", None,)
+            kwargs.pop(
+                "seed",
+                None,
+            )
             or (
                 "my_seed_000000000000000000000000"
                 + str(random.randint(100_000, 999_999))  # nosec
@@ -171,7 +174,9 @@ class Strategy(Model):
                 self._search_query["search_value"],
             ),
         )
-        query = Query([close_to_my_service, service_key_filter],)
+        query = Query(
+            [close_to_my_service, service_key_filter],
+        )
         return query
 
     def get_location_description(self) -> Description:
@@ -181,7 +186,8 @@ class Strategy(Model):
         :return: a description of the agent's location
         """
         description = Description(
-            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+            self._agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 
@@ -192,7 +198,8 @@ class Strategy(Model):
         :return: a description of the offered services
         """
         description = Description(
-            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+            self._set_service_data,
+            data_model=AGENT_SET_SERVICE_MODEL,
         )
         return description
 
@@ -203,7 +210,8 @@ class Strategy(Model):
         :return: a description of the personality
         """
         description = Description(
-            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_personality_data,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -214,7 +222,8 @@ class Strategy(Model):
         :return: a description of the classification
         """
         description = Description(
-            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_classification,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -225,6 +234,7 @@ class Strategy(Model):
         :return: a description of the to be removed service
         """
         description = Description(
-            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+            self._remove_service_data,
+            data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description

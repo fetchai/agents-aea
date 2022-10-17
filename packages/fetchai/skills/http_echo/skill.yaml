@@ -10,7 +10,7 @@ fingerprint:
   README.md: QmYC2Y95Mg327LyHzQ3WbxZA8g1NfSHasmDTRcvrGCXmiR
   __init__.py: QmZeRhxJciQUxdwSc4Jb5fZXWFsU9oRFgQJSRxXuqP5DXH
   dialogues.py: QmUSbxe3nGmPYWsV2uL4KXSFFiMyHdr96UhDwTyJn88wWm
-  handlers.py: QmZNner2UogvSm97VJyCLZuFL5ihHJcSbwp9fHk1qprjeD
+  handlers.py: QmRmvkeEAUPDESDsPT1rhU5kRH3QqPdSyMc8vqeU43zZwi
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_server:0.23.2

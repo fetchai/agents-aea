@@ -133,7 +133,8 @@ class FipaHandler(Handler):
             # accept any proposal with the correct keys
             self.context.logger.info(
                 "received valid PROPOSE from sender={}: proposal={}".format(
-                    fipa_msg.sender[-5:], fipa_msg.proposal.values,
+                    fipa_msg.sender[-5:],
+                    fipa_msg.proposal.values,
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
@@ -183,7 +184,8 @@ class FipaHandler(Handler):
         else:
             self.context.logger.info(
                 "received invalid PROPOSE from sender={}: proposal={}".format(
-                    fipa_msg.sender[-5:], fipa_msg.proposal.values,
+                    fipa_msg.sender[-5:],
+                    fipa_msg.proposal.values,
                 )
             )
 
@@ -316,7 +318,8 @@ class OefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )
 
@@ -434,7 +437,8 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
+                contract_api_msg.performative,
+                contract_api_dialogue,
             )
         )
 
@@ -509,7 +513,8 @@ class SigningHandler(Handler):
         )
         self.context.logger.info(
             "sending ACCEPT_W_INFORM to agent={}: tx_signature={}".format(
-                last_fipa_msg.sender[-5:], signing_msg.signed_message,
+                last_fipa_msg.sender[-5:],
+                signing_msg.signed_message,
             )
         )
         self.context.outbox.put_message(message=inform_msg)
@@ -603,7 +608,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
 
@@ -633,6 +639,7 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )

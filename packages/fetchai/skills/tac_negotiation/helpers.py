@@ -60,7 +60,10 @@ def _build_goods_datamodel(good_ids: List[str], is_supply: bool) -> DataModel:
         "price", int, False, "The price of the goods in the currency."
     )
     fee_attribute = Attribute(
-        "fee", int, False, "The transaction fee payable by the buyer in the currency.",
+        "fee",
+        int,
+        False,
+        "The transaction fee payable by the buyer in the currency.",
     )
     nonce_attribute = Attribute(
         "nonce", str, False, "The nonce to distinguish identical descriptions."

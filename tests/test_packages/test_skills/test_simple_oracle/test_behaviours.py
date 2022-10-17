@@ -112,7 +112,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         ) as mock_logger:
             self.simple_oracle_behaviour.setup()
         mock_logger.assert_any_call(
-            logging.INFO, "Fetch oracle contract address already added",
+            logging.INFO,
+            "Fetch oracle contract address already added",
         )
         self.assert_quantity_in_outbox(0)
 
@@ -135,7 +136,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         ) as mock_logger:
             self.simple_oracle_behaviour.setup()
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle role already granted",
+            logging.INFO,
+            "Oracle role already granted",
         )
 
         self.assert_quantity_in_outbox(0)

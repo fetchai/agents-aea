@@ -84,7 +84,9 @@ class TestStrategy(ConfirmationAW2TestCase):
         ) as mock_get_trade_table:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_trade(
-                    self.address, self.timestamp, self.data,
+                    self.address,
+                    self.timestamp,
+                    self.data,
                 )
 
         # after
@@ -111,7 +113,9 @@ class TestStrategy(ConfirmationAW2TestCase):
         ) as mock_get_trade_table:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_trade(
-                    self.address, self.timestamp, self.data,
+                    self.address,
+                    self.timestamp,
+                    self.data,
                 )
 
         # after
@@ -145,7 +149,9 @@ class TestStrategy(ConfirmationAW2TestCase):
         ) as mock_get_trade_table:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_trade(
-                    self.address, self.timestamp, self.data,
+                    self.address,
+                    self.timestamp,
+                    self.data,
                 )
 
         # after
@@ -179,7 +185,8 @@ class TestStrategy(ConfirmationAW2TestCase):
         ) as mock_is_registered:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_registered(
-                    self.address, self.developer_handle,
+                    self.address,
+                    self.developer_handle,
                 )
 
         # after
@@ -197,7 +204,8 @@ class TestStrategy(ConfirmationAW2TestCase):
         ) as mock_is_registered:
             with patch.object(self.db, "_execute_single_sql") as mock_exe:
                 self.db.set_registered(
-                    self.address, self.developer_handle,
+                    self.address,
+                    self.developer_handle,
                 )
 
         # after

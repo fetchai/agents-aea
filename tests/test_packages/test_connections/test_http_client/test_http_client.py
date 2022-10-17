@@ -20,7 +20,7 @@
 import asyncio
 import logging
 from asyncio import CancelledError
-from typing import cast
+from typing import Any, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
@@ -51,7 +51,7 @@ class _MockRequest:
         """Init with mock response."""
         self.response = response
 
-    async def __aenter__(self) -> None:
+    async def __aenter__(self) -> Any:
         """Enter async context."""
         return self.response
 
@@ -225,7 +225,9 @@ class TestHTTPClientConnect:
         response_mock.read.return_value = asyncio.Future()
 
         with patch.object(
-            aiohttp.ClientSession, "request", return_value=_MockRequest(response_mock),
+            aiohttp.ClientSession,
+            "request",
+            return_value=_MockRequest(response_mock),
         ):
             await self.http_client_connection.send(envelope=request_envelope)
 
@@ -270,7 +272,9 @@ class TestHTTPClientConnect:
         response_mock.read.return_value.set_result("")
 
         with patch.object(
-            aiohttp.ClientSession, "request", return_value=_MockRequest(response_mock),
+            aiohttp.ClientSession,
+            "request",
+            return_value=_MockRequest(response_mock),
         ):
             await self.http_client_connection.send(envelope=request_envelope)
             # TODO: Consider returning the response from the server in order to be able to assert that the message send!

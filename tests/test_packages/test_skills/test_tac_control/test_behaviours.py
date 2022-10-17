@@ -293,7 +293,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
                         self.tac_behaviour.act()
 
     def _assert_tac_message_and_logging_output(
-        self, tac_message: TacMessage, participant_address: Address, mocked_logger,
+        self,
+        tac_message: TacMessage,
+        participant_address: Address,
+        mocked_logger,
     ):
         has_attributes, error_str = self.message_has_attributes(
             actual_message=tac_message,

@@ -349,7 +349,8 @@ def test_run_multiple_connections(connection_ids):
         process.expect_all(["Start processing messages"], timeout=40)
         process.control_c()
         process.expect(
-            EOF, timeout=40,
+            EOF,
+            timeout=40,
         )
         process.wait_to_complete(15)
         assert process.returncode == 0
@@ -1035,8 +1036,8 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             DEFAULT_CONNECTION_CONFIG_FILE,
         )
         cls.connection_configuration_path.unlink()
-        cls.relative_connection_configuration_path = cls.connection_configuration_path.relative_to(
-            Path(cls.t, cls.agent_name)
+        cls.relative_connection_configuration_path = (
+            cls.connection_configuration_path.relative_to(Path(cls.t, cls.agent_name))
         )
 
         cls.result = cls.runner.invoke(
@@ -1383,7 +1384,8 @@ class TestExcludeConnection(AEATestCaseEmpty):
         with pytest.raises(Exception, match="^None$"):
             with patch("aea.cli.run.run_aea", raise_err):
                 self.run_cli_command(
-                    "run", cwd=self._get_cwd(),
+                    "run",
+                    cwd=self._get_cwd(),
                 )
         with pytest.raises(Exception, match=f"^..{self.connection2_id}..$"):
             with patch("aea.cli.run.run_aea", raise_err):

@@ -63,7 +63,7 @@ class TestStrategy(ConfirmationAW3TestCase):
             },
         }
         cls.leaderboard_url = "some_url"
-        cls.leaderboard_token = "some_token"
+        cls.leaderboard_token = "some_token"  # nosec
 
         cls.strategy = Strategy(
             aw1_aea="some_aw1_aea",
@@ -173,8 +173,8 @@ class TestStrategy(ConfirmationAW3TestCase):
         with patch.object(
             self.strategy, "is_valid_counterparty", side_effect=is_valid_counterparty
         ):
-            actual_acceptable_counterparties = self.strategy.get_acceptable_counterparties(
-                couterparties
+            actual_acceptable_counterparties = (
+                self.strategy.get_acceptable_counterparties(couterparties)
             )
 
         # after
@@ -192,7 +192,8 @@ class TestStrategy(ConfirmationAW3TestCase):
         # after
         mock_is_regostered.assert_any_call(self.counterparty)
         mock_logger.assert_any_call(
-            logging.INFO, f"Invalid counterparty={self.counterparty}, not registered!",
+            logging.INFO,
+            f"Invalid counterparty={self.counterparty}, not registered!",
         )
         assert is_valid is False
 
@@ -238,7 +239,8 @@ class TestStrategy(ConfirmationAW3TestCase):
         mock_handle.assert_any_call(self.counterparty)
 
         mock_logger.assert_any_call(
-            logging.INFO, f"Successful trade with={self.counterparty}.",
+            logging.INFO,
+            f"Successful trade with={self.counterparty}.",
         )
 
         self.assert_quantity_in_outbox(1)

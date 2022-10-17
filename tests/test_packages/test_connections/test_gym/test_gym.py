@@ -123,9 +123,14 @@ class TestGymConnection:
     async def test_send_connection_error(self):
         """Test send connection error."""
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
+            counterparty=self.gym_address,
+            performative=GymMessage.Performative.RESET,
         )
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
 
         with pytest.raises(ConnectionError):
             await self.gym_con.send(envelope)
@@ -140,7 +145,11 @@ class TestGymConnection:
             action=GymMessage.AnyObject("any_action"),
             step_id=1,
         )
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self.gym_con.connect()
 
         observation = 1
@@ -175,8 +184,14 @@ class TestGymConnection:
         """Test send close message."""
         sending_dialogue = await self.send_reset()
         assert sending_dialogue.last_message is not None
-        msg = sending_dialogue.reply(performative=GymMessage.Performative.CLOSE,)
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        msg = sending_dialogue.reply(
+            performative=GymMessage.Performative.CLOSE,
+        )
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self.gym_con.connect()
 
         with patch.object(self.env, "close") as mock:
@@ -212,10 +227,15 @@ class TestGymConnection:
     async def send_reset(self) -> GymDialogue:
         """Send a reset."""
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
+            counterparty=self.gym_address,
+            performative=GymMessage.Performative.RESET,
         )
         assert sending_dialogue is not None
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         await self.gym_con.connect()
 
         with patch.object(self.env, "reset") as mock:

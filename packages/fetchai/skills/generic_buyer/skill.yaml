@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: QmdNsFvxVhmtSwd5S7TDrXNuqfrQELsJdSjZqmhhK3njHV
   behaviours.py: QmephYoPF78rWrwqBwpKWKSJhKUV6pe5GpEm4fgoR3BpPx
   dialogues.py: QmaZsSYcxyjNJ4FQz4gTxYjW5qYi4hfkv3Aky5eCXNLbfc
-  handlers.py: QmUrPrqGB2aW8ZWv1NLPsNCAgjZbMw83g1yk5qGEGsZ8SE
-  strategy.py: QmUGFUoiif8qtGCG7BQiomQL48erPQydWPWm5FbguDpeC1
+  handlers.py: Qmee6K1NvwqiXCM5x1ycAmTp2iS7JbuQxLsytZpckmoMPa
+  strategy.py: QmY84D8JwXJxLSWTZNBZeHoyJjmuRsj2U7Dya6EhYSw1ny
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.21.1

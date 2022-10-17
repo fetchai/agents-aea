@@ -138,7 +138,8 @@ class ProxyEnv(gym.Env):
         self._step_count = 0
         self._is_rl_agent_trained = False
         gym_msg, gym_dialogue = self.gym_dialogues.create(
-            counterparty=self.gym_address, performative=GymMessage.Performative.RESET,
+            counterparty=self.gym_address,
+            performative=GymMessage.Performative.RESET,
         )
         gym_dialogue = cast(GymDialogue, gym_dialogue)
         self._active_dialogue = gym_dialogue
@@ -161,7 +162,8 @@ class ProxyEnv(gym.Env):
         if last_msg is None:  # pragma: nocover
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_gym_dialogue.reply(
-            performative=GymMessage.Performative.CLOSE, target_message=last_msg,
+            performative=GymMessage.Performative.CLOSE,
+            target_message=last_msg,
         )
         self._skill_context.outbox.put_message(message=gym_msg)
 

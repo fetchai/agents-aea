@@ -340,7 +340,8 @@ class TestHttpHandler(ConfirmationAW3TestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 

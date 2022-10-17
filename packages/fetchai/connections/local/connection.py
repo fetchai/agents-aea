@@ -253,7 +253,9 @@ class LocalNode:
                 error_data={},
             )
             error_envelope = Envelope(
-                to=envelope.sender, sender=OEF_LOCAL_NODE_ADDRESS, message=msg,
+                to=envelope.sender,
+                sender=OEF_LOCAL_NODE_ADDRESS,
+                message=msg,
             )
             await self._send(error_envelope)
             return
@@ -272,7 +274,9 @@ class LocalNode:
             self.services[address].append(service_description)
 
     async def _unregister_service(
-        self, oef_search_msg: OefSearchMessage, dialogue: OefSearchDialogue,
+        self,
+        oef_search_msg: OefSearchMessage,
+        dialogue: OefSearchDialogue,
     ) -> None:
         """
         Unregister a service agent.
@@ -289,7 +293,11 @@ class LocalNode:
                     target_message=oef_search_msg,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
                 )
-                envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+                envelope = Envelope(
+                    to=msg.to,
+                    sender=msg.sender,
+                    message=msg,
+                )
                 await self._send(envelope)
             else:
                 self.services[address].remove(service_description)
@@ -297,7 +305,9 @@ class LocalNode:
                     self.services.pop(address)
 
     async def _search_services(
-        self, oef_search_msg: OefSearchMessage, dialogue: OefSearchDialogue,
+        self,
+        oef_search_msg: OefSearchMessage,
+        dialogue: OefSearchDialogue,
     ) -> None:
         """
         Search the agents in the local Service Directory, and send back the result.
@@ -325,7 +335,11 @@ class LocalNode:
                 agents=tuple(sorted(set(result))),
             )
 
-            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+            )
             await self._send(envelope)
 
     def _get_message_and_dialogue(

@@ -74,7 +74,9 @@ class TestTacSkills(AEATestCaseManyFlaky):
 
         # create tac controller, agent one and agent two
         self.create_agents(
-            tac_aea_one, tac_aea_two, tac_controller_name,
+            tac_aea_one,
+            tac_aea_two,
+            tac_controller_name,
         )
 
         default_routing = {
@@ -350,7 +352,9 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # create tac controller, agent one and agent two
         self.create_agents(
-            tac_aea_one, tac_aea_two, tac_controller_name,
+            tac_aea_one,
+            tac_aea_two,
+            tac_controller_name,
         )
 
         # default routing (both for controller and participants)
@@ -861,7 +865,9 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # create tac controller, agent one and agent two
         self.create_agents(
-            tac_aea_one, tac_aea_two, tac_controller_name,
+            tac_aea_one,
+            tac_aea_two,
+            tac_controller_name,
         )
 
         # default routing (both for controller and participants)

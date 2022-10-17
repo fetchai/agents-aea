@@ -60,7 +60,7 @@ security:
         plugins/aea-ledger-cosmos/aea_ledger_cosmos \
         plugins/aea-cli-ipfs/aea_cli_ipfs
 	bandit -s B101 -r tests scripts
-	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706
+	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706 -i 44610 -i 50473
 
 .PHONY: static
 static:
@@ -106,16 +106,12 @@ test-all:
 
 .PHONY: install
 install: clean
-	python3 setup.py install
+	pip install .[all]
 
 .PHONY: dist
 dist: clean
-	python setup.py sdist
-	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win_amd64
-	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win32
-	python setup.py bdist_wheel --plat-name=manylinux1_x86_64
-	python setup.py bdist_wheel --plat-name=manylinux2014_aarch64
-	python setup.py bdist_wheel --plat-name=macosx_10_9_x86_64
+	poetry build
+
 
 h := $(shell git rev-parse --abbrev-ref HEAD)
 
@@ -136,14 +132,12 @@ v := $(shell pip -V | grep virtualenvs)
 new_env: clean
 	if [ -z "$v" ];\
 	then\
-		pipenv --rm;\
-		pipenv --python 3.7;\
-		pipenv install --dev --skip-lock --clear;\
-		pipenv run pip install -e .[all];\
-		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
-		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
-		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
-		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\
+		poetry install --with dev,docs,packages,tools,testing;\
+		poetry run pip install -e .[all];\
+		poetry run pip install --no-deps file:plugins/aea-ledger-ethereum;\
+		poetry run pip install --no-deps file:plugins/aea-ledger-cosmos;\
+		poetry run pip install --no-deps file:plugins/aea-ledger-fetchai;\
+		poetry run pip install --no-deps file:plugins/aea-cli-ipfs;\
 		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 	else\
 		echo "In a virtual environment! Exit first: 'exit'.";\

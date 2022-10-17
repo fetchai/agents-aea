@@ -67,7 +67,8 @@ class TestAggregationHandler(BaseSkillTestCase):
         cls.logger = cls._skill.skill_context.logger
 
         cls.aggregation_strategy = cast(
-            AggregationStrategy, cls._skill.skill_context.strategy,
+            AggregationStrategy,
+            cls._skill.skill_context.strategy,
         )
 
         cls.aggregation_dialogues = cast(
@@ -201,12 +202,16 @@ class TestOefSearchHandler(BaseSkillTestCase):
         cls.oef_search_handler = cast(
             OefSearchHandler, cls._skill.skill_context.handlers.oef_search
         )
-        cls.strategy = cast(AggregationStrategy, cls._skill.skill_context.strategy,)
+        cls.strategy = cast(
+            AggregationStrategy,
+            cls._skill.skill_context.strategy,
+        )
         cls.oef_dialogues = cast(
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
         )
         cls.service_registration_behaviour = cast(
-            SearchBehaviour, cls._skill.skill_context.behaviours.search,
+            SearchBehaviour,
+            cls._skill.skill_context.behaviours.search,
         )
 
         cls.register_location_description = Description(
@@ -345,7 +350,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_service",
+                self.service_registration_behaviour,
+                "register_service",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -372,7 +378,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_genus",
+                self.service_registration_behaviour,
+                "register_genus",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -399,7 +406,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # operation
         with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             with patch.object(
-                self.service_registration_behaviour, "register_classification",
+                self.service_registration_behaviour,
+                "register_classification",
             ) as mock_reg:
                 self.oef_search_handler.handle(incoming_message)
 
@@ -497,7 +505,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler where the oef error does NOT target register_service."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages_unregister[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_unregister[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,
@@ -523,7 +532,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages_search[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_search[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,
@@ -546,7 +556,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages_search[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_search[:1],
         )
         agents = ("agnt1", "agnt2")
         incoming_message = self.build_incoming_message_for_skill_dialogue(

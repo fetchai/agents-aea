@@ -70,7 +70,7 @@ def test_agent_context():
         storage_callable=storage_callable_,
         data_dir=data_dir,
         send_to_skill=send_to_skill,
-        **kwargs
+        **kwargs,
     )
 
     assert ac.data_dir == data_dir

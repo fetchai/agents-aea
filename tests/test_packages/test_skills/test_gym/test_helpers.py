@@ -59,7 +59,8 @@ class TestProxyEnv(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:2],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:2],
             ),
         )
         self.proxy_env._active_dialogue = gym_dialogue
@@ -115,12 +116,14 @@ class TestProxyEnv(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:2],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:2],
             ),
         )
         self.proxy_env._active_dialogue = gym_dialogue
         invalid_percept_msg = self.build_incoming_message(
-            message_type=GymMessage, performative=GymMessage.Performative.RESET,
+            message_type=GymMessage,
+            performative=GymMessage.Performative.RESET,
         )
 
         # operation
@@ -159,7 +162,8 @@ class TestProxyEnv(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:2],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:2],
             ),
         )
         self.proxy_env._active_dialogue = gym_dialogue
@@ -239,7 +243,8 @@ class TestProxyEnv(GymTestCase):
         """Test the reset method of the ProxyEnv class where performative is NOT status."""
         # setup
         invalid_msg = self.build_incoming_message(
-            message_type=GymMessage, performative=GymMessage.Performative.RESET,
+            message_type=GymMessage,
+            performative=GymMessage.Performative.RESET,
         )
 
         # operation
@@ -277,7 +282,8 @@ class TestProxyEnv(GymTestCase):
         gym_dialogue = cast(
             GymDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.gym_dialogues, messages=self.list_of_gym_messages[:4],
+                dialogues=self.gym_dialogues,
+                messages=self.list_of_gym_messages[:4],
             ),
         )
         self.proxy_env._active_dialogue = gym_dialogue

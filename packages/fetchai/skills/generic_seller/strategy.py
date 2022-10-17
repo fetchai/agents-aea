@@ -150,7 +150,8 @@ class GenericStrategy(Model):
         :return: a description of the agent's location
         """
         description = Description(
-            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+            self._agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 
@@ -161,7 +162,8 @@ class GenericStrategy(Model):
         :return: a description of the offered services
         """
         description = Description(
-            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+            self._set_service_data,
+            data_model=AGENT_SET_SERVICE_MODEL,
         )
         return description
 
@@ -172,7 +174,8 @@ class GenericStrategy(Model):
         :return: a description of the personality
         """
         description = Description(
-            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_personality_data,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -183,7 +186,8 @@ class GenericStrategy(Model):
         :return: a description of the classification
         """
         description = Description(
-            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_classification,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -194,7 +198,8 @@ class GenericStrategy(Model):
         :return: a description of the offered services
         """
         description = Description(
-            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+            self._simple_service_data,
+            data_model=SIMPLE_SERVICE_MODEL,
         )
         return description
 
@@ -205,7 +210,8 @@ class GenericStrategy(Model):
         :return: a description of the to be removed service
         """
         description = Description(
-            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+            self._remove_service_data,
+            data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 

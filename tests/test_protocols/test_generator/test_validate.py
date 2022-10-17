@@ -783,7 +783,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_6
             == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-                invalid_content_type_6, performative,
+                invalid_content_type_6,
+                performative,
             )
         )
 
@@ -795,7 +796,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_7
             == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-                invalid_content_type_7, performative,
+                invalid_content_type_7,
+                performative,
             )
         )
 
@@ -902,7 +904,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_1
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
@@ -914,7 +917,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_2
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
@@ -926,7 +930,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_3
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
@@ -938,7 +943,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_4
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
@@ -950,7 +956,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_5
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
@@ -962,7 +969,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_6
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
@@ -974,11 +982,14 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_7
             == "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             )
         )
 
-    @mock.patch("aea.configurations.base.ProtocolSpecification",)
+    @mock.patch(
+        "aea.configurations.base.ProtocolSpecification",
+    )
     def test_validate_speech_acts_section(self, mocked_spec):
         """Test for the '_validate_speech_acts_section' method."""
         valid_speech_act_content_config_1 = SpeechActContentConfig(
@@ -1048,7 +1059,8 @@ class TestValidate(TestCase):
         assert (
             invalid_msg_2
             == "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-                "target", valid_perm,
+                "target",
+                valid_perm,
             )
         )
         assert invalid_all_per_2 is None
@@ -1138,7 +1150,9 @@ class TestValidate(TestCase):
         assert invalid_all_per_6 is None
         assert invalid_all_content_6 is None
 
-    @mock.patch("aea.configurations.base.ProtocolSpecification",)
+    @mock.patch(
+        "aea.configurations.base.ProtocolSpecification",
+    )
     def test_validate_protocol_buffer_schema_code_snippets(self, mocked_spec):
         """Test for the '_validate_protocol_buffer_schema_code_snippets' method."""
         valid_protobuf_snippet_1 = {
@@ -1227,9 +1241,10 @@ class TestValidate(TestCase):
             "keep_terminal_state_dialogues": True,
         }
 
-        valid_result_1, valid_msg_1, = _validate_field_existence(
-            valid_dialogue_config_1
-        )
+        (
+            valid_result_1,
+            valid_msg_1,
+        ) = _validate_field_existence(valid_dialogue_config_1)
         assert valid_result_1 is True
         assert valid_msg_1 == "Dialogue section has all the required fields."
 
@@ -1238,9 +1253,10 @@ class TestValidate(TestCase):
         invalid_dialogue_config_1 = valid_dialogue_config_1.copy()
         invalid_dialogue_config_1.pop("initiation")
 
-        invalid_result_1, invalid_msg_1, = _validate_field_existence(
-            invalid_dialogue_config_1
-        )
+        (
+            invalid_result_1,
+            invalid_msg_1,
+        ) = _validate_field_existence(invalid_dialogue_config_1)
         assert invalid_result_1 is False
         assert (
             invalid_msg_1
@@ -1250,9 +1266,10 @@ class TestValidate(TestCase):
         invalid_dialogue_config_2 = valid_dialogue_config_1.copy()
         invalid_dialogue_config_2.pop("reply")
 
-        invalid_result_2, invalid_msg_2, = _validate_field_existence(
-            invalid_dialogue_config_2
-        )
+        (
+            invalid_result_2,
+            invalid_msg_2,
+        ) = _validate_field_existence(invalid_dialogue_config_2)
         assert invalid_result_2 is False
         assert (
             invalid_msg_2
@@ -1639,7 +1656,9 @@ class TestValidate(TestCase):
             == f"Invalid type for keep_terminal_state_dialogues. Expected bool. Found {type(invalid_keep_terminal_state_dialogues_1)}."
         )
 
-    @mock.patch("aea.configurations.base.ProtocolSpecification",)
+    @mock.patch(
+        "aea.configurations.base.ProtocolSpecification",
+    )
     def test_validate_dialogue_section(self, mocked_spec):
         """Test for the '_validate_dialogue_section' method."""
         valid_dialogue_config_1 = {
@@ -1669,9 +1688,10 @@ class TestValidate(TestCase):
         }
         mocked_spec.dialogue_config = valid_dialogue_config_1
 
-        valid_result_1, valid_msg_1, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            valid_result_1,
+            valid_msg_1,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert valid_result_1 is True
         assert valid_msg_1 == "Dialogue section of the protocol specification is valid."
 
@@ -1682,9 +1702,10 @@ class TestValidate(TestCase):
 
         mocked_spec.dialogue_config = invalid_dialogue_config_1
 
-        invalid_result_1, invalid_msg_1, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_1,
+            invalid_msg_1,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_1 is False
         assert (
             invalid_msg_1
@@ -1703,9 +1724,10 @@ class TestValidate(TestCase):
 
         mocked_spec.dialogue_config = invalid_dialogue_config_2
 
-        invalid_result_2, invalid_msg_2, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_2,
+            invalid_msg_2,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_2 is False
         assert (
             invalid_msg_2
@@ -1719,9 +1741,10 @@ class TestValidate(TestCase):
 
         mocked_spec.dialogue_config = invalid_dialogue_config_3
 
-        invalid_result_3, invalid_msg_3, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_3,
+            invalid_msg_3,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_3 is False
         assert (
             invalid_msg_3
@@ -1737,9 +1760,10 @@ class TestValidate(TestCase):
 
         mocked_spec.dialogue_config = invalid_dialogue_config_4
 
-        invalid_result_4, invalid_msg_4, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_4,
+            invalid_msg_4,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_4 is False
         assert (
             invalid_msg_4
@@ -1751,9 +1775,10 @@ class TestValidate(TestCase):
 
         mocked_spec.dialogue_config = invalid_dialogue_config_5
 
-        invalid_result_5, invalid_msg_5, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_5,
+            invalid_msg_5,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_5 is False
         assert (
             invalid_msg_5
@@ -1766,9 +1791,10 @@ class TestValidate(TestCase):
         invalid_dialogue_config_6.pop("termination")
         mocked_spec.dialogue_config = invalid_dialogue_config_6
 
-        invalid_result_6, invalid_msg_6, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_6,
+            invalid_msg_6,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_6 is False
         assert (
             invalid_msg_6
@@ -1780,9 +1806,10 @@ class TestValidate(TestCase):
         invalid_dialogue_config_7["keep_terminal_state_dialogues"] = invalid_value
         mocked_spec.dialogue_config = invalid_dialogue_config_7
 
-        invalid_result_7, invalid_msg_7, = _validate_dialogue_section(
-            mocked_spec, valid_performatives_set_1
-        )
+        (
+            invalid_result_7,
+            invalid_msg_7,
+        ) = _validate_dialogue_section(mocked_spec, valid_performatives_set_1)
         assert invalid_result_7 is False
         assert (
             invalid_msg_7
@@ -1810,7 +1837,10 @@ class TestValidate(TestCase):
         macked_validate_dialogue,
     ):
         """Positive test for the 'validate' method: invalid dialogue section."""
-        valid_result_1, valid_msg_1, = validate(mocked_spec)
+        (
+            valid_result_1,
+            valid_msg_1,
+        ) = validate(mocked_spec)
         assert valid_result_1 is True
         assert valid_msg_1 == "Protocol specification is valid."
 
@@ -1823,7 +1853,10 @@ class TestValidate(TestCase):
         self, mocked_spec, macked_validate_speech_acts
     ):
         """Negative test for the 'validate' method: invalid speech_acts."""
-        invalid_result_1, invalid_msg_1, = validate(mocked_spec)
+        (
+            invalid_result_1,
+            invalid_msg_1,
+        ) = validate(mocked_spec)
         assert invalid_result_1 is False
         assert invalid_msg_1 == "Some error on speech_acts."
 
@@ -1840,7 +1873,10 @@ class TestValidate(TestCase):
         self, mocked_spec, macked_validate_speech_acts, macked_validate_protobuf
     ):
         """Negative test for the 'validate' method: invalid protobuf snippets."""
-        invalid_result_1, invalid_msg_1, = validate(mocked_spec)
+        (
+            invalid_result_1,
+            invalid_msg_1,
+        ) = validate(mocked_spec)
         assert invalid_result_1 is False
         assert invalid_msg_1 == "Some error on protobuf snippets."
 
@@ -1865,6 +1901,9 @@ class TestValidate(TestCase):
         macked_validate_dialogue,
     ):
         """Negative test for the 'validate' method: invalid dialogue section."""
-        invalid_result_1, invalid_msg_1, = validate(mocked_spec)
+        (
+            invalid_result_1,
+            invalid_msg_1,
+        ) = validate(mocked_spec)
         assert invalid_result_1 is False
         assert invalid_msg_1 == "Some error on dialogue section."

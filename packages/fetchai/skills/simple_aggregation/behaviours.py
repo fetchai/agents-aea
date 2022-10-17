@@ -199,7 +199,10 @@ class AggregationBehaviour(TickerBehaviour):
         value = quantity.get("value", None)
         if value:
             strategy.make_observation(
-                value, str(time()), source=DEFAULT_SOURCE, signature=DEFAULT_SIGNATURE,
+                value,
+                str(time()),
+                source=DEFAULT_SOURCE,
+                signature=DEFAULT_SIGNATURE,
             )
         self.broadcast_observation()
 

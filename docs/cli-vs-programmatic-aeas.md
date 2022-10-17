@@ -177,19 +177,37 @@ def run():
 
     # Add the ledger_api protocol
     ledger_api_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "ledger_api",)
+        os.path.join(
+            os.getcwd(),
+            "packages",
+            "fetchai",
+            "protocols",
+            "ledger_api",
+        )
     )
     resources.add_protocol(ledger_api_protocol)
 
     # Add the oef_search protocol
     oef_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
+        os.path.join(
+            os.getcwd(),
+            "packages",
+            "fetchai",
+            "protocols",
+            "oef_search",
+        )
     )
     resources.add_protocol(oef_protocol)
 
     # Add the fipa protocol
     fipa_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
+        os.path.join(
+            os.getcwd(),
+            "packages",
+            "fetchai",
+            "protocols",
+            "fipa",
+        )
     )
     resources.add_protocol(fipa_protocol)
 

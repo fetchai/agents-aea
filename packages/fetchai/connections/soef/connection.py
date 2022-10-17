@@ -388,7 +388,8 @@ class SOEFChannel:
         return True
 
     def _construct_personality_filter_params(
-        self, equality_constraints: List[Constraint],
+        self,
+        equality_constraints: List[Constraint],
     ) -> Dict[str, List[str]]:
         """
         Construct a dictionary of personality filters.
@@ -864,7 +865,8 @@ class SOEFChannel:
         if disclosure_accuracy:
             params = {"accuracy": disclosure_accuracy}
             await self._generic_oef_command(
-                "set_find_position_disclosure_accuracy", params,
+                "set_find_position_disclosure_accuracy",
+                params,
             )
 
         self.agent_location = agent_location
@@ -981,7 +983,11 @@ class SOEFChannel:
             target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         await self.in_queue.put(envelope)
 
     async def unregister_service(
@@ -1244,7 +1250,11 @@ class SOEFChannel:
             agents=tuple(agents.keys()),
             agents_info=AgentsInfo(agents),
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         await self.in_queue.put(envelope)
 
 

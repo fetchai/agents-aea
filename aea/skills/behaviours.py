@@ -110,7 +110,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         self,
         tick_interval: float = 1.0,
         start_at: Optional[datetime.datetime] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Initialize the ticker behaviour.

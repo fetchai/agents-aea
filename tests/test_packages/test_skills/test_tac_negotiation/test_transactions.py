@@ -262,7 +262,9 @@ class TestTransactions(BaseSkillTestCase):
 
         # operation
         self.transactions.add_pending_initial_acceptance(
-            self.dialogue_label, self.proposal_id, self.terms,
+            self.dialogue_label,
+            self.proposal_id,
+            self.terms,
         )
 
         # after
@@ -286,7 +288,9 @@ class TestTransactions(BaseSkillTestCase):
             match="Initial acceptance is already in the list of pending initial acceptances.",
         ):
             self.transactions.add_pending_initial_acceptance(
-                self.dialogue_label, self.proposal_id, self.terms,
+                self.dialogue_label,
+                self.proposal_id,
+                self.terms,
             )
 
     def test_add_pending_initial_acceptance_iii(self):
@@ -302,14 +306,18 @@ class TestTransactions(BaseSkillTestCase):
             match="Initial acceptance is already in the list of pending initial acceptances.",
         ):
             self.transactions.add_pending_initial_acceptance(
-                self.dialogue_label, self.proposal_id, self.terms,
+                self.dialogue_label,
+                self.proposal_id,
+                self.terms,
             )
 
     def test_pop_pending_initial_acceptance_i(self):
         """Test the pop_pending_initial_acceptance method of the Transactions class."""
         # setup
         self.transactions.add_pending_initial_acceptance(
-            self.dialogue_label, self.proposal_id, self.terms,
+            self.dialogue_label,
+            self.proposal_id,
+            self.terms,
         )
 
         # operation
@@ -328,7 +336,9 @@ class TestTransactions(BaseSkillTestCase):
         """Test the pop_pending_initial_acceptance method of the Transactions class where dialogue_label IS in _pending_initial_acceptances."""
         # setup
         self.transactions.add_pending_initial_acceptance(
-            self.dialogue_label, self.proposal_id, self.terms,
+            self.dialogue_label,
+            self.proposal_id,
+            self.terms,
         )
         self.transactions._pending_initial_acceptances = {}
 
@@ -345,7 +355,9 @@ class TestTransactions(BaseSkillTestCase):
         """Test the pop_pending_initial_acceptance method of the Transactions class where dialogue_label and proposal_id IS in _pending_initial_acceptances."""
         # setup
         self.transactions.add_pending_initial_acceptance(
-            self.dialogue_label, self.proposal_id, self.terms,
+            self.dialogue_label,
+            self.proposal_id,
+            self.terms,
         )
         self.transactions._pending_initial_acceptances[self.dialogue_label] = {
             1: self.terms

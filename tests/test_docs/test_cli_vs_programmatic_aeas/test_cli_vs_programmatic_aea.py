@@ -131,7 +131,10 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_client_process, check_strings, timeout=30, is_terminating=False,
+            weather_client_process,
+            check_strings,
+            timeout=30,
+            is_terminating=False,
         )
         assert (
             missing_strings == []

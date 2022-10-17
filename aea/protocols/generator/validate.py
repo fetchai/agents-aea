@@ -334,7 +334,8 @@ def _validate_content_name(content_name: str, performative: str) -> Tuple[bool, 
         return (
             False,
             "Invalid name for content '{}' of performative '{}'. This name is reserved.".format(
-                content_name, performative,
+                content_name,
+                performative,
             ),
         )
 
@@ -362,7 +363,8 @@ def _validate_content_type(
         return (
             False,
             "Invalid type for content '{}' of performative '{}'. See documentation for the correct format of specification types.".format(
-                content_name, performative,
+                content_name,
+                performative,
             ),
         )
 

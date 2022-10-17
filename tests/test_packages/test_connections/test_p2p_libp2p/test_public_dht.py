@@ -174,7 +174,11 @@ class TestLibp2pConnectionPublicDHTRelay:
                     performative=DefaultMessage.Performative.BYTES,
                     content=b"hello",
                 )
-                envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                envelope = Envelope(
+                    to=addr_2,
+                    sender=addr_1,
+                    message=msg,
+                )
 
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -247,7 +251,11 @@ class TestLibp2pConnectionPublicDHTRelay:
                         performative=DefaultMessage.Performative.BYTES,
                         content=b"hello",
                     )
-                    envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                    envelope = Envelope(
+                        to=addr_2,
+                        sender=addr_1,
+                        message=msg,
+                    )
 
                     multiplexer1.put(envelope)
                     delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -366,7 +374,11 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     performative=DefaultMessage.Performative.BYTES,
                     content=b"hello",
                 )
-                envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                envelope = Envelope(
+                    to=addr_2,
+                    sender=addr_1,
+                    message=msg,
+                )
 
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -441,7 +453,11 @@ class TestLibp2pConnectionPublicDHTDelegate:
                         performative=DefaultMessage.Performative.BYTES,
                         content=b"hello",
                     )
-                    envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+                    envelope = Envelope(
+                        to=addr_2,
+                        sender=addr_1,
+                        message=msg,
+                    )
 
                     multiplexer1.put(envelope)
                     delivered_envelope = multiplexer2.get(block=True, timeout=20)

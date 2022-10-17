@@ -138,7 +138,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "Retrieved latest block: " + str({"block_height": 1}),
+            logging.INFO,
+            "Retrieved latest block: " + str({"block_height": 1}),
         )
 
         self.assert_quantity_in_outbox(0)

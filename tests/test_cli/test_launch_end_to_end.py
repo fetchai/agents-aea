@@ -151,10 +151,12 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             cwd=search_agent_name,
         )
         self.run_cli_command(
-            "build", cwd=registration_agent_name,
+            "build",
+            cwd=registration_agent_name,
         )
         self.run_cli_command(
-            "build", cwd=search_agent_name,
+            "build",
+            cwd=search_agent_name,
         )
         self.set_agent_context(registration_agent_name)
         self.generate_private_key(
@@ -169,7 +171,8 @@ class TestLaunchEndToEnd(AEATestCaseMany):
         self.add_private_key()
         self.unset_agent_context()
         self.run_cli_command(
-            "issue-certificates", cwd=registration_agent_name,
+            "issue-certificates",
+            cwd=registration_agent_name,
         )
         self.set_agent_context(search_agent_name)
         self.generate_private_key(
@@ -184,7 +187,8 @@ class TestLaunchEndToEnd(AEATestCaseMany):
         self.add_private_key()
         self.unset_agent_context()
         self.run_cli_command(
-            "issue-certificates", cwd=search_agent_name,
+            "issue-certificates",
+            cwd=search_agent_name,
         )
 
         proc = PexpectWrapper(  # nosec

@@ -41,7 +41,9 @@ class ScaffoldErrorHandlerTestCase(TestCase):
     def test_scaffold_error_handler_command_positive(self, *mocks):
         """Test for CLI scaffold error handler command for positive result."""
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "scaffold", "error-handler"], standalone_mode=False,
+            cli,
+            [*CLI_LOG_OPTION, "scaffold", "error-handler"],
+            standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
 

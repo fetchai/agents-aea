@@ -92,10 +92,15 @@ def test_tac_message_instantiation():
 def test_register_serialization():
     """Test the serialization for 'register' speech-act works."""
     msg = TacMessage(
-        performative=TacMessage.Performative.REGISTER, agent_name="some_agent_name",
+        performative=TacMessage.Performative.REGISTER,
+        agent_name="some_agent_name",
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -118,10 +123,16 @@ def test_register_serialization():
 def test_unregister_serialization():
     """Test the serialization for 'unregister' speech-act works."""
     msg = TacMessage(
-        message_id=2, target=1, performative=TacMessage.Performative.UNREGISTER,
+        message_id=2,
+        target=1,
+        performative=TacMessage.Performative.UNREGISTER,
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -157,7 +168,11 @@ def test_transaction_serialization():
         counterparty_signature="some_counterparty_signature",
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -179,9 +194,15 @@ def test_transaction_serialization():
 
 def test_cancelled_serialization():
     """Test the serialization for 'cancelled' speech-act works."""
-    msg = TacMessage(performative=TacMessage.Performative.CANCELLED,)
+    msg = TacMessage(
+        performative=TacMessage.Performative.CANCELLED,
+    )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -217,7 +238,11 @@ def test_game_data_serialization():
         info={"key_1": "value_1", "key_2": "value_2"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -246,7 +271,11 @@ def test_transaction_confirmation_serialization():
         quantities_by_good_id={"key_1": 1, "key_2": 2},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -274,7 +303,11 @@ def test_tac_error_serialization():
         info={"key_1": "value_1", "key_2": "value_2"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -359,7 +392,9 @@ def test_error_code_to_msg():
 
 def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
-    msg = TacMessage(performative=TacMessage.Performative.CANCELLED,)
+    msg = TacMessage(
+        performative=TacMessage.Performative.CANCELLED,
+    )
 
     with pytest.raises(ValueError, match="Performative not valid:"):
         with mock.patch.object(TacMessage.Performative, "__eq__", return_value=False):
@@ -368,7 +403,9 @@ def test_encoding_unknown_performative():
 
 def test_decoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during decoding."""
-    msg = TacMessage(performative=TacMessage.Performative.CANCELLED,)
+    msg = TacMessage(
+        performative=TacMessage.Performative.CANCELLED,
+    )
 
     encoded_msg = TacMessage.serializer.encode(msg)
     with pytest.raises(ValueError, match="Performative not valid:"):
@@ -384,7 +421,9 @@ def test_decoding_unknown_performative():
 def test_incorrect_message(mocked_enforce):
     """Test that we raise an exception when the message is incorrect."""
     with mock.patch.object(tac_message_logger, "error") as mock_logger:
-        TacMessage(performative=TacMessage.Performative.CANCELLED,)
+        TacMessage(
+            performative=TacMessage.Performative.CANCELLED,
+        )
 
         mock_logger.assert_any_call("some error")
 

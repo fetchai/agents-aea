@@ -211,7 +211,8 @@ class TestAddManyKeys:
         """Test that the keys are added correctly."""
 
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
+            cli,
+            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
         )
         assert result.exit_code == 0
         result = self.runner.invoke(
@@ -373,7 +374,7 @@ class AddKeyCommandTestCase(TestCase):
     def test_run_positive(self, *mocks):
         """Test for CLI add_key positive result."""
         filepath = str(
-            Path(ROOT_DIR, "setup.py")
+            Path(ROOT_DIR, "pyproject.toml")
         )  # some existing filepath to pass CLI argument check
         result = self.runner.invoke(
             cli,

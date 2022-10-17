@@ -114,7 +114,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,
@@ -137,7 +138,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # setup
         agents = ("agent_1", "agent_2")
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,
@@ -170,7 +172,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         # setup
         agents = tuple()
         oef_search_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_search_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_search_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_search_dialogue,
@@ -190,7 +193,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"no agents found, search_response={incoming_message}",
+            logging.INFO,
+            f"no agents found, search_response={incoming_message}",
         )
 
     def test_handle_invalid(self):

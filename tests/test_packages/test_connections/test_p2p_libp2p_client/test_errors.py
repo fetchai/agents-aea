@@ -117,7 +117,9 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         )
         with pytest.raises(Exception):
             P2PLibp2pClientConnection(
-                configuration=configuration, data_dir=self.t, identity=self.identity,
+                configuration=configuration,
+                data_dir=self.t,
+                identity=self.identity,
             )
 
     @classmethod

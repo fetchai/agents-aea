@@ -64,10 +64,12 @@ class TestAggregationBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.aggregation_behaviour = cast(
-            AggregationBehaviour, cls._skill.skill_context.behaviours.aggregation,
+            AggregationBehaviour,
+            cls._skill.skill_context.behaviours.aggregation,
         )
         cls.aggregation_strategy = cast(
-            AggregationStrategy, cls.aggregation_behaviour.context.strategy,
+            AggregationStrategy,
+            cls.aggregation_behaviour.context.strategy,
         )
         cls.aggregation_strategy.url = "some_url"
         cls.aggregation_strategy._quantity_name = "some_quantity"
@@ -82,7 +84,8 @@ class TestAggregationBehaviour(BaseSkillTestCase):
             self.aggregation_behaviour.act()
 
         mock_logger.assert_any_call(
-            logging.INFO, "No observation to send",
+            logging.INFO,
+            "No observation to send",
         )
         self.assert_quantity_in_outbox(0)
 
@@ -100,10 +103,12 @@ class TestAggregationBehaviour(BaseSkillTestCase):
             self.aggregation_behaviour.act()
 
         mock_logger.assert_any_call(
-            logging.INFO, f"sending observation to peer={PEERS[0]}",
+            logging.INFO,
+            f"sending observation to peer={PEERS[0]}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, f"sending observation to peer={PEERS[1]}",
+            logging.INFO,
+            f"sending observation to peer={PEERS[1]}",
         )
 
         obs = self.aggregation_strategy.observation
@@ -135,10 +140,12 @@ class TestSearchBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.search_behaviour = cast(
-            SearchBehaviour, cls._skill.skill_context.behaviours.search,
+            SearchBehaviour,
+            cls._skill.skill_context.behaviours.search,
         )
         cls.aggregation_strategy = cast(
-            AggregationStrategy, cls.search_behaviour.context.strategy,
+            AggregationStrategy,
+            cls.search_behaviour.context.strategy,
         )
         cls.aggregation_strategy.url = "some_url"
         cls.aggregation_strategy._quantity_name = "some_quantity"
@@ -161,7 +168,8 @@ class TestSearchBehaviour(BaseSkillTestCase):
             self.search_behaviour.setup()
 
         mock_logger.assert_any_call(
-            logging.INFO, "registering agent on SOEF.",
+            logging.INFO,
+            "registering agent on SOEF.",
         )
 
         description = self.aggregation_strategy.get_location_description()
@@ -351,10 +359,12 @@ class TestSearchBehaviour(BaseSkillTestCase):
             self.search_behaviour.teardown()
 
         mock_logger.assert_any_call(
-            logging.INFO, "unregistering agent from SOEF.",
+            logging.INFO,
+            "unregistering agent from SOEF.",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "unregistering service from SOEF.",
+            logging.INFO,
+            "unregistering service from SOEF.",
         )
 
         descriptions = [

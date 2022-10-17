@@ -260,6 +260,7 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
     def test_run(self):
         """Run the test."""
         with pytest.raises(
-            Exception, match="Cannot find private key with id 'bad_ledger_id'",
+            Exception,
+            match="Cannot find private key with id 'bad_ledger_id'",
         ):
             self.run_cli_command("issue-certificates", cwd=self._get_cwd())

@@ -69,7 +69,10 @@ def get(ctx: Context, json_path: str) -> None:
 @click.argument("VALUE", required=True, type=str)
 @pass_ctx
 def set_command(
-    ctx: Context, json_path: str, value: str, type_: Optional[str],
+    ctx: Context,
+    json_path: str,
+    value: str,
+    type_: Optional[str],
 ) -> None:
     """Set a field."""
     try:

@@ -66,7 +66,8 @@ class GymTestCase(BaseSkillTestCase):
 
         # models
         cls.task = GymTask(
-            skill_context=cls._skill.skill_context, nb_steps=cls.nb_steps,
+            skill_context=cls._skill.skill_context,
+            nb_steps=cls.nb_steps,
         )
 
         cls.task_manager = cast(TaskManager, cls._skill.skill_context.task_manager)

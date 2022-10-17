@@ -499,7 +499,7 @@ class ERC1155Contract(Contract):
 
             # from_address sends tokens
             if from_supply > 0:
-                contract_msg = {
+                contract_msg: JSONLike = {
                     "transfer_single": {
                         "operator": str(from_address),
                         "from_address": str(from_address),
@@ -730,7 +730,7 @@ class ERC1155Contract(Contract):
 
             # First direction of swap
             if len(from_tokens) != 0:
-                contract_msg = {
+                contract_msg: JSONLike = {
                     "transfer_batch": {
                         "operator": str(from_address),
                         "from_address": str(from_address),
