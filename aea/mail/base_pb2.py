@@ -22,7 +22,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
     serialized_pb=b'\n\nbase.proto\x12\x0f\x61\x65\x61.base.v0_1_0\x1a\x1cgoogle/protobuf/struct.proto"\x90\x01\n\x0f\x44ialogueMessage\x12\x12\n\nmessage_id\x18\x01 \x01(\x05\x12"\n\x1a\x64ialogue_starter_reference\x18\x02 \x01(\t\x12$\n\x1c\x64ialogue_responder_reference\x18\x03 \x01(\t\x12\x0e\n\x06target\x18\x04 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x05 \x01(\x0c"{\n\x07Message\x12\'\n\x04\x62ody\x18\x01 \x01(\x0b\x32\x17.google.protobuf.StructH\x00\x12<\n\x10\x64ialogue_message\x18\x02 \x01(\x0b\x32 .aea.base.v0_1_0.DialogueMessageH\x00\x42\t\n\x07message"Y\n\x08\x45nvelope\x12\n\n\x02to\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\x12\x13\n\x0bprotocol_id\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\x0c\x12\x0b\n\x03uri\x18\x05 \x01(\tb\x06proto3',
-    dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,],
+    dependencies=[
+        google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,
+    ],
 )
 
 

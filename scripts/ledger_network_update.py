@@ -98,7 +98,7 @@ class NetworkConfig:
 
 
 def _get_value(variable_name: str, text: str) -> str:
-    m = re.search(fr'{variable_name} = "(.*)"', text, re.MULTILINE)
+    m = re.search(rf'{variable_name} = "(.*)"', text, re.MULTILINE)
     if m:
         return m.groups()[0]
     raise ValueError("Value not found")
@@ -326,7 +326,8 @@ class NetworkUpdate:
         for f in docs_files:
             content = f.read_text()
             content = content.replace(
-                self.cur_config.explorer_url, self.new_config.explorer_url,
+                self.cur_config.explorer_url,
+                self.new_config.explorer_url,
             )
             content = content.replace(
                 f"Fetch.ai `{self.cur_config.net_name.capitalize()}`",

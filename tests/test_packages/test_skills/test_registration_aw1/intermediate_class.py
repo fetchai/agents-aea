@@ -78,7 +78,8 @@ class RegiatrationAW1TestCase(BaseSkillTestCase):
             )
 
         cls.register_behaviour = cast(
-            AW1RegistrationBehaviour, cls._skill.skill_context.behaviours.registration,
+            AW1RegistrationBehaviour,
+            cls._skill.skill_context.behaviours.registration,
         )
         cls.register_handler = cast(
             AW1RegistrationHandler, cls._skill.skill_context.handlers.registration

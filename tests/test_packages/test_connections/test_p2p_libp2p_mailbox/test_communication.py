@@ -73,7 +73,8 @@ class TestLibp2pClientConnectionConnectDisconnect:
         temp_dir_client = os.path.join(cls.t, "temp_dir_client")
         os.mkdir(temp_dir_client)
         cls.connection = _make_libp2p_mailbox_connection(
-            data_dir=temp_dir_client, peer_public_key=cls.connection_node.node.pub,
+            data_dir=temp_dir_client,
+            peer_public_key=cls.connection_node.node.pub,
         )
 
     @pytest.mark.asyncio

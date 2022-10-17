@@ -181,7 +181,8 @@ class TestAW1Registration(RegiatrationAW1TestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, f"sending registration info: {info}",
+            logging.INFO,
+            f"sending registration info: {info}",
         )
 
     def test_act_vi(self):

@@ -50,7 +50,7 @@ def test_uri():
     assert uri.host == "netloc"
     assert uri.port == 80
     assert uri.username == "user"
-    assert uri.password == "pwd"
+    assert uri.password == "pwd"  # nosec
 
 
 def test_uri_eq():
@@ -69,7 +69,11 @@ def test_envelope_initialisation():
     )
     msg.to = receiver_address
 
-    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
+    envelope = Envelope(
+        to=receiver_address,
+        sender=agent_address,
+        message=msg,
+    )
 
     assert envelope, "Cannot generate a new envelope"
 
@@ -101,7 +105,11 @@ def test_inbox_nowait():
     )
     msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
-    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
+    envelope = Envelope(
+        to=receiver_address,
+        sender=agent_address,
+        message=msg,
+    )
     multiplexer.in_queue.put(envelope)
     inbox = InBox(multiplexer)
     assert (
@@ -118,7 +126,11 @@ def test_inbox_get():
     )
     msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
-    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
+    envelope = Envelope(
+        to=receiver_address,
+        sender=agent_address,
+        message=msg,
+    )
     multiplexer.in_queue.put(envelope)
     inbox = InBox(multiplexer)
 
@@ -166,7 +178,11 @@ def test_outbox_put():
     wait_for_condition(
         lambda: dummy_connection.is_connected, 15, "Connection is not connected"
     )
-    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
+    envelope = Envelope(
+        to=receiver_address,
+        sender=agent_address,
+        message=msg,
+    )
     outbox.put(envelope)
     wait_for_condition(
         lambda: inbox.empty(), 15, "Inbox must not be empty after putting an envelope"
@@ -273,7 +289,11 @@ def test_envelope_serialization():
 def test_envelope_message_bytes():
     """Test the property Envelope.message_bytes."""
     message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
-    envelope = Envelope(to="to", sender="sender", message=message,)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        message=message,
+    )
 
     expected_message_bytes = message.encode()
     actual_message_bytes = envelope.message_bytes

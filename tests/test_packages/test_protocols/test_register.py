@@ -86,14 +86,17 @@ class TestRegisterMessage:
 
 def test_consistency_check_negative():
     """Test the consistency check, negative case."""
-    tx_msg = RegisterMessage(performative=RegisterMessage.Performative.REGISTER,)
+    tx_msg = RegisterMessage(
+        performative=RegisterMessage.Performative.REGISTER,
+    )
     assert not tx_msg._is_consistent()
 
 
 def test_serialization_negative():
     """Test serialization when performative is not recognized."""
     tx_msg = RegisterMessage(
-        performative=RegisterMessage.Performative.REGISTER, info={},
+        performative=RegisterMessage.Performative.REGISTER,
+        info={},
     )
 
     with patch.object(RegisterMessage.Performative, "__eq__", return_value=False):

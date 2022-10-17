@@ -63,7 +63,7 @@ def test_register_make_with_class_kwargs():
         id_=id_,
         entry_point="tests.test_crypto.test_registries:Something",
         class_kwargs=class_kwargs,
-        **kwargs
+        **kwargs,
     )
     assert Something.class_key is None
     item = reg.make(id_)

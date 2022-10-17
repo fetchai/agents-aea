@@ -240,7 +240,8 @@ def generate_currency_endowments(
 
 
 def generate_exchange_params(
-    agent_addresses: List[str], currency_ids: List[str],
+    agent_addresses: List[str],
+    currency_ids: List[str],
 ) -> Dict[str, Dict[str, float]]:
     """
     Compute the exchange parameters for each agent.
@@ -313,9 +314,9 @@ def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
         utility_params_l.append(temp_u_p)
 
     # maths
-    endowments_a = np.array(good_endowments_l, dtype=np.int)
-    scaled_utility_params_a = np.array(
-        utility_params_l, dtype=np.float
+    endowments_a = np.array(good_endowments_l, dtype=np.int)  # type: ignore
+    scaled_utility_params_a = np.array(  # type: ignore
+        utility_params_l, dtype=np.float  # type: ignore
     )  # note, they are already scaled
     endowments_by_good = np.sum(endowments_a, axis=0)
     scaled_params_by_good = np.sum(scaled_utility_params_a, axis=0)

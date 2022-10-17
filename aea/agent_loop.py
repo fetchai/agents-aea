@@ -234,7 +234,10 @@ class AsyncAgentLoop(BaseAgentLoop):
         elif isinstance(message_or_envelope, Message):
             message = message_or_envelope
             envelope = Envelope(
-                to=message.to, sender=message.sender, message=message, context=context,
+                to=message.to,
+                sender=message.sender,
+                message=message,
+                context=context,
             )
         else:
             raise ValueError(

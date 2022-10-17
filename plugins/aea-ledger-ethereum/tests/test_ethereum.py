@@ -267,7 +267,8 @@ def test_get_deploy_transaction(ethereum_testnet_config, ganache):
     ec2 = EthereumCrypto()
     interface = {"abi": [], "bytecode": b""}
     deploy_tx = ethereum_api.get_deploy_transaction(
-        contract_interface=interface, deployer_address=ec2.address,
+        contract_interface=interface,
+        deployer_address=ec2.address,
     )
     assert type(deploy_tx) == dict and len(deploy_tx) == 6
     assert all(

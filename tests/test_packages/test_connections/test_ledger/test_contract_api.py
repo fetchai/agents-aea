@@ -92,7 +92,11 @@ async def test_erc1155_get_deploy_transaction(erc1155_contract, ledger_apis_conn
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({"deployer_address": ETHEREUM_ADDRESS_ONE}),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -138,7 +142,11 @@ async def test_erc1155_get_raw_transaction(
             }
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -185,7 +193,11 @@ async def test_erc1155_get_raw_message(erc1155_contract, ledger_apis_connection)
             }
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -223,7 +235,11 @@ async def test_erc1155_get_state(erc1155_contract, ledger_apis_connection):
             {"agent_address": ETHEREUM_ADDRESS_ONE, "token_id": token_id}
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -307,7 +323,11 @@ async def test_callable_wrong_number_of_arguments_api_and_contract_address(
             {"agent_address": ETHEREUM_ADDRESS_ONE, "token_id": token_id}
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     with unittest.mock.patch(
         "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[None])
@@ -351,7 +371,11 @@ async def test_callable_wrong_number_of_arguments_apis(
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({}),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     with unittest.mock.patch(
         "inspect.getfullargspec", return_value=unittest.mock.MagicMock(args=[])
@@ -399,7 +423,11 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
         callable="get_deploy_transaction",
         kwargs=ContractApiMessage.Kwargs({}),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     with unittest.mock.patch.object(
         ledger_apis_connection._contract_dispatcher, "_call_stub", return_value=None
@@ -432,7 +460,11 @@ async def test_callable_generic_error(erc1155_contract, ledger_apis_connection):
             {"agent_address": ETHEREUM_ADDRESS_ONE, "token_id": token_id}
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     with unittest.mock.patch(
         "inspect.getfullargspec", side_effect=Exception("Generic error")
@@ -471,7 +503,11 @@ async def test_callable_cannot_find(erc1155_contract, ledger_apis_connection, ca
             {"agent_address": ETHEREUM_ADDRESS_ONE, "token_id": token_id}
         ),
     )
-    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+    envelope = Envelope(
+        to=request.to,
+        sender=request.sender,
+        message=request,
+    )
 
     with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.ledger"):
         await ledger_apis_connection.send(envelope)

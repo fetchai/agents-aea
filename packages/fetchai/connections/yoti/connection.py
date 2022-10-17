@@ -217,7 +217,9 @@ class YotiConnection(BaseSyncConnection):
 
     @staticmethod
     def get_error_message(
-        e: Exception, message: YotiMessage, dialogue: YotiDialogue,
+        e: Exception,
+        message: YotiMessage,
+        dialogue: YotiDialogue,
     ) -> YotiMessage:
         """
         Build an error message.

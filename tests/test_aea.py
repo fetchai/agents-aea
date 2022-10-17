@@ -180,7 +180,11 @@ def test_react():
         )
         msg.to = agent.identity.address
         msg.sender = agent.identity.address
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
             wait_for_condition(lambda: agent.is_running, timeout=20)
@@ -243,13 +247,18 @@ def test_handle():
             dummy_skill = an_aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.skill_context.handlers.dummy
             # UNSUPPORTED PROTOCOL
-            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+            )
             envelope._protocol_specification_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             assert error_handler.unsupported_protocol_count == 0
             an_aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: error_handler.unsupported_protocol_count == 1, timeout=2,
+                lambda: error_handler.unsupported_protocol_count == 1,
+                timeout=2,
             )
 
             # DECODING ERROR
@@ -262,7 +271,8 @@ def test_handle():
             assert error_handler.decoding_error_count == 0
             an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
-                lambda: error_handler.decoding_error_count == 1, timeout=5,
+                lambda: error_handler.decoding_error_count == 1,
+                timeout=5,
             )
 
             #   UNSUPPORTED SKILL
@@ -274,12 +284,17 @@ def test_handle():
             )
             msg.to = an_aea.identity.address
             msg.sender = an_aea.identity.address
-            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+            )
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             assert error_handler.no_active_handler_count == 0
             an_aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: error_handler.no_active_handler_count == 1, timeout=5,
+                lambda: error_handler.no_active_handler_count == 1,
+                timeout=5,
             )
 
             #   DECODING OK
@@ -293,7 +308,8 @@ def test_handle():
             assert len(dummy_handler.handled_messages) == 0
             an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 1, timeout=5,
+                lambda: len(dummy_handler.handled_messages) == 1,
+                timeout=5,
             )
             an_aea.stop()
 
@@ -426,7 +442,9 @@ def test_initialize_aea_programmatically_build_resources():
                 wait_for_condition(lambda: an_aea.is_running, timeout=10)
                 an_aea.outbox.put(
                     Envelope(
-                        to=agent_name, sender=agent_name, message=expected_message,
+                        to=agent_name,
+                        sender=agent_name,
+                        message=expected_message,
                     )
                 )
 
@@ -542,14 +560,17 @@ def test_no_handlers_registered():
         )
         msg.to = an_aea.identity.address
         envelope = Envelope(
-            to=an_aea.identity.address, sender=an_aea.identity.address, message=msg,
+            to=an_aea.identity.address,
+            sender=an_aea.identity.address,
+            message=msg,
         )
         with patch(
             "aea.registries.filter.Filter.get_active_handlers",
             new_callable=PropertyMock,
         ):
             with patch.object(
-                an_aea.runtime.multiplexer, "put",
+                an_aea.runtime.multiplexer,
+                "put",
             ):
                 an_aea.handle_envelope(envelope)
         mock_logger.assert_any_call(
@@ -951,7 +972,11 @@ def test_skill2skill_message():
             )
             msg.to = str(DUMMY_SKILL_PUBLIC_ID)
             msg.sender = "some_author/some_skill:0.1.0"
-            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+            )
 
             with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
                 wait_for_condition(lambda: agent.is_running, timeout=20)

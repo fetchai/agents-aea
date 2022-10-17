@@ -144,7 +144,8 @@ def test_acn_message_str_values():
 def test_encoding_unknown_performative():
     """Test that we raise an exception when the performative is unknown during encoding."""
     msg = AcnMessage(
-        performative=AcnMessage.Performative.LOOKUP_REQUEST, agent_address="address",
+        performative=AcnMessage.Performative.LOOKUP_REQUEST,
+        agent_address="address",
     )
 
     with pytest.raises(ValueError, match="Performative not valid:"):

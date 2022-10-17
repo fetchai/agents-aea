@@ -84,7 +84,12 @@ class TestDemoDocs:
     def test_generic_buyer_skill_behaviour(self):
         """Test that the code blocks exist in the generic_buyer skill."""
         path = Path(
-            ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer", "behaviours.py",
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "generic_buyer",
+            "behaviours.py",
         )
         with open(path, "r") as file:
             python_code = file.read()
@@ -93,7 +98,12 @@ class TestDemoDocs:
     def test_generic_buyer_skill_handler(self):
         """Test handlers.py of generic_buyer skill."""
         path = Path(
-            ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer", "handlers.py",
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "generic_buyer",
+            "handlers.py",
         )
 
         with open(path, "r") as file:
@@ -104,7 +114,12 @@ class TestDemoDocs:
     def test_generic_buyer_skill_strategy(self):
         """Test strategy.py correctness of generic_buyer skill."""
         path = Path(
-            ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer", "strategy.py",
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "generic_buyer",
+            "strategy.py",
         )
 
         with open(path, "r") as file:
@@ -115,7 +130,12 @@ class TestDemoDocs:
     def test_generic_buyer_skill_dialogues(self):
         """Test dialogues.py of generic_buyer skill."""
         path = Path(
-            ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer", "dialogues.py",
+            ROOT_DIR,
+            "packages",
+            "fetchai",
+            "skills",
+            "generic_buyer",
+            "dialogues.py",
         )
         with open(path, "r") as file:
             python_code = file.read()

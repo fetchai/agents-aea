@@ -1023,7 +1023,8 @@ class Game(Model):
         :return: a description of the agent's location
         """
         description = Description(
-            self.context.parameters.agent_location, data_model=AGENT_LOCATION_MODEL,
+            self.context.parameters.agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 

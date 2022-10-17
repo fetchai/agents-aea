@@ -166,7 +166,9 @@ def ipfs_hashing(
         follow_symlinks=False,
     )
     key = os.path.join(
-        configuration.author, package_type.to_plural(), configuration.directory.name,
+        configuration.author,
+        package_type.to_plural(),
+        configuration.directory.name,
     )
     # check that the last result of the list is for the whole package directory
     assert result_list[-1]["Name"] == configuration.directory.name
@@ -223,7 +225,9 @@ class IPFSDaemon:
         if res is None:
             raise Exception("Please install IPFS first!")
         process = subprocess.Popen(  # nosec
-            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
+            ["ipfs", "--version"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
         )
         output, _ = process.communicate()
         if b"0.6.0" not in output:
@@ -235,7 +239,9 @@ class IPFSDaemon:
     def __enter__(self) -> None:
         """Run the ipfs daemon."""
         self.process = subprocess.Popen(  # nosec
-            ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
+            ["ipfs", "daemon"],
+            stdout=subprocess.PIPE,
+            env=os.environ.copy(),
         )
         print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
 
@@ -338,7 +344,8 @@ def compute_fingerprint(  # pylint: disable=unsubscriptable-object
     :return: the fingerprint
     """
     fingerprint = _compute_fingerprint(
-        package_path, ignore_patterns=fingerprint_ignore_patterns,
+        package_path,
+        ignore_patterns=fingerprint_ignore_patterns,
     )
     assert_hash_consistency(fingerprint, package_path, client)
     return fingerprint

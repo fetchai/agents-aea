@@ -50,16 +50,32 @@ URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 @password_option()
 @click.option("-c", "--connection", is_flag=True)
 @click.option(
-    "-i", "--connection-id", type=PublicIdParameter(), required=False, default=None,
+    "-i",
+    "--connection-id",
+    type=PublicIdParameter(),
+    required=False,
+    default=None,
 )
 @click.option(
-    "-h", "--host-field", type=str, required=False, default=None,
+    "-h",
+    "--host-field",
+    type=str,
+    required=False,
+    default=None,
 )
 @click.option(
-    "-p", "--port-field", type=str, required=False, default=None,
+    "-p",
+    "--port-field",
+    type=str,
+    required=False,
+    default=None,
 )
 @click.option(
-    "-u", "--uri-field", type=str, required=False, default="public_uri",
+    "-u",
+    "--uri-field",
+    type=str,
+    required=False,
+    default="public_uri",
 )
 @click.pass_context
 @check_aea_project

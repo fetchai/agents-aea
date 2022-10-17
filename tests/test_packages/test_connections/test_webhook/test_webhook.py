@@ -99,7 +99,9 @@ class TestWebhookConnection:
             connection_id=WebhookConnection.connection_id,
         )
         self.webhook_connection = WebhookConnection(
-            configuration=configuration, data_dir=MagicMock(), identity=self.identity,
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.identity,
         )
         self.skill_dialogues = HttpDialogues(self.target_skill_id)
 
@@ -165,7 +167,11 @@ class TestWebhookConnection:
             body="",
             version="",
         )
-        envelope = Envelope(to="addr", sender="my_id", message=http_message,)
+        envelope = Envelope(
+            to="addr",
+            sender="my_id",
+            message=http_message,
+        )
         with patch.object(self.webhook_connection.logger, "warning") as mock_logger:
             await self.webhook_connection.send(envelope)
             await asyncio.sleep(0.01)

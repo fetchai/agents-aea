@@ -84,7 +84,7 @@ class PexpectWrapper(PopenSpawn):
             env=os.environ.copy(),
             encoding="utf-8",
             logfile=sys.stdout,
-            **kwargs
+            **kwargs,
         )
 
     def expect_all(

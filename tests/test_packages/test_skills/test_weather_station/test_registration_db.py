@@ -94,7 +94,8 @@ class TestDBCommunication(BaseSkillTestCase):
         mock_curs.assert_called_once()
         mock_fetchall.assert_called_once()
         mock_exe.assert_any_call(
-            "SELECT * FROM data WHERE idx BETWEEN ? AND ?", (str(start), str(end)),
+            "SELECT * FROM data WHERE idx BETWEEN ? AND ?",
+            (str(start), str(end)),
         )
         mock_cur_close.assert_called_once()
         mock_con_close.assert_called_once()

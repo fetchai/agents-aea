@@ -201,7 +201,9 @@ class TestContractTestCase(BaseContractTestCase):
         tx = "tx"
         with pytest.raises(ValueError, match="Transaction digest not found!"):
             self.sign_send_confirm_receipt_multisig_transaction(
-                tx, self.ledger_api, [self.deployer_crypto],
+                tx,
+                self.ledger_api,
+                [self.deployer_crypto],
             )
         is_transaction_settled_mock.assert_not_called()
         get_transaction_receipt_mock.assert_not_called()

@@ -21,7 +21,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, List, Mapping, Optional, Tuple
 
 import click
 from click import Context, Option, UsageError, option
@@ -182,7 +182,7 @@ class MutuallyExclusiveOption(Option):
         super().__init__(*args, **kwargs)
 
     def handle_parse_result(
-        self, ctx: Context, opts: Dict[str, Any], args: List[Any]
+        self, ctx: Context, opts: Mapping[str, Any], args: List[Any]
     ) -> Tuple[Any, List[str]]:
         """
         Handle parse result.
@@ -198,7 +198,7 @@ class MutuallyExclusiveOption(Option):
                 f"arguments `{', '.join(self.mutually_exclusive)}`."
             )
 
-        return super().handle_parse_result(ctx, opts, args)
+        return super().handle_parse_result(ctx, opts, args)  # type: ignore
 
 
 def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  # type: ignore

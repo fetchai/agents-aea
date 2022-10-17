@@ -496,7 +496,10 @@ class SSLValidator:
     """Interprocess communication channel client using tcp sockets with TLS."""
 
     def __init__(
-        self, url: str, server_pub_key: str, logger: logging.Logger = _default_logger,
+        self,
+        url: str,
+        server_pub_key: str,
+        logger: logging.Logger = _default_logger,
     ) -> None:
         """
         Check ssl certificate with server pub key.
@@ -560,7 +563,11 @@ class SSLValidator:
         ssl_ctx = ssl.create_default_context(cadata=cadata)
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_REQUIRED
-        _, writer = await asyncio.open_connection(self.host, self.port, ssl=ssl_ctx,)
+        _, writer = await asyncio.open_connection(
+            self.host,
+            self.port,
+            ssl=ssl_ctx,
+        )
         session_pub_key = self._get_session_pub_key(writer)
         writer.close()
         return ssl_ctx, session_pub_key

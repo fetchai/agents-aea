@@ -100,7 +100,8 @@ def test_utility():
         exchange_params_by_currency_id=exchange_params,
     )
     score = preferences.utility(
-        quantities_by_good_id=good_holdings, amount_by_currency_id=currency_holdings,
+        quantities_by_good_id=good_holdings,
+        amount_by_currency_id=currency_holdings,
     )
     linear_utility = preferences.linear_utility(amount_by_currency_id=currency_holdings)
     log_utility = preferences.logarithmic_utility(quantities_by_good_id=good_holdings)
@@ -124,7 +125,8 @@ def test_marginal_utility():
     delta_currency_holdings = {"FET": -5}
     ownership_state = OwnershipState()
     ownership_state.set(
-        amount_by_currency_id=currency_holdings, quantities_by_good_id=good_holdings,
+        amount_by_currency_id=currency_holdings,
+        quantities_by_good_id=good_holdings,
     )
     marginal_utility = preferences.marginal_utility(
         ownership_state=ownership_state,

@@ -104,7 +104,11 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
-        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
+        self,
+        metric_name: str,
+        update_func: str,
+        value: float,
+        labels: Dict[str, str],
     ) -> None:
         """
         Update a prometheus metric.

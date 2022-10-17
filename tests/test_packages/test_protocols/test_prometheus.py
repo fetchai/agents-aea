@@ -61,7 +61,11 @@ def test_add_metric_serialization():
         labels={"label_key": "label_value"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -94,7 +98,11 @@ def test_update_metric_serialization():
         labels={"label_key": "label_value"},
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
@@ -125,7 +133,11 @@ def test_response_serialization():
         message="some_message",
     )
     msg.to = "receiver"
-    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender="sender",
+        message=msg,
+    )
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)

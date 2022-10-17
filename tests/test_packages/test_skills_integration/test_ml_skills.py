@@ -54,7 +54,8 @@ class TestMLSkills(AEATestCaseManyFlaky):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        _is_not_tensorflow_installed(), reason="This test requires Tensorflow.",
+        _is_not_tensorflow_installed(),
+        reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
@@ -238,7 +239,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        _is_not_tensorflow_installed(), reason="This test requires Tensorflow.",
+        _is_not_tensorflow_installed(),
+        reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""

@@ -119,7 +119,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "Balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
         if self.context.prometheus_dialogues.enabled:
@@ -213,7 +214,8 @@ class LedgerApiHandler(Handler):
         tx_receipt = cast(JSONLike, ledger_api_msg.transaction_receipt.receipt)
 
         is_transaction_successful = LedgerApis.is_transaction_settled(
-            ledger_id, tx_receipt,
+            ledger_id,
+            tx_receipt,
         )
         if is_transaction_successful:
             self.context.logger.info(
@@ -299,7 +301,8 @@ class LedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 
@@ -419,7 +422,8 @@ class ContractApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle contract_api message of performative={} in dialogue={}.".format(
-                contract_api_msg.performative, contract_api_dialogue,
+                contract_api_msg.performative,
+                contract_api_dialogue,
             )
         )
 

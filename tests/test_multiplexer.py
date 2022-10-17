@@ -544,10 +544,17 @@ async def test_inbox_outbox():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
-    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
     msg.to = "to"
     msg.sender = "sender"
-    envelope = Envelope(to="to", sender="sender", message=msg,)
+    envelope = Envelope(
+        to="to",
+        sender="sender",
+        message=msg,
+    )
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
@@ -578,7 +585,10 @@ async def test_threaded_mode():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, threaded=True)
-    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
     msg.to = "to"
     msg.sender = "sender"
     envelope = Envelope(to="to", sender="sender", message=msg)
@@ -613,7 +623,10 @@ async def test_outbox_negative():
     connection_1 = _make_dummy_connection()
     connections = [connection_1]
     multiplexer = AsyncMultiplexer(connections, loop=asyncio.get_event_loop())
-    msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES,
+        content=b"",
+    )
     context = EnvelopeContext(connection_id=connection_1.connection_id)
     envelope = Envelope(
         to="to",
@@ -946,15 +959,19 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Starting libp2p node..."], timeout=50,
+            ["Starting libp2p node..."],
+            timeout=50,
         )
         self.proc.control_c()
         self.proc.expect_all(
-            ["Multiplexer .*disconnected."], timeout=20, strict=False,
+            ["Multiplexer .*disconnected."],
+            timeout=20,
+            strict=False,
         )
 
         self.proc.expect_all(
-            [EOF], timeout=20,
+            [EOF],
+            timeout=20,
         )
 
     def test_multiplexer_disconnected_on_termination_after_connected_no_connection(
@@ -970,7 +987,8 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Start processing messages..."], timeout=20,
+            ["Start processing messages..."],
+            timeout=20,
         )
         self.proc.control_c()
         self.proc.expect_all(
@@ -998,7 +1016,8 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         )
 
         self.proc.expect_all(
-            ["Start processing messages..."], timeout=20,
+            ["Start processing messages..."],
+            timeout=20,
         )
         self.proc.control_c()
         self.proc.expect_all(

@@ -100,7 +100,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             OefSearchMessage,
@@ -126,7 +127,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _on_search_result method of the oef handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             OefSearchMessage,
@@ -154,7 +156,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         # _on_controller_search_result
         mock_logger.assert_any_call(
-            logging.INFO, "found the TAC controller. Registering...",
+            logging.INFO,
+            "found the TAC controller. Registering...",
         )
 
         # _register_to_tac
@@ -182,7 +185,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _on_controller_search_result method of the oef handler where phase is not PRE_GAME."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             OefSearchMessage,
@@ -216,7 +220,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _on_controller_search_result method of the oef handler where list of agent addresses is empty."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             OefSearchMessage,
@@ -242,14 +247,16 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         # _on_controller_search_result
         mock_logger.assert_any_call(
-            logging.INFO, "couldn't find the TAC controller. Retrying...",
+            logging.INFO,
+            "couldn't find the TAC controller. Retrying...",
         )
 
     def test_on_controller_search_result_more_than_one_agents(self):
         """Test the _on_controller_search_result method of the oef handler where list of agents contains more than one agents."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             OefSearchMessage,
@@ -275,7 +282,8 @@ class TestOefSearchHandler(BaseSkillTestCase):
 
         # _on_controller_search_result
         mock_logger.assert_any_call(
-            logging.WARNING, "found more than one TAC controller. Retrying...",
+            logging.WARNING,
+            "found more than one TAC controller. Retrying...",
         )
 
     def test_handle_invalid(self):
@@ -487,7 +495,8 @@ class TestTacHandler(BaseSkillTestCase):
             f"received error from the controller in dialogue={dialogue}. error_msg={TacMessage.ErrorCode.to_msg(error_code.value)}",
         )
         mock_logger.assert_any_call(
-            logging.WARNING, f"received error on transaction id: {tx_id[-10:]}",
+            logging.WARNING,
+            f"received error on transaction id: {tx_id[-10:]}",
         )
 
     def test_on_start_i(self):
@@ -632,7 +641,8 @@ class TestTacHandler(BaseSkillTestCase):
             == contract_address
         )
         mock_logger.assert_any_call(
-            logging.INFO, f"received a contract address: {contract_address}",
+            logging.INFO,
+            f"received a contract address: {contract_address}",
         )
         mocked_uoap.assert_called_once()
 
@@ -679,7 +689,8 @@ class TestTacHandler(BaseSkillTestCase):
             "received start event from the controller. Starting to compete...",
         )
         mock_logger.assert_any_call(
-            logging.WARNING, "did not receive a contract address!",
+            logging.WARNING,
+            "did not receive a contract address!",
         )
         mocked_uoap.assert_not_called()
 
@@ -707,7 +718,8 @@ class TestTacHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "received cancellation from the controller.",
+            logging.INFO,
+            "received cancellation from the controller.",
         )
         assert self.game.phase == Phase.POST_GAME
         assert self.skill.skill_context.is_active is False
@@ -737,7 +749,8 @@ class TestTacHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "received cancellation from the controller.",
+            logging.INFO,
+            "received cancellation from the controller.",
         )
         assert self.game.phase == Phase.POST_GAME
         assert self.skill.skill_context.is_active is False
@@ -910,7 +923,8 @@ class TestTacHandler(BaseSkillTestCase):
         """Test the _handle_invalid method of the tac handler."""
         # setup
         tac_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.tac_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.tac_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=tac_dialogue,

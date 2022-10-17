@@ -158,7 +158,11 @@ def test_storage_access_from_handler():
     )
     msg.to = aea.identity.address
     msg.sender = aea.identity.address
-    envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+    envelope = Envelope(
+        to=msg.to,
+        sender=msg.sender,
+        message=msg,
+    )
     try:
         wait_for_condition(lambda: aea.is_running, timeout=10)
 
@@ -233,12 +237,19 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+            )
             aea.runtime.multiplexer.in_queue.put(envelope)
 
-            dialogue_storage: PersistDialoguesStorage = echo_skill.skill_context.default_dialogues._dialogues_storage
+            dialogue_storage: PersistDialoguesStorage = (
+                echo_skill.skill_context.default_dialogues._dialogues_storage
+            )
             wait_for_condition(
-                lambda: _storage_all_dialogues_labels(dialogue_storage), timeout=3,
+                lambda: _storage_all_dialogues_labels(dialogue_storage),
+                timeout=3,
             )
             dialogues_for_check = _storage_all_dialogues_labels(dialogue_storage)
         finally:
@@ -251,9 +262,12 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
             wait_for_condition(lambda: aea.is_running, timeout=10)
             echo_skill = aea.resources.get_skill(PUBLIC_ID)
 
-            dialogue_storage: PersistDialoguesStorage = echo_skill.skill_context.default_dialogues._dialogues_storage
+            dialogue_storage: PersistDialoguesStorage = (
+                echo_skill.skill_context.default_dialogues._dialogues_storage
+            )
             wait_for_condition(
-                lambda: _storage_all_dialogues_labels(dialogue_storage), timeout=3,
+                lambda: _storage_all_dialogues_labels(dialogue_storage),
+                timeout=3,
             )
             assert (
                 _storage_all_dialogues_labels(dialogue_storage) == dialogues_for_check

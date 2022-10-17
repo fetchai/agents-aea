@@ -175,7 +175,12 @@ def _generate_protocol(package_path: Path) -> None:
 def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
     """Run black and isort against a directory."""
     run_cli(
-        sys.executable, "-m", "black", "--verbose", str(directory.absolute()), **kwargs,
+        sys.executable,
+        "-m",
+        "black",
+        "--verbose",
+        str(directory.absolute()),
+        **kwargs,
     )
     run_cli(
         sys.executable,

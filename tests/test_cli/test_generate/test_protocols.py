@@ -194,13 +194,25 @@ class TestGenerateProtocolProtobufOnlyMode:
     def test_resource_folder_contains_protobuf_schema_file(self):
         """Test that the protocol folder contains a structurally valid configuration file."""
         protobuf_schema_file = Path(
-            self.t, self.agent_name, "protocols", "t_protocol", "t_protocol.proto",
+            self.t,
+            self.agent_name,
+            "protocols",
+            "t_protocol",
+            "t_protocol.proto",
         )
         cpp_header_file = Path(
-            self.t, self.agent_name, "protocols", "t_protocol", "t_protocol.pb.h",
+            self.t,
+            self.agent_name,
+            "protocols",
+            "t_protocol",
+            "t_protocol.pb.h",
         )
         cpp_implementation_file = Path(
-            self.t, self.agent_name, "protocols", "t_protocol", "t_protocol.pb.cc",
+            self.t,
+            self.agent_name,
+            "protocols",
+            "t_protocol",
+            "t_protocol.pb.cc",
         )
 
         assert protobuf_schema_file.exists()

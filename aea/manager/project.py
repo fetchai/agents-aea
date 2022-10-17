@@ -223,7 +223,10 @@ class AgentAlias(_Base):
         return self._agent_config
 
     def _create_private_key(
-        self, ledger: str, replace: bool = False, is_connection: bool = False,
+        self,
+        ledger: str,
+        replace: bool = False,
+        is_connection: bool = False,
     ) -> str:
         """
         Create new key for agent alias in working dir keys dir.

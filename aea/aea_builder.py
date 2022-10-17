@@ -521,7 +521,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         return _class
 
-    def _load_error_handler_class(self,) -> Optional[Type[AbstractErrorHandler]]:
+    def _load_error_handler_class(
+        self,
+    ) -> Optional[Type[AbstractErrorHandler]]:
         """
         Load error handler class.
 
@@ -1110,7 +1112,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def run_build_for_component_configuration(
-        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None,
+        cls,
+        config: ComponentConfiguration,
+        logger: Optional[logging.Logger] = None,
     ) -> None:
         """Run a build entrypoint script for component configuration."""
         if not config.build_entrypoint:
@@ -1256,7 +1260,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return identity
 
     def _process_connection_ids(  # pylint: disable=unsubscriptable-object
-        self, connection_ids: Optional[Collection[PublicId]] = None,
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
     ) -> List[PublicId]:
         """
         Process connection ids.
@@ -1437,7 +1442,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             else self.DEFAULT_MAX_REACTIONS
         )
 
-    def _get_error_handler_class(self,) -> Optional[Type]:
+    def _get_error_handler_class(
+        self,
+    ) -> Optional[Type]:
         """
         Return the error handler class.
 
@@ -1445,7 +1452,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._error_handler_class
 
-    def _get_error_handler_config(self,) -> Optional[Dict[str, Any]]:
+    def _get_error_handler_config(
+        self,
+    ) -> Optional[Dict[str, Any]]:
         """
         Return the error handler config.
 
@@ -1463,7 +1472,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._decision_maker_handler_class
 
-    def _get_decision_maker_handler_config(self,) -> Optional[Dict[str, Any]]:
+    def _get_decision_maker_handler_config(
+        self,
+    ) -> Optional[Dict[str, Any]]:
         """
         Return the decision maker handler config.
 
@@ -1688,10 +1699,12 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         build_entrypoint = cast(str, build_entrypoint)
         script_path = Path(directory) / build_entrypoint
         enforce(
-            script_path.exists(), f"File '{build_entrypoint}' does not exists.",
+            script_path.exists(),
+            f"File '{build_entrypoint}' does not exists.",
         )
         enforce(
-            script_path.is_file(), f"'{build_entrypoint}' is not a file.",
+            script_path.is_file(),
+            f"'{build_entrypoint}' is not a file.",
         )
         try:
             ast.parse(script_path.read_text())
@@ -2016,7 +2029,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
 
 def make_component_logger(
-    configuration: ComponentConfiguration, agent_name: str,
+    configuration: ComponentConfiguration,
+    agent_name: str,
 ) -> Optional[logging.Logger]:
     """
     Make the logger for a component.

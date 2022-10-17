@@ -133,7 +133,8 @@ class TestStrategy(BaseSkillTestCase):
         service_key_constraint = Constraint(
             self.search_query["search_key"],
             ConstraintType(
-                self.search_query["constraint_type"], self.search_query["search_value"],
+                self.search_query["constraint_type"],
+                self.search_query["search_value"],
             ),
         )
         assert query.constraints[1] == service_key_constraint
@@ -150,7 +151,8 @@ class TestStrategy(BaseSkillTestCase):
         service_key_constraint = Constraint(
             self.search_query["search_key"],
             ConstraintType(
-                self.search_query["constraint_type"], self.search_query["search_value"],
+                self.search_query["constraint_type"],
+                self.search_query["search_value"],
             ),
         )
         assert query.constraints[0] == service_key_constraint
