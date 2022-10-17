@@ -27,11 +27,11 @@ import time
 from abc import ABC, abstractmethod
 from typing import Generator, cast
 
-import docker  # pylint: disable=import-error
+import docker
 import pytest
-from docker import DockerClient  # pylint: disable=import-error
-from docker.errors import DockerException  # pylint: disable=import-error
-from docker.models.containers import Container  # pylint: disable=import-error
+from docker import DockerClient
+from docker.errors import DockerException
+from docker.models.containers import Container
 
 
 logger = logging.getLogger(__name__)
