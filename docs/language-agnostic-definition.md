@@ -27,7 +27,7 @@ The format for the above fields are as follows:
 
 <ul>
 <li><code>to</code> and <code>sender</code>: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">secp256k1</a>-compatible elliptic curve</li>
-<li><code>protocol_id</code>: this must match a defined  <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a> (see below)
+<li><code>protocol_id</code>: this must match a defined  <a href="https://learn.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a> (see below)
 <li><code>message</code>: a bytes string representing a serialized message in the specified  <a href="../protocol">protocol</a></li>
 <li><code>URI</code>: follows <a href="https://datatracker.ietf.org/doc/html/rfc3986" target="_blank">this syntax</a></li>
 </ul>

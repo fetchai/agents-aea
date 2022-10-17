@@ -45,7 +45,7 @@ False
 
 For other details, please refer to PEP440:
 
-    https://www.python.org/dev/peps/pep-0440
+https://www.python.org/dev/peps/pep-0440
 
 **Arguments**:
 

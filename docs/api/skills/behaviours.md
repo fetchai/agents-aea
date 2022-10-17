@@ -163,7 +163,7 @@ This behaviour is executed periodically with an interval.
 #### `__`init`__`
 
 ```python
- | __init__(tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs: Any) -> None
+ | __init__(tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize the ticker behaviour.
