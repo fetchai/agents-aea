@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pytest
 
-from aea.test_tools.utils import wait_for_condition, remove_test_directory
+from aea.test_tools.utils import remove_test_directory, wait_for_condition
 
 
 def test_wait_for_condition():

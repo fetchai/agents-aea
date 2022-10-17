@@ -21,6 +21,7 @@
 """This module contains tests for mocking utils."""
 import subprocess
 from typing import Any
+
 import pytest
 
 from aea.test_tools.mocks import AnyStringWith, RegexComparator, ctx_mock_Popen

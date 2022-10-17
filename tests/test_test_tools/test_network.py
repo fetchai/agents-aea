@@ -22,13 +22,13 @@
 import socket
 from unittest import mock
 
-from aea.test_tools.network import get_unused_tcp_port, get_host
+from aea.test_tools.network import get_host, get_unused_tcp_port
 
 
 def is_port_in_use(port: int) -> bool:
     """Check if port is in use"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
+        return s.connect_ex(("localhost", port)) == 0
 
 
 def test_get_unused_tcp_port() -> None:
