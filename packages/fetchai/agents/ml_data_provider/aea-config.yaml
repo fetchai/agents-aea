@@ -14,9 +14,9 @@ contracts: []
 protocols:
 - fetchai/default:1.1.3
 - fetchai/ledger_api:1.1.3
-- fetchai/ml_trade:1.1.2
+- fetchai/ml_trade:1.1.3
 - fetchai/oef_search:1.1.3
-- fetchai/signing:1.1.2
+- fetchai/signing:1.1.3
 - fetchai/state_update:1.1.3
 skills:
 - fetchai/generic_seller:0.28.3

@@ -12,7 +12,7 @@ contracts: []
 protocols:
 - fetchai/default:1.1.3
 - fetchai/ledger_api:1.1.3
-- fetchai/signing:1.1.2
+- fetchai/signing:1.1.3
 - fetchai/state_update:1.1.3
 skills:
 - fetchai/fetch_block:0.12.3

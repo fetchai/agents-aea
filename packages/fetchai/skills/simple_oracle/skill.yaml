@@ -20,7 +20,7 @@ protocols:
 - fetchai/default:1.1.3
 - fetchai/ledger_api:1.1.3
 - fetchai/prometheus:1.1.3
-- fetchai/signing:1.1.2
+- fetchai/signing:1.1.3
 skills: []
 behaviours:
   simple_oracle_behaviour:

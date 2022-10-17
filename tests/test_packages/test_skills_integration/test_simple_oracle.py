@@ -73,7 +73,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             default_routing = {
                 "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
                 "fetchai/contract_api:1.1.3": "fetchai/ledger:0.21.2",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.3",
+                "fetchai/http:1.1.3": "fetchai/http_client:0.24.3",
                 "fetchai/prometheus:1.1.3": "fetchai/prometheus:0.9.3",
             }
 
@@ -169,7 +169,7 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
             default_routing = {
                 "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
                 "fetchai/contract_api:1.1.3": "fetchai/ledger:0.21.2",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.3",
+                "fetchai/http:1.1.3": "fetchai/http_client:0.24.3",
             }
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -305,7 +305,7 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             default_routing = {
                 "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
                 "fetchai/contract_api:1.1.3": "fetchai/ledger:0.21.2",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.3",
+                "fetchai/http:1.1.3": "fetchai/http_client:0.24.3",
                 "fetchai/prometheus:1.1.3": "fetchai/prometheus:0.9.3",
             }
 
@@ -385,7 +385,7 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
             default_routing = {
                 "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
                 "fetchai/contract_api:1.1.3": "fetchai/ledger:0.21.2",
-                "fetchai/http:1.1.2": "fetchai/http_client:0.24.3",
+                "fetchai/http:1.1.3": "fetchai/http_client:0.24.3",
             }
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)

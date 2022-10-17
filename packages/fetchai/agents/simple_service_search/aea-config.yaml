@@ -14,7 +14,7 @@ protocols:
 - fetchai/default:1.1.3
 - fetchai/fipa:1.1.3
 - fetchai/oef_search:1.1.3
-- fetchai/signing:1.1.2
+- fetchai/signing:1.1.3
 - fetchai/state_update:1.1.3
 skills:
 - fetchai/simple_service_search:0.11.3

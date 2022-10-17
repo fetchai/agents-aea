@@ -3089,7 +3089,7 @@ protocols:
 - fetchai/fipa:1.1.3
 - fetchai/ledger_api:1.1.3
 - fetchai/oef_search:1.1.3
-- fetchai/signing:1.1.2
+- fetchai/signing:1.1.3
 skills: []
 behaviours:
   search:
@@ -3227,7 +3227,7 @@ aea add connection fetchai/p2p_libp2p:0.27.2
 aea add connection fetchai/soef:0.27.3
 aea add connection fetchai/ledger:0.21.2
 aea add protocol fetchai/fipa:1.1.3
-aea add protocol fetchai/signing:1.1.2
+aea add protocol fetchai/signing:1.1.3
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
