@@ -4,4 +4,4 @@ An HTTP webhook connection which registers a webhook and waits for incoming requ
 
 ## Usage
 
-First, add the connection to your AEA project: `aea add connection fetchai/webhook:0.20.2`. Then ensure the `config` in `connection.yaml` matches your need. In particular, set `webhook_address`, `webhook_port` and `webhook_url_path` appropriately.
+First, add the connection to your AEA project: `aea add connection fetchai/webhook:0.20.3`. Then ensure the `config` in `connection.yaml` matches your need. In particular, set `webhook_address`, `webhook_port` and `webhook_url_path` appropriately.

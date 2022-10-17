@@ -1,6 +1,6 @@
 name: simple_seller
 author: fetchai
-version: 0.14.2
+version: 0.14.3
 type: skill
 description: The simple_seller skill extends the generic_seller skill and sells data
   from the shared state of the AEA.
@@ -8,22 +8,22 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmfKe4D4dyoN9hrJhQFJgDd9myNEqqU6SrZHYqYFAZ8y6Y
-  __init__.py: QmXvHD2CffxZtSR5fn2i2Uqjs7Bb7oatS9WKrgHNbTHoM4
+  __init__.py: QmWDjXQsQ58HQVJUwev4APiSey43wP6HZWuph3NHwvBNth
   behaviours.py: QmNr1BfBdHqbrzpNCJMAyAx42j8Kr62uprPGc57xVpAbdS
   dialogues.py: QmUSjiRrWgxWYbmHMfEBis9hpsNukCpAWMmmXvKdyt2HbW
   handlers.py: QmZ1ecijEqK5eihGp6FSiuZfNJuJm6cUNHXGtc696WRNcF
   strategy.py: QmQ1huHEgS3zm5hwEWc3mBJdXanMjS2Uzjv5a63irS8VEb
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
+- fetchai/ledger:0.21.2
 contracts: []
 protocols:
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.2
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/ledger_api:1.1.3
+- fetchai/oef_search:1.1.3
 skills:
-- fetchai/generic_seller:0.28.2
+- fetchai/generic_seller:0.28.3
 behaviours:
   service_registration:
     args:

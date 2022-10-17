@@ -10,7 +10,7 @@ This is a protocol for contract APIs' requests and responses.
 ---
 name: contract_api
 author: fetchai
-version: 1.1.2
+version: 1.1.3
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
