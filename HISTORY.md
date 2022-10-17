@@ -1,6 +1,23 @@
 # Release History
 
 
+## 1.2.1 (2022-10-17)
+
+AEA:
+- Dependency management switched from pipenv to poetry.
+- Protocol generator updated to support Unions
+- Dependencies versions updates: click, mypy, black, ipfshttpclient
+- Small code format improvements
+
+Plugins:
+- Update web3 to version 5.31
+- Small code format improvements
+- ipfshttpclient depdendency version updated to 0.8.0a2
+
+Packages:
+- Protocols regenrateed according to the latest protocol generator improvements: Union support
+- Small code format improvements
+
 ## 1.2.1 (2022-07-12)
 
 AEA:
