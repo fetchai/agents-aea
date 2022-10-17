@@ -25,10 +25,10 @@ import shutil
 import subprocess  # nosec
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Generator
+from typing import Generator
 
-import pytest
 import docker  # pylint: disable=import-error
+import pytest
 from docker import DockerClient  # pylint: disable=import-error
 from docker.errors import DockerException  # pylint: disable=import-error
 from docker.models.containers import Container  # pylint: disable=import-error
