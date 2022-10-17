@@ -72,6 +72,7 @@ class DockerImage(ABC):
             pytest.skip(
                 f"'docker --version' failed with exit code {proc_result.returncode}"
             )
+            return
 
         match = re.search(
             r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
@@ -79,6 +80,7 @@ class DockerImage(ABC):
         )
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
+            return
 
         match = cast(re.Match, match)
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
@@ -114,7 +116,6 @@ class DockerImage(ABC):
         :param sleep_rate: the amount of time to sleep between different requests.
         :return: True if the wait was successful, False otherwise.
         """
-        return True  # pragma: no cover
 
 
 def launch_image(
