@@ -74,7 +74,7 @@ class DockerImage(ABC):
         )
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
-        
+
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(
@@ -108,7 +108,6 @@ class DockerImage(ABC):
         :param sleep_rate: the amount of time to sleep between different requests.
         :return: True if the wait was successful, False otherwise.
         """
-        return True
 
 
 def launch_image(
