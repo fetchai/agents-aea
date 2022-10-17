@@ -173,8 +173,7 @@ generators:
 	python -m aea.cli hash all --packages-dir=./tests/data/packages
 	python -m aea.cli packages lock
 	python -m aea.cli --registry-path=./tests/data/packages packages lock
-	python -m aea.cli generate-all-protocols
-	python -m aea.cli generate-all-protocols tests/data/packages
+	tox -e generate-all-protocols
 	tox -e generate-api-documentation
 	tox -e fix-doc-hashes
 
