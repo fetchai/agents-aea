@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
+import subprocess
 from contextlib import contextmanager
 from typing import Dict, Optional
 from unittest import mock
@@ -108,3 +109,17 @@ class TestHelloWorldImage:
         """Test skip when docker binary not available"""
 
         self.image._check_docker_binary_available()
+
+    @pytest.mark.parametrize(
+        "proc_result",
+        [
+            subprocess.CompletedProcess("", 1),
+            subprocess.CompletedProcess("", 0, stdout=b""),
+            subprocess.CompletedProcess("", 0, stdout=b"Docker version 0.0.0, build b40c2f6"),
+        ],
+    )
+    def test_correct_docker_binary_not_available(self, proc_result):
+        """Test skip when docker binary not available"""
+
+        with mock.patch("subprocess.run", return_value=proc_result):
+            self.image._check_docker_binary_available()
