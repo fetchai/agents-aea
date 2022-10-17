@@ -19,7 +19,6 @@
 
 import subprocess
 from contextlib import contextmanager
-from typing import Dict, Optional
 from unittest import mock
 
 import docker
@@ -28,36 +27,13 @@ import pytest
 from aea.test_tools.docker_image import (
     Container,
     DockerException,
-    DockerClient,
     DockerImage,
     launch_image,
 )
 
 
-@pytest.fixture(scope="session")
-def configuration():
-    """Get the Ganache configuration for testing purposes."""
-    return {}
-
-
 class HelloWorldImage(DockerImage):
     """Wrapper to Hello World Docker image."""
-
-    def __init__(
-        self,
-        client: DockerClient,
-        config: Optional[Dict] = None,
-    ):
-        """
-        Initialize the Hello World Docker image.
-
-        :param client: the Docker client.
-        :param addr: the address.
-        :param port: the port.
-        :param config: optional configuration to command line.
-        """
-        super().__init__(client)
-        self._config = config or {}
 
     @property
     def tag(self) -> str:
@@ -66,8 +42,7 @@ class HelloWorldImage(DockerImage):
 
     def create(self) -> Container:
         """Create the container."""
-        container = self._client.containers.run(self.tag, detach=True)
-        return container
+        return self._client.containers.run(self.tag, detach=True)
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
         """Wait until the image is up."""
@@ -75,24 +50,18 @@ class HelloWorldImage(DockerImage):
 
 
 @pytest.fixture(scope="class")
-def hello_world(
-    configuration,
-    timeout: float = 2.0,
-    max_attempts: int = 10,
-):
+def hello_world(timeout: float = 2.0, max_attempts: int = 10):
     """Launch the Hello World image."""
-    with _context(configuration, timeout, max_attempts) as image:
+
+    with _context(timeout, max_attempts) as image:
         yield image
 
 
 @contextmanager
-def _context(
-    configuration: Dict,
-    timeout: float = 2.0,
-    max_attempts: int = 10,
-):
-    client = docker.from_env()
-    image = HelloWorldImage(client, config=configuration)
+def _context(timeout: float = 2.0, max_attempts: int = 10):
+    """Context"""
+
+    image = HelloWorldImage(docker.from_env())
     yield from launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
@@ -116,7 +85,7 @@ class TestHelloWorldImage:
         [
             subprocess.CompletedProcess("", 1),
             subprocess.CompletedProcess("", 0, stdout=b""),
-            subprocess.CompletedProcess("", 0, stdout=b"Docker version 0.0.0, build b40c2f6"),
+            subprocess.CompletedProcess("", 0, stdout=b"Docker version 0.0.0,"),
         ],
     )
     def test_correct_docker_binary_not_available(self, proc_result):
@@ -137,5 +106,6 @@ class TestHelloWorldImage:
     @mock.patch.object(HelloWorldImage, "wait", return_value=False)
     def test_wait_returns_false(self, _):
         """Test wait returns False"""
-        with pytest.raises(DockerException, match=f"{self.image.tag} doesn't work. Exiting..."):
+        
+        with pytest.raises(DockerException, match=f"{self.image.tag} doesn't work."):
             any(launch_image(self.image))
