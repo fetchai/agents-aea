@@ -101,6 +101,12 @@ class TestSkillTestCase(BaseSkillTestCase):
             == self.behaviour_arg_2
         )
 
+    def test_setup_with_kwargs(self):
+        """Test setup with kwargs"""
+        setup_class_skill = self.skill
+        super().setup(shared_state=None)
+        assert self.skill is not setup_class_skill
+
     def test_properties(self):
         """Test the properties."""
         assert isinstance(self.skill, Skill)
