@@ -123,3 +123,12 @@ class TestHelloWorldImage:
 
         with mock.patch("subprocess.run", return_value=proc_result):
             self.image._check_docker_binary_available()
+
+    def test_stop_if_already_running(self):
+        """Test stop if already running"""
+
+        magic_mock = mock.MagicMock()
+        magic_mock.image.tags = [self.image.tag]
+        ContainerCollection = docker.models.containers.ContainerCollection
+        with mock.patch.object(ContainerCollection, "list", return_value=[magic_mock]):
+            any(launch_image(self.image))
