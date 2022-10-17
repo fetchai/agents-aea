@@ -169,8 +169,7 @@ security:
 generators:
 	rm -rf packages/fetchai/connections/stub/input_file
 	tox -e fix-copyright
-	python -m aea.cli hash all
-	python -m aea.cli hash all --packages-dir=./tests/data/packages
+	tox -e hash-all
 	tox -e lock-packages
 	tox -e generate-all-protocols
 	tox -e generate-api-documentation
