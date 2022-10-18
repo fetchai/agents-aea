@@ -19,7 +19,9 @@
 
 """This module contains tests for test case classes for AEA contract testing."""
 
-from typing import cast
+from typing import Iterable, Generator, Any, cast
+import collections
+from contextlib import contextmanager, ExitStack
 from pathlib import Path
 import pytest
 
@@ -30,6 +32,20 @@ from aea.test_tools.test_contract import BaseContractTestCase
 
 
 PATH_TO_DUMMY_CONTRACT = Path(*DummyContract.__module__.split(".")).parent.absolute()
+
+
+# TODO: move to aea.test_tools.utils
+def consume(iterator: Iterable) -> None:
+    """Consume the iterator"""
+    collections.deque(iterator, maxlen=0)
+
+
+@contextmanager
+def as_context(*contexts: Any) -> Generator[None, None, None]:
+    """Set contexts"""
+    with ExitStack() as stack:
+        consume(map(stack.enter_context, contexts))
+        yield
 
 
 class TestCls(BaseContractTestCase):
