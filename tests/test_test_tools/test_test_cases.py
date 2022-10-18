@@ -169,13 +169,8 @@ class TestGenericCases(AEATestCaseEmpty):
         """Call logging disable."""
         self.disable_aea_logging()
 
-    def test_run_interaction(self):
-        """Test run_interaction"""
-        process = self.run_interaction()
-        process.terminate()
-
     def test_run_install(self):
-        """Test run_interaction"""
+        """Test run_install"""
         result = self.run_install()
         assert result.exit_code == 0
 
