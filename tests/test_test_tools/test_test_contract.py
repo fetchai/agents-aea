@@ -25,6 +25,9 @@ from contextlib import contextmanager, ExitStack
 from pathlib import Path
 import pytest
 
+from unittest import mock
+
+from aea_ledger_ethereum import EthereumApi
 from tests.data.dummy_contract.contract import DummyContract
 
 
@@ -32,6 +35,10 @@ from aea.test_tools.test_contract import BaseContractTestCase
 
 
 PATH_TO_DUMMY_CONTRACT = Path(*DummyContract.__module__.split(".")).parent.absolute()
+
+
+# mocks
+mock_get_deploy_transaction = mock.patch.object(EthereumApi, "get_deploy_transaction", return_value=DUMMY_TX)
 
 
 # TODO: move to aea.test_tools.utils
@@ -92,4 +99,15 @@ class TestBaseContractTestCaseSetup:
         self.test_cls.ledger_identifier = "ethereum"
         self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
         with pytest.raises(ValueError, match="Deploy transaction not found!"):
+            self.setup_test_cls()
+
+    def test_contract_setup_transaction_digest_not_found(self):
+        """Test contract setup transaction digest not found"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
+        with as_context(
+            mock_get_deploy_transaction,
+            pytest.raises(ValueError, match="Transaction digest not found!"),
+        ):
             self.setup_test_cls()
