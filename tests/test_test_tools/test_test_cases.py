@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains a test for aea.test_tools.test_cases."""
 
+import logging
 import os
 import time
 from pathlib import Path
@@ -160,6 +161,25 @@ class TestRunAgent(AEATestCaseEmpty):
         self.add_private_key()
         process = self.run_agent()
         assert self.is_running(process, timeout=30)
+
+
+class TestTeardownClassTimeout:
+    """Test BaseAEATestCase.teardown_class timeout"""
+
+    def setup(self):
+        """Setup test"""
+        BaseAEATestCase.setup_class()
+        self.test = BaseAEATestCase()
+
+    def test_teardown_class_timeout(self, caplog):
+        """Test teardown_class timeout"""
+
+        with mock.patch.object(BaseAEATestCase, "is_successfully_terminated", return_value=False):
+            with mock.patch("time.sleep", return_value=None):
+                with caplog.at_level(logging.ERROR):
+                    self.test.teardown_class()
+                    assert "Not all subprocesses terminated successfully" in caplog.text
+                    assert "Non-zero returncodes" in caplog.text
 
 
 class TestGenericCases(AEATestCaseEmpty):
