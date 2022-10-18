@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for aea.cli.utils module."""
-import sys
+
 from builtins import FileNotFoundError
 from copy import deepcopy
 from tempfile import TemporaryDirectory
@@ -82,12 +82,6 @@ from tests.test_cli.tools_for_testing import (
 
 
 AUTHOR = "author"
-
-
-py310_skip_mark = pytest.mark.skipif(
-    sys.version_info.major == 3 and sys.version_info.minor == 10,
-    reason="Fails on python 3.10 in CI only needs investigation",
-)
 
 
 class FormatItemsTestCase(TestCase):
@@ -180,7 +174,7 @@ class PublicIdParameterTestCase(TestCase):
 class TestInitConfigFolder:
     """Test case for _init_cli_config method."""
 
-    @py310_skip_mark
+    @pytest.mark.skip
     def test_init_cli_config_positive(self, makedirs_mock, exists_mock, dirname_mock):
         """Test for _init_cli_config method positive result."""
         user_config = get_or_create_cli_config()
@@ -216,6 +210,7 @@ def _raise_file_not_found_error(*args):
     raise FileNotFoundError()
 
 
+@pytest.mark.skip
 @mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 @mock.patch("aea.cli.utils.config.validate_cli_config")
 class TestGetOrCreateCLIConfig:
@@ -233,7 +228,6 @@ class TestGetOrCreateCLIConfig:
         assert result == expected_result
         validate_mock.assert_called_once()
 
-    @py310_skip_mark
     def test_get_or_create_cli_config_bad_yaml(self, validate_mock):
         """Test for rget_or_create_cli_config method bad yaml behavior."""
 
