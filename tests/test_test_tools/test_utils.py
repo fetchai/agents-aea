@@ -20,7 +20,6 @@
 """Test utilities."""
 
 import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -38,9 +37,5 @@ def test_wait_for_condition():
 def test_remove_test_directory():
     """Test remove_test_directory"""
 
-    tmp_dir = Path(str(tempfile.TemporaryDirectory()))
-    assert not tmp_dir.exists()
-    tmp_dir.mkdir(parents=True)
-    assert tmp_dir.exists()
-    remove_test_directory(str(tmp_dir))
-    assert not tmp_dir.exists()
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        assert remove_test_directory(str(tmp_dir))
