@@ -64,6 +64,7 @@ class DockerImage(ABC):
         result = shutil.which("docker")
         if result is None:
             pytest.skip("Docker not in the OS Path; skipping the test")
+            return  # pragma: no cover
 
         proc_result = subprocess.run(  # pylint: disable=subprocess-run-check # nosec
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -72,6 +73,7 @@ class DockerImage(ABC):
             pytest.skip(
                 f"'docker --version' failed with exit code {proc_result.returncode}"
             )
+            return  # pragma: no cover
 
         match = re.search(
             r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
@@ -79,6 +81,7 @@ class DockerImage(ABC):
         )
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
+            return  # pragma: no cover
 
         match = cast(re.Match, match)
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
@@ -86,6 +89,7 @@ class DockerImage(ABC):
             pytest.skip(
                 f"expected Docker version to be at least {'.'.join([str(item) for item in self.MINIMUM_DOCKER_VERSION])}, found {'.'.join([str(item) for item in version])}"
             )
+            return  # pragma: no cover
 
     @property
     @abstractmethod
