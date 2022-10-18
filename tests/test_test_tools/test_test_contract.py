@@ -169,3 +169,19 @@ class TestBaseContractTestCaseSetup:
         test_instance = TestCls()
         with pytest.raises(ValueError, match="Ensure the contract is set during setup."):
             assert test_instance.contract
+
+    def test_fund_from_faucet_balance_not_increased(self):
+        """Test fund fom faucet balance NOT increased"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
+        self.test_cls.fund_from_faucet = True
+        with as_context(
+            mock_get_deploy_transaction,
+            mock_send_signed_transaction,
+            mock_time_sleep,
+            mock_tx_receipt,
+            mock_is_transaction_settled,
+            pytest.raises(ValueError, match="Balance not increased!"),
+        ):
+            self.setup_test_cls()
