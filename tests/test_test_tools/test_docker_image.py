@@ -20,7 +20,6 @@
 """This module contains a test for aea.test_tools.docker_image."""
 
 import subprocess  # nosec
-from contextlib import contextmanager
 from unittest import mock
 
 import docker
@@ -44,22 +43,6 @@ class HelloWorldImage(DockerImage):
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
         """Wait until the image is up."""
         return True
-
-
-@pytest.fixture(scope="class")
-def hello_world(timeout: float = 2.0, max_attempts: int = 10):
-    """Launch the Hello World image."""
-
-    with _context(timeout, max_attempts) as image:
-        yield image
-
-
-@contextmanager
-def _context(timeout: float = 2.0, max_attempts: int = 10):
-    """Context"""
-
-    image = HelloWorldImage(docker.from_env())
-    yield from launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
 class TestHelloWorldImage:
