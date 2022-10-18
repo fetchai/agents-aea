@@ -25,17 +25,18 @@ import shutil
 import subprocess  # nosec
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Generator
+from typing import Any, Generator, cast
 
 import pytest
 
 
 try:
+    import docker
     from docker import DockerClient
     from docker.models.containers import Container
-except ImportError:
-    DockerClient = Any
-    Container = Any
+except ImportError:  # pragma: no cover
+    # to avoid having to make docker a framework dependency
+    docker = DockerClient = Container = Any
 
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ class DockerImage(ABC):
         result = shutil.which("docker")
         if result is None:
             pytest.skip("Docker not in the OS Path; skipping the test")
+            return  # pragma: no cover
 
         proc_result = subprocess.run(  # pylint: disable=subprocess-run-check # nosec
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -71,6 +73,7 @@ class DockerImage(ABC):
             pytest.skip(
                 f"'docker --version' failed with exit code {proc_result.returncode}"
             )
+            return  # pragma: no cover
 
         match = re.search(
             r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
@@ -78,12 +81,15 @@ class DockerImage(ABC):
         )
         if match is None:
             pytest.skip("cannot read version from the output of 'docker --version'")
-            return
+            return  # pragma: no cover
+
+        match = cast(re.Match, match)
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(
                 f"expected Docker version to be at least {'.'.join([str(item) for item in self.MINIMUM_DOCKER_VERSION])}, found {'.'.join([str(item) for item in version])}"
             )
+            return  # pragma: no cover
 
     @property
     @abstractmethod
@@ -92,7 +98,6 @@ class DockerImage(ABC):
 
     def stop_if_already_running(self) -> None:
         """Stop the running images with the same tag, if any."""
-        import docker  # pylint: disable=import-outside-toplevel,import-error
 
         client = docker.from_env()
         for container in client.containers.list():
@@ -113,7 +118,7 @@ class DockerImage(ABC):
         :param sleep_rate: the amount of time to sleep between different requests.
         :return: True if the wait was successful, False otherwise.
         """
-        return True
+        return True  # pragma: no cover
 
 
 def launch_image(
@@ -127,7 +132,7 @@ def launch_image(
     container.start()
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
-    if not success:
+    if not success:  # pragma: no cover
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
