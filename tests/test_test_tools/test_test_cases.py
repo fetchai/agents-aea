@@ -21,6 +21,7 @@
 
 import logging
 import os
+import subprocess
 import time
 from pathlib import Path
 from unittest import TestCase, mock
@@ -161,6 +162,22 @@ class TestRunAgent(AEATestCaseEmpty):
         self.add_private_key()
         process = self.run_agent()
         assert self.is_running(process, timeout=30)
+
+
+class TestTerminateAgentTimeoutExpired(AEATestCaseEmpty):
+    """Tests for agent termination raises subprocess.TimeoutExpired"""
+
+    def test_terminate_agent_timeout_expired(self):
+        """Test terminate agent raises subprocess.TimeoutExpired."""
+
+        self.generate_private_key()
+        self.add_private_key()
+        process = self.run_agent()
+        side_effect = subprocess.TimeoutExpired([], 0)
+        with mock.patch.object(process, "wait", side_effect=side_effect):
+            with mock.patch.object(process, "kill") as m:
+                self.terminate_agents(process)
+                m.assert_called_once()
 
 
 class TestTeardownClassTimeout:
