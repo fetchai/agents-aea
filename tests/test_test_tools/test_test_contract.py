@@ -22,7 +22,6 @@
 from typing import cast
 import pytest
 
-
 from aea.test_tools.test_contract import BaseContractTestCase
 
 
@@ -55,4 +54,11 @@ class TestBaseContractTestCaseSetup:
         """Test contract setup missing ledger identifier"""
 
         with pytest.raises(ValueError, match="ledger_identifier not set!"):
+            self.setup_test_cls()
+
+    def test_contract_setup_contract_configuration_not_found(self):
+        """Test contract setup contract configuration not found"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        with pytest.raises(FileNotFoundError, match="Contract configuration not found: contract.yaml"):
             self.setup_test_cls()
