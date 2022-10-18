@@ -19,33 +19,42 @@
 
 """This module contains tests for test case classes for AEA contract testing."""
 
-from typing import Iterable, Generator, Any, cast
 import collections
-from contextlib import contextmanager, ExitStack
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-import pytest
-
+from typing import Any, Generator, Iterable, cast
 from unittest import mock
 
+import pytest
 from aea_ledger_ethereum import EthereumApi
-from tests.data.dummy_contract.contract import DummyContract
-
 
 from aea.test_tools.test_contract import BaseContractTestCase
 
+from tests.data.dummy_contract.contract import DummyContract
 
-DUMMY_TX = {'gasPrice': 0, 'nonce': 0, 'gas': 0}
+
+DUMMY_TX = {"gasPrice": 0, "nonce": 0, "gas": 0}
 TX_RECEIPT = {"raw_log": ""}
 PATH_TO_DUMMY_CONTRACT = Path(*DummyContract.__module__.split(".")).parent.absolute()
 
 
 # mocks
-mock_get_deploy_transaction = mock.patch.object(EthereumApi, "get_deploy_transaction", return_value=DUMMY_TX)
-mock_send_signed_transaction = mock.patch.object(EthereumApi, "send_signed_transaction", return_value="")
-mock_time_sleep = mock.patch('time.sleep', return_value=None)
-mock_tx_receipt = mock.patch.object(EthereumApi, "get_transaction_receipt", return_value=TX_RECEIPT)
-mock_is_transaction_settled = mock.patch.object(EthereumApi, "is_transaction_settled", return_value=True)
-mock_get_balance_increment = mock.patch.object(EthereumApi, "get_balance", side_effect=range(4))
+mock_get_deploy_transaction = mock.patch.object(
+    EthereumApi, "get_deploy_transaction", return_value=DUMMY_TX
+)
+mock_send_signed_transaction = mock.patch.object(
+    EthereumApi, "send_signed_transaction", return_value=""
+)
+mock_time_sleep = mock.patch("time.sleep", return_value=None)
+mock_tx_receipt = mock.patch.object(
+    EthereumApi, "get_transaction_receipt", return_value=TX_RECEIPT
+)
+mock_is_transaction_settled = mock.patch.object(
+    EthereumApi, "is_transaction_settled", return_value=True
+)
+mock_get_balance_increment = mock.patch.object(
+    EthereumApi, "get_balance", side_effect=range(4)
+)
 
 
 # TODO: move to aea.test_tools.utils
@@ -67,7 +76,7 @@ class TestCls(BaseContractTestCase):
 
     @classmethod
     def finish_contract_deployment(cls) -> str:
-        """concrete finish_contract_deployment"""
+        """Concrete finish_contract_deployment"""
         return ""
 
 
@@ -78,14 +87,14 @@ class TestBaseContractTestCaseSetup:
         """Setup test"""
 
         # must `copy` the class to avoid test interference
-        class_copy = type('TestCls', TestCls.__bases__, dict(TestCls.__dict__))
+        class_copy = type("TestCls", TestCls.__bases__, dict(TestCls.__dict__))
         self.test_cls = cast(TestCls, class_copy)
 
     def setup_test_cls(self) -> TestCls:
         """Helper method to setup test to be tested"""
 
         self.test_cls.setup()
-        return self.test_cls()
+        return self.test_cls()  # type: ignore
 
     def test_contract_setup_missing_ledger_identifier(self):
         """Test contract setup missing ledger identifier"""
@@ -97,7 +106,9 @@ class TestBaseContractTestCaseSetup:
         """Test contract setup contract configuration not found"""
 
         self.test_cls.ledger_identifier = "ethereum"
-        with pytest.raises(FileNotFoundError, match="Contract configuration not found: contract.yaml"):
+        with pytest.raises(
+            FileNotFoundError, match="Contract configuration not found: contract.yaml"
+        ):
             self.setup_test_cls()
 
     def test_contract_setup_deploy_transaction_not_found(self):
@@ -168,7 +179,9 @@ class TestBaseContractTestCaseSetup:
         """Test contract not set"""
 
         test_instance = TestCls()
-        with pytest.raises(ValueError, match="Ensure the contract is set during setup."):
+        with pytest.raises(
+            ValueError, match="Ensure the contract is set during setup."
+        ):
             assert test_instance.contract
 
     def test_fund_from_faucet_balance_not_increased(self):
