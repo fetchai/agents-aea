@@ -22,6 +22,7 @@
 
 import subprocess  # nosec
 from typing import Any
+from unittest import mock
 
 import pytest
 
@@ -51,8 +52,10 @@ def test_ctx_mock_popen_communicate_return_value() -> None:
     popen = subprocess.Popen([cmd_name])  # nosec
     stdout, stderr = popen.communicate()
     assert stdout is stderr is None
+    assert popen.returncode == 0
 
     with ctx_mock_Popen():
         popen = subprocess.Popen([cmd_name])  # nosec
         stdout, stderr = popen.communicate()
-        assert stdout and stderr
+        objects = stdout, stderr, popen.returncode
+        assert all(isinstance(obj, mock.MagicMock) for obj in objects)
