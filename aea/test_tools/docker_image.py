@@ -132,7 +132,7 @@ def launch_image(
     container.start()
     logger.info(f"Setting up image {image.tag}...")
     success = image.wait(max_attempts, timeout)
-    if not success:  # pragma: no cover
+    if not success:
         container.stop()
         container.remove()
         pytest.fail(f"{image.tag} doesn't work. Exiting...")
