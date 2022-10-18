@@ -83,3 +83,11 @@ class TestHelloWorldImage:
             with mock.patch.object(magic_mock, "stop"):
                 any(launch_image(self.image))
                 assert magic_mock.stop.call_count == 1
+
+    @mock.patch.object(HelloWorldImage, "wait", return_value=False)
+    def test_image_wait_returns_false(self, _) -> None:
+        """Test wait returns False"""
+
+        with mock.patch("pytest.fail") as m:
+            any(launch_image(self.image))
+            m.assert_called_once()
