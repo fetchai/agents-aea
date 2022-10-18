@@ -20,6 +20,8 @@
 """This module contains tests for test case classes for AEA contract testing."""
 
 from typing import cast
+import pytest
+
 
 from aea.test_tools.test_contract import BaseContractTestCase
 
@@ -48,3 +50,9 @@ class TestBaseContractTestCaseSetup:
 
         self.test_cls.setup()
         return self.test_cls()
+
+    def test_contract_setup_missing_ledger_identifier(self):
+        """Test contract setup missing ledger identifier"""
+
+        with pytest.raises(ValueError, match="ledger_identifier not set!"):
+            self.setup_test_cls()
