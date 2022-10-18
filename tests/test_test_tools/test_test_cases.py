@@ -21,7 +21,7 @@
 
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 import time
 from pathlib import Path
 from unittest import TestCase, mock
@@ -191,7 +191,9 @@ class TestTeardownClassTimeout:
     def test_teardown_class_timeout(self, caplog):
         """Test teardown_class timeout"""
 
-        with mock.patch.object(BaseAEATestCase, "is_successfully_terminated", return_value=False):
+        with mock.patch.object(
+            BaseAEATestCase, "is_successfully_terminated", return_value=False
+        ):
             with mock.patch("time.sleep", return_value=None):
                 with caplog.at_level(logging.ERROR):
                     self.test.teardown_class()

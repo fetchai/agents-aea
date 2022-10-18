@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """Test utilities."""
-import os
+
 import tempfile
 from unittest import mock
 

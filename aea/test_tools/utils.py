@@ -62,7 +62,7 @@ def remove_test_directory(directory: str, retries: int = 3) -> bool:
     while os.path.exists(directory) and retries:
         try:
             shutil.rmtree(directory, onerror=readonly_handler)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             retries -= 1
             time.sleep(1)
     return not os.path.exists(directory)
