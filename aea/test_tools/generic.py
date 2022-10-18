@@ -123,9 +123,6 @@ def _nested_set(
     ):
         root_attr = getattr(configuration_obj, root_key)
         length = len(keys)
-        import pdb
-
-        pdb.set_trace()
         if length < 3:
             raise ValueError(f"Invalid keys={keys}.")  # pragma: nocover
         skill_component_id = keys[1]
