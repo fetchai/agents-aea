@@ -228,7 +228,6 @@ class PackageConfiguration(Configuration, ABC):
     package_type: PackageType
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
-    OVERRIDABLE_FIELDS: FrozenSet[str] = frozenset()
 
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
@@ -437,7 +436,7 @@ class PackageConfiguration(Configuration, ABC):
 
     def get_overridable(self) -> dict:
         """Get dictionary of values that can be updated for this config."""
-        return {k: self.json.get(k) for k in self.OVERRIDABLE_FIELDS}
+        return {k: self.json.get(k) for k in self.FIELDS_ALLOWED_TO_UPDATE}
 
     @classmethod
     def _apply_params_to_instance(
@@ -572,7 +571,6 @@ class ConnectionConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["config", "cert_requests", "is_abstract", "build_directory"]
     )
-    OVERRIDABLE_FIELDS: FrozenSet[str] = frozenset(["config"])
 
     __slots__ = (
         "class_name",
@@ -954,7 +952,6 @@ class SkillConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models", "is_abstract", "build_directory"]
     )
-    OVERRIDABLE_FIELDS: FrozenSet[str] = frozenset(["behaviours", "handlers", "models"])
 
     __slots__ = (
         "connections",
@@ -1135,7 +1132,9 @@ class SkillConfig(ComponentConfiguration):
         """Get overridable configuration data."""
         result = super().get_overridable()
 
-        for overridable in result:
+        for overridable in ("handlers", "behaviours", "models"):
+            if not result.get(overridable):
+                continue
             for field in result[overridable]:
                 # We don't want users to override the `class_name`` parameter
                 # for a behaviour/handler/model object.
@@ -1176,7 +1175,7 @@ class AgentConfig(PackageConfiguration):
             "storage_uri",
         ]
     )
-    OVERRIDABLE_FIELDS: FrozenSet[str] = frozenset(["logging_config"])
+
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
