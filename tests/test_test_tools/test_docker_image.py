@@ -19,6 +19,7 @@
 
 """This module contains a test for aea.test_tools.docker_image."""
 
+import platform
 import subprocess  # nosec
 from unittest import mock
 
@@ -51,6 +52,7 @@ class TestHelloWorldImage:
     image = HelloWorldImage(mock.Mock())
 
     @pytest.mark.parametrize("result", [None, not None])
+    @pytest.mark.skipif(platform.system() == "Darwin", reason="no docker on github CI")
     def test_docker_binary_availability(self, result) -> None:
         """Test skip based on docker binary availability"""
 
