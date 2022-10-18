@@ -20,9 +20,16 @@
 """This module contains tests for test case classes for AEA contract testing."""
 
 from typing import cast
+from pathlib import Path
 import pytest
 
+from tests.data.dummy_contract.contract import DummyContract
+
+
 from aea.test_tools.test_contract import BaseContractTestCase
+
+
+PATH_TO_DUMMY_CONTRACT = Path(*DummyContract.__module__.split(".")).parent.absolute()
 
 
 class TestCls(BaseContractTestCase):
@@ -61,4 +68,12 @@ class TestBaseContractTestCaseSetup:
 
         self.test_cls.ledger_identifier = "ethereum"
         with pytest.raises(FileNotFoundError, match="Contract configuration not found: contract.yaml"):
+            self.setup_test_cls()
+
+    def test_contract_setup_deploy_transaction_not_found(self):
+        """Test contract setup deploy transaction not found"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
+        with pytest.raises(ValueError, match="Deploy transaction not found!"):
             self.setup_test_cls()
