@@ -45,7 +45,7 @@ WHITELIST_URL_TO_CODE = {
     "https://github.com/fetchai/networks-stargateworld": 404,
 }
 
-IGNORE: Set[str] = {"https://faucet.metamask.io/", "https://ipfs.io/"}
+IGNORE: Set[str] = {"https://faucet.metamask.io/", "https://ipfs.tech/"}
 
 
 def is_url_reachable(url: str, attempts: int = 3) -> bool:
