@@ -162,3 +162,10 @@ class TestBaseContractTestCaseSetup:
             # exists for backward compatibility
             args = DUMMY_TX, test.ledger_api, test.deployer_crypto
             assert test.sign_send_confirm_receipt_transaction(*args) is TX_RECEIPT
+
+    def test_contract_not_set(self):
+        """Test contract not set"""
+
+        test_instance = TestCls()
+        with pytest.raises(ValueError, match="Ensure the contract is set during setup."):
+            assert test_instance.contract
