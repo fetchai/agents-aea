@@ -44,6 +44,7 @@ mock_get_deploy_transaction = mock.patch.object(EthereumApi, "get_deploy_transac
 mock_send_signed_transaction = mock.patch.object(EthereumApi, "send_signed_transaction", return_value="")
 mock_time_sleep = mock.patch('time.sleep', return_value=None)
 mock_tx_receipt = mock.patch.object(EthereumApi, "get_transaction_receipt", return_value=TX_RECEIPT)
+mock_is_transaction_settled = mock.patch.object(EthereumApi, "is_transaction_settled", return_value=True)
 
 
 # TODO: move to aea.test_tools.utils
@@ -143,3 +144,21 @@ class TestBaseContractTestCaseSetup:
             pytest.raises(ValueError, match="Transaction receipt not valid!"),
         ):
             self.setup_test_cls()
+
+    def test_contract_setup_successful(self):
+        """Test contract setup successful"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
+        with as_context(
+            mock_get_deploy_transaction,
+            mock_send_signed_transaction,
+            mock_time_sleep,
+            mock_tx_receipt,
+            mock_is_transaction_settled,
+        ):
+            test = self.setup_test_cls()
+            assert test.contract
+            # exists for backward compatibility
+            args = DUMMY_TX, test.ledger_api, test.deployer_crypto
+            assert test.sign_send_confirm_receipt_transaction(*args) is TX_RECEIPT
