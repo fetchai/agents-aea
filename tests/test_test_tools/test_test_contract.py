@@ -45,6 +45,7 @@ mock_send_signed_transaction = mock.patch.object(EthereumApi, "send_signed_trans
 mock_time_sleep = mock.patch('time.sleep', return_value=None)
 mock_tx_receipt = mock.patch.object(EthereumApi, "get_transaction_receipt", return_value=TX_RECEIPT)
 mock_is_transaction_settled = mock.patch.object(EthereumApi, "is_transaction_settled", return_value=True)
+mock_get_balance_increment = mock.patch.object(EthereumApi, "get_balance", side_effect=range(4))
 
 
 # TODO: move to aea.test_tools.utils
@@ -183,5 +184,21 @@ class TestBaseContractTestCaseSetup:
             mock_tx_receipt,
             mock_is_transaction_settled,
             pytest.raises(ValueError, match="Balance not increased!"),
+        ):
+            self.setup_test_cls()
+
+    def test_fund_from_faucet_balance_increased(self):
+        """Test fund fom faucet balance increased"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
+        self.test_cls.fund_from_faucet = True
+        with as_context(
+            mock_get_deploy_transaction,
+            mock_send_signed_transaction,
+            mock_time_sleep,
+            mock_tx_receipt,
+            mock_is_transaction_settled,
+            mock_get_balance_increment,
         ):
             self.setup_test_cls()
