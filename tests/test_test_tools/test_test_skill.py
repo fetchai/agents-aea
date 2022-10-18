@@ -723,8 +723,10 @@ class TestSkillTestCase(BaseSkillTestCase):
                 dialogue_stats.add_dialogue_endstate(end_state, False)
 
         assert all(fipa_dialogues.dialogue_stats.self_initiated.values())
+        assert all(fipa_dialogues.dialogue_stats.other_initiated.values())
         self.reset_all_dialogues()
         assert not any(fipa_dialogues.dialogue_stats.self_initiated.values())
+        assert not any(fipa_dialogues.dialogue_stats.other_initiated.values())
 
 
 class FipaDialogues(BaseFipaDialogues):
