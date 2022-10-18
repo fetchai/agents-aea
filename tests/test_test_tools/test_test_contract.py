@@ -35,6 +35,7 @@ from aea.test_tools.test_contract import BaseContractTestCase
 
 
 DUMMY_TX = {'gasPrice': 0, 'nonce': 0, 'gas': 0}
+TX_RECEIPT = {"raw_log": ""}
 PATH_TO_DUMMY_CONTRACT = Path(*DummyContract.__module__.split(".")).parent.absolute()
 
 
@@ -42,6 +43,7 @@ PATH_TO_DUMMY_CONTRACT = Path(*DummyContract.__module__.split(".")).parent.absol
 mock_get_deploy_transaction = mock.patch.object(EthereumApi, "get_deploy_transaction", return_value=DUMMY_TX)
 mock_send_signed_transaction = mock.patch.object(EthereumApi, "send_signed_transaction", return_value="")
 mock_time_sleep = mock.patch('time.sleep', return_value=None)
+mock_tx_receipt = mock.patch.object(EthereumApi, "get_transaction_receipt", return_value=TX_RECEIPT)
 
 
 # TODO: move to aea.test_tools.utils
@@ -125,5 +127,19 @@ class TestBaseContractTestCaseSetup:
             mock_send_signed_transaction,
             mock_time_sleep,
             pytest.raises(ValueError, match="Transaction receipt not found!"),
+        ):
+            self.setup_test_cls()
+
+    def test_contract_setup_transaction_receipt_not_valid(self):
+        """Test contract setup transaction receipt not valid"""
+
+        self.test_cls.ledger_identifier = "ethereum"
+        self.test_cls.path_to_contract = PATH_TO_DUMMY_CONTRACT
+        with as_context(
+            mock_get_deploy_transaction,
+            mock_send_signed_transaction,
+            mock_time_sleep,
+            mock_tx_receipt,
+            pytest.raises(ValueError, match="Transaction receipt not valid!"),
         ):
             self.setup_test_cls()
