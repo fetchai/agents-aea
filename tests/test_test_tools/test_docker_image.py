@@ -51,11 +51,13 @@ class TestHelloWorldImage:
     image = HelloWorldImage(mock.Mock())
 
     @pytest.mark.parametrize("result", [None, not None])
-    def test_docker_binary_not_available(self, result) -> None:
-        """Test skip when docker binary not available"""
+    def test_docker_binary_availability(self, result) -> None:
+        """Test skip based on docker binary availability"""
 
         with mock.patch("shutil.which", return_value=result):
-            self.image._check_docker_binary_available()
+            with mock.patch("pytest.skip") as m:
+                self.image._check_docker_binary_available()
+                assert m.call_count == int(not bool(result))
 
     @pytest.mark.parametrize(
         "proc_result",
