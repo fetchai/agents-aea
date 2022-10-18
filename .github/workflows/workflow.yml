@@ -129,7 +129,7 @@ jobs:
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           # install IPFS
           sudo apt-get install -y wget
-          wget -O ./go-ipfs.tar.gz https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
+          wget -O ./go-ipfs.tar.gz https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
           tar xvfz go-ipfs.tar.gz
           sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
           ipfs init
@@ -429,7 +429,7 @@ jobs:
           make protolint_install
 
           # install ipfs
-          wget https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
+          wget https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-amd64.tar.gz
           tar -xvzf go-ipfs_v0.6.0_linux-amd64.tar.gz
           cd go-ipfs
           sudo ./install.sh
@@ -453,7 +453,7 @@ jobs:
           brew install protolint
 
           # install ipfs
-          curl -O https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_darwin-amd64.tar.gz
+          curl -O https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_darwin-amd64.tar.gz
           tar -xvzf go-ipfs_v0.6.0_darwin-amd64.tar.gz
           cd go-ipfs
           sudo ./install.sh
@@ -482,7 +482,7 @@ jobs:
           # just check protolint runs
           protolint version
 
-          curl https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
+          curl https://dist.ipfs.tech/go-ipfs/v0.6.0/go-ipfs_v0.6.0_windows-amd64.zip -o go-ipfs_v0.6.0.zip
           Expand-Archive -Path go-ipfs_v0.6.0.zip -DestinationPath ~\Apps\
           cp ~\Apps\go-ipfs\ipfs.exe C:\Users\runneradmin\go\bin\
           ipfs init
