@@ -53,7 +53,7 @@ def remove_test_directory(directory: str, retries: int = 3) -> bool:
 
     def readonly_handler(
         func: Any, path: Any, execinfo: Any  # pylint: disable=unused-argument
-    ) -> None:  # pragma: no cover
+    ) -> None:
         """If permission is readonly, we change these and retry."""
         os.chmod(path, stat.S_IWRITE)
         func(path)
@@ -62,7 +62,7 @@ def remove_test_directory(directory: str, retries: int = 3) -> bool:
     while os.path.exists(directory) and retries:
         try:
             shutil.rmtree(directory, onerror=readonly_handler)
-        except Exception:  # pylint: disable=broad-except  # pragma: no cover
+        except Exception:
             retries -= 1
             time.sleep(1)
     return not os.path.exists(directory)

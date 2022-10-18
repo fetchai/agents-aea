@@ -18,8 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """Test utilities."""
-
+import os
 import tempfile
+from unittest import mock
 
 import pytest
 
@@ -39,3 +40,7 @@ def test_remove_test_directory():
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         assert remove_test_directory(str(tmp_dir))
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        with mock.patch("os.lstat", side_effect=Exception):
+            assert not remove_test_directory(tmp_dir)
