@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for mocking utils."""
+
 import subprocess  # nosec
 from typing import Any
 
@@ -43,13 +44,15 @@ def test_regex_comparator(builtin_type: Any) -> None:
     assert not RegexComparator("ni") in builtin_type(["string"])
 
 
-def test_ctx_mock_popen() -> None:
+def test_ctx_mock_popen_communicate_return_value() -> None:
     """Test ctx_mock_popen"""
 
-    filename = "..."
-    with pytest.raises(FileNotFoundError):
-        subprocess.Popen([filename])  # nosec
+    cmd_name = "python"
+    popen = subprocess.Popen([cmd_name])  # nosec
+    stdout, stderr = popen.communicate()
+    assert stdout is stderr is None
 
     with ctx_mock_Popen():
-        popen = subprocess.Popen([filename])  # nosec
-        popen.communicate()
+        popen = subprocess.Popen([cmd_name])  # nosec
+        stdout, stderr = popen.communicate()
+        assert stdout and stderr
