@@ -456,32 +456,27 @@ class TestSerialisations:
     def test_generated_protocol_serialisation_mt(self):
         """Test serialisation and deserialisation of a message involving an mt type."""
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
-            bytes_field=b"some bytes",
-            int_field=42,
-            float_field=42.7,
-            bool_field=True,
-            str_field="some string",
-            set_field={1, 2, 3, 4, 5},
-            list_field=["some string 1", "some string 2"],
-            dict_field=some_dict,
-        )
-        data_model2 = TProtocolMessage.DataModel2(
-            bytes_field=b"some bytes",
-            int_field=42,
-            float_field=42.7,
-            bool_field=True,
-            str_field="some string",
-            set_field={1, 2, 3, 4, 5},
-            list_field=["some string 1", "some string 2"],
-            dict_field=some_dict,
-        )
+
+        def make_data_model(type_):
+            return type_(
+                bytes_field=b"some bytes",
+                int_field=42,
+                float_field=42.7,
+                bool_field=True,
+                str_field="some string",
+                set_field={1, 2, 3, 4, 5},
+                list_field=["some string 1", "some string 2"],
+                dict_field=some_dict,
+            )
+
+        data_model1 = make_data_model(TProtocolMessage.DataModel1)
+        data_model2 = make_data_model(TProtocolMessage.DataModel2)
         message_ct = TProtocolMessage(
             message_id=1,
             dialogue_reference=(str(0), ""),
             target=0,
             performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
-            content_union_1=data_model,
+            content_union_1=data_model1,
             content_union_2=frozenset([1, 2, 3]),
             content_union_3=data_model2,
         )
@@ -541,7 +536,7 @@ class TestSerialisations:
             target=0,
             performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
             content_union_1=3453,
-            content_union_2=tuple([1, 2, 3]),
+            content_union_2=tuple([b"1", b"2", b"3"]),
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_int)
@@ -759,7 +754,7 @@ class TestSerialisations:
     def test_generated_protocol_serialisation_o(self):
         """Test serialisation and deserialisation of a message involving an optional type."""
         some_dict = {1: True, 2: False, 3: True, 4: False}
-        data_model = TProtocolMessage.DataModel(
+        data_model = TProtocolMessage.DataModel4(
             bytes_field=b"some bytes",
             int_field=42,
             float_field=42.7,

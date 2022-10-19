@@ -16,7 +16,40 @@ message TProtocolMessage{
     map<int64, bool> dict_field = 8;
   }
 
+  message DataModel1{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
   message DataModel2{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel3{
+    bytes bytes_field = 1;
+    int64 int_field = 2;
+    float float_field = 3;
+    bool bool_field = 4;
+    string str_field = 5;
+    repeated int64 set_field = 6;
+    repeated string list_field = 7;
+    map<int64, bool> dict_field = 8;
+  }
+
+  message DataModel4{
     bytes bytes_field = 1;
     int64 int_field = 2;
     float float_field = 3;
@@ -73,8 +106,8 @@ message TProtocolMessage{
   }
 
   message Performative_Mt_Performative{
-    DataModel content_union_1_type_DataModel = 1;
-    bool content_union_1_type_DataModel_is_set = 2;
+    DataModel1 content_union_1_type_DataModel1 = 1;
+    bool content_union_1_type_DataModel1_is_set = 2;
     bytes content_union_1_type_bytes = 3;
     bool content_union_1_type_bytes_is_set = 4;
     int64 content_union_1_type_int = 5;
@@ -85,22 +118,40 @@ message TProtocolMessage{
     bool content_union_1_type_bool_is_set = 10;
     string content_union_1_type_str = 11;
     bool content_union_1_type_str_is_set = 12;
-    repeated int64 content_union_2_type_set_of_int = 13;
-    bool content_union_2_type_set_of_int_is_set = 14;
-    repeated int64 content_union_2_type_list_of_int = 15;
-    bool content_union_2_type_list_of_int_is_set = 16;
-    map<string, string> content_union_2_type_dict_of_str_str = 17;
-    bool content_union_2_type_dict_of_str_str_is_set = 18;
-    int64 content_union_2_type_int = 19;
-    bool content_union_2_type_int_is_set = 20;
-    DataModel content_union_3_type_DataModel = 21;
-    bool content_union_3_type_DataModel_is_set = 22;
-    DataModel2 content_union_3_type_DataModel2 = 23;
-    bool content_union_3_type_DataModel2_is_set = 24;
+    repeated int64 content_union_1_type_set_of_int = 13;
+    bool content_union_1_type_set_of_int_is_set = 14;
+    repeated bool content_union_1_type_list_of_bool = 15;
+    bool content_union_1_type_list_of_bool_is_set = 16;
+    map<string, int64> content_union_1_type_dict_of_str_int = 17;
+    bool content_union_1_type_dict_of_str_int_is_set = 18;
+    repeated bytes content_union_2_type_set_of_bytes = 19;
+    bool content_union_2_type_set_of_bytes_is_set = 20;
+    repeated int64 content_union_2_type_set_of_int = 21;
+    bool content_union_2_type_set_of_int_is_set = 22;
+    repeated string content_union_2_type_set_of_str = 23;
+    bool content_union_2_type_set_of_str_is_set = 24;
+    repeated float content_union_2_type_list_of_float = 25;
+    bool content_union_2_type_list_of_float_is_set = 26;
+    repeated bool content_union_2_type_list_of_bool = 27;
+    bool content_union_2_type_list_of_bool_is_set = 28;
+    repeated bytes content_union_2_type_list_of_bytes = 29;
+    bool content_union_2_type_list_of_bytes_is_set = 30;
+    map<string, int64> content_union_2_type_dict_of_str_int = 31;
+    bool content_union_2_type_dict_of_str_int_is_set = 32;
+    map<int64, float> content_union_2_type_dict_of_int_float = 33;
+    bool content_union_2_type_dict_of_int_float_is_set = 34;
+    map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 35;
+    bool content_union_2_type_dict_of_bool_bytes_is_set = 36;
+    int64 content_union_2_type_int = 37;
+    bool content_union_2_type_int_is_set = 38;
+    DataModel2 content_union_3_type_DataModel2 = 39;
+    bool content_union_3_type_DataModel2_is_set = 40;
+    DataModel3 content_union_3_type_DataModel3 = 41;
+    bool content_union_3_type_DataModel3_is_set = 42;
   }
 
   message Performative_O_Performative{
-    DataModel content_o_ct = 1;
+    DataModel4 content_o_ct = 1;
     bool content_o_ct_is_set = 2;
     bool content_o_bool = 3;
     bool content_o_bool_is_set = 4;

@@ -417,12 +417,12 @@ class TestExtractSpecification(TestCase):
                 "content_dict_str_str": "Dict[str, str]",
             },
             "performative_mt": {
-                "content_union_1": "Union[DataModel, bytes, int, float, " "bool, str]",
-                "content_union_2": "Union[FrozenSet[int], Tuple[int, ...], Dict[str, str], int]",
-                "content_union_3": "Union[DataModel, DataModel2]",
+                "content_union_1": "Union[DataModel1, bytes, int, float, bool, str, FrozenSet[int], Tuple[bool, ...], Dict[str, int]]",
+                "content_union_2": "Union[FrozenSet[bytes], FrozenSet[int], FrozenSet[str], Tuple[float, ...], Tuple[bool, ...], Tuple[bytes, ...], Dict[str, int], Dict[int, float], Dict[bool, bytes], int]",
+                "content_union_3": "Union[DataModel2, DataModel3]",
             },
             "performative_o": {
-                "content_o_ct": "Optional[DataModel]",
+                "content_o_ct": "Optional[DataModel4]",
                 "content_o_bool": "Optional[bool]",
                 "content_o_set_int": "Optional[FrozenSet[int]]",
                 "content_o_list_bytes": "Optional[Tuple[bytes, ...]]",
@@ -471,20 +471,30 @@ class TestExtractSpecification(TestCase):
             "content_dict_str_float": "Dict[str, float]",
             "content_dict_str_bool": "Dict[str, bool]",
             "content_dict_str_str": "Dict[str, str]",
-            "content_union_1": "Union[DataModel, bytes, int, float, bool, str]",
-            "content_union_2": "Union[FrozenSet[int], Tuple[int, ...], Dict[str, str], int]",
-            "content_union_3": "Union[DataModel, DataModel2]",
-            "content_o_ct": "Optional[DataModel]",
+            "content_union_1": "Union[DataModel1, bytes, int, float, bool, str, FrozenSet[int], Tuple[bool, ...], Dict[str, int]]",
+            "content_union_2": "Union[FrozenSet[bytes], FrozenSet[int], FrozenSet[str], Tuple[float, ...], Tuple[bool, ...], Tuple[bytes, ...], Dict[str, int], Dict[int, float], Dict[bool, bytes], int]",
+            "content_union_3": "Union[DataModel2, DataModel3]",
+            "content_o_ct": "Optional[DataModel4]",
             "content_o_bool": "Optional[bool]",
             "content_o_set_int": "Optional[FrozenSet[int]]",
             "content_o_list_bytes": "Optional[Tuple[bytes, ...]]",
             "content_o_dict_str_int": "Optional[Dict[str, int]]",
         }
-        assert spec.all_custom_types == ["DataModel", "DataModel2"]
+        assert spec.all_custom_types == [
+            "DataModel",
+            "DataModel1",
+            "DataModel2",
+            "DataModel3",
+            "DataModel4",
+        ]
         assert spec.custom_custom_types == {
             "DataModel": "CustomDataModel",
+            "DataModel1": "CustomDataModel1",
             "DataModel2": "CustomDataModel2",
+            "DataModel3": "CustomDataModel3",
+            "DataModel4": "CustomDataModel4",
         }
+
         assert spec.initial_performatives == ["PERFORMATIVE_CT", "PERFORMATIVE_PT"]
         assert spec.reply == {
             "performative_ct": ["performative_pct"],

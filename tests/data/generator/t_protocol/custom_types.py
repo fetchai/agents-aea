@@ -105,5 +105,17 @@ class DataModel:
         )
 
 
+class DataModel1(DataModel):
+    """This class represents an instance of DataModel1."""
+
+
 class DataModel2(DataModel):
     """This class represents an instance of DataModel2."""
+
+
+class DataModel3(DataModel):
+    """This class represents an instance of DataModel3."""
+
+
+class DataModel4(DataModel):
+    """This class represents an instance of DataModel3."""

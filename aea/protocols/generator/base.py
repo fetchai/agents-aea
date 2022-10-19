@@ -1353,12 +1353,10 @@ class ProtocolGenerator:
         """
         if not _is_compositional_type(content_type):
             return content_type
-
-        type_ = (
-            re.search(r"^(pt:)?([a-zA-Z0-9_]+)(\[.*)?", content_type)
-            .groups()[1]
-            .lower()
-        )
+        m = re.search(r"^(pt:)?([a-zA-Z0-9_]+)(\[.*)?", content_type)
+        if not m:
+            return content_type
+        type_ = m.groups()[1].lower()
         if type_ == "frozenset":
             return "(set, frozenset)"
         if type_ == "tuple":
@@ -1414,9 +1412,16 @@ class ProtocolGenerator:
                 sub_type_name_in_protobuf = _union_sub_type_to_protobuf_variable_name(
                     content_name, sub_type
                 )
+                extra = ""
+                if _is_compositional_type(sub_type):
+                    subt = _get_sub_types_of_compositional_types(sub_type)
+                    if "dict" in sub_type.lower():
+                        extra = f" and all(map(lambda x: isinstance(x[0], {subt[0]}) and isinstance(x[1], {subt[1]}), msg.{content_name}.items()))"
+                    else:
+                        extra = f" and all(map(lambda x: isinstance(x, {subt[0]}), msg.{content_name}))"
                 encoding_str += (
                     self.indent
-                    + f"{elif_add}if isinstance(msg.{content_name}, {self._to_python_type(sub_type)}):\n"
+                    + f"{elif_add}if isinstance(msg.{content_name}, {self._to_python_type(sub_type)}){extra}:\n"
                 )
                 self._change_indent(1)
                 encoding_str += self.indent + "performative.{}_is_set = True\n".format(
@@ -1427,6 +1432,19 @@ class ProtocolGenerator:
                 )
                 self._change_indent(-1)
                 elif_add = "el"
+
+            encoding_str += self.indent + f"elif msg.{content_name} is None:\n"
+            self._change_indent(1)
+            encoding_str += self.indent + "pass\n"
+            self._change_indent(-1)
+
+            encoding_str += self.indent + "else:\n"
+            self._change_indent(1)
+            encoding_str += (
+                self.indent
+                + f"raise ValueError(f'Bad value set to `{content_name}` {{msg.{content_name} }}')\n"
+            )
+            self._change_indent(-1)
 
             self._change_indent(-1)
         elif content_type.startswith("Optional"):

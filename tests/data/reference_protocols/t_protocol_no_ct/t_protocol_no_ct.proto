@@ -55,6 +55,30 @@ message TProtocolNoCtMessage{
     bool content_union_1_type_bool_is_set = 8;
     string content_union_1_type_str = 9;
     bool content_union_1_type_str_is_set = 10;
+    repeated int64 content_union_1_type_set_of_int = 11;
+    bool content_union_1_type_set_of_int_is_set = 12;
+    repeated bool content_union_1_type_list_of_bool = 13;
+    bool content_union_1_type_list_of_bool_is_set = 14;
+    map<string, int64> content_union_1_type_dict_of_str_int = 15;
+    bool content_union_1_type_dict_of_str_int_is_set = 16;
+    repeated bytes content_union_2_type_set_of_bytes = 17;
+    bool content_union_2_type_set_of_bytes_is_set = 18;
+    repeated int64 content_union_2_type_set_of_int = 19;
+    bool content_union_2_type_set_of_int_is_set = 20;
+    repeated string content_union_2_type_set_of_str = 21;
+    bool content_union_2_type_set_of_str_is_set = 22;
+    repeated float content_union_2_type_list_of_float = 23;
+    bool content_union_2_type_list_of_float_is_set = 24;
+    repeated bool content_union_2_type_list_of_bool = 25;
+    bool content_union_2_type_list_of_bool_is_set = 26;
+    repeated bytes content_union_2_type_list_of_bytes = 27;
+    bool content_union_2_type_list_of_bytes_is_set = 28;
+    map<string, int64> content_union_2_type_dict_of_str_int = 29;
+    bool content_union_2_type_dict_of_str_int_is_set = 30;
+    map<int64, float> content_union_2_type_dict_of_int_float = 31;
+    bool content_union_2_type_dict_of_int_float_is_set = 32;
+    map<bool, bytes> content_union_2_type_dict_of_bool_bytes = 33;
+    bool content_union_2_type_dict_of_bool_bytes_is_set = 34;
   }
 
   message Performative_O_Performative{
