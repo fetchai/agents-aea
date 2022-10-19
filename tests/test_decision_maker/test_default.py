@@ -20,6 +20,9 @@
 
 """This module contains tests for decision_maker."""
 
+import platform
+import sys
+
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
@@ -143,6 +146,14 @@ class BaseTestDecisionMaker:
                 access_code="some_invalid_code"
             )
 
+    @pytest.mark.skipif(
+        condition=(
+            platform.system() == "Darwin"
+            and sys.version_info.major == 3
+            and sys.version_info.minor == 10
+        ),
+        reason="Fails because of cosmpy dependency on macOS/py310",
+    )
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
