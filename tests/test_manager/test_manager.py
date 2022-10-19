@@ -35,6 +35,8 @@ from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
 import _strptime  # pylint: disbale=unsed-import # noqa: F401
+
+import click
 import pytest
 
 from aea.configurations.base import PublicId
@@ -231,6 +233,11 @@ class BaseTestMultiAgentManager(BaseCase):
         package_prefix, (version, agents) = prefix_to_version.copy().popitem()
 
         with patch.object(self.manager, "_versionless_projects_set", return_value=set()):
+
+            error_msg = "The remote registry is not initialized. Remote registry command currently not supported - manually edit config file!"
+            with pytest.raises(click.ClickException, match=error_msg):
+                self.manager.add_project(self.project_public_id, remote=True)
+
             with patch.object(Project, "load", return_value=project):
                 self.manager.add_project(self.project_public_id, local=True)
 
