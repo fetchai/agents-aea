@@ -282,6 +282,19 @@ def test_recursive_update_negative_different_type():
         recursive_update(to_update, new_values)
 
 
+def test_recursive_update_with_env_var_without():
+    """Test the 'recursive update' utility, when the types are different."""
+    # here we try to update an integer with a boolean - it raises error.
+    to_update = dict(subdict=dict(to_update=1))
+    new_values = dict(subdict=dict(to_update="${ENV_VAR}"))
+
+    with pytest.raises(
+        ValueError,
+        match="It appears you are using environmental variables as overwrites. Make sure to use the `--aev` flag.",
+    ):
+        recursive_update(to_update, new_values)
+
+
 def test_recursive_update_new_fields():
     """Test the 'recursive update' utility, with new fields."""
     # here we try to update an integer with a boolean - it raises error.
