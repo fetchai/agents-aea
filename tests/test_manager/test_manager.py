@@ -44,6 +44,7 @@ from aea.crypto.registries import crypto_registry
 from aea.helpers.install_dependency import call_pip
 from aea.manager import MultiAgentManager
 from aea.manager.manager import AgentRunProcessTask, ProjectPackageConsistencyCheckError
+from aea.manager.project import Project
 
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
@@ -218,6 +219,17 @@ class BaseTestMultiAgentManager(BaseCase):
         self.manager.add_project(self.project_public_id, local=True)
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
+
+    def test_add_project_check_version_consistency(self, *args):
+        """Test add project check version consistency"""
+
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        project = self.manager._projects[self.project_public_id]
+        with patch.object(self.manager, "_versionless_projects_set", return_value=set()):
+            with patch.object(Project, "load", return_value=project):
+                self.manager.add_project(self.project_public_id, local=True)
 
     def read_logs(self) -> str:
         """Read log file"""
