@@ -227,9 +227,17 @@ class BaseTestMultiAgentManager(BaseCase):
         self.manager.add_project(self.project_public_id, local=True)
 
         project = self.manager._projects[self.project_public_id]
+        prefix_to_version = self.manager._package_id_prefix_to_version
+        package_prefix, (version, agents) = prefix_to_version.copy().popitem()
+
         with patch.object(self.manager, "_versionless_projects_set", return_value=set()):
             with patch.object(Project, "load", return_value=project):
                 self.manager.add_project(self.project_public_id, local=True)
+
+                prefix_to_version[package_prefix] = version + "0", agents
+                error_msg = "AEA dependencies have conflicts with previously added projects"
+                with pytest.raises(ProjectPackageConsistencyCheckError, match=error_msg):
+                    self.manager.add_project(self.project_public_id, local=True)
 
     def read_logs(self) -> str:
         """Read log file"""
