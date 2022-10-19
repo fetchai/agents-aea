@@ -39,6 +39,7 @@ import pytest
 from packaging.version import Version
 
 from aea.exceptions import AEAEnforceError
+from aea.configurations.base import ComponentId, ComponentType
 from aea.helpers.base import (
     CertRequest,
     MaxRetriesError,
@@ -60,11 +61,13 @@ from aea.helpers.base import (
     send_control_c,
     try_decorator,
     win_popen_kwargs,
+    perform_dict_override,
 )
 
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection
 
 from tests.conftest import CUR_PATH, ROOT_DIR, skip_test_windows
+from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
 NOT_BEFORE = "2022-01-01"
@@ -323,6 +326,23 @@ def test_recursive_update_negative_unknown_field():
         match="Key 'new_field' is not contained in the dictionary to update.",
     ):
         recursive_update(to_update, new_values)
+
+
+def test_perform_dict_override():
+    """Test perform_dict_override"""
+
+    component_id = ComponentId(ComponentType.SKILL, DUMMY_SKILL_PUBLIC_ID)
+    overrides = {component_id: ["ab"]}
+    updated_configurations = {component_id: {"a": {"b": None, "c": 3}}}
+    new_configurations = {component_id: {"a": {"b": 2}}}
+
+    perform_dict_override(
+        component_id,
+        overrides,
+        updated_configurations,
+        new_configurations,
+    )
+    assert updated_configurations[component_id] == {"a": {"b": 2, "c": 3}}
 
 
 class TestTopologicalOrder:
