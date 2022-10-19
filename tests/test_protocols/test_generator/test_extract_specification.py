@@ -418,6 +418,7 @@ class TestExtractSpecification(TestCase):
             },
             "performative_mt": {
                 "content_union_1": "Union[DataModel, bytes, int, float, " "bool, str]",
+                "content_union_2": "Union[FrozenSet[int], Tuple[int, ...], Dict[str, str], int]",
                 "content_union_3": "Union[DataModel, DataModel2]",
             },
             "performative_o": {
@@ -471,6 +472,7 @@ class TestExtractSpecification(TestCase):
             "content_dict_str_bool": "Dict[str, bool]",
             "content_dict_str_str": "Dict[str, str]",
             "content_union_1": "Union[DataModel, bytes, int, float, bool, str]",
+            "content_union_2": "Union[FrozenSet[int], Tuple[int, ...], Dict[str, str], int]",
             "content_union_3": "Union[DataModel, DataModel2]",
             "content_o_ct": "Optional[DataModel]",
             "content_o_bool": "Optional[bool]",

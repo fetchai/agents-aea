@@ -482,6 +482,7 @@ class TestSerialisations:
             target=0,
             performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
             content_union_1=data_model,
+            content_union_2=frozenset([1, 2, 3]),
             content_union_3=data_model2,
         )
 
@@ -498,6 +499,7 @@ class TestSerialisations:
         assert decoded_message.target == message_ct.target
         assert decoded_message.performative == message_ct.performative
         assert decoded_message.content_union_1 == message_ct.content_union_1
+        assert decoded_message.content_union_2 == message_ct.content_union_2
 
         #####################
 
@@ -507,6 +509,7 @@ class TestSerialisations:
             target=0,
             performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
             content_union_1=b"some bytes",
+            content_union_2=2,
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_bytes)
@@ -528,6 +531,7 @@ class TestSerialisations:
         assert decoded_message.target == message_pt_bytes.target
         assert decoded_message.performative == message_pt_bytes.performative
         assert decoded_message.content_union_1 == message_pt_bytes.content_union_1
+        assert decoded_message.content_union_2 == message_pt_bytes.content_union_2
 
         #####################
 
@@ -537,6 +541,7 @@ class TestSerialisations:
             target=0,
             performative=TProtocolMessage.Performative.PERFORMATIVE_MT,
             content_union_1=3453,
+            content_union_2=tuple([1, 2, 3]),
         )
 
         encoded_message_in_bytes = TProtocolMessage.serializer.encode(message_pt_int)
@@ -558,6 +563,7 @@ class TestSerialisations:
         assert decoded_message.target == message_pt_int.target
         assert decoded_message.performative == message_pt_int.performative
         assert decoded_message.content_union_1 == message_pt_int.content_union_1
+        assert decoded_message.content_union_2 == message_pt_int.content_union_2
 
         #####################
         # float does not decoded properly

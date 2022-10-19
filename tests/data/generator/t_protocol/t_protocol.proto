@@ -85,10 +85,18 @@ message TProtocolMessage{
     bool content_union_1_type_bool_is_set = 10;
     string content_union_1_type_str = 11;
     bool content_union_1_type_str_is_set = 12;
-    DataModel content_union_3_type_DataModel = 13;
-    bool content_union_3_type_DataModel_is_set = 14;
-    DataModel2 content_union_3_type_DataModel2 = 15;
-    bool content_union_3_type_DataModel2_is_set = 16;
+    repeated int64 content_union_2_type_set_of_int = 13;
+    bool content_union_2_type_set_of_int_is_set = 14;
+    repeated int64 content_union_2_type_list_of_int = 15;
+    bool content_union_2_type_list_of_int_is_set = 16;
+    map<string, string> content_union_2_type_dict_of_str_str = 17;
+    bool content_union_2_type_dict_of_str_str_is_set = 18;
+    int64 content_union_2_type_int = 19;
+    bool content_union_2_type_int_is_set = 20;
+    DataModel content_union_3_type_DataModel = 21;
+    bool content_union_3_type_DataModel_is_set = 22;
+    DataModel2 content_union_3_type_DataModel2 = 23;
+    bool content_union_3_type_DataModel2_is_set = 24;
   }
 
   message Performative_O_Performative{

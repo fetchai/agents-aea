@@ -129,19 +129,19 @@ class TProtocolNoCtSerializer(Serializer):
                     performative.content_union_1_type_bytes_is_set = True
                     content_union_1_type_bytes = msg.content_union_1
                     performative.content_union_1_type_bytes = content_union_1_type_bytes
-                if isinstance(msg.content_union_1, int):
+                elif isinstance(msg.content_union_1, int):
                     performative.content_union_1_type_int_is_set = True
                     content_union_1_type_int = msg.content_union_1
                     performative.content_union_1_type_int = content_union_1_type_int
-                if isinstance(msg.content_union_1, float):
+                elif isinstance(msg.content_union_1, float):
                     performative.content_union_1_type_float_is_set = True
                     content_union_1_type_float = msg.content_union_1
                     performative.content_union_1_type_float = content_union_1_type_float
-                if isinstance(msg.content_union_1, bool):
+                elif isinstance(msg.content_union_1, bool):
                     performative.content_union_1_type_bool_is_set = True
                     content_union_1_type_bool = msg.content_union_1
                     performative.content_union_1_type_bool = content_union_1_type_bool
-                if isinstance(msg.content_union_1, str):
+                elif isinstance(msg.content_union_1, str):
                     performative.content_union_1_type_str_is_set = True
                     content_union_1_type_str = msg.content_union_1
                     performative.content_union_1_type_str = content_union_1_type_str

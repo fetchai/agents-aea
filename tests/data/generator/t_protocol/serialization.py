@@ -138,26 +138,47 @@ class TProtocolSerializer(Serializer):
                         performative.content_union_1_type_DataModel,
                         content_union_1_type_DataModel,
                     )
-                if isinstance(msg.content_union_1, bytes):
+                elif isinstance(msg.content_union_1, bytes):
                     performative.content_union_1_type_bytes_is_set = True
                     content_union_1_type_bytes = msg.content_union_1
                     performative.content_union_1_type_bytes = content_union_1_type_bytes
-                if isinstance(msg.content_union_1, int):
+                elif isinstance(msg.content_union_1, int):
                     performative.content_union_1_type_int_is_set = True
                     content_union_1_type_int = msg.content_union_1
                     performative.content_union_1_type_int = content_union_1_type_int
-                if isinstance(msg.content_union_1, float):
+                elif isinstance(msg.content_union_1, float):
                     performative.content_union_1_type_float_is_set = True
                     content_union_1_type_float = msg.content_union_1
                     performative.content_union_1_type_float = content_union_1_type_float
-                if isinstance(msg.content_union_1, bool):
+                elif isinstance(msg.content_union_1, bool):
                     performative.content_union_1_type_bool_is_set = True
                     content_union_1_type_bool = msg.content_union_1
                     performative.content_union_1_type_bool = content_union_1_type_bool
-                if isinstance(msg.content_union_1, str):
+                elif isinstance(msg.content_union_1, str):
                     performative.content_union_1_type_str_is_set = True
                     content_union_1_type_str = msg.content_union_1
                     performative.content_union_1_type_str = content_union_1_type_str
+            if msg.is_set("content_union_2"):
+                if isinstance(msg.content_union_2, (set, frozenset)):
+                    performative.content_union_2_type_set_of_int_is_set = True
+                    content_union_2 = msg.content_union_2
+                    performative.content_union_2_type_set_of_int.extend(content_union_2)
+                elif isinstance(msg.content_union_2, (list, tuple)):
+                    performative.content_union_2_type_list_of_int_is_set = True
+                    content_union_2 = msg.content_union_2
+                    performative.content_union_2_type_list_of_int.extend(
+                        content_union_2
+                    )
+                elif isinstance(msg.content_union_2, dict):
+                    performative.content_union_2_type_dict_of_str_str_is_set = True
+                    content_union_2 = msg.content_union_2
+                    performative.content_union_2_type_dict_of_str_str.update(
+                        content_union_2
+                    )
+                elif isinstance(msg.content_union_2, int):
+                    performative.content_union_2_type_int_is_set = True
+                    content_union_2_type_int = msg.content_union_2
+                    performative.content_union_2_type_int = content_union_2_type_int
             if msg.is_set("content_union_3"):
                 if isinstance(msg.content_union_3, DataModel):
                     performative.content_union_3_type_DataModel_is_set = True
@@ -166,7 +187,7 @@ class TProtocolSerializer(Serializer):
                         performative.content_union_3_type_DataModel,
                         content_union_3_type_DataModel,
                     )
-                if isinstance(msg.content_union_3, DataModel2):
+                elif isinstance(msg.content_union_3, DataModel2):
                     performative.content_union_3_type_DataModel2_is_set = True
                     content_union_3_type_DataModel2 = msg.content_union_3
                     DataModel2.encode(
@@ -371,6 +392,29 @@ class TProtocolSerializer(Serializer):
             if t_protocol_pb.performative_mt.content_union_1_type_str_is_set:
                 content_union_1 = t_protocol_pb.performative_mt.content_union_1_type_str
                 performative_content["content_union_1"] = content_union_1
+            if t_protocol_pb.performative_mt.content_union_2_type_set_of_int_is_set:
+                content_union_2 = (
+                    t_protocol_pb.performative_mt.content_union_2_type_set_of_int
+                )
+                content_union_2_frozenset = frozenset(content_union_2)
+                performative_content["content_union_2"] = content_union_2_frozenset
+            if t_protocol_pb.performative_mt.content_union_2_type_list_of_int_is_set:
+                content_union_2 = (
+                    t_protocol_pb.performative_mt.content_union_2_type_list_of_int
+                )
+                content_union_2_tuple = tuple(content_union_2)
+                performative_content["content_union_2"] = content_union_2_tuple
+            if (
+                t_protocol_pb.performative_mt.content_union_2_type_dict_of_str_str_is_set
+            ):
+                content_union_2 = (
+                    t_protocol_pb.performative_mt.content_union_2_type_dict_of_str_str
+                )
+                content_union_2_dict = dict(content_union_2)
+                performative_content["content_union_2"] = content_union_2_dict
+            if t_protocol_pb.performative_mt.content_union_2_type_int_is_set:
+                content_union_2 = t_protocol_pb.performative_mt.content_union_2_type_int
+                performative_content["content_union_2"] = content_union_2
             if t_protocol_pb.performative_mt.content_union_3_type_DataModel_is_set:
                 pb2_content_union_3_type_DataModel = (
                     t_protocol_pb.performative_mt.content_union_3_type_DataModel

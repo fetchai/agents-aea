@@ -61,7 +61,7 @@ speech_acts:
     content_dict_str_str: pt:dict[pt:str, pt:str]
   performative_mt:
     content_union_1: pt:union[ct:DataModel, pt:bytes, pt:int, pt:float, pt:bool, pt:str]
-    # content_union_2: pt:union[pt:set[pt:bytes], int]: # nested types  not allowed in union for the moment
+    content_union_2: pt:union[pt:set[pt:int], pt:list[pt:int], pt:dict[pt:str,pt:str], pt:int] # nested types  not allowed in union for the moment
     content_union_3: pt:union[ct:DataModel, ct:DataModel2]
   performative_o:
     content_o_ct: pt:optional[ct:DataModel]

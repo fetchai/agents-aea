@@ -226,7 +226,13 @@ def _is_valid_union(content_type: str) -> bool:
         return False
 
     for sub_type in sub_types:
-        if not (_is_valid_ct(sub_type) or _is_valid_pt(sub_type)):
+        if not (
+            _is_valid_ct(sub_type)
+            or _is_valid_pt(sub_type)
+            or _is_valid_dict(sub_type)
+            or _is_valid_list(sub_type)
+            or _is_valid_set(sub_type)
+        ):
             return False
 
     return True

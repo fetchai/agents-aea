@@ -392,13 +392,16 @@ class TestValidate(TestCase):
         valid_content_type_5 = "pt:union[pt:bool,pt:bytes]"
         assert _is_valid_union(valid_content_type_5) is True
 
-        ###################################################
-
-        invalid_content_type_4 = "pt:union[pt:set[pt:int], pt:set[pt:float]]"
-        assert _is_valid_union(invalid_content_type_4) is False
+        valid_content_type_4 = "pt:union[pt:set[pt:int], pt:set[pt:float]]"
+        assert _is_valid_union(valid_content_type_4) is True
 
         valid_content_type_6 = "   pt:union[  pt:bytes  ,   pt:set[  pt:int  ]   ] "
-        assert _is_valid_union(valid_content_type_6) is False
+        assert _is_valid_union(valid_content_type_6) is True
+
+        valid_content_type_13 = "pt:union[pt:bytes, pt:set[pt:int]]"
+        assert _is_valid_union(valid_content_type_13) is True
+
+        ###################################################
 
         invalid_content_type_1 = "pt:onion[pt:bool, pt:str]"
         assert _is_valid_union(invalid_content_type_1) is False
@@ -437,9 +440,6 @@ class TestValidate(TestCase):
 
         invalid_content_type_12 = "pt:union"
         assert _is_valid_union(invalid_content_type_12) is False
-
-        invalid_content_type_13 = "pt:union[pt:bytes, pt:set[pt:int]]"
-        assert _is_valid_union(invalid_content_type_13) is False
 
     def test_is_valid_optional(self):
         """Test for the '_is_valid_optional' method."""

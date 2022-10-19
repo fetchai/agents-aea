@@ -1344,6 +1344,28 @@ class ProtocolGenerator:
             self._change_indent(-2)
         return cls_str
 
+    def _to_python_type(self, content_type: str) -> str:
+        """
+        Return python type.
+
+        :param  content_type: str
+        :return: str
+        """
+        if not _is_compositional_type(content_type):
+            return content_type
+
+        type_ = (
+            re.search(r"^(pt:)?([a-zA-Z0-9_]+)(\[.*)?", content_type)
+            .groups()[1]
+            .lower()
+        )
+        if type_ == "frozenset":
+            return "(set, frozenset)"
+        if type_ == "tuple":
+            return "(list, tuple)"
+
+        return type_
+
     def _encoding_message_content_from_python_to_protobuf(
         self,
         content_name: str,
@@ -1373,29 +1395,28 @@ class ProtocolGenerator:
                 content_name, content_name
             )
             encoding_str += self.indent + "performative.{}.extend({})\n".format(
-                content_name, content_name
+                performative_name, content_name
             )
         elif content_type.startswith("Dict"):
             encoding_str += self.indent + "{} = msg.{}\n".format(
                 content_name, content_name
             )
             encoding_str += self.indent + "performative.{}.update({})\n".format(
-                content_name, content_name
+                performative_name, content_name
             )
 
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
             encoding_str += self.indent + f'if msg.is_set("{content_name}"):\n'
             self._change_indent(1)
-            filtered_sub_types = [i for i in sub_types if not _is_compositional_type(i)]
-            if len(sub_types) != len(filtered_sub_types):
-                raise ValueError(f"Bad Union content type: {content_type}")
+            elif_add = ""
             for sub_type in sub_types:
                 sub_type_name_in_protobuf = _union_sub_type_to_protobuf_variable_name(
                     content_name, sub_type
                 )
                 encoding_str += (
-                    self.indent + f"if isinstance(msg.{content_name}, {sub_type}):\n"
+                    self.indent
+                    + f"{elif_add}if isinstance(msg.{content_name}, {self._to_python_type(sub_type)}):\n"
                 )
                 self._change_indent(1)
                 encoding_str += self.indent + "performative.{}_is_set = True\n".format(
@@ -1405,6 +1426,7 @@ class ProtocolGenerator:
                     content_name, sub_type, performative_name=sub_type_name_in_protobuf
                 )
                 self._change_indent(-1)
+                elif_add = "el"
 
             self._change_indent(-1)
         elif content_type.startswith("Optional"):
@@ -1469,7 +1491,7 @@ class ProtocolGenerator:
                 content_name,
                 self.protocol_specification.name,
                 performative,
-                content_name,
+                variable_name,
             )
             decoding_str += self.indent + "{}_frozenset = frozenset({})\n".format(
                 content_name, content_name
@@ -1485,7 +1507,7 @@ class ProtocolGenerator:
                 content_name,
                 self.protocol_specification.name,
                 performative,
-                content_name,
+                variable_name,
             )
             decoding_str += self.indent + "{}_tuple = tuple({})\n".format(
                 content_name, content_name
@@ -1501,7 +1523,7 @@ class ProtocolGenerator:
                 content_name,
                 self.protocol_specification.name,
                 performative,
-                content_name,
+                variable_name,
             )
             decoding_str += self.indent + "{}_dict = dict({})\n".format(
                 content_name, content_name
