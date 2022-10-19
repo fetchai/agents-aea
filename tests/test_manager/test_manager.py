@@ -226,25 +226,24 @@ class BaseTestMultiAgentManager(BaseCase):
         """Test add project check version consistency"""
 
         self.manager.start_manager()
-        self.manager.add_project(self.project_public_id, local=True)
 
+        error_msg = "The remote registry is not initialized. Remote registry command currently not supported - manually edit config file!"
+        with pytest.raises(click.ClickException, match=error_msg):
+            self.manager.add_project(self.project_public_id, remote=True)
+
+        self.manager.add_project(self.project_public_id)
         project = self.manager._projects[self.project_public_id]
         prefix_to_version = self.manager._package_id_prefix_to_version
         package_prefix, (version, agents) = prefix_to_version.copy().popitem()
 
         with patch.object(self.manager, "_versionless_projects_set", return_value=set()):
-
-            error_msg = "The remote registry is not initialized. Remote registry command currently not supported - manually edit config file!"
-            with pytest.raises(click.ClickException, match=error_msg):
-                self.manager.add_project(self.project_public_id, remote=True)
-
             with patch.object(Project, "load", return_value=project):
-                self.manager.add_project(self.project_public_id, local=True)
+                self.manager.add_project(self.project_public_id)
 
                 prefix_to_version[package_prefix] = version + "0", agents
                 error_msg = "AEA dependencies have conflicts with previously added projects"
                 with pytest.raises(ProjectPackageConsistencyCheckError, match=error_msg):
-                    self.manager.add_project(self.project_public_id, local=True)
+                    self.manager.add_project(self.project_public_id)
 
     def read_logs(self) -> str:
         """Read log file"""

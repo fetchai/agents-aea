@@ -31,7 +31,9 @@ def test_aea_project():
 
     cwd = os.getcwd()
     with AEAProject():
-        assert cwd != os.getcwd()
-        assert set(os.listdir(os.getcwd())) == set(PROJECT_CONTENT)
+        project_wd = os.getcwd()
+        assert cwd != project_wd
+        assert set(os.listdir(project_wd)) == set(PROJECT_CONTENT)
 
     assert cwd == os.getcwd()
+    assert not os.path.exists(project_wd)
