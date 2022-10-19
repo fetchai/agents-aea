@@ -20,10 +20,18 @@
 """Tests for project helper tools."""
 
 import os
+
 from aea.manager.helpers import AEAProject
 
 
-PROJECT_CONTENT = ['contracts', 'connections', 'skills', 'aea-config.yaml', 'vendor', 'protocols']
+PROJECT_CONTENT = [
+    "contracts",
+    "connections",
+    "skills",
+    "aea-config.yaml",
+    "vendor",
+    "protocols",
+]
 
 
 def test_aea_project():

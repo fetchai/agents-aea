@@ -35,7 +35,6 @@ from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
 import _strptime  # pylint: disbale=unsed-import # noqa: F401
-
 import click
 import pytest
 
@@ -236,13 +235,16 @@ class BaseTestMultiAgentManager(BaseCase):
         prefix_to_version = self.manager._package_id_prefix_to_version
         package_prefix, (version, agents) = prefix_to_version.copy().popitem()
 
-        with patch.object(self.manager, "_versionless_projects_set", return_value=set()):
+        with patch.object(
+            self.manager, "_versionless_projects_set", return_value=set()
+        ):
             with patch.object(Project, "load", return_value=project):
                 self.manager.add_project(self.project_public_id)
-
                 prefix_to_version[package_prefix] = version + "0", agents
-                error_msg = "AEA dependencies have conflicts with previously added projects"
-                with pytest.raises(ProjectPackageConsistencyCheckError, match=error_msg):
+                with pytest.raises(
+                    ProjectPackageConsistencyCheckError,
+                    match="AEA dependencies have conflicts with previously added projects",
+                ):
                     self.manager.add_project(self.project_public_id)
 
     def read_logs(self) -> str:
