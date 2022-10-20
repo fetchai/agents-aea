@@ -134,3 +134,11 @@ def test_is_cid(multihash):
 
     assert CID.is_cid(multihash)
     assert not CID.is_cid(multihash[::-1])
+
+
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_cid_from_bytes(multihash):
+    """Test CID.from_bytes"""
+
+    multihash_bytes = multihash.encode("utf-8")
+    assert CID.from_bytes(multihash_bytes)
