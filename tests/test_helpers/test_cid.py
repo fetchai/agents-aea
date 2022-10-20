@@ -142,3 +142,20 @@ def test_cid_from_bytes(multihash):
 
     multihash_bytes = multihash.encode("utf-8")
     assert CID.from_bytes(multihash_bytes)
+
+
+@pytest.mark.parametrize(
+    "cid_bytes, error_message",
+    [
+        (b"b", "argument length can not be zero"),
+        (b"bb", "cid length is invalid"),
+        (bytes(2), "multihash is too short"),
+        (bytes(10), "multihash length field does not match digest field length"),
+        (HASH_V1[::-1].encode("utf-8"), "multihash is not a valid base58 encoded multihash"),
+    ],
+)
+def test_cid_from_incorrect_bytes_raises(cid_bytes, error_message):
+    """Test CID.from_bytes raises on incorrect input"""
+
+    with pytest.raises(ValueError, match=error_message):
+        assert CID.from_bytes(cid_bytes)
