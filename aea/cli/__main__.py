@@ -19,6 +19,8 @@
 #
 # ------------------------------------------------------------------------------
 
+# pragma: nocover
+
 """Entry-point for the AEA command-line tool."""
 
 from aea.cli.core import cli
