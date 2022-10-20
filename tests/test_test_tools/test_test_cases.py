@@ -21,8 +21,11 @@
 
 import logging
 import os
+import shutil
 import subprocess  # nosec
+import tempfile
 import time
+from collections import OrderedDict
 from pathlib import Path
 from unittest import TestCase, mock
 
@@ -37,6 +40,7 @@ from aea.configurations.constants import (
     DEFAULT_AEA_CONFIG_FILE,
     PRIVATE_KEY_PATH_SCHEMA,
 )
+from aea.configurations.manager import AgentConfigManager
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
@@ -60,6 +64,7 @@ from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import MAX_FLAKY_RERUNS, MY_FIRST_AEA_PUBLIC_ID
+from tests.data import dummy_aea
 from tests.test_cli import test_generate_wealth
 
 
@@ -151,6 +156,42 @@ class TestConfigCases(AEATestCaseEmpty):
         """Test agent test get non exists key."""
         with pytest.raises(Exception, match=".*bad_key.*"):
             self.run_cli_command("config", "get", "agent.bad_key", cwd=self._get_cwd())
+
+
+class TestConfigCasesAEV(AEATestCaseEmpty):
+    """Test configuration overwrite via CLI tool"""
+
+    def test_agent_set_aev(self):
+        """Test agent skill overwrite using environment variable."""
+
+        def copy_dummy_aea_and_update_aea_config_with_env_var():
+            shutil.copytree(dummy_aea.__path__[0], agent_dir)
+            aea_config_file = agent_dir / "aea-config.yaml"
+            content = aea_config_file.read_text()
+            new_content = content + f"\nis_abstract: ${{{env_var}:bool:false}}"
+            aea_config_file.write_text(new_content)
+
+        def set_config_load_agent_return_component_config():
+            self.set_config(key_name, value, aev=True)
+            manager = AgentConfigManager.load(agent_dir, substitude_env_vars=True)
+            return manager.agent_config.json["component_configurations"]
+
+        value = True
+        key_name = "agent.logging_config.disable_existing_loggers"
+        env_var = "DUMMY_ENV_VAR"
+        assert env_var not in os.environ
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            agent_dir = Path(tmp_dir, "dummy_aea")
+            copy_dummy_aea_and_update_aea_config_with_env_var()
+            try:
+                component_configs = set_config_load_agent_return_component_config()
+                assert not any(c["is_abstract"] for c in component_configs)
+                os.environ[env_var] = "true"
+                component_configs = set_config_load_agent_return_component_config()
+                assert any(c["is_abstract"] for c in component_configs)
+            finally:
+                os.environ.pop(env_var, None)
 
 
 class TestRunAgent(AEATestCaseEmpty):
