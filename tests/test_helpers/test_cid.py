@@ -63,6 +63,16 @@ def test_cids() -> None:
     assert str(cid_v1) == HASH_V1
 
 
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_cid__eq__(multihash):
+    """Test CID __eq__"""
+    cid = CID.from_string(multihash)
+    assert cid is not CID.from_string(multihash)
+    assert cid == CID.from_string(multihash)
+    assert not cid == multihash
+    assert not multihash == cid
+
+
 def test_make() -> None:
     """Test make method."""
 
