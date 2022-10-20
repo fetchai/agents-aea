@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for aea.cli.utils module."""
+
 from builtins import FileNotFoundError
 from copy import deepcopy
 from tempfile import TemporaryDirectory
@@ -28,6 +29,7 @@ from uuid import uuid4
 
 import click
 import pytest
+import yaml
 from aea_ledger_fetchai import FetchAICrypto
 from click import BadParameter, ClickException
 from click.testing import CliRunner
@@ -166,20 +168,19 @@ class PublicIdParameterTestCase(TestCase):
         self.assertEqual(result, expected_result)
 
 
-@pytest.mark.skip
-@mock.patch("aea.cli.utils.config.os.path.dirname", return_value="dir-name")
-@mock.patch("aea.cli.utils.config.os.path.exists", return_value=False)
-@mock.patch("aea.cli.utils.config.os.makedirs")
-@mock.patch("aea.cli.utils.click_utils.open_file")
-class InitConfigFolderTestCase(TestCase):
+@mock.patch("os.path.dirname", return_value="dir-name")
+@mock.patch("os.path.exists", return_value=False)
+@mock.patch("os.makedirs")
+class TestInitConfigFolder:
     """Test case for _init_cli_config method."""
 
-    def test_init_cli_config_positive(
-        self, open_mock, makedirs_mock, exists_mock, dirname_mock
-    ):
+    @pytest.mark.skip
+    def test_init_cli_config_positive(self, makedirs_mock, exists_mock, dirname_mock):
         """Test for _init_cli_config method positive result."""
         user_config = get_or_create_cli_config()
-        _init_cli_config(user_config)
+
+        with mock.patch("aea.helpers.io.open_file", mock.mock_open()):
+            _init_cli_config(user_config)
 
         dirname_mock.assert_called_once()
         exists_mock.assert_called_once_with("dir-name")
@@ -209,28 +210,30 @@ def _raise_file_not_found_error(*args):
     raise FileNotFoundError()
 
 
-@pytest.mark.skip(reason="flaky test addressed in PR #369")
+@pytest.mark.skip
 @mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 @mock.patch("aea.cli.utils.config.validate_cli_config")
-class GetOrCreateCLIConfigTestCase(TestCase):
+class TestGetOrCreateCLIConfig:
     """Test case for read_cli_config method."""
 
-    @mock.patch(
-        "aea.cli.utils.generic.yaml.safe_load", return_value={"correct": "output"}
-    )
-    def testget_or_create_cli_config_positive(self, safe_load_mock, validate_mock):
+    def test_get_or_create_cli_config_positive(self, validate_mock):
         """Test for get_or_create_cli_config method positive result."""
-        result = get_or_create_cli_config()
+
+        with mock.patch(
+            "aea.cli.utils.config.load_yaml", return_value={"correct": "output"}
+        ):
+            result = get_or_create_cli_config()
+
         expected_result = {"correct": "output"}
-        self.assertEqual(result, expected_result)
-        safe_load_mock.assert_called_once()
+        assert result == expected_result
         validate_mock.assert_called_once()
 
-    @mock.patch("aea.cli.utils.generic.yaml.safe_load", _raise_yamlerror)
-    def testget_or_create_cli_config_bad_yaml(self, validate_mock):
+    def test_get_or_create_cli_config_bad_yaml(self, validate_mock):
         """Test for rget_or_create_cli_config method bad yaml behavior."""
-        with self.assertRaises(ClickException):
-            get_or_create_cli_config()
+
+        with pytest.raises(ClickException):
+            with mock.patch.object(yaml, "safe_load", new=_raise_yamlerror):
+                get_or_create_cli_config()
 
 
 class CleanAfterTestCase(TestCase):
