@@ -126,3 +126,11 @@ def test_cid__repr__(multihash):
     keys = ["version", "codec", "multihash"]
     cid = CID.from_string(multihash)
     assert all(k in repr(cid) for k in keys)
+
+
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_is_cid(multihash):
+    """Test CID.is_cid"""
+
+    assert CID.is_cid(multihash)
+    assert not CID.is_cid(multihash[::-1])
