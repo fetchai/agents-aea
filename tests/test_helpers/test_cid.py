@@ -46,6 +46,14 @@ def test_conversion() -> None:
     ):
         to_v1(HASH_V1)
 
+    with pytest.raises(
+        ValueError,
+        match="CIDv1 can only be converted for codec dag-pb",
+    ):
+        cid_v1 = CID.from_string(HASH_V1)
+        cid_v1._codec = CIDv0.CODEC[::-1]
+        cid_v1.to_v0()
+
 
 def test_cids() -> None:
     """Test CID object."""
