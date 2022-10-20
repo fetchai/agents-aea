@@ -21,7 +21,9 @@
 """This module contains tests for aea.contracts.base."""
 import logging
 import os
+import platform
 import shutil
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import mkdtemp
@@ -183,6 +185,14 @@ def test_get_instance_no_address_cosmwasm(dummy_contract):
     assert instance is None
 
 
+@pytest.mark.skipif(
+    condition=(
+        platform.system() == "Darwin"
+        and sys.version_info.major == 3
+        and sys.version_info.minor == 10
+    ),
+    reason="Fails because of cosmpy dependency on macOS/py310",
+)
 def test_get_deploy_transaction_cosmwasm(dummy_contract):
     """Tests the deploy transaction classmethod for fetchai."""
     aea_ledger_fetchai = crypto_registry.make(FetchAICrypto.identifier)
