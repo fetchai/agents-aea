@@ -25,7 +25,6 @@ import shutil
 import subprocess  # nosec
 import tempfile
 import time
-from collections import OrderedDict
 from pathlib import Path
 from unittest import TestCase, mock
 
