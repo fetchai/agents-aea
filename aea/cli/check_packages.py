@@ -35,6 +35,8 @@ import click
 import yaml
 from pip._internal.commands.show import search_packages_info
 
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import pass_ctx
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.constants import (
     AGENTS,
@@ -75,6 +77,14 @@ def list_decorator(fn: Callable) -> Callable:
         return list(fn(*args, **kwargs))
 
     return wrapper
+
+
+class PypiDependencyNotFound(CustomException):
+    """Custom exception for Pypi dependency not found."""
+
+    def print_error(self) -> None:
+        """Print the error message."""
+        return print(self.args[0])
 
 
 class DependencyNotFound(CustomException):
@@ -227,7 +237,7 @@ def find_all_configuration_files(
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
         if any([file in str(path) for file in CONFIG_FILE_NAMES])
-        and path.parent.parent.parent.name == vendor
+        and (vendor is None or path.parent.parent.parent.name == vendor)
     ]
     return config_files
 
@@ -541,19 +551,14 @@ class PyPIDependenciesCheckTool:
         )
 
         if missed_deps_for_imports:
-            print(f"unresolved imports: {', '.join(missed_deps_for_imports)}")
-
-        if deps_not_imported_directly:
-            if missed_deps_for_imports:
-                print()
-            print(
-                f"Dependencies not imported in code directly: {', '.join(deps_not_imported_directly)}"
+            raise PypiDependencyNotFound(
+                f"unresolved imports: {', '.join(missed_deps_for_imports)}"
             )
 
-        if missed_deps_for_imports or deps_not_imported_directly:
-            sys.exit(1)
-        else:
-            print("All good!")
+        if deps_not_imported_directly:
+            raise PypiDependencyNotFound(
+                f"Dependencies not imported in code directly: {', '.join(deps_not_imported_directly)}"
+            )
 
     @staticmethod
     def check_imports(
@@ -595,13 +600,9 @@ def check_pypi_dependencies(configuration_file: Path) -> None:
 
 
 @click.command(name="check-packages")
-@click.argument(
-    "packages_dir",
-    type=click.Path(dir_okay=True, exists=True),
-    default=Path.cwd() / "packages",
-)
 @click.option("--vendor", type=str, default=None, required=False)
-def check_packages(packages_dir: Path, vendor: Optional[str]) -> None:
+@pass_ctx
+def check_packages(ctx: Context, vendor: Optional[str]) -> None:
     """
     Run different checks on AEA packages.
 
@@ -609,10 +610,10 @@ def check_packages(packages_dir: Path, vendor: Optional[str]) -> None:
     - Check that every package has existing dependencies
     - Check that every package has non-empty description
 
-    :param packages_dir: Path to packages dir.
+    :param ctx: AEA cli context.
     :param vendor: filter by author name
     """
-    packages_dir = Path(packages_dir).absolute()
+    packages_dir = Path(ctx.registry_path).absolute()
     all_packages_ids_ = find_all_packages_ids(packages_dir)
     failed: bool = False
 
