@@ -19,7 +19,7 @@
 #
 # ------------------------------------------------------------------------------
 
-# pragma: nocover
+# pragma: nocover  # noqa: E800
 
 """Entry-point for the AEA command-line tool."""
 
