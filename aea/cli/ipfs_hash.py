@@ -22,7 +22,7 @@
 This script generates the IPFS hashes for all packages.
 
 This script requires that you have IPFS installed:
-- https://docs.ipfs.io/guides/guides/install/
+- https://docs.ipfs.tech/guides/guides/install/
 """
 
 import sys

@@ -156,7 +156,7 @@ aea init --remote
 
 ## Setup Open-AEA Components
 
-AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.io/" target="_blank">IPFS registry</a> for others to use.
+AEAs are composed of components. AEAs and AEA components can be developed by anyone and pushed to an <a href="https://ipfs.tech/" target="_blank">IPFS registry</a> for others to use.
 
 
 
