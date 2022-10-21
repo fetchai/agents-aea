@@ -53,7 +53,7 @@ def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool
 
     while os.path.exists(directory) and retries:
         try:
-            os.chmod(directory, 0o777)
+            os.chmod(directory, 0o777)  # nosec
             shutil.rmtree(directory)
         except Exception:  # pylint: disable=broad-except
             retries -= 1
