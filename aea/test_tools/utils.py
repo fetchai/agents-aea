@@ -51,11 +51,15 @@ def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool
     :return: whether the directory was successfully deleted
     """
 
+    permission = os.stat(directory).st_mode
     while os.path.exists(directory) and retries:
         try:
-            os.chmod(directory, 0o777)  # nosec
+            os.chmod(directory, 0o40777)  # nosec
             shutil.rmtree(directory)
         except Exception:  # pylint: disable=broad-except
             retries -= 1
             time.sleep(1)
+        finally:
+            if os.path.exists(directory):
+                os.chmod(directory, permission)
     return not os.path.exists(directory)
