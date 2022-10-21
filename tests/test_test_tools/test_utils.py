@@ -28,7 +28,11 @@ from unittest import mock
 import pytest
 
 from aea.test_tools import utils
-from aea.test_tools.utils import remove_test_directory, wait_for_condition
+from aea.test_tools.utils import (
+    FULL_PERMISSION,
+    remove_test_directory,
+    wait_for_condition,
+)
 
 
 def test_wait_for_condition():
@@ -49,9 +53,12 @@ def test_remove_non_empty_test_directory(path_type):
     assert os.path.isdir(tmp_dir)
     assert list(Path(tmp_dir).glob("*"))
 
+    permission = os.stat(tmp_dir).st_mode
+    assert permission != FULL_PERMISSION
     with mock.patch("os.lstat", side_effect=Exception):
         assert not remove_test_directory(tmp_dir)
     assert os.path.exists(tmp_dir)
+    assert os.stat(tmp_dir).st_mode == permission
 
     assert remove_test_directory(tmp_dir)
     assert not os.path.exists(tmp_dir)

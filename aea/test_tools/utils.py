@@ -26,6 +26,9 @@ from pathlib import Path
 from typing import Callable, Union
 
 
+FULL_PERMISSION = 0o40777
+
+
 def wait_for_condition(
     condition_checker: Callable,
     timeout: int = 2,
@@ -54,7 +57,7 @@ def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool
     permission = os.stat(directory).st_mode
     while os.path.exists(directory) and retries:
         try:
-            os.chmod(directory, 0o40777)  # nosec
+            os.chmod(directory, FULL_PERMISSION)  # nosec
             shutil.rmtree(directory)
         except Exception:  # pylint: disable=broad-except
             retries -= 1
