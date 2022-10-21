@@ -22,7 +22,7 @@
 import socket
 from unittest import mock
 
-from aea.test_tools.network import get_host, get_unused_tcp_port
+from aea.test_tools.network import get_host, get_unused_tcp_port, LOCALHOST
 
 
 def is_port_in_use(port: int) -> bool:
@@ -42,6 +42,7 @@ def test_get_unused_tcp_port() -> None:
 def test_get_host():
     """Test get_host"""
 
-    assert get_host()
+    assert socket.inet_aton(get_host())
     with mock.patch("socket.socket.connect", side_effect=Exception):
-        get_host()
+        assert socket.inet_aton(get_host())
+        assert get_host() == LOCALHOST.hostname
