@@ -19,8 +19,6 @@
 #
 # ------------------------------------------------------------------------------
 
-# pragma: nocover  # noqa: E800
-
 """Entry-point for the AEA command-line tool."""
 
 from aea.cli.core import cli
