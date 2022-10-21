@@ -19,6 +19,7 @@
 """This module contains the protocol generator."""
 import itertools
 import os
+import re
 import shutil
 
 # pylint: skip-file
@@ -48,6 +49,7 @@ from aea.protocols.generator.common import (
     _create_protocol_file,
     _get_sub_types_of_compositional_types,
     _includes_custom_type,
+    _is_compositional_type,
     _python_pt_or_ct_type_to_proto_type,
     _to_camel_case,
     _union_sub_type_to_protobuf_variable_name,
@@ -297,8 +299,10 @@ class ProtocolGenerator:
         new_content_type = content_type
         if _includes_custom_type(content_type):
             for custom_type in self.spec.all_custom_types:
-                new_content_type = new_content_type.replace(
-                    custom_type, self.spec.custom_custom_types[custom_type]
+                new_content_type = re.sub(
+                    rf"(^|[ \[\,])({custom_type})($|[, \]])",
+                    rf"\g<1>{self.spec.custom_custom_types[custom_type]}\g<3>",
+                    new_content_type,
                 )
         return new_content_type
 
@@ -1340,58 +1344,109 @@ class ProtocolGenerator:
             self._change_indent(-2)
         return cls_str
 
+    def _to_python_type(self, content_type: str) -> str:
+        """
+        Return python type.
+
+        :param  content_type: str
+        :return: str
+        """
+        if not _is_compositional_type(content_type):
+            return content_type
+        m = re.search(r"^(pt:)?([a-zA-Z0-9_]+)(\[.*)?", content_type)
+        if not m:
+            return content_type
+        type_ = m.groups()[1].lower()
+        if type_ == "frozenset":
+            return "(set, frozenset)"
+        if type_ == "tuple":
+            return "(list, tuple)"
+
+        return type_
+
     def _encoding_message_content_from_python_to_protobuf(
         self,
         content_name: str,
         content_type: str,
+        performative_name: Optional[str] = None,
     ) -> str:
         """
         Produce the encoding of message contents for the serialisation class.
 
         :param content_name: the name of the content to be encoded
         :param content_type: the type of the content to be encoded
+        :param performative_name: optional performative name of the content to be encoded
 
         :return: the encoding string
         """
+        performative_name = performative_name or content_name
         encoding_str = ""
         if content_type in PYTHON_TYPE_TO_PROTO_TYPE.keys():
             encoding_str += self.indent + "{} = msg.{}\n".format(
-                content_name, content_name
+                performative_name, content_name
             )
             encoding_str += self.indent + "performative.{} = {}\n".format(
-                content_name, content_name
+                performative_name, performative_name
             )
         elif content_type.startswith("FrozenSet") or content_type.startswith("Tuple"):
             encoding_str += self.indent + "{} = msg.{}\n".format(
                 content_name, content_name
             )
             encoding_str += self.indent + "performative.{}.extend({})\n".format(
-                content_name, content_name
+                performative_name, content_name
             )
         elif content_type.startswith("Dict"):
             encoding_str += self.indent + "{} = msg.{}\n".format(
                 content_name, content_name
             )
             encoding_str += self.indent + "performative.{}.update({})\n".format(
-                content_name, content_name
+                performative_name, content_name
             )
+
         elif content_type.startswith("Union"):
             sub_types = _get_sub_types_of_compositional_types(content_type)
+            encoding_str += self.indent + f'if msg.is_set("{content_name}"):\n'
+            self._change_indent(1)
+            elif_add = ""
             for sub_type in sub_types:
                 sub_type_name_in_protobuf = _union_sub_type_to_protobuf_variable_name(
                     content_name, sub_type
                 )
-                encoding_str += self.indent + 'if msg.is_set("{}"):\n'.format(
-                    sub_type_name_in_protobuf
+                extra = ""
+                if _is_compositional_type(sub_type):
+                    subt = _get_sub_types_of_compositional_types(sub_type)
+                    if "dict" in sub_type.lower():
+                        extra = f" and all(map(lambda x: isinstance(x[0], {subt[0]}) and isinstance(x[1], {subt[1]}), msg.{content_name}.items()))"
+                    else:
+                        extra = f" and all(map(lambda x: isinstance(x, {subt[0]}), msg.{content_name}))"
+                encoding_str += (
+                    self.indent
+                    + f"{elif_add}if isinstance(msg.{content_name}, {self._to_python_type(sub_type)}){extra}:\n"
                 )
                 self._change_indent(1)
                 encoding_str += self.indent + "performative.{}_is_set = True\n".format(
                     sub_type_name_in_protobuf
                 )
                 encoding_str += self._encoding_message_content_from_python_to_protobuf(
-                    sub_type_name_in_protobuf, sub_type
+                    content_name, sub_type, performative_name=sub_type_name_in_protobuf
                 )
                 self._change_indent(-1)
+                elif_add = "el"
+
+            encoding_str += self.indent + f"elif msg.{content_name} is None:\n"
+            self._change_indent(1)
+            encoding_str += self.indent + "pass\n"
+            self._change_indent(-1)
+
+            encoding_str += self.indent + "else:\n"
+            self._change_indent(1)
+            encoding_str += (
+                self.indent
+                + f"raise ValueError(f'Bad value set to `{content_name}` {{msg.{content_name} }}')\n"
+            )
+            self._change_indent(-1)
+
+            self._change_indent(-1)
         elif content_type.startswith("Optional"):
             sub_type = _get_sub_types_of_compositional_types(content_type)[0]
             if not sub_type.startswith("Union"):
@@ -1409,10 +1464,10 @@ class ProtocolGenerator:
                 self._change_indent(-1)
         else:
             encoding_str += self.indent + "{} = msg.{}\n".format(
-                content_name, content_name
+                performative_name, content_name
             )
             encoding_str += self.indent + "{}.encode(performative.{}, {})\n".format(
-                content_type, content_name, content_name
+                content_type, performative_name, performative_name
             )
         return encoding_str
 
@@ -1454,7 +1509,7 @@ class ProtocolGenerator:
                 content_name,
                 self.protocol_specification.name,
                 performative,
-                content_name,
+                variable_name,
             )
             decoding_str += self.indent + "{}_frozenset = frozenset({})\n".format(
                 content_name, content_name
@@ -1470,7 +1525,7 @@ class ProtocolGenerator:
                 content_name,
                 self.protocol_specification.name,
                 performative,
-                content_name,
+                variable_name,
             )
             decoding_str += self.indent + "{}_tuple = tuple({})\n".format(
                 content_name, content_name
@@ -1486,7 +1541,7 @@ class ProtocolGenerator:
                 content_name,
                 self.protocol_specification.name,
                 performative,
-                content_name,
+                variable_name,
             )
             decoding_str += self.indent + "{}_dict = dict({})\n".format(
                 content_name, content_name
@@ -1816,7 +1871,7 @@ class ProtocolGenerator:
                     content_name, sub_type
                 )
                 content_to_proto_field_str, tag_no = self._content_to_proto_field_str(
-                    sub_type_name, sub_type, tag_no
+                    sub_type_name, f"Optional[{sub_type}]", tag_no
                 )
                 entry += content_to_proto_field_str
         elif content_type.startswith("Optional"):  # it is an <O>

@@ -168,6 +168,9 @@ class TestValidate(TestCase):
         valid_content_type_6 = "ct:DataF"
         assert _is_valid_ct(valid_content_type_6) is True
 
+        valid_content_type_7 = "ct:DataModel2"
+        assert _is_valid_ct(valid_content_type_7) is True
+
         ###################################################
 
         invalid_content_type_1 = "ct:data"
@@ -178,9 +181,6 @@ class TestValidate(TestCase):
 
         invalid_content_type_3 = "ct: DataModel"
         assert _is_valid_ct(invalid_content_type_3) is False
-
-        invalid_content_type_4 = "ct:E3"
-        assert _is_valid_ct(invalid_content_type_4) is False
 
     def test_is_valid_pt(self):
         """Test for the '_is_valid_pt' method."""
@@ -377,32 +377,29 @@ class TestValidate(TestCase):
 
     def test_is_valid_union(self):
         """Test for the '_is_valid_union' method."""
-        valid_content_type_1 = (
-            "pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:bytes], "
-            "pt:set[pt:int], pt:set[pt:float], pt:set[pt:bool], pt:set[pt:str], "
-            "pt:list[pt:bytes], pt:list[pt:int], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:str], "
-            "pt:dict[pt:bytes, pt:bytes],    pt:dict[  pt:bytes  ,   pt:int   ]  , pt:dict[pt:bytes, pt:float], pt:dict[pt:bytes, pt:bool], pt:dict[pt:bytes, pt:str], "
-            "pt:dict[pt:int, pt:bytes], pt:dict[pt:int, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:int, pt:bool], pt:dict[pt:int, pt:str], "
-            "pt:dict[pt:float, pt:bytes], pt:dict[pt:float, pt:int], pt:dict[pt:float, pt:float], pt:dict[pt:float, pt:bool], pt:dict[pt:float, pt:str], "
-            "pt:dict[pt:bool, pt:bytes], pt:dict[pt:bool, pt:int], pt:dict[pt:bool,pt:float], pt:dict[pt:bool, pt:bool], pt:dict[pt:bool, pt:str], "
-            "pt:dict[pt:str, pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:str,pt:float], pt:dict[pt:str, pt:bool], pt:dict[pt:str, pt:str]]"
-        )
+        valid_content_type_1 = "pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str]"
         assert _is_valid_union(valid_content_type_1) is True
-
-        valid_content_type_2 = "pt:union[pt:bytes, pt:set[pt:int]]"
-        assert _is_valid_union(valid_content_type_2) is True
 
         valid_content_type_3 = "pt:union[pt:float, pt:bool]"
         assert _is_valid_union(valid_content_type_3) is True
 
-        valid_content_type_4 = "pt:union[pt:set[pt:int], pt:set[pt:float]]"
-        assert _is_valid_union(valid_content_type_4) is True
+        valid_content_type_3 = "pt:union[ct:DataModel, pt:bool]"
+        assert _is_valid_union(valid_content_type_3) is True
+
+        valid_content_type_3 = "pt:union[ct:DataModel, ct:DataModel2]"
+        assert _is_valid_union(valid_content_type_3) is True
 
         valid_content_type_5 = "pt:union[pt:bool,pt:bytes]"
         assert _is_valid_union(valid_content_type_5) is True
 
+        valid_content_type_4 = "pt:union[pt:set[pt:int], pt:set[pt:float]]"
+        assert _is_valid_union(valid_content_type_4) is True
+
         valid_content_type_6 = "   pt:union[  pt:bytes  ,   pt:set[  pt:int  ]   ] "
         assert _is_valid_union(valid_content_type_6) is True
+
+        valid_content_type_13 = "pt:union[pt:bytes, pt:set[pt:int]]"
+        assert _is_valid_union(valid_content_type_13) is True
 
         ###################################################
 
@@ -447,18 +444,11 @@ class TestValidate(TestCase):
     def test_is_valid_optional(self):
         """Test for the '_is_valid_optional' method."""
         valid_content_type_1 = (
-            "pt:optional[pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:bytes], "
-            "pt:set[pt:int], pt:set[pt:float], pt:set[pt:bool], pt:set[pt:str], "
-            "pt:list[pt:bytes], pt:list[pt:int], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:str], "
-            "pt:dict[pt:bytes, pt:bytes],    pt:dict[  pt:bytes  ,   pt:int   ]  , pt:dict[pt:bytes, pt:float], pt:dict[pt:bytes, pt:bool], pt:dict[pt:bytes, pt:str], "
-            "pt:dict[pt:int, pt:bytes], pt:dict[pt:int, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:int, pt:bool], pt:dict[pt:int, pt:str], "
-            "pt:dict[pt:float, pt:bytes], pt:dict[pt:float, pt:int], pt:dict[pt:float, pt:float], pt:dict[pt:float, pt:bool], pt:dict[pt:float, pt:str], "
-            "pt:dict[pt:bool, pt:bytes], pt:dict[pt:bool, pt:int], pt:dict[pt:bool,pt:float], pt:dict[pt:bool, pt:bool], pt:dict[pt:bool, pt:str], "
-            "pt:dict[pt:str, pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:str,pt:float], pt:dict[pt:str, pt:bool], pt:dict[pt:str, pt:str]]]"
+            "pt:optional[pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str]]"
         )
         assert _is_valid_optional(valid_content_type_1) is True
 
-        valid_content_type_2 = "pt:optional[pt:union[pt:bytes, pt:set[pt:int]]]"
+        valid_content_type_2 = "pt:optional[pt:union[pt:bytes, pt:str]]"
         assert _is_valid_optional(valid_content_type_2) is True
 
         valid_content_type_3 = "pt:optional[pt:bytes]"
@@ -543,14 +533,7 @@ class TestValidate(TestCase):
         assert _is_valid_content_type_format(valid_content_type_5) is True
 
         valid_content_type_6 = (
-            "pt:optional[pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:bytes], "
-            "pt:set[pt:int], pt:set[pt:float], pt:set[pt:bool], pt:set[pt:str], "
-            "pt:list[pt:bytes], pt:list[pt:int], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:str], "
-            "pt:dict[pt:bytes, pt:bytes],    pt:dict[  pt:bytes  ,   pt:int   ]  , pt:dict[pt:bytes, pt:float], pt:dict[pt:bytes, pt:bool], pt:dict[pt:bytes, pt:str], "
-            "pt:dict[pt:int, pt:bytes], pt:dict[pt:int, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:int, pt:bool], pt:dict[pt:int, pt:str], "
-            "pt:dict[pt:float, pt:bytes], pt:dict[pt:float, pt:int], pt:dict[pt:float, pt:float], pt:dict[pt:float, pt:bool], pt:dict[pt:float, pt:str], "
-            "pt:dict[pt:bool, pt:bytes], pt:dict[pt:bool, pt:int], pt:dict[pt:bool,pt:float], pt:dict[pt:bool, pt:bool], pt:dict[pt:bool, pt:str], "
-            "pt:dict[pt:str, pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:str,pt:float], pt:dict[pt:str, pt:bool], pt:dict[pt:str, pt:str]]]"
+            "pt:optional[pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str]]"
         )
         assert _is_valid_content_type_format(valid_content_type_6) is True
 
@@ -884,14 +867,7 @@ class TestValidate(TestCase):
         )
 
         valid_content_type_6 = (
-            "pt:optional[pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str, pt:set[pt:bytes], "
-            "pt:set[pt:int], pt:set[pt:float], pt:set[pt:bool], pt:set[pt:str], "
-            "pt:list[pt:bytes], pt:list[pt:int], pt:list[pt:float], pt:list[pt:bool], pt:list[pt:str], "
-            "pt:dict[pt:bytes, pt:bytes],    pt:dict[  pt:bytes  ,   pt:int   ]  , pt:dict[pt:bytes, pt:float], pt:dict[pt:bytes, pt:bool], pt:dict[pt:bytes, pt:str], "
-            "pt:dict[pt:int, pt:bytes], pt:dict[pt:int, pt:int], pt:dict[pt:int, pt:float], pt:dict[pt:int, pt:bool], pt:dict[pt:int, pt:str], "
-            "pt:dict[pt:float, pt:bytes], pt:dict[pt:float, pt:int], pt:dict[pt:float, pt:float], pt:dict[pt:float, pt:bool], pt:dict[pt:float, pt:str], "
-            "pt:dict[pt:bool, pt:bytes], pt:dict[pt:bool, pt:int], pt:dict[pt:bool,pt:float], pt:dict[pt:bool, pt:bool], pt:dict[pt:bool, pt:str], "
-            "pt:dict[pt:str, pt:bytes], pt:dict[pt:str, pt:int], pt:dict[pt:str,pt:float], pt:dict[pt:str, pt:bool], pt:dict[pt:str, pt:str]]]"
+            "pt:optional[pt:union[pt:bytes, pt:int, pt:float, pt:bool, pt:str]]"
         )
         valid_result_6, valid_msg_6 = _validate_content_type(
             valid_content_type_6, content_name, performative
