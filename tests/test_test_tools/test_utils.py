@@ -54,7 +54,6 @@ def test_remove_non_empty_test_directory(path_type):
     assert list(Path(tmp_dir).glob("*"))
 
     permission = os.stat(tmp_dir).st_mode
-    assert permission != FULL_PERMISSION
     with mock.patch("os.lstat", side_effect=Exception):
         assert not remove_test_directory(tmp_dir)
     assert os.path.exists(tmp_dir)
