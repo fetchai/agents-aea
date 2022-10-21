@@ -20,6 +20,7 @@
 
 """Test check packages command module."""
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, List
 from unittest import mock
@@ -51,10 +52,33 @@ def _find_all_configuration_files_patch(config_files: List) -> Any:
     )
 
 
+@dataclass
+class _TestPublicIdParameters:
+    """Dataclass to store parameters for a public id check test."""
+
+    side_effect: List
+    exit_code: int
+    message: str
+
+
 class TestCheckPackagesCommand(BaseAEATestCase):
     """Test check-packages command."""
 
     use_packages_dir: bool = True
+    test_aea_config: Path
+    test_connection_config: Path
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Setup class."""
+        super().setup_class()
+
+        cls.test_aea_config = (
+            cls.t / "packages" / "fetchai" / "agents" / "error_test" / "aea-config.yaml"
+        )
+        cls.test_connection_config = (
+            cls.t / "packages" / "fetchai" / "connections" / "gym" / "connection.yaml"
+        )
 
     def test_invocation(
         self,
@@ -69,12 +93,8 @@ class TestCheckPackagesCommand(BaseAEATestCase):
 
         assert result.exit_code == 0, result.output
         assert all(
-            [
-                str(file) in result.output
-                for file in find_all_configuration_files(
-                    self.packages_dir_path.absolute()
-                )
-            ]
+            str(file) in result.output
+            for file in find_all_configuration_files(self.packages_dir_path.absolute())
         )
 
     def test_dependency_not_found(
@@ -82,16 +102,8 @@ class TestCheckPackagesCommand(BaseAEATestCase):
     ) -> None:
         """Test"""
 
-        config_file = (
-            self.t
-            / "packages"
-            / "fetchai"
-            / "agents"
-            / "error_test"
-            / "aea-config.yaml"
-        )
         with find_all_packages_ids_patch, _find_all_configuration_files_patch(
-            [config_file]
+            [self.test_aea_config]
         ):
             result = self.invoke(
                 "--registry-path",
@@ -107,20 +119,11 @@ class TestCheckPackagesCommand(BaseAEATestCase):
     ) -> None:
         """Test description check."""
 
-        config_file = (
-            self.t
-            / "packages"
-            / "fetchai"
-            / "agents"
-            / "error_test"
-            / "aea-config.yaml"
-        )
-
         with _unified_yaml_load_patch(
             description=""
         ), check_author_patch, check_dependencies_patch, find_all_packages_ids_patch, _find_all_configuration_files_patch(
             [
-                config_file,
+                self.test_aea_config,
             ]
         ):
             result = self.invoke(
@@ -137,20 +140,11 @@ class TestCheckPackagesCommand(BaseAEATestCase):
     ) -> None:
         """Test `check_author` failure."""
 
-        config_file = (
-            self.t
-            / "packages"
-            / "fetchai"
-            / "agents"
-            / "error_test"
-            / "aea-config.yaml"
-        )
-
         with _unified_yaml_load_patch(
             author="SOME_AUTHOR"
         ), find_all_packages_ids_patch, _find_all_configuration_files_patch(
             [
-                config_file,
+                self.test_aea_config,
             ]
         ):
             result = self.invoke(
@@ -170,13 +164,11 @@ class TestCheckPackagesCommand(BaseAEATestCase):
     ) -> None:
         """Test `check_public_id` failure."""
 
-        config_file = (
-            self.t / "packages" / "fetchai" / "connections" / "gym" / "connection.yaml"
-        )
-
         with mock.patch(
             "re.findall", return_value=[]
-        ), _find_all_configuration_files_patch([config_file]), check_dependencies_patch:
+        ), _find_all_configuration_files_patch(
+            [self.test_connection_config]
+        ), check_dependencies_patch:
             result = self.invoke(
                 "--registry-path",
                 str(self.packages_dir_path),
@@ -188,74 +180,69 @@ class TestCheckPackagesCommand(BaseAEATestCase):
         assert "found 0" in result.output
 
     @pytest.mark.parametrize(
-        ("side_effect", "exit_code", "message"),
+        "test_param",
         [
-            (
-                [
+            _TestPublicIdParameters(
+                side_effect=[
                     [(None,)],
                     [(None, None, None)],
                 ],
-                1,
-                "found 'None'",
+                exit_code=1,
+                message="found 'None'",
             ),
-            (
-                [
+            _TestPublicIdParameters(
+                side_effect=[
                     [(None,)],
                     [],
                     [(None, None, None)],
                 ],
-                1,
-                "found 'None/None:None'",
+                exit_code=1,
+                message="found 'None/None:None'",
             ),
-            (
-                [
+            _TestPublicIdParameters(
+                side_effect=[
                     [(None,)],
                     [],
                     [("fetchai", "gym", "0.19.0")],
                 ],
-                0,
-                "OK!",
+                exit_code=0,
+                message="OK!",
             ),
-            (
-                [
+            _TestPublicIdParameters(
+                side_effect=[
                     [(None,)],
                     [],
                     ["", ()],
                 ],
-                1,
-                "found ''",
+                exit_code=1,
+                message="found ''",
             ),
         ],
     )
     def test_check_public_id_failure_wrong_public_id(
-        self, side_effect: List[Any], exit_code: int, message: str
+        self, test_param: _TestPublicIdParameters
     ) -> None:
         """Test `check_public_id` failure."""
 
-        config_file = (
-            self.t / "packages" / "fetchai" / "connections" / "gym" / "connection.yaml"
-        )
-
         with mock.patch(
             "re.findall",
-            side_effect=side_effect,
-        ), _find_all_configuration_files_patch([config_file]), check_dependencies_patch:
+            side_effect=test_param.side_effect,
+        ), _find_all_configuration_files_patch(
+            [self.test_connection_config]
+        ), check_dependencies_patch:
             result = self.invoke(
                 "--registry-path",
                 str(self.packages_dir_path),
                 "check-packages",
             )
 
-        assert result.exit_code == exit_code, result.output
-        assert message in result.output
+        assert result.exit_code == test_param.exit_code, result.output
+        assert test_param.message in result.output
 
     def test_check_pypi_dependencies_failure(
         self,
     ) -> None:
         """Test `check_pypi_dependencies`"""
-        config_file = (
-            self.t / "packages" / "fetchai" / "connections" / "gym" / "connection.yaml"
-        )
 
         with mock.patch(
             "aea.cli.check_packages.PyPIDependenciesCheckTool.check_imports",
@@ -265,7 +252,9 @@ class TestCheckPackagesCommand(BaseAEATestCase):
                 ],
                 [],
             ),
-        ), _find_all_configuration_files_patch([config_file]), check_dependencies_patch:
+        ), _find_all_configuration_files_patch(
+            [self.test_connection_config]
+        ), check_dependencies_patch:
             result = self.invoke(
                 "--registry-path",
                 str(self.packages_dir_path),
