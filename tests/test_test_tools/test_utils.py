@@ -28,11 +28,7 @@ from unittest import mock
 import pytest
 
 from aea.test_tools import utils
-from aea.test_tools.utils import (
-    FULL_PERMISSION,
-    remove_test_directory,
-    wait_for_condition,
-)
+from aea.test_tools.utils import remove_test_directory, wait_for_condition
 
 
 def test_wait_for_condition():
