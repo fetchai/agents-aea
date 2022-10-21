@@ -19,11 +19,15 @@
 
 """Test utilities."""
 
+import os
+import shutil
 import tempfile
+from pathlib import Path
 from unittest import mock
 
 import pytest
 
+from aea.test_tools import utils
 from aea.test_tools.utils import remove_test_directory, wait_for_condition
 
 
@@ -35,12 +39,19 @@ def test_wait_for_condition():
         wait_for_condition(lambda: False, error_msg="test error msg")
 
 
-def test_remove_test_directory():
+@pytest.mark.parametrize("path_type", [str, Path])
+def test_remove_non_empty_test_directory(path_type):
     """Test remove_test_directory"""
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        assert remove_test_directory(str(tmp_dir))
+    tmp_dir = path_type(tempfile.TemporaryDirectory().name)
+    assert not os.path.exists(tmp_dir)
+    shutil.copytree(str(Path(utils.__file__).parent), tmp_dir)
+    assert os.path.isdir(tmp_dir)
+    assert list(Path(tmp_dir).glob("*"))
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        with mock.patch("os.lstat", side_effect=Exception):
-            assert not remove_test_directory(tmp_dir)
+    with mock.patch("os.lstat", side_effect=Exception):
+        assert not remove_test_directory(tmp_dir)
+    assert os.path.exists(tmp_dir)
+
+    assert remove_test_directory(tmp_dir)
+    assert not os.path.exists(tmp_dir)
