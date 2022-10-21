@@ -39,10 +39,11 @@ def test_wait_for_condition():
         wait_for_condition(lambda: False, error_msg="test error msg")
 
 
-def test_remove_non_empty_test_directory():
+@pytest.mark.parametrize("path_type", [str, Path])
+def test_remove_non_empty_test_directory(path_type):
     """Test remove_test_directory"""
 
-    tmp_dir = tempfile.TemporaryDirectory().name
+    tmp_dir = path_type(tempfile.TemporaryDirectory().name)
     assert not os.path.exists(tmp_dir)
     shutil.copytree(str(Path(utils.__file__).parent), tmp_dir)
     assert os.path.isdir(tmp_dir)
