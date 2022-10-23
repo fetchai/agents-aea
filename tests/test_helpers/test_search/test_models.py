@@ -540,6 +540,8 @@ def test_constraint():
     assert not c1.check(book_2)
     # empty description
     assert not c1.check(Description({}))
+    # description not matching contained type
+    assert not c2.check(Description({"year": str(12)}))
     # bad type
     assert not c1.check(Description({"author": 12}))
     # bad type
