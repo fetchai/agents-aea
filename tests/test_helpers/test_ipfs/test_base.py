@@ -135,6 +135,9 @@ class TestDirectoryHashing:
                 hash_daemon == hash_local
             ), f"Hash from daemon {hash_daemon} does not match calculated hash {hash_local}\n{d}"
 
+            Path(temp_dir, "inner_0", "__pycache__").mkdir()
+            assert hash_daemon == self.hash_tool.get(temp_dir)
+
     def test_depth_multi(
         self,
     ) -> None:
