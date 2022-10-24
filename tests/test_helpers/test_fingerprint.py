@@ -19,36 +19,41 @@
 
 """Tests for fingerprinting packages."""
 
+import random
 import shutil
 import tempfile
-import random
-
-import yaml
-import pytest
 from pathlib import Path
 
-from tests.conftest import PACKAGES_DIR
-from aea.helpers.cid import CID
-from aea.helpers.fingerprint import compute_fingerprint, update_fingerprint, check_fingerprint
-from aea.helpers.dependency_tree import COMPONENTS
+import pytest
+import yaml
+
 from aea.configurations.base import PACKAGE_TYPE_TO_CONFIG_CLASS
+from aea.helpers.cid import CID
+from aea.helpers.dependency_tree import COMPONENTS
+from aea.helpers.fingerprint import (
+    check_fingerprint,
+    compute_fingerprint,
+    update_fingerprint,
+)
+
+from tests.conftest import PACKAGES_DIR
 
 
 CONFIG_CLASSES = {k.value: v for k, v in PACKAGE_TYPE_TO_CONFIG_CLASS.items()}
-CONFIG_FILES = {k: list(Path(PACKAGES_DIR).rglob(file_name)) for k, file_name in COMPONENTS}
+CONFIG_FILES = {k: Path(PACKAGES_DIR).rglob(f_name) for k, f_name in COMPONENTS}
 
 
 def test_compute_fingerprint():
-    """ Test compute_fingerprint"""
+    """Test compute_fingerprint"""
 
-    ignore_pattern = '__init__.py'
+    ignore_pattern = "__init__.py"
     package_path = Path(PACKAGES_DIR)
     fingerprints = compute_fingerprint(package_path, fingerprint_ignore_patterns=None)
     assert all(map(lambda multihash: CID.is_cid(multihash), fingerprints.values()))
 
     n_fingerprints_without_ignore = len(fingerprints)
     n_init_dot_py = sum(p.endswith(ignore_pattern) for p in fingerprints)
-    fingerprints = compute_fingerprint(package_path, (ignore_pattern, ))
+    fingerprints = compute_fingerprint(package_path, (ignore_pattern,))
     assert len(fingerprints) + n_init_dot_py == n_fingerprints_without_ignore
     assert all(map(lambda multihash: CID.is_cid(multihash), fingerprints.values()))
 
@@ -67,13 +72,14 @@ def test_update_fingerprint(package_type, files):
         return config_cls._create_or_update_from_json(json)
 
     def point_mutation(directory: Path) -> None:
-        """Mutate random character in a python file"""
+        """Mutate random character in a random python file"""
         py_file = random.choice(list(directory.glob("*.py")))
         content = Path(py_file).read_text()
         i = random.choice(range(len(content)))
-        new = content[:i] + chr(ord(content[i]) + 1) + content[i + 1:]
+        new = content[:i] + chr(ord(content[i]) + 1) + content[i + 1 :]
         py_file.write_text(new)
 
+    dir_none_error_msg = "configuration.directory cannot be None."
     config_cls = CONFIG_CLASSES.get(package_type)
     with tempfile.TemporaryDirectory() as tmp_dir:
         for file in files:
@@ -83,7 +89,7 @@ def test_update_fingerprint(package_type, files):
             copied_file = nested_dir / file.name
 
             config = load_config(copied_file)
-            with pytest.raises(ValueError, match="configuration.directory cannot be None."):
+            with pytest.raises(ValueError, match=dir_none_error_msg):
                 update_fingerprint(config)
 
             # no code accompanies the aea-config.yaml file
@@ -94,7 +100,7 @@ def test_update_fingerprint(package_type, files):
                 continue
 
             # check all other types of packages
-            with pytest.raises(ValueError, match="configuration.directory cannot be None."):
+            with pytest.raises(ValueError, match=dir_none_error_msg):
                 check_fingerprint(config)
             config.directory = nested_dir
 
