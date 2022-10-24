@@ -81,6 +81,26 @@ class TestDirectoryHashing:
         self.hash_tool = IPFSHashOnly()
         self.ipfs_tool = IPFSTool(addr="/ip4/127.0.0.1/tcp/5001")
 
+    @pytest.mark.parametrize(
+        "wrap, cid_v1, expected_multihash",
+        [
+            (1, 1, "bafybeies5n7nngqpzwzhety4ndktmzfjgwr5pk2ge3wbftqjwymhlzrc7e"),
+            (1, 0, "QmYEAWM6jmjffDQNiyVjVWFcx7SRvutnoRuEP6AJKN9apY"),
+            (0, 1, "bafybeicjexomh6l2rb3efmzojmsx2p2gynjzg3eztf4quu6zyepmnisn4e"),
+            (0, 0, "QmTGBxU5aqqpeiihQxcWr4xynhqWt23R73Btss2j8r9XcC"),
+        ],
+    )
+    def test_get_dir_hash(self, wrap, cid_v1, expected_multihash):
+        """Test IPFSHashOnly.get directory hash"""
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            file = Path(tmp_dir) / "nested" / "dummy_file.txt"
+            file.parent.mkdir()
+            file.write_text("dummy_data")
+            wrap, cid_v1 = map(bool, (wrap, cid_v1))
+            computed_multihash = IPFSHashOnly.get(str(file.parent), wrap=wrap, cid_v1=cid_v1)
+            assert computed_multihash == expected_multihash
+
     def test_depth_0(
         self,
     ) -> None:
