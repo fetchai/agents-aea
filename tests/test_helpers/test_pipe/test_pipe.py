@@ -20,6 +20,7 @@
 """Tests for the pipe module."""
 import asyncio
 from threading import Thread
+from unittest import mock
 
 import pytest
 
@@ -28,6 +29,7 @@ from aea.helpers.pipe import (
     PosixNamedPipeChannel,
     PosixNamedPipeChannelClient,
     TCPSocketChannel,
+    TCPSocketProtocol,
     TCPSocketChannelClient,
     make_ipc_channel,
     make_ipc_channel_client,
@@ -135,6 +137,15 @@ class TestAEAHelperTCPSocketChannel:
 
         connected = await client_pipe.connect()
         assert connected is False
+
+    def test_tcp_socket_channel_protocol_writer_property(self):
+        """Test that TCP socket channel protocol write not set raises"""
+
+        pipe = TCPSocketChannel()
+        reader = asyncio.StreamReader()
+        writer = asyncio.StreamWriter(mock.Mock(), mock.Mock(), reader, mock.Mock())
+        pipe._sock = TCPSocketProtocol(reader, writer)
+        assert pipe._sock.writer is writer
 
 
 def make_future(result) -> asyncio.Future:
