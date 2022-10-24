@@ -426,17 +426,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return cls._start_cli_process("run", *args)
 
     @classmethod
-    def run_interaction(cls) -> subprocess.Popen:
-        """
-        Run interaction as subprocess.
-
-        Run from agent's directory.
-
-        :return: subprocess object.
-        """
-        return cls._start_cli_process("interact")
-
-    @classmethod
     def _start_cli_process(cls, *args: str) -> subprocess.Popen:
         """
         Start cli subprocess with args specified.

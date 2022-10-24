@@ -19,7 +19,7 @@ Wait for condition to occur in selected timeout.
 #### remove`_`test`_`directory
 
 ```python
-def remove_test_directory(directory: str, retries: int = 3) -> bool
+def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool
 ```
 
 Destroy a directory once tests are done, change permissions if needed.
