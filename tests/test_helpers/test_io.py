@@ -78,7 +78,7 @@ def test_csv_io(capsys) -> None:
         ), csv_data
 
         enum_rows = enumerate(csv_file.read_text().split())
-        new_rows = [",".join([*row.split(','), f"another_{i}"]) for i, row in enum_rows]
+        new_rows = [",".join([*row.split(","), f"another_{i}"]) for i, row in enum_rows]
         csv_file.write_text("\n".join(new_rows))
         with pytest.raises(ValueError, match="Length of the row should be 2"):
             from_csv(csv_file)

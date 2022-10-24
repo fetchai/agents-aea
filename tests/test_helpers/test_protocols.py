@@ -19,9 +19,10 @@
 
 """Test protocol helpers."""
 
-import yaml
 from pathlib import Path
+
 import pytest
+import yaml
 
 from aea.configurations.base import PublicId
 from aea.helpers.protocols import (

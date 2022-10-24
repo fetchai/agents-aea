@@ -20,6 +20,7 @@
 """Tests for git tools."""
 
 from unittest import mock
+
 from aea.helpers.git import check_working_tree_is_dirty
 
 

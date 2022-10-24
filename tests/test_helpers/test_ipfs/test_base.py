@@ -50,6 +50,8 @@ def test_hash_for_big_file():
 
 
 class TestFileHashing:
+    """Test file hashing"""
+
     @pytest.mark.parametrize(
         "wrap, cid_v1, expected_multihash",
         [
@@ -98,7 +100,9 @@ class TestDirectoryHashing:
             file.parent.mkdir()
             file.write_text("dummy_data")
             wrap, cid_v1 = map(bool, (wrap, cid_v1))
-            computed_multihash = IPFSHashOnly.get(str(file.parent), wrap=wrap, cid_v1=cid_v1)
+            computed_multihash = IPFSHashOnly.get(
+                str(file.parent), wrap=wrap, cid_v1=cid_v1
+            )
             assert computed_multihash == expected_multihash
 
     def test_depth_0(

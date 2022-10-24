@@ -19,6 +19,8 @@
 
 """Test cid implementation."""
 
+from typing import cast
+
 import pytest
 
 from aea.helpers.cid import CID, CIDv0, CIDv1, to_v0, to_v1
@@ -50,7 +52,7 @@ def test_conversion() -> None:
         ValueError,
         match="CIDv1 can only be converted for codec dag-pb",
     ):
-        cid_v1 = CID.from_string(HASH_V1)
+        cid_v1 = cast(CIDv1, CID.from_string(HASH_V1))
         cid_v1._codec = CIDv0.CODEC[::-1]
         cid_v1.to_v0()
 
@@ -122,6 +124,7 @@ def test_make() -> None:
 
 @pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
 def test_cid__repr__(multihash):
+    """Test CID __repr__"""
 
     keys = ["version", "codec", "multihash"]
     cid = CID.from_string(multihash)
@@ -151,7 +154,10 @@ def test_cid_from_bytes(multihash):
         (b"bb", "cid length is invalid"),
         (bytes(2), "multihash is too short"),
         (bytes(10), "multihash length field does not match digest field length"),
-        (HASH_V1[::-1].encode("utf-8"), "multihash is not a valid base58 encoded multihash"),
+        (
+            HASH_V1[::-1].encode("utf-8"),
+            "multihash is not a valid base58 encoded multihash",
+        ),
     ],
 )
 def test_cid_from_incorrect_bytes_raises(cid_bytes, error_message):

@@ -38,8 +38,8 @@ import _strptime  # pylint: disbale=unsed-import # noqa: F401
 import pytest
 from packaging.version import Version
 
-from aea.exceptions import AEAEnforceError
 from aea.configurations.base import ComponentId, ComponentType
+from aea.exceptions import AEAEnforceError
 from aea.helpers.base import (
     CertRequest,
     MaxRetriesError,
@@ -54,6 +54,7 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
     locate,
+    perform_dict_override,
     prepend_if_not_absolute,
     reachable_nodes,
     recursive_update,
@@ -61,7 +62,6 @@ from aea.helpers.base import (
     send_control_c,
     try_decorator,
     win_popen_kwargs,
-    perform_dict_override,
 )
 
 from packages.fetchai.connections.http_server.connection import HTTPServerConnection

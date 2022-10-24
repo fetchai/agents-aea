@@ -29,8 +29,8 @@ from aea.helpers.pipe import (
     PosixNamedPipeChannel,
     PosixNamedPipeChannelClient,
     TCPSocketChannel,
-    TCPSocketProtocol,
     TCPSocketChannelClient,
+    TCPSocketProtocol,
     make_ipc_channel,
     make_ipc_channel_client,
 )
