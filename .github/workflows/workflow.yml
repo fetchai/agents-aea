@@ -26,15 +26,15 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install pipenv
-#      - name: Pipenv install requirements and check it can be locked
-#        run: |
-#          pipenv --clear
-#          pipenv install --dev --skip-lock
-#          pipenv run pip install -e .[all]
-#          pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
-#          pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
-#          pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
-#          pipenv lock
+      - name: Pipenv install requirements and check it can be locked
+        run: |
+          pipenv --clear
+          time pipenv install --verbose --dev --skip-lock
+          time pipenv run pip install -e .[all]
+          time pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
+          time pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
+          time pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
+          time pipenv lock
       - name: Check plugin consistency
         run: |
           # these two files should not be different;
