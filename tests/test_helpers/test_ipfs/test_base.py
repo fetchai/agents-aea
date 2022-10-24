@@ -138,6 +138,9 @@ class TestDirectoryHashing:
             Path(temp_dir, "inner_0", "__pycache__").mkdir()
             assert hash_daemon == self.hash_tool.get(temp_dir)
 
+            Path(temp_dir, "inner_0", "dummy.pyc").touch()
+            assert hash_daemon == self.hash_tool.get(temp_dir)
+
     def test_depth_multi(
         self,
     ) -> None:
