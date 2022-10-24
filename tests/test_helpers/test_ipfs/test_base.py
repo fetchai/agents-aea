@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests for the ipfs helper module."""
-
+import tempfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -47,6 +47,26 @@ def test_hash_for_big_file():
     data = b"1" * int(IPFSHashOnly.DEFAULT_CHUNK_SIZE * 1.5)
     my_hash = IPFSHashOnly._generate_hash(data)
     assert my_hash == VALID_HASH
+
+
+class TestFileHashing:
+    @pytest.mark.parametrize(
+        "wrap, cid_v1, expected_multihash",
+        [
+            (1, 1, "bafybeicjexomh6l2rb3efmzojmsx2p2gynjzg3eztf4quu6zyepmnisn4e"),
+            (1, 0, "QmTGBxU5aqqpeiihQxcWr4xynhqWt23R73Btss2j8r9XcC"),
+            (0, 1, "bafybeidydfeznx64wcyut2quu2xfx7sk3afxbgy5y6qfoj7lic6fgk4khq"),
+            (0, 0, "QmWRTzpGNWJZoNkLoQVBRjsSk58P9nfpxx4iAU4MJDRxkb"),
+        ],
+    )
+    def test_get_file_hash(self, wrap, cid_v1, expected_multihash):
+        """Test IPFSHashOnly.get file hash"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            file = Path(tmp_dir) / "dummy_file.txt"
+            file.write_text("dummy_data")
+            wrap, cid_v1 = map(bool, (wrap, cid_v1))
+            computed_multihash = IPFSHashOnly.get(str(file), wrap=wrap, cid_v1=cid_v1)
+            assert computed_multihash == expected_multihash
 
 
 @pytest.mark.usefixtures("use_ipfs_daemon")
