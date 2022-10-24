@@ -73,9 +73,9 @@ def test_update_fingerprint(package_type, files):
 
     def point_mutation(directory: Path) -> None:
         """Mutate random character in a random python file"""
-        py_file = random.choice(list(directory.glob("*.py")))
+        py_file = random.choice(list(directory.glob("*.py")))  # nosec
         content = Path(py_file).read_text()
-        i = random.choice(range(len(content)))
+        i = random.choice(range(len(content)))  # nosec
         new = content[:i] + chr(ord(content[i]) + 1) + content[i + 1 :]
         py_file.write_text(new)
 
