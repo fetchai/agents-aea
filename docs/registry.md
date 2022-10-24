@@ -1,6 +1,6 @@
 # Component Registry
 
-Individual components are stored on the  <a href="https://ipfs.io" target="_blank">`IPFS registry`</a>. This registry allows other developer to reuse these components. Anyone case register a new component which is uniquely identifiable by a hash of the contents of the component.
+Individual components are stored on the  <a href="https://ipfs.tech" target="_blank">`IPFS registry`</a>. This registry allows other developer to reuse these components. Anyone case register a new component which is uniquely identifiable by a hash of the contents of the component.
 
 ## Creating a Project
 We can create a new agent with the bare minimal components as so;

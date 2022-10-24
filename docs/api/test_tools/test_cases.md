@@ -243,23 +243,6 @@ Run from agent's directory.
 
 subprocess object.
 
-<a id="aea.test_tools.test_cases.BaseAEATestCase.run_interaction"></a>
-
-#### run`_`interaction
-
-```python
-@classmethod
-def run_interaction(cls) -> subprocess.Popen
-```
-
-Run interaction as subprocess.
-
-Run from agent's directory.
-
-**Returns**:
-
-subprocess object.
-
 <a id="aea.test_tools.test_cases.BaseAEATestCase.terminate_agents"></a>
 
 #### terminate`_`agents
