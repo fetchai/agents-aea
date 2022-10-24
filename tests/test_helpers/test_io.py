@@ -57,8 +57,13 @@ def test_raise_if_binary_mode():
         open_file(MagicMock(), mode="rb")
 
 
-def test_csv_io() -> None:
+def test_csv_io(capsys) -> None:
     """Test csv utils."""
+
+    csv_file = Path("non-existent-directory", "file.csv")
+    to_csv(DUMMY_CSV_DATA, csv_file)
+    captured = capsys.readouterr()
+    assert captured.out == "I/O error\n"
 
     with tempfile.TemporaryDirectory() as temp_dir:
         csv_file = Path(temp_dir, "file.csv")
