@@ -124,8 +124,11 @@ class BaseTestDecisionMaker:
 
         cls.decision_maker.start()
 
-    def test_decision_maker_config(self):
-        """Test config property."""
+    def test_decision_maker_properties(self):
+        """Test DecisionMaker properties."""
+        assert self.decision_maker_handler.agent_name == self.agent_name
+        assert self.decision_maker_handler.identity == self.identity
+        assert self.decision_maker_handler.wallet == self.wallet
         assert self.decision_maker_handler.config == self.config
 
     def test_decision_maker_execute_w_wrong_input(self):
