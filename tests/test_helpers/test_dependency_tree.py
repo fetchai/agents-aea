@@ -18,14 +18,19 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the helper module 'dependency_tree'."""
+
 import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
 
 from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.exceptions import AEAPackageLoadingError
-from aea.helpers.dependency_tree import DependencyTree
+from aea.helpers.base import cd
+from aea.helpers.dependency_tree import DependencyTree, dump_yaml, load_yaml
 
 from tests.conftest import PACKAGES_DIR
 
@@ -34,6 +39,21 @@ def test_generation_of_dependency_tree_of_repo_packages() -> None:
     """Test we can generate the dependency tree of the package directory of the repository."""
     dependency_tree = DependencyTree.generate(Path(PACKAGES_DIR))
     assert len(dependency_tree) > 0
+
+
+def test_generation_of_dependency_tree_of_project() -> None:
+    """Test we can generate the dependency tree of the project directory."""
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        source_path = Path(PACKAGES_DIR)
+        shutil.copytree(source_path, Path(tmp_dir) / source_path.parts[-1])
+        with cd(tmp_dir):
+            cmd = ["aea", "create", "dummy_project"]
+            project_path = Path(tmp_dir) / "dummy_project"
+            stdout, stderr = subprocess.Popen(cmd).communicate()
+            assert stdout is stderr is None
+            dependency_tree = DependencyTree.generate(project_path, from_project=True)
+            assert len(dependency_tree) > 0
 
 
 def test_case_when_dependency_tree_has_a_self_loop() -> None:
