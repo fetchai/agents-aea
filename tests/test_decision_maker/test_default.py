@@ -137,11 +137,11 @@ class BaseTestDecisionMaker:
 
     def test_decision_maker_queue_access_not_permitted(self):
         """Test the in queue of the decision maker can not be accessed."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Access not permitted!"):
             self.decision_maker.message_in_queue.get()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Access not permitted!"):
             self.decision_maker.message_in_queue.get_nowait()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Wrong code, access not permitted!"):
             self.decision_maker.message_in_queue.protected_get(
                 access_code="some_invalid_code"
             )
