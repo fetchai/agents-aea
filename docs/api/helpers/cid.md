@@ -65,6 +65,7 @@ CID multihash
 
 ```python
 @property
+@abstractmethod
 def buffer() -> bytes
 ```
 
@@ -75,6 +76,7 @@ Multihash buffer.
 #### encode
 
 ```python
+@abstractmethod
 def encode(encoding: str = DEFAULT_ENCODING) -> bytes
 ```
 
