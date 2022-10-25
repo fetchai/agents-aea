@@ -23,6 +23,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from collections import OrderedDict
 from pathlib import Path
 
 import pytest
@@ -96,3 +97,17 @@ def test_case_when_dependency_tree_has_a_cycle() -> None:
         ),
     ):
         DependencyTree.resolve_tree(dependency_list)
+
+
+@pytest.mark.parametrize("extra_data", [None, [{}] * 3])
+def test_dump_yaml(extra_data) -> None:
+    """Test dump yaml"""
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        filepath = Path(tmp_dir) / "dump_dummy.yaml"
+        data = dict.fromkeys(reversed(range(3)))
+        dump_yaml(filepath, data, extra_data)
+        reconstituted_data, reconstituted_extra_data = load_yaml(filepath)
+        assert isinstance(reconstituted_data, OrderedDict)
+        assert list(reconstituted_data.keys()) == list(range(3))
+        assert all(map(lambda o: isinstance(o, OrderedDict), reconstituted_extra_data))
