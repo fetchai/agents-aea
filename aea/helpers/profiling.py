@@ -110,10 +110,11 @@ class Profiling(Runnable):
             def make_fn(obj: Any) -> Callable:
                 orig_new = obj.__new__
                 # pylint: disable=protected-access  # type: ignore
+                obj_copy = obj
 
                 @wraps(orig_new)
                 def new(*args: Any, **kwargs: Any) -> Callable:
-                    self._counter[obj] += 1
+                    self._counter[obj_copy] += 1
                     if orig_new is object.__new__:
                         return orig_new(args[0])  # pragma: nocover
                     return orig_new(*args, **kwargs)  # pragma: nocover

@@ -159,7 +159,8 @@ def run(
     runner.start(threaded=True)
 
     for agent in agents:
-        wait_for_condition(lambda: agent.is_running, timeout=5)
+        wait_for_condition((lambda agnt: lambda: agnt.is_running)(agent), timeout=5)
+
     wait_for_condition(lambda: runner.is_running, timeout=5)
     time.sleep(1)
 
