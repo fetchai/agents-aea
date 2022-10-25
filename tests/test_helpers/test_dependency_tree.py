@@ -21,7 +21,7 @@
 
 import re
 import shutil
-import subprocess
+import subprocess  # nosec
 import tempfile
 from collections import OrderedDict
 from pathlib import Path
@@ -51,7 +51,7 @@ def test_generation_of_dependency_tree_of_project() -> None:
         with cd(tmp_dir):
             cmd = ["aea", "create", "dummy_project"]
             project_path = Path(tmp_dir) / "dummy_project"
-            stdout, stderr = subprocess.Popen(cmd).communicate()
+            stdout, stderr = subprocess.Popen(cmd).communicate()  # nosec
             assert stdout is stderr is None
             dependency_tree = DependencyTree.generate(project_path, from_project=True)
             assert len(dependency_tree) > 0
