@@ -19,12 +19,16 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea runtime."""
 import asyncio
+import contextlib
 import os
+import time
 from pathlib import Path
 from typing import Type
 from unittest.mock import patch
-
+import logging
 import pytest
+from aea.agent_loop import BaseAgentLoop
+from unittest import mock
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
@@ -127,6 +131,27 @@ class TestAsyncRuntime:
                 self.runtime.start_and_wait_completed(sync=True)
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state
+
+    def test_cancelled_during_start_agent_loop(self, caplog):
+        """Test asyncio.CancelledError during _start_agent_loop."""
+
+        # we check for this log because async_utils.Runnable._thread_target
+        # catches all BaseExceptions and logs them instead of raising
+        self.runtime._storage = None
+        self.runtime._decision_maker = None
+        with mock.patch.object(self.runtime.agent_loop, "wait_completed", side_effect=asyncio.CancelledError):
+            with caplog.at_level(logging.ERROR):
+                self.runtime.start()
+                wait_for_condition(
+                    lambda: f"Exception raised in {self.runtime}" in caplog.text,
+                    timeout=2,
+                    error_msg="Failed to raise asyncio.CancelledError during _start_agent_loop.",
+                )
+
+        # this is needed else will be raised in teardown
+        with contextlib.suppress(asyncio.CancelledError):
+            self.runtime.stop()
+            self.runtime.wait_completed(sync=True)
 
 
 class TestThreadedRuntime(TestAsyncRuntime):
