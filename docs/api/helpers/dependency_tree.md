@@ -24,16 +24,6 @@ def dump_yaml(file_path: Path, data: Dict, extra_data: Optional[List[Dict]] = No
 
 Dump yaml file.
 
-<a id="aea.helpers.dependency_tree.without_hash"></a>
-
-#### without`_`hash
-
-```python
-def without_hash(public_id: str) -> PublicId
-```
-
-Convert to public id.
-
 <a id="aea.helpers.dependency_tree.to_plural"></a>
 
 #### to`_`plural
