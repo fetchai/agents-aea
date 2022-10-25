@@ -152,7 +152,6 @@ class DependencyTree:
             if root_package in visited:
                 # cycle found; raise error
                 cls._raise_circular_dependency_error(root_package, stack)
-                return
 
             # add current package to the stack - needed to check if there are circular dependencies
             visited.add(root_package)
