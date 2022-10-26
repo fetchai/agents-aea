@@ -15,7 +15,7 @@ fingerprint:
   custom_types.py: QmS4h6s3ZnbzrDrud9ZPfaUesN3CczZHC4LPqFX8VGFPcj
   dialogues.py: QmNWYxmPJJEuqyc8NS5zxXMB3w2avNxZwBVdvX1Fms6oDD
   message.py: QmSpcJoWw9fYemaRHyTf3aFYVfhtmzktcyfdCP67bBoYK4
-  serialization.py: QmU8ZVMYPB3AMhjCxbTdqfK8HiYsSGcUrRwg5zaR3HLw2u
+  serialization.py: QmeF2MbgLAsJ4TnXmsLF6eTfepvzmiQjyS3veYUhmph7bJ
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

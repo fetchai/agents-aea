@@ -34,16 +34,16 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     arguments = parse_args()
 
-    pip_freeze_call = subprocess.Popen(  # nosec
+    with subprocess.Popen(  # nosec
         ["pip", "freeze"], stdout=subprocess.PIPE
-    )
-    (stdout, stderr) = pip_freeze_call.communicate()
-    requirements = stdout.decode("utf-8")
+    ) as pip_freeze_call:
+        (stdout, stderr) = pip_freeze_call.communicate()
+        requirements = stdout.decode("utf-8")
 
-    # remove 'aea' itself
-    regex = re.compile("^aea(==.*| .*)?$", re.MULTILINE)
-    requirements = re.sub(regex, "", requirements)
-    if arguments.output is None:
-        print(requirements)
-    else:
-        arguments.output.write(requirements)
+        # remove 'aea' itself
+        regex = re.compile("^aea(==.*| .*)?$", re.MULTILINE)
+        requirements = re.sub(regex, "", requirements)
+        if arguments.output is None:
+            print(requirements)
+        else:
+            arguments.output.write(requirements)

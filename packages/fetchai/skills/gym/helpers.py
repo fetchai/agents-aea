@@ -85,7 +85,7 @@ class ProxyEnv(gym.Env):
         """Get training status."""
         return self._is_rl_agent_trained
 
-    def step(self, action: Action) -> Feedback:
+    def step(self, action: Action) -> Feedback:  # type: ignore
         """
         Run one time-step of the environment's dynamics.
 
@@ -133,7 +133,7 @@ class ProxyEnv(gym.Env):
         :param mode: the mode
         """
 
-    def reset(self) -> None:
+    def reset(self) -> None:  # type: ignore # pylint: disable=arguments-differ
         """Reset the environment."""
         self._step_count = 0
         self._is_rl_agent_trained = False

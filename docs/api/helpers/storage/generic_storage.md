@@ -100,7 +100,7 @@ None
 #### list
 
 ```python
- | async list() -> List[OBJECT_ID_AND_BODY]
+ | async [] -> List[OBJECT_ID_AND_BODY]
 ```
 
 List all objects with keys from the collection.
@@ -206,7 +206,7 @@ List of object bodies
 #### list
 
 ```python
- | list() -> List[OBJECT_ID_AND_BODY]
+ | [] -> List[OBJECT_ID_AND_BODY]
 ```
 
 List all objects with keys from the collection.

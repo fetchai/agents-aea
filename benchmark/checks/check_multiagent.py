@@ -159,7 +159,12 @@ def run(
     runner.start(threaded=True)
 
     for agent in agents:
-        wait_for_condition((lambda agnt: lambda: agnt.is_running)(agent), timeout=5)
+        wait_for_condition(
+            (  # pylint: disable=unnecessary-direct-lambda-call
+                lambda agnt: lambda: agnt.is_running
+            )(agent),
+            timeout=5,
+        )
 
     wait_for_condition(lambda: runner.is_running, timeout=5)
     time.sleep(1)
@@ -178,28 +183,25 @@ def run(
     runner.stop(timeout=5)
 
     total_messages = sum(
-        [cast(TestHandler, skill.handlers["test"]).count for skill in skills]
+        cast(TestHandler, skill.handlers["test"]).count for skill in skills
     )
     rate = total_messages / duration
 
     rtt_total_time = sum(
-        [cast(TestHandler, skill.handlers["test"]).rtt_total_time for skill in skills]
+        cast(TestHandler, skill.handlers["test"]).rtt_total_time for skill in skills
     )
     rtt_count = sum(
-        [cast(TestHandler, skill.handlers["test"]).rtt_count for skill in skills]
+        cast(TestHandler, skill.handlers["test"]).rtt_count for skill in skills
     )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [
-            cast(TestHandler, skill.handlers["test"]).latency_total_time
-            for skill in skills
-        ]
+        cast(TestHandler, skill.handlers["test"]).latency_total_time for skill in skills
     )
     latency_count = sum(
-        [cast(TestHandler, skill.handlers["test"]).latency_count for skill in skills]
+        cast(TestHandler, skill.handlers["test"]).latency_count for skill in skills
     )
 
     if latency_count == 0:

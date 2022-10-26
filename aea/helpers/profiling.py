@@ -180,8 +180,7 @@ class Profiling(Runnable):
         """Return dict with counted object instances present now."""
         result: Dict = Counter()
 
-        lock.acquire()
-        try:
+        with lock:
             for obj_type in self._objects_instances_to_count:
                 result[obj_type.__name__] += 0
 
@@ -189,8 +188,6 @@ class Profiling(Runnable):
                 for obj_type in self._objects_instances_to_count:
                     if isinstance(obj, obj_type):
                         result[obj_type.__name__] += 1
-        finally:
-            lock.release()
         return result
 
     def get_objecst_created(self) -> Dict:

@@ -198,7 +198,7 @@ class LedgerApiHandler(Handler):
             self.context.logger.info(
                 f"Saving contract address to file: {strategy.contract_address_file}"
             )
-            with open(strategy.contract_address_file, "w") as file:
+            with open(strategy.contract_address_file, "w", encoding="utf-8") as file:
                 file.write(strategy.contract_address)
 
     def _handle_transaction_receipt(

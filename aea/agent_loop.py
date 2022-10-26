@@ -110,12 +110,12 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Set event loop and all event loop related objects."""
         self._loop: AbstractEventLoop = loop
 
-    def _setup(self) -> None:  # pylint: disable=no-self-use
+    def _setup(self) -> None:
         """Set up agent loop before started."""
         # start and stop methods are classmethods cause one instance shared across multiple threads
         ExecTimeoutThreadGuard.start()
 
-    def _teardown(self) -> None:  # pylint: disable=no-self-use
+    def _teardown(self) -> None:
         """Tear down loop on stop."""
         # start and stop methods are classmethods cause one instance shared across multiple threads
         ExecTimeoutThreadGuard.stop()
@@ -295,10 +295,11 @@ class AsyncAgentLoop(BaseAgentLoop):
                 if self.agent.exception_handler(e, fn) is True:
                     self._state.set(AgentLoopStates.error)
                     raise
-            except Exception as e:
+            except Exception as e2:
                 self._state.set(AgentLoopStates.error)
-                self._exceptions.append(e)
+                self._exceptions.append(e2)
                 raise
+        return None
 
     def _register_periodic_task(
         self,

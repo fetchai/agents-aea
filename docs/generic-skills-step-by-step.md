@@ -2623,16 +2623,14 @@ The following code block checks if the proposal that we received is acceptable a
         """
         result = (
             all(
-                [
-                    key in proposal.values
-                    for key in [
-                        "ledger_id",
-                        "currency_id",
-                        "price",
-                        "service_id",
-                        "quantity",
-                        "tx_nonce",
-                    ]
+                key in proposal.values
+                for key in [
+                    "ledger_id",
+                    "currency_id",
+                    "price",
+                    "service_id",
+                    "quantity",
+                    "tx_nonce",
                 ]
             )
             and proposal.values["ledger_id"] == self.ledger_id

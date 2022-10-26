@@ -84,12 +84,12 @@ def react_speed_in_loop(
         aea_test_wrapper.start_loop()
 
     try:
-        while sum([not i.is_inbox_empty() for i in aea_test_wrappers]):
+        while sum((not i.is_inbox_empty() for i in aea_test_wrappers)):
             time.sleep(0.1)
 
     finally:
         # wait to start, Race condition in case no messages to process
-        while sum([not i.is_running() for i in aea_test_wrappers]):
+        while sum(not i.is_running() for i in aea_test_wrappers):
             pass
         for aea_test_wrapper in aea_test_wrappers:
             aea_test_wrapper.stop_loop()

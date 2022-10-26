@@ -174,7 +174,7 @@ def _get_sub_types_of_compositional_types(compositional_type: str) -> Tuple[str,
     :param compositional_type: the compositional type string whose sub-types are to be extracted.
     :return: tuple containing all extracted sub-types.
     """
-    sub_types_list = list()
+    sub_types_list = []
     for valid_compositional_type in (
         SPECIFICATION_COMPOSITIONAL_TYPES + PYTHON_COMPOSITIONAL_TYPES
     ):

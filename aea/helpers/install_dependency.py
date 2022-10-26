@@ -109,13 +109,6 @@ def run_install_subprocess(
     :param install_timeout: timeout to wait pip to install
     :return: the return code of the subprocess
     """
-    try:
-        subp = subprocess.Popen(install_command)  # nosec
+    with subprocess.Popen(install_command) as subp:  # nosec
         subp.wait(install_timeout)
-        return_code = subp.returncode
-    finally:
-        poll = subp.poll()
-        if poll is None:  # pragma: no cover
-            subp.terminate()
-            subp.wait(30)
-    return return_code
+        return subp.returncode

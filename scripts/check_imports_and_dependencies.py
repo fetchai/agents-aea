@@ -88,7 +88,7 @@ class ImportsTool:
     @staticmethod
     def get_imports_for_file(pyfile: Union[str, Path]) -> List[str]:
         """Get all imported modules for python source file."""
-        with open(pyfile, "r") as f:
+        with open(pyfile, "r", encoding="utf-8") as f:
             statements = f.read()
         instructions = dis.get_instructions(statements)  # type: ignore
         imports = [i for i in instructions if "IMPORT" in i.opname]

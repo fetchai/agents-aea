@@ -129,7 +129,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
         super().__init__()
         self._public_id_to_item: Dict[PublicId, Item] = {}
 
-    def register(  # pylint: disable=arguments-differ,unused-argument
+    def register(  # pylint: disable=arguments-differ,unused-argument,arguments-renamed
         self, public_id: PublicId, item: Item, is_dynamically_added: bool = False
     ) -> None:
         """Register an item."""
@@ -141,7 +141,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
             raise ValueError(f"Item already registered with item id '{public_id}'")
         self._public_id_to_item[public_id] = item
 
-    def unregister(  # pylint: disable=arguments-differ
+    def unregister(  # pylint: disable=arguments-differ,arguments-renamed
         self, public_id: PublicId
     ) -> Item:
         """Unregister an item."""
@@ -150,7 +150,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
         item = self._public_id_to_item.pop(public_id)
         return item
 
-    def fetch(  # pylint: disable=arguments-differ
+    def fetch(  # pylint: disable=arguments-differ,arguments-renamed
         self, public_id: PublicId
     ) -> Optional[Item]:
         """
@@ -201,7 +201,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
         self._registered_keys: Set[ComponentId] = set()
 
-    def register(  # pylint: disable=arguments-differ,unused-argument
+    def register(  # pylint: disable=arguments-differ,unused-argument,arguments-renamed
         self,
         component_id: ComponentId,
         component: Component,
@@ -255,7 +255,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
             )
         return item
 
-    def unregister(  # pylint: disable=arguments-differ
+    def unregister(  # pylint: disable=arguments-differ,arguments-renamed
         self, component_id: ComponentId
     ) -> Optional[Component]:
         """
@@ -270,7 +270,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
             )
         return self._unregister(component_id)
 
-    def fetch(  # pylint: disable=arguments-differ
+    def fetch(  # pylint: disable=arguments-differ,arguments-renamed
         self, component_id: ComponentId
     ) -> Optional[Component]:
         """

@@ -19,7 +19,7 @@
 """Base config data types."""
 import functools
 import re
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import (
     Any,
@@ -70,7 +70,8 @@ class JSONSerializable(ABC):
     def json(self) -> Dict:
         """Compute the JSON representation."""
 
-    @abstractclassmethod
+    @classmethod
+    @abstractmethod
     def from_json(cls, obj: Dict) -> "JSONSerializable":
         """Build from a JSON object."""
 

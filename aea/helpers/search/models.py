@@ -37,8 +37,8 @@ from typing import (
     cast,
 )
 
-import aea.helpers.search.models_pb2 as models_pb2
 from aea.exceptions import enforce
+from aea.helpers.search import models_pb2
 
 
 _default_logger = logging.getLogger(__name__)
@@ -833,13 +833,13 @@ class ConstraintType:
         """
         encoding: Optional[Any] = None
 
-        if (
-            self.type == ConstraintTypes.EQUAL
-            or self.type == ConstraintTypes.NOT_EQUAL
-            or self.type == ConstraintTypes.LESS_THAN
-            or self.type == ConstraintTypes.LESS_THAN_EQ
-            or self.type == ConstraintTypes.GREATER_THAN
-            or self.type == ConstraintTypes.GREATER_THAN_EQ
+        if self.type in (
+            ConstraintTypes.EQUAL,
+            ConstraintTypes.NOT_EQUAL,
+            ConstraintTypes.LESS_THAN,
+            ConstraintTypes.LESS_THAN_EQ,
+            ConstraintTypes.GREATER_THAN,
+            ConstraintTypes.GREATER_THAN_EQ,
         ):
             relation = models_pb2.Query.Relation()  # type: ignore
 
@@ -890,7 +890,7 @@ class ConstraintType:
                 range_.double_pair.CopyFrom(values)
             encoding = range_
 
-        elif self.type == ConstraintTypes.IN or self.type == ConstraintTypes.NOT_IN:
+        elif self.type in (ConstraintTypes.IN, ConstraintTypes.NOT_IN):
             set_ = models_pb2.Query.Set()  # type: ignore
 
             if self.type == ConstraintTypes.IN:
@@ -1071,7 +1071,7 @@ class ConstraintExpr(ABC):
 
     def check_validity(  # noqa: B027
         self,
-    ) -> None:  # pylint: disable=no-self-use  # pragma: nocover
+    ) -> None:  # pragma: nocover
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 
@@ -1457,21 +1457,18 @@ class Constraint(ConstraintExpr):
         constraint = models_pb2.Query.ConstraintExpr.Constraint()  # type: ignore
         constraint.attribute_name = self.attribute_name
 
-        if (
-            self.constraint_type.type == ConstraintTypes.EQUAL
-            or self.constraint_type.type == ConstraintTypes.NOT_EQUAL
-            or self.constraint_type.type == ConstraintTypes.LESS_THAN
-            or self.constraint_type.type == ConstraintTypes.LESS_THAN_EQ
-            or self.constraint_type.type == ConstraintTypes.GREATER_THAN
-            or self.constraint_type.type == ConstraintTypes.GREATER_THAN_EQ
+        if self.constraint_type.type in (
+            ConstraintTypes.EQUAL,
+            ConstraintTypes.NOT_EQUAL,
+            ConstraintTypes.LESS_THAN,
+            ConstraintTypes.LESS_THAN_EQ,
+            ConstraintTypes.GREATER_THAN,
+            ConstraintTypes.GREATER_THAN_EQ,
         ):
             constraint.relation.CopyFrom(self.constraint_type.encode())
         elif self.constraint_type.type == ConstraintTypes.WITHIN:
             constraint.range_.CopyFrom(self.constraint_type.encode())
-        elif (
-            self.constraint_type.type == ConstraintTypes.IN
-            or self.constraint_type.type == ConstraintTypes.NOT_IN
-        ):
+        elif self.constraint_type.type in (ConstraintTypes.IN, ConstraintTypes.NOT_IN):
             constraint.set_.CopyFrom(self.constraint_type.encode())
         elif self.constraint_type.type == ConstraintTypes.DISTANCE:
             constraint.distance.CopyFrom(self.constraint_type.encode())

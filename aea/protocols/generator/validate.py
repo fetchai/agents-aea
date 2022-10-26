@@ -394,7 +394,7 @@ def _validate_speech_acts_section(
     custom_types_set = set()
     performatives_set = set()
 
-    content_names_types: Dict[str, Tuple[str, str]] = dict()
+    content_names_types: Dict[str, Tuple[str, str]] = {}
 
     # check that speech-acts definition is not empty
     if len(protocol_specification.speech_acts.read_all()) == 0:

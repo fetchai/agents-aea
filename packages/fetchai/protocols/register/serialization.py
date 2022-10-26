@@ -102,7 +102,7 @@ class RegisterSerializer(Serializer):
         register_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = register_pb.WhichOneof("performative")
         performative_id = RegisterMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == RegisterMessage.Performative.REGISTER:
             info = register_pb.register.info
             info_dict = dict(info)

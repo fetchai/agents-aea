@@ -14,7 +14,7 @@ fingerprint:
   default_pb2.py: QmPX9tm18ddM5Q928JLd1HmdUZKp2ssKhCJzhZ53FJmjxM
   dialogues.py: QmZhspQD1MV1Cv49DN1uQti8YVjV6sA78v8gD1fobabEUu
   message.py: QmVRW9y1bbBUj9r4CRFmPFz1T5L5fah4qRbSbgrW3m7UKy
-  serialization.py: QmRdfN4CZovYR1jukwb2RkQDHVjQqha9Wu9PmVLSao1o5j
+  serialization.py: QmbooPDNM5gDKJhXcmJKFkFoiMtR3pJZD2ziojXX3D6Zw4
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

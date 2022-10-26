@@ -180,14 +180,14 @@ def run_pydoc_markdown(module: str) -> str:
     :param module: the dotted path.
     :return: the PyDoc content (pre-processed).
     """
-    pydoc = subprocess.Popen(  # nosec
+    with subprocess.Popen(  # nosec
         ["pydoc-markdown", "-m", module, "-I", "."], stdout=subprocess.PIPE
-    )
-    stdout, _ = pydoc.communicate()
-    pydoc.wait()
-    stdout_text = stdout.decode("utf-8")
-    text = replace_underscores(stdout_text)
-    return text
+    ) as pydoc:
+        stdout, _ = pydoc.communicate()
+        pydoc.wait()
+        stdout_text = stdout.decode("utf-8")
+        text = replace_underscores(stdout_text)
+        return text
 
 
 def generate_api_docs() -> None:

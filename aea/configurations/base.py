@@ -447,7 +447,7 @@ class PackageConfiguration(Configuration, ABC):
         if instance is None:
             instance = cls(**params)
         else:
-            instance.__init__(**params)  # type: ignore
+            instance.__init__(**params)  # type: ignore # pylint: disable=unnecessary-dunder-call
 
         if directory and not instance.directory:
             instance.directory = directory
@@ -930,7 +930,7 @@ class SkillComponentConfiguration:
         if instance is None:
             instance = cls(**params)
         else:  # pragma: nocover
-            instance.__init__(**params)  # type: ignore
+            instance.__init__(**params)  # type: ignore # pylint: disable=unnecessary-dunder-call
         return instance
 
 

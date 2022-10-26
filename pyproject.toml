@@ -116,7 +116,7 @@ optional = true
 tensorflow = [{ version = "^2.9.2", python = "<3.11" }]
 # openapi-core = "==0.13.2"  # problematic package for poetry. requirede by http server connection
 openapi-spec-validator = "==0.2.8" # required by openapi core and best to pin it here
-gym = "^0.26.2"
+gym = "==0.15.6"
 aiohttp = "^3.8"
 aioprometheus = ">=20.0.0,<21.0.0"
 numpy = ">=1.18.1"

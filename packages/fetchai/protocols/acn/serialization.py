@@ -111,7 +111,7 @@ class AcnSerializer(Serializer):
         acn_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = acn_pb.WhichOneof("performative")
         performative_id = AcnMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == AcnMessage.Performative.REGISTER:
             pb2_record = acn_pb.register.record
             record = AgentRecord.decode(pb2_record)

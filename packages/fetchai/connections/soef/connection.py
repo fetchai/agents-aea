@@ -294,7 +294,7 @@ class SOEFChannel:
         """Get the unique page address from storage."""
         if self._token_storage_path is None:
             return None
-        with open(self._token_storage_path, "r") as f:
+        with open(self._token_storage_path, "r", encoding="utf-8") as f:
             result = f.read().strip()
         unique_page_address = (
             result if result != self.NONE_UNIQUE_PAGE_ADDRESS else None
@@ -309,7 +309,7 @@ class SOEFChannel:
             return
         if unique_page_address is None:
             unique_page_address = self.NONE_UNIQUE_PAGE_ADDRESS
-        with open(self._token_storage_path, "w") as f:
+        with open(self._token_storage_path, "w", encoding="utf-8") as f:
             f.write(unique_page_address)
 
     async def _find_around_me_processor(self) -> None:
