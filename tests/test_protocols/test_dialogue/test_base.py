@@ -1766,10 +1766,6 @@ class TestPersistDialoguesStorage:
             dialogues_storage_restored._dialogue_by_address
         )
 
-        assert len(dialogues_storage._dialogue_by_address) == len(
-            dialogues_storage_restored._dialogue_by_address
-        )
-
         assert (
             dialogues_storage._incomplete_to_complete_dialogue_labels
             == dialogues_storage_restored._incomplete_to_complete_dialogue_labels
