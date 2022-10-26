@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,14 @@
 """This module contains tests for aea runtime."""
 import asyncio
 import contextlib
+import logging
 import os
-import time
 from pathlib import Path
 from typing import Type
-from unittest.mock import patch
-import logging
-import pytest
-from aea.agent_loop import BaseAgentLoop
 from unittest import mock
+from unittest.mock import patch
+
+import pytest
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
@@ -139,7 +138,11 @@ class TestAsyncRuntime:
         # catches all BaseExceptions and logs them instead of raising
         self.runtime._storage = None
         self.runtime._decision_maker = None
-        with mock.patch.object(self.runtime.agent_loop, "wait_completed", side_effect=asyncio.CancelledError):
+        with mock.patch.object(
+            self.runtime.agent_loop,
+            "wait_completed",
+            side_effect=asyncio.CancelledError,
+        ):
             with caplog.at_level(logging.ERROR):
                 self.runtime.start()
                 wait_for_condition(
