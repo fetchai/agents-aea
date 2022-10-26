@@ -1834,7 +1834,7 @@ class TestPersistDialoguesStorage:
         assert dialogues_storage._incomplete_to_complete_dialogue_labels
         assert dialogues_storage._terminal_state_dialogues_labels
 
-        self.dialogues._dialogues_storage.cleanup()
+        self.dialogues.cleanup()
 
         assert not dialogues_storage._dialogues_by_dialogue_label
         assert not dialogues_storage._dialogue_by_address
@@ -1870,6 +1870,7 @@ class TestPersistDialoguesStorageOffloading:
         """Tear down the environment to test PersistDialogueStorage."""
         self.generic_storage.stop()
         self.generic_storage.wait_completed(sync=True, timeout=10)
+        self.dialogues.cleanup()
 
     def test_dump_restore(self):
         """Test dump and load methods of the persists storage."""
