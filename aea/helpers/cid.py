@@ -23,6 +23,7 @@ Utils to support multiple CID versions.
 Original implementation: https://github.com/ipld/py-cid/
 """
 
+from abc import abstractmethod
 from typing import Union, cast
 
 import base58
@@ -66,13 +67,13 @@ class BaseCID:
         return self._multihash
 
     @property
+    @abstractmethod
     def buffer(self) -> bytes:
         """Multihash buffer."""
-        raise NotImplementedError
 
+    @abstractmethod
     def encode(self, encoding: str = DEFAULT_ENCODING) -> bytes:
         """Encode multihash."""
-        raise NotImplementedError
 
     def __repr__(self) -> str:
         """Object representation."""

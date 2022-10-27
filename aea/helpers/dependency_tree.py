@@ -73,14 +73,6 @@ def dump_yaml(
             yaml.dump(data, fp, Dumper=_AEAYamlDumper)
 
 
-def without_hash(public_id: str) -> PublicId:
-    """Convert to public id."""
-    try:
-        return PublicId.from_str(public_id)
-    except ValueError:
-        return PublicId.from_json(PublicId.from_str(public_id).json)
-
-
 def to_plural(string: str) -> str:
     """Convert component to plural"""
     return string + "s"
@@ -160,7 +152,6 @@ class DependencyTree:
             if root_package in visited:
                 # cycle found; raise error
                 cls._raise_circular_dependency_error(root_package, stack)
-                return
 
             # add current package to the stack - needed to check if there are circular dependencies
             visited.add(root_package)
