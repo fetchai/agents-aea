@@ -104,7 +104,7 @@ def verify_private_keys_ctx(
         ).agent_config
         if ctx is not None:
             ctx.agent_config = agent_config
-    except ValueError as e:  # pragma: nocover
+    except ValueError as e:
         raise click.ClickException(str(e))
 
 
