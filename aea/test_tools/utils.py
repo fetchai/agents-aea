@@ -19,11 +19,13 @@
 
 """Helpful utilities."""
 
+import collections
 import os
 import shutil
 import time
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Callable, Union
+from typing import Any, Callable, Generator, Iterable, Union
 
 
 FULL_PERMISSION = 0o40777
@@ -42,6 +44,19 @@ def wait_for_condition(
         time.sleep(period)
         if time.time() > start_time + timeout:
             raise TimeoutError(error_msg)
+
+
+def consume(iterator: Iterable) -> None:
+    """Consume the iterator"""
+    collections.deque(iterator, maxlen=0)
+
+
+@contextmanager
+def as_context(*contexts: Any) -> Generator[None, None, None]:
+    """Set contexts"""
+    with ExitStack() as stack:
+        consume(map(stack.enter_context, contexts))
+        yield
 
 
 def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool:

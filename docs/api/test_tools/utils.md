@@ -14,6 +14,27 @@ def wait_for_condition(condition_checker: Callable, timeout: int = 2, error_msg:
 
 Wait for condition to occur in selected timeout.
 
+<a id="aea.test_tools.utils.consume"></a>
+
+#### consume
+
+```python
+def consume(iterator: Iterable) -> None
+```
+
+Consume the iterator
+
+<a id="aea.test_tools.utils.as_context"></a>
+
+#### as`_`context
+
+```python
+@contextmanager
+def as_context(*contexts: Any) -> Generator[None, None, None]
+```
+
+Set contexts
+
 <a id="aea.test_tools.utils.remove_test_directory"></a>
 
 #### remove`_`test`_`directory

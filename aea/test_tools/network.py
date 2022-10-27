@@ -48,3 +48,9 @@ def get_host() -> str:
     finally:
         s.close()
     return IP
+
+
+def is_port_in_use(port: int) -> bool:
+    """Check if port is in use"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(("localhost", port)) == 0
