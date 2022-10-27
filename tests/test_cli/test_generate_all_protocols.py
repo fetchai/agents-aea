@@ -64,7 +64,8 @@ class BaseGenerateAllProtocolsTestCase(AEATestCaseMany):
         """Setup test class."""
         super().setup_class()
 
-        cls.package_path = cls.t / "packages" / "fetchai" / "protocols" / "fipa"
+        cls.packages_dir_path = cls.packages_dir_path.absolute()
+        cls.package_path = cls.packages_dir_path / "fetchai" / "protocols" / "fipa"
         cls.find_packages_patch = mock.patch(
             "aea.cli.generate_all_protocols.find_protocols_in_local_registry",
             return_value=(cls.package_path,),
@@ -234,7 +235,7 @@ class TestParentAsRootDir(BaseGenerateAllProtocolsTestCase):
                 "generate-all-protocols",
                 str(self.packages_dir_path),
                 "--root-dir",
-                str(self.t.parent),
+                str(self.packages_dir_path.parent.parent),
             )
 
             assert result.exit_code == 0
