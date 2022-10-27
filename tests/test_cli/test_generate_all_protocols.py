@@ -52,8 +52,8 @@ def _run_cli_patch(*args: Any, **kwargs: Any) -> None:
     )
 
 
-class TestGenerateAllProtcols(AEATestCaseMany):
-    """Test generate all protocols."""
+class BaseGenerateAllProtocolsTestCase(AEATestCaseMany):
+    """Base test class."""
 
     use_packages_dir: bool = True
     find_packages_patch: Any
@@ -69,6 +69,10 @@ class TestGenerateAllProtcols(AEATestCaseMany):
             "aea.cli.generate_all_protocols.find_protocols_in_local_registry",
             return_value=(cls.package_path,),
         )
+
+
+class TestGenerateAllProtcols(BaseGenerateAllProtocolsTestCase):
+    """Test generate all protocols."""
 
     def test_run(self, caplog) -> None:
         """Test command invocation."""
@@ -126,7 +130,7 @@ class TestGenerateAllProtcols(AEATestCaseMany):
     def test_check_bump(self) -> None:
         """Test command invocation."""
 
-        fipa_dir = self.t / "packages" / "fetchai" / "protocols" / "fipa"
+        fipa_dir = self.package_path
 
         def _download_patch(_: Any, temp_dir: str):
             temp_fipa = Path(temp_dir, "fipa")
@@ -162,7 +166,7 @@ class TestGenerateAllProtcols(AEATestCaseMany):
     def test_check_bump_fail(self) -> None:
         """Test command invocation."""
 
-        fipa_dir = self.t / "packages" / "fetchai" / "protocols" / "fipa"
+        fipa_dir = self.package_path
 
         def _download_patch(_: Any, temp_dir: str):
             temp_fipa = Path(temp_dir, "fipa")
@@ -217,21 +221,8 @@ class TestGenerateAllProtcols(AEATestCaseMany):
                 )
 
 
-class TestParentAsRootDir(AEATestCaseMany):
+class TestParentAsRootDir(BaseGenerateAllProtocolsTestCase):
     """Test generate all protocols."""
-
-    use_packages_dir: bool = True
-    find_packages_patch: Any
-
-    @classmethod
-    def setup_class(cls) -> None:
-        """Setup test class."""
-        super().setup_class()
-
-        cls.find_packages_patch = mock.patch(
-            "aea.cli.generate_all_protocols.find_protocols_in_local_registry",
-            return_value=(cls.t / "packages" / "fetchai" / "protocols" / "fipa",),
-        )
 
     def test_root_dir_parent(self, caplog) -> None:
         """Test command invocation."""
