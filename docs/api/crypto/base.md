@@ -736,7 +736,7 @@ Get all transfer events derived from a transaction.
 
 - `contract_instance`: the contract
 - `tx_hash`: the transaction hash
-- `target_address`: optional address to filter tranfer events to just those that affect it
+- `target_address`: optional address to filter transfer events to just those that affect it
 
 <a id="aea.crypto.base.FaucetApi"></a>
 
