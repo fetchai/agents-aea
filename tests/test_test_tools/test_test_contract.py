@@ -19,15 +19,14 @@
 
 """This module contains tests for test case classes for AEA contract testing."""
 
-import collections
-from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Any, Generator, Iterable, cast
+from typing import cast
 from unittest import mock
 
 import pytest
 from aea_ledger_ethereum import EthereumApi
 
+from aea.test_tools.utils import as_context
 from aea.test_tools.test_contract import BaseContractTestCase
 
 from tests.data.dummy_contract.contract import DummyContract
@@ -55,20 +54,6 @@ mock_is_transaction_settled = mock.patch.object(
 mock_get_balance_increment = mock.patch.object(
     EthereumApi, "get_balance", side_effect=range(4)
 )
-
-
-# TODO: move to aea.test_tools.utils
-def consume(iterator: Iterable) -> None:
-    """Consume the iterator"""
-    collections.deque(iterator, maxlen=0)
-
-
-@contextmanager
-def as_context(*contexts: Any) -> Generator[None, None, None]:
-    """Set contexts"""
-    with ExitStack() as stack:
-        consume(map(stack.enter_context, contexts))
-        yield
 
 
 class TestCls(BaseContractTestCase):
