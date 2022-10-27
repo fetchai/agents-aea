@@ -15,7 +15,7 @@ fingerprint:
   tests/base.py: bafybeifetr4vll34azapap52cwnhrwgvsgs4veld263vb277z6lzcti2si
   tests/conftest.py: bafybeifkjrvsysdb7ujp2wxurzgytzy3ecu6fv247zfszfymdvb7y7klpu
   tests/test_certificate_dates.py: bafybeif4t76wsvsfvvplkmi4gecgod6ijff3bbqgtaqmpep6ywfapfptfm
-  tests/test_dht.py: bafybeifbnvlt7ts4ol5ygs3f3ype2iyallcvnv6scjooypngov2quoqrfy
+  tests/test_dht.py: bafybeibobjncrjsovxt5m4vt5yto7dy5blovbom6x5icxugyxtc22f3tzu
   tests/test_p2p_libp2p/__init__.py: bafybeig7f7s5ptqtscf74y25dtqvhp75joekcxi6qnuzxgxyzictpsp4dm
   tests/test_p2p_libp2p/test_aea_cli.py: bafybeiej55kwbxuqjvjjz4tc7we54pxur7kvsh5o36lau7b7utltzwkc34
   tests/test_p2p_libp2p/test_communication.py: bafybeihnkle2pokfzfkguegmq4ptatvpcaezxrv564l76atjnuec57b2am
@@ -25,7 +25,7 @@ fingerprint:
   tests/test_p2p_libp2p/test_slow_queue.py: bafybeihx6dga3bxiy7i67ggf6gnoakygyf5djyzv6prias5tcjpxawlpyy
   tests/test_p2p_libp2p_client/__init__.py: bafybeihjzl7ireo5rbnxcdbghbncykgcgcbh26m4mjjofsseeflauuf6sy
   tests/test_p2p_libp2p_client/test_aea_cli.py: bafybeigcyn7yqcmfsdrrdy4dllqvkyhbdxywkfc3ikofczqqjhz4wsdr4y
-  tests/test_p2p_libp2p_client/test_communication.py: bafybeigflhmhqmfkytzhpcglmljvd3qqk6cpf6vci6hs4ceqwadc6azufa
+  tests/test_p2p_libp2p_client/test_communication.py: bafybeiceec5zsd2u37t56oiajijgwx7frpo3wzu4qdfd3lcq3lcldyqszq
   tests/test_p2p_libp2p_client/test_errors.py: bafybeiakajzr6jtecwnlzcrrx7paydz3obmleqzv7am5xbadu6wjtzabmm
   tests/test_p2p_libp2p_mailbox/__init__.py: bafybeiad64wftnugaahubhqc6bcqzg7om4435dzojdv7oeq4zdmn7kxzui
   tests/test_p2p_libp2p_mailbox/test_aea_cli.py: bafybeievjaiacpvcpabemtrmmeejbf4cbkrqzhu2ekxzyfyeg42ityxn5q
