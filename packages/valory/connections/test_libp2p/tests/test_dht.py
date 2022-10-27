@@ -214,7 +214,7 @@ test_classes = [
 
 
 @dataclass
-class TestCaseConfig:
+class NodeConfigTestCase:
     """TestCase"""
 
     name: str
@@ -225,8 +225,8 @@ class TestCaseConfig:
 # dynamically create tests
 for base_cls in test_classes:
     for test_case in (
-        TestCaseConfig("Local", local_nodes, True),
-        TestCaseConfig("Public", public_nodes),
+        NodeConfigTestCase("Local", local_nodes, True),
+        NodeConfigTestCase("Public", public_nodes),
     ):
         name = f"Test{test_case.name}{base_cls.__name__}"
 
