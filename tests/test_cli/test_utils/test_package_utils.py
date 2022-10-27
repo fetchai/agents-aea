@@ -181,11 +181,11 @@ class TestItemPresentWithHash(BaseAEATestCase):
         (signing_protocol,) = agent_config.protocols
 
         assert is_item_with_hash_present(
-            self.packages_dir_path, agent_config, signing_protocol.hash
+            str(self.packages_dir_path), agent_config, signing_protocol.hash
         )
 
         assert (
-            is_item_with_hash_present(self.packages_dir_path, agent_config, "Qm")
+            is_item_with_hash_present(str(self.packages_dir_path), agent_config, "Qm")
             is None
         )
 
@@ -200,8 +200,8 @@ class TestItemPresentWithHash(BaseAEATestCase):
                 cast(
                     PublicId,
                     is_item_with_hash_present(
-                        self.t / agent_name, agent_config, "Qm"
-                    ).name,
-                )
+                        str(self.t / agent_name), agent_config, "Qm"
+                    ),
+                ).name
                 == "signing"
             )
