@@ -70,8 +70,8 @@ class TestSkillTestCase(BaseSkillTestCase):
             dm_context_kwargs={},
         )
 
-    def test_setup(self):
-        """Test the setup() class method."""
+    def test_setup_class(self):
+        """Test the setup_class() method."""
         assert self.skill.skill_context.agent_address == "test_agent_address"
         assert self.skill.skill_context.agent_name == "test_agent_name"
         assert (
@@ -100,6 +100,12 @@ class TestSkillTestCase(BaseSkillTestCase):
             self.skill.skill_context.behaviours.dummy.kwargs["behaviour_arg_2"]
             == self.behaviour_arg_2
         )
+
+    def test_setup_with_kwargs(self):
+        """Test setup with kwargs"""
+        setup_class_skill = self.skill
+        super().setup(shared_state=None)
+        assert self.skill is not setup_class_skill
 
     def test_properties(self):
         """Test the properties."""
@@ -700,6 +706,27 @@ class TestSkillTestCase(BaseSkillTestCase):
                 dialogue_messages,
                 "counterparty",
             )
+
+    def test_reset_all_dialogues(self):
+        """Test reset_all_dialogues"""
+
+        fipa_dialogues = FipaDialogues(
+            self_address=self.skill.skill_context.agent_address
+        )
+
+        for handler in self.skill.handlers.values():
+            name = handler.SUPPORTED_PROTOCOL.name + "_dialogues"
+            setattr(handler.context, name, fipa_dialogues)
+            dialogue_stats = fipa_dialogues.dialogue_stats
+            for end_state in dialogue_stats.self_initiated:
+                dialogue_stats.add_dialogue_endstate(end_state, True)
+                dialogue_stats.add_dialogue_endstate(end_state, False)
+
+        assert all(fipa_dialogues.dialogue_stats.self_initiated.values())
+        assert all(fipa_dialogues.dialogue_stats.other_initiated.values())
+        self.reset_all_dialogues()
+        assert not any(fipa_dialogues.dialogue_stats.self_initiated.values())
+        assert not any(fipa_dialogues.dialogue_stats.other_initiated.values())
 
 
 class FipaDialogues(BaseFipaDialogues):

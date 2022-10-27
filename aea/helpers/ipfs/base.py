@@ -92,7 +92,7 @@ class IPFSHashOnly:
         if os.path.isdir(file_path):
             return cls.hash_directory(file_path, wrap=wrap, cid_v1=cid_v1)
 
-        return cls.hash_file(file_path, wrap=wrap)
+        return cls.hash_file(file_path, wrap=wrap, cid_v1=cid_v1)
 
     @classmethod
     def hash_file(cls, file_path: str, wrap: bool = True, cid_v1: bool = True) -> str:

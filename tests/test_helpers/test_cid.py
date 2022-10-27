@@ -19,6 +19,8 @@
 
 """Test cid implementation."""
 
+from typing import cast
+
 import pytest
 
 from aea.helpers.cid import CID, CIDv0, CIDv1, to_v0, to_v1
@@ -46,6 +48,14 @@ def test_conversion() -> None:
     ):
         to_v1(HASH_V1)
 
+    with pytest.raises(
+        ValueError,
+        match="CIDv1 can only be converted for codec dag-pb",
+    ):
+        cid_v1 = cast(CIDv1, CID.from_string(HASH_V1))
+        cid_v1._codec = CIDv0.CODEC[::-1]
+        cid_v1.to_v0()
+
 
 def test_cids() -> None:
     """Test CID object."""
@@ -61,6 +71,16 @@ def test_cids() -> None:
     assert isinstance(cid_v1, CIDv1)
     assert cid_v1.version == 1
     assert str(cid_v1) == HASH_V1
+
+
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_cid__eq__(multihash):
+    """Test CID __eq__"""
+    cid = CID.from_string(multihash)
+    assert cid is not CID.from_string(multihash)
+    assert cid == CID.from_string(multihash)
+    assert not cid == multihash
+    assert not multihash == cid
 
 
 def test_make() -> None:
@@ -100,3 +120,48 @@ def test_make() -> None:
     )
 
     assert cid_v1 == cid_v1_expected
+
+
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_cid__repr__(multihash):
+    """Test CID __repr__"""
+
+    keys = ["version", "codec", "multihash"]
+    cid = CID.from_string(multihash)
+    assert all(k in repr(cid) for k in keys)
+
+
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_is_cid(multihash):
+    """Test CID.is_cid"""
+
+    assert CID.is_cid(multihash)
+    assert not CID.is_cid(multihash[::-1])
+
+
+@pytest.mark.parametrize("multihash", [HASH_V0, HASH_V1])
+def test_cid_from_bytes(multihash):
+    """Test CID.from_bytes"""
+
+    multihash_bytes = multihash.encode("utf-8")
+    assert CID.from_bytes(multihash_bytes)
+
+
+@pytest.mark.parametrize(
+    "cid_bytes, error_message",
+    [
+        (b"b", "argument length can not be zero"),
+        (b"bb", "cid length is invalid"),
+        (bytes(2), "multihash is too short"),
+        (bytes(10), "multihash length field does not match digest field length"),
+        (
+            HASH_V1[::-1].encode("utf-8"),
+            "multihash is not a valid base58 encoded multihash",
+        ),
+    ],
+)
+def test_cid_from_incorrect_bytes_raises(cid_bytes, error_message):
+    """Test CID.from_bytes raises on incorrect input"""
+
+    with pytest.raises(ValueError, match=error_message):
+        assert CID.from_bytes(cid_bytes)

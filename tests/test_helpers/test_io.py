@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the 'aea.helpers.io' module."""
+
 import os
 import tempfile
 from pathlib import Path
@@ -57,8 +58,13 @@ def test_raise_if_binary_mode():
         open_file(MagicMock(), mode="rb")
 
 
-def test_csv_io() -> None:
+def test_csv_io(capsys) -> None:
     """Test csv utils."""
+
+    csv_file = Path("non-existent-directory", "file.csv")
+    to_csv(DUMMY_CSV_DATA, csv_file)
+    captured = capsys.readouterr()
+    assert captured.out == "I/O error\n"
 
     with tempfile.TemporaryDirectory() as temp_dir:
         csv_file = Path(temp_dir, "file.csv")
@@ -70,3 +76,9 @@ def test_csv_io() -> None:
         assert any(
             [csv_data[key] == value for key, value in DUMMY_CSV_DATA.items()]
         ), csv_data
+
+        enum_rows = enumerate(csv_file.read_text().split())
+        new_rows = [",".join([*row.split(","), f"another_{i}"]) for i, row in enum_rows]
+        csv_file.write_text("\n".join(new_rows))
+        with pytest.raises(ValueError, match="Length of the row should be 2"):
+            from_csv(csv_file)

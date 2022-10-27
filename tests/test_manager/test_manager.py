@@ -35,6 +35,7 @@ from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
 import _strptime  # pylint: disbale=unsed-import # noqa: F401
+import click
 import pytest
 
 from aea.configurations.base import PublicId
@@ -44,6 +45,7 @@ from aea.crypto.registries import crypto_registry
 from aea.helpers.install_dependency import call_pip
 from aea.manager import MultiAgentManager
 from aea.manager.manager import AgentRunProcessTask, ProjectPackageConsistencyCheckError
+from aea.manager.project import Project
 
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
@@ -218,6 +220,32 @@ class BaseTestMultiAgentManager(BaseCase):
         self.manager.add_project(self.project_public_id, local=True)
         assert self.project_public_id in self.manager.list_projects()
         assert os.path.exists(self.project_path)
+
+    def test_add_project_check_version_consistency(self, *args):
+        """Test add project check version consistency"""
+
+        self.manager.start_manager()
+
+        error_msg = "The remote registry is not initialized. Remote registry command currently not supported - manually edit config file!"
+        with pytest.raises(click.ClickException, match=error_msg):
+            self.manager.add_project(self.project_public_id, remote=True)
+
+        self.manager.add_project(self.project_public_id)
+        project = self.manager._projects[self.project_public_id]
+        prefix_to_version = self.manager._package_id_prefix_to_version
+        package_prefix, (version, agents) = prefix_to_version.copy().popitem()
+
+        with patch.object(
+            self.manager, "_versionless_projects_set", return_value=set()
+        ):
+            with patch.object(Project, "load", return_value=project):
+                self.manager.add_project(self.project_public_id)
+                prefix_to_version[package_prefix] = version + "0", agents
+                with pytest.raises(
+                    ProjectPackageConsistencyCheckError,
+                    match="AEA dependencies have conflicts with previously added projects",
+                ):
+                    self.manager.add_project(self.project_public_id)
 
     def read_logs(self) -> str:
         """Read log file"""
