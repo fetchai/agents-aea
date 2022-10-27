@@ -20,12 +20,12 @@
 """Helpful utilities."""
 
 import collections
-from contextlib import ExitStack, contextmanager
 import os
 import shutil
 import time
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Callable, Union, Any, Generator, Iterable
+from typing import Any, Callable, Generator, Iterable, Union
 
 
 FULL_PERMISSION = 0o40777

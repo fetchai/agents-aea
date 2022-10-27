@@ -22,7 +22,12 @@
 import socket
 from unittest import mock
 
-from aea.test_tools.network import LOCALHOST, get_host, get_unused_tcp_port, is_port_in_use
+from aea.test_tools.network import (
+    LOCALHOST,
+    get_host,
+    get_unused_tcp_port,
+    is_port_in_use,
+)
 
 
 def test_get_unused_tcp_port() -> None:

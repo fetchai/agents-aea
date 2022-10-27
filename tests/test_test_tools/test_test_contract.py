@@ -26,8 +26,8 @@ from unittest import mock
 import pytest
 from aea_ledger_ethereum import EthereumApi
 
-from aea.test_tools.utils import as_context
 from aea.test_tools.test_contract import BaseContractTestCase
+from aea.test_tools.utils import as_context
 
 from tests.data.dummy_contract.contract import DummyContract
 
