@@ -22,7 +22,7 @@
 import logging
 import pprint
 import shutil
-import subprocess
+import subprocess  # nosec
 from pathlib import Path
 from typing import Any
 from unittest import mock
