@@ -19,6 +19,7 @@
 
 """Test `generate-all-protocols` command."""
 
+import logging
 import pprint
 import shutil
 import subprocess
@@ -56,23 +57,25 @@ class TestGenerateAllProtcols(AEATestCaseMany):
 
     use_packages_dir: bool = True
     find_packages_patch: Any
+    package_path: Path
 
     @classmethod
     def setup_class(cls) -> None:
         """Setup test class."""
         super().setup_class()
 
+        cls.package_path = cls.t / "packages" / "fetchai" / "protocols" / "fipa"
         cls.find_packages_patch = mock.patch(
             "aea.cli.generate_all_protocols.find_protocols_in_local_registry",
-            return_value=(cls.t / "packages" / "fetchai" / "protocols" / "fipa",),
+            return_value=(cls.package_path,),
         )
 
-    def test_run(self) -> None:
+    def test_run(self, caplog) -> None:
         """Test command invocation."""
 
         with self.find_packages_patch, mock.patch.object(
             AEAProject, "run_cli", new=_run_cli_patch
-        ):
+        ), caplog.at_level(logging.INFO):
             result = self.run_cli_command(
                 "generate-all-protocols",
                 str(self.packages_dir_path),
@@ -81,6 +84,7 @@ class TestGenerateAllProtcols(AEATestCaseMany):
             )
 
             assert result.exit_code == 0
+            assert f"Processing protocol at path {self.package_path}"
 
     def test_check_clean_pass(self) -> None:
         """Test command invocation."""
@@ -229,12 +233,12 @@ class TestParentAsRootDir(AEATestCaseMany):
             return_value=(cls.t / "packages" / "fetchai" / "protocols" / "fipa",),
         )
 
-    def test_root_dir_parent(self) -> None:
+    def test_root_dir_parent(self, caplog) -> None:
         """Test command invocation."""
 
         with self.find_packages_patch, mock.patch.object(
             AEAProject, "run_cli", new=_run_cli_patch
-        ):
+        ), caplog.at_level(logging.INFO):
             result = self.run_cli_command(
                 "generate-all-protocols",
                 str(self.packages_dir_path),
@@ -243,6 +247,9 @@ class TestParentAsRootDir(AEATestCaseMany):
             )
 
             assert result.exit_code == 0
+            assert (
+                "Replace prefix of import statements in directory 'fipa'" in caplog.text
+            )
 
     def test_root_dir_dont_match(self) -> None:
         """Test command invocation."""
