@@ -23,12 +23,13 @@ import contextlib
 import logging
 import os
 from pathlib import Path
-from typing import Type
+from typing import Type, cast
 from unittest import mock
 from unittest.mock import patch
 
 import pytest
 
+from aea.test_tools.utils import copy_class
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ComponentType
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
@@ -43,7 +44,8 @@ from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 class TestAsyncRuntime:
     """Test async runtime."""
 
-    RUNTIME: Type[BaseRuntime] = AsyncRuntime
+    # set a copy to prevent lasting state changes via class attributes affecting
+    RUNTIME: Type[BaseRuntime] = cast(AsyncRuntime, copy_class(AsyncRuntime))
 
     def setup(self):
         """Set up case."""
