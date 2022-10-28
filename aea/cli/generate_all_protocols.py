@@ -257,7 +257,9 @@ def _check_preliminaries() -> None:
     )
 
 
-def download_package(package_id: PackageId, destination_path: str) -> None:
+def download_package(
+    package_id: PackageId, destination_path: str
+) -> None:  # pragma: nocover
     """Download a package into a directory."""
     api_path = f"/{package_id.package_type.to_plural()}/{package_id.author}/{package_id.name}/{package_id.public_id.LATEST_VERSION}"
     resp = cast(JSONLike, request_api("GET", api_path))
