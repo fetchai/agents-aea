@@ -72,12 +72,12 @@ class TestBaseContractTestCaseSetup:
         """Setup test"""
 
         # must `copy` the class to avoid test interference
-        self.test_cls = copy_class(TestCls)
+        self.test_cls = cast(TestCls, copy_class(TestCls))
 
     def setup_test_cls(self) -> TestCls:
         """Helper method to setup test to be tested"""
 
-        test_instance = self.test_cls()
+        test_instance = self.test_cls()  # type: ignore
         test_instance.setup()
         return test_instance
 

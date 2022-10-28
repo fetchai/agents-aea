@@ -28,7 +28,7 @@ from unittest import mock
 import pytest
 
 from aea.test_tools import utils
-from aea.test_tools.utils import remove_test_directory, wait_for_condition, copy_class
+from aea.test_tools.utils import copy_class, remove_test_directory, wait_for_condition
 
 
 def test_wait_for_condition():
@@ -48,7 +48,7 @@ def test_copy_class():
         attr = "attr"
 
         def f(self) -> None:
-            """f"""
+            """F"""
 
     copy_of_A = copy_class(A)
     assert copy_of_A is not A

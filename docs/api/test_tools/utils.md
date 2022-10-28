@@ -35,6 +35,16 @@ def as_context(*contexts: Any) -> Generator[None, None, None]
 
 Set contexts
 
+<a id="aea.test_tools.utils.copy_class"></a>
+
+#### copy`_`class
+
+```python
+def copy_class(cls: Type) -> Type
+```
+
+Copy a class. Useful for testing class setup configurations
+
 <a id="aea.test_tools.utils.remove_test_directory"></a>
 
 #### remove`_`test`_`directory
