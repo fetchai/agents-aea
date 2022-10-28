@@ -391,7 +391,7 @@ class TestPushFromPath(BaseAEATestCase):
             )
             assert result.exit_code == 0
             copytree_mock.assert_called_with(
-                self.t / "packages" / "fetchai" / "skills" / "echo", ""
+                self.packages_dir_path.absolute() / "fetchai" / "skills" / "echo", ""
             )
 
     def test_remote(
