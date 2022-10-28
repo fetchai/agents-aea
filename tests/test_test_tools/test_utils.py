@@ -28,7 +28,7 @@ from unittest import mock
 import pytest
 
 from aea.test_tools import utils
-from aea.test_tools.utils import remove_test_directory, wait_for_condition
+from aea.test_tools.utils import remove_test_directory, wait_for_condition, copy_class
 
 
 def test_wait_for_condition():
@@ -37,6 +37,32 @@ def test_wait_for_condition():
     wait_for_condition(lambda: True)
     with pytest.raises(TimeoutError, match="test error msg"):
         wait_for_condition(lambda: False, error_msg="test error msg")
+
+
+def test_copy_class():
+    """Test copy_class"""
+
+    class A:
+        """A"""
+
+        attr = "attr"
+
+        def f(self) -> None:
+            """f"""
+
+    copy_of_A = copy_class(A)
+    assert copy_of_A is not A
+    assert copy_of_A != A
+    assert copy_of_A.attr == A.attr
+    assert copy_of_A.f is A.f
+    assert copy_of_A().f != A().f
+    assert copy_of_A.__name__ == A.__name__
+
+    # new attributes / methods on copy not present on original
+    copy_of_A.new_attr = "new_attr"
+    copy_of_A.g = lambda: None
+    assert not hasattr(A, "new_attr")
+    assert not hasattr(A, "g")
 
 
 @pytest.mark.parametrize("path_type", [str, Path])
