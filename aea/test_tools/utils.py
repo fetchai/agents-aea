@@ -25,7 +25,7 @@ import shutil
 import time
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Any, Callable, Generator, Iterable, Union
+from typing import Any, Callable, Generator, Iterable, Union, Type, cast
 
 
 FULL_PERMISSION = 0o40777
@@ -57,6 +57,11 @@ def as_context(*contexts: Any) -> Generator[None, None, None]:
     with ExitStack() as stack:
         consume(map(stack.enter_context, contexts))
         yield
+
+
+def copy_class(cls: Type) -> Type:
+    """Copy a class. Useful for testing class setup configurations"""
+    return cast(cls, type(cls.__name__, cls.__bases__, dict(cls.__dict__)))
 
 
 def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool:
