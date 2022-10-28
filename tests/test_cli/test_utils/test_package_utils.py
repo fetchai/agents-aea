@@ -120,9 +120,7 @@ def test_try_get_item_target_path() -> None:
     with mock.patch("os.path.exists", return_value=True):
         with pytest.raises(
             click.ClickException,
-            match=re.escape(
-                'Item "some_skill" already exists in target folder "author/skill".'
-            ),
+            match=re.escape('Item "some_skill" already exists in target folder'),
         ):
             try_get_item_target_path(path, author_name, item_type_plural, item_name)
 
