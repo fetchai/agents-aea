@@ -194,6 +194,9 @@ def update_hashes(
     try:
         public_id_to_hash_mappings: Dict = {}
         dependency_tree = DependencyTree.generate(packages_dir)
+        if not dependency_tree:
+            raise ValueError(f"Could not find any package in {packages_dir}")
+
         packages = [
             [package_id_and_path(package_id, packages_dir) for package_id in tree_level]
             for tree_level in dependency_tree
@@ -223,6 +226,11 @@ def update_hashes(
                 public_id_to_hash_mappings[package_id] = package_hash
 
                 if vendor is not None and package_id.author != vendor:
+                    click.echo(
+                        "Skipping the hash update for {} of type {}".format(
+                            package_path.name, package_id.package_type
+                        )
+                    )
                     continue
                 package_hashes[key] = package_hash
         click.echo("Done!")

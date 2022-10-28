@@ -200,8 +200,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             if result.exit_code != 0:  # pragma: nocover
                 raise AEATestingException(
                     "Failed to execute AEA CLI command with args {}.\n"
-                    "Exit code: {}\nException: {}".format(
-                        args, result.exit_code, result.exception
+                    "Exit code: {}\nException: {}\n{}".format(
+                        args, result.exit_code, result.exception, result.output
                     )
                 )
             return result
