@@ -24,3 +24,13 @@ def get_host() -> str
 
 Get the host.
 
+<a id="aea.test_tools.network.is_port_in_use"></a>
+
+#### is`_`port`_`in`_`use
+
+```python
+def is_port_in_use(port: int) -> bool
+```
+
+Check if port is in use
+

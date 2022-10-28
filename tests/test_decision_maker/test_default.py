@@ -124,8 +124,11 @@ class BaseTestDecisionMaker:
 
         cls.decision_maker.start()
 
-    def test_decision_maker_config(self):
-        """Test config property."""
+    def test_decision_maker_properties(self):
+        """Test DecisionMaker properties."""
+        assert self.decision_maker_handler.agent_name == self.agent_name
+        assert self.decision_maker_handler.identity == self.identity
+        assert self.decision_maker_handler.wallet == self.wallet
         assert self.decision_maker_handler.config == self.config
 
     def test_decision_maker_execute_w_wrong_input(self):
@@ -137,11 +140,11 @@ class BaseTestDecisionMaker:
 
     def test_decision_maker_queue_access_not_permitted(self):
         """Test the in queue of the decision maker can not be accessed."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Access not permitted!"):
             self.decision_maker.message_in_queue.get()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Access not permitted!"):
             self.decision_maker.message_in_queue.get_nowait()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Wrong code, access not permitted!"):
             self.decision_maker.message_in_queue.protected_get(
                 access_code="some_invalid_code"
             )

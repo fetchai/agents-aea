@@ -1331,6 +1331,7 @@ class ProtocolGeneratorTestCase(TestCase):
         )
         assert Path(path_to_protobuf_schema_file).exists()
         assert Path(path_to_protobuf_python_implementation).exists()
+        assert protocol_generator.generate(protobuf_only=True)
 
     def test_generate_protobuf_only_mode_positive_cpp(self):
         """Positive test for the 'generate_protobuf_only_mode' where language is C++."""

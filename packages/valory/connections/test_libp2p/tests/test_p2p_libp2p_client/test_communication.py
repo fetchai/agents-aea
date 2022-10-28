@@ -80,7 +80,6 @@ class TestLibp2pClientConnectionConnectDisconnect(BaseP2PLibp2pTest):
             await connection_node.disconnect()
 
 
-@pytest.mark.asyncio
 @libp2p_log_on_failure_all
 class TestLibp2pClientConnectionEchoEnvelope(BaseP2PLibp2pTest):
     """Test that connection will route envelope to destination through the same libp2p node"""
