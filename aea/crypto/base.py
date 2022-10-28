@@ -462,7 +462,6 @@ class LedgerApi(Helper, ABC):
         :param transaction: the transaction
         :return: the updated transaction
         """
-        raise NotImplementedError
 
     @abstractmethod
     def contract_method_call(
@@ -477,7 +476,6 @@ class LedgerApi(Helper, ABC):
         :param method_name: the contract method to call
         :param method_args: the contract call parameters
         """
-        raise NotImplementedError
 
     @abstractmethod
     def build_transaction(
@@ -496,7 +494,6 @@ class LedgerApi(Helper, ABC):
         :param tx_args: the transaction parameters
         :param raise_on_try: whether the method will raise or log on error
         """
-        raise NotImplementedError
 
     @abstractmethod
     def get_transaction_transfer_logs(
@@ -510,9 +507,8 @@ class LedgerApi(Helper, ABC):
 
         :param contract_instance: the contract
         :param tx_hash: the transaction hash
-        :param target_address: optional address to filter tranfer events to just those that affect it
+        :param target_address: optional address to filter transfer events to just those that affect it
         """
-        raise NotImplementedError
 
 
 class FaucetApi(ABC):
