@@ -20,18 +20,20 @@
 """Test module for Registry push methods."""
 import filecmp
 import os
+from pathlib import Path
 from unittest import TestCase, mock
 
 import pytest
+from aea_cli_ipfs.core import IPFSTool  # type: ignore
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.push import _save_item_locally, check_package_public_id
-from aea.cli.registry.settings import REMOTE_HTTP
+from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.cli.utils.constants import ITEM_TYPES
 from aea.configurations.base import PublicId
 from aea.test_tools.constants import DEFAULT_AUTHOR
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.skills.echo import PUBLIC_ID
 
@@ -360,4 +362,98 @@ class TestPushVersionsMismatch(TestCase):
                     [*CLI_LOG_OPTION, "push", "contract", "author/name:0.1.0"],
                     standalone_mode=False,
                     catch_exceptions=False,
+                )
+
+
+class TestPushFromPath(BaseAEATestCase):
+    """Test `aea push` using path"""
+
+    use_packages_dir: bool = True
+
+    def test_local(
+        self,
+    ) -> None:
+        """Test command invocation"""
+
+        with mock.patch(
+            "aea.cli.push.get_registry_path_from_cli_config",
+            return_value=self.packages_dir_path,
+        ), mock.patch(
+            "aea.cli.push.try_get_item_target_path", return_value=""
+        ), mock.patch(
+            "aea.cli.push.copytree"
+        ) as copytree_mock:
+            result = self.run_cli_command(
+                "push",
+                "--local",
+                "skill",
+                str(self.packages_dir_path / "fetchai" / "skills" / "echo"),
+            )
+            assert result.exit_code == 0
+            copytree_mock.assert_called_with(
+                self.t / "packages" / "fetchai" / "skills" / "echo", ""
+            )
+
+    def test_remote(
+        self,
+    ) -> None:
+        """Test command invocation"""
+
+        with mock.patch.object(
+            IPFSTool, "add", return_value=(None, "hash", None)
+        ), mock.patch(
+            "aea.cli.push.get_default_remote_registry", return_value=REMOTE_IPFS
+        ), mock.patch.object(
+            Path, "glob", return_value=[]
+        ), mock.patch(
+            "aea.cli.push.to_v1", return_value="hash"
+        ):
+            result = self.run_cli_command(
+                "push",
+                "--remote",
+                "skill",
+                str(self.packages_dir_path / "fetchai" / "skills" / "echo"),
+            )
+
+            assert result.exit_code == 0, result.output
+            assert "Package hash: hash" in result.output
+
+    def test_remote_failure(
+        self,
+    ) -> None:
+        """Test command invocation"""
+
+        with mock.patch("aea.cli.push.push_item_ipfs"), mock.patch(
+            "aea.cli.push.get_default_remote_registry", return_value=REMOTE_HTTP
+        ):
+            with pytest.raises(
+                ClickException,
+                match="Pushing using HTTP is not supported using path parameter.",
+            ):
+                self.run_cli_command(
+                    "push",
+                    "--remote",
+                    "skill",
+                    str(self.packages_dir_path / "fetchai" / "skills" / "echo"),
+                )
+
+    def test_local_failure(
+        self,
+    ) -> None:
+        """Test command invocation"""
+
+        with mock.patch(
+            "aea.cli.push.get_default_remote_registry", return_value=REMOTE_HTTP
+        ):
+            with pytest.raises(
+                ClickException,
+                match='Item "echo" already exists in target folder',
+            ):
+                self.run_cli_command(
+                    "--registry-path",
+                    str(self.packages_dir_path),
+                    "push",
+                    "--local",
+                    "skill",
+                    str(self.packages_dir_path / "fetchai" / "skills" / "echo"),
                 )
