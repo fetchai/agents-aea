@@ -27,7 +27,7 @@ import pytest
 from aea_ledger_ethereum import EthereumApi
 
 from aea.test_tools.test_contract import BaseContractTestCase
-from aea.test_tools.utils import as_context
+from aea.test_tools.utils import as_context, copy_class
 
 from tests.data.dummy_contract.contract import DummyContract
 
@@ -72,14 +72,14 @@ class TestBaseContractTestCaseSetup:
         """Setup test"""
 
         # must `copy` the class to avoid test interference
-        class_copy = type("TestCls", TestCls.__bases__, dict(TestCls.__dict__))
-        self.test_cls = cast(TestCls, class_copy)
+        self.test_cls = cast(TestCls, copy_class(TestCls))
 
     def setup_test_cls(self) -> TestCls:
         """Helper method to setup test to be tested"""
 
-        self.test_cls.setup()
-        return self.test_cls()  # type: ignore
+        test_instance = self.test_cls()  # type: ignore
+        test_instance.setup()
+        return test_instance
 
     def test_contract_setup_missing_ledger_identifier(self):
         """Test contract setup missing ledger identifier"""
