@@ -26,6 +26,13 @@ import xml.etree.ElementTree as ET  # nosec
 from pathlib import Path
 from typing import Pattern, Set
 
+import requests
+import urllib3  # type: ignore
+from requests.adapters import HTTPAdapter  # type: ignore
+from requests.packages.urllib3.util.retry import (  # type: ignore # pylint: disable=import-error
+    Retry,
+)
+
 from aea.helpers import http_requests as requests
 
 
@@ -36,19 +43,33 @@ RELATIVE_PATH_STR = "../"
 RELATIVE_PATH_STR_LEN = len(RELATIVE_PATH_STR)
 INDEX_FILE_PATH = Path("docs/index.md")
 
-WHITELIST_URL_TO_CODE = {
-    "https://dl.acm.org/doi/10.1145/3212734.3212736": 302,
-    "https://s-oef.fetch.ai:443": 405,
-    "https://golang.org/dl/": 403,
-    "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
-    "https://colab.research.google.com": 403,
-    "https://github.com/fetchai/networks-stargateworld": 404,
-}
+# Special links that are allowed to respond with an error status
+# Remove non-url-allowed characters like ` before adding them here
+URL_SKIPS = []
 
-IGNORE: Set[str] = {"https://faucet.metamask.io/", "https://ipfs.tech/"}
+# Define here custom timeouts for some edge cases
+CUSTOM_TIMEOUTS = {}
+
+DEFAULT_REQUEST_TIMEOUT = 5  # seconds
+
+# Disable insecure request warning (expired SSL certificates)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Configure request retries
+retry_strategy = Retry(
+    total=3,  # number of retries
+    status_forcelist=[404, 429, 500, 502, 503, 504],  # codes to retry on
+)
+# https://stackoverflow.com/questions/18466079/change-the-connection-pool-size-for-pythons-requests-module-when-in-threading
+adapter = HTTPAdapter(
+    max_retries=retry_strategy, pool_connections=100, pool_maxsize=100
+)
+session = requests.Session()
+session.mount("https://", adapter)
+session.mount("http://", adapter)
 
 
-def is_url_reachable(url: str, attempts: int = 3) -> bool:
+def is_url_reachable(url: str) -> bool:
     """
     Check if an url is reachable.
 
@@ -58,19 +79,25 @@ def is_url_reachable(url: str, attempts: int = 3) -> bool:
     """
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
         return True
-    if url in IGNORE:
+    if url in URL_SKIPS:
         return True
 
     try:
-        for _ in range(attempts):
-            response = requests.head(url, timeout=60)
-            if response.status_code == 200:
-                return True
-            if response.status_code in [403, 405, 302, 404]:
-                return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
-    except Exception as e:  # pylint: disable=broad-except
-        print(e)
-    return False
+        # Do not verify requests. Expired SSL certificates would make those links fail
+        status_code = session.get(
+            url,
+            timeout=CUSTOM_TIMEOUTS.get(url, DEFAULT_REQUEST_TIMEOUT),
+            verify=False,
+        ).status_code
+        if status_code not in (200, 403):
+            return False
+    except (
+        requests.exceptions.RetryError,
+        requests.exceptions.ConnectionError,
+    ):
+        return False
+
+    return True
 
 
 def check_header_in_file(header: str, file: Path) -> None:
