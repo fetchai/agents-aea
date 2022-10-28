@@ -24,7 +24,7 @@ import re
 import sys
 import xml.etree.ElementTree as ET  # nosec
 from pathlib import Path
-from typing import Pattern, Set
+from typing import Dict, List, Pattern, Set
 
 import requests
 import urllib3  # type: ignore
@@ -32,8 +32,6 @@ from requests.adapters import HTTPAdapter  # type: ignore
 from requests.packages.urllib3.util.retry import (  # type: ignore # pylint: disable=import-error
     Retry,
 )
-
-from aea.helpers import http_requests as requests
 
 
 LINK_PATTERN_MD = re.compile(r"\[([^]]+)]\(\s*([^]]+)\s*\)")
@@ -45,10 +43,10 @@ INDEX_FILE_PATH = Path("docs/index.md")
 
 # Special links that are allowed to respond with an error status
 # Remove non-url-allowed characters like ` before adding them here
-URL_SKIPS = []
+URL_SKIPS: List[str] = []
 
 # Define here custom timeouts for some edge cases
-CUSTOM_TIMEOUTS = {}
+CUSTOM_TIMEOUTS: Dict[str, int] = {}
 
 DEFAULT_REQUEST_TIMEOUT = 5  # seconds
 
@@ -74,7 +72,6 @@ def is_url_reachable(url: str) -> bool:
     Check if an url is reachable.
 
     :param url: the url to check
-    :param attempts: how often to retry connecting
     :return: bool
     """
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
