@@ -75,6 +75,11 @@ def as_context(*contexts: Any) -> Generator[None, None, None]:
 def copy_class(cls: Type) -> Type:
     """Copy a class. Useful for testing class setup configurations"""
 
+    # NOTE: this does not recursively deepcopy the class
+    #       nor can it copy items that cannot be pickled,
+    #       e.g. classes containing classmethods in __dict__.
+    #       Use at your own risk.
+
     def is_mutable(obj: Any) -> bool:
         return isinstance(obj, (MutableSequence, MutableSet, MutableMapping))
 
