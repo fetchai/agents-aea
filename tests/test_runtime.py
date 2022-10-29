@@ -133,6 +133,7 @@ class TestAsyncRuntime:
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state
 
+    @pytest.mark.skip(reason="https://github.com/valory-xyz/open-aea/issues/408")
     def test_cancelled_during_start_agent_loop(self, caplog):
         """Test asyncio.CancelledError during _start_agent_loop."""
 
