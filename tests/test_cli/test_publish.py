@@ -28,12 +28,12 @@ from click import ClickException
 
 from aea.cli import cli
 from aea.cli.publish import (
+    IPFSTool,
     LocalRegistry,
     MixedRegistry,
     RemoteRegistry,
     _save_agent_locally,
     _validate_pkp,
-    IPFSTool,
 )
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.configurations.base import PublicId

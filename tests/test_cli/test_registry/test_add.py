@@ -20,17 +20,17 @@
 """This test module contains tests for CLI Registry add methods."""
 
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase, mock
 
+from aea.cli.add import HashNotProvided
 from aea.cli.registry.add import fetch_package
 from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import PublicId
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import BaseAEATestCase
-from aea.cli.add import HashNotProvided
 
 
 @mock.patch("aea.cli.registry.utils.request_api", return_value={"file": "url"})
@@ -117,7 +117,9 @@ class TestAddFromHash(BaseTestAdd):
                 assert (Path.cwd() / "vendor" / "fetchai" / "skills" / "echo").exists()
 
 
-class TestAddFromHashFail(BaseTestAdd):
+class TestAddFromHashIPFSFail(BaseTestAdd):
+    """Test ipfs registry failing"""
+
     def test_hash_not_provided(
         self,
     ) -> None:
