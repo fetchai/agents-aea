@@ -79,16 +79,16 @@ When loading the skill, the loader will apply these overrides to the in-memory c
 
 > Although it's possible to perform overrides at the component level, avoid performing overrides at the component level. Use agent configuration to perform overrides. This will help you keep the configurations clean.
 
-### Enviroment overrides
+### Environment overrides
 
-The configuration loader also allows the users to define overrides who's values can be picked up from the environment at the runtime. Define an enviroment override using following syntax
+The configuration loader also allows the users to define overrides who's values can be picked up from the environment at the runtime. Define an environment override using following syntax
 
 ```yaml
 some_parameter: ${ENVIRONMENT_VARIABLE_NAME:data_type:default_value}
 ```
 
-- `ENVIRONMENT_VARIABLE_NAME` is a string representing the name of the environment variable to look for. Make sure it's all in the uppercase letters.
-- `data_type` is a string defining the type of enviroment variable and needs to be one of the (`bool`, `int`, `float`, `str`, `list`, `dict`).
+- `ENVIRONMENT_VARIABLE_NAME` is a string representing the name of the environment variable to look for. Make sure it's all in the capital letters.
+- `data_type` is a string defining the type of environment variable and needs to be one of the (`bool`, `int`, `float`, `str`, `list`, `dict`).
 - `default_value` should be the default value to be used if the environment variable is not provided.
 
 To use the environment variable placeholder on the example above, define `skill.yaml` like this
@@ -104,7 +104,7 @@ config:
   foo: ${FOO:str:bar}
 ```
 
-To utilise the environment variable placeholder, export the varible before running the application and make sure to use `--aev` flag if applicable for the given command
+To utilise the environment variable placeholder, export the variable before running the application and make sure to use `--aev` flag if applicable for the given command
 
 ```
 $ export FOO=some_other_value
