@@ -82,7 +82,7 @@ class TestPrometheusConnection:
         self.some_skill = "some/skill:0.1.0"
         self.agent_address = "my_address"
         self.agent_public_key = "my_public_key"
-        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.1.2")
+        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.1.3")
         identity = Identity(
             "name", address=self.agent_address, public_key=self.agent_public_key
         )

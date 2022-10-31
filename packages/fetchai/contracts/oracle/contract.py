@@ -31,7 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.12.1")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.12.2")
 
 
 def keccak256(input_: bytes) -> bytes:

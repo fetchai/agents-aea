@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/thermometer_client:0.26.2")
+PUBLIC_ID = PublicId.from_str("fetchai/thermometer_client:0.26.3")

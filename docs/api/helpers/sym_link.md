@@ -58,7 +58,7 @@ we want to compute:
 
 The resulting command on UNIX systems will be:
 
-    cd directory_1 && ln -s ../../directory_1/target_path symbolic_link
+cd directory_1 && ln -s ../../directory_1/target_path symbolic_link
 
 **Arguments**:
 

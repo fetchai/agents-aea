@@ -5,7 +5,7 @@ Follow the instructions below to build and run the TAC demo.
 
 ## Requirements
 
-Make sure you are running <a href="https://docs.docker.com/install/" target="_blank">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank">Docker Compose</a>.
+Make sure you are running <a href="https://docs.docker.com/get-docker/" target="_blank">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank">Docker Compose</a>.
 
 
 ## Quick start
