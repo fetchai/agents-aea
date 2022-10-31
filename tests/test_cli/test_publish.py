@@ -33,10 +33,12 @@ from aea.cli.publish import (
     RemoteRegistry,
     _save_agent_locally,
     _validate_pkp,
+    IPFSTool,
 )
-from aea.cli.registry.settings import REMOTE_HTTP
+from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.configurations.base import PublicId
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
@@ -324,3 +326,44 @@ class CheckAndPublishCommandTestCase(TestCase):
                 registry.check_item_present_and_push("connections", mock.Mock())
 
         push_item_mock.assert_called_once()
+
+
+class TestPublishIPFS(BaseAEATestCase):
+    """Test publish agent to IPFS"""
+
+    agent_name: str
+    agent_dir: Path
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Setup test class."""
+
+        super().setup_class()
+
+        cls.agent_name = "agent"
+        cls.create_agents(cls.agent_name)
+
+        cls.agent_dir = cls.t / cls.agent_name
+
+    def test_publish_agent_to_ipfs(self) -> None:
+        """Test run"""
+
+        with cd(self.agent_dir):
+            with mock.patch(
+                "aea.cli.publish.get_default_remote_registry", return_value=REMOTE_IPFS
+            ), mock.patch(
+                "aea.cli.publish._check_dependencies_in_registry",
+            ) as dep_check_mock, mock.patch(
+                "aea.cli.publish.to_v1",
+            ) as hash_v1_mock, mock.patch.object(
+                IPFSTool, "add", return_value=(None, "hash", None)
+            ):
+                result = self.run_cli_command("publish", "--remote")
+                assert result.exit_code == 0, result.output
+                assert (
+                    "Successfully published agent agent to the Registry"
+                    in result.output
+                ), result.output
+
+                dep_check_mock.assert_called_once()
+                hash_v1_mock.assert_called_once()

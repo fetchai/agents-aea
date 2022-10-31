@@ -20,10 +20,17 @@
 """This test module contains tests for CLI Registry add methods."""
 
 import os
+from pathlib import Path
+import shutil
+from tempfile import TemporaryDirectory
 from unittest import TestCase, mock
 
 from aea.cli.registry.add import fetch_package
+from aea.cli.registry.settings import REMOTE_IPFS
 from aea.configurations.base import PublicId
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import BaseAEATestCase
+from aea.cli.add import HashNotProvided
 
 
 @mock.patch("aea.cli.registry.utils.request_api", return_value={"file": "url"})
@@ -47,3 +54,95 @@ class FetchPackageTestCase(TestCase):
         )
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", os.path.join("dest", "path"))
+
+
+class BaseTestAdd(BaseAEATestCase):
+    """Test `aea add` command."""
+
+    agent_name: str
+    agent_dir: Path
+    skill_path: Path
+    skill_id: PublicId = PublicId(
+        author="fetchai",
+        name="echo",
+        package_hash="bafybeia3ovoxmnipktwnyztie55itsuempnfeircw72jn62uojzry5pwsu",
+    )
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Setup test class."""
+
+        super().setup_class()
+
+        cls.agent_name = "agent"
+        cls.create_agents(cls.agent_name)
+
+        cls.agent_dir = cls.t / cls.agent_name
+        cls.skill_path = (
+            cls.packages_dir_path.absolute()
+            / cls.skill_id.author
+            / "skills"
+            / cls.skill_id.name
+        )
+
+
+class TestAddFromHash(BaseTestAdd):
+    """Test add using hash."""
+
+    def test_from_hash(
+        self,
+    ) -> None:
+        """Test run."""
+
+        with cd(self.agent_dir), TemporaryDirectory() as temp_dir:
+            download_path = Path(temp_dir, self.skill_id.name)
+            shutil.copytree(self.skill_path, download_path)
+            with mock.patch(
+                "aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS
+            ), mock.patch(
+                "aea.cli.add.fetch_ipfs", return_value=download_path
+            ), mock.patch(
+                "aea.cli.add._add_item_deps"
+            ):
+                result = self.run_cli_command(
+                    "add",
+                    "skill",
+                    self.skill_id.hash,
+                    "--remote",
+                )
+
+                assert result.exit_code == 0, result.output
+                assert "Successfully added skill" in result.stdout
+
+                assert (Path.cwd() / "vendor" / "fetchai" / "skills" / "echo").exists()
+
+
+class TestAddFromHashFail(BaseTestAdd):
+    def test_hash_not_provided(
+        self,
+    ) -> None:
+        """Test run."""
+
+        with cd(self.agent_dir), TemporaryDirectory() as temp_dir:
+            download_path = Path(temp_dir, self.skill_id.name)
+            shutil.copytree(self.skill_path, download_path)
+            with mock.patch(
+                "aea.cli.add.get_default_remote_registry", return_value=REMOTE_IPFS
+            ), mock.patch(
+                "aea.cli.add.fetch_ipfs", side_effect=HashNotProvided
+            ), mock.patch(
+                "aea.cli.add.fetch_package", return_value=download_path
+            ), mock.patch(
+                "aea.cli.add._add_item_deps"
+            ):
+                result = self.run_cli_command(
+                    "add",
+                    "skill",
+                    self.skill_id.hash,
+                    "--remote",
+                )
+
+                assert result.exit_code == 0, result.output
+                assert "Hash was not provided for" in result.stdout
+                assert "Will try with http repository" in result.stdout
+                assert "Successfully added skill" in result.stdout
