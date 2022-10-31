@@ -1136,9 +1136,13 @@ class SkillConfig(ComponentConfiguration):
             if not result.get(overridable):
                 continue
             for field in result[overridable]:
+                result[overridable][field]["args"] = result[overridable][field].get(
+                    "args", {}
+                )
                 # We don't want users to override the `class_name`` parameter
                 # for a behaviour/handler/model object.
-                del result[overridable][field]["class_name"]
+                if "class_name" in result[overridable][field]:
+                    del result[overridable][field]["class_name"]
 
         if self.abstract_field_name in self.json:
             result[self.abstract_field_name] = self.json[self.abstract_field_name]
