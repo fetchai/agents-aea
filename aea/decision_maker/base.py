@@ -43,7 +43,7 @@ def _hash(access_code: str) -> str:
     :param access_code: the access code
     :return: the hash
     """
-    result = hashlib.sha224(access_code.encode("utf-8")).hexdigest()
+    result = hashlib.sha512(access_code.encode("utf-8")).hexdigest()
     return result
 
 
