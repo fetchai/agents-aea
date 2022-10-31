@@ -151,9 +151,11 @@ def fetch_agent_ipfs(
         else:
             target_dir = Path(agent_path)
     except DownloadError as e:
-        raise click.ClickException(e.args[0])
+        raise click.ClickException(
+            f"Error occured while downloading agent {public_id}"
+        ) from e
     except shutil.Error as e:
-        raise click.ClickException(e.args[0])
+        raise click.ClickException(str(e)) from e
 
     ctx.clean_paths.append(target_dir)
     ctx.cwd = str(target_dir)
