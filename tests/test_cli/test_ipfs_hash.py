@@ -42,7 +42,8 @@ class TestHashAll(BaseAEATestCase):
 
         tree = DependencyTree.generate(self.packages_dir_path)
         packages: Set[PackageId] = set()
-        _ = [packages.update(level) for level in tree]
+        for level in tree:
+            packages.update(level)
 
         result = self.run_cli_command(
             "hash", "all", "--packages-dir", str(self.packages_dir_path)
@@ -73,7 +74,8 @@ class TestHashAll(BaseAEATestCase):
         vendor = "valory"
         tree = DependencyTree.generate(self.packages_dir_path)
         packages: Set[PackageId] = set()
-        _ = [packages.update(level) for level in tree]
+        for level in tree:
+            packages.update(level)
 
         result = self.run_cli_command(
             "hash",
