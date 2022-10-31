@@ -292,6 +292,8 @@ api
 gitleaks
 valory
 ABIs
+overridable
+overridables
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

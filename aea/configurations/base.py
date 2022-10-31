@@ -228,8 +228,6 @@ class PackageConfiguration(Configuration, ABC):
     package_type: PackageType
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
-    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset()
-    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
@@ -573,7 +571,6 @@ class ConnectionConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["config", "cert_requests", "is_abstract", "build_directory"]
     )
-    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["config"])
 
     __slots__ = (
         "class_name",
@@ -955,10 +952,6 @@ class SkillConfig(ComponentConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models", "is_abstract", "build_directory"]
     )
-    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
-        ["behaviours", "handlers", "models"]
-    )
-    NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
 
     __slots__ = (
         "connections",
@@ -1137,23 +1130,23 @@ class SkillConfig(ComponentConfiguration):
 
     def get_overridable(self) -> dict:
         """Get overridable configuration data."""
-        result = {}
-        current_config_data = self.json
-        if self.abstract_field_name in current_config_data:
-            result[self.abstract_field_name] = current_config_data[
-                self.abstract_field_name
-            ]
+        result = super().get_overridable()
 
-        for field in self.FIELDS_WITH_NESTED_FIELDS:
-            if not current_config_data.get(field, {}):
+        for overridable in ("handlers", "behaviours", "models"):
+            if not result.get(overridable):
                 continue
-            result[field] = {}
-            for name in current_config_data[field].keys():
-                result[field][name] = {}
-                for nested_field in self.NESTED_FIELDS_ALLOWED_TO_UPDATE:
-                    result[field][name][nested_field] = current_config_data[field][
-                        name
-                    ][nested_field]
+            for field in result[overridable]:
+                result[overridable][field]["args"] = result[overridable][field].get(
+                    "args", {}
+                )
+                # We don't want users to override the `class_name`` parameter
+                # for a behaviour/handler/model object.
+                if "class_name" in result[overridable][field]:
+                    del result[overridable][field]["class_name"]
+
+        if self.abstract_field_name in self.json:
+            result[self.abstract_field_name] = self.json[self.abstract_field_name]
+
         return result
 
 
@@ -1186,7 +1179,7 @@ class AgentConfig(PackageConfiguration):
             "storage_uri",
         ]
     )
-    FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(["logging_config"])
+
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),

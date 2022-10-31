@@ -57,6 +57,7 @@ nav:
       - Ledger & Crypto APIs: 'ledger-integration.md'
       - Message routing: 'message-routing.md'
       - Configurations: 'config.md'
+      - Working with overrides: 'overrides.md'
       - Limitations of v1: 'limits.md'
     - Use Case:
       - Front-end intergration: 'connect-a-frontend.md'
