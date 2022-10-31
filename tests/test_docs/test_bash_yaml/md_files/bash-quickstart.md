@@ -61,7 +61,7 @@ v1.1.1
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.28.1
+aea fetch fetchai/my_first_aea:0.28.2
 cd my_first_aea
 ```
 ``` bash
@@ -72,7 +72,7 @@ cd my_first_aea
 aea add connection fetchai/stub:0.21.1
 ```
 ``` bash
-aea add skill fetchai/echo:0.20.2
+aea add skill fetchai/echo:0.20.3
 ```
 ``` bash
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,

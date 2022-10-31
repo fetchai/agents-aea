@@ -1,27 +1,27 @@
 name: generic_buyer
 author: fetchai
-version: 0.27.2
+version: 0.27.3
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmd7hF4eNgxUoGaxkPEKVPQNxpLG2aG4DvovSLKkwKxVYt
-  __init__.py: QmdNsFvxVhmtSwd5S7TDrXNuqfrQELsJdSjZqmhhK3njHV
+  __init__.py: QmQZKBxKJa2pHbnoAMXssQACqBeuUPe1kzPfyzhoqdmucK
   behaviours.py: QmephYoPF78rWrwqBwpKWKSJhKUV6pe5GpEm4fgoR3BpPx
   dialogues.py: QmaZsSYcxyjNJ4FQz4gTxYjW5qYi4hfkv3Aky5eCXNLbfc
   handlers.py: Qmee6K1NvwqiXCM5x1ycAmTp2iS7JbuQxLsytZpckmoMPa
   strategy.py: QmP37EH7dWeK6TfAz9pMuJjZUiKzqX8G9VwHqrkrtnwPDJ
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
+- fetchai/ledger:0.21.2
 contracts: []
 protocols:
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.2
-- fetchai/signing:1.1.2
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/ledger_api:1.1.3
+- fetchai/oef_search:1.1.3
+- fetchai/signing:1.1.3
 skills: []
 behaviours:
   search:

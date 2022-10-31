@@ -8,7 +8,7 @@ The HTTP server connection allows you to run a server inside the connection itse
 
 ## HTTP Client
 
-The `fetchai/simple_data_request:0.14.2` skill demonstrates a simple use case of the HTTP Client connection.
+The `fetchai/simple_data_request:0.14.3` skill demonstrates a simple use case of the HTTP Client connection.
 
 The `HttpRequestBehaviour` in `behaviours.py` periodically sends HTTP envelops to the HTTP client connection. Its `act()` method, periodically called, simply calls `_generate_http_request` which contains the logic for enqueueing an HTTP request envelop.
 
@@ -26,13 +26,13 @@ cd my_aea
 Add the http server connection package:
 
 ``` bash
-aea add connection fetchai/http_server:0.23.2
+aea add connection fetchai/http_server:0.23.3
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.23.2
+aea config set agent.default_connection fetchai/http_server:0.23.3
 ```
 
 Modify the `api_spec_path`:
@@ -317,7 +317,7 @@ models:
 
 Run the fingerprinter (note, you will have to replace the author name with your author handle):
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.21.2
+aea fingerprint skill fetchai/http_echo:0.21.3
 ```
 
 

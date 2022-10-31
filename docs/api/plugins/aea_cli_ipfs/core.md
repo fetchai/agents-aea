@@ -18,7 +18,7 @@ IPFS Commands
 #### process`_`result
 
 ```python
-@ipfs.resultcallback()
+@ipfs.result_callback()
 @click.pass_context
 process_result(click_context: click.Context, *_: Any) -> None
 ```
@@ -51,7 +51,10 @@ Add directory to ipfs, if not directory specified the current one will be added.
 ```python
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.pass_context
 remove(click_context: click.Context, hash_: str) -> None
@@ -65,7 +68,10 @@ Remove a directory from ipfs by it's hash.
 ```python
 @ipfs.command()
 @click.argument(
-    "hash_", metavar="hash", type=str, required=True,
+    "hash_",
+    metavar="hash",
+    type=str,
+    required=True,
 )
 @click.argument(
     "target_dir",

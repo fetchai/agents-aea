@@ -72,6 +72,7 @@ PatternByPath = Dict[Path, str]
 AEA_DIR = Path("aea")
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = Path(os.path.join(CUR_PATH, ".."))
+PYPROJECT_TOML = ROOT_DIR / "pyproject.toml"
 
 PLUGINS_DIR = Path("plugins")
 ALL_PLUGINS = tuple(PLUGINS_DIR.iterdir())
@@ -269,28 +270,32 @@ class PythonPackageVersionBumper:
         :return: the current version
         """
         version_path = self.python_pkg_dir / Path("__version__.py")
-        setup_path = self.python_pkg_dir.parent / "setup.py"
+        path_regexp = []
         if version_path.exists():
             regex_template = '(?<=__version__ = [\'"])({version})(?=")'
             path = version_path
-        elif setup_path.exists():
-            regex_template = r'(?<=version=[\'"])({version})(?=[\'"],)'
-            path = setup_path
-        else:
-            raise ValueError("cannot fine neither '__version__.py' nor 'setup.py'")
+            path_regexp.append((path, regex_template))
+        if PYPROJECT_TOML.exists():
+            regex_template = r"(?<=\nversion = \")(?P<version>{version})(?=\"\n)"
+            path = PYPROJECT_TOML
+            path_regexp.append((path, regex_template))
 
-        content = path.read_text()
-        pattern = regex_template.format(version=".*")
-        current_version_candidates = re.findall(pattern, content)
-        more_than_one_match = len(current_version_candidates) > 1
-        if more_than_one_match:
-            raise ValueError(
-                f"find more than one match for current version in {path}: {current_version_candidates}"
+        for path, regex_template in path_regexp:
+            content = path.read_text()
+            pattern = regex_template.format(version=".*")
+            current_version_candidates = re.findall(pattern, content)
+            more_than_one_match = len(current_version_candidates) > 1
+            if more_than_one_match:
+                raise ValueError(
+                    f"find more than one match for current version in {path}: {current_version_candidates}"
+                )
+            current_version = current_version_candidates[0]
+            self.update_version_for_file(
+                path,
+                current_version,
+                new_version,
+                version_regex_template=regex_template,
             )
-        current_version = current_version_candidates[0]
-        self.update_version_for_file(
-            path, current_version, new_version, version_regex_template=regex_template
-        )
         return current_version
 
     def update_version_for_file(
