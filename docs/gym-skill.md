@@ -1,4 +1,4 @@
-The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.ml/" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
+The AEA gym skill demonstrates how a custom Reinforcement Learning agent, that uses OpenAI's <a href="https://www.gymlibrary.dev/" target="_blank">gym</a> library, may be embedded into an AEA skill and connection.
 
 ### Discussion
 
@@ -32,7 +32,7 @@ pip install numpy gym
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.26.1 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.26.2 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -49,12 +49,12 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.21.2
+aea add skill fetchai/gym:0.21.3
 ```
 
 ### Set gym connection as default
 ``` bash
-aea config set agent.default_connection fetchai/gym:0.20.2
+aea config set agent.default_connection fetchai/gym:0.20.3
 ```
 
 ### Install the skill dependencies

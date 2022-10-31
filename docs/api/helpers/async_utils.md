@@ -161,7 +161,7 @@ Provides better cancel behaviour: on cancel it will wait till cancelled complete
 #### `__`init`__`
 
 ```python
- | __init__(coro: Awaitable, loop: AbstractEventLoop) -> None
+ | __init__(coro: Coroutine[Any, Any, Any], loop: AbstractEventLoop) -> None
 ```
 
 Init the task.
@@ -250,7 +250,7 @@ Run code inside thread.
 #### call
 
 ```python
- | call(coro: Awaitable) -> Any
+ | call(coro: Coroutine[Any, Any, Any]) -> Any
 ```
 
 Run a coroutine inside the event loop.
@@ -336,7 +336,7 @@ Implement run logic respectful to CancelError on termination.
 #### wait`_`completed
 
 ```python
- | wait_completed(sync: bool = False, timeout: float = None, force_result: bool = False) -> Awaitable
+ | wait_completed(sync: bool = False, timeout: float = None, force_result: bool = False) -> Union[Coroutine, Awaitable]
 ```
 
 Wait runnable execution completed.
@@ -364,7 +364,7 @@ Stop runnable.
 #### start`_`and`_`wait`_`completed
 
 ```python
- | start_and_wait_completed(*args: Any, **kwargs: Any) -> Awaitable
+ | start_and_wait_completed(*args: Any, **kwargs: Any) -> Union[Coroutine, Awaitable]
 ```
 
 Alias for start and wait methods.

@@ -1,6 +1,6 @@
 name: erc1155_client
 author: fetchai
-version: 0.29.2
+version: 0.29.3
 type: skill
 description: The erc1155 client interacts with the erc1155 deployer to conduct an
   atomic swap.
@@ -8,23 +8,23 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWwmYKMpr8A9VsN1dNAi8BdfkbVhFVrDfaSZeEgwgcVGv
-  __init__.py: Qmbwz43BLTgNkoDqVziWW45M486yD6G9Pqzy51H5GaKoKZ
+  __init__.py: Qmca9okKGYZkYYbY1WukyQYPbCgE63G1VTzUj2LX8yX21k
   behaviours.py: QmcnYqEA9r9XtofBKw16JWgjdaUBZMysDhvB1bzWvwqTfr
   dialogues.py: Qmf4EVwfeExPBPPpZoiNZKBHdLbefcJgYPkRobKv66AFAz
   handlers.py: QmQ6LBDKT9tvCHqCFmWv4mcu84RaAME878acCY7b3UYodb
   strategy.py: QmdVRFdLtzU9i7DFLDqPMAV3RYb3nbRjBXMyp96d9pDGhj
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
+- fetchai/ledger:0.21.2
 contracts:
-- fetchai/erc1155:0.23.1
+- fetchai/erc1155:0.23.2
 protocols:
-- fetchai/contract_api:1.1.2
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.2
-- fetchai/signing:1.1.2
+- fetchai/contract_api:1.1.3
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/ledger_api:1.1.3
+- fetchai/oef_search:1.1.3
+- fetchai/signing:1.1.3
 skills: []
 behaviours:
   search:

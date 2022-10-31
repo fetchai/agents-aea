@@ -388,7 +388,9 @@ the MultiAgentManager instance.
 ```python
  | @property
  | last_start_status() -> Tuple[
- |         bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+ |         bool,
+ |         Dict[PublicId, List[Dict]],
+ |         List[Tuple[PublicId, List[Dict], Exception]],
  |     ]
 ```
 
