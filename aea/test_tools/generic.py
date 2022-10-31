@@ -123,7 +123,9 @@ def _nested_set(
     ):
         root_attr = getattr(configuration_obj, root_key)
         length = len(keys)
-        if length < 3:
+        if (
+            length < 3
+        ):  # root.skill_component_id.args needs to be there, else we cannot move ahead
             raise ValueError(f"Invalid keys={keys}.")  # pragma: nocover
         skill_component_id = keys[1]
         skill_component_config = root_attr.read(skill_component_id)
