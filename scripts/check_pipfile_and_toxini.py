@@ -39,8 +39,6 @@ WHITELIST = {
     "tomte[safety]": "==0.1.5",
     "tomte[vulture]": "==0.1.5",
     "tomte[darglint]": "==0.1.5",
-    "open-aea[all]": "==1.21.0.post1",
-    "open-aea-cli-ipfs": "==1.21.0",
 }
 
 
