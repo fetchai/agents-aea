@@ -17,7 +17,7 @@
 
 7. Check the package upgrades are correct by running `python -m aea.cli check-packages` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 
-8. Check the docs are up-to-date by running `python scripts/generate_api_docs.py`, `python scripts/check_doc_ipfs_hashes.py --fix` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
+8. Check the docs are up-to-date by running `tox -e generate-api-documentation`, `python scripts/check_doc_ipfs_hashes.py --fix` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
 
 9. Ensure the signing protocol hash in open-aea is updated: `tests/test_configurations/test_constants.py::test_signing_protocol_hash`
 
