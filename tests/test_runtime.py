@@ -43,6 +43,7 @@ from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 class TestAsyncRuntime:
     """Test async runtime."""
 
+    # set a copy to prevent lasting state changes via class attributes
     RUNTIME: Type[BaseRuntime] = AsyncRuntime
 
     def setup(self):
@@ -131,6 +132,7 @@ class TestAsyncRuntime:
 
         assert self.runtime.state == RuntimeStates.error, self.runtime.state
 
+    @pytest.mark.skip(reason="https://github.com/valory-xyz/open-aea/issues/408")
     def test_cancelled_during_start_agent_loop(self, caplog):
         """Test asyncio.CancelledError during _start_agent_loop."""
 

@@ -58,7 +58,7 @@ class TimeoutException(BaseException)
 
 TimeoutException raised by ExecTimeout context managers in thread with limited execution time.
 
-Used internally, does not propagated outside of context manager
+Used internally, does not propagate outside of context manager
 
 <a id="aea.helpers.exec_timeout.BaseExecTimeout"></a>
 

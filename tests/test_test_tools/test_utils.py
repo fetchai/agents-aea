@@ -23,6 +23,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Type
 from unittest import mock
 
 import pytest
@@ -39,30 +40,107 @@ def test_wait_for_condition():
         wait_for_condition(lambda: False, error_msg="test error msg")
 
 
-def test_copy_class():
+class TestCopyClass:
     """Test copy_class"""
 
-    class A:
-        """A"""
+    cls: Type
+    copy_of_cls: Type
 
-        attr = "attr"
+    def setup(self):
+        """Setup"""
 
-        def f(self) -> None:
-            """F"""
+        # redefine for each test
+        class Parent:
+            """Parent"""
 
-    copy_of_A = copy_class(A)
-    assert copy_of_A is not A
-    assert copy_of_A != A
-    assert copy_of_A.attr == A.attr
-    assert copy_of_A.f is A.f
-    assert copy_of_A().f != A().f
-    assert copy_of_A.__name__ == A.__name__
+            def __init__(self):
+                self.x = self._y = None
+                self.attr = "attr"
+                self.mutable_attr = []
 
-    # new attributes / methods on copy not present on original
-    copy_of_A.new_attr = "new_attr"
-    copy_of_A.g = lambda: None
-    assert not hasattr(A, "new_attr")
-    assert not hasattr(A, "g")
+        class Child(Parent):
+            """Child"""
+
+            cls_attr = "cls_attr"
+            cls_mutable_attr = []
+
+            def __init__(self):
+                super().__init__()
+
+            @classmethod
+            def cls_method(cls, x):
+                cls.x = x
+
+            def method(self, y):
+                """F"""
+                self._y = y
+
+            @property
+            def y(self):
+                return self._y
+
+        self.cls = Child
+        self.copy_of_cls = copy_class(Child)
+
+    @pytest.mark.parametrize("mutate_original", [False, True])
+    def test_cls(self, mutate_original: bool):
+        """Test cls"""
+
+        original, replica = self.cls, self.copy_of_cls
+        a, b = (original, replica) if mutate_original else (replica, original)
+
+        assert a is not b
+        assert a != b
+        assert a.cls_attr == b.cls_attr
+        assert a.cls_mutable_attr == b.cls_mutable_attr
+
+        # mutate state
+        assert not hasattr(a, "x")
+        a.cls_method(3)
+        assert hasattr(a, "x")
+        a.cls_mutable_attr.append(1)
+        assert a.cls_mutable_attr
+        assert not b.cls_mutable_attr
+
+        # if we set the attribute on the original (parent class),
+        # the replicate (child) will also have it.
+        a.new_attr = "new_attr"
+        a.g = lambda: None
+        if not mutate_original:
+            assert not hasattr(b, "x")
+            assert not hasattr(b, "new_attr")
+            assert not hasattr(b, "g")
+
+    @pytest.mark.parametrize("mutate_original", [False, True])
+    def test_instance(self, mutate_original: bool):
+        """Test instance"""
+
+        original, replica = self.cls(), self.copy_of_cls()
+        a, b = (original, replica) if mutate_original else (replica, original)
+
+        assert a is not b
+        assert a != b
+        assert a.cls_attr == b.cls_attr
+        assert a.cls_mutable_attr == b.cls_mutable_attr
+
+        # mutate state
+        assert hasattr(a, "x") and hasattr(b, "x")  # set in __init__
+        a.cls_method(3)
+        assert a.x is b.x is None  # class method does not affect instance
+
+        a.method(3)
+        assert a.y == 3
+        assert b.y is None
+
+        a.cls_mutable_attr.append(1)
+        assert a.cls_mutable_attr
+        assert not b.cls_mutable_attr
+
+        # mutating instance attributes in not heritable
+        a.new_attr = "new_attr"
+        a.g = lambda: None
+        assert not hasattr(b, "new_attr")
+        assert not hasattr(b, "g")
 
 
 @pytest.mark.parametrize("path_type", [str, Path])
