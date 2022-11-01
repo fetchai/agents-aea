@@ -34,7 +34,6 @@ from aea.configurations.base import ComponentType
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.exceptions import _StopRuntime
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
-from aea.test_tools.utils import copy_class
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
@@ -45,7 +44,7 @@ class TestAsyncRuntime:
     """Test async runtime."""
 
     # set a copy to prevent lasting state changes via class attributes
-    RUNTIME: Type[BaseRuntime] = copy_class(AsyncRuntime)
+    RUNTIME: Type[BaseRuntime] = AsyncRuntime
 
     def setup(self):
         """Set up case."""

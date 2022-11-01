@@ -271,4 +271,4 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         """
         if self._future_guard_task and not self._future_guard_task.done():
             self._future_guard_task.cancel()
-        self._future_guard_task = None
+            self._future_guard_task = None
