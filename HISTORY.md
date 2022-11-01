@@ -1,5 +1,34 @@
 # Release History - open AEA
 
+## 1.22.0 (2022-11-1)
+
+AEA:
+- Updates the cert request serialisation process to maintain consistency across different operating systems
+- Updates the `get_or_create_cli_config` method to return default config instead of creating one
+- Introduces the `copy_class` utility function for testing different setup configurations
+- Updates the overridable policies for the configuration classes
+
+Packages:
+- Removes the unwanted autonomy dependency from the ledger connection
+  
+Tests:
+- Updates the cli config fixture to retain user config
+- Fixes outbox check test 
+- Adds test coverage for
+  - `aea/cli`
+  - `aea/configurations`
+  - `aea/helpers`
+  - `aea/test_tools`
+  - `aea/manager`
+
+Docs:
+- Adds documentation on the usage of component overrides
+
+Chores:
+- Adds a script to automatically generate a package table for the docs
+- Introduces the usage of `tomte` to maintain third party dependency version consistency
+- Updates the script to check the broken links to use parallelization
+
 ## 1.21.0 (2022-09-28)
 
 AEA:
