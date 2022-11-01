@@ -29,7 +29,7 @@ cd ..
 To keep file paths consistent with the reference code, we suggest you initialize your local author as `fetchai` for the purpose of this demo only:
 
 ``` bash
-aea init --reset --local --author fetchai
+aea init --reset --author fetchai
 ```
 
 ## Generic Seller AEA
