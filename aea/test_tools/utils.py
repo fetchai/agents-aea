@@ -24,8 +24,21 @@ import os
 import shutil
 import time
 from contextlib import ExitStack, contextmanager
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Generator, Iterable, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Type,
+    Union,
+)
 
 
 FULL_PERMISSION = 0o40777
@@ -61,7 +74,23 @@ def as_context(*contexts: Any) -> Generator[None, None, None]:
 
 def copy_class(cls: Type) -> Type:
     """Copy a class. Useful for testing class setup configurations"""
-    return type(cls.__name__, cls.__bases__, dict(cls.__dict__))
+
+    # NOTE: this does not recursively deepcopy the class
+    #       nor can it copy items that cannot be pickled,
+    #       e.g. classes containing classmethods in __dict__.
+    #       Use at your own risk.
+
+    def is_mutable(obj: Any) -> bool:
+        return isinstance(obj, (MutableSequence, MutableSet, MutableMapping))
+
+    def deepcopy_if_mutable(mapping: Mapping[str, Any]) -> Dict[str, Any]:
+        return {k: deepcopy(v) if is_mutable(v) else v for k, v in mapping.items()}
+
+    return type(
+        f"CopyOf{cls.__name__}",
+        (cls, *cls.__bases__),
+        deepcopy_if_mutable(cls.__dict__),
+    )
 
 
 def remove_test_directory(directory: Union[str, Path], retries: int = 3) -> bool:
