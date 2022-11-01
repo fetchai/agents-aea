@@ -4,7 +4,7 @@ the main implementation of the Agent Communication Network (ACN).
 
 In particular:
 
-- The <a href="https://github.com/valory-xyz/open-acn" target="_blank">`open-acn`<a/> Golang library; At the moment a copy resides locally in open-aea here as `libp2p_node`. 
+- The <a href="https://github.com/valory-xyz/open-acn" target="_blank">`open-acn`<a/> Golang library; At the moment a copy resides locally in open-aea here as `libp2p_node`.
 - The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`<a/> AEA connection, written in Python, that implements the _direct connection_ with an ACN peer;
 - The <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`<a/> AEA connection, written in Python, which implements the _delegate connection_ with an ACN peer.
 
@@ -31,12 +31,12 @@ and the message exchange involved;
 ## Messages and Data Structures
 
 At the foundation of the ACN there is the _ACN protocol_.
-The protocol messages and the reply structure are generated from this 
-<a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>,
+The protocol messages and the reply structure are generated from this
+<a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.yaml" target="_blank">protocol specification</a>,
 using the <a href="../protocol-generator" target="_blank">protocol generator</a>.
 Therefore, it uses <a href="https://developers.google.com/protocol-buffers" target="_blank">Protocol Buffers</a>
 as a serialization format, and the definition of the data structures involved is defined in this
-<a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
+<a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">`.proto` file</a>.
 
 To know more about the protocol generator, refer to the relevant
 section of the documentation:
@@ -51,7 +51,7 @@ This data structure is used as a payload in other ACN messages (see below).
 The `AgentRecord` data structure contains the following fields:
 
 - `service_id`: a string describing the service identifier.
-- `ledger_id`: a string. It is the identifier of the ledger 
+- `ledger_id`: a string. It is the identifier of the ledger
     this agent record is associated to.
     Currently, the allowed values are:
     - `fetchai`, the identifier for the Fetch.AI ledger;
@@ -64,7 +64,7 @@ The `AgentRecord` data structure contains the following fields:
 - `signature`: a string. The signature for PoR.
 - `not_before`: a string. Specify the lower bound for certificate validity.
     If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as time zone UTC-0
-- `not_after`: a string. Specify the upper bound for certificate validity. 
+- `not_after`: a string. Specify the upper bound for certificate validity.
     If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as time zone UTC-0.
 
 
@@ -84,15 +84,15 @@ There are different types of payloads:
 
 ### Status
 
-The `Status` payload is used as a response message to inform 
+The `Status` payload is used as a response message to inform
 the sender about the handling of certain requests.
 The payload contains:
 
-- the `status_code`, a positive integer among the ones in the 
-  <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/open_aea/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">Protobuf file</a>.
+- the `status_code`, a positive integer among the ones in the
+  <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/protocols/acn/v1_0_0/acn.proto" target="_blank">Protobuf file</a>.
 - a list of error messages (string).
 
-A status code `0`, identified as `SUCCESS`, 
+A status code `0`, identified as `SUCCESS`,
 means that the request has been processed successfully.
 Status codes greater than `0` can be:
 
@@ -106,7 +106,7 @@ Status codes greater than `0` can be:
     - `ERROR_SERIALIZATION`, with integer value `4`: a serialization error occurred
          on the receiving end;
 
-- Register errors: errors that occur during agent registration operations in the ACN. 
+- Register errors: errors that occur during agent registration operations in the ACN.
 
     - `ERROR_WRONG_AGENT_ADDRESS`, with integer value `10`:
          the PoR by a peer from another peer does not match the destination address of
@@ -117,7 +117,7 @@ Status codes greater than `0` can be:
     - `ERROR_UNSUPPORTED_LEDGER`, with integer value `13`: the ledger of the PoR is not supported by the peer;
 
 - Lookup and delivery errors: errors that occur during lookup to the DHT and envelope delivery operations in the ACN.
-  
+
     - `ERROR_UNKNOWN_AGENT_ADDRESS`, with integer value `20`: the requested agent address has not been found in the local DHT of the peer;
     - `ERROR_AGENT_NOT_READY`, with integer value `21`: the agent is not ready for envelope delivery.
 
@@ -211,7 +211,7 @@ and peers to route the envelope through the ACN.
         else error on decoding of Envelope payload
             Peer2->>Peer1: Status(ERROR_SERIALIZATION)
         else PoR errors
-            note over Peer1,Peer2: see above 
+            note over Peer1,Peer2: see above
         end
 
 </div>
@@ -238,9 +238,9 @@ Each node handles four different types of <a href="https://docs.libp2p.io/concep
 To begin with, the node process initializes
 the transport connections with the bootstrap peers,
 the local copy of the Kademlia Distributed
-Hash Table (DHT), 
+Hash Table (DHT),
 the persistent storage for agent records,
-and performs other non-functional operations 
+and performs other non-functional operations
 like setting up the <a href="https://prometheus.io/" target="_blank"> Prometheus monitoring system</a>.
 Optionally, can also start listening for relay connections
 and delegate connections.
@@ -262,7 +262,7 @@ Then, it sets up the notification stream and notifies the bootstrap peers (if an
         note over Peer2,Peer3: Peer1 registered to DHT
         deactivate Peer2
         deactivate Peer3
-        loop for each local/relay/delegate address 
+        loop for each local/relay/delegate address
             Peer1->>Peer1: compute CID from address
             Peer1->>Peer2: register address
             Peer1->>Peer3: register address
@@ -310,7 +310,7 @@ If the ACN node is configured to run the delegate service,
 it starts listening from a TCP socket at a configurable URI.
 
 To see a diagram of the message exchanged
-during a registration request read 
+during a registration request read
 <a href="../acn-internals#registration-interaction" target="_blank">this section</a>.
 
 ## ACN transport
@@ -318,39 +318,39 @@ during a registration request read
 In the following sections, we describe the main three steps of the routing
 of an envelope through the ACN:
 
-- _ACN entrance_: when an envelope sent by an agent enters 
+- _ACN entrance_: when an envelope sent by an agent enters
   the peer-to-peer network via the peer the agent is connected to
   i.e. agent-to-peer communication;
 - _ACN routing_: when an envelope gets routed through the peer-to-peer network,
   i.e. peer-to-peer communication;
 - _ACN exit_: when an envelope gets delivered to the receiving agent
   through its representative peer, i.e. peer-to-agent communication.
-  
+
 
 ### ACN Envelope Entrance: Agent -> Peer
 
-In this section, we will describe the interaction protocols between agents and peers 
+In this section, we will describe the interaction protocols between agents and peers
 for the messages sent by the agent to the ACN network;
 in particular, the communication from the contact peer of an agent to the agent.
 
 The following diagram explains the exchange of messages on entering an envelope in the ACN.
 
-In the case of _direct connection_, 
+In the case of _direct connection_,
 `Agent` is a Python process, whereas `Peer` is in a separate (Golang) process.
-The logic of the Python Agent client is implemented in 
+The logic of the Python Agent client is implemented in
 the <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p" target="_blank">`valory/p2p_libp2p`</a> connection.
-The communication between `Agent` and `Peer` is done through 
+The communication between `Agent` and `Peer` is done through
 an OS pipe for Inter-Process Communication (IPC) between the AEAs process and the libp2p node process;
 then, the message gets enqueued to an output queue by an input coroutine.
-Finally, the envelope ends up in an output queue, 
+Finally, the envelope ends up in an output queue,
 which is processed by an output coroutine and routed to the next peer.
 
-In the case of _delegate connection_, 
-the message exchange is very similar; however, instead of using 
+In the case of _delegate connection_,
+the message exchange is very similar; however, instead of using
 pipes, the communication is done through the network, i.e. TCP,
 with a peer which has the delegate service enabled.
 The logic of the `Agent` client connected with a delegate connection
-is implemented in the open-aea 
+is implemented in the open-aea
 <a href="https://github.com/valory-xyz/open-aea/tree/main/packages/valory/connections/p2p_libp2p_client" target="_blank">`valory/p2p_libp2p_client`</a> connection.
 
 
@@ -387,7 +387,7 @@ In this section, we describe the interaction between peers
 when it comes to envelope routing.
 
 Assume an envelope arrives from an agent to peer `Peer1`,
-i.e. `Peer1` is the first hop 
+i.e. `Peer1` is the first hop
 of the routing.
 Let `Agent` be the local agent directly connected
 to `Peer1`, `Peer2` a direct peer
@@ -398,8 +398,8 @@ we may have different scenario:
 
 1) In case of direct connection,
    and the field `sender` of the envelope
-   is not the local agent address: 
-   the message is considered invalid, and it is dropped. 
+   is not the local agent address:
+   the message is considered invalid, and it is dropped.
 
 <div class="mermaid">
     sequenceDiagram
@@ -412,7 +412,7 @@ we may have different scenario:
         end
 </div>
 
-2) the `target` of the envelope is 
+2) the `target` of the envelope is
    the local agent connected to the peer:
    the envelope is routed to the local agent.
 
@@ -502,8 +502,8 @@ it does the following:
         end
 </div>
 
-Let `Peer3` the contact peer of the recipient of the envelope. 
-The following diagram shows how the contact peer of the 
+Let `Peer3` the contact peer of the recipient of the envelope.
+The following diagram shows how the contact peer of the
 envelope recipient handles the incoming envelope:
 
 <div class="mermaid">
@@ -516,7 +516,7 @@ envelope recipient handles the incoming envelope:
         else unexpected payload
             Peer3->>Peer1: Status(ERROR_UNEXPECTED_PAYLOAD)
         else decoding error of envelope payload
-            Peer3->>Peer1: Status(ERROR_SERIALIZATION)        
+            Peer3->>Peer1: Status(ERROR_SERIALIZATION)
         else PoR check fails
             alt wrong agent address
                 Peer3->>Peer1: Status(ERROR_WRONG_AGENT_ADDRESS)
@@ -549,7 +549,7 @@ envelope recipient handles the incoming envelope:
 The following diagram explains the exchange of messages on exiting an envelope in the ACN.
 That is, the communication from the contact peer of an agent to the agent.
 
-The same message exchange is done 
+The same message exchange is done
 both in the case of direct connection and
 delegate connection,
 similarly for what has been described for the envelope entrance
@@ -597,13 +597,13 @@ therefore can be used by the Multiplexer as any other connection.
 
 - The `connect` method of this connection spawns a new instance
   of the <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/libp2p_node.go" target="_blank">`libp2p_node` program</a>
-(i.e. an ACN peer node) and connects to it through OS pipes. 
+(i.e. an ACN peer node) and connects to it through OS pipes.
 Then, it sets up the _message receiving loop_,
   which enqueues messages in the input queue to be read by `read` method calls,
-  and the _message sending loop_, 
-  which dequeues messages from the output queue and forwards them to the Libp2p node. 
-The loops are run concurrently in the Multiplexer thread, 
-  using the Python asynchronous programming library `asyncio`.  
+  and the _message sending loop_,
+  which dequeues messages from the output queue and forwards them to the Libp2p node.
+The loops are run concurrently in the Multiplexer thread,
+  using the Python asynchronous programming library `asyncio`.
 
 <div class="mermaid">
     sequenceDiagram
@@ -626,7 +626,7 @@ The loops are run concurrently in the Multiplexer thread,
 
 - The `send` method enqueues a message in the output queue.
 The message is then dequeued by the sending loop,
-and then sent to the Libp2p node. 
+and then sent to the Libp2p node.
 
 <div class="mermaid">
     sequenceDiagram
@@ -647,18 +647,18 @@ and then sent to the Libp2p node.
             note over sending loop: OK
         else timed out
             note over sending loop: raise with error
-        else acn message decoding error 
+        else acn message decoding error
             Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
         else unexpected payload
             Libp2p Node->>sending loop: Status(ERROR_UNEXPECTED_PAYLOAD)
-        else envelope decoding error 
+        else envelope decoding error
             Libp2p Node->>sending loop: Status(ERROR_SERIALIZATION)
         end
 </div>
 
 - The `receive` method dequeues a message from the input queue.
 The queue is populated by the receiving loop,
-which receives messages from the Libp2p node. 
+which receives messages from the Libp2p node.
 
 <div class="mermaid">
     sequenceDiagram
@@ -677,11 +677,11 @@ which receives messages from the Libp2p node.
             note over receiving loop: OK
         else timed out
             note over Libp2p Node: ignore
-        else acn message decoding error 
+        else acn message decoding error
             receiving loop->>Libp2p Node: Status(ERROR_SERIALIZATION)
         else unexpected payload
             receiving loop->>Libp2p Node: Status(ERROR_UNEXPECTED_PAYLOAD)
-        else envelope decoding error 
+        else envelope decoding error
             receiving loop->>Libp2p Node: Status(ERROR_SERIALIZATION)
         end
         Libp2p Connection->>receiving loop: read message from output queue
@@ -704,11 +704,11 @@ therefore can be used by the Multiplexer as any other connection.
   connection to the URI of the delegate peer. Then, it will
   send a `Register` request to register the agent among the peer's
   client connections.
-  On registration success, it sets up the _message receiving loop_, 
-  which enqueues messages in the input queue to be read by read method calls, 
-  and the _message sending loop_, which dequeues messages from the output queue 
-  and forwards them to the Libp2p node. 
-  The loops are run concurrently in the Multiplexer thread, 
+  On registration success, it sets up the _message receiving loop_,
+  which enqueues messages in the input queue to be read by read method calls,
+  and the _message sending loop_, which dequeues messages from the output queue
+  and forwards them to the Libp2p node.
+  The loops are run concurrently in the Multiplexer thread,
   using the Python asynchronous programming library `asyncio`.
 
 <div class="mermaid">
@@ -736,7 +736,7 @@ therefore can be used by the Multiplexer as any other connection.
         else PoR check succeeds
             Libp2p Node->>Libp2p Client Connection: Status(SUCCESS)
             note over Libp2p Node: announce agent<br/>address to<br/>other peers
-            Libp2p Node->>Libp2p Node: wait data from socket 
+            Libp2p Node->>Libp2p Node: wait data from socket
             activate Libp2p Node
             deactivate Libp2p Node
         end
@@ -760,45 +760,45 @@ and the AEA connections, for the Python AEA framework, to interact with them.
 ### Delegate client on client disconnection/reconnection
 
 In case of disconnection/reconnection, delegate client record will be removed.
-This can cause two problems: either the delegate client is not found, 
+This can cause two problems: either the delegate client is not found,
 or connection is closed during the send operation.
 
 Possible solutions:
 
 - Create more complicated structure for clients storage;
-- Keep the delegate client record for longer; 
+- Keep the delegate client record for longer;
 - Clean up the record by timeout, per client queues.
 
 Code references:
 
-- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L994" target="_blank">agent record removal</a>
-- <a href="https://github.com/valory-xyz/open-aea/blob/5e35f68adeda724d403349f3ce52b895e3c64631/packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L1110" target="_blank">message routing</a>
+- <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L999" target="_blank">agent record removal</a>
+- <a href="https://github.com/valory-xyz/open-aea/blob/main/packages/valory/connections/p2p_libp2p/libp2p_node/dht/dhtpeer/dhtpeer.go#L1110" target="_blank">message routing</a>
 
 
 ### Golang Node <> Python Client `libp2p` connection
 
-In case of connection between the Golang side (i.e. ACN node) 
-and the Python side (i.e. the `libp2p` AEA connection) is broken, 
+In case of connection between the Golang side (i.e. ACN node)
+and the Python side (i.e. the `libp2p` AEA connection) is broken,
 there is no reconnection attempt.
-The Golang side connect to the Python server opened, 
-but if the connection is broken Golang can try to reconnect; 
+The Golang side connect to the Python server opened,
+but if the connection is broken Golang can try to reconnect;
 however, the Python side does not know about this and will restart
 the node completely.
 
 Possible solutions: the problem requires updates on both sides and assume possible timeouts on broken connection.
-If connection is broken, the Python side awaits for reconnection from Golang side, 
+If connection is broken, the Python side awaits for reconnection from Golang side,
 and restart node completely after timeout.
 
 ### What a peer should do if it receives an acknowledgement with an error?
 
 If an ACN response is the `Status` with error code different from `SUCCESS`,
-the forwarding to other peers is not repeated. 
+the forwarding to other peers is not repeated.
 
 A possible solution is to resend the message; however,
 not clear why it should help in case of healthy connection,
 how many times the sender should retry, and how it would help.
 
-Discussion on GitHub: 
+Discussion on GitHub:
 <a href="https://github.com/fetchai/agents-aea/pull/2509#discussion_r642628983" target="_blank">https://github.com/fetchai/agents-aea/pull/2509#discussion_r642628983</a>
 
 ### No possibility of switching peers
