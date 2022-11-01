@@ -59,7 +59,7 @@ class TimeoutException(BaseException):
     """
     TimeoutException raised by ExecTimeout context managers in thread with limited execution time.
 
-    Used internally, does not propagated outside of context manager
+    Used internally, does not propagate outside of context manager
     """
 
 
@@ -119,7 +119,6 @@ class BaseExecTimeout(ABC):
 
         Should be implemented in concrete class.
         """
-        raise NotImplementedError  # pragma: nocover
 
     @abstractmethod
     def _remove_timeout_watch(self) -> None:
@@ -128,7 +127,6 @@ class BaseExecTimeout(ABC):
 
         Should be implemented in concrete class.
         """
-        raise NotImplementedError  # pragma: nocover
 
 
 class ExecTimeoutSigAlarm(BaseExecTimeout):  # pylint: disable=too-few-public-methods
@@ -256,7 +254,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         """
         if not self._supervisor_thread:
             _default_logger.warning(
-                "ExecTimeoutThreadGuard is used but not started! No timeout wil be applied!"
+                "ExecTimeoutThreadGuard is used but not started! No timeout will be applied!"
             )
             return
 
@@ -273,4 +271,4 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         """
         if self._future_guard_task and not self._future_guard_task.done():
             self._future_guard_task.cancel()
-            self._future_guard_task = None
+        self._future_guard_task = None

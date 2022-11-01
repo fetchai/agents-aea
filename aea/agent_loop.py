@@ -150,9 +150,8 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         await asyncio.gather(*self._tasks)
 
     @abstractmethod
-    def _set_tasks(self) -> None:  # pragma: nocover
+    def _set_tasks(self) -> None:
         """Set run loop tasks."""
-        raise NotImplementedError
 
     def _stop_tasks(self) -> None:
         """Cancel all tasks."""
