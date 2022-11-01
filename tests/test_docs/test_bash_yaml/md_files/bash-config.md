@@ -17,10 +17,10 @@ connections:                                    # The list of connection public 
 - fetchai/stub:0.21.1
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:1.1.2
+- fetchai/default:1.1.3
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.18.2
-default_connection: fetchai/p2p_libp2p:0.27.1   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.18.3
+default_connection: fetchai/p2p_libp2p:0.27.2   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 required_ledgers: [fetchai]                            # the list of identifiers of ledgers that the AEA project requires key pairs for (each item must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)

@@ -1,6 +1,6 @@
 agent_name: tac_participant_contract
 author: fetchai
-version: 0.22.1
+version: 0.22.2
 description: An AEA to participate in the TAC (trading agent competition) using an
   ERC1155 smart contract.
 license: Apache-2.0
@@ -8,22 +8,22 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
-- fetchai/p2p_libp2p:0.27.1
-- fetchai/soef:0.27.2
+- fetchai/ledger:0.21.2
+- fetchai/p2p_libp2p:0.27.2
+- fetchai/soef:0.27.3
 contracts:
-- fetchai/erc1155:0.23.1
+- fetchai/erc1155:0.23.2
 protocols:
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/oef_search:1.1.2
-- fetchai/signing:1.1.2
-- fetchai/state_update:1.1.2
-- fetchai/tac:1.1.2
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/oef_search:1.1.3
+- fetchai/signing:1.1.3
+- fetchai/state_update:1.1.3
+- fetchai/tac:1.1.3
 skills:
-- fetchai/tac_negotiation:0.29.2
-- fetchai/tac_participation:0.25.2
-default_connection: fetchai/p2p_libp2p:0.27.1
+- fetchai/tac_negotiation:0.29.3
+- fetchai/tac_participation:0.25.3
+default_connection: fetchai/p2p_libp2p:0.27.2
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -33,9 +33,9 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/contract_api:1.1.2: fetchai/ledger:0.21.1
-  fetchai/ledger_api:1.1.2: fetchai/ledger:0.21.1
-  fetchai/oef_search:1.1.2: fetchai/soef:0.27.2
+  fetchai/contract_api:1.1.3: fetchai/ledger:0.21.2
+  fetchai/ledger_api:1.1.3: fetchai/ledger:0.21.2
+  fetchai/oef_search:1.1.3: fetchai/soef:0.27.3
 connection_private_key_paths: {}
 decision_maker_handler:
   dotted_path: aea.decision_maker.gop:DecisionMakerHandler
@@ -47,7 +47,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/p2p_libp2p:0.27.1
+public_id: fetchai/p2p_libp2p:0.27.2
 type: connection
 cert_requests:
 - identifier: acn
@@ -58,19 +58,19 @@ cert_requests:
   message_format: '{public_key}'
   save_path: .certs/conn_cert.txt
 ---
-public_id: fetchai/soef:0.27.2
+public_id: fetchai/soef:0.27.3
 type: connection
 config:
   chain_identifier: fetchai_v2_misc
 ---
-public_id: fetchai/tac_participation:0.25.2
+public_id: fetchai/tac_participation:0.25.3
 type: skill
 models:
   game:
     args:
       is_using_contract: true
 ---
-public_id: fetchai/tac_negotiation:0.29.2
+public_id: fetchai/tac_negotiation:0.29.3
 type: skill
 models:
   strategy:

@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "aea"
-version = "1.2.1"
+version = "1.2.2"
 description = "Autonomous Economic Agent framework"
 authors = ["Fetch.AI Limited"]
 readme = "README.md"
@@ -64,7 +64,7 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 tox = "==3.25.1"
 py-sr25519-bindings = "==0.1.4"
-cosmpy = ">=0.5.0,<0.6.0"
+cosmpy = ">=0.6.0,<0.7.0"
 pylint = "==2.6.0"
 bandit = "==1.7.4"
 vulture = "==2.6"

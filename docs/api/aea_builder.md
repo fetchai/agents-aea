@@ -224,9 +224,9 @@ Reset the builder.
 
 A full reset causes a reset of all data on the builder. A partial reset
 only resets:
-    - name,
-    - private keys, and
-    - component instances
+- name,
+- private keys, and
+- component instances
 
 **Arguments**:
 
@@ -544,7 +544,7 @@ Add a private key path.
 
 - `identifier`: the identifier for that private key path.
 - `private_key_path`: an (optional) path to the private key file.
-    If None, the key will be created at build time.
+If None, the key will be created at build time.
 - `is_connection`: if the pair is for the connection cryptos
 
 **Returns**:
@@ -677,7 +677,7 @@ Add a component, given its type and the directory.
 **Raises**:
 
 - `AEAException`: if a component is already registered with the same component id.   # noqa: DAR402
-                    | or if there's a missing dependency.  # noqa: DAR402
+| or if there's a missing dependency.  # noqa: DAR402
 
 **Returns**:
 
