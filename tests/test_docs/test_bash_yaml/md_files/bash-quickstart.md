@@ -43,6 +43,9 @@ sudo apt-get install python3.7-dev
 aea init
 ```
 ``` bash
+aea register
+```
+``` bash
 Do you have a Registry account? [y/N]: n
 Create a new account on the Registry now:
 Username: fetchai
@@ -56,7 +59,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.1.1
+v1.2.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
