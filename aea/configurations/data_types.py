@@ -236,10 +236,10 @@ class PublicId(JSONSerializable):
     AUTHOR_REGEX = SIMPLE_ID_REGEX
     PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
-    VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-    PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
+    VERSION_REGEX = rf"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+    PUBLIC_ID_REGEX = rf"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"
     PUBLIC_ID_URI_REGEX = (
-        fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
+        rf"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})/({VERSION_REGEX})$"
     )
 
     ANY_VERSION = "any"
@@ -392,7 +392,11 @@ class PublicId(JSONSerializable):
     @classmethod
     def from_json(cls, obj: Dict) -> "PublicId":
         """Build from a JSON object."""
-        return PublicId(obj["author"], obj["name"], obj["version"],)
+        return PublicId(
+            obj["author"],
+            obj["name"],
+            obj["version"],
+        )
 
     def __hash__(self) -> int:
         """Get the hash."""
@@ -554,7 +558,8 @@ class PackageId:
     def __str__(self) -> str:
         """Get the string representation."""
         return "({package_type}, {public_id})".format(
-            package_type=self.package_type.value, public_id=self.public_id,
+            package_type=self.package_type.value,
+            public_id=self.public_id,
         )
 
     def __repr__(self) -> str:

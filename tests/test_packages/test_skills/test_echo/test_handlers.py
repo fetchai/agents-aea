@@ -92,7 +92,8 @@ class TestEchoHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         default_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.default_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.default_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=default_dialogue,
@@ -116,7 +117,8 @@ class TestEchoHandler(BaseSkillTestCase):
         """Test the _handle_error method of the oef_search handler."""
         # setup
         default_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.default_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.default_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             DefaultMessage,
@@ -155,12 +157,14 @@ class TestEchoHandler(BaseSkillTestCase):
         """Test the _handle_invalid method of the echo handler."""
         # setup
         default_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.default_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.default_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             DefaultMessage,
             self.build_incoming_message_for_skill_dialogue(
-                dialogue=default_dialogue, performative=DefaultMessage.Performative.END,
+                dialogue=default_dialogue,
+                performative=DefaultMessage.Performative.END,
             ),
         )
 

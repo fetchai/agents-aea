@@ -24,7 +24,7 @@ from aea.common import Address
 from aea.crypto.base import Crypto, EntityClass
 
 
-class CustomCrypto(Crypto):
+class CustomCrypto(Crypto[EntityClass]):
     """This is a custom crypto class for testing purposes.."""
 
     @classmethod

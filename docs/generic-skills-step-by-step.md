@@ -11,16 +11,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.29.1
+aea fetch fetchai/generic_seller:0.29.2
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.28.2
+aea eject skill fetchai/generic_seller:0.28.3
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.1
+aea fetch fetchai/generic_buyer:0.30.2
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.27.2
+aea eject skill fetchai/generic_buyer:0.27.3
 cd ..
 ```
 
@@ -418,7 +418,8 @@ The next code block handles `CFP` (call-for-proposal) negotiation messages. Past
                 "declined the CFP from sender={}".format(fipa_msg.sender[-5:])
             )
             decline_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=fipa_msg,
             )
             self.context.outbox.put_message(message=decline_msg)
 ```
@@ -477,7 +478,8 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
         )
         self.context.logger.info(
             "sending MATCH_ACCEPT_W_INFORM to sender={} with info={}".format(
-                fipa_msg.sender[-5:], info,
+                fipa_msg.sender[-5:],
+                info,
             )
         )
         self.context.outbox.put_message(message=match_accept_msg)
@@ -543,7 +545,8 @@ Lastly, we must handle an `INFORM` message, which the buyer uses to inform us th
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, fipa_msg.sender[-5:],
+                    fipa_dialogue.data_for_sale,
+                    fipa_msg.sender[-5:],
                 )
             )
         else:
@@ -636,7 +639,8 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.info(
             "starting balance on {} ledger={}.".format(
-                ledger_api_msg.ledger_id, ledger_api_msg.balance,
+                ledger_api_msg.ledger_id,
+                ledger_api_msg.balance,
             )
         )
 
@@ -679,7 +683,8 @@ class GenericLedgerApiHandler(Handler):
             )
             self.context.logger.info(
                 "transaction confirmed, sending data={} to buyer={}.".format(
-                    fipa_dialogue.data_for_sale, last_message.sender[-5:],
+                    fipa_dialogue.data_for_sale,
+                    last_message.sender[-5:],
                 )
             )
         else:
@@ -715,7 +720,8 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 
@@ -862,7 +868,8 @@ class GenericOefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )
 ```
@@ -1011,7 +1018,8 @@ The following properties and methods deal with different aspects of the strategy
         :return: a description of the agent's location
         """
         description = Description(
-            self._agent_location, data_model=AGENT_LOCATION_MODEL,
+            self._agent_location,
+            data_model=AGENT_LOCATION_MODEL,
         )
         return description
 
@@ -1022,7 +1030,8 @@ The following properties and methods deal with different aspects of the strategy
         :return: a description of the offered services
         """
         description = Description(
-            self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+            self._set_service_data,
+            data_model=AGENT_SET_SERVICE_MODEL,
         )
         return description
 
@@ -1033,7 +1042,8 @@ The following properties and methods deal with different aspects of the strategy
         :return: a description of the personality
         """
         description = Description(
-            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_personality_data,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -1044,7 +1054,8 @@ The following properties and methods deal with different aspects of the strategy
         :return: a description of the classification
         """
         description = Description(
-            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+            self._set_classification,
+            data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -1055,7 +1066,8 @@ The following properties and methods deal with different aspects of the strategy
         :return: a description of the offered services
         """
         description = Description(
-            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
+            self._simple_service_data,
+            data_model=SIMPLE_SERVICE_MODEL,
         )
         return description
 
@@ -1066,7 +1078,8 @@ The following properties and methods deal with different aspects of the strategy
         :return: a description of the to be removed service
         """
         description = Description(
-            self._remove_service_data, data_model=AGENT_REMOVE_SERVICE_MODEL,
+            self._remove_service_data,
+            data_model=AGENT_REMOVE_SERVICE_MODEL,
         )
         return description
 
@@ -1406,13 +1419,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
+- fetchai/ledger:0.21.2
 contracts: []
 protocols:
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.2
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/ledger_api:1.1.3
+- fetchai/oef_search:1.1.3
 skills: []
 behaviours:
   service_registration:
@@ -1802,7 +1815,8 @@ The above code handles messages referencing unidentified dialogues and responds 
         """
         self.context.logger.info(
             "received proposal={} from sender={}".format(
-                fipa_msg.proposal.values, fipa_msg.sender[-5:],
+                fipa_msg.proposal.values,
+                fipa_msg.sender[-5:],
             )
         )
         strategy = cast(GenericStrategy, self.context.strategy)
@@ -1815,7 +1829,8 @@ The above code handles messages referencing unidentified dialogues and responds 
             terms = strategy.terms_from_proposal(fipa_msg.proposal, fipa_msg.sender)
             fipa_dialogue.terms = terms
             accept_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.ACCEPT, target_message=fipa_msg,
+                performative=FipaMessage.Performative.ACCEPT,
+                target_message=fipa_msg,
             )
             self.context.outbox.put_message(message=accept_msg)
         else:
@@ -1823,7 +1838,8 @@ The above code handles messages referencing unidentified dialogues and responds 
                 "declining the proposal from sender={}".format(fipa_msg.sender[-5:])
             )
             decline_msg = fipa_dialogue.reply(
-                performative=FipaMessage.Performative.DECLINE, target_message=fipa_msg,
+                performative=FipaMessage.Performative.DECLINE,
+                target_message=fipa_msg,
             )
             self.context.outbox.put_message(message=decline_msg)
 ```
@@ -1869,7 +1885,7 @@ The above code terminates each dialogue with the specific AEA and stores the sta
 If `my_generic_seller` AEA wants to move on with the sale, it will send a `MATCH_ACCEPT` message. In order to handle this we add the following code:
 
 ``` python
-    def _handle_match_accept(
+def _handle_match_accept(
         self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue
     ) -> None:
         """
@@ -2080,7 +2096,8 @@ class GenericOefSearchHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle oef_search message of performative={} in dialogue={}.".format(
-                oef_search_msg.performative, oef_search_dialogue,
+                oef_search_msg.performative,
+                oef_search_dialogue,
             )
         )
 ```
@@ -2277,7 +2294,8 @@ class GenericLedgerApiHandler(Handler):
         if ledger_api_msg.balance > 0:
             self.context.logger.info(
                 "starting balance on {} ledger={}.".format(
-                    strategy.ledger_id, ledger_api_msg.balance,
+                    strategy.ledger_id,
+                    ledger_api_msg.balance,
                 )
             )
             strategy.balance = ledger_api_msg.balance
@@ -2419,7 +2437,8 @@ class GenericLedgerApiHandler(Handler):
         """
         self.context.logger.warning(
             "cannot handle ledger_api message of performative={} in dialogue={}.".format(
-                ledger_api_msg.performative, ledger_api_dialogue,
+                ledger_api_msg.performative,
+                ledger_api_dialogue,
             )
         )
 ```
@@ -2570,7 +2589,9 @@ Similar to the seller AEA, we initialize the strategy class by trying to read th
                 self._search_query["search_value"],
             ),
         )
-        query = Query([close_to_my_service, service_key_filter],)
+        query = Query(
+            [close_to_my_service, service_key_filter],
+        )
         return query
 
     def get_service_query(self) -> Query:
@@ -3061,14 +3082,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
+- fetchai/ledger:0.21.2
 contracts: []
 protocols:
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.2
-- fetchai/signing:1.1.2
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/ledger_api:1.1.3
+- fetchai/oef_search:1.1.3
+- fetchai/signing:1.1.3
 skills: []
 behaviours:
   search:
@@ -3167,8 +3188,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1",
-  "fetchai/oef_search:1.1.2": "fetchai/soef:0.27.2"
+  "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
+  "fetchai/oef_search:1.1.3": "fetchai/soef:0.27.3"
 }'
 ```
 
@@ -3185,13 +3206,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.2
-aea add connection fetchai/ledger:0.21.1
-aea add protocol fetchai/fipa:1.1.2
+aea add connection fetchai/p2p_libp2p:0.27.2
+aea add connection fetchai/soef:0.27.3
+aea add connection fetchai/ledger:0.21.2
+aea add protocol fetchai/fipa:1.1.3
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
 aea run
 ```
 
@@ -3202,14 +3223,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.1
-aea add connection fetchai/soef:0.27.2
-aea add connection fetchai/ledger:0.21.1
-aea add protocol fetchai/fipa:1.1.2
-aea add protocol fetchai/signing:1.1.2
+aea add connection fetchai/p2p_libp2p:0.27.2
+aea add connection fetchai/soef:0.27.3
+aea add connection fetchai/ledger:0.21.2
+aea add protocol fetchai/fipa:1.1.3
+aea add protocol fetchai/signing:1.1.3
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.1
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:

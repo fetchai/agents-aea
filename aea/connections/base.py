@@ -392,7 +392,8 @@ class BaseSyncConnection(Connection):
             # cause task.get_name for python3.8+
             task_name = getattr(task, "task_name", "TASK NAME NOT SET")
             self.logger.exception(
-                f"in task `{task_name}`, exception occurred", exc_info=task.exception(),
+                f"in task `{task_name}`, exception occurred",
+                exc_info=task.exception(),
             )
 
     async def _run_in_pool(self, fn: Callable, *args: Any) -> Any:

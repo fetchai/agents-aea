@@ -267,7 +267,8 @@ class TestTransactionBehaviour(BaseSkillTestCase):
         ml_dialogue = cast(
             MlTradeDialogue,
             self_.prepare_skill_dialogue(
-                dialogues=self_.ml_dialogues, messages=self_.list_of_messages,
+                dialogues=self_.ml_dialogues,
+                messages=self_.list_of_messages,
             ),
         )
         ml_dialogue.terms = self_.terms

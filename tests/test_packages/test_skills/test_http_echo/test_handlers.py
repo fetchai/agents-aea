@@ -174,7 +174,8 @@ class TestHttpHandler(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, f"responding with: {message}",
+            logging.INFO,
+            f"responding with: {message}",
         )
 
     def test_handle_request_post(self):
@@ -226,14 +227,16 @@ class TestHttpHandler(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(
-            logging.INFO, f"responding with: {message}",
+            logging.INFO,
+            f"responding with: {message}",
         )
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the http_echo handler."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = cast(
             HttpMessage,

@@ -154,7 +154,9 @@ async def test_yoti_profile_ok():
 async def test_yoti_profile_error_on_handle():
     """Test error message on bad provile."""
     with patch.object(
-        yoti_connection, "YotiClient", FakeYotiClientBadProfile,
+        yoti_connection,
+        "YotiClient",
+        FakeYotiClientBadProfile,
     ):
         con = YotiConnection(
             configuration=mock_conf, data_dir=MagicMock(), logger=logging.getLogger()

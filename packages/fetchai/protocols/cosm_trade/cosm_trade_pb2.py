@@ -22,12 +22,12 @@ _COSMTRADEMESSAGE = DESCRIPTOR.message_types_by_name["CosmTradeMessage"]
 _COSMTRADEMESSAGE_SIGNEDTRANSACTION = _COSMTRADEMESSAGE.nested_types_by_name[
     "SignedTransaction"
 ]
-_COSMTRADEMESSAGE_INFORM_PUBLIC_KEY_PERFORMATIVE = _COSMTRADEMESSAGE.nested_types_by_name[
-    "Inform_Public_Key_Performative"
-]
-_COSMTRADEMESSAGE_INFORM_SIGNED_TRANSACTION_PERFORMATIVE = _COSMTRADEMESSAGE.nested_types_by_name[
-    "Inform_Signed_Transaction_Performative"
-]
+_COSMTRADEMESSAGE_INFORM_PUBLIC_KEY_PERFORMATIVE = (
+    _COSMTRADEMESSAGE.nested_types_by_name["Inform_Public_Key_Performative"]
+)
+_COSMTRADEMESSAGE_INFORM_SIGNED_TRANSACTION_PERFORMATIVE = (
+    _COSMTRADEMESSAGE.nested_types_by_name["Inform_Signed_Transaction_Performative"]
+)
 _COSMTRADEMESSAGE_ERROR_PERFORMATIVE = _COSMTRADEMESSAGE.nested_types_by_name[
     "Error_Performative"
 ]

@@ -51,7 +51,10 @@ from aea.helpers.io import open_file
     help_remote="For fetching agent from remote registry.",
 )
 @click.option(
-    "--alias", type=str, required=False, help="Provide a local alias for the agent.",
+    "--alias",
+    type=str,
+    required=False,
+    help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context

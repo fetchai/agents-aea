@@ -49,7 +49,11 @@ def make_test_envelope(to_="any", sender_="sender") -> Envelope:
     )
     msg.to = to_
     msg.sender = sender_
-    envelope = Envelope(to=to_, sender=sender_, message=msg,)
+    envelope = Envelope(
+        to=to_,
+        sender=sender_,
+        message=msg,
+    )
     return envelope
 
 
@@ -64,7 +68,8 @@ class Testp2pStubConnectionReception:
         d.mkdir(parents=True)
 
         configuration = ConnectionConfig(
-            namespace_dir=d, connection_id=P2PStubConnection.connection_id,
+            namespace_dir=d,
+            connection_id=P2PStubConnection.connection_id,
         )
         self.loop = asyncio.get_event_loop()
         self.identity1 = Identity("test", "con1", "public_key_1")

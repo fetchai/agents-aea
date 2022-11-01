@@ -107,7 +107,7 @@ def get_gas_price_strategy(
             raise ValueError(f"Invalid return value for `{gas_price_strategy}`!")
         gwei_result = result / 10  # adjustment (see api documentation)
         wei_result = web3.toWei(gwei_result, "gwei")
-        return wei_result
+        return Wei(wei_result)
 
     return gas_station_gas_price_strategy
 
@@ -393,7 +393,11 @@ class EthereumHelper(Helper):
 
     @staticmethod
     def is_transaction_valid(
-        tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: dict,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -769,11 +773,12 @@ class EthereumApi(LedgerApi, EthereumHelper):
         """
         if contract_address is None:
             instance = self.api.eth.contract(
-                abi=contract_interface[_ABI], bytecode=contract_interface[_BYTECODE],
+                abi=contract_interface[_ABI],
+                bytecode=contract_interface[_BYTECODE],
             )
         else:
             _contract_address = self.api.toChecksumAddress(contract_address)
-            instance = self.api.eth.contract(
+            instance = self.api.eth.contract(  # type: ignore
                 address=_contract_address,
                 abi=contract_interface[_ABI],
                 bytecode=contract_interface[_BYTECODE],

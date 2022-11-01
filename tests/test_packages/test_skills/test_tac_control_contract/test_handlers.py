@@ -130,7 +130,9 @@ class TestContractApiHandler(BaseSkillTestCase):
             f"received invalid contract_api message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_raw_transaction(self,):
+    def test_handle_raw_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         contract_api_dialogue = cast(
@@ -315,7 +317,9 @@ class TestSigningHandler(BaseSkillTestCase):
             f"received invalid signing message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_signed_transaction(self,):
+    def test_handle_signed_transaction(
+        self,
+    ):
         """Test the _handle_signed_transaction method of the signing handler."""
         # setup
         signing_counterparty = self.skill.skill_context.decision_maker_address
@@ -828,7 +832,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, "requesting contract initialisation transaction...",
+            logging.INFO,
+            "requesting contract initialisation transaction...",
         )
 
     def test_handle_transaction_receipt_callable_get_deploy_transaction_label_store_no_code_id(
@@ -887,7 +892,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         # _request_init_transaction
         self.assert_quantity_in_outbox(0)
         mock_logger.assert_any_call(
-            logging.INFO, "Failed to initialise contract: code_id not found",
+            logging.INFO,
+            "Failed to initialise contract: code_id not found",
         )
 
     def test_handle_transaction_receipt_callable_get_deploy_transaction_label_init(

@@ -43,7 +43,8 @@ def test_initialisation():
     good_endowment = {"good_id": 2}
     ownership_state = OwnershipState()
     ownership_state.set(
-        amount_by_currency_id=currency_endowment, quantities_by_good_id=good_endowment,
+        amount_by_currency_id=currency_endowment,
+        quantities_by_good_id=good_endowment,
     )
     assert ownership_state.amount_by_currency_id is not None
     assert ownership_state.quantities_by_good_id is not None

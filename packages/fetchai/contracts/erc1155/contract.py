@@ -37,7 +37,7 @@ from aea.crypto.base import LedgerApi
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.23.1")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.23.2")
 DEFAUT_ETH_ATOMIC_SWAP_GAS_LIMIT = 2818111
 DEFAUT_COSMOS_ATOMIC_SWAP_GAS_LIMIT = 1500000
 DEFAUT_ETH_SINGLE_TASK_GAS_LIMIT = 300000
@@ -499,7 +499,7 @@ class ERC1155Contract(Contract):
 
             # from_address sends tokens
             if from_supply > 0:
-                contract_msg = {
+                contract_msg: JSONLike = {
                     "transfer_single": {
                         "operator": str(from_address),
                         "from_address": str(from_address),
@@ -730,7 +730,7 @@ class ERC1155Contract(Contract):
 
             # First direction of swap
             if len(from_tokens) != 0:
-                contract_msg = {
+                contract_msg: JSONLike = {
                     "transfer_batch": {
                         "operator": str(from_address),
                         "from_address": str(from_address),

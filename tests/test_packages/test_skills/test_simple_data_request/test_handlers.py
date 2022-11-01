@@ -105,7 +105,8 @@ class TestHttpHandler(SimpleDataRequestTestCase):
         """Test the _handle_response method of the http handler."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.http_dialogues,
+            messages=self.list_of_messages[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
@@ -128,7 +129,8 @@ class TestHttpHandler(SimpleDataRequestTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, "updating shared_state with received data=b'some_body'!",
+            logging.INFO,
+            "updating shared_state with received data=b'some_body'!",
         )
 
         assert (

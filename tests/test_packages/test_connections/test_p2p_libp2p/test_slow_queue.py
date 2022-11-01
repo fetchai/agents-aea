@@ -126,7 +126,11 @@ class TestSlowQueue:
                 content=b"hello",
             )
 
-            envelope = Envelope(to=addr, sender=self.conn.node.address, message=msg,)
+            envelope = Envelope(
+                to=addr,
+                sender=self.conn.node.address,
+                message=msg,
+            )
             return envelope
 
         try:

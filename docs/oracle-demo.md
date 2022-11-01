@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.17.2
+aea fetch fetchai/coin_price_oracle:0.17.3
 cd coin_price_oracle
 aea install
 ```
@@ -32,17 +32,17 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
-aea add connection fetchai/http_client:0.24.2
-aea add connection fetchai/ledger:0.21.1
-aea add connection fetchai/prometheus:0.9.2
-aea add skill fetchai/advanced_data_request:0.7.2
-aea add skill fetchai/simple_oracle:0.16.1
+aea add connection fetchai/http_client:0.24.3
+aea add connection fetchai/ledger:0.21.2
+aea add connection fetchai/prometheus:0.9.3
+aea add skill fetchai/advanced_data_request:0.7.3
+aea add skill fetchai/simple_oracle:0.16.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/ledger:0.21.1
+aea config set agent.default_connection fetchai/ledger:0.21.2
 aea install
 ```
 
@@ -65,9 +65,9 @@ Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
-"fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
-"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1"
+"fetchai/contract_api:1.1.3": "fetchai/ledger:0.21.2",
+"fetchai/http:1.1.3": "fetchai/http_client:0.24.3",
+"fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2"
 }'
 ```
 
@@ -126,7 +126,7 @@ aea generate-wealth $LEDGER_ID
 From a new terminal (in the same top-level directory), fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.12.2
+aea fetch fetchai/coin_price_oracle_client:0.12.3
 cd coin_price_oracle_client
 aea install
 ```
@@ -139,15 +139,15 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create coin_price_oracle_client
 cd coin_price_oracle_client
-aea add connection fetchai/http_client:0.24.2
-aea add connection fetchai/ledger:0.21.1
-aea add skill fetchai/simple_oracle_client:0.13.1
+aea add connection fetchai/http_client:0.24.3
+aea add connection fetchai/ledger:0.21.2
+aea add skill fetchai/simple_oracle_client:0.13.2
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/ledger:0.21.1
+aea config set agent.default_connection fetchai/ledger:0.21.2
 aea install
 ```
 
@@ -155,9 +155,9 @@ Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:1.1.2": "fetchai/ledger:0.21.1",
-"fetchai/http:1.1.2": "fetchai/http_client:0.24.2",
-"fetchai/ledger_api:1.1.2": "fetchai/ledger:0.21.1"
+"fetchai/contract_api:1.1.3": "fetchai/ledger:0.21.2",
+"fetchai/http:1.1.3": "fetchai/http_client:0.24.3",
+"fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2"
 }'
 ```
 

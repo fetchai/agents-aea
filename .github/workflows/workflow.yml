@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: 3.8
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -24,14 +24,6 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           sudo pip install pipenv
-      - name: Pipenv install requirements and check it can be locked
-        run: |
-          pipenv install --dev --skip-lock --clear
-          pipenv run pip install -e .[all]
-          pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
-          pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
-          pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
-          pipenv lock
       - name: Check plugin consistency
         run: |
           # these two files should not be different;
@@ -50,12 +42,12 @@ jobs:
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.6
+          python-version: 3.8
       - uses: actions/setup-go@v3
         with:
           go-version: '^1.17.0'
@@ -86,14 +78,14 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.45.2
+          version: v1.48.0
           working-directory: libs/go/libp2p_node
       - name: Golang code style check (aealite)
         uses: golangci/golangci-lint-action@v3.1.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
-          version: v1.45.2
+          version: v1.48.0
           working-directory: libs/go/aealite
 
   common_checks_3:
@@ -104,7 +96,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.6
+          python-version: 3.8
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -124,7 +116,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.6
+          python-version: 3.8
       - uses: actions/setup-go@v3
         with:
           go-version: '^1.17.0'
@@ -176,7 +168,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: 3.8
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
@@ -196,39 +188,6 @@ jobs:
       - name: Check spelling
         run: tox -e spell_check
 
-  dependencies_checks:
-    continue-on-error: False
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.7]
-    timeout-minutes: 10
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python_version }}
-      - if: matrix.os == 'ubuntu-latest'
-        name: Install dependencies (ubuntu-latest)
-        run: |
-          sudo apt-get update --fix-missing
-          sudo apt-get install libmbedtls-dev
-          sudo apt-get autoremove
-          sudo apt-get autoclean
-      - name: Install tox
-        run : |
-          pip install tox
-      - name: Check Pipfile and tox.ini consistency
-        run : |
-          python ./scripts/check_pipfile_and_toxini.py
-      - name: Install current aea
-        run: |
-          pip install -e .[all]
-      - name: Check aea dependenices and imports
-        run: |
-          tox -e dependencies_check
-
   plugins_install_check:
     continue-on-error: False
     runs-on: ${{ matrix.sys.os }}
@@ -238,7 +197,7 @@ jobs:
           - { os: windows-latest, shell: 'msys2 {0}' }
           - { os: ubuntu-latest,  shell: bash  }
           - { os: macos-latest,   shell: bash  }
-        python_version: [3.7]
+        python_version: [3.8]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@master
@@ -278,10 +237,10 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.6
+          python-version: 3.8
       - uses: actions/setup-go@v3
         with:
-          go-version: '^1.14.0'
+          go-version: '^1.17.0'
       - name: Install protolint (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -299,7 +258,6 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
-    - dependencies_checks
     - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -310,7 +268,7 @@ jobs:
         python-version: 3.8
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - name: Setup GCloud - production
       uses: google-github-actions/setup-gcloud@v0
       with:
@@ -346,7 +304,6 @@ jobs:
       - common_checks_2
       - common_checks_3
       - common_checks_4
-      - dependencies_checks
       - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -382,13 +339,12 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
-    - dependencies_checks
     - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.7, 3.8, 3.9, '3.10']
+        python_version: [3.8, 3.9, '3.10']
     timeout-minutes: 90
     steps:
     - uses: actions/checkout@master
@@ -397,7 +353,7 @@ jobs:
         python-version: ${{ matrix.python_version }}
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - if: matrix.os == 'ubuntu-latest'
       name: Install dependencies (ubuntu-latest)
       run: |
@@ -461,7 +417,6 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
-    - dependencies_checks
     - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -472,7 +427,7 @@ jobs:
         python-version: 3.8
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - name: Install dependencies (ubuntu-latest)
       run: |
         sudo apt-get update --fix-missing
@@ -495,13 +450,12 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
-    - dependencies_checks
     - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6]
+        python-version: [3.8]
     timeout-minutes: 45
     steps:
     - uses: actions/checkout@master
@@ -510,7 +464,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - if: matrix.os == 'macos-latest'
       working-directory: ./libs/go/libp2p_node
       run: |
@@ -519,11 +473,11 @@ jobs:
          sudo cp $LINKPATH ${LINKPATH}_orig
          sudo cp link $LINKPATH
          sudo chmod a+x $LINKPATH
-    - if: matrix.python-version == '3.6'
+    - if: matrix.python-version == '3.8'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
       run: make test
-    - if: matrix.python-version == '3.6'
+    - if: matrix.python-version == '3.8'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
@@ -531,10 +485,10 @@ jobs:
     name: libp2p_coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.14
+      - name: Set up Go 1.17
         uses: actions/setup-go@v1
         with:
-          go-version: 1.14
+          go-version: 1.17
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
@@ -570,10 +524,10 @@ jobs:
     - uses: actions/checkout@master
     - uses: actions/setup-python@v3
       with:
-        python-version: 3.7
+        python-version: 3.8
     - uses: actions/setup-go@v3
       with:
-        go-version: '^1.14.0'
+        go-version: '^1.17.0'
     - name: Install dependencies (ubuntu-latest)
       run: |
         sudo apt-get update --fix-missing
@@ -590,8 +544,8 @@ jobs:
     # sudo apt-get install -y protobuf-compiler
     - name: Run all tests
       run: |
-        tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
-        tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
+        tox -e py3.8-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+        tox -e plugins-py3.8-cov -- --cov-append -m 'not unstable'
       continue-on-error: true
     - name: Show full coverage report
       run: |

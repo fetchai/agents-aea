@@ -85,7 +85,8 @@ class AriesAliceTestCase(BaseSkillTestCase):
 
         # behaviours
         cls.alice_behaviour = cast(
-            AliceBehaviour, cls._skill.skill_context.behaviours.alice,
+            AliceBehaviour,
+            cls._skill.skill_context.behaviours.alice,
         )
 
         # dialogues

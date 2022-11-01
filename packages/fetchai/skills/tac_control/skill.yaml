@@ -1,6 +1,6 @@
 name: tac_control
 author: fetchai
-version: 0.25.2
+version: 0.25.3
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
@@ -8,21 +8,21 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
-  __init__.py: QmTUhk3GzH5B5SXHBeJqbm9Dt8dbaENeHt3sZadzs75tjL
+  __init__.py: QmRkN2jwbP6EFmQr4AiAhPHtK1DdKYj8CzwXZxga7BDyaU
   behaviours.py: QmcuWLHYBAE8gM9AwrfPmaucgJsnctqmhNj38mH5H6Tbst
   dialogues.py: QmU2S3AvctrMNKTspSm8f3CGgKpZKQ6tWhuZsqv62LeZ5e
-  game.py: QmVciVXNp4HSYBzENrMBWFs31SmympvALrPjZ9JZ64TxHz
-  handlers.py: QmYeW1SejgZJx941DUD7Ti18GzEajX1cC7cQn8tZMSCkp3
-  helpers.py: QmR51Bt18pdAofTrhdrUtH222qfSQtpYwiqRWDJNEtUxcm
+  game.py: QmUotGmD8qwdb8j7uwMqNfTnSrKiPubyRvffgzjEvKoH17
+  handlers.py: QmQ71eC6osB1RX4MXfEJQ9QkqEfDqHKNetiJLoeqcT3QW7
+  helpers.py: Qmf11rS9J6ezmB9QBi9AdxEsdQiMZXD1z3pSQRaaUtoB9V
   parameters.py: QmZuXLsLVncd53KPemCvSwG16Ft7ff613yAi8uk7Nz6Qcp
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- fetchai/erc1155:0.23.1
+- fetchai/erc1155:0.23.2
 protocols:
-- fetchai/default:1.1.2
-- fetchai/oef_search:1.1.2
-- fetchai/tac:1.1.2
+- fetchai/default:1.1.3
+- fetchai/oef_search:1.1.3
+- fetchai/tac:1.1.3
 skills: []
 behaviours:
   tac:

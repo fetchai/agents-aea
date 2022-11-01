@@ -222,7 +222,9 @@ class TestReplaceComponentIdsInSkillConfig(BaseTestReplaceComponentIds):
         cls.expected_custom_component_configuration = dict(foo="bar")
 
         cls.skill_config = SkillConfig(
-            name="skill_name", author="author", version="0.1.0",
+            name="skill_name",
+            author="author",
+            version="0.1.0",
         )
 
         cls.skill_config.protocols = {cls.old_protocol_id}

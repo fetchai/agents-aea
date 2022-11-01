@@ -98,8 +98,8 @@ class TestStrategy(ConfirmationAW2TestCase):
         with patch.object(
             self.strategy, "is_valid_counterparty", side_effect=is_valid_counterparty
         ):
-            actual_acceptable_counterparties = self.strategy.get_acceptable_counterparties(
-                couterparties
+            actual_acceptable_counterparties = (
+                self.strategy.get_acceptable_counterparties(couterparties)
             )
 
         # after
@@ -175,7 +175,8 @@ class TestStrategy(ConfirmationAW2TestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"Invalid counterparty={self.counterparty}, not registered!",
+            logging.INFO,
+            f"Invalid counterparty={self.counterparty}, not registered!",
         )
         assert is_valid is False
 

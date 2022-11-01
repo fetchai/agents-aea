@@ -139,7 +139,9 @@ def _try_get_component_id_from_prefix(
 
 
 def handle_dotted_path(
-    value: str, author: str, aea_project_path: Union[str, Path] = ".",
+    value: str,
+    author: str,
+    aea_project_path: Union[str, Path] = ".",
 ) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]:
     """Separate the path between path to resource and json path to attribute.
 
@@ -309,7 +311,9 @@ class AgentConfigManager:
         self.env_vars_friendly = env_vars_friendly
 
     def load_component_configuration(
-        self, component_id: ComponentId, skip_consistency_check: bool = True,
+        self,
+        component_id: ComponentId,
+        skip_consistency_check: bool = True,
     ) -> ComponentConfiguration:
         """
         Load component configuration from the project directory.

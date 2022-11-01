@@ -59,7 +59,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.22.2")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.22.3")
 
 OefSearchDialogue = BaseOefSearchDialogue
 
@@ -133,7 +133,7 @@ class OEFChannel(OEFAgent):
 
         self.aea_logger = logger
 
-    async def _run_in_executor(self, fn: Callable, *args: Any) -> None:
+    async def _run_in_executor(self, fn: Callable, *args: Any) -> Any:
         if not self._loop:  # pragma: nocover
             raise ValueError("Channel not connected!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
@@ -276,7 +276,11 @@ class OEFChannel(OEFAgent):
             target_message=last_msg,
             agents=tuple(agents),
         )
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_oef_error(
@@ -308,7 +312,11 @@ class OEFChannel(OEFAgent):
             target_message=last_msg,
             oef_error_operation=operation,
         )
-        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+        )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_dialogue_error(  # pylint: disable=unused-argument
@@ -331,7 +339,11 @@ class OEFChannel(OEFAgent):
             error_msg="Destination not available",
             error_data={},
         )
-        envelope = Envelope(to=self.address, sender=DEFAULT_OEF, message=msg,)
+        envelope = Envelope(
+            to=self.address,
+            sender=DEFAULT_OEF,
+            message=msg,
+        )
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def send(self, envelope: Envelope) -> None:

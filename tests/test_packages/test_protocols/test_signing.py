@@ -130,7 +130,9 @@ class TestSigningMessage:
 
 def test_consistency_check_negative():
     """Test the consistency check, negative case."""
-    tx_msg = SigningMessage(performative=SigningMessage.Performative.SIGN_TRANSACTION,)
+    tx_msg = SigningMessage(
+        performative=SigningMessage.Performative.SIGN_TRANSACTION,
+    )
     assert not tx_msg._is_consistent()
 
 

@@ -122,7 +122,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
             callable="get_deploy_transaction",
             kwargs=strategy.get_deploy_kwargs(),
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
@@ -157,7 +160,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
     @staticmethod
     def _get_tx_expriration_block() -> int:
         """Return max block number for no expiration."""
-        return 2 ** 256 - 1
+        return 2**256 - 1
 
     def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
         """Request transaction that updates value in Fetch oracle contract."""
@@ -238,7 +241,11 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
-        self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
+        self,
+        metric_name: str,
+        update_func: str,
+        value: float,
+        labels: Dict[str, str],
     ) -> None:
         """
         Update a prometheus metric.

@@ -1,6 +1,6 @@
 name: tac_negotiation
 author: fetchai
-version: 0.29.2
+version: 0.29.3
 type: skill
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
@@ -8,28 +8,28 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
-  __init__.py: QmS8cSmKuUP3Ya67J8APmfxCKyPj8YaXLek1v3poG6r1tV
+  __init__.py: QmckLB24RqhiiM7tTjqosiumnkNAo6pxPTaSiRQoQM493Q
   behaviours.py: QmRYUEG3Xh6D53BcWwhepTaXHTsz5Ag2ZghETLfc37AvsB
   dialogues.py: Qme98nNXajpA42LcZY6r1QARtycYkovnJWvJdfUoV6dtgB
-  handlers.py: QmW2ecyFu65x7Yk9VWaDMEJ1Yzgi6zDzEKg9reb6rE8g5C
-  helpers.py: QmXPzdgo8yHsa8H4YT8cNjZ8gN2K8qQNyAynNp6VnaehGe
-  strategy.py: QmbyNaAv67SYp7PFEoNmxedJxnn6FxNZScwyghakt4LRsm
-  transactions.py: QmXLunaZALbzA2jQJ2NFd7PHqM25Hu2GYmB8tcNGYQQDZW
+  handlers.py: QmXLa466taabMV97G5ZiVxNBtjeBumoS2N4hxr5RrGLsKm
+  helpers.py: QmaziekDk2Zg1NtKFXRe6WAd1xUm5sFoboJThe4YTX21fM
+  strategy.py: QmYtojBvPCKwGEfAzQDZQcNgJmBxz8p9kERVH5wunbfZxk
+  transactions.py: Qmch1rpN7L9dFDvZ2yg2udHtV4Ljy9yUKQHhNGVLBfYi4K
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.1
+- fetchai/ledger:0.21.2
 contracts:
-- fetchai/erc1155:0.23.1
+- fetchai/erc1155:0.23.2
 protocols:
-- fetchai/contract_api:1.1.2
-- fetchai/cosm_trade:0.2.2
-- fetchai/default:1.1.2
-- fetchai/fipa:1.1.2
-- fetchai/ledger_api:1.1.2
-- fetchai/oef_search:1.1.2
-- fetchai/signing:1.1.2
+- fetchai/contract_api:1.1.3
+- fetchai/cosm_trade:0.2.3
+- fetchai/default:1.1.3
+- fetchai/fipa:1.1.3
+- fetchai/ledger_api:1.1.3
+- fetchai/oef_search:1.1.3
+- fetchai/signing:1.1.3
 skills:
-- fetchai/tac_participation:0.25.2
+- fetchai/tac_participation:0.25.3
 behaviours:
   clean_up:
     args:

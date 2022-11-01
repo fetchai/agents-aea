@@ -93,7 +93,9 @@ class HttpHandler(Handler):
         """
         self.context.logger.info(
             "received http request with method={}, url={} and body={!r}".format(
-                http_msg.method, http_msg.url, http_msg.body,
+                http_msg.method,
+                http_msg.url,
+                http_msg.body,
             )
         )
         if http_msg.method == "get":

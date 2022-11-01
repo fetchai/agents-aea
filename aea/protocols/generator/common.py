@@ -128,7 +128,8 @@ def _match_brackets(text: str, index_of_open_bracket: int) -> int:
     if text[index_of_open_bracket] != "[":
         raise SyntaxError(
             "Index {} in 'text' is not an open bracket '['. It is {}".format(
-                index_of_open_bracket, text[index_of_open_bracket],
+                index_of_open_bracket,
+                text[index_of_open_bracket],
             )
         )
 
@@ -286,6 +287,7 @@ def _includes_custom_type(content_type: str) -> bool:
     :param content_type: the content type
     :return: Boolean result
     """
+
     if content_type.startswith("Optional"):
         sub_type = _get_sub_types_of_compositional_types(content_type)[0]
         result = _includes_custom_type(sub_type)
@@ -467,7 +469,8 @@ def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> Non
     """
     # path to proto file
     path_to_proto_file = os.path.join(
-        path_to_generated_protocol_package, f"{name}.proto",
+        path_to_generated_protocol_package,
+        f"{name}.proto",
     )
 
     # Dump protolint configuration into a temporary file
@@ -572,3 +575,17 @@ def apply_protolint(path_to_proto_file: str, name: str) -> Tuple[bool, str]:
                 lines_to_show.append(line)
         error_message = "\n".join(lines_to_show)
         return False, error_message
+
+
+def _is_compositional_type(content_type: str) -> bool:
+    """Checks if content_type is compositional.
+
+    :param content_type: the type string.
+    :return: bool.
+    """
+    for valid_compositional_type in (
+        SPECIFICATION_COMPOSITIONAL_TYPES + PYTHON_COMPOSITIONAL_TYPES
+    ):
+        if content_type.startswith(valid_compositional_type):
+            return True
+    return False

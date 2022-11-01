@@ -61,7 +61,9 @@ class Transactions(Model):
         self._nonce = 0
 
     @property
-    def pending_proposals(self,) -> Dict[DialogueLabel, Dict[MessageId, Terms]]:
+    def pending_proposals(
+        self,
+    ) -> Dict[DialogueLabel, Dict[MessageId, Terms]]:
         """Get the pending proposals."""
         return self._pending_proposals
 
@@ -120,7 +122,10 @@ class Transactions(Model):
             next_date, next_item = queue[0]  # pragma: no cover
 
     def add_pending_proposal(
-        self, dialogue_label: DialogueLabel, proposal_id: int, terms: Terms,
+        self,
+        dialogue_label: DialogueLabel,
+        proposal_id: int,
+        terms: Terms,
     ) -> None:
         """
         Add a proposal (in the form of a transaction) to the pending list.
@@ -155,7 +160,10 @@ class Transactions(Model):
         return terms
 
     def add_pending_initial_acceptance(
-        self, dialogue_label: DialogueLabel, proposal_id: int, terms: Terms,
+        self,
+        dialogue_label: DialogueLabel,
+        proposal_id: int,
+        terms: Terms,
     ) -> None:
         """
         Add an acceptance (in the form of a transaction) to the pending list.

@@ -71,7 +71,7 @@ class TestEchoSkill(AEATestCaseEmpty):
         self.generate_private_key()
         self.add_private_key()
         self.add_item("connection", "fetchai/stub:0.21.1")
-        self.add_item("skill", "fetchai/echo:0.20.2")
+        self.add_item("skill", "fetchai/echo:0.20.3")
 
         process = self.run_agent()
         is_running = self.is_running(process)
@@ -86,7 +86,11 @@ class TestEchoSkill(AEATestCaseEmpty):
             dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             content=message_content,
         )
-        sent_envelope = Envelope(to=self.agent_name, sender=sender, message=message,)
+        sent_envelope = Envelope(
+            to=self.agent_name,
+            sender=sender,
+            message=message,
+        )
 
         self.send_envelope_to_agent(sent_envelope, self.agent_name)
 

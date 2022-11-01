@@ -311,7 +311,10 @@ class DecisionMaker(WithLogger):
         "_stopped",
     )
 
-    def __init__(self, decision_maker_handler: DecisionMakerHandler,) -> None:
+    def __init__(
+        self,
+        decision_maker_handler: DecisionMakerHandler,
+    ) -> None:
         """
         Initialize the decision maker.
 

@@ -68,7 +68,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.32.1", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.32.2", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -131,7 +131,10 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_client_process, check_strings, timeout=30, is_terminating=False,
+            weather_client_process,
+            check_strings,
+            timeout=30,
+            is_terminating=False,
         )
         assert (
             missing_strings == []

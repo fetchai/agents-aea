@@ -62,7 +62,9 @@ class TestStateUpdateMessage:
         )
         assert stum._is_consistent()
         assert len(stum.valid_performatives) == 3
-        stum = StateUpdateMessage(performative=StateUpdateMessage.Performative.END,)
+        stum = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.END,
+        )
         assert stum._is_consistent()
 
     def test_message_inconsistency(self):
@@ -119,7 +121,9 @@ class TestSerialization:
 
     def test_serialization_end(self):
         """Test serialization of end message."""
-        msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.END,)
+        msg = StateUpdateMessage(
+            performative=StateUpdateMessage.Performative.END,
+        )
         assert msg._is_consistent()
         assert len(msg.valid_performatives) == 3
         encoded_msg = msg.serializer.encode(msg)

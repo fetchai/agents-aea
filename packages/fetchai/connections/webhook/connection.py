@@ -42,7 +42,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.20.2")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.20.3")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
@@ -208,7 +208,9 @@ class WebhookChannel:
             body=payload_bytes if payload_bytes is not None else b"",
         )
         envelope = Envelope(
-            to=http_message.to, sender=http_message.sender, message=http_message,
+            to=http_message.to,
+            sender=http_message.sender,
+            message=http_message,
         )
         return envelope
 

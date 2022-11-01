@@ -162,7 +162,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -191,7 +192,8 @@ class TestHttpHandler(AriesFaberTestCase):
         # after
         mock_logger.assert_any_call(logging.INFO, f"Received message: {str(body)}")
         mock_logger.assert_any_call(
-            logging.INFO, f"Registering Faber_ACA with seed {str(self.strategy.seed)}",
+            logging.INFO,
+            f"Registering Faber_ACA with seed {str(self.strategy.seed)}",
         )
         mock_http_req.assert_any_call(
             method="POST",
@@ -206,7 +208,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -258,7 +261,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -307,7 +311,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -351,7 +356,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -395,7 +401,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -458,7 +465,8 @@ class TestHttpHandler(AriesFaberTestCase):
         http_dialogue = cast(
             HttpDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.http_dialogues, messages=self.list_of_http_messages[:1],
+                dialogues=self.http_dialogues,
+                messages=self.list_of_http_messages[:1],
             ),
         )
 
@@ -607,7 +615,8 @@ class TestOefSearchHandler(AriesFaberTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"found agents {', '.join(agents)}, stopping search.",
+            logging.INFO,
+            f"found agents {', '.join(agents)}, stopping search.",
         )
 
         assert self.strategy.is_searching is False
@@ -643,7 +652,8 @@ class TestOefSearchHandler(AriesFaberTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "Waiting for more agents.",
+            logging.INFO,
+            "Waiting for more agents.",
         )
 
     def test_handle_invalid(self):

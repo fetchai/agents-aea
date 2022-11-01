@@ -123,7 +123,7 @@ class TestSoefTokenStorage:
         self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
 
         # create the connection and multiplexer objects
-        self.token_storage_path = "test.storage"
+        self.token_storage_path = "test.storage"  # nosec
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="s-oef.fetch.ai",
@@ -133,7 +133,9 @@ class TestSoefTokenStorage:
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
-            configuration=configuration, data_dir=self.data_dir, identity=identity,
+            configuration=configuration,
+            data_dir=self.data_dir,
+            identity=identity,
         )
 
     def teardown(self):
@@ -201,7 +203,9 @@ class TestSoef:
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
-            configuration=configuration, data_dir=self.data_dir, identity=identity,
+            configuration=configuration,
+            data_dir=self.data_dir,
+            identity=identity,
         )
         self.connection2 = SOEFConnection(
             configuration=configuration,
@@ -229,7 +233,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
 
         with patch.object(
             self.connection.channel,
@@ -255,7 +263,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
 
         with patch.object(
             self.connection.channel,
@@ -297,7 +309,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
 
         with patch.object(
             self.connection.channel,
@@ -334,7 +350,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         await self.connection.send(envelope)
 
         expected_envelope = await asyncio.wait_for(self.connection.receive(), timeout=1)
@@ -360,7 +380,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -382,7 +406,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -423,7 +451,11 @@ class TestSoef:
         )
         message.to = str(SOEFConnection.connection_id.to_any())
         message.sender = self.skill_id
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
         with pytest.raises(ValueError):
             await self.connection.send(envelope)
 
@@ -437,7 +469,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
 
         with patch.object(
             self.connection.channel,
@@ -479,7 +515,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
 
         with patch.object(
             self.connection.channel,
@@ -593,7 +633,8 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`acknowledge` .*Exception: .*",
+                SOEFException,
+                match=r"`acknowledge` .*Exception: .*",
             ):
                 await self.connection.channel._register_agent()
 
@@ -762,7 +803,9 @@ class TestSoef:
         )
         with pytest.raises(ValueError, match="Unsupported chain_identifier"):
             SOEFConnection(
-                configuration=configuration, data_dir=MagicMock(), identity=identity,
+                configuration=configuration,
+                data_dir=MagicMock(),
+                identity=identity,
             )
 
     def test_chain_identifier_ok(self):
@@ -779,7 +822,9 @@ class TestSoef:
             chain_identifier=chain_identifier,
         )
         connection = SOEFConnection(
-            configuration=configuration, data_dir=MagicMock(), identity=identity,
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=identity,
         )
 
         assert connection.channel.chain_identifier == chain_identifier
@@ -793,7 +838,11 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
+        envelope = Envelope(
+            to=message.to,
+            sender=message.sender,
+            message=message,
+        )
 
         with patch.object(
             self.connection.channel,

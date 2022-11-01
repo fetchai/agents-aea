@@ -48,7 +48,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.24.2")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.24.3")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -109,7 +109,11 @@ class HTTPClientAsyncChannel:
     )
 
     def __init__(
-        self, agent_address: Address, address: str, port: int, connection_id: PublicId,
+        self,
+        agent_address: Address,
+        address: str,
+        port: int,
+        connection_id: PublicId,
     ):
         """
         Initialize an http client channel.
@@ -332,7 +336,9 @@ class HTTPClientAsyncChannel:
             version="",
         )
         envelope = Envelope(
-            to=http_message.to, sender=http_message.sender, message=http_message,
+            to=http_message.to,
+            sender=http_message.sender,
+            message=http_message,
         )
         return envelope
 
@@ -377,7 +383,10 @@ class HTTPClientConnection(Connection):
         if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
-            self.address, host, port, connection_id=self.connection_id,
+            self.address,
+            host,
+            port,
+            connection_id=self.connection_id,
         )
 
     async def connect(self) -> None:

@@ -432,7 +432,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         performative = FipaMessage.Performative.PROPOSE
         proposal = "some_proposal"
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=dialogue, performative=performative, proposal=proposal,
+            dialogue=dialogue,
+            performative=performative,
+            proposal=proposal,
         )
 
         assert type(incoming_message) == FipaMessage
@@ -455,7 +457,9 @@ class TestSkillTestCase(BaseSkillTestCase):
 
         with pytest.raises(AEAEnforceError, match="dialogue cannot be None."):
             self.build_incoming_message_for_skill_dialogue(
-                dialogue=None, performative=performative, proposal=proposal,
+                dialogue=None,
+                performative=performative,
+                proposal=proposal,
             )
 
     def test_negative_build_incoming_message_for_skill_dialogue_dialogue_is_empty(self):
@@ -474,7 +478,9 @@ class TestSkillTestCase(BaseSkillTestCase):
 
         with pytest.raises(AEAEnforceError, match="dialogue cannot be empty."):
             self.build_incoming_message_for_skill_dialogue(
-                dialogue=dialogue, performative=performative, proposal=proposal,
+                dialogue=dialogue,
+                performative=performative,
+                proposal=proposal,
             )
 
     def test_provide_unspecified_fields(self):
@@ -582,7 +588,9 @@ class TestSkillTestCase(BaseSkillTestCase):
             ),
         )
         dialogue = self.prepare_skill_dialogue(
-            fipa_dialogues, dialogue_messages, "counterparty",
+            fipa_dialogues,
+            dialogue_messages,
+            "counterparty",
         )
 
         assert type(dialogue) == FipaDialogue
@@ -626,7 +634,9 @@ class TestSkillTestCase(BaseSkillTestCase):
             ),
         )
         dialogue = self.prepare_skill_dialogue(
-            fipa_dialogues, dialogue_messages, "counterparty",
+            fipa_dialogues,
+            dialogue_messages,
+            "counterparty",
         )
 
         assert type(dialogue) == FipaDialogue
@@ -670,7 +680,9 @@ class TestSkillTestCase(BaseSkillTestCase):
             AEAEnforceError, match="Cannot update the dialogue with message number 1"
         ):
             self.prepare_skill_dialogue(
-                fipa_dialogues, dialogue_messages, "counterparty",
+                fipa_dialogues,
+                dialogue_messages,
+                "counterparty",
             )
 
     def test_negative_prepare_skill_dialogue_empty_messages(self):
@@ -684,7 +696,9 @@ class TestSkillTestCase(BaseSkillTestCase):
             AEAEnforceError, match="the list of messages must be positive."
         ):
             self.prepare_skill_dialogue(
-                fipa_dialogues, dialogue_messages, "counterparty",
+                fipa_dialogues,
+                dialogue_messages,
+                "counterparty",
             )
 
     def test_negative_prepare_skill_dialogue_invalid(self):
@@ -705,7 +719,9 @@ class TestSkillTestCase(BaseSkillTestCase):
             AEAEnforceError, match="Cannot update the dialogue with message number .*"
         ):
             self.prepare_skill_dialogue(
-                fipa_dialogues, dialogue_messages, "counterparty",
+                fipa_dialogues,
+                dialogue_messages,
+                "counterparty",
             )
 
 

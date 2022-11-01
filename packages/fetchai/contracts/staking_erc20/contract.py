@@ -33,7 +33,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.staking_erc20.contract"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/staking_erc20:0.10.1")
+PUBLIC_ID = PublicId.from_str("fetchai/staking_erc20:0.10.2")
 
 
 class StakingERC20(Contract):
@@ -43,7 +43,10 @@ class StakingERC20(Contract):
 
     @classmethod
     def get_stake(
-        cls, ledger_api: LedgerApi, contract_address: Address, address: Address,
+        cls,
+        ledger_api: LedgerApi,
+        contract_address: Address,
+        address: Address,
     ) -> JSONLike:
         """
         Get the balance for a specific token id.

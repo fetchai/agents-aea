@@ -33,7 +33,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.32.1
+aea fetch fetchai/weather_station:0.32.2
 cd weather_station
 aea install
 aea build
@@ -177,19 +177,37 @@ def run():
 
     # Add the ledger_api protocol
     ledger_api_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "ledger_api",)
+        os.path.join(
+            os.getcwd(),
+            "packages",
+            "fetchai",
+            "protocols",
+            "ledger_api",
+        )
     )
     resources.add_protocol(ledger_api_protocol)
 
     # Add the oef_search protocol
     oef_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "oef_search",)
+        os.path.join(
+            os.getcwd(),
+            "packages",
+            "fetchai",
+            "protocols",
+            "oef_search",
+        )
     )
     resources.add_protocol(oef_protocol)
 
     # Add the fipa protocol
     fipa_protocol = Protocol.from_dir(
-        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "fipa",)
+        os.path.join(
+            os.getcwd(),
+            "packages",
+            "fetchai",
+            "protocols",
+            "fipa",
+        )
     )
     resources.add_protocol(fipa_protocol)
 

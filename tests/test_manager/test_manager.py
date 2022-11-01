@@ -259,7 +259,8 @@ class BaseTestMultiAgentManager(BaseCase):
 
         with pytest.raises(ValueError, match="already exists"):
             self.manager.add_agent(
-                self.project_public_id, self.agent_name,
+                self.project_public_id,
+                self.agent_name,
             )
 
     def test_set_overrides(self, *args):
@@ -347,7 +348,8 @@ class BaseTestMultiAgentManager(BaseCase):
         self.manager.add_project(project_id, local=True)
 
         self.manager.add_agent(
-            project_id, agent_name,
+            project_id,
+            agent_name,
         )
 
         agent_alias = self.manager.get_agent_alias(agent_name)
@@ -940,7 +942,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.2 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.3 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

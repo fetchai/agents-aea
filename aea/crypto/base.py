@@ -207,7 +207,11 @@ class Helper(ABC):
     @staticmethod
     @abstractmethod
     def is_transaction_valid(
-        tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: JSONLike,
+        seller: Address,
+        client: Address,
+        tx_nonce: str,
+        amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.

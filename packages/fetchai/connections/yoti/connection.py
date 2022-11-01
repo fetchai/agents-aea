@@ -35,7 +35,7 @@ from packages.fetchai.protocols.yoti.dialogues import YotiDialogues as BaseYotiD
 from packages.fetchai.protocols.yoti.message import YotiMessage
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.7.2")
+PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.7.3")
 
 
 def rgetattr(obj: Any, attr: str, *args: Any) -> Any:
@@ -217,7 +217,9 @@ class YotiConnection(BaseSyncConnection):
 
     @staticmethod
     def get_error_message(
-        e: Exception, message: YotiMessage, dialogue: YotiDialogue,
+        e: Exception,
+        message: YotiMessage,
+        dialogue: YotiDialogue,
     ) -> YotiMessage:
         """
         Build an error message.

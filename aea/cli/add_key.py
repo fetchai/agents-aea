@@ -47,7 +47,10 @@ key_file_argument = click.Path(
     required=True,
 )
 @click.argument(
-    "file", metavar="FILE", type=key_file_argument, required=False,
+    "file",
+    metavar="FILE",
+    type=key_file_argument,
+    required=False,
 )
 @password_option()
 @click.option(

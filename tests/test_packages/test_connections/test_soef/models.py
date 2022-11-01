@@ -59,7 +59,11 @@ REMOVE_SERVICE_KEY_MODEL = DataModel(
     "A data model to remove service key.",
 )
 
-PING_MODEL = DataModel(ModelNames.PING.value, [], "A data model for ping command.",)
+PING_MODEL = DataModel(
+    ModelNames.PING.value,
+    [],
+    "A data model for ping command.",
+)
 
 
 SEARCH_MODEL = DataModel(

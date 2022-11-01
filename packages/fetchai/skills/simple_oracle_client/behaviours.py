@@ -101,7 +101,10 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
             callable="get_deploy_transaction",
             kwargs=strategy.get_deploy_kwargs(),
         )
-        contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            contract_api_dialogue,
+        )
         contract_api_dialogue.terms = strategy.get_deploy_terms()
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")

@@ -47,7 +47,7 @@ class TestStrategy(BaseSkillTestCase):
     def setup(cls):
         """Setup the test class."""
         super().setup()
-        cls.token_denomination = "atestfet"
+        cls.token_denomination = "atestfet"  # nosec
         cls.token_dispense_amount = 100000
         cls.fetchai_staking_contract_address = (
             "0x351bac612b50e87b46e4b10a282f632d41397de2"
@@ -156,7 +156,8 @@ class TestStrategy(BaseSkillTestCase):
         )
 
         mock_set.assert_any_call(
-            address=self.address, developer_handle=self.info["developer_handle"],
+            address=self.address,
+            developer_handle=self.info["developer_handle"],
         )
 
     def test_unlock_registration(self):
@@ -480,7 +481,8 @@ class TestStrategy(BaseSkillTestCase):
         # after
         mock_recover.assert_called_once()
         mock_logger.assert_any_call(
-            logging.WARNING, f"Signing exception: {exception_message}",
+            logging.WARNING,
+            f"Signing exception: {exception_message}",
         )
         assert not is_valid
 
