@@ -1,9 +1,11 @@
-<a name="aea.error_handler.base"></a>
+<a id="aea.error_handler.base"></a>
+
 # aea.error`_`handler.base
 
 This module contains the abstract error handler class.
 
-<a name="aea.error_handler.base.AbstractErrorHandler"></a>
+<a id="aea.error_handler.base.AbstractErrorHandler"></a>
+
 ## AbstractErrorHandler Objects
 
 ```python
@@ -12,31 +14,34 @@ class AbstractErrorHandler(ABC)
 
 Error handler class for handling problematic envelopes.
 
-<a name="aea.error_handler.base.AbstractErrorHandler.__init__"></a>
+<a id="aea.error_handler.base.AbstractErrorHandler.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs: Any)
+def __init__(**kwargs: Any)
 ```
 
 Instantiate error handler.
 
-<a name="aea.error_handler.base.AbstractErrorHandler.config"></a>
+<a id="aea.error_handler.base.AbstractErrorHandler.config"></a>
+
 #### config
 
 ```python
- | @property
- | config() -> Dict[str, Any]
+@property
+def config() -> Dict[str, Any]
 ```
 
 Get handler config.
 
-<a name="aea.error_handler.base.AbstractErrorHandler.send_unsupported_protocol"></a>
+<a id="aea.error_handler.base.AbstractErrorHandler.send_unsupported_protocol"></a>
+
 #### send`_`unsupported`_`protocol
 
 ```python
- | @abstractmethod
- | send_unsupported_protocol(envelope: Envelope, logger: Logger) -> None
+@abstractmethod
+def send_unsupported_protocol(envelope: Envelope, logger: Logger) -> None
 ```
 
 Handle the received envelope in case the protocol is not supported.
@@ -50,12 +55,14 @@ Handle the received envelope in case the protocol is not supported.
 
 None
 
-<a name="aea.error_handler.base.AbstractErrorHandler.send_decoding_error"></a>
+<a id="aea.error_handler.base.AbstractErrorHandler.send_decoding_error"></a>
+
 #### send`_`decoding`_`error
 
 ```python
- | @abstractmethod
- | send_decoding_error(envelope: Envelope, exception: Exception, logger: Logger) -> None
+@abstractmethod
+def send_decoding_error(envelope: Envelope, exception: Exception,
+                        logger: Logger) -> None
 ```
 
 Handle a decoding error.
@@ -70,12 +77,14 @@ Handle a decoding error.
 
 None
 
-<a name="aea.error_handler.base.AbstractErrorHandler.send_no_active_handler"></a>
+<a id="aea.error_handler.base.AbstractErrorHandler.send_no_active_handler"></a>
+
 #### send`_`no`_`active`_`handler
 
 ```python
- | @abstractmethod
- | send_no_active_handler(envelope: Envelope, reason: str, logger: Logger) -> None
+@abstractmethod
+def send_no_active_handler(envelope: Envelope, reason: str,
+                           logger: Logger) -> None
 ```
 
 Handle the received envelope in case the handler is not supported.
