@@ -18,11 +18,9 @@ RUN mkdir /build
 WORKDIR /build
 COPY docs/ /build/docs
 COPY mkdocs.yml /build
-COPY Pipfile* /build
 
-RUN pipenv install --dev --skip-lock --system
-
-
+RUN python3 -m pip install "tomte[docs]==0.1.5"
+RUN python3 -m pip install git+https://github.com/pugong/mkdocs-mermaid-plugin.git
 RUN mkdocs build
 
 FROM python:3.10-alpine
