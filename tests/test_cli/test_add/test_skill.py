@@ -75,9 +75,7 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -163,9 +161,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -243,9 +239,7 @@ class TestAddSkillFailsWhenSkillNotInRegistry:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -300,9 +294,7 @@ class TestAddSkillFailsWhenDifferentPublicId:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -354,9 +346,7 @@ class TestAddSkillFailsWhenConfigFileIsNotCompliant:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -426,9 +416,7 @@ class TestAddSkillFailsWhenDirectoryAlreadyExists:
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(

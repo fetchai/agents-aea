@@ -81,9 +81,7 @@ class TestCreate:
             "aea.cli.utils.config.CLI_CONFIG_PATH", cls.cli_config_file
         )
         cls.cli_config_patch.start()
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0, result.stdout
 
         cls.result = cls.runner.invoke(
@@ -265,9 +263,7 @@ class TestCreateFailsWhenDirectoryAlreadyExists:
 
         # create a directory with the agent name -> make 'aea create fail.
         os.mkdir(cls.agent_name)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
@@ -321,9 +317,7 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
@@ -371,9 +365,7 @@ class TestCreateFailsWhenExceptionOccurs:
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(
@@ -417,9 +409,7 @@ class TestCreateFailsWhenAlreadyInAEAProject:
 
         cls.runner = CliRunner()
         cls.agent_name = "myagent"
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         cls.result = cls.runner.invoke(

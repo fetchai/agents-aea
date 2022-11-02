@@ -71,9 +71,7 @@ class TestScaffoldSkill:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -162,9 +160,7 @@ class TestScaffoldSkillFailsWhenDirectoryAlreadyExists:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -229,9 +225,7 @@ class TestScaffoldSkillFailsWhenSkillAlreadyExists:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -302,9 +296,7 @@ class TestScaffoldSkillFailsWhenConfigFileIsNotCompliant:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -374,9 +366,7 @@ class TestScaffoldSkillFailsWhenExceptionOccurs:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
