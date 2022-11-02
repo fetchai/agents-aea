@@ -491,7 +491,7 @@ class ImportsTool:
             pyfile = cls.get_module_file(module_name)
             if not pyfile:
                 continue
-            if "site-packages" not in Path(pyfile).parts:
+            if "site-packages" not in Path(pyfile).parts or "aea" in Path(pyfile).parts:
                 continue
             yield module_name, Path(pyfile)
 
