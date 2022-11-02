@@ -120,9 +120,7 @@ class BaseLaunchTestCase:
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
         password_option = cls.get_password_args(cls.PASSWORD)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name_1]

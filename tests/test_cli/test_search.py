@@ -181,9 +181,7 @@ class TestSearchAgentsLocal:
             "aea.cli.utils.config.CLI_CONFIG_PATH", cls.cli_config_file
         )
         cls.cli_config_patch.start()
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -414,9 +412,7 @@ class TestSearchInAgentDirectoryLocal:
             if p.name not in ["echo", "error"] and p.is_dir():
                 shutil.rmtree(p)
 
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         # create an AEA proejct and enter into it.

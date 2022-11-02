@@ -143,11 +143,16 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 ## Setup author name
 
-AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
-
 You can set up your author name using the `init` command:
 ``` bash
 aea init
+```
+
+## Register as an AEA author (optional)
+
+AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To publish packages to the registry, we need to register an author name:
+``` bash
+aea register
 ```
 
 This is your unique author (or developer) name in the AEA ecosystem.
@@ -167,7 +172,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.1.1
+v1.2.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```

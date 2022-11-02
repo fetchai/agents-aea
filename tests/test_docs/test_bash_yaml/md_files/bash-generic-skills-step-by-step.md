@@ -17,7 +17,7 @@ aea eject skill fetchai/generic_buyer:0.27.3
 cd ..
 ```
 ``` bash
-aea init --reset --local --author fetchai
+aea init --reset --author fetchai
 ```
 ``` bash
 aea create my_generic_seller
