@@ -67,7 +67,7 @@ class TestScaffoldConnection:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -143,7 +143,7 @@ class TestScaffoldConnectionWithSymlinks:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -230,7 +230,7 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -298,7 +298,7 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -372,7 +372,7 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -446,7 +446,7 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
 
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 

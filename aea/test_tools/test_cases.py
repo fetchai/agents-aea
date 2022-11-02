@@ -466,7 +466,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     @classmethod
     def initialize_aea(cls, author: str) -> None:
         """Initialize AEA locally with author name."""
-        cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
+        cls.run_cli_command("init", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
     def add_item(cls, item_type: str, public_id: str, local: bool = True) -> Result:

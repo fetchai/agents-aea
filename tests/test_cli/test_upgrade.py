@@ -117,7 +117,7 @@ class BaseTestCase:
         os.chdir(cls.t)
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            [*CLI_LOG_OPTION, "init", "--author", AUTHOR],
             standalone_mode=False,
         )
         assert result.exit_code == 0

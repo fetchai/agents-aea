@@ -75,7 +75,7 @@ class TestGenerateProtocolFullMode:
         # create an agent
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -155,7 +155,7 @@ class TestGenerateProtocolProtobufOnlyMode:
         # create an agent
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -252,7 +252,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
         # create an agent
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -336,7 +336,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
         # create an agent
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -430,7 +430,7 @@ class TestGenerateProtocolFailsWhenConfigFileIsNotCompliant:
         # create an agent
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 
@@ -507,7 +507,7 @@ class TestGenerateProtocolFailsWhenExceptionOccurs:
         # create an agent
         os.chdir(cls.t)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+            cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR]
         )
         assert result.exit_code == 0
 

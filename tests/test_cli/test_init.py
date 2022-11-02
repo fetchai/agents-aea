@@ -55,7 +55,7 @@ class TestDoInit:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", author],
+            [*CLI_LOG_OPTION, "init", "--author", author],
         )
 
         assert result.exit_code == 0
@@ -75,10 +75,10 @@ class TestDoInit:
         """Test author already registered."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", "author"],
+            [*CLI_LOG_OPTION, "init", "--author", "author"],
         )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local"])
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "init"])
         assert "AEA configurations already initialized" in result.output
 
     @patch("aea.cli.register.register_new_account", return_value="TOKEN")
