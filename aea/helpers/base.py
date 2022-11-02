@@ -395,7 +395,7 @@ def _is_dict_like(obj: Any) -> bool:
     :param obj: the object to test.
     :return: True if the object is dict-like, False otherwise.
     """
-    return type(obj) in {dict, OrderedDict}
+    return type(obj) in (dict, OrderedDict)
 
 
 def recursive_update(
@@ -822,7 +822,7 @@ class CertRequest:
             result = self.key_identifier
         return result
 
-    def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
+    def get_message(self, public_key: str) -> bytes:
         """Get the message to sign."""
         message = self.construct_message(
             public_key,

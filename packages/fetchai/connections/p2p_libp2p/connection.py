@@ -53,7 +53,7 @@ LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
 LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
-LIBP2P_NODE_CLARGS = list()  # type: List[str]
+LIBP2P_NODE_CLARGS = []  # type: List[str]
 
 
 PIPE_CONN_TIMEOUT = 10.0
@@ -106,7 +106,7 @@ def _golang_module_run(
     env = os.environ
     try:
         logger.debug(cmd)
-        proc = subprocess.Popen(  # nosec
+        proc = subprocess.Popen(  # nosec  # pylint: disable=consider-using-with
             cmd,
             cwd=path,
             env=env,
@@ -432,7 +432,9 @@ class Libp2pNode:
 
         config += "AEA_P2P_MAILBOX_URI={}\n".format(self.mailbox_uri)
 
-        with open(self.env_file, "w") as env_file:  # overwrite if exists
+        with open(
+            self.env_file, "w", encoding="utf-8"
+        ) as env_file:  # overwrite if exists
             env_file.write(config)
 
         return config
@@ -476,7 +478,9 @@ class Libp2pNode:
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
-        self._log_file_desc = open(self.log_file, "a", 1)
+        self._log_file_desc = open(  # pylint: disable=consider-using-with
+            self.log_file, "a", 1, encoding="utf-8"
+        )
         self._log_file_desc.write("test")
         self._log_file_desc.flush()
 
@@ -517,7 +521,7 @@ class Libp2pNode:
                 "Libp2p process configuration:\n{}".format(env_file_data.strip())
             )
             if err_msg == "":
-                with open(self.log_file, "r") as f:
+                with open(self.log_file, "r", encoding="utf-8") as f:
                     self.logger.error(
                         "Libp2p process log file {}:\n{}".format(
                             self.log_file, f.read()
@@ -573,7 +577,7 @@ class Libp2pNode:
 
         multiaddrs = []  # type: List[MultiAddr]
 
-        with open(self.log_file, "r") as f:
+        with open(self.log_file, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         found = False
@@ -603,7 +607,7 @@ class Libp2pNode:
         error_msg = ""
         panic_msg = ""
 
-        with open(self.log_file, "r") as f:
+        with open(self.log_file, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         for line in lines:  # pragma: nocover

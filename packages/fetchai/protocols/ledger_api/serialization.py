@@ -175,7 +175,7 @@ class LedgerApiSerializer(Serializer):
         ledger_api_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = ledger_api_pb.WhichOneof("performative")
         performative_id = LedgerApiMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == LedgerApiMessage.Performative.GET_BALANCE:
             ledger_id = ledger_api_pb.get_balance.ledger_id
             performative_content["ledger_id"] = ledger_id

@@ -52,7 +52,7 @@ def component_type_to_class(component_type: ComponentType) -> Type[Component]:
     return type_to_class[component_type]
 
 
-def load_component_from_config(  # type: ignore
+def load_component_from_config(  # type: ignore  # pylint: disable=inconsistent-return-statements #pylint mistake
     configuration: ComponentConfiguration, *args, **kwargs
 ) -> Component:
     """

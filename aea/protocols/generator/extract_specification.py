@@ -148,18 +148,18 @@ class PythonicProtocolSpecification:  # pylint: disable=too-few-public-methods
 
     def __init__(self) -> None:
         """Instantiate a Pythonic protocol specification."""
-        self.speech_acts = dict()  # type: Dict[str, Dict[str, str]]
-        self.all_performatives = list()  # type: List[str]
-        self.all_unique_contents = dict()  # type: Dict[str, str]
-        self.all_custom_types = list()  # type: List[str]
-        self.custom_custom_types = dict()  # type: Dict[str, str]
+        self.speech_acts = {}  # type: Dict[str, Dict[str, str]]
+        self.all_performatives = []  # type: List[str]
+        self.all_unique_contents = {}  # type: Dict[str, str]
+        self.all_custom_types = []  # type: List[str]
+        self.custom_custom_types = {}  # type: Dict[str, str]
 
         # dialogue config
-        self.initial_performatives = list()  # type: List[str]
-        self.reply = dict()  # type: Dict[str, List[str]]
-        self.terminal_performatives = list()  # type: List[str]
-        self.roles = list()  # type: List[str]
-        self.end_states = list()  # type: List[str]
+        self.initial_performatives = []  # type: List[str]
+        self.reply = {}  # type: Dict[str, List[str]]
+        self.terminal_performatives = []  # type: List[str]
+        self.roles = []  # type: List[str]
+        self.end_states = []  # type: List[str]
         self.keep_terminal_state_dialogues = False  # type: bool
 
         self.typing_imports = {

@@ -13,7 +13,7 @@ fingerprint:
   aggregation_pb2.py: QmXi2zGdc5QNgfybPBxnCfRNmnZH7TvkTuYE9P5EtYVG9L
   dialogues.py: QmZhvgjNtjwiSy6bHKaw4PG8jgY6pLfCFivbcr5xQ8JJN8
   message.py: QmZcxCwyQCeBnEsk7TkswdZb1HwfDAbNi9bEFdHatrPshj
-  serialization.py: QmSK6nnPMcDSuQZo2cxabo8xESxbQxKvRncTkSEtK6WhZD
+  serialization.py: Qmdka2M9GFQMnrEYFY3t3mJh4KFPHkYqC8ecQkroM8rqzS
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

@@ -60,10 +60,8 @@ class Strategy(GenericStrategy):
         try:
             loaded = json.loads(data)
             if isinstance(loaded, dict) and all(
-                [
-                    isinstance(key, str) and isinstance(value, str)
-                    for key, value in loaded.items()
-                ]
+                isinstance(key, str) and isinstance(value, str)
+                for key, value in loaded.items()
             ):
                 result = loaded
             else:

@@ -10,8 +10,8 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdsSnTijwHtVddLfPEKhDdPy7YPXzRthQYqEhieLqVUXg
   __init__.py: QmcibHXQV8uZnMRJe7jNGEFeUKns1ZF2QR9c6mxKMbV4oa
-  check_dependencies.py: QmUGeuH2RArEi21m3aYEmawsYZrz9Pr9NeinQsqRBoSnRc
-  connection.py: QmVyRPW43mc4hVAns5oLmzXoEEcg4T3CqQ8w74Ggyupphy
+  check_dependencies.py: QmXpT25ZDNrjJ7VPspLGipn9WP9j313cvhP439pzr5Gc3J
+  connection.py: QmUB2B8yB4y15DjJfAH8zwT9zyBSm8a16NhBpJGrGcYShY
   consts.py: QmNbua6EsorAf3FS4fCmCHBZ9TRZ6ENkZoHTyA9TEJZqpy
   libp2p_node/.dockerignore: QmVwyNjya468nRTxSjFP73dSzQdSffp74osz5dGEAHHweA
   libp2p_node/Dockerfile: QmeZ6KJf4cpgL7DY6qdWetVfTPPijUvHxoCUbYgSS3SsWM

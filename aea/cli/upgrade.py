@@ -658,7 +658,7 @@ def _compute_replacements(
     """Compute replacements from old component ids to new components ids."""
     agent_config = load_item_config(PackageType.AGENT.value, Path(ctx.cwd))
     new_component_ids = list(agent_config.package_dependencies)
-    replacements: Dict[ComponentId, ComponentId] = dict()
+    replacements: Dict[ComponentId, ComponentId] = {}
     for old_component_id in old_component_ids:
         same_prefix = list(filter(old_component_id.same_prefix, new_component_ids))
         enforce(len(same_prefix) < 2, "More than one component id found.")

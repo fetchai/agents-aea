@@ -109,7 +109,7 @@ class HttpSerializer(Serializer):
         http_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = http_pb.WhichOneof("performative")
         performative_id = HttpMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == HttpMessage.Performative.REQUEST:
             method = http_pb.request.method
             performative_content["method"] = method

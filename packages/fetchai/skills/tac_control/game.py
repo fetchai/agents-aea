@@ -412,7 +412,7 @@ class Transaction(Terms):
             "Wrong performative",
         )
         sender_is_seller = all(
-            [value >= 0 for value in message.amount_by_currency_id.values()]
+            value >= 0 for value in message.amount_by_currency_id.values()
         )
         transaction = Transaction(
             ledger_id=message.ledger_id,

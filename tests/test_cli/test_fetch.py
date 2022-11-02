@@ -68,7 +68,7 @@ class FetchAgentLocallyTestCase(TestCase):
         ctx = ContextMock()
         ctx.config["is_local"] = True
         fetch_agent_locally(ctx, PublicIdMock(), alias="some-alias")
-        copy_tree.assert_called_once_with("path", "joined-path")
+        copy_tree.assert_called_once_with("path", "joined-path", dirs_exist_ok=True)
 
     @mock.patch("aea.cli.fetch._is_version_correct", return_value=True)
     @mock.patch("aea.cli.fetch.os.path.exists", return_value=True)

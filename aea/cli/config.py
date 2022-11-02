@@ -49,7 +49,7 @@ def get(ctx: Context, json_path: str) -> None:
         agent_config_manager = AgentConfigManager.load(ctx.cwd)
         value = agent_config_manager.get_variable(json_path)
     except (ValueError, AEAException) as e:
-        raise ClickException(*e.args)
+        raise ClickException(str(e.args[0]))
 
     if isinstance(value, dict):
         # turn it to json compatible string, not dict str representation
@@ -101,4 +101,4 @@ def set_command(
     except ExtraPropertiesError as e:  # pragma: nocover
         raise ClickException(f"Attribute `{e.args[0][0]}` is not allowed to change!")
     except (ValueError, AEAException) as e:
-        raise ClickException(*e.args)
+        raise ClickException(str(e.args[0]))

@@ -584,8 +584,8 @@ class TestLibp2pClientConnectionRouting:
                     cls.addresses.append(conn.address)
 
                     mux.connect()
-                    wait_for_condition(lambda: mux.is_connected, 10)
-                    wait_for_condition(lambda: conn.is_connected, 10)
+                    wait_for_condition((lambda m: lambda: m.is_connected)(mux), 10)
+                    wait_for_condition((lambda c: lambda: c.is_connected)(conn), 10)
                     cls.multiplexers.append(mux)
                 break
 

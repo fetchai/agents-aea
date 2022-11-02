@@ -1441,9 +1441,9 @@ class CosmosFaucetApi(FaucetApi):
                 break
 
             # if the status is failure
-            if (
-                status.status != self.FAUCET_STATUS_PENDING
-                and status.status != self.FAUCET_STATUS_PROCESSING
+            if status.status not in (
+                self.FAUCET_STATUS_PENDING,
+                self.FAUCET_STATUS_PROCESSING,
             ):  # pragma: nocover
                 raise RuntimeError(f"Failed to get wealth for {address}")
 

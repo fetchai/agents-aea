@@ -26,11 +26,12 @@ import shutil
 import subprocess  # nosec
 import sys
 import tempfile
-from distutils.dir_util import copy_tree
 from itertools import islice
+from shutil import copytree as copy_tree
 from subprocess import Popen, TimeoutExpired  # nosec
 from typing import Iterable, List, Optional, Pattern, Tuple
 
+from aea.exceptions import AEAException
 from aea.helpers.base import ensure_dir
 
 
@@ -50,8 +51,6 @@ except ImportError:  # pragma: nocover
         LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
     )
-
-from aea.exceptions import AEAException
 
 
 ERROR_MESSAGE_TEMPLATE_BINARY_NOT_FOUND = "'{command}' is required by the libp2p connection, but it is not installed, or it is not accessible from the system path."
@@ -198,30 +197,29 @@ def _golang_module_build(
     :param timeout: the build timeout
     :return: str with logs or error description if happens
     """
-    proc = Popen(  # nosec
+    with Popen(  # nosec
         ["go", "build"],
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
         cwd=path,
         env=os.environ,
-    )
+    ) as proc:
+        try:
+            stdout, _ = proc.communicate(timeout=timeout)  # type: ignore
+        except TimeoutExpired:  # pragma: nocover
+            proc.terminate()
+            proc.wait(timeout=timeout)
+            return "terminated by timeout"
 
-    try:
-        stdout, _ = proc.communicate(timeout=timeout)  # type: ignore
-    except TimeoutExpired:  # pragma: nocover
-        proc.terminate()
-        proc.wait(timeout=timeout)
-        return "terminated by timeout"
-
-    if proc.returncode != 0:  # pragma: nocover
-        return stdout.decode()  # type: ignore
+        if proc.returncode != 0:  # pragma: nocover
+            return stdout.decode()  # type: ignore
     return None
 
 
 def build_node(build_dir: str) -> None:
     """Build node placed inside build_dir."""
     with tempfile.TemporaryDirectory() as dirname:
-        copy_tree(LIBP2P_NODE_MODULE, dirname)
+        copy_tree(LIBP2P_NODE_MODULE, dirname, dirs_exist_ok=True)  # type: ignore
         err_str = _golang_module_build(dirname)
         if err_str:  # pragma: nocover
             raise Exception(f"Node build failed: {err_str}")

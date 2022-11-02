@@ -9,12 +9,12 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRT19AnABoTNuiYK3MXXKTYbRHYMKvmEyiDmBCN8WHVD4
   __init__.py: Qmc3PEwgSaAje7x3yMzVUJYm1hCNDoDoMmjaFxi1YHKRQS
-  custom_types.py: Qmf4krChNQ3GF8zrp6bsZCfyGGMLM3t5i1cxdMvikM6EWs
+  custom_types.py: QmWHcqh5AcpTLAsiRPaNDLBoNRgnQ6ykQCTZB5hf6womQT
   dialogues.py: QmUkhFxEAJ4YKPXddit7rWZ13r78MM3suZJ1uAAgTbuLwH
   ledger_api.proto: QmR92cmoxSxKANTvCmm9skftvgzYobNwcWCUanNkduJjyh
   ledger_api_pb2.py: QmNt9mSa71PcXDHFDwEWb3ay4RAE11KURX8hzZmFj8voEo
   message.py: QmVvyHYU1jbJJR1HgRdYyZ9Wzth2TyQQDk4Ud581EWdMnK
-  serialization.py: Qmd1HVCps97Y2Dy1wRs344YdYD1SeJtNe5ybfzFPbzJinV
+  serialization.py: QmcsSo3pzXF1j214TAq1hM2cypTg4yQLJSwWVBDyj5WK1g
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

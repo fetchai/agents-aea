@@ -154,7 +154,7 @@ class ProtectedQueue(Queue):
         super().__init__()
         self._access_code_hash = _hash(access_code)
 
-    def put(  # pylint: disable=arguments-differ
+    def put(  # pylint: disable=arguments-differ,arguments-renamed
         self,
         internal_message: Optional[Message],
         block: bool = True,
@@ -180,7 +180,7 @@ class ProtectedQueue(Queue):
             raise ValueError("Only messages are allowed!")
         super().put(internal_message, block=True, timeout=None)
 
-    def put_nowait(  # pylint: disable=arguments-differ
+    def put_nowait(  # pylint: disable=arguments-differ,arguments-renamed
         self, internal_message: Optional[Message]
     ) -> None:
         """

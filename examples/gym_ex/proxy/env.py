@@ -112,7 +112,7 @@ class ProxyEnv(gym.Env):
             raise RuntimeError("active dialogue was not set")
         return self._active_dialogue
 
-    def step(self, action: Action) -> Feedback:
+    def step(self, action: Action) -> Feedback:  # type: ignore
         """
         Run one time-step of the environment's dynamics.
 
@@ -151,9 +151,11 @@ class ProxyEnv(gym.Env):
             raise RuntimeError("Default connection was not set")
         cast(
             GymConnection, self._agent.runtime.multiplexer.default_connection
-        ).channel.gym_env.render(mode)
+        ).channel.gym_env.render(
+            mode
+        )  # type: ignore
 
-    def reset(self) -> None:
+    def reset(self) -> None:  # type: ignore # pylint: disable=arguments-differ
         """Reset the environment."""
         if not self._agent.runtime.multiplexer.is_connected:
             self._connect()

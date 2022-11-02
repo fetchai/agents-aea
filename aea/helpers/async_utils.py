@@ -420,9 +420,10 @@ class Runnable(ABC):
 
         if self._threaded:
             self._thread = Thread(
-                target=self._thread_target, name=self.__class__.__name__  # type: ignore # loop was set in set_loop
+                target=self._thread_target,
+                name=self.__class__.__name__,  # type: ignore # loop was set in set_loop
+                daemon=True,
             )
-            self._thread.setDaemon(True)
             self._thread.start()
         self._stop_called = 0
         return True

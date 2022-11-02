@@ -190,7 +190,7 @@ class Strategy(Model):
         """
         if self.developer_handle_only:
             if not all(
-                [key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS]
+                key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS
             ):
                 return (
                     False,
@@ -203,7 +203,7 @@ class Strategy(Model):
             )
             return (is_valid, error_code, error_msg)
 
-        if not all([key in registration_info for key in REQUIRED_KEYS]):
+        if not all(key in registration_info for key in REQUIRED_KEYS):
             return (
                 False,
                 1,

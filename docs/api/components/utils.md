@@ -1,4 +1,5 @@
-<a name="aea.components.utils"></a>
+<a id="aea.components.utils"></a>
+
 # aea.components.utils
 
 This module contains the component loading utils.

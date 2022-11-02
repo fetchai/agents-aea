@@ -102,7 +102,7 @@ class DockerDeployment:
         :return: success of the operation
         """
 
-        cmds: List[List[str]] = list()
+        cmds: List[List[str]] = []
 
         cmds.append(
             [
@@ -252,7 +252,7 @@ class AcnK8sPodConfig:
         :param k8s_number_of_replicas: number of replica pods to run
         """
 
-        config: Dict[str, str] = dict()
+        config: Dict[str, str] = {}
         cls: Type[AcnK8sPodConfig] = AcnK8sPodConfig
 
         k8s_number_of_replicas = (

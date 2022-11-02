@@ -13,7 +13,7 @@ fingerprint:
   message.py: QmTuugR6UiwQqGrKT3dtzqFq6mcD21aqaRh5qBJhbPKaME
   prometheus.proto: QmXzFWmrWVqQuxtVgaZwuMgbrEvSRrRVU63htURUsFJ1wv
   prometheus_pb2.py: QmNuDYT7RWNRmRKSMgsLqD76gmmNSNm88uTCSPcvoxTdHr
-  serialization.py: QmYXXhfSkq4Xo93Yah4QhtriFpGZjr97sW8nozA6LpxzaQ
+  serialization.py: QmeC957DMVN53eMSMiTUnyc6vwpTx2NTmg69KfdptEEd2E
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

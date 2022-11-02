@@ -1062,9 +1062,7 @@ class TestDialoguesBase:
 
     def test_dialogues_properties(self):
         """Test dialogue properties."""
-        assert (
-            self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label == dict()
-        )
+        assert self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label == {}
         assert self.own_dialogues.self_address == self.agent_address
         assert self.own_dialogues.dialogue_stats.other_initiated == {
             Dialogue.EndState.SUCCESSFUL: 0,

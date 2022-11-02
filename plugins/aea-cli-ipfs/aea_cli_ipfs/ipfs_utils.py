@@ -45,7 +45,7 @@ class IPFSDaemon:
 
     def start(self) -> None:
         """Run the ipfs daemon."""
-        self.process = subprocess.Popen(  # nosec
+        self.process = subprocess.Popen(  # nosec # pylint: disable=consider-using-with
             ["ipfs", "daemon"],
             stdout=subprocess.PIPE,
             env=os.environ.copy(),
