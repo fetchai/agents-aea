@@ -151,7 +151,6 @@ jobs:
     continue-on-error: False
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.base_ref == 'main'
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v3
@@ -246,7 +245,6 @@ jobs:
       - go_code_checks
       - misc_checks
       - misc_checks_extra
-      #- docs_check
       - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -293,7 +291,6 @@ jobs:
       - go_code_checks
       - misc_checks
       - misc_checks_extra
-      #- docs_check
       - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -329,7 +326,6 @@ jobs:
       - go_code_checks
       - misc_checks
       - misc_checks_extra
-      #- docs_check
       - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
@@ -408,7 +404,6 @@ jobs:
       - go_code_checks
       - misc_checks
       - misc_checks_extra
-      #- docs_check
       - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -444,7 +439,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          #- macos-latest
+          - macos-latest
           - windows-latest
         python-version: [3.8]
     timeout-minutes: 45
@@ -534,7 +529,6 @@ jobs:
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           make protolint_install
-      # sudo apt-get install -y protobuf-compiler
       - name: Run all tests
         run: |
           tox -e py3.8-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
