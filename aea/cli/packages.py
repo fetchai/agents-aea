@@ -23,12 +23,11 @@
 import sys
 from pathlib import Path
 
-
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
-from aea.package_manager.base import PackageManager, IS_IPFS_PLUGIN_INSTALLED
+from aea.package_manager.base import IS_IPFS_PLUGIN_INSTALLED, PackageManager
 
 
 class SyncTypes:  # pylint: disable=too-few-public-methods

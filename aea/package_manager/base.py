@@ -26,17 +26,18 @@ import shutil
 import traceback
 from collections import OrderedDict
 from pathlib import Path
-from typing import Callable, Optional, cast, Tuple
+from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
-
+from typing import Tuple, cast
 
 from aea.configurations.base import PackageConfiguration
 from aea.configurations.data_types import PackageId, PackageType
+from aea.configurations.loader import load_configuration_object
 from aea.helpers.dependency_tree import DependencyTree
 from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
-from aea.configurations.loader import load_configuration_object
+
 
 try:
     from aea_cli_ipfs.registry import fetch_ipfs  # type: ignore
@@ -349,8 +350,8 @@ class PackageManager:
                     )
                     continue
 
-                expected_hash = self._dev_packages.get(
-                    package_id, self._third_party_packages.get(package_id)
+                expected_hash = self.dev_packages.get(
+                    package_id, self.third_party_packages.get(package_id)
                 )
 
                 if expected_hash is None:
