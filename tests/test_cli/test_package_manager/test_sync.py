@@ -29,34 +29,32 @@ from unittest import mock
 import click
 import pytest
 
-from aea.cli.packages import PACKAGES_FILE, PackageManager
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
+from aea.package_manager.base import PACKAGES_FILE, PackageManager
 from aea.test_tools.test_cases import BaseAEATestCase
 
 
-@mock.patch("aea.cli.packages.fetch_ipfs")
+@mock.patch("aea.package_manager.base.fetch_ipfs")
 class TestSyncCommand(BaseAEATestCase):
     """Test sync command."""
 
-    def test_sync_normal(self, *args: Any) -> None:
+    def test_sync_normal(self, ipfs_mock, caplog) -> None:
         """Test sync command."""
 
-        with mock.patch.object(logging.Logger, "info") as mock_logger:
+        with caplog.at_level(logging.INFO):
             result = self.run_cli_command("packages", "sync")
             assert result.exit_code == 0
-            assert "No package was updated." in [
-                arg[0][0] for arg in mock_logger.call_args_list
-            ]
+            assert "No package was updated." in caplog.text
 
-    def test_sync_with_missing_packages(self, *args: Any) -> None:
+    def test_sync_with_missing_dev_packages(self, ipfs_mock, caplog) -> None:
         """Test sync with missing packages."""
 
         packages_file = self.t / PACKAGES / PACKAGES_FILE
         packages = dict(
             map(
                 lambda x: (PackageId.from_uri_path(x[0]), x[1]),
-                json.loads(packages_file.read_text()).items(),
+                json.loads(packages_file.read_text())["dev"].items(),
             )
         )
         packages[
@@ -64,30 +62,44 @@ class TestSyncCommand(BaseAEATestCase):
         ] = "bafybeidv77u2xl52mnxakwvh7fuh46aiwfpteyof4eaptfd4agoi6cdblb"
 
         with mock.patch.object(
-            PackageManager, "packages", new=packages
-        ), mock.patch.object(logging.Logger, "info") as mock_logger:
+            PackageManager, "dev_packages", new=packages
+        ), caplog.at_level(logging.INFO):
+            result = self.run_cli_command("packages", "sync", "--dev")
+            assert result.exit_code == 0
+            assert (
+                "(skill, author/some_skill:0.1.0) not found locally, downloading..."
+                in caplog.text
+            )
+
+    def test_sync_with_missing_third_party_packages(self, ipfs_mock, caplog) -> None:
+        """Test sync with missing packages."""
+
+        packages = {
+            PackageId.from_uri_path(
+                "skill/author/some_skill/0.1.0"
+            ): "bafybeidv77u2xl52mnxakwvh7fuh46aiwfpteyof4eaptfd4agoi6cdblb"
+        }
+
+        with mock.patch.object(
+            PackageManager, "third_party_packages", new=packages
+        ), caplog.at_level(logging.INFO):
             result = self.run_cli_command("packages", "sync")
             assert result.exit_code == 0
             assert (
                 "(skill, author/some_skill:0.1.0) not found locally, downloading..."
-                in [arg[0][0] for arg in mock_logger.call_args_list]
+                in caplog.text
             )
 
-    def test_sync_with_wrong_hash(self, *args: Any) -> None:
+    def test_sync_with_wrong_hash(self, ipfs_mock, caplog) -> None:
         """Test sync with missing packages."""
 
-        packages_file = self.t / PACKAGES / PACKAGES_FILE
-        packages = dict(
-            map(
-                lambda x: (PackageId.from_uri_path(x[0]), x[1]),
-                json.loads(packages_file.read_text()).items(),
-            )
-        )
-        packages[
-            PackageId.from_uri_path("protocol/open_aea/signing/1.0.0")
-        ] = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo41"
+        packages = {
+            PackageId.from_uri_path(
+                "protocol/open_aea/signing/1.0.0"
+            ): "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo41"
+        }
 
-        with mock.patch.object(PackageManager, "packages", new=packages):
+        with mock.patch.object(PackageManager, "third_party_packages", new=packages):
             with pytest.raises(
                 click.ClickException,
                 match=re.escape(
@@ -96,9 +108,9 @@ class TestSyncCommand(BaseAEATestCase):
             ):
                 self.run_cli_command("packages", "sync")
 
-        with mock.patch.object(PackageManager, "packages", new=packages), mock.patch(
-            "shutil.rmtree"
-        ), mock.patch.object(logging.Logger, "info") as mock_logger:
+        with mock.patch.object(
+            PackageManager, "third_party_packages", new=packages
+        ), mock.patch("shutil.rmtree"), caplog.at_level(logging.INFO):
             result = self.run_cli_command(
                 "packages",
                 "sync",
@@ -107,18 +119,19 @@ class TestSyncCommand(BaseAEATestCase):
             assert result.exit_code == 0
             assert (
                 "Hash does not match for (protocol, open_aea/signing:1.0.0), downloading package again..."
-                in [arg[0][0] for arg in mock_logger.call_args_list]
+                in caplog.text
             )
 
-        with mock.patch.object(PackageManager, "packages", new=packages), mock.patch(
-            "shutil.rmtree"
-        ), mock.patch.object(logging.Logger, "info") as mock_logger:
+        with mock.patch.object(
+            PackageManager, "third_party_packages", new=packages
+        ), mock.patch("shutil.rmtree"), caplog.at_level(logging.INFO):
             result = self.run_cli_command(
                 "packages",
                 "sync",
                 "--update-hashes",
             )
             assert result.exit_code == 0
-            assert "Updating hash for (protocol, open_aea/signing:1.0.0)" in [
-                arg[0][0] for arg in mock_logger.call_args_list
-            ]
+            assert (
+                "Updating (protocol, open_aea/signing:1.0.0:bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo41)"
+                in caplog.text
+            )

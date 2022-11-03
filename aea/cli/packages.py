@@ -133,6 +133,6 @@ def lock_packages(ctx: Context, check: bool) -> None:
 
         click.echo("Updating hashes")
         PackageManager.from_dir(packages_dir).update_package_hashes().dump()
-        click.echo("Updating done")
+        click.echo("Done")
     except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e)) from e
