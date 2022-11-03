@@ -29,7 +29,6 @@ from pathlib import Path
 from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple, cast
-from typing import cast
 
 from aea.configurations.base import PackageConfiguration
 from aea.configurations.data_types import PackageId, PackageType
@@ -46,20 +45,6 @@ try:
     IS_IPFS_PLUGIN_INSTALLED = True
 except (ImportError, ModuleNotFoundError):
     IS_IPFS_PLUGIN_INSTALLED = False
-
-PACKAGES_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "additionalProperties": False,
-    "type": "object",
-    "required": [
-        "dev",
-        "third_party",
-    ],
-    "properties": {
-        "dev": {"type": "object"},
-        "third_party": {"type": "object"},
-    },
-}
 
 PACKAGES_FILE = "packages.json"
 
@@ -130,11 +115,13 @@ class PackageManager:
         """
         Sync local packages to the remote registry.
 
+        :param packages: Packages to sync
         :param update_packages: Update packages if the calculated hash for a
                                 package does not match the one in the packages.json.
         :param update_hashes: Update hashes in the packages.json if the calculated
                               hash for a package does not match the one in the
                               packages.json.
+        :return: flag specifying if sync is needes, updates hashes, list of packages needs to be updates
         """
 
         sync_needed = False
