@@ -193,7 +193,7 @@ class PackageManager:
         if third_party:
             self._logger.info("Checking third party packages.")
             (
-                sync_needed,
+                _sync_needed,
                 hash_updates_third_party,
                 package_updates_third_party,
             ) = self._sync(
@@ -201,27 +201,41 @@ class PackageManager:
                 update_hashes=update_hashes,
                 update_packages=update_packages,
             )
+            sync_needed = sync_needed or _sync_needed
+
+            if update_hashes and hash_updates_third_party:
+                self._logger.warning(
+                    f"Hashes for follwing third party module has changed.\n\t- "
+                    + "\n\t- ".join(map(str, hash_updates_third_party))
+                )
+
+            if update_packages and package_updates_third_party:
+                self._logger.info("Updating third party packages.")
+                for package_id, _ in package_updates_third_party.items():
+                    self._logger.info(f"Updating {package_id}")
+                    self.update_package(package_id=package_id)
 
         if dev:
             self._logger.info("Checking dev packages.")
-            sync_needed, hash_updates_dev, package_updates_dev = self._sync(
+            _sync_needed, hash_updates_dev, package_updates_dev = self._sync(
                 packages=self.dev_packages,
                 update_hashes=update_hashes,
                 update_packages=update_packages,
             )
+            sync_needed = sync_needed or _sync_needed
+
+            if update_hashes:
+                self._dev_packages = hash_updates_dev
+
+            if update_packages and package_updates_dev:
+                self._logger.info("Updating dev packages.")
+                for package_id, _ in package_updates_dev.items():
+                    self._logger.info(f"Updating {package_id}")
+                    self.update_package(package_id=package_id)
 
         if update_hashes:
             self._logger.info("Updating hashes")
-            self._dev_packages = hash_updates_dev
-            if hash_updates_third_party:
-                self._logger.warning(f"Hashes for third party module were changed.")
             self.dump()
-
-        if update_packages:
-            self._logger.info("Updating packages.")
-            for package_id, _ in package_updates_third_party.items():
-                self._logger.info(f"Updating {package_id}")
-                self.update_package(package_id=package_id)
 
         if sync_needed:
             self._logger.info("Sync complete")
