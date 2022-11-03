@@ -29,13 +29,13 @@ from unittest import mock
 import click
 import pytest
 
-from aea.cli.packages import PACKAGES_FILE, PackageManager
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
+from aea.package_manager.base import PACKAGES_FILE, PackageManager
 from aea.test_tools.test_cases import BaseAEATestCase
 
 
-@mock.patch("aea.cli.packages.fetch_ipfs")
+@mock.patch("aea.package_manager.base.fetch_ipfs")
 class TestSyncCommand(BaseAEATestCase):
     """Test sync command."""
 
