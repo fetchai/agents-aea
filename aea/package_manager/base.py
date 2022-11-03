@@ -48,6 +48,8 @@ except (ImportError, ModuleNotFoundError):
 
 PACKAGES_FILE = "packages.json"
 
+PackageIdToHashMapping = OrderedDictType[PackageId, str]
+
 
 def load_configuration(
     package_type: PackageType, package_path: Path
@@ -69,14 +71,14 @@ class PackageManager:
 
     path: Path
 
-    _third_party_packages: OrderedDictType[PackageId, str]
-    _dev_packages: OrderedDictType[PackageId, str]
+    _third_party_packages: PackageIdToHashMapping
+    _dev_packages: PackageIdToHashMapping
 
     def __init__(
         self,
         path: Path,
-        dev_packages: Optional[OrderedDictType[PackageId, str]] = None,
-        third_party_packages: Optional[OrderedDictType[PackageId, str]] = None,
+        dev_packages: Optional[PackageIdToHashMapping] = None,
+        third_party_packages: Optional[PackageIdToHashMapping] = None,
     ) -> None:
         """Initialize object."""
 
@@ -92,7 +94,7 @@ class PackageManager:
     @property
     def dev_packages(
         self,
-    ) -> OrderedDictType[PackageId, str]:
+    ) -> PackageIdToHashMapping:
         """Returns mappings of package ids -> package hash"""
 
         return self._dev_packages
@@ -100,17 +102,17 @@ class PackageManager:
     @property
     def third_party_packages(
         self,
-    ) -> OrderedDictType[PackageId, str]:
+    ) -> PackageIdToHashMapping:
         """Returns mappings of package ids -> package hash"""
 
         return self._third_party_packages
 
     def _sync(
         self,
-        packages: OrderedDictType[PackageId, str],
+        packages: PackageIdToHashMapping,
         update_packages: bool = False,
         update_hashes: bool = False,
-    ) -> Tuple[bool, OrderedDictType[PackageId, str], OrderedDictType[PackageId, str]]:
+    ) -> Tuple[bool, PackageIdToHashMapping, PackageIdToHashMapping]:
         """
         Sync local packages to the remote registry.
 
@@ -271,7 +273,7 @@ class PackageManager:
 
     def get_available_package_hashes(
         self,
-    ) -> OrderedDictType[PackageId, str]:
+    ) -> PackageIdToHashMapping:
         """Returns a mapping object between available packages and their hashes"""
 
         _packages = OrderedDict()
@@ -372,7 +374,8 @@ class PackageManager:
         self,
     ) -> OrderedDictType:
         """Json representation"""
-        data = OrderedDict()
+
+        data: OrderedDictType[str, OrderedDictType[str, str]] = OrderedDict()
         data["dev"] = OrderedDict()
         data["third_party"] = OrderedDict()
 
