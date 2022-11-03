@@ -64,7 +64,6 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-# TODO: utilise `WithLogger` class for logging
 class PackageManager:
     """AEA package manager"""
 
@@ -193,9 +192,11 @@ class PackageManager:
             sync_needed = sync_needed or _sync_needed
 
             if update_hashes and hash_updates_third_party:
+                third_party_package_id = "\n\t- ".join(
+                    map(str, hash_updates_third_party)
+                )
                 self._logger.warning(
-                    f"Hashes for follwing third party module has changed.\n\t- "
-                    + "\n\t- ".join(map(str, hash_updates_third_party))
+                    f"Hashes for follwing third party module has changed.\n\t- {third_party_package_id}"
                 )
 
             if update_packages and package_updates_third_party:
