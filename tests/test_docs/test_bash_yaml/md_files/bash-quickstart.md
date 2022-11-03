@@ -59,12 +59,12 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.2.2
+v1.2.3
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.28.2
+aea fetch fetchai/my_first_aea:0.28.3
 cd my_first_aea
 ```
 ``` bash
@@ -72,10 +72,10 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
-aea add connection fetchai/stub:0.21.1
+aea add connection fetchai/stub:0.21.2
 ```
 ``` bash
-aea add skill fetchai/echo:0.20.3
+aea add skill fetchai/echo:0.20.4
 ```
 ``` bash
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,

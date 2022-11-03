@@ -8,7 +8,7 @@
 }
 ```
 ``` bash 
-aea fetch fetchai/thermometer_aea:0.30.2 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.30.3 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -16,21 +16,21 @@ aea build
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.27.2
-aea add connection fetchai/soef:0.27.3
-aea add connection fetchai/ledger:0.21.2
-aea add skill fetchai/thermometer:0.27.3
+aea add connection fetchai/p2p_libp2p:0.27.3
+aea add connection fetchai/soef:0.27.4
+aea add connection fetchai/ledger:0.21.3
+aea add skill fetchai/thermometer:0.27.4
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
-  "fetchai/oef_search:1.1.3": "fetchai/soef:0.27.3"
+  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
 }'
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.32.2 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.32.3 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
@@ -38,17 +38,17 @@ aea build
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.27.2
-aea add connection fetchai/soef:0.27.3
-aea add connection fetchai/ledger:0.21.2
-aea add skill fetchai/thermometer_client:0.26.3
+aea add connection fetchai/p2p_libp2p:0.27.3
+aea add connection fetchai/soef:0.27.4
+aea add connection fetchai/ledger:0.21.3
+aea add skill fetchai/thermometer_client:0.26.4
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
-  "fetchai/oef_search:1.1.3": "fetchai/soef:0.27.3"
+  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
 }'
 ```
 ``` bash
@@ -100,7 +100,7 @@ aea delete my_thermometer_client
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.27.2
+public_id: fetchai/p2p_libp2p:0.27.3
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

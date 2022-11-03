@@ -10,7 +10,7 @@ This is a protocol for interacting with prometheus connection.
 ---
 name: prometheus
 author: fetchai
-version: 1.1.3
+version: 1.1.4
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

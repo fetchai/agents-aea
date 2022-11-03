@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the signing protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.2`.
+It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.3`.
 """
 
 from packages.fetchai.protocols.signing.message import SigningMessage
