@@ -213,7 +213,8 @@ class PackageManager:
         if update_hashes:
             self._logger.info("Updating hashes")
             self._dev_packages = hash_updates_dev
-            self._third_party_packages = hash_updates_third_party
+            if hash_updates_third_party:
+                self._logger.warning(f"Hashes for third party module were changed.")
             self.dump()
 
         if update_packages:
@@ -387,17 +388,15 @@ class PackageManager:
         with open_file(packages_file, "r") as fp:
             _packages = json.load(fp)
 
-        packages = OrderedDict()
-
         dev_packages = OrderedDict()
         for package_id, package_hash in _packages["dev"].items():
-            packages[PackageId.from_uri_path(package_id)] = package_hash
+            dev_packages[PackageId.from_uri_path(package_id)] = package_hash
 
         third_party_packages = OrderedDict()
         for package_id, package_hash in _packages["third_party"].items():
-            packages[PackageId.from_uri_path(package_id)] = package_hash
+            third_party_packages[PackageId.from_uri_path(package_id)] = package_hash
 
-        return cls(packages_dir, packages)
+        return cls(packages_dir, dev_packages, third_party_packages)
 
 
 class PackageHashDoesNotMatch(Exception):
