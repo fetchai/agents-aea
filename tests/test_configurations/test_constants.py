@@ -36,4 +36,4 @@ def test_signing_protocol_hash() -> None:
     public_id = PublicId.from_str(SIGNING_PROTOCOL_WITH_HASH)
     package_id = PackageId(PackageType.PROTOCOL, public_id)
 
-    assert public_id.hash == package_manager.packages[package_id]
+    assert public_id.hash == package_manager.dev_packages[package_id]
