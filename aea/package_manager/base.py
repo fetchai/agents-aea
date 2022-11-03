@@ -23,7 +23,7 @@
 import json
 import logging
 import shutil
-import traceback
+from abc import abstractmethod
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Optional
@@ -34,7 +34,6 @@ from aea.configurations.base import PackageConfiguration
 from aea.configurations.data_types import PackageId, PackageType
 from aea.configurations.loader import load_configuration_object
 from aea.helpers.dependency_tree import DependencyTree
-from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -66,46 +65,22 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-class PackageManager:
+class BasePackageManager:
     """AEA package manager"""
 
     path: Path
 
-    _third_party_packages: PackageIdToHashMapping
-    _dev_packages: PackageIdToHashMapping
-
     def __init__(
         self,
         path: Path,
-        dev_packages: Optional[PackageIdToHashMapping] = None,
-        third_party_packages: Optional[PackageIdToHashMapping] = None,
     ) -> None:
         """Initialize object."""
 
         self.path = path
         self._packages_file = path / PACKAGES_FILE
 
-        self._dev_packages = dev_packages or OrderedDict()
-        self._third_party_packages = third_party_packages or OrderedDict()
-
         self._logger = logging.getLogger(name="PackageManager")
         self._logger.setLevel(logging.INFO)
-
-    @property
-    def dev_packages(
-        self,
-    ) -> PackageIdToHashMapping:
-        """Returns mappings of package ids -> package hash"""
-
-        return self._dev_packages
-
-    @property
-    def third_party_packages(
-        self,
-    ) -> PackageIdToHashMapping:
-        """Returns mappings of package ids -> package hash"""
-
-        return self._third_party_packages
 
     def _sync(
         self,
@@ -162,81 +137,7 @@ class PackageManager:
 
         return sync_needed, hash_updates, package_updates
 
-    def sync(
-        self,
-        dev: bool = False,
-        third_party: bool = True,
-        update_packages: bool = False,
-        update_hashes: bool = False,
-    ) -> "PackageManager":
-        """Sync local packages to the remote registry."""
-
-        if update_packages and update_hashes:
-            raise ValueError(
-                "Both `update_packages` and `update_hashes` cannot be set to `True`."
-            )
-
-        self._logger.info(f"Performing sync @ {self.path}")
-
-        sync_needed = False
-
-        if third_party:
-            self._logger.info("Checking third party packages.")
-            (
-                _sync_needed,
-                hash_updates_third_party,
-                package_updates_third_party,
-            ) = self._sync(
-                packages=self.third_party_packages,
-                update_hashes=update_hashes,
-                update_packages=update_packages,
-            )
-            sync_needed = sync_needed or _sync_needed
-
-            if update_hashes and hash_updates_third_party:
-                third_party_package_id = "\n\t- ".join(
-                    map(str, hash_updates_third_party)
-                )
-                self._logger.warning(
-                    f"Hashes for follwing third party module has changed.\n\t- {third_party_package_id}"
-                )
-
-            if update_packages and package_updates_third_party:
-                self._logger.info("Updating third party packages.")
-                for package_id, _ in package_updates_third_party.items():
-                    self._logger.info(f"Updating {package_id}")
-                    self.update_package(package_id=package_id)
-
-        if dev:
-            self._logger.info("Checking dev packages.")
-            _sync_needed, hash_updates_dev, package_updates_dev = self._sync(
-                packages=self.dev_packages,
-                update_hashes=update_hashes,
-                update_packages=update_packages,
-            )
-            sync_needed = sync_needed or _sync_needed
-
-            if update_hashes:
-                self._dev_packages = hash_updates_dev
-
-            if update_packages and package_updates_dev:
-                self._logger.info("Updating dev packages.")
-                for package_id, _ in package_updates_dev.items():
-                    self._logger.info(f"Updating {package_id}")
-                    self.update_package(package_id=package_id)
-
-        if update_hashes:
-            self._logger.info("Updating hashes")
-            self.dump()
-
-        if sync_needed:
-            self._logger.info("Sync complete")
-        else:
-            self._logger.info("No package was updated.")
-
-        return self
-
-    def add_package(self, package_id: PackageId) -> "PackageManager":
+    def add_package(self, package_id: PackageId) -> "BasePackageManager":
         """Add packages."""
 
         author_repo = self.path / package_id.author
@@ -256,10 +157,19 @@ class PackageManager:
 
         return self
 
+    def package_path_from_package_id(self, package_id: PackageId) -> Path:
+        """Get package path from the package id."""
+        return (
+            self.path
+            / package_id.author
+            / package_id.package_type.to_plural()
+            / package_id.name
+        )
+
     def update_package(
         self,
         package_id: PackageId,
-    ) -> "PackageManager":
+    ) -> "BasePackageManager":
         """Update package."""
 
         package_path = self.package_path_from_package_id(package_id=package_id)
@@ -286,34 +196,23 @@ class PackageManager:
 
         return _packages
 
-    def update_package_hashes(self) -> "PackageManager":
-        """Initialize package.json file."""
-        for package_id, package_hash in self.get_available_package_hashes().items():
-            is_dev_package = package_id in self._dev_packages
-            is_third_party_package = package_id in self._third_party_packages
-            if not is_dev_package and not is_third_party_package:
-                raise PackageNotValid(
-                    f"Found a package which is not listed in the `packages.json` with package id {package_id}"
-                )
+    @abstractmethod
+    def sync(
+        self,
+        dev: bool = False,
+        third_party: bool = True,
+        update_packages: bool = False,
+        update_hashes: bool = False,
+    ) -> "BasePackageManager":
+        """Sync local packages to the remote registry."""
 
-            if is_dev_package:
-                if self._dev_packages[package_id] == package_hash:
-                    continue
+    @abstractmethod
+    def update_package_hashes(
+        self,
+    ) -> "BasePackageManager":
+        """Update package.json file."""
 
-                self._logger.info(f"Updating hash for {package_id}")
-                self._dev_packages[package_id] = package_hash
-
-        return self
-
-    def package_path_from_package_id(self, package_id: PackageId) -> Path:
-        """Get package path from the package id."""
-        return (
-            self.path
-            / package_id.author
-            / package_id.package_type.to_plural()
-            / package_id.name
-        )
-
+    @abstractmethod
     def verify(
         self,
         config_loader: Callable[
@@ -322,46 +221,12 @@ class PackageManager:
     ) -> int:
         """Verify fingerprints and outer hash of all available packages."""
 
-        failed = False
-        try:
-            available_packages = self.get_available_package_hashes()
-            for package_id in available_packages:
-                self._logger.info(f"Verifying {package_id}")
-                package_path = self.package_path_from_package_id(package_id)
-                configuration_obj = config_loader(
-                    package_id.package_type,
-                    package_path,
-                )
-
-                fingerprint_check = check_fingerprint(configuration_obj)
-                if not fingerprint_check:
-                    failed = True
-                    self._logger.info(
-                        f"Fingerprints does not match for {package_id} @ {package_path}"
-                    )
-                    continue
-
-                expected_hash = self.dev_packages.get(
-                    package_id, self.third_party_packages.get(package_id)
-                )
-
-                if expected_hash is None:
-                    failed = True
-                    self._logger.info(f"Cannot find hash for {package_id}")
-                    continue
-
-                calculated_hash = IPFSHashOnly.get(str(package_path))
-                if calculated_hash != expected_hash:
-                    failed = True
-                    self._logger.info(f"Hash does not match for {package_id}")
-                    self._logger.info(f"\tCalculated hash: {calculated_hash}")
-                    self._logger.info(f"\tExpected hash: {expected_hash}")
-
-        except Exception:  # pylint: disable=broad-except
-            traceback.print_exc()
-            failed = True
-
-        return int(failed)
+    @property
+    @abstractmethod
+    def json(
+        self,
+    ) -> OrderedDictType:
+        """Json representation"""
 
     def dump(self, file: Optional[Path] = None) -> None:
         """Dump package data to file."""
@@ -369,41 +234,10 @@ class PackageManager:
         with open_file(file, "w+") as fp:
             json.dump(self.json, fp, indent=4)
 
-    @property
-    def json(
-        self,
-    ) -> OrderedDictType:
-        """Json representation"""
-
-        data: OrderedDictType[str, OrderedDictType[str, str]] = OrderedDict()
-        data["dev"] = OrderedDict()
-        data["third_party"] = OrderedDict()
-
-        for package_id, package_hash in self._dev_packages.items():
-            data["dev"][package_id.to_uri_path] = package_hash
-
-        for package_id, package_hash in self._third_party_packages.items():
-            data["third_party"][package_id.to_uri_path] = package_hash
-
-        return data
-
     @classmethod
-    def from_dir(cls, packages_dir: Path) -> "PackageManager":
+    @abstractmethod
+    def from_dir(cls, packages_dir: Path) -> "BasePackageManager":
         """Initialize from packages directory."""
-
-        packages_file = packages_dir / PACKAGES_FILE
-        with open_file(packages_file, "r") as fp:
-            _packages = json.load(fp)
-
-        dev_packages = OrderedDict()
-        for package_id, package_hash in _packages["dev"].items():
-            dev_packages[PackageId.from_uri_path(package_id)] = package_hash
-
-        third_party_packages = OrderedDict()
-        for package_id, package_hash in _packages["third_party"].items():
-            third_party_packages[PackageId.from_uri_path(package_id)] = package_hash
-
-        return cls(packages_dir, dev_packages, third_party_packages)
 
 
 class PackageHashDoesNotMatch(Exception):
@@ -416,3 +250,7 @@ class PackageUpdateError(Exception):
 
 class PackageNotValid(Exception):
     """Package not valid."""
+
+
+class PackageFileNotValid(Exception):
+    """Package file not valid."""
