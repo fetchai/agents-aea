@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple, cast
+from typing import cast
 
 from aea.configurations.base import PackageConfiguration
 from aea.configurations.data_types import PackageId, PackageType
