@@ -30,7 +30,8 @@ import pytest
 
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
-from aea.package_manager.base import PACKAGES_FILE, PackageManager
+from aea.package_manager.base import PACKAGES_FILE
+from aea.package_manager.v1 import PackageManagerV1
 from aea.test_tools.test_cases import BaseAEATestCase
 
 
@@ -61,7 +62,7 @@ class TestSyncCommand(BaseAEATestCase):
         ] = "bafybeidv77u2xl52mnxakwvh7fuh46aiwfpteyof4eaptfd4agoi6cdblb"
 
         with mock.patch.object(
-            PackageManager, "dev_packages", new=packages
+            PackageManagerV1, "dev_packages", new=packages
         ), caplog.at_level(logging.INFO):
             result = self.run_cli_command("packages", "sync", "--dev")
             assert result.exit_code == 0
@@ -80,7 +81,7 @@ class TestSyncCommand(BaseAEATestCase):
         }
 
         with mock.patch.object(
-            PackageManager, "third_party_packages", new=packages
+            PackageManagerV1, "third_party_packages", new=packages
         ), caplog.at_level(logging.INFO):
             result = self.run_cli_command("packages", "sync")
             assert result.exit_code == 0
@@ -98,7 +99,7 @@ class TestSyncCommand(BaseAEATestCase):
             ): "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo41"
         }
 
-        with mock.patch.object(PackageManager, "third_party_packages", new=packages):
+        with mock.patch.object(PackageManagerV1, "third_party_packages", new=packages):
             with pytest.raises(
                 click.ClickException,
                 match=re.escape(
@@ -108,7 +109,7 @@ class TestSyncCommand(BaseAEATestCase):
                 self.run_cli_command("packages", "sync")
 
         with mock.patch.object(
-            PackageManager, "third_party_packages", new=packages
+            PackageManagerV1, "third_party_packages", new=packages
         ), mock.patch("shutil.rmtree"), caplog.at_level(logging.INFO):
             result = self.run_cli_command(
                 "packages",
@@ -122,7 +123,7 @@ class TestSyncCommand(BaseAEATestCase):
             )
 
         with mock.patch.object(
-            PackageManager, "third_party_packages", new=packages
+            PackageManagerV1, "third_party_packages", new=packages
         ), mock.patch("shutil.rmtree"), caplog.at_level(logging.INFO):
             result = self.run_cli_command(
                 "packages",

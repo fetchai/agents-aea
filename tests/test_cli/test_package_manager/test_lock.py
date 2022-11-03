@@ -28,7 +28,8 @@ from unittest import mock
 from aea.cli import cli
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
-from aea.package_manager.base import PACKAGES_FILE, PackageManager
+from aea.package_manager.base import PACKAGES_FILE
+from aea.package_manager.v1 import PackageManagerV1
 from aea.test_tools.test_cases import BaseAEATestCase
 
 
@@ -62,7 +63,7 @@ class TestLockCommand(BaseAEATestCase):
         ] = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vu"
 
         with mock.patch.object(
-            PackageManager, "dev_packages", new=dev_packages
+            PackageManagerV1, "dev_packages", new=dev_packages
         ), caplog.at_level(logging.INFO):
             result = self.runner.invoke(cli, ["packages", "lock", "--check"])
             assert result.exit_code == 1
