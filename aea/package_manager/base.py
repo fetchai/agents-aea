@@ -23,18 +23,17 @@
 import json
 import logging
 import shutil
-import traceback
+from abc import abstractmethod
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Optional
 from typing import OrderedDict as OrderedDictType
-from typing import cast
+from typing import Tuple, cast
 
 from aea.configurations.base import PackageConfiguration
 from aea.configurations.data_types import PackageId, PackageType
 from aea.configurations.loader import load_configuration_object
 from aea.helpers.dependency_tree import DependencyTree
-from aea.helpers.fingerprint import check_fingerprint
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -47,6 +46,8 @@ except (ImportError, ModuleNotFoundError):
     IS_IPFS_PLUGIN_INSTALLED = False
 
 PACKAGES_FILE = "packages.json"
+
+PackageIdToHashMapping = OrderedDictType[PackageId, str]
 
 
 def load_configuration(
@@ -64,78 +65,64 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-class PackageManager:
+class BasePackageManager:
     """AEA package manager"""
 
     path: Path
-    _packages: OrderedDictType[PackageId, str]
 
     def __init__(
-        self, path: Path, packages: Optional[OrderedDictType[PackageId, str]] = None
+        self,
+        path: Path,
     ) -> None:
         """Initialize object."""
 
         self.path = path
         self._packages_file = path / PACKAGES_FILE
-        self._packages = packages or OrderedDict()
 
         self._logger = logging.getLogger(name="PackageManager")
         self._logger.setLevel(logging.INFO)
 
-    @property
-    def packages(
+    def _sync(
         self,
-    ) -> OrderedDictType[PackageId, str]:
-        """Returns mappings of package ids -> package hash"""
-
-        return self._packages
-
-    def sync(
-        self,
+        packages: PackageIdToHashMapping,
         update_packages: bool = False,
         update_hashes: bool = False,
-    ) -> "PackageManager":
+    ) -> Tuple[bool, PackageIdToHashMapping, PackageIdToHashMapping]:
         """
         Sync local packages to the remote registry.
 
+        :param packages: Packages to sync
         :param update_packages: Update packages if the calculated hash for a
                                 package does not match the one in the packages.json.
         :param update_hashes: Update hashes in the packages.json if the calculated
                               hash for a package does not match the one in the
                               packages.json.
-        :return: PackageManager object
+        :return: flag specifying if sync is needes, updates hashes, list of packages needs to be updates
         """
 
-        if update_packages and update_hashes:
-            raise ValueError(
-                "Both `update_packages` and `update_hashes` cannot be set to `True`."
-            )
-
-        self._logger.info(f"Performing sync @ {self.path}")
         sync_needed = False
+        hash_updates = packages.copy()
+        package_updates = OrderedDict()
 
-        for package_id in self.packages:
+        for package_id in packages:
             package_path = self.package_path_from_package_id(package_id)
 
             if package_path.exists():
                 package_hash = IPFSHashOnly.get(str(package_path))
-                expected_hash = self.packages[package_id]
+                expected_hash = packages[package_id]
 
                 if package_hash == expected_hash:
                     continue
 
                 if update_hashes:
-                    self._logger.info(f"Updating hash for {package_id}")
-                    self._packages[package_id] = package_hash
+                    hash_updates[package_id] = package_hash
                     continue
 
                 if update_packages:
                     sync_needed = True
+                    package_updates[package_id.with_hash(expected_hash)] = expected_hash
                     self._logger.info(
                         f"Hash does not match for {package_id}, downloading package again..."
-                    )
-                    self.update_package(
-                        package_path, package_id.with_hash(expected_hash)
                     )
                     continue
 
@@ -145,17 +132,12 @@ class PackageManager:
 
             sync_needed = True
             self._logger.info(f"{package_id} not found locally, downloading...")
-            package_id_with_hash = package_id.with_hash(self.packages[package_id])
+            package_id_with_hash = package_id.with_hash(packages[package_id])
             self.add_package(package_id=package_id_with_hash)
 
-        if sync_needed:
-            self._logger.info("Sync complete")
-        else:
-            self._logger.info("No package was updated.")
+        return sync_needed, hash_updates, package_updates
 
-        return self
-
-    def add_package(self, package_id: PackageId) -> "PackageManager":
+    def add_package(self, package_id: PackageId) -> "BasePackageManager":
         """Add packages."""
 
         author_repo = self.path / package_id.author
@@ -175,13 +157,22 @@ class PackageManager:
 
         return self
 
+    def package_path_from_package_id(self, package_id: PackageId) -> Path:
+        """Get package path from the package id."""
+        return (
+            self.path
+            / package_id.author
+            / package_id.package_type.to_plural()
+            / package_id.name
+        )
+
     def update_package(
         self,
-        package_path: Path,
         package_id: PackageId,
-    ) -> "PackageManager":
+    ) -> "BasePackageManager":
         """Update package."""
 
+        package_path = self.package_path_from_package_id(package_id=package_id)
         try:
             shutil.rmtree(str(package_path))
         except (OSError, PermissionError) as e:
@@ -192,7 +183,7 @@ class PackageManager:
 
     def get_available_package_hashes(
         self,
-    ) -> OrderedDictType[PackageId, str]:
+    ) -> PackageIdToHashMapping:
         """Returns a mapping object between available packages and their hashes"""
 
         _packages = OrderedDict()
@@ -205,21 +196,23 @@ class PackageManager:
 
         return _packages
 
-    def update_package_hashes(self) -> "PackageManager":
-        """Initialize package.json file."""
-        self._logger.info("Updating hashes")
-        self._packages.update(self.get_available_package_hashes())
-        return self
+    @abstractmethod
+    def sync(
+        self,
+        dev: bool = False,
+        third_party: bool = True,
+        update_packages: bool = False,
+        update_hashes: bool = False,
+    ) -> "BasePackageManager":
+        """Sync local packages to the remote registry."""
 
-    def package_path_from_package_id(self, package_id: PackageId) -> Path:
-        """Get package path from the package id."""
-        return (
-            self.path
-            / package_id.author
-            / package_id.package_type.to_plural()
-            / package_id.name
-        )
+    @abstractmethod
+    def update_package_hashes(
+        self,
+    ) -> "BasePackageManager":
+        """Update package.json file."""
 
+    @abstractmethod
     def verify(
         self,
         config_loader: Callable[
@@ -228,42 +221,12 @@ class PackageManager:
     ) -> int:
         """Verify fingerprints and outer hash of all available packages."""
 
-        failed = False
-        try:
-            available_packages = self.get_available_package_hashes()
-            for package_id in available_packages:
-                package_path = self.package_path_from_package_id(package_id)
-                configuration_obj = config_loader(
-                    package_id.package_type,
-                    package_path,
-                )
-
-                fingerprint_check = check_fingerprint(configuration_obj)
-                if not fingerprint_check:
-                    failed = True
-                    self._logger.info(
-                        f"Fingerprints does not match for {package_id} @ {package_path}"
-                    )
-                    continue
-
-                expected_hash = self.packages.get(package_id)
-                if expected_hash is None:
-                    failed = True
-                    self._logger.info(f"Cannot find hash for {package_id}")
-                    continue
-
-                calculated_hash = IPFSHashOnly.get(str(package_path))
-                if calculated_hash != expected_hash:
-                    failed = True
-                    self._logger.info(
-                        f"\nHash does not match for {package_id}\n\tCalculated hash: {calculated_hash}\n\tExpected hash: {expected_hash}"
-                    )
-
-        except Exception:  # pylint: disable=broad-except
-            traceback.print_exc()
-            failed = True
-
-        return int(failed)
+    @property
+    @abstractmethod
+    def json(
+        self,
+    ) -> OrderedDictType:
+        """Json representation"""
 
     def dump(self, file: Optional[Path] = None) -> None:
         """Dump package data to file."""
@@ -271,29 +234,10 @@ class PackageManager:
         with open_file(file, "w+") as fp:
             json.dump(self.json, fp, indent=4)
 
-    @property
-    def json(
-        self,
-    ) -> OrderedDictType:
-        """Json representation"""
-        data = OrderedDict()
-        for package_id, package_hash in self._packages.items():
-            data[package_id.to_uri_path] = package_hash
-        return data
-
     @classmethod
-    def from_dir(cls, packages_dir: Path) -> "PackageManager":
+    @abstractmethod
+    def from_dir(cls, packages_dir: Path) -> "BasePackageManager":
         """Initialize from packages directory."""
-
-        packages_file = packages_dir / PACKAGES_FILE
-        with open_file(packages_file, "r") as fp:
-            _packages = json.load(fp)
-
-        packages = OrderedDict()
-        for package_id, package_hash in _packages.items():
-            packages[PackageId.from_uri_path(package_id)] = package_hash
-
-        return cls(packages_dir, packages)
 
 
 class PackageHashDoesNotMatch(Exception):
@@ -302,3 +246,11 @@ class PackageHashDoesNotMatch(Exception):
 
 class PackageUpdateError(Exception):
     """Package update error."""
+
+
+class PackageNotValid(Exception):
+    """Package not valid."""
+
+
+class PackageFileNotValid(Exception):
+    """Package file not valid."""

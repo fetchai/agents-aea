@@ -28,7 +28,8 @@ from unittest import mock
 from aea.cli import cli
 from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import PackageId
-from aea.package_manager.base import PACKAGES_FILE, PackageManager
+from aea.package_manager.base import PACKAGES_FILE
+from aea.package_manager.v1 import PackageManagerV1
 from aea.test_tools.test_cases import BaseAEATestCase
 
 
@@ -39,36 +40,34 @@ class TestLockCommand(BaseAEATestCase):
     def test_lock(self, *args: Any) -> None:
         """Test sync command."""
 
-        with mock.patch.object(logging.Logger, "info") as mock_logger:
-            result = self.run_cli_command("packages", "lock")
-            assert result.exit_code == 0
-            assert "Updating hashes" in [
-                arg[0][0] for arg in mock_logger.call_args_list
-            ]
+        result = self.run_cli_command("packages", "lock")
+        assert result.exit_code == 0
+        assert "Updating hashes" in result.stdout
+        assert "Done" in result.stdout
 
-    def test_lock_check(self, *args: Any) -> None:
+    def test_lock_check(self, fetch_mock, caplog) -> None:
         """Test sync command."""
 
         result = self.run_cli_command("packages", "lock", "--check")
         assert result.exit_code == 0
 
         packages_file = self.t / PACKAGES / PACKAGES_FILE
-        packages = dict(
+        dev_packages = dict(
             map(
                 lambda x: (PackageId.from_uri_path(x[0]), x[1]),
-                json.loads(packages_file.read_text()).items(),
+                json.loads(packages_file.read_text())["dev"].items(),
             )
         )
-        packages[
+        dev_packages[
             PackageId.from_uri_path("protocol/open_aea/signing/1.0.0")
-        ] = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo41"
+        ] = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vu"
 
         with mock.patch.object(
-            PackageManager, "packages", new=packages
-        ), mock.patch.object(logging.Logger, "info") as mock_logger:
+            PackageManagerV1, "dev_packages", new=dev_packages
+        ), caplog.at_level(logging.INFO):
             result = self.runner.invoke(cli, ["packages", "lock", "--check"])
             assert result.exit_code == 1
             assert (
                 "Hash does not match for (protocol, open_aea/signing:1.0.0)"
-                in mock_logger.call_args_list[0][0][0]
+                in caplog.text
             )
