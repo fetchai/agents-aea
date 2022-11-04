@@ -50,7 +50,7 @@ class TestHelloWorld(BaseSkillTestCase):
         self.logger = self._skill.skill_context.logger
 
     def test_act(self):
-        """Test the act method of the echo behaviour."""
+        """Test the act method of the hello_world behaviour."""
         # operation
         with patch.object(self.logger, "log") as mock_logger:
             assert self.hello_world_behaviour.act() is None
