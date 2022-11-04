@@ -38,7 +38,6 @@ class HelloWorld(OneShotBehaviour):
 
     def setup(self) -> None:
         """The setup."""
-        pass
 
     def act(self) -> None:
         """The act."""
@@ -46,4 +45,3 @@ class HelloWorld(OneShotBehaviour):
 
     def teardown(self) -> None:
         """The teardown."""
-        pass
