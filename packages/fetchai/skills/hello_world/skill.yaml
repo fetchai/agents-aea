@@ -6,8 +6,8 @@ description: This skill prints Hello World! on the screen.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: Qmbk6r8NZZZY6N7PYioQftvN7fsvYBJRugo8peT7FugqNa
-  behaviours.py: QmcWTwWtod6Ud4vbqTrkwuHesRNkSpwwSPBSVp3BZmxyuw
+  __init__.py: QmYp3J4dt8e4nKz2dyVw3LD185MrCCxB9oESM5SCeTEhk9
+  behaviours.py: QmZZimwqA8AzvPpQwXrQPEFkzX8wbk6otQq54xQke5S4hc
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
