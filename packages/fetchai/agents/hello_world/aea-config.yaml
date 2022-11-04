@@ -1,0 +1,33 @@
+agent_name: hello_world
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: A hello world agent. An agent that prints a message on the screen.
+aea_version: '>=1.2.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections: []
+contracts: []
+protocols: []
+skills:
+- ali/hello_world:0.1.0
+default_ledger: fetchai
+required_ledgers:
+- fetchai
+default_routing: {}
+connection_private_key_paths: {}
+private_key_paths:
+  fetchai: fetchai_private_key.txt
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+dependencies:
+  aea-ledger-fetchai: {}
+default_connection: null
+---
+public_id: ali/hello_world:0.1.0
+type: skill
+behaviours:
+  hello_world:
+    args:
+      message: Hello World!

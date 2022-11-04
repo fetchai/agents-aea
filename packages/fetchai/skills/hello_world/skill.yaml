@@ -1,0 +1,24 @@
+name: hello_world
+author: fetchai
+version: 0.1.0
+type: skill
+description: This skill prints Hello World! on the screen.
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  __init__.py: Qmbk6r8NZZZY6N7PYioQftvN7fsvYBJRugo8peT7FugqNa
+  behaviours.py: QmcWTwWtod6Ud4vbqTrkwuHesRNkSpwwSPBSVp3BZmxyuw
+fingerprint_ignore_patterns: []
+connections: []
+contracts: []
+protocols: []
+skills: []
+behaviours:
+  hello_world:
+    args:
+      message: Hello World!
+    class_name: HelloWorld
+handlers: {}
+models: {}
+dependencies: {}
+is_abstract: false
