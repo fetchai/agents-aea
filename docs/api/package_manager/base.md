@@ -23,100 +23,37 @@ Load a configuration, knowing the type and the path to the package root.
 
 the configuration object.
 
-<a id="aea.package_manager.base.PackageManager"></a>
+<a id="aea.package_manager.base.BasePackageManager"></a>
 
-## PackageManager Objects
+## BasePackageManager Objects
 
 ```python
-class PackageManager()
+class BasePackageManager()
 ```
 
 AEA package manager
 
-<a id="aea.package_manager.base.PackageManager.__init__"></a>
+<a id="aea.package_manager.base.BasePackageManager.__init__"></a>
 
 #### `__`init`__`
 
 ```python
-def __init__(path: Path, packages: Optional[OrderedDictType[PackageId, str]] = None) -> None
+def __init__(path: Path) -> None
 ```
 
 Initialize object.
 
-<a id="aea.package_manager.base.PackageManager.packages"></a>
-
-#### packages
-
-```python
-@property
-def packages() -> OrderedDictType[PackageId, str]
-```
-
-Returns mappings of package ids -> package hash
-
-<a id="aea.package_manager.base.PackageManager.sync"></a>
-
-#### sync
-
-```python
-def sync(update_packages: bool = False, update_hashes: bool = False) -> "PackageManager"
-```
-
-Sync local packages to the remote registry.
-
-**Arguments**:
-
-                        package does not match the one in the packages.json.
-                      hash for a package does not match the one in the
-                      packages.json.
-- `update_packages`: Update packages if the calculated hash for a
-- `update_hashes`: Update hashes in the packages.json if the calculated
-
-**Returns**:
-
-PackageManager object
-
-<a id="aea.package_manager.base.PackageManager.add_package"></a>
+<a id="aea.package_manager.base.BasePackageManager.add_package"></a>
 
 #### add`_`package
 
 ```python
-def add_package(package_id: PackageId) -> "PackageManager"
+def add_package(package_id: PackageId) -> "BasePackageManager"
 ```
 
 Add packages.
 
-<a id="aea.package_manager.base.PackageManager.update_package"></a>
-
-#### update`_`package
-
-```python
-def update_package(package_path: Path, package_id: PackageId) -> "PackageManager"
-```
-
-Update package.
-
-<a id="aea.package_manager.base.PackageManager.get_available_package_hashes"></a>
-
-#### get`_`available`_`package`_`hashes
-
-```python
-def get_available_package_hashes() -> OrderedDictType[PackageId, str]
-```
-
-Returns a mapping object between available packages and their hashes
-
-<a id="aea.package_manager.base.PackageManager.update_package_hashes"></a>
-
-#### update`_`package`_`hashes
-
-```python
-def update_package_hashes() -> "PackageManager"
-```
-
-Initialize package.json file.
-
-<a id="aea.package_manager.base.PackageManager.package_path_from_package_id"></a>
+<a id="aea.package_manager.base.BasePackageManager.package_path_from_package_id"></a>
 
 #### package`_`path`_`from`_`package`_`id
 
@@ -126,11 +63,54 @@ def package_path_from_package_id(package_id: PackageId) -> Path
 
 Get package path from the package id.
 
-<a id="aea.package_manager.base.PackageManager.verify"></a>
+<a id="aea.package_manager.base.BasePackageManager.update_package"></a>
+
+#### update`_`package
+
+```python
+def update_package(package_id: PackageId) -> "BasePackageManager"
+```
+
+Update package.
+
+<a id="aea.package_manager.base.BasePackageManager.get_available_package_hashes"></a>
+
+#### get`_`available`_`package`_`hashes
+
+```python
+def get_available_package_hashes() -> PackageIdToHashMapping
+```
+
+Returns a mapping object between available packages and their hashes
+
+<a id="aea.package_manager.base.BasePackageManager.sync"></a>
+
+#### sync
+
+```python
+@abstractmethod
+def sync(dev: bool = False, third_party: bool = True, update_packages: bool = False, update_hashes: bool = False) -> "BasePackageManager"
+```
+
+Sync local packages to the remote registry.
+
+<a id="aea.package_manager.base.BasePackageManager.update_package_hashes"></a>
+
+#### update`_`package`_`hashes
+
+```python
+@abstractmethod
+def update_package_hashes() -> "BasePackageManager"
+```
+
+Update package.json file.
+
+<a id="aea.package_manager.base.BasePackageManager.verify"></a>
 
 #### verify
 
 ```python
+@abstractmethod
 def verify(config_loader: Callable[
             [PackageType, Path], PackageConfiguration
         ] = load_configuration) -> int
@@ -138,7 +118,19 @@ def verify(config_loader: Callable[
 
 Verify fingerprints and outer hash of all available packages.
 
-<a id="aea.package_manager.base.PackageManager.dump"></a>
+<a id="aea.package_manager.base.BasePackageManager.json"></a>
+
+#### json
+
+```python
+@property
+@abstractmethod
+def json() -> OrderedDictType
+```
+
+Json representation
+
+<a id="aea.package_manager.base.BasePackageManager.dump"></a>
 
 #### dump
 
@@ -148,24 +140,14 @@ def dump(file: Optional[Path] = None) -> None
 
 Dump package data to file.
 
-<a id="aea.package_manager.base.PackageManager.json"></a>
-
-#### json
-
-```python
-@property
-def json() -> OrderedDictType
-```
-
-Json representation
-
-<a id="aea.package_manager.base.PackageManager.from_dir"></a>
+<a id="aea.package_manager.base.BasePackageManager.from_dir"></a>
 
 #### from`_`dir
 
 ```python
 @classmethod
-def from_dir(cls, packages_dir: Path) -> "PackageManager"
+@abstractmethod
+def from_dir(cls, packages_dir: Path) -> "BasePackageManager"
 ```
 
 Initialize from packages directory.
@@ -189,4 +171,24 @@ class PackageUpdateError(Exception)
 ```
 
 Package update error.
+
+<a id="aea.package_manager.base.PackageNotValid"></a>
+
+## PackageNotValid Objects
+
+```python
+class PackageNotValid(Exception)
+```
+
+Package not valid.
+
+<a id="aea.package_manager.base.PackageFileNotValid"></a>
+
+## PackageFileNotValid Objects
+
+```python
+class PackageFileNotValid(Exception)
+```
+
+Package file not valid.
 

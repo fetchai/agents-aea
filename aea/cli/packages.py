@@ -22,12 +22,19 @@
 
 import sys
 from pathlib import Path
+from warnings import warn
 
 import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
-from aea.package_manager.base import IS_IPFS_PLUGIN_INSTALLED, PackageManager
+from aea.package_manager.base import (
+    BasePackageManager,
+    IS_IPFS_PLUGIN_INSTALLED,
+    PackageFileNotValid,
+)
+from aea.package_manager.v0 import PackageManagerV0
+from aea.package_manager.v1 import PackageManagerV1
 
 
 class SyncTypes:  # pylint: disable=too-few-public-methods
@@ -96,7 +103,7 @@ def sync(
 
     packages_dir = Path(ctx.registry_path)
     try:
-        PackageManager.from_dir(packages_dir).sync(
+        get_package_manager(packages_dir).sync(
             dev=(sync_type == SyncTypes.DEV or sync_type == SyncTypes.ALL),
             third_party=(
                 sync_type == SyncTypes.THIRD_PARTY or sync_type == SyncTypes.ALL
@@ -124,7 +131,7 @@ def lock_packages(ctx: Context, check: bool) -> None:
         if check:
             packages_dir = Path(ctx.registry_path)
             click.echo("Verifying packages.json")
-            return_code = PackageManager.from_dir(packages_dir).verify()
+            return_code = get_package_manager(packages_dir).verify()
             if return_code:
                 click.echo("Verification failed.")
             else:
@@ -132,7 +139,24 @@ def lock_packages(ctx: Context, check: bool) -> None:
             sys.exit(return_code)
 
         click.echo("Updating hashes")
-        PackageManager.from_dir(packages_dir).update_package_hashes().dump()
+        get_package_manager(packages_dir).update_package_hashes().dump()
         click.echo("Done")
     except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e)) from e
+
+
+def get_package_manager(package_dir: Path) -> BasePackageManager:
+    """Get package manager."""
+
+    try:
+        return PackageManagerV1.from_dir(package_dir)
+    except PackageFileNotValid:
+        warn(
+            "The provided `packages.json` still follows an older format which will be deprecated on v2.0.0",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        click.echo(
+            "The provided `packages.json` still follows an older format which will be deprecated on v2.0.0"
+        )
+        return PackageManagerV0.from_dir(package_dir)
