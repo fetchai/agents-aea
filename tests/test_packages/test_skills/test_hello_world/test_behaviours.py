@@ -39,7 +39,9 @@ class TestHelloWorld(BaseSkillTestCase):
     def setup_method(self):
         """Set up the test environment."""
         self.message = "Hello Something Custom!"
-        config_overrides = {"behaviours": {"hello_world": {"args": {"message": self.message}}}}
+        config_overrides = {
+            "behaviours": {"hello_world": {"args": {"message": self.message}}}
+        }
 
         super().setup(config_overrides=config_overrides)
         self.hello_world_behaviour = cast(

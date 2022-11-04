@@ -36,9 +36,7 @@ class TestHelloWorldSkill(AEATestCaseEmpty):
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
 
-        check_strings = (
-            "Hello World!",
-        )
+        check_strings = ("Hello World!",)
         missing_strings = self.missing_from_output(process, check_strings)
         assert (
             missing_strings == []
