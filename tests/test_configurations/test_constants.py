@@ -22,9 +22,9 @@
 
 from pathlib import Path
 
-from aea.cli.packages import PackageManager
 from aea.configurations.constants import PACKAGES, SIGNING_PROTOCOL_WITH_HASH
 from aea.configurations.data_types import PackageId, PackageType, PublicId
+from aea.package_manager.v1 import PackageManagerV1
 
 from tests.conftest import ROOT_DIR
 
@@ -32,7 +32,7 @@ from tests.conftest import ROOT_DIR
 def test_signing_protocol_hash() -> None:
     """Test signing protocol"""
 
-    package_manager = PackageManager.from_dir(Path(ROOT_DIR, PACKAGES))
+    package_manager = PackageManagerV1.from_dir(Path(ROOT_DIR, PACKAGES))
     public_id = PublicId.from_str(SIGNING_PROTOCOL_WITH_HASH)
     package_id = PackageId(PackageType.PROTOCOL, public_id)
 
