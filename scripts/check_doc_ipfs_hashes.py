@@ -21,7 +21,6 @@
 """This module contains the tools for autoupdating ipfs hashes in the documentation."""
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path

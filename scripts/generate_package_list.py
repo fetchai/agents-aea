@@ -19,7 +19,6 @@
 # ------------------------------------------------------------------------------
 
 """Script to generate a markdown package table."""
-import json
 from pathlib import Path
 from typing import Dict
 
