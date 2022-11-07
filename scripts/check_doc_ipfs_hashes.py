@@ -29,6 +29,7 @@ from typing import Dict, Optional
 
 import yaml
 
+from aea.cli.packages import get_package_manager
 from aea.configurations.data_types import PackageId
 from aea.helpers.base import IPFS_HASH_REGEX, SIMPLE_ID_REGEX
 
@@ -57,6 +58,14 @@ def read_file(filepath: str) -> str:
     with open(filepath, "r", encoding="utf-8") as file_:
         file_str = file_.read()
     return file_str
+
+
+def get_packages() -> Dict[str, str]:
+    """Get packages."""
+    data = get_package_manager(Path("packages").relative_to(".")).json
+    if "dev" in data:
+        return data["dev"]
+    return data
 
 
 class Package:  # pylint: disable=too-few-public-methods
@@ -125,10 +134,9 @@ class PackageHashManager:
 
     def __init__(self) -> None:
         """Constructor"""
-        hashes_file = Path("packages", "packages.json").relative_to(".")
-        hash_data = json.loads(hashes_file.read_text(encoding="utf-8"))
-        self.packages = [Package(key, value) for key, value in hash_data.items()]
+        packages = get_packages()
 
+        self.packages = [Package(key, value) for key, value in packages.items()]
         self.package_tree: Dict = {}
         for p in self.packages:
             self.package_tree.setdefault(p.vendor, {})
