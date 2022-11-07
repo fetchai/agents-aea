@@ -19,21 +19,26 @@
 # ------------------------------------------------------------------------------
 
 """Script to generate a markdown package table."""
-import json
 from pathlib import Path
+from typing import Dict
+
+from aea.cli.packages import get_package_manager
 
 
 COL_WIDTH = 61
 
 
+def get_packages() -> Dict[str, str]:
+    """Get packages."""
+    data = get_package_manager(Path("packages").relative_to(".")).json
+    if "dev" in data:
+        return data["dev"]
+    return data
+
+
 def generate_table() -> None:
     """Generates a markdown table containing a package list"""
-
-    # Load packages.json
-    with open(
-        Path("packages", "packages.json"), mode="r", encoding="utf-8"
-    ) as packages_file:
-        data = json.load(packages_file)
+    data = get_packages()
 
     # Table header
     content = (

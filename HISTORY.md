@@ -1,5 +1,10 @@
 # Release History - open AEA
 
+## 1.23.0 (TBD)
+
+AEA:
+- Extends the package manager implementation to introduce separation between development and third party packages
+
 ## 1.22.0 (2022-11-1)
 
 AEA:
