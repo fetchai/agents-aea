@@ -8,7 +8,8 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
-protocols: []
+protocols:
+- fetchai/signing:1.1.3
 skills:
 - fetchai/hello_world:0.1.0
 default_ledger: fetchai

@@ -2,7 +2,8 @@ name: hello_world
 author: fetchai
 version: 0.1.0
 type: skill
-description: This skill prints Hello World! on the screen.
+description: This skill prints `Hello World!` on the screen. The message can be configured
+  to be any different string.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
