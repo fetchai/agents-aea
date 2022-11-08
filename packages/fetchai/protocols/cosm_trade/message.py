@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class CosmTradeMessage(Message):
     """A protocol for preparing an atomic swap bilateral transaction for cosmos-based ledgers, including fetchai's."""
 
-    protocol_id = PublicId.from_str("fetchai/cosm_trade:0.2.3")
+    protocol_id = PublicId.from_str("fetchai/cosm_trade:0.2.4")
     protocol_specification_id = PublicId.from_str("fetchai/cosm_trade:1.0.0")
 
     SignedTransaction = CustomSignedTransaction
