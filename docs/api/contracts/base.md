@@ -1,9 +1,11 @@
-<a name="aea.contracts.base"></a>
+<a id="aea.contracts.base"></a>
+
 # aea.contracts.base
 
 The base contract.
 
-<a name="aea.contracts.base.Contract"></a>
+<a id="aea.contracts.base.Contract"></a>
+
 ## Contract Objects
 
 ```python
@@ -12,11 +14,12 @@ class Contract(Component)
 
 Abstract definition of a contract.
 
-<a name="aea.contracts.base.Contract.__init__"></a>
+<a id="aea.contracts.base.Contract.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(contract_config: ContractConfig, **kwargs: Any) -> None
+def __init__(contract_config: ContractConfig, **kwargs: Any) -> None
 ```
 
 Initialize the contract.
@@ -26,32 +29,37 @@ Initialize the contract.
 - `contract_config`: the contract configurations.
 - `kwargs`: the keyword arguments.
 
-<a name="aea.contracts.base.Contract.id"></a>
+<a id="aea.contracts.base.Contract.id"></a>
+
 #### id
 
 ```python
- | @property
- | id() -> PublicId
+@property
+def id() -> PublicId
 ```
 
 Get the name.
 
-<a name="aea.contracts.base.Contract.configuration"></a>
+<a id="aea.contracts.base.Contract.configuration"></a>
+
 #### configuration
 
 ```python
- | @property
- | configuration() -> ContractConfig
+@property
+def configuration() -> ContractConfig
 ```
 
 Get the configuration.
 
-<a name="aea.contracts.base.Contract.get_instance"></a>
+<a id="aea.contracts.base.Contract.get_instance"></a>
+
 #### get`_`instance
 
 ```python
- | @classmethod
- | get_instance(cls, ledger_api: LedgerApi, contract_address: Optional[str] = None) -> Any
+@classmethod
+def get_instance(cls,
+                 ledger_api: LedgerApi,
+                 contract_address: Optional[str] = None) -> Any
 ```
 
 Get the instance.
@@ -65,12 +73,13 @@ Get the instance.
 
 the contract instance
 
-<a name="aea.contracts.base.Contract.from_dir"></a>
+<a id="aea.contracts.base.Contract.from_dir"></a>
+
 #### from`_`dir
 
 ```python
- | @classmethod
- | from_dir(cls, directory: str, **kwargs: Any) -> "Contract"
+@classmethod
+def from_dir(cls, directory: str, **kwargs: Any) -> "Contract"
 ```
 
 Load the protocol from a directory.
@@ -84,12 +93,14 @@ Load the protocol from a directory.
 
 the contract object.
 
-<a name="aea.contracts.base.Contract.from_config"></a>
+<a id="aea.contracts.base.Contract.from_config"></a>
+
 #### from`_`config
 
 ```python
- | @classmethod
- | from_config(cls, configuration: ContractConfig, **kwargs: Any) -> "Contract"
+@classmethod
+def from_config(cls, configuration: ContractConfig,
+                **kwargs: Any) -> "Contract"
 ```
 
 Load contract from configuration.
@@ -103,12 +114,14 @@ Load contract from configuration.
 
 the contract object.
 
-<a name="aea.contracts.base.Contract.get_deploy_transaction"></a>
+<a id="aea.contracts.base.Contract.get_deploy_transaction"></a>
+
 #### get`_`deploy`_`transaction
 
 ```python
- | @classmethod
- | get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs: Any) -> Optional[JSONLike]
+@classmethod
+def get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str,
+                           **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -126,12 +139,14 @@ to handle the contract requests manually.
 
 the tx
 
-<a name="aea.contracts.base.Contract.get_raw_transaction"></a>
+<a id="aea.contracts.base.Contract.get_raw_transaction"></a>
+
 #### get`_`raw`_`transaction
 
 ```python
- | @classmethod
- | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[JSONLike]
+@classmethod
+def get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str,
+                        **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -149,12 +164,14 @@ to handle the contract requests manually.
 
 the tx  # noqa: DAR202
 
-<a name="aea.contracts.base.Contract.get_raw_message"></a>
+<a id="aea.contracts.base.Contract.get_raw_message"></a>
+
 #### get`_`raw`_`message
 
 ```python
- | @classmethod
- | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[bytes]
+@classmethod
+def get_raw_message(cls, ledger_api: LedgerApi, contract_address: str,
+                    **kwargs: Any) -> Optional[bytes]
 ```
 
 Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -172,12 +189,14 @@ to handle the contract requests manually.
 
 the tx  # noqa: DAR202
 
-<a name="aea.contracts.base.Contract.get_state"></a>
+<a id="aea.contracts.base.Contract.get_state"></a>
+
 #### get`_`state
 
 ```python
- | @classmethod
- | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[JSONLike]
+@classmethod
+def get_state(cls, ledger_api: LedgerApi, contract_address: str,
+              **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_STATE' requests.

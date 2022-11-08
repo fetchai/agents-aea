@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea fetch' subcommand."""
 import os
-from distutils.dir_util import copy_tree
 from pathlib import Path
+from shutil import copytree as copy_tree
 from typing import Optional, cast
 
 import click
@@ -169,7 +169,7 @@ def fetch_agent_locally(
         os.makedirs(target_path)  # pragma: nocover
 
     ctx.clean_paths.append(target_path)
-    copy_tree(source_path, target_path)
+    copy_tree(source_path, target_path, dirs_exist_ok=True)  # type: ignore
 
     ctx.cwd = target_path
     try_to_load_agent_config(ctx)

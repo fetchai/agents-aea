@@ -88,7 +88,9 @@ class PublicIdParameter(click.ParamType):
         """Return the metavar default for this param if it provides one."""
         return "PUBLIC_ID"
 
-    def convert(self, value: str, param: Any, ctx: Optional[click.Context]) -> PublicId:
+    def convert(  # pylint: disable=inconsistent-return-statements
+        self, value: str, param: Any, ctx: Optional[click.Context]
+    ) -> PublicId:
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         try:
             return PublicId.from_str(value)

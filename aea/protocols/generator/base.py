@@ -471,7 +471,7 @@ class ProtocolGenerator:
                 self._change_indent(1)
                 check_str += self.indent + "enforce(\n"
                 self._change_indent(1)
-                dict_key_value_types = dict()
+                dict_key_value_types = {}
                 for element_type in element_types:
                     if element_type.startswith("Dict"):
                         dict_key_value_types[
@@ -1784,9 +1784,7 @@ class ProtocolGenerator:
                 self.protocol_specification_in_camel_case
             )
         )
-        cls_str += (
-            self.indent + "performative_content = dict()  # type: Dict[str, Any]\n"
-        )
+        cls_str += self.indent + "performative_content = {}  # type: Dict[str, Any]\n"
         counter = 1
         for performative, contents in self.spec.speech_acts.items():
             if counter == 1:

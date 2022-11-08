@@ -105,7 +105,7 @@ class AggregationSerializer(Serializer):
         aggregation_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = aggregation_pb.WhichOneof("performative")
         performative_id = AggregationMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == AggregationMessage.Performative.OBSERVATION:
             value = aggregation_pb.observation.value
             performative_content["value"] = value

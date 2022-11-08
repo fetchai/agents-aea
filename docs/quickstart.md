@@ -143,11 +143,16 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 ## Setup author name
 
-AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
-
 You can set up your author name using the `init` command:
 ``` bash
 aea init
+```
+
+## Register as an AEA author (optional)
+
+AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To publish packages to the registry, we need to register an author name:
+``` bash
+aea register
 ```
 
 This is your unique author (or developer) name in the AEA ecosystem.
@@ -167,7 +172,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.1.1
+v1.2.3
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -184,7 +189,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.28.2
+aea fetch fetchai/my_first_aea:0.28.3
 cd my_first_aea
 ```
 
@@ -204,16 +209,16 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.21.1
+aea add connection fetchai/stub:0.21.2
 ```
 <br>
 <b>Add the echo skill</b>
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.20.3
+aea add skill fetchai/echo:0.20.4
 ```
-This copies the <code>fetchai/echo:0.20.3</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.20.3</code> consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the <code>fetchai/echo:0.20.4</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.20.4</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ### Echo skill

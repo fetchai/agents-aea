@@ -94,7 +94,7 @@ class OwnershipState(BaseOwnershipState):
         self._amount_by_currency_id = None  # type: Optional[CurrencyHoldings]
         self._quantities_by_good_id = None  # type: Optional[GoodHoldings]
 
-    def set(  # pylint: disable=arguments-differ
+    def set(  # pylint: disable=arguments-differ,arguments-renamed
         self,
         amount_by_currency_id: CurrencyHoldings = None,
         quantities_by_good_id: GoodHoldings = None,
@@ -119,7 +119,7 @@ class OwnershipState(BaseOwnershipState):
         self._amount_by_currency_id = copy.copy(amount_by_currency_id)
         self._quantities_by_good_id = copy.copy(quantities_by_good_id)
 
-    def apply_delta(  # pylint: disable=arguments-differ
+    def apply_delta(  # pylint: disable=arguments-differ,arguments-renamed
         self,
         delta_amount_by_currency_id: Dict[str, int] = None,
         delta_quantities_by_good_id: Dict[str, int] = None,
@@ -144,19 +144,19 @@ class OwnershipState(BaseOwnershipState):
             )
         enforce(
             all(
-                [
+                (
                     key in self._amount_by_currency_id
                     for key in delta_amount_by_currency_id.keys()
-                ]
+                )
             ),
             "Invalid keys present in delta_amount_by_currency_id.",
         )
         enforce(
             all(
-                [
+                (
                     key in self._quantities_by_good_id
                     for key in delta_quantities_by_good_id.keys()
-                ]
+                )
             ),
             "Invalid keys present in delta_quantities_by_good_id.",
         )
@@ -288,7 +288,7 @@ class Preferences(BasePreferences):
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
 
-    def set(  # pylint: disable=arguments-differ
+    def set(  # pylint: disable=arguments-differ,arguments-renamed
         self,
         exchange_params_by_currency_id: ExchangeParams = None,
         utility_params_by_good_id: UtilityParams = None,
@@ -383,7 +383,7 @@ class Preferences(BasePreferences):
         score = goods_score + currency_score
         return score
 
-    def marginal_utility(  # pylint: disable=arguments-differ
+    def marginal_utility(  # pylint: disable=arguments-differ,arguments-renamed
         self,
         ownership_state: BaseOwnershipState,
         delta_quantities_by_good_id: Optional[GoodHoldings] = None,

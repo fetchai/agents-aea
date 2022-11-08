@@ -116,7 +116,7 @@ class CosmTradeSerializer(Serializer):
         cosm_trade_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = cosm_trade_pb.WhichOneof("performative")
         performative_id = CosmTradeMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == CosmTradeMessage.Performative.INFORM_PUBLIC_KEY:
             public_key = cosm_trade_pb.inform_public_key.public_key
             performative_content["public_key"] = public_key

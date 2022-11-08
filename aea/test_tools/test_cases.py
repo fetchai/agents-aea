@@ -204,7 +204,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         )
         kwargs.update(win_popen_kwargs())
 
-        process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs
+        process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs # pylint: disable=consider-using-with
             [sys.executable, *args],
             **kwargs,
         )
@@ -325,10 +325,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "required_ledgers",
             ]
             result = all(
-                [key in allowed_diff_keys for key in content1_agentconfig.keys()]
+                (key in allowed_diff_keys for key in content1_agentconfig.keys())
             )
             result = result and all(
-                [key in allowed_diff_keys for key in content2_agentconfig.keys()]
+                (key in allowed_diff_keys for key in content2_agentconfig.keys())
             )
             if not result:
                 return result, content1_agentconfig, content2_agentconfig
@@ -460,13 +460,13 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
 
-        all_terminated = all([process.returncode == 0 for process in subprocesses])
+        all_terminated = all((process.returncode == 0 for process in subprocesses))
         return all_terminated
 
     @classmethod
     def initialize_aea(cls, author: str) -> None:
         """Initialize AEA locally with author name."""
-        cls.run_cli_command("init", "--local", "--author", author, cwd=cls._get_cwd())
+        cls.run_cli_command("init", "--author", author, cwd=cls._get_cwd())
 
     @classmethod
     def add_item(cls, item_type: str, public_id: str, local: bool = True) -> Result:

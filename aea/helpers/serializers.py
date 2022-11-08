@@ -73,7 +73,7 @@ class DictProtobufStructSerializer:
 
     @classmethod
     def _patch_dict(cls, dictionnary: Dict[str, Any]) -> None:
-        need_patch: Dict[str, bool] = dict()
+        need_patch: Dict[str, bool] = {}
         for key, value in dictionnary.items():
             new_value, patch_needed = cls._patch_value(value)
             if patch_needed:

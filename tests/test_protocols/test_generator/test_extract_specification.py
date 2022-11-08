@@ -351,16 +351,16 @@ class TestExtractSpecification(TestCase):
     def test_pythonic_protocol_specification_class(self):
         """Test the 'PythonicProtocolSpecification' class."""
         spec = PythonicProtocolSpecification()
-        assert spec.speech_acts == dict()
-        assert spec.all_performatives == list()
-        assert spec.all_unique_contents == dict()
-        assert spec.all_custom_types == list()
-        assert spec.custom_custom_types == dict()
-        assert spec.initial_performatives == list()
-        assert spec.reply == dict()
-        assert spec.terminal_performatives == list()
-        assert spec.roles == list()
-        assert spec.end_states == list()
+        assert spec.speech_acts == {}
+        assert spec.all_performatives == []
+        assert spec.all_unique_contents == {}
+        assert spec.all_custom_types == []
+        assert spec.custom_custom_types == {}
+        assert spec.initial_performatives == []
+        assert spec.reply == {}
+        assert spec.terminal_performatives == []
+        assert spec.roles == []
+        assert spec.end_states == []
         assert spec.typing_imports == {
             "Set": True,
             "Tuple": True,

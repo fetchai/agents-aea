@@ -39,7 +39,7 @@ def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
     :return: dictionary with dependencies and their versions
     """
     result: Dict[str, str] = WHITELIST
-    with open(file, "r") as f:
+    with open(file, "r", encoding="utf-8") as f:
         is_dev_dependency = False
         for line in f:
             if line == "[dev-packages]\n":
@@ -67,7 +67,7 @@ def check_versions_in_tox_correct(file: str = "tox.ini") -> None:
     """
     dependencies = get_deps_in_pipfile()
 
-    with open(file, "r") as f:
+    with open(file, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             looks_like_deps = False

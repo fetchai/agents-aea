@@ -50,6 +50,7 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+import pytest_asyncio
 from _pytest.monkeypatch import MonkeyPatch  # type: ignore
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
@@ -151,7 +152,7 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
     CONFIGURATION_SCHEMA_DIR, "protocol-specification_schema.json"
 )
 
-DUMMY_ENV = gym.GoalEnv
+DUMMY_ENV = gym.GoalEnv  # type: ignore
 
 # URL to local Ganache instance
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
@@ -281,7 +282,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.28.2")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.28.3")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -1296,7 +1297,7 @@ def check_test_threads(request):
     assert num_threads >= new_num_threads, "Non closed threads!"
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def ledger_apis_connection(request, ethereum_testnet_config):
     """Make a connection."""
     crypto = make_crypto(DEFAULT_LEDGER)

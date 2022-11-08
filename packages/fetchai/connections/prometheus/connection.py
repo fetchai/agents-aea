@@ -39,7 +39,7 @@ from packages.fetchai.protocols.prometheus.dialogues import (
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.9.3")
+PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.9.4")
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 9090

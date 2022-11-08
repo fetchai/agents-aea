@@ -91,11 +91,11 @@ def react_speed_in_loop(
 
     try:
         # wait all messages are pushed to inboxes
-        while sum([i.is_messages_in_fake_connection() for i in wrappers]):
+        while sum(i.is_messages_in_fake_connection() for i in wrappers):
             time.sleep(0.01)
 
         # wait all messages are consumed from inboxes
-        while sum([not i.is_inbox_empty() for i in wrappers]):
+        while sum(not i.is_inbox_empty() for i in wrappers):
             time.sleep(0.01)
     finally:
         for aea_test_wrapper in wrappers:

@@ -68,10 +68,10 @@ class BanditEnv(gym.Env):
             spaces.Space()
         )  # None type space. agents only get a reward back.
 
-        self.seed()  # seed environment randomness
+        self.seed()  # type: ignore  # seed environment randomness # pylint: disable=no-member  # used in aries skills
 
     @staticmethod
-    def reset() -> Observation:
+    def reset() -> Observation:  # type:ignore  # pylint: disable=arguments-differ
         """
         Reset the environment.
 
@@ -80,7 +80,7 @@ class BanditEnv(gym.Env):
         observation = None  # we purposefully make this explicit here
         return observation
 
-    def step(self, action: Action) -> Feedback:
+    def step(self, action: Action) -> Feedback:  # type: ignore
         """
         Execute one time step within the environment.
 

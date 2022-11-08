@@ -73,9 +73,7 @@ def test_run(password_or_none):
     password_options = _get_password_option_args(password_or_none)
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -153,9 +151,7 @@ def test_run_with_profiling():
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -227,9 +223,7 @@ def test_run_with_default_connection():
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -289,9 +283,7 @@ def test_run_multiple_connections(connection_ids):
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -373,9 +365,7 @@ def test_run_unknown_private_key():
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -448,9 +438,7 @@ def test_run_fet_private_key_config():
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -507,9 +495,7 @@ def test_run_ethereum_private_key_config():
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -569,9 +555,7 @@ def test_run_with_install_deps():
     shutil.copytree(packages_src, packages_dst)
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -649,9 +633,7 @@ def test_run_with_install_deps_and_requirement_file():
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
 
     os.chdir(t)
-    result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-    )
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
     assert result.exit_code == 0
 
     result = runner.invoke(cli, [*CLI_LOG_OPTION, "create", "--local", agent_name])
@@ -736,9 +718,7 @@ class TestRunFailsWhenExceptionOccursInSkill:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -807,9 +787,7 @@ class TestRunFailsWhenConfigurationFileNotFound:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -863,9 +841,7 @@ class TestRunFailsWhenConfigurationFileIsEmpty:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -916,9 +892,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -997,9 +971,7 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -1170,9 +1142,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -1245,9 +1215,7 @@ class TestRunFailsWhenProtocolNotComplete:
         shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(

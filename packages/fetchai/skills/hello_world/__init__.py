@@ -17,4 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the yoti connection implementation."""
+"""This module contains the implementation of the 'Hello World!' skill."""
+
+from aea.configurations.base import PublicId
+
+
+PUBLIC_ID = PublicId.from_str("fetchai/hello_world:0.1.0")

@@ -182,7 +182,7 @@ class BaseSkillTestCase:
                 if is_agent_to_agent_messages
                 else COUNTERPARTY_SKILL_ADDRESS
             )
-        message_attributes = dict()  # type: Dict[str, Any]
+        message_attributes = {}  # type: Dict[str, Any]
 
         default_dialogue_reference = Dialogues.new_self_initiated_dialogue_reference()
         dialogue_reference = (

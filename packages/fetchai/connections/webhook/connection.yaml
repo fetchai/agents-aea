@@ -1,18 +1,18 @@
 name: webhook
 author: fetchai
-version: 0.20.3
+version: 0.20.4
 type: connection
 description: The webhook connection that wraps a webhook functionality.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: Qmc5haAgMML3jXbNgQbdGeynakaWRXp6AmikaTie1Qi2Ae
+  README.md: QmX7VJvCJNAdcBRDYqDUaoCEdQ1ddxuN4m69LiorFc3xYk
   __init__.py: QmYVwjb5jTf46hMNVajEPVjDCBfDFHi6uJYob9xfkXdTmW
-  connection.py: QmYgkmVqBQtUJEwYKnCiU2wDVsnQ847RRebu7ZUgYfyWev
+  connection.py: QmWCaAbj8AnRVuppULpR19D5KZjSgWyiWYvTdKok2gPxTu
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:1.1.3
+- fetchai/http:1.1.4
 class_name: WebhookConnection
 config:
   target_skill_id: null
@@ -21,7 +21,7 @@ config:
   webhook_url_path: /some/url/path
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:1.1.3
+- fetchai/http:1.1.4
 dependencies:
   aiohttp:
     version: <3.8,>=3.7.4

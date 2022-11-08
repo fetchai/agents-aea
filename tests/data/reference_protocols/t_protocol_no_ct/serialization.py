@@ -316,7 +316,7 @@ class TProtocolNoCtSerializer(Serializer):
         t_protocol_no_ct_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = t_protocol_no_ct_pb.WhichOneof("performative")
         performative_id = TProtocolNoCtMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == TProtocolNoCtMessage.Performative.PERFORMATIVE_PT:
             content_bytes = t_protocol_no_ct_pb.performative_pt.content_bytes
             performative_content["content_bytes"] = content_bytes

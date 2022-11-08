@@ -267,9 +267,8 @@ def multi_run(
     multiprocessing.set_start_method("spawn")
     results = []
     for _ in range(num_runs):
-        p = Pool(1)
-        results.append(p.apply(fn, tuple(args)))
-        p.terminate()
+        with Pool(1) as p:
+            results.append(p.apply(fn, tuple(args)))
         del p
 
     mean_values = map(mean, zip(*(map(lambda x: x[1], i) for i in results)))

@@ -102,7 +102,7 @@ def find_all_packages_ids() -> Set[PackageId]:
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
-        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+        if any(file in str(path) for file in CONFIG_FILE_NAMES)
     ]
     for configuration_file in chain(config_files, default_config_file_paths()):
         package_type = PackageType(configuration_file.parts[-3][:-1])
@@ -152,8 +152,8 @@ def push_package(package_id: PackageId, runner: CliRunner) -> None:
             package_id.package_type.value, str(package_id.public_id)
         )
     )
+    cwd = os.getcwd()
     try:
-        cwd = os.getcwd()
         agent_name = "some_agent"
         result = runner.invoke(
             cli,
@@ -238,8 +238,8 @@ def publish_agent(package_id: PackageId, runner: CliRunner) -> None:
             package_id.package_type.value, str(package_id.public_id)
         )
     )
+    cwd = os.getcwd()
     try:
-        cwd = os.getcwd()
         result = runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "fetch", "--local", str(package_id.public_id)],

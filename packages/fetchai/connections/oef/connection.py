@@ -59,7 +59,7 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.22.3")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.22.4")
 
 OefSearchDialogue = BaseOefSearchDialogue
 
@@ -408,7 +408,7 @@ class OEFChannel(OEFAgent):
         else:
             raise ValueError("OEF request not recognized.")  # pragma: nocover
 
-    def handle_failure(  # pylint: disable=no-self-use,unused-argument
+    def handle_failure(  # pylint: disable=unused-argument
         self, exception: Exception, conn: Any
     ) -> None:
         """Handle failure."""
@@ -431,7 +431,9 @@ class OEFChannel(OEFAgent):
     ) -> None:
         """Connect channel."""
         await self._set_loop_and_queue()
-        self.core.__init__(loop=self._loop, logger=_default_logger)
+        self.core = AsyncioCore(  # pylint: disable=attribute-defined-outside-init
+            loop=self._loop, logger=_default_logger
+        )
 
         if self.CONNECT_ATTEMPTS_LIMIT != 0:  # pragma: nocover
             gen = range(self.CONNECT_ATTEMPTS_LIMIT)

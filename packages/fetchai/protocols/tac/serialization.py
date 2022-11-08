@@ -163,7 +163,7 @@ class TacSerializer(Serializer):
         tac_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = tac_pb.WhichOneof("performative")
         performative_id = TacMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == TacMessage.Performative.REGISTER:
             agent_name = tac_pb.register.agent_name
             performative_content["agent_name"] = agent_name

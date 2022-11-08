@@ -685,7 +685,7 @@ def test_public_id_comparator_when_author_is_different():
         ValueError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
-        pid1 < pid2
+        _ = pid1 < pid2
 
 
 def test_public_id_comparator_when_name_is_different():
@@ -696,7 +696,7 @@ def test_public_id_comparator_when_name_is_different():
         ValueError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
-        pid1 < pid2
+        _ = pid1 < pid2
 
 
 def test_package_id_version():

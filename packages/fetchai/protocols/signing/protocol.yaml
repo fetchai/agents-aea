@@ -1,18 +1,18 @@
 name: signing
 author: fetchai
-version: 1.1.3
+version: 1.1.4
 protocol_specification_id: fetchai/signing:1.0.0
 type: protocol
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmSNFEuizMspCvy1QVRGYRT1yqQfFeKWS9kmSsoD6FbVet
-  __init__.py: QmQahekDP2cvFdwW5wYHxQTHrmDEqsExE3XhKM53MFRrA7
+  README.md: QmTQmesXVQyZdbhpjxPzhx6P8zFZaKYNHQEktRWXnpqRKy
+  __init__.py: QmW65AmXigcE7WTveJDiTY6zaVEEXo6CTWVXXLDvWNgTby
   custom_types.py: QmQTVJEAzTMYa5uhuoaV5ax4t4M1FGsS4yUzeng1xbkszV
   dialogues.py: QmeVvBdgfjB7YsCP5ubkUGZasSFEXnghucbEJaCtg5Av78
-  message.py: QmQ61JAyoF9K8sNo9xrCRZTgysKrfgNhh3BoV3FKaGVu9h
-  serialization.py: QmeRu5i5VKkbEQQk7zCWk9FerNx9dnvecxyxF2QPhzBCax
+  message.py: QmZuRf92hvxFpriJgivwqSQin3pgr4zd68ZEXhhmeK888q
+  serialization.py: Qmb23gobo6L9rm5C7hWAqnfnfgpch9ARhtXkVRe34B3URS
   signing.proto: QmbHQYswu1d5JTq8QD3WY9Trw7CwCFbv4c1wmgwiZC5756
   signing_pb2.py: QmaYoSC2uxSATBzNY9utPp7J78drWgyYocr4cPjEhyLf7y
 fingerprint_ignore_patterns: []
