@@ -43,22 +43,19 @@ sudo apt-get dist-upgrade
 ## Install common dependencies
 
 ``` bash
-sudo apt install cmake
-sudo apt install golang
+sudo apt install cmake golang -y
 ```
 
 ## Install less common dependencies (optional)
 
-For some of the more advanced AEAs hat make use of SciPy, such as the Car Park Detector, you will need some additional dependencies.
+For some of the more advanced AEAs that make use of SciPy, such as the Car Park Detector, you will need some additional dependencies.
 
 <details><summary>Install additional dependencies with the enclosed steps</summary>
 <p>
 
 Install additional dependencies
 ``` bash
-sudo apt install gfortran
-sudo apt install libatlas-base-dev
-sudo apt install libopenblas-dev
+sudo apt install gfortran libatlas-base-dev libopenblas-dev -y
 ```
 
 Increase the swap space for the SciPy installation:
@@ -75,26 +72,30 @@ pip install numpy --upgrade
 pip install scikit-image
 ```
 
+Revert to default swap space
+``` bash
+sudo swapoff /var/swap.1
+sudo rm /var/swap.1
+```
+
 </p>
 </details>
 
 ## Install the AEA Framework
 
-First, install pipenv: 
-
+Add to the local `PATH` environment variable (this will happen automatically the next time you login):
 ``` bash
-sudo apt-get install pipenv
-```
-
-Once installed, create and launch a clean virtual environment with Python 3.9:
-
-``` bash
-pipenv --python 3.9 && pipenv shell
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 Finally, install the AEA framework from PyPI:
-
 ``` bash
 pip install aea[all]
 ```
 
+Check to make sure installation was successful:
+``` bash
+aea --version
+```
+
+Your Raspberry Pi is now ready to run an AEA!
