@@ -16,9 +16,9 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/default:1.1.3
-- fetchai/signing:1.1.3
-- fetchai/state_update:1.1.3
+- fetchai/default:1.1.4
+- fetchai/signing:1.1.4
+- fetchai/state_update:1.1.4
 skills: []
 behaviours:
   dummy:

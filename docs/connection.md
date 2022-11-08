@@ -36,7 +36,7 @@ The developer needs to implement four public coroutines:
 
 - The `receive` coroutine is continuously called by the AEA framework. It either returns `None` or an envelope. The `receive` coroutine must implement the logic of data being received by the agent, and if necessary, its translation into a relevant protocol.
 
-The framework provides a demo `stub` connection which implements an I/O reader and writer to send and receive messages between the agent and a local file. To gain inspiration and become familiar with the structure of connection packages, you may find it useful to check out `fetchai/stub:0.21.1`, `fetchai/http_server:0.23.3` or `fetchai/http_client:0.24.3` connections. The latter two connections are for external clients to connect with an agent, and for the agent to connect with external servers, respectively.
+The framework provides a demo `stub` connection which implements an I/O reader and writer to send and receive messages between the agent and a local file. To gain inspiration and become familiar with the structure of connection packages, you may find it useful to check out `fetchai/stub:0.21.2`, `fetchai/http_server:0.23.4` or `fetchai/http_client:0.24.4` connections. The latter two connections are for external clients to connect with an agent, and for the agent to connect with external servers, respectively.
 
 ### Primary methods to develop - sync connection interface
 

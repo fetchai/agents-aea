@@ -4,6 +4,14 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v1.2.2` to `v1.2.3`
+
+Ensure you update the plugins to their latest version (all plugins are changed in this release)
+
+Update the packages to the latest versions (especially protocols).
+
+Update development envidonment
+
 ## `v1.2.0` to `v1.2.2`
 
 Ensure you update the plugins to their latest version (all plugins are changed in this release)

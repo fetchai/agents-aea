@@ -1,6 +1,6 @@
 ``` bash
 agent_name="agg$i"
-aea fetch fetchai/simple_aggregator:0.5.2 --alias $agent_name
+aea fetch fetchai/simple_aggregator:0.5.3 --alias $agent_name
 cd $agent_name
 aea install
 aea build
@@ -9,15 +9,15 @@ aea build
 agent_name="agg$i"
 aea create agent_name
 cd agent_name
-aea add connection fetchai/http_client:0.24.3
-aea add connection fetchai/http_server:0.23.3
-aea add connection fetchai/p2p_libp2p:0.27.2
-aea add connection fetchai/soef:0.27.3
-aea add connection fetchai/prometheus:0.9.3
-aea add skill fetchai/advanced_data_request:0.7.3
-aea add skill fetchai/simple_aggregation:0.3.3
+aea add connection fetchai/http_client:0.24.4
+aea add connection fetchai/http_server:0.23.4
+aea add connection fetchai/p2p_libp2p:0.27.3
+aea add connection fetchai/soef:0.27.4
+aea add connection fetchai/prometheus:0.9.4
+aea add skill fetchai/advanced_data_request:0.7.4
+aea add skill fetchai/simple_aggregation:0.3.4
 
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea install
 aea build
 ```
@@ -67,8 +67,8 @@ aea config set vendor.fetchai.connections.prometheus.config.port $((20000+i))
 aea config set vendor.fetchai.connections.http_server.config.port $((8000+i))
 ```
 ``` bash
-aea add connection fetchai/ledger:0.21.2
-aea add skill fetchai/simple_oracle:0.16.2
+aea add connection fetchai/ledger:0.21.3
+aea add skill fetchai/simple_oracle:0.16.3
 ```
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
