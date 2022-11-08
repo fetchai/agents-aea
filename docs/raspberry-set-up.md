@@ -7,13 +7,13 @@ This guide explains how to run an AEA inside a Raspberry Pi.
 
 ## Preparing the Raspberry Pi
 
-The easiest and recommended way to get started is to download and unzip our custom <a href="https://github.com/fetchai/aea-raspberry-pi/aea_rpi.img.tar.gz" target="_blank">AEA Raspberry Pi Image</a>, which includes the AEA installation as well as the most common dependencies.
+The easiest and recommended way to get started is to download and unzip our custom <a href="https://storage.googleapis.com/fetch-ai-aea-images/aea_rpi.img.tar.gz" target="_blank">AEA Raspberry Pi Image</a>, which includes the AEA installation as well as the most common dependencies.
 
 However, you can also do the installation manually, and if you have a new Raspberry Pi, you can boot the system using the included SD card and skip the next section.
 
 ## Raspberry Pi Imager
 
-Raspberry Pi Imager is a way to create an SD card for easy operating system installation on a Raspberry Pi.
+Raspberry Pi Imager is a way to write to an SD card for easy installation on a Raspberry Pi.
 
 First download the tool from <a href="https://www.raspberrypi.com/software/" target="_blank">this link</a>.
 
@@ -24,9 +24,11 @@ Once you have set up your SD card, plug it into your Raspberry Pi, connect the p
 
 ## Booting up with the AEA Raspberry Pi Image
 
-Upon booting up, you will be prompted to log in as the `aea` user and the password is `fetch`.
+After booting up, you may be prompted to log in as the `aea` user and the password is `fetch`.
 Next, navigate to settings menu to set up your internet connection.
 Your Raspberry Pi is now ready to run an AEA!
+You can find some preloaded demos in the folder `~/aea/demos`.
+To run these demos, navigate to one of the subfolders and enter `aea run`.
 
 ## Booting up with the Raspberry Pi OS for manual installation
 
