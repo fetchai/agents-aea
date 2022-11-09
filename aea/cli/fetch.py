@@ -76,7 +76,10 @@ def fetch(
     """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
     ctx.registry_type = registry
-    do_fetch(ctx, public_id, alias)
+    try:
+        do_fetch(ctx, public_id, alias)
+    except NotAnAgentPacakge as e:
+        raise click.ClickException(str(e)) from e
 
 
 def do_fetch(
@@ -159,6 +162,12 @@ def fetch_agent_ipfs(
 
     ctx.clean_paths.append(target_dir)
     ctx.cwd = str(target_dir)
+
+    if not Path(target_dir, DEFAULT_AEA_CONFIG_FILE).exists():
+        raise NotAnAgentPacakge(
+            f"Downloaded packages at {target_dir} is not an agent package, please check hash"
+        )
+
     try_to_load_agent_config(ctx)
 
     ctx.agent_config.agent_name = target_dir.name
@@ -268,3 +277,7 @@ def fetch_mixed(
             f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
         )
         fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
+
+
+class NotAnAgentPacakge(Exception):
+    """Raise when downloaded package is not an agent package."""
