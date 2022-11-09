@@ -1,11 +1,19 @@
 # Release History - open AEA
 
-## 1.23.0 (TBD)
+## 1.23.0 (2022-11-09)
 
 AEA:
+- Extracts package manager implementation into core module
 - Extends the package manager implementation to introduce separation between development and third party packages
+- Extends aea packages lock command to work with new `packages.json` format
+- Extends aea packages sync command with `--dev`, `--third-party`, `--all` flags to specify what packages to sync avoid updating hashes for third party packages
+- Updates the `check-packages` command to make sure we skip `open-aea` when generating list for third party packages in package dependency check
+- Adds proper exception handling on `aea fetch` command for bad packages
 
-## 1.22.0 (2022-11-1)
+Chores:
+- Updates dependencies in Dockerfile for documentation
+
+## 1.22.0 (2022-11-01)
 
 AEA:
 - Updates the cert request serialisation process to maintain consistency across different operating systems
