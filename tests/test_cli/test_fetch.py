@@ -31,7 +31,7 @@ from click import ClickException
 
 import aea
 from aea.cli import cli
-from aea.cli.fetch import NotAnAgentPacakge, _is_version_correct, fetch_agent_locally
+from aea.cli.fetch import _is_version_correct, fetch_agent_locally
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
