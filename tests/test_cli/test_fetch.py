@@ -31,7 +31,7 @@ from click import ClickException
 
 import aea
 from aea.cli import cli
-from aea.cli.fetch import _is_version_correct, fetch_agent_locally
+from aea.cli.fetch import NotAnAgentPacakge, _is_version_correct, fetch_agent_locally
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
@@ -364,6 +364,20 @@ class TestFetchIPFS(BaseAEATestCase):
             with pytest.raises(
                 click.ClickException,
             ):
+                self.run_cli_command(
+                    "fetch",
+                    self.dummy_id,
+                    "--remote",
+                )
+
+    def test_not_an_agent_error(self) -> None:
+        """Test run."""
+
+        with mock.patch(
+            "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
+        ), mock.patch.object(IPFSTool, "download"):
+
+            with pytest.raises(ClickException, match="is not an agent package"):
                 self.run_cli_command(
                     "fetch",
                     self.dummy_id,
