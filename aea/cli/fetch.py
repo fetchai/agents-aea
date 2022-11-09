@@ -78,7 +78,7 @@ def fetch(
     ctx.registry_type = registry
     try:
         do_fetch(ctx, public_id, alias)
-    except NotAnAgentPacakge as e:
+    except NotAnAgentPackage as e:
         raise click.ClickException(str(e)) from e
 
 
@@ -164,7 +164,7 @@ def fetch_agent_ipfs(
     ctx.cwd = str(target_dir)
 
     if not Path(target_dir, DEFAULT_AEA_CONFIG_FILE).exists():
-        raise NotAnAgentPacakge(
+        raise NotAnAgentPackage(
             f"Downloaded packages at {target_dir} is not an agent package, please check hash"
         )
 
@@ -279,5 +279,5 @@ def fetch_mixed(
         fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
-class NotAnAgentPacakge(Exception):
+class NotAnAgentPackage(Exception):
     """Raise when downloaded package is not an agent package."""
