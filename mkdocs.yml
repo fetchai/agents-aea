@@ -14,7 +14,7 @@ strict: true
 
 nav:
   - Introduction:
-      - What is the AEA Framework?: "introduction/what_is_the_aea_framework.md"
+      - What is the AEA Framework?: 'introduction/what_is_the_aea_framework.md'
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
