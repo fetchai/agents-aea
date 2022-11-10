@@ -1598,7 +1598,7 @@ class TestExcludeConnection(AEATestCaseEmpty):
     def test_connection_excluded(self):
         """Test connection excluded."""
 
-        def raise_err(*args):
+        def raise_err(*args, **kwargs):
             raise Exception(args[1])
 
         with pytest.raises(Exception, match="^None$"):
