@@ -352,7 +352,7 @@ blspy = "*"
 ecdsa = "*"
 google-api-python-client = "*"
 grpcio = "1.47.0"
-jsonschema = ">=4.16.0,<5.0.0"
+jsonschema = ">=3.2.0,<5.0.0"
 protobuf = ">=3.19.4,<4"
 requests = "*"
 
