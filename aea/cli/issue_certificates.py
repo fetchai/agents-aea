@@ -26,6 +26,7 @@ from click import ClickException
 from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
+from aea.cli.utils.exceptions import aev_flag_depreaction
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_dotted_package_path_unified
 from aea.configurations.base import AgentConfig, PublicId
@@ -55,10 +56,13 @@ def issue_certificates(
     password: Optional[str],
 ) -> None:
     """Issue certificates for connections that require them."""
+    if apply_environment_variables:
+        aev_flag_depreaction()
+
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(
         ctx.cwd,
-        substitude_env_vars=apply_environment_variables,
+        substitude_env_vars=True,
     )
     issue_certificates_(ctx.cwd, agent_config_manager, password=password)
 
