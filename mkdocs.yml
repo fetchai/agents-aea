@@ -13,7 +13,8 @@ theme:
 strict: true
 
 nav:
-  - Introduction: 'index.md'
+  - Introduction:
+      - What is the AEA Framework?: "introduction/what_is_the_aea_framework.md"
   - Version: 'version.md'
   - Upgrading: 'upgrading.md'
   - Concepts:
