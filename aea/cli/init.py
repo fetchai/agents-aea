@@ -36,14 +36,16 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.command()
 @click.option("--author", type=str, required=False)
 @click.option("--reset", is_flag=True, help="To reset the initialization.")
-@click.option("--local", is_flag=True, help="For init AEA locally.")
+@click.option(
+    "--register", is_flag=True, help="To register the author in the AEA registry."
+)
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 @pass_ctx
 def init(  # pylint: disable=unused-argument
-    ctx: Context, author: str, reset: bool, local: bool, no_subscribe: bool
+    ctx: Context, author: str, reset: bool, register: bool, no_subscribe: bool
 ) -> None:
     """Initialize your AEA configurations."""
-    do_init(author, reset, not local, no_subscribe)
+    do_init(author, reset, register, no_subscribe)
 
 
 def do_init(author: str, reset: bool, registry: bool, no_subscribe: bool) -> None:

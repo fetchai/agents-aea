@@ -87,9 +87,11 @@ def publish_agent(ctx: Context) -> None:
 
     files = {}
     try:
-        files["file"] = open(output_tar, "rb")
+        files["file"] = open(output_tar, "rb")  # pylint: disable=consider-using-with
         if is_readme_present(readme_source_path):
-            files["readme"] = open(readme_source_path, "rb")
+            files["readme"] = open(  # pylint: disable=consider-using-with
+                readme_source_path, "rb"
+            )
         path = "/agents/create"
         logger.debug("Publishing agent {} to Registry ...".format(name))
         resp = cast(

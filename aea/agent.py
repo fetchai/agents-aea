@@ -215,7 +215,7 @@ class Agent(AbstractAgent, WithLogger):
 
         if was_started:
             self.runtime.wait_completed(sync=True)
-        else:  #  pragma: nocover
+        else:  # pragma: nocover
             raise AEAException("Failed to start runtime! Was it already started?")
 
     def handle_envelope(self, envelope: Envelope) -> None:

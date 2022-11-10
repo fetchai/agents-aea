@@ -1,20 +1,20 @@
 name: acn
 author: fetchai
-version: 1.1.3
+version: 1.1.4
 protocol_specification_id: aea/acn:1.0.0
 type: protocol
 description: The protocol used for envelope delivery on the ACN.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmUTHYxLiNzWGe8bKgsi46eKU9x3S8P2zCUQUM5Uw9AQHn
-  __init__.py: QmX5Pw6VxLYhVDCSAzYKeVKajBQcmDiUpssmnQEWbCyQQf
+  README.md: QmUXc3ou55xJHWm1HQof97GJuiejdzSoyemb6xrGKTKibN
+  __init__.py: QmeNcmhZhzaNQ92PBaiSCZqvmPDpzBGnbiHYcKtTaevXcy
   acn.proto: QmVWvXETUNe7QZTvBgzwpofNP3suFthwyxbTVUqSx8mdnE
   acn_pb2.py: Qmf3HYmJtGwugpCuWSmJEDVHwZcnCF6BWmeEouUSpBRs45
   custom_types.py: QmWG7yrphMBi1pxHW6ypM5oBPWCYqE1Aj5BfeSsgqb7BNf
   dialogues.py: QmcxdAUTH1zyu2S8aWbmAQ8ba62Yk4wB4qshNs8MWcMCpj
-  message.py: QmVQsUv15qyP6izWm1emstHXuimPKoUDyGHUsSiHPPuedJ
-  serialization.py: QmYYBnxzJEqHfLRCQFAvcNR7sd9SfVpUmT9RY8ryxj32V8
+  message.py: QmW4ghVr74u5VJ8EYt4ehbRbrGD5bZT1VkmNfDQbPPHrjy
+  serialization.py: QmWaMfQEJCMCRjwxCYa4Zd8VFESMZSRgAnBa3XcRFFpKo9
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

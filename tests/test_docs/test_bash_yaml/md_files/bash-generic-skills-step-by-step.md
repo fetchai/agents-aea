@@ -5,19 +5,19 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.29.2
+aea fetch fetchai/generic_seller:0.29.3
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.28.3
+aea eject skill fetchai/generic_seller:0.28.4
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.30.2
+aea fetch fetchai/generic_buyer:0.30.3
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.27.3
+aea eject skill fetchai/generic_buyer:0.27.4
 cd ..
 ```
 ``` bash
-aea init --reset --local --author fetchai
+aea init --reset --author fetchai
 ```
 ``` bash
 aea create my_generic_seller
@@ -55,32 +55,32 @@ aea issue-certificates
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.3": "fetchai/ledger:0.21.2",
-  "fetchai/oef_search:1.1.3": "fetchai/soef:0.27.3"
+  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
 }'
 ```
 ``` bash
 aea generate-wealth fetchai --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.27.2
-aea add connection fetchai/soef:0.27.3
-aea add connection fetchai/ledger:0.21.2
-aea add protocol fetchai/fipa:1.1.3
+aea add connection fetchai/p2p_libp2p:0.27.3
+aea add connection fetchai/soef:0.27.4
+aea add connection fetchai/ledger:0.21.3
+aea add protocol fetchai/fipa:1.1.4
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.27.2
-aea add connection fetchai/soef:0.27.3
-aea add connection fetchai/ledger:0.21.2
-aea add protocol fetchai/fipa:1.1.3
-aea add protocol fetchai/signing:1.1.3
+aea add connection fetchai/p2p_libp2p:0.27.3
+aea add connection fetchai/soef:0.27.4
+aea add connection fetchai/ledger:0.21.3
+aea add protocol fetchai/fipa:1.1.4
+aea add protocol fetchai/signing:1.1.4
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.27.2
+aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 ```
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
@@ -118,13 +118,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.2
+- fetchai/ledger:0.21.3
 contracts: []
 protocols:
-- fetchai/default:1.1.3
-- fetchai/fipa:1.1.3
-- fetchai/ledger_api:1.1.3
-- fetchai/oef_search:1.1.3
+- fetchai/default:1.1.4
+- fetchai/fipa:1.1.4
+- fetchai/ledger_api:1.1.4
+- fetchai/oef_search:1.1.4
 skills: []
 behaviours:
   service_registration:
@@ -189,14 +189,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.21.2
+- fetchai/ledger:0.21.3
 contracts: []
 protocols:
-- fetchai/default:1.1.3
-- fetchai/fipa:1.1.3
-- fetchai/ledger_api:1.1.3
-- fetchai/oef_search:1.1.3
-- fetchai/signing:1.1.3
+- fetchai/default:1.1.4
+- fetchai/fipa:1.1.4
+- fetchai/ledger_api:1.1.4
+- fetchai/oef_search:1.1.4
+- fetchai/signing:1.1.4
 skills: []
 behaviours:
   search:

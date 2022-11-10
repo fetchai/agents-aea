@@ -17,14 +17,31 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This module contains the support resources for the yoti protocol.
+"""This module contains the behaviour of the 'Hello World!' skill."""
 
-It was created with protocol buffer compiler version `libprotoc 3.19.4` and aea version `1.2.2`.
-"""
+from typing import Any
 
-from packages.fetchai.protocols.yoti.message import YotiMessage
-from packages.fetchai.protocols.yoti.serialization import YotiSerializer
+from aea.skills.behaviours import OneShotBehaviour
 
 
-YotiMessage.serializer = YotiSerializer
+DEFAULT_MESSAGE = "Hello World!"
+
+
+class HelloWorld(OneShotBehaviour):
+    """This skill prints 'Hello World!' on the screen."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialise the behaviour."""
+
+        self.message = kwargs.pop("message", DEFAULT_MESSAGE)  # type: str
+        super().__init__(**kwargs)
+
+    def setup(self) -> None:
+        """The setup."""
+
+    def act(self) -> None:
+        """The act."""
+        self.context.logger.info(self.message)
+
+    def teardown(self) -> None:
+        """The teardown."""

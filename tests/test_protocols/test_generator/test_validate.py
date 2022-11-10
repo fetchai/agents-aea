@@ -1552,7 +1552,7 @@ class TestValidate(TestCase):
 
         ###################################################
 
-        invalid_roles_1 = dict()
+        invalid_roles_1 = {}
         invalid_result_1, invalid_msg_1 = _validate_roles(invalid_roles_1)
         assert invalid_result_1 is False
         assert (

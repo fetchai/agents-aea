@@ -51,7 +51,7 @@ class Kwargs:
         """Check consistency of the object."""
         enforce(
             isinstance(self._body, dict)
-            and all([isinstance(key, str) for key in self._body.keys()]),
+            and all(isinstance(key, str) for key in self._body.keys()),
             "Body must be dict and keys must be str.",
         )
 

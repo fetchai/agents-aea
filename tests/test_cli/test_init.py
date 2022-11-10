@@ -55,7 +55,7 @@ class TestDoInit:
 
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", author],
+            [*CLI_LOG_OPTION, "init", "--author", author],
         )
 
         assert result.exit_code == 0
@@ -75,10 +75,10 @@ class TestDoInit:
         """Test author already registered."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--local", "--author", "author"],
+            [*CLI_LOG_OPTION, "init", "--author", "author"],
         )
         assert result.exit_code == 0
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local"])
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "init"])
         assert "AEA configurations already initialized" in result.output
 
     @patch("aea.cli.register.register_new_account", return_value="TOKEN")
@@ -89,7 +89,7 @@ class TestDoInit:
         author = "test_author" + random_string()
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--author", author],
+            [*CLI_LOG_OPTION, "init", "--register", "--author", author],
             input=f"n\n{email}\n{pwd}\n{pwd}\n\n",
         )
         assert result.exit_code == 0, result.output
@@ -105,7 +105,7 @@ class TestDoInit:
         author = "test_author" + random_string()
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--author", author],
+            [*CLI_LOG_OPTION, "init", "--register", "--author", author],
             input="y\nsome fake password\n",
         )
 
@@ -117,7 +117,7 @@ class TestDoInit:
         """Registered and logged in (has token)."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "init", "--author", "test_author"],
+            [*CLI_LOG_OPTION, "init", "--register", "--author", "test_author"],
         )
         assert result.exit_code == 0
 

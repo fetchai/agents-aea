@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Scaffold of a connection."""
+"""Tests for fetchai/hellow_world skill."""

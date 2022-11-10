@@ -42,7 +42,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.20.3")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.20.4")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 

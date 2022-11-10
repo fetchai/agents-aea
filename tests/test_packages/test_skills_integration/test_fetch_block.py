@@ -32,9 +32,9 @@ class TestFetchBlockSkill(AEATestCaseEmpty):
         """Run the fetch block skill sequence."""
         self.generate_private_key()
         self.add_private_key()
-        self.add_item("connection", "fetchai/ledger:0.21.2")
-        self.add_item("skill", "fetchai/fetch_block:0.12.3")
-        self.set_config("agent.default_connection", "fetchai/ledger:0.21.2")
+        self.add_item("connection", "fetchai/ledger:0.21.3")
+        self.add_item("skill", "fetchai/fetch_block:0.12.4")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.21.3")
 
         self.run_install()
 

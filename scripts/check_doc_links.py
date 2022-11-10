@@ -65,7 +65,7 @@ def is_url_reachable(url: str) -> bool:
         if response.status_code in [403, 405, 302, 404]:
             return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302, 404]
         return False
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except,redefined-outer-name
         print(e)
         return False
 
@@ -77,7 +77,7 @@ def check_header_in_file(header: str, file: Path) -> None:
     :param header: the header
     :param file: the file path
     """
-    with open(file) as f:
+    with open(file, encoding="utf-8") as f:
         s = f.read()
         if header not in s:
             raise ValueError(

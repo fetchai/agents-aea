@@ -236,7 +236,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
     def stop(self) -> None:
         """Stop task."""
-        if not self._future:  #  pragma: nocover
+        if not self._future:  # pragma: nocover
             _default_logger.debug("Stop called, but no future set.")
             return
         if self._future.done():

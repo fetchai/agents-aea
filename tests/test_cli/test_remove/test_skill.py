@@ -55,9 +55,7 @@ class TestRemoveSkillWithPublicId:
         cls.skill_name = "gym"
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -127,9 +125,7 @@ class TestRemoveSkillFailsWhenSkillIsNotSupported:
         cls.skill_id = str(GYM_SKILL_PUBLIC_ID)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -186,9 +182,7 @@ class TestRemoveSkillFailsWhenExceptionOccurs:
         cls.skill_name = "gym"
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(

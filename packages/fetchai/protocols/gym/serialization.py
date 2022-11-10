@@ -115,7 +115,7 @@ class GymSerializer(Serializer):
         gym_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = gym_pb.WhichOneof("performative")
         performative_id = GymMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == GymMessage.Performative.ACT:
             pb2_action = gym_pb.act.action
             action = AnyObject.decode(pb2_action)

@@ -122,7 +122,7 @@ arguments: argparse.Namespace = None  # type: ignore
 
 def get_hashes_from_last_release() -> Dict[str, str]:
     """Get hashes from last release."""
-    svn_call = subprocess.Popen(  # nosec
+    with subprocess.Popen(  # nosec
         [
             "svn",
             "export",
@@ -130,10 +130,10 @@ def get_hashes_from_last_release() -> Dict[str, str]:
                 HASHES_CSV
             ),
         ]
-    )
-    svn_call.wait()
+    ) as svn_call:
+        svn_call.wait()
     hashes = {}  # Dict[str, str]
-    with open(HASHES_CSV) as f:
+    with open(HASHES_CSV, encoding="utf-8") as f:
         for line in f:
             split = line.split(",")
             hashes[split[0]] = split[1].rstrip()
@@ -144,7 +144,7 @@ def get_hashes_from_last_release() -> Dict[str, str]:
 def get_hashes_from_current_release() -> Dict[str, str]:
     """Get hashes from last release."""
     hashes = {}  # Dict[str, str]
-    with open(os.path.join("packages", HASHES_CSV)) as f:
+    with open(os.path.join("packages", HASHES_CSV), encoding="utf-8") as f:
         for line in f:
             split = line.split(",")
             hashes[split[0]] = split[1].rstrip()
@@ -189,7 +189,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
     :return: the data.
     """
     package_type = configuration_file.parent.parent.name
-    with configuration_file.open() as fp:
+    with configuration_file.open(encoding="utf-8") as fp:
         if package_type != "agents":
             return yaml.safe_load(fp)
         # when it is an agent configuration file,
@@ -568,9 +568,12 @@ def bump_version_in_yaml(
 ) -> None:
     """Bump the package version in the package yaml."""
     loader = ConfigLoader.from_configuration_type(type_[:-1])
-    config = loader.load(configuration_file_path.open())
+    with configuration_file_path.open(encoding="utf-8") as f:
+        config = loader.load(f)
     config.version = version
-    loader.dump(config, open(configuration_file_path, "w"))
+
+    with open(configuration_file_path, "w", encoding="utf-8") as f:
+        loader.dump(config, f)
 
 
 class Updater:
@@ -605,11 +608,13 @@ class Updater:
 
         Script should only be run on a clean branch.
         """
-        git_call = subprocess.Popen(["git", "diff"], stdout=subprocess.PIPE)  # nosec
-        (stdout, _) = git_call.communicate()
-        git_call.wait()
-        if len(stdout) > 0:
-            raise Exception("Cannot run script in unclean git state.")
+        with subprocess.Popen(  # nosec
+            ["git", "diff"], stdout=subprocess.PIPE
+        ) as git_call:
+            (stdout, _) = git_call.communicate()
+            git_call.wait()
+            if len(stdout) > 0:
+                raise Exception("Cannot run script in unclean git state.")
 
     def _checks(self) -> None:
         self.check_if_svn_installed()

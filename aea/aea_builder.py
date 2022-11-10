@@ -415,7 +415,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def _remove_components_from_dependency_manager(self) -> None:
         """Remove components added via 'add_component' from the dependency manager."""
-        for component_type in self._component_instances.keys():
+        for (
+            component_type
+        ) in (
+            self._component_instances.keys()
+        ):  # pylint: disable=consider-using-dict-items
             for component_config in self._component_instances[component_type].keys():
                 self._package_dependency_manager.remove_component(
                     component_config.component_id

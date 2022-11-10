@@ -230,7 +230,7 @@ class Message:
         for key, value in data.items():
             self.set(key, value)
 
-    def _is_consistent(self) -> bool:  # pylint: disable=no-self-use
+    def _is_consistent(self) -> bool:
         """Check that the data is consistent."""
         return True
 

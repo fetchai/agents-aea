@@ -249,7 +249,7 @@ class TestFSMBehaviourCreation:
         }
         self.fsm_behaviour.unregister_transition("state_1", "state_2", None)
         self.fsm_behaviour.unregister_transition("state_1", "state_2", "an_event")
-        assert self.fsm_behaviour.transitions == dict()
+        assert self.fsm_behaviour.transitions == {}
 
     def test_register_same_transition_twice(self):
         """Test that when we try to register twice the same transition we raise an error."""

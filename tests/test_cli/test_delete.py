@@ -45,7 +45,7 @@ class TestDelete:
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
-        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR])
+        cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
 
         cls.runner.invoke(
             cli,
@@ -118,9 +118,7 @@ class TestDeleteFailsWhenDirectoryCannotBeDeleted:
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
