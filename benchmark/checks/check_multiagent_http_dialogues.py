@@ -185,8 +185,15 @@ def run(
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
+
     for agent in agents:
-        wait_for_condition(lambda: agent.is_running, timeout=5)
+        wait_for_condition(
+            (  # pylint: disable=unnecessary-direct-lambda-call
+                lambda agnt: lambda: agnt.is_running
+            )(agent),
+            timeout=5,
+        )
+
     wait_for_condition(lambda: runner.is_running, timeout=5)
     time.sleep(1)
 
@@ -202,40 +209,30 @@ def run(
     local_node.stop()
     runner.stop(timeout=5)
     total_messages = sum(
-        [
-            cast(HttpPingPongHandler, skill.handlers[handler_name]).count
-            for skill in skills.values()
-        ]
+        cast(HttpPingPongHandler, skill.handlers[handler_name]).count
+        for skill in skills.values()
     )
     rate = total_messages / duration
 
     rtt_total_time = sum(
-        [
-            cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_total_time
-            for skill in skills.values()
-        ]
+        cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_total_time
+        for skill in skills.values()
     )
     rtt_count = sum(
-        [
-            cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_count
-            for skill in skills.values()
-        ]
+        cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_count
+        for skill in skills.values()
     )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [
-            cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_total_time
-            for skill in skills.values()
-        ]
+        cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_total_time
+        for skill in skills.values()
     )
     latency_count = sum(
-        [
-            cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_count
-            for skill in skills.values()
-        ]
+        cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_count
+        for skill in skills.values()
     )
 
     if latency_count == 0:

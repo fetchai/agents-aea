@@ -1,6 +1,6 @@
 name: p2p_libp2p_mailbox
 author: fetchai
-version: 0.2.3
+version: 0.2.4
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
@@ -8,13 +8,13 @@ description: The libp2p client connection implements a tcp connection to a runni
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQjq5XattvyCCfQwcj8u4U4b3E2vcvu2tFJUPuoLhbpNX
+  README.md: QmathnM2UNdWoyhDqc1gxzbsw7bG9RQbFFi6a4U3FAnJM7
   __init__.py: QmQKLUSEPVm59e3JC78zQTebbo8AKf4SBRhz1AKuV7bmCB
-  connection.py: QmRLKwsnagQpxYiVpg7xk6eaiQjYpTKnmaD1iNPpFLGz5x
+  connection.py: QmTgs2d4oJ8r9QZbWrgoLX4qJodqmRkBjrwLjT4uCW5gcC
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/acn:1.1.3
+- fetchai/acn:1.1.4
 class_name: P2PLibp2pMailboxConnection
 config:
   connect_retries: 3

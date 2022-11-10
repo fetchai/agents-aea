@@ -106,7 +106,7 @@ class StateUpdateSerializer(Serializer):
         state_update_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = state_update_pb.WhichOneof("performative")
         performative_id = StateUpdateMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == StateUpdateMessage.Performative.INITIALIZE:
             exchange_params_by_currency_id = (
                 state_update_pb.initialize.exchange_params_by_currency_id

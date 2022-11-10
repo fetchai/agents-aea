@@ -274,7 +274,7 @@ class ExtractTestCase(TestCase):
         """Test for extract method wrong file type."""
         source = "file.wrong"
         target = "target-folder"
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             extract(source, target)
 
 

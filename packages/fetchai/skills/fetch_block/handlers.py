@@ -102,7 +102,7 @@ class LedgerApiHandler(Handler):
         if block_height_str:
             block_height = int(block_height_str)  # type: Optional[int]
         else:
-            block_height = None  #  pragma: nocover
+            block_height = None  # pragma: nocover
 
         if block_height is None:  # pragma: nocover
             self.context.logger.info("block height not present")

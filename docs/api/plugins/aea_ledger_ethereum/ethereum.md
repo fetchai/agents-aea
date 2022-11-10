@@ -1,18 +1,23 @@
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum"></a>
+
 # plugins.aea-ledger-ethereum.aea`_`ledger`_`ethereum.ethereum
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_gas_price_strategy"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_gas_price_strategy"></a>
+
 #### get`_`gas`_`price`_`strategy
 
 ```python
-get_gas_price_strategy(gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None) -> Callable[[Web3, TxParams], Wei]
+def get_gas_price_strategy(
+        gas_price_strategy: Optional[str] = None,
+        api_key: Optional[str] = None) -> Callable[[Web3, TxParams], Wei]
 ```
 
 Get the gas price strategy.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator"></a>
+
 ## SignedTransactionTranslator Objects
 
 ```python
@@ -21,27 +26,31 @@ class SignedTransactionTranslator()
 
 Translator for SignedTransaction.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator.to_dict"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator.to_dict"></a>
+
 #### to`_`dict
 
 ```python
- | @staticmethod
- | to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]
+@staticmethod
+def to_dict(
+        signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]
 ```
 
 Write SignedTransaction to dict.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator.from_dict"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator.from_dict"></a>
+
 #### from`_`dict
 
 ```python
- | @staticmethod
- | from_dict(signed_transaction_dict: JSONLike) -> SignedTransaction
+@staticmethod
+def from_dict(signed_transaction_dict: JSONLike) -> SignedTransaction
 ```
 
 Get SignedTransaction from dict.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator"></a>
+
 ## AttributeDictTranslator Objects
 
 ```python
@@ -50,27 +59,31 @@ class AttributeDictTranslator()
 
 Translator for AttributeDict.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator.to_dict"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator.to_dict"></a>
+
 #### to`_`dict
 
 ```python
- | @classmethod
- | to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike
+@classmethod
+def to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt,
+                                  TxData]) -> JSONLike
 ```
 
 Simplify to dict.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator.from_dict"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator.from_dict"></a>
+
 #### from`_`dict
 
 ```python
- | @classmethod
- | from_dict(cls, di: JSONLike) -> AttributeDict
+@classmethod
+def from_dict(cls, di: JSONLike) -> AttributeDict
 ```
 
 Get back attribute dict.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto"></a>
+
 ## EthereumCrypto Objects
 
 ```python
@@ -79,11 +92,13 @@ class EthereumCrypto(Crypto[Account])
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.__init__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None) -> None
+def __init__(private_key_path: Optional[str] = None,
+             password: Optional[str] = None) -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -93,12 +108,13 @@ Instantiate an ethereum crypto object.
 - `private_key_path`: the private key path of the agent
 - `password`: the password to encrypt/decrypt the private key.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.private_key"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.private_key"></a>
+
 #### private`_`key
 
 ```python
- | @property
- | private_key() -> str
+@property
+def private_key() -> str
 ```
 
 Return a private key.
@@ -107,12 +123,13 @@ Return a private key.
 
 a private key string
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.public_key"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.public_key"></a>
+
 #### public`_`key
 
 ```python
- | @property
- | public_key() -> str
+@property
+def public_key() -> str
 ```
 
 Return a public key in hex format.
@@ -121,12 +138,13 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.address"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.address"></a>
+
 #### address
 
 ```python
- | @property
- | address() -> str
+@property
+def address() -> str
 ```
 
 Return the address for the key pair.
@@ -135,12 +153,15 @@ Return the address for the key pair.
 
 a display_address str
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.load_private_key_from_path"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.load_private_key_from_path"></a>
+
 #### load`_`private`_`key`_`from`_`path
 
 ```python
- | @classmethod
- | load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> Account
+@classmethod
+def load_private_key_from_path(cls,
+                               file_name: str,
+                               password: Optional[str] = None) -> Account
 ```
 
 Load a private key in hex format from a file.
@@ -154,11 +175,12 @@ Load a private key in hex format from a file.
 
 the Entity.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.sign_message"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.sign_message"></a>
+
 #### sign`_`message
 
 ```python
- | sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
+def sign_message(message: bytes, is_deprecated_mode: bool = False) -> str
 ```
 
 Sign a message in bytes string form.
@@ -172,11 +194,12 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.sign_transaction"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.sign_transaction"></a>
+
 #### sign`_`transaction
 
 ```python
- | sign_transaction(transaction: JSONLike) -> JSONLike
+def sign_transaction(transaction: JSONLike) -> JSONLike
 ```
 
 Sign a transaction in bytes string form.
@@ -189,21 +212,23 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.generate_private_key"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.generate_private_key"></a>
+
 #### generate`_`private`_`key
 
 ```python
- | @classmethod
- | generate_private_key(cls) -> Account
+@classmethod
+def generate_private_key(cls) -> Account
 ```
 
 Generate a key pair for ethereum network.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.encrypt"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.encrypt"></a>
+
 #### encrypt
 
 ```python
- | encrypt(password: str) -> str
+def encrypt(password: str) -> str
 ```
 
 Encrypt the private key and return in json.
@@ -216,12 +241,13 @@ Encrypt the private key and return in json.
 
 json string containing encrypted private key.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.decrypt"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.decrypt"></a>
+
 #### decrypt
 
 ```python
- | @classmethod
- | decrypt(cls, keyfile_json: str, password: str) -> str
+@classmethod
+def decrypt(cls, keyfile_json: str, password: str) -> str
 ```
 
 Decrypt the private key and return in raw form.
@@ -235,7 +261,8 @@ Decrypt the private key and return in raw form.
 
 the raw private key.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper"></a>
+
 ## EthereumHelper Objects
 
 ```python
@@ -244,12 +271,13 @@ class EthereumHelper(Helper)
 
 Helper class usable as Mixin for EthereumApi or as standalone class.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_settled"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_settled"></a>
+
 #### is`_`transaction`_`settled
 
 ```python
- | @staticmethod
- | is_transaction_settled(tx_receipt: JSONLike) -> bool
+@staticmethod
+def is_transaction_settled(tx_receipt: JSONLike) -> bool
 ```
 
 Check whether a transaction is settled or not.
@@ -262,12 +290,13 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_contract_address"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_contract_address"></a>
+
 #### get`_`contract`_`address
 
 ```python
- | @staticmethod
- | get_contract_address(tx_receipt: JSONLike) -> Optional[str]
+@staticmethod
+def get_contract_address(tx_receipt: JSONLike) -> Optional[str]
 ```
 
 Retrieve the `contract_address` from a transaction receipt.
@@ -280,12 +309,14 @@ Retrieve the `contract_address` from a transaction receipt.
 
 the contract address, if present
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_valid"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_valid"></a>
+
 #### is`_`transaction`_`valid
 
 ```python
- | @staticmethod
- | is_transaction_valid(tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+@staticmethod
+def is_transaction_valid(tx: dict, seller: Address, client: Address,
+                         tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -302,12 +333,13 @@ Check whether a transaction is valid or not.
 
 True if the random_message is equals to tx['input']
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.generate_tx_nonce"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.generate_tx_nonce"></a>
+
 #### generate`_`tx`_`nonce
 
 ```python
- | @staticmethod
- | generate_tx_nonce(seller: Address, client: Address) -> str
+@staticmethod
+def generate_tx_nonce(seller: Address, client: Address) -> str
 ```
 
 Generate a unique hash to distinguish transactions with the same terms.
@@ -321,12 +353,13 @@ Generate a unique hash to distinguish transactions with the same terms.
 
 return the hash in hex.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_address_from_public_key"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_address_from_public_key"></a>
+
 #### get`_`address`_`from`_`public`_`key
 
 ```python
- | @classmethod
- | get_address_from_public_key(cls, public_key: str) -> str
+@classmethod
+def get_address_from_public_key(cls, public_key: str) -> str
 ```
 
 Get the address from the public key.
@@ -339,12 +372,16 @@ Get the address from the public key.
 
 str
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.recover_message"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.recover_message"></a>
+
 #### recover`_`message
 
 ```python
- | @classmethod
- | recover_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[Address, ...]
+@classmethod
+def recover_message(cls,
+                    message: bytes,
+                    signature: str,
+                    is_deprecated_mode: bool = False) -> Tuple[Address, ...]
 ```
 
 Recover the addresses from the hash.
@@ -359,12 +396,17 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.recover_public_keys_from_message"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.recover_public_keys_from_message"></a>
+
 #### recover`_`public`_`keys`_`from`_`message
 
 ```python
- | @classmethod
- | recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+@classmethod
+def recover_public_keys_from_message(
+        cls,
+        message: bytes,
+        signature: str,
+        is_deprecated_mode: bool = False) -> Tuple[str, ...]
 ```
 
 Get the public key used to produce the `signature` of the `message`
@@ -379,12 +421,13 @@ Get the public key used to produce the `signature` of the `message`
 
 the recovered public keys
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_hash"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_hash"></a>
+
 #### get`_`hash
 
 ```python
- | @staticmethod
- | get_hash(message: bytes) -> str
+@staticmethod
+def get_hash(message: bytes) -> str
 ```
 
 Get the hash of a message.
@@ -397,12 +440,13 @@ Get the hash of a message.
 
 the hash of the message.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.load_contract_interface"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.load_contract_interface"></a>
+
 #### load`_`contract`_`interface
 
 ```python
- | @classmethod
- | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+@classmethod
+def load_contract_interface(cls, file_path: Path) -> Dict[str, str]
 ```
 
 Load contract interface.
@@ -415,20 +459,22 @@ Load contract interface.
 
 the interface
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi"></a>
+
 ## EthereumApi Objects
 
 ```python
-class EthereumApi(LedgerApi,  EthereumHelper)
+class EthereumApi(LedgerApi, EthereumHelper)
 ```
 
 Class to interact with the Ethereum Web3 APIs.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.__init__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs: Any)
+def __init__(**kwargs: Any)
 ```
 
 Initialize the Ethereum ledger APIs.
@@ -437,39 +483,52 @@ Initialize the Ethereum ledger APIs.
 
 - `kwargs`: keyword arguments
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.api"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.api"></a>
+
 #### api
 
 ```python
- | @property
- | api() -> Web3
+@property
+def api() -> Web3
 ```
 
 Get the underlying API object.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_balance"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_balance"></a>
+
 #### get`_`balance
 
 ```python
- | get_balance(address: Address) -> Optional[int]
+def get_balance(address: Address) -> Optional[int]
 ```
 
 Get the balance of a given account.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_state"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_state"></a>
+
 #### get`_`state
 
 ```python
- | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
+def get_state(callable_name: str, *args: Any,
+              **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the ledger API.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transfer_transaction"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transfer_transaction"></a>
+
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+def get_transfer_transaction(sender_address: Address,
+                             destination_address: Address,
+                             amount: int,
+                             tx_fee: int,
+                             tx_nonce: str,
+                             chain_id: Optional[int] = None,
+                             gas_price: Optional[str] = None,
+                             gas_price_strategy: Optional[str] = None,
+                             **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -490,11 +549,12 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.update_with_gas_estimate"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.update_with_gas_estimate"></a>
+
 #### update`_`with`_`gas`_`estimate
 
 ```python
- | update_with_gas_estimate(transaction: JSONLike) -> JSONLike
+def update_with_gas_estimate(transaction: JSONLike) -> JSONLike
 ```
 
 Attempts to update the transaction with a gas estimate
@@ -507,11 +567,12 @@ Attempts to update the transaction with a gas estimate
 
 the updated transaction
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.send_signed_transaction"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.send_signed_transaction"></a>
+
 #### send`_`signed`_`transaction
 
 ```python
- | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
+def send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -524,11 +585,12 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction_receipt"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction_receipt"></a>
+
 #### get`_`transaction`_`receipt
 
 ```python
- | get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
+def get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -541,11 +603,12 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction"></a>
+
 #### get`_`transaction
 
 ```python
- | get_transaction(tx_digest: str) -> Optional[JSONLike]
+def get_transaction(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -558,11 +621,13 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_contract_instance"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_contract_instance"></a>
+
 #### get`_`contract`_`instance
 
 ```python
- | get_contract_instance(contract_interface: Dict[str, str], contract_address: Optional[str] = None) -> Any
+def get_contract_instance(contract_interface: Dict[str, str],
+                          contract_address: Optional[str] = None) -> Any
 ```
 
 Get the instance of a contract.
@@ -576,11 +641,18 @@ Get the instance of a contract.
 
 the contract instance
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_deploy_transaction"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_deploy_transaction"></a>
+
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+def get_deploy_transaction(contract_interface: Dict[str, str],
+                           deployer_address: Address,
+                           value: int = 0,
+                           gas: int = 0,
+                           gas_price: Optional[str] = None,
+                           gas_price_strategy: Optional[str] = None,
+                           **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -599,12 +671,13 @@ Get the transaction to deploy the smart contract.
 
 the transaction dictionary.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.is_valid_address"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.is_valid_address"></a>
+
 #### is`_`valid`_`address
 
 ```python
- | @classmethod
- | is_valid_address(cls, address: Address) -> bool
+@classmethod
+def is_valid_address(cls, address: Address) -> bool
 ```
 
 Check if the address is valid.
@@ -617,7 +690,8 @@ Check if the address is valid.
 
 whether the address is valid
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
+
 ## EthereumFaucetApi Objects
 
 ```python
@@ -626,11 +700,12 @@ class EthereumFaucetApi(FaucetApi)
 
 Ethereum testnet faucet API.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi.get_wealth"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi.get_wealth"></a>
+
 #### get`_`wealth
 
 ```python
- | get_wealth(address: Address, url: Optional[str] = None) -> None
+def get_wealth(address: Address, url: Optional[str] = None) -> None
 ```
 
 Get wealth from the faucet for the provided address.
@@ -640,7 +715,8 @@ Get wealth from the faucet for the provided address.
 - `address`: the address.
 - `url`: the url
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper"></a>
+
 ## LruLockWrapper Objects
 
 ```python
@@ -649,56 +725,62 @@ class LruLockWrapper()
 
 Wrapper for LRU with threading.Lock.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__init__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(lru: LRU) -> None
+def __init__(lru: LRU) -> None
 ```
 
 Init wrapper.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__getitem__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__getitem__"></a>
+
 #### `__`getitem`__`
 
 ```python
- | __getitem__(*args: Any, **kwargs: Any) -> Any
+def __getitem__(*args: Any, **kwargs: Any) -> Any
 ```
 
 Get item
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__setitem__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__setitem__"></a>
+
 #### `__`setitem`__`
 
 ```python
- | __setitem__(*args: Any, **kwargs: Any) -> Any
+def __setitem__(*args: Any, **kwargs: Any) -> Any
 ```
 
 Set item.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__contains__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__contains__"></a>
+
 #### `__`contains`__`
 
 ```python
- | __contains__(*args: Any, **kwargs: Any) -> Any
+def __contains__(*args: Any, **kwargs: Any) -> Any
 ```
 
 Contain item.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__delitem__"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__delitem__"></a>
+
 #### `__`delitem`__`
 
 ```python
- | __delitem__(*args: Any, **kwargs: Any) -> Any
+def __delitem__(*args: Any, **kwargs: Any) -> Any
 ```
 
 Del item.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.set_wrapper_for_web3py_session_cache"></a>
+<a id="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.set_wrapper_for_web3py_session_cache"></a>
+
 #### set`_`wrapper`_`for`_`web3py`_`session`_`cache
 
 ```python
-set_wrapper_for_web3py_session_cache() -> None
+def set_wrapper_for_web3py_session_cache() -> None
 ```
 
 Wrap web3py session cache with threading.Lock.

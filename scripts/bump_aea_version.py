@@ -124,8 +124,8 @@ def check_executed(func: Callable) -> Callable:
     def wrapper(self: Any, *args: Any, **kwargs: Any) -> None:
         if self.is_executed:
             raise ValueError("already executed")
-        self._executed = True
-        self._result = func(self, *args, **kwargs)
+        self._executed = True  # pylint: disable=protected-access
+        self._result = func(self, *args, **kwargs)  # pylint: disable=protected-access
 
     return wrapper
 
@@ -166,7 +166,7 @@ def get_regex_from_specifier_set(specifier_set: str) -> str:
     """
     specifiers = SpecifierSet(specifier_set)
     upper, lower = sorted(specifiers, key=str)
-    alternatives = list()
+    alternatives = []
     alternatives.append(f"{upper} *, *{lower}")
     alternatives.append(f"{lower} *, *{upper}")
     return "|".join(alternatives)
@@ -481,8 +481,8 @@ def only_check_bump_needed() -> int:
 
     :return: the return code
     """
-    bumpers: List[PythonPackageVersionBumper] = list()
-    to_upgrade: List[Path] = list()
+    bumpers: List[PythonPackageVersionBumper] = []
+    to_upgrade: List[Path] = []
     bumpers.append(make_aea_bumper(None))  # type: ignore
     for plugin_dir in ALL_PLUGINS:
         bumpers.append(make_plugin_bumper(plugin_dir, None))  # type: ignore

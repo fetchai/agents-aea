@@ -229,7 +229,7 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
             )
             handlers_file.write_text(file_data)
             with cd("./vendor/fetchai"):
-                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.20.3")
+                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.20.4")
 
             proc = PexpectWrapper.aea_cli(["run"], cwd=self._get_cwd())
             proc.expect_all(

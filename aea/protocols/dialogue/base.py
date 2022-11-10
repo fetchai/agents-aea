@@ -963,7 +963,7 @@ class Dialogue(metaclass=_DialogueMeta):
         )
         self._dialogue_label = final_dialogue_label
 
-    def _custom_validation(  # pylint: disable=no-self-use,unused-argument
+    def _custom_validation(  # pylint: disable=unused-argument
         self, message: Message
     ) -> Tuple[bool, str]:
         """
@@ -1802,9 +1802,8 @@ class Dialogues:
         """
         complete_dialogue_reference = message.dialogue_reference
         enforce(
-            complete_dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and complete_dialogue_reference[1]
-            != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE,
+            Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
+            not in (complete_dialogue_reference[0], complete_dialogue_reference[1]),
             "Only complete dialogue references allowed.",
         )
 

@@ -114,7 +114,7 @@ class PrometheusSerializer(Serializer):
         prometheus_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = prometheus_pb.WhichOneof("performative")
         performative_id = PrometheusMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == PrometheusMessage.Performative.ADD_METRIC:
             type = prometheus_pb.add_metric.type
             performative_content["type"] = type

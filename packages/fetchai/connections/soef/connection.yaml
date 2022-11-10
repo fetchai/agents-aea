@@ -1,18 +1,18 @@
 name: soef
 author: fetchai
-version: 0.27.3
+version: 0.27.4
 type: connection
 description: The soef connection provides a connection api to the simple OEF.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmZJncJCmswM8n95sRFD9nk6rfDAg5zgdVoA7wZJeJr5T1
+  README.md: QmVFNKmCbDWr8Zg5szWva3eFbji66kFYW2ZyeTTeVBbAHR
   __init__.py: QmQNy17gZ5rHXFy7v8fqKBQuR7aR6pFaHBmmDxisq8Syi2
-  connection.py: QmfGUzRLdKGR9pPRZQDK84YtLp2kB2UnnTzFHBVrFoj7J1
+  connection.py: QmS89kWa9s2nqvC6iXuAJDQaZcPmqMJu94xsVuDtLoKnDv
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/oef_search:1.1.3
+- fetchai/oef_search:1.1.4
 class_name: SOEFConnection
 config:
   api_key: TwiCIriSl0mLahw17pyqoA
@@ -25,7 +25,7 @@ config:
   token_storage_path: soef_token.txt
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/oef_search:1.1.3
+- fetchai/oef_search:1.1.4
 dependencies:
   defusedxml: {}
 is_abstract: false

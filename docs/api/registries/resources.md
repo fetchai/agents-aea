@@ -1,9 +1,11 @@
-<a name="aea.registries.resources"></a>
+<a id="aea.registries.resources"></a>
+
 # aea.registries.resources
 
 This module contains the resources class.
 
-<a name="aea.registries.resources.Resources"></a>
+<a id="aea.registries.resources.Resources"></a>
+
 ## Resources Objects
 
 ```python
@@ -12,11 +14,12 @@ class Resources()
 
 This class implements the object that holds the resources of an AEA.
 
-<a name="aea.registries.resources.Resources.__init__"></a>
+<a id="aea.registries.resources.Resources.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str = "standalone") -> None
+def __init__(agent_name: str = "standalone") -> None
 ```
 
 Instantiate the resources.
@@ -25,70 +28,77 @@ Instantiate the resources.
 
 - `agent_name`: the name of the agent
 
-<a name="aea.registries.resources.Resources.agent_name"></a>
+<a id="aea.registries.resources.Resources.agent_name"></a>
+
 #### agent`_`name
 
 ```python
- | @property
- | agent_name() -> str
+@property
+def agent_name() -> str
 ```
 
 Get the agent name.
 
-<a name="aea.registries.resources.Resources.component_registry"></a>
+<a id="aea.registries.resources.Resources.component_registry"></a>
+
 #### component`_`registry
 
 ```python
- | @property
- | component_registry() -> AgentComponentRegistry
+@property
+def component_registry() -> AgentComponentRegistry
 ```
 
 Get the agent component registry.
 
-<a name="aea.registries.resources.Resources.behaviour_registry"></a>
+<a id="aea.registries.resources.Resources.behaviour_registry"></a>
+
 #### behaviour`_`registry
 
 ```python
- | @property
- | behaviour_registry() -> ComponentRegistry[Behaviour]
+@property
+def behaviour_registry() -> ComponentRegistry[Behaviour]
 ```
 
 Get the behaviour registry.
 
-<a name="aea.registries.resources.Resources.handler_registry"></a>
+<a id="aea.registries.resources.Resources.handler_registry"></a>
+
 #### handler`_`registry
 
 ```python
- | @property
- | handler_registry() -> HandlerRegistry
+@property
+def handler_registry() -> HandlerRegistry
 ```
 
 Get the handler registry.
 
-<a name="aea.registries.resources.Resources.model_registry"></a>
+<a id="aea.registries.resources.Resources.model_registry"></a>
+
 #### model`_`registry
 
 ```python
- | @property
- | model_registry() -> ComponentRegistry[Model]
+@property
+def model_registry() -> ComponentRegistry[Model]
 ```
 
 Get the model registry.
 
-<a name="aea.registries.resources.Resources.add_component"></a>
+<a id="aea.registries.resources.Resources.add_component"></a>
+
 #### add`_`component
 
 ```python
- | add_component(component: Component) -> None
+def add_component(component: Component) -> None
 ```
 
 Add a component to resources.
 
-<a name="aea.registries.resources.Resources.add_protocol"></a>
+<a id="aea.registries.resources.Resources.add_protocol"></a>
+
 #### add`_`protocol
 
 ```python
- | add_protocol(protocol: Protocol) -> None
+def add_protocol(protocol: Protocol) -> None
 ```
 
 Add a protocol to the set of resources.
@@ -97,11 +107,12 @@ Add a protocol to the set of resources.
 
 - `protocol`: a protocol
 
-<a name="aea.registries.resources.Resources.get_protocol"></a>
+<a id="aea.registries.resources.Resources.get_protocol"></a>
+
 #### get`_`protocol
 
 ```python
- | get_protocol(protocol_id: PublicId) -> Optional[Protocol]
+def get_protocol(protocol_id: PublicId) -> Optional[Protocol]
 ```
 
 Get protocol for given protocol id.
@@ -114,11 +125,13 @@ Get protocol for given protocol id.
 
 a matching protocol, if present, else None
 
-<a name="aea.registries.resources.Resources.get_protocol_by_specification_id"></a>
+<a id="aea.registries.resources.Resources.get_protocol_by_specification_id"></a>
+
 #### get`_`protocol`_`by`_`specification`_`id
 
 ```python
- | get_protocol_by_specification_id(protocol_specification_id: PublicId) -> Optional[Protocol]
+def get_protocol_by_specification_id(
+        protocol_specification_id: PublicId) -> Optional[Protocol]
 ```
 
 Get protocol for given protocol_specification_id.
@@ -131,11 +144,12 @@ Get protocol for given protocol_specification_id.
 
 a matching protocol, if present, else None
 
-<a name="aea.registries.resources.Resources.get_all_protocols"></a>
+<a id="aea.registries.resources.Resources.get_all_protocols"></a>
+
 #### get`_`all`_`protocols
 
 ```python
- | get_all_protocols() -> List[Protocol]
+def get_all_protocols() -> List[Protocol]
 ```
 
 Get the list of all the protocols.
@@ -144,11 +158,12 @@ Get the list of all the protocols.
 
 the list of protocols.
 
-<a name="aea.registries.resources.Resources.remove_protocol"></a>
+<a id="aea.registries.resources.Resources.remove_protocol"></a>
+
 #### remove`_`protocol
 
 ```python
- | remove_protocol(protocol_id: PublicId) -> None
+def remove_protocol(protocol_id: PublicId) -> None
 ```
 
 Remove a protocol from the set of resources.
@@ -157,11 +172,12 @@ Remove a protocol from the set of resources.
 
 - `protocol_id`: the protocol id for the protocol to be removed.
 
-<a name="aea.registries.resources.Resources.add_contract"></a>
+<a id="aea.registries.resources.Resources.add_contract"></a>
+
 #### add`_`contract
 
 ```python
- | add_contract(contract: Contract) -> None
+def add_contract(contract: Contract) -> None
 ```
 
 Add a contract to the set of resources.
@@ -170,11 +186,12 @@ Add a contract to the set of resources.
 
 - `contract`: a contract
 
-<a name="aea.registries.resources.Resources.get_contract"></a>
+<a id="aea.registries.resources.Resources.get_contract"></a>
+
 #### get`_`contract
 
 ```python
- | get_contract(contract_id: PublicId) -> Optional[Contract]
+def get_contract(contract_id: PublicId) -> Optional[Contract]
 ```
 
 Get contract for given contract id.
@@ -187,11 +204,12 @@ Get contract for given contract id.
 
 a matching contract, if present, else None
 
-<a name="aea.registries.resources.Resources.get_all_contracts"></a>
+<a id="aea.registries.resources.Resources.get_all_contracts"></a>
+
 #### get`_`all`_`contracts
 
 ```python
- | get_all_contracts() -> List[Contract]
+def get_all_contracts() -> List[Contract]
 ```
 
 Get the list of all the contracts.
@@ -200,11 +218,12 @@ Get the list of all the contracts.
 
 the list of contracts.
 
-<a name="aea.registries.resources.Resources.remove_contract"></a>
+<a id="aea.registries.resources.Resources.remove_contract"></a>
+
 #### remove`_`contract
 
 ```python
- | remove_contract(contract_id: PublicId) -> None
+def remove_contract(contract_id: PublicId) -> None
 ```
 
 Remove a contract from the set of resources.
@@ -213,11 +232,12 @@ Remove a contract from the set of resources.
 
 - `contract_id`: the contract id for the contract to be removed.
 
-<a name="aea.registries.resources.Resources.add_connection"></a>
+<a id="aea.registries.resources.Resources.add_connection"></a>
+
 #### add`_`connection
 
 ```python
- | add_connection(connection: Connection) -> None
+def add_connection(connection: Connection) -> None
 ```
 
 Add a connection to the set of resources.
@@ -226,11 +246,12 @@ Add a connection to the set of resources.
 
 - `connection`: a connection
 
-<a name="aea.registries.resources.Resources.get_connection"></a>
+<a id="aea.registries.resources.Resources.get_connection"></a>
+
 #### get`_`connection
 
 ```python
- | get_connection(connection_id: PublicId) -> Optional[Connection]
+def get_connection(connection_id: PublicId) -> Optional[Connection]
 ```
 
 Get connection for given connection id.
@@ -243,11 +264,12 @@ Get connection for given connection id.
 
 a matching connection, if present, else None
 
-<a name="aea.registries.resources.Resources.get_all_connections"></a>
+<a id="aea.registries.resources.Resources.get_all_connections"></a>
+
 #### get`_`all`_`connections
 
 ```python
- | get_all_connections() -> List[Connection]
+def get_all_connections() -> List[Connection]
 ```
 
 Get the list of all the connections.
@@ -256,11 +278,12 @@ Get the list of all the connections.
 
 the list of connections.
 
-<a name="aea.registries.resources.Resources.remove_connection"></a>
+<a id="aea.registries.resources.Resources.remove_connection"></a>
+
 #### remove`_`connection
 
 ```python
- | remove_connection(connection_id: PublicId) -> None
+def remove_connection(connection_id: PublicId) -> None
 ```
 
 Remove a connection from the set of resources.
@@ -269,11 +292,12 @@ Remove a connection from the set of resources.
 
 - `connection_id`: the connection id for the connection to be removed.
 
-<a name="aea.registries.resources.Resources.add_skill"></a>
+<a id="aea.registries.resources.Resources.add_skill"></a>
+
 #### add`_`skill
 
 ```python
- | add_skill(skill: Skill) -> None
+def add_skill(skill: Skill) -> None
 ```
 
 Add a skill to the set of resources.
@@ -282,11 +306,12 @@ Add a skill to the set of resources.
 
 - `skill`: a skill
 
-<a name="aea.registries.resources.Resources.get_skill"></a>
+<a id="aea.registries.resources.Resources.get_skill"></a>
+
 #### get`_`skill
 
 ```python
- | get_skill(skill_id: PublicId) -> Optional[Skill]
+def get_skill(skill_id: PublicId) -> Optional[Skill]
 ```
 
 Get the skill for a given skill id.
@@ -299,11 +324,12 @@ Get the skill for a given skill id.
 
 a matching skill, if present, else None
 
-<a name="aea.registries.resources.Resources.get_all_skills"></a>
+<a id="aea.registries.resources.Resources.get_all_skills"></a>
+
 #### get`_`all`_`skills
 
 ```python
- | get_all_skills() -> List[Skill]
+def get_all_skills() -> List[Skill]
 ```
 
 Get the list of all the skills.
@@ -312,11 +338,12 @@ Get the list of all the skills.
 
 the list of skills.
 
-<a name="aea.registries.resources.Resources.remove_skill"></a>
+<a id="aea.registries.resources.Resources.remove_skill"></a>
+
 #### remove`_`skill
 
 ```python
- | remove_skill(skill_id: PublicId) -> None
+def remove_skill(skill_id: PublicId) -> None
 ```
 
 Remove a skill from the set of resources.
@@ -325,11 +352,13 @@ Remove a skill from the set of resources.
 
 - `skill_id`: the skill id for the skill to be removed.
 
-<a name="aea.registries.resources.Resources.get_handler"></a>
+<a id="aea.registries.resources.Resources.get_handler"></a>
+
 #### get`_`handler
 
 ```python
- | get_handler(protocol_id: PublicId, skill_id: PublicId) -> Optional[Handler]
+def get_handler(protocol_id: PublicId,
+                skill_id: PublicId) -> Optional[Handler]
 ```
 
 Get a specific handler.
@@ -343,11 +372,12 @@ Get a specific handler.
 
 the handler
 
-<a name="aea.registries.resources.Resources.get_handlers"></a>
+<a id="aea.registries.resources.Resources.get_handlers"></a>
+
 #### get`_`handlers
 
 ```python
- | get_handlers(protocol_id: PublicId) -> List[Handler]
+def get_handlers(protocol_id: PublicId) -> List[Handler]
 ```
 
 Get all handlers for a given protocol.
@@ -360,11 +390,12 @@ Get all handlers for a given protocol.
 
 the list of handlers matching the protocol
 
-<a name="aea.registries.resources.Resources.get_all_handlers"></a>
+<a id="aea.registries.resources.Resources.get_all_handlers"></a>
+
 #### get`_`all`_`handlers
 
 ```python
- | get_all_handlers() -> List[Handler]
+def get_all_handlers() -> List[Handler]
 ```
 
 Get all handlers from all skills.
@@ -373,11 +404,13 @@ Get all handlers from all skills.
 
 the list of handlers
 
-<a name="aea.registries.resources.Resources.get_behaviour"></a>
+<a id="aea.registries.resources.Resources.get_behaviour"></a>
+
 #### get`_`behaviour
 
 ```python
- | get_behaviour(skill_id: PublicId, behaviour_name: str) -> Optional[Behaviour]
+def get_behaviour(skill_id: PublicId,
+                  behaviour_name: str) -> Optional[Behaviour]
 ```
 
 Get a specific behaviours for a given skill.
@@ -391,11 +424,12 @@ Get a specific behaviours for a given skill.
 
 the behaviour, if it is present, else None
 
-<a name="aea.registries.resources.Resources.get_behaviours"></a>
+<a id="aea.registries.resources.Resources.get_behaviours"></a>
+
 #### get`_`behaviours
 
 ```python
- | get_behaviours(skill_id: PublicId) -> List[Behaviour]
+def get_behaviours(skill_id: PublicId) -> List[Behaviour]
 ```
 
 Get all behaviours for a given skill.
@@ -408,11 +442,12 @@ Get all behaviours for a given skill.
 
 the list of behaviours of the skill
 
-<a name="aea.registries.resources.Resources.get_all_behaviours"></a>
+<a id="aea.registries.resources.Resources.get_all_behaviours"></a>
+
 #### get`_`all`_`behaviours
 
 ```python
- | get_all_behaviours() -> List[Behaviour]
+def get_all_behaviours() -> List[Behaviour]
 ```
 
 Get all behaviours from all skills.
@@ -421,22 +456,24 @@ Get all behaviours from all skills.
 
 the list of all behaviours
 
-<a name="aea.registries.resources.Resources.setup"></a>
+<a id="aea.registries.resources.Resources.setup"></a>
+
 #### setup
 
 ```python
- | setup() -> None
+def setup() -> None
 ```
 
 Set up the resources.
 
 Calls setup on all resources.
 
-<a name="aea.registries.resources.Resources.teardown"></a>
+<a id="aea.registries.resources.Resources.teardown"></a>
+
 #### teardown
 
 ```python
- | teardown() -> None
+def teardown() -> None
 ```
 
 Teardown the resources.

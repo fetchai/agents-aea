@@ -53,9 +53,7 @@ class TestRemoveProtocolWithPublicId:
         cls.protocol_name = "gym"
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -115,9 +113,7 @@ class TestRemoveProtocolFailsWhenProtocolDoesNotExist:
         cls.protocol_id = str(GymMessage.protocol_id)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
@@ -171,9 +167,7 @@ class TestRemoveProtocolFailsWhenExceptionOccurs:
         cls.protocol_id = str(GymMessage.protocol_id)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,

@@ -1,9 +1,11 @@
-<a name="aea.helpers.multiaddr.base"></a>
+<a id="aea.helpers.multiaddr.base"></a>
+
 # aea.helpers.multiaddr.base
 
 This module contains multiaddress class.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr"></a>
+
 ## MultiAddr Objects
 
 ```python
@@ -12,11 +14,15 @@ class MultiAddr()
 
 Protocol Labs' Multiaddress representation of a network address.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.__init__"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.__init__"></a>
+
 #### `__`init`__`
 
 ```python
- | __init__(host: str, port: int, public_key: Optional[str] = None, multihash_id: Optional[str] = None) -> None
+def __init__(host: str,
+             port: int,
+             public_key: Optional[str] = None,
+             multihash_id: Optional[str] = None) -> None
 ```
 
 Initialize a multiaddress.
@@ -28,12 +34,13 @@ Initialize a multiaddress.
 - `public_key`: hex encoded public key. Must conform to Bitcoin EC encoding standard for Secp256k1
 - `multihash_id`: a multihash of the public key
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.compute_peerid"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.compute_peerid"></a>
+
 #### compute`_`peerid
 
 ```python
- | @staticmethod
- | compute_peerid(public_key: str) -> str
+@staticmethod
+def compute_peerid(public_key: str) -> str
 ```
 
 Compute the peer id from a public key.
@@ -49,12 +56,13 @@ libp2p PeerID from Bitcoin EC encoded Secp256k1 public key.
 
 the peer id.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.from_string"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.from_string"></a>
+
 #### from`_`string
 
 ```python
- | @classmethod
- | from_string(cls, maddr: str) -> "MultiAddr"
+@classmethod
+def from_string(cls, maddr: str) -> "MultiAddr"
 ```
 
 Construct a MultiAddr object from its string format
@@ -67,60 +75,66 @@ Construct a MultiAddr object from its string format
 
 multiaddress object
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.public_key"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.public_key"></a>
+
 #### public`_`key
 
 ```python
- | @property
- | public_key() -> str
+@property
+def public_key() -> str
 ```
 
 Get the public key.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.peer_id"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.peer_id"></a>
+
 #### peer`_`id
 
 ```python
- | @property
- | peer_id() -> str
+@property
+def peer_id() -> str
 ```
 
 Get the peer id.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.host"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.host"></a>
+
 #### host
 
 ```python
- | @property
- | host() -> str
+@property
+def host() -> str
 ```
 
 Get the peer host.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.port"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.port"></a>
+
 #### port
 
 ```python
- | @property
- | port() -> int
+@property
+def port() -> int
 ```
 
 Get the peer port.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.format"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.format"></a>
+
 #### format
 
 ```python
- | format() -> str
+def format() -> str
 ```
 
 Canonical representation of a multiaddress.
 
-<a name="aea.helpers.multiaddr.base.MultiAddr.__str__"></a>
+<a id="aea.helpers.multiaddr.base.MultiAddr.__str__"></a>
+
 #### `__`str`__`
 
 ```python
- | __str__() -> str
+def __str__() -> str
 ```
 
 Default string representation of a multiaddress.

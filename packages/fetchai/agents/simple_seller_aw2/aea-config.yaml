@@ -1,31 +1,31 @@
 agent_name: simple_seller_aw2
 author: fetchai
-version: 0.20.3
+version: 0.20.4
 description: This AEA sells data to a simple buyer in Agent World 2.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.24.3
-- fetchai/ledger:0.21.2
-- fetchai/p2p_libp2p:0.27.2
-- fetchai/soef:0.27.3
+- fetchai/http_client:0.24.4
+- fetchai/ledger:0.21.3
+- fetchai/p2p_libp2p:0.27.3
+- fetchai/soef:0.27.4
 contracts: []
 protocols:
-- fetchai/contract_api:1.1.3
-- fetchai/default:1.1.3
-- fetchai/fipa:1.1.3
-- fetchai/http:1.1.3
-- fetchai/ledger_api:1.1.3
-- fetchai/oef_search:1.1.3
-- fetchai/signing:1.1.3
-- fetchai/state_update:1.1.3
+- fetchai/contract_api:1.1.4
+- fetchai/default:1.1.4
+- fetchai/fipa:1.1.4
+- fetchai/http:1.1.4
+- fetchai/ledger_api:1.1.4
+- fetchai/oef_search:1.1.4
+- fetchai/signing:1.1.4
+- fetchai/state_update:1.1.4
 skills:
-- fetchai/generic_seller:0.28.3
-- fetchai/simple_data_request:0.14.3
-- fetchai/simple_seller:0.14.3
-default_connection: fetchai/p2p_libp2p:0.27.2
+- fetchai/generic_seller:0.28.4
+- fetchai/simple_data_request:0.14.4
+- fetchai/simple_seller:0.14.4
+default_connection: fetchai/p2p_libp2p:0.27.3
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -56,15 +56,15 @@ logging_config:
       propagate: false
 private_key_paths: {}
 default_routing:
-  fetchai/http:1.1.3: fetchai/http_client:0.24.3
-  fetchai/ledger_api:1.1.3: fetchai/ledger:0.21.2
-  fetchai/oef_search:1.1.3: fetchai/soef:0.27.3
+  fetchai/http:1.1.4: fetchai/http_client:0.24.4
+  fetchai/ledger_api:1.1.4: fetchai/ledger:0.21.3
+  fetchai/oef_search:1.1.4: fetchai/soef:0.27.4
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/simple_seller:0.14.3
+public_id: fetchai/simple_seller:0.14.4
 type: skill
 models:
   strategy:
@@ -79,7 +79,7 @@ models:
       shared_state_key: my_data
       unit_price: 10
 ---
-public_id: fetchai/simple_data_request:0.14.3
+public_id: fetchai/simple_data_request:0.14.4
 type: skill
 behaviours:
   http_request:
@@ -93,7 +93,7 @@ handlers:
     args:
       shared_state_key: my_data
 ---
-public_id: fetchai/p2p_libp2p:0.27.2
+public_id: fetchai/p2p_libp2p:0.27.3
 type: connection
 config:
   delegate_uri: null
@@ -101,12 +101,12 @@ config:
   entry_peers:
   - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
-public_id: fetchai/soef:0.27.3
+public_id: fetchai/soef:0.27.4
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
 ---
-public_id: fetchai/ledger:0.21.2
+public_id: fetchai/ledger:0.21.3
 type: connection
 config:
   ledger_apis:

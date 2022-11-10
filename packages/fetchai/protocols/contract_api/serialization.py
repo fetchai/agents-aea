@@ -167,7 +167,7 @@ class ContractApiSerializer(Serializer):
         contract_api_pb.ParseFromString(message_pb.dialogue_message.content)
         performative = contract_api_pb.WhichOneof("performative")
         performative_id = ContractApiMessage.Performative(str(performative))
-        performative_content = dict()  # type: Dict[str, Any]
+        performative_content = {}  # type: Dict[str, Any]
         if performative_id == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION:
             ledger_id = contract_api_pb.get_deploy_transaction.ledger_id
             performative_content["ledger_id"] = ledger_id

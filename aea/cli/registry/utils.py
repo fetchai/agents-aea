@@ -96,7 +96,7 @@ def request_api(
         logger.debug("Successfully created!")
     elif resp.status_code == 403:
         raise click.ClickException(
-            "You are not authenticated. " 'Please sign in with "aea login" command.'
+            """You are not authenticated. 'Please sign in with "aea login" command."""
         )
     elif resp.status_code == 500:
         raise click.ClickException(
@@ -182,7 +182,7 @@ def extract(source: str, target: str) -> None:
     :param target: str path to target directory.
     """
     if source.endswith("tar.gz"):
-        tar = tarfile.open(source, "r:gz")
+        tar = tarfile.open(source, "r:gz")  # pylint: disable=consider-using-with
         tar.extractall(path=target)
         tar.close()
     else:

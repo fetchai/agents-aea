@@ -66,9 +66,7 @@ class TestScaffoldConnection:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -142,9 +140,7 @@ class TestScaffoldConnectionWithSymlinks:
         cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -229,9 +225,7 @@ class TestScaffoldConnectionFailsWhenDirectoryAlreadyExists:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -297,9 +291,7 @@ class TestScaffoldConnectionFailsWhenConnectionAlreadyExists:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -371,9 +363,7 @@ class TestScaffoldConnectionFailsWhenConfigFileIsNotCompliant:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
@@ -445,9 +435,7 @@ class TestScaffoldConnectionFailsWhenExceptionOccurs:
         shutil.copytree(str(src_dir), str(tmp_dir))
 
         os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
+        result = cls.runner.invoke(cli, [*CLI_LOG_OPTION, "init", "--author", AUTHOR])
         assert result.exit_code == 0
 
         result = cls.runner.invoke(

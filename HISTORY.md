@@ -1,7 +1,22 @@
 # Release History
 
 
-## 1.2.1 (2022-10-17)
+## 1.2.3(2022-11-03)
+
+AEA:
+- core and development are dependencies updated.
+- ci improvements
+- cosmpy updated to 0.6.0
+- Small code format improvements and better linting
+
+Plugins:
+- Small code format improvements
+- cosmpy updated to 0.6.0
+
+Packages:
+- Small code format improvements
+
+## 1.2.2 (2022-10-17)
 
 AEA:
 - Dependency management switched from pipenv to poetry.

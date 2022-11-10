@@ -108,7 +108,7 @@ def find_all_configuration_files() -> List:
     config_files = [
         path
         for path in packages_dir.glob("*/*/*/*.yaml")
-        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+        if any(file in str(path) for file in CONFIG_FILE_NAMES)
     ]
     return list(chain(config_files, default_config_file_paths()))
 

@@ -253,7 +253,7 @@ class ItemRemoveHelper:
             item, package_id
         )
         can_be_removed = set()
-        can_not_be_removed = dict()
+        can_not_be_removed = {}
 
         for dep_key, deps in item_deps.items():
             if agent_deps[dep_key] == deps:
