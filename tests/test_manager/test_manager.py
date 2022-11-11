@@ -329,7 +329,7 @@ class BaseTestMultiAgentManager(BaseCase):
 
     def test_exception_handling(self, *args):
         """Test error callback works."""
-        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.1"))
         self.manager.start_all_agents()
 
         callback_mock = Mock()
@@ -357,7 +357,7 @@ class BaseTestMultiAgentManager(BaseCase):
 
     def test_default_exception_handling(self, *args):
         """Test that the default error callback works."""
-        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.1"))
 
         with patch.object(
             self.manager,
@@ -372,7 +372,7 @@ class BaseTestMultiAgentManager(BaseCase):
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""
-        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.0"))
+        self.add_agent("test_agent", PublicId.from_str("fetchai/error_test:0.1.1"))
 
         def handler(*args, **kwargs):
             self.manager.stop_manager()
@@ -942,7 +942,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.3 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.20.4 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

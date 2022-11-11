@@ -7,20 +7,30 @@ This guide explains how to run an AEA inside a Raspberry Pi.
 
 ## Preparing the Raspberry Pi
 
-If you have a brand-new Raspberry Pi, you can simply insert the SD card, connect the power and boot up.
-If you do not have a new Raspberry Pi SD card, you will need to make one. To do this follow the NOOBS instructions below.
+The easiest and recommended way to get started is to download and unzip our custom <a href="https://storage.googleapis.com/fetch-ai-aea-images/aea_rpi.img.tar.gz" target="_blank">AEA Raspberry Pi Image</a>, which includes the AEA installation as well as the most common dependencies.
 
-## NOOBS
+However, you can also do the installation manually, and if you have a new Raspberry Pi, you can boot the system using the included SD card and skip the next section.
 
-NOOBS is a way to create an SD card for easy operating system installation on a Raspberry Pi. 
+## Raspberry Pi Imager
 
-First download noobs from <a href="https://www.raspberrypi.com/software/" target="_blank">this link</a>.
+Raspberry Pi Imager is a way to write to an SD card for easy installation on a Raspberry Pi.
+
+First download the tool from <a href="https://www.raspberrypi.com/software/" target="_blank">this link</a>.
 
 Then follow <a href="https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up" target="_blank">this guide</a> to set up your SD card.
+When you get to the step of choosing an operating system, select the downloaded and unzipped AEA Raspberry Pi Image (`AEA_RPI.IMG`), or for a manual installation, select the latest Raspberry Pi OS.
 
-Once you have set up your SD card, plug it into your Raspberry Pi, connect the power and boot up. When prompted, select the Raspbian operating system and click "Install".
+Once you have set up your SD card, plug it into your Raspberry Pi, connect the power and boot up. 
 
-## Booting up and updating the OS
+## Booting up with the AEA Raspberry Pi Image
+
+After booting up, you may be prompted to log in as the `aea` user and the password is `fetch`.
+Next, navigate to settings menu to set up your internet connection.
+Your Raspberry Pi is now ready to run an AEA!
+You can find some preloaded demos in the folder `~/aea/demos`.
+To run these demos, navigate to one of the subfolders and enter `aea run`.
+
+## Booting up with the Raspberry Pi OS for manual installation
 
 When you first boot your Raspberry Pi, you will be prompted to enter a password for the Raspberry Pi and your WiFi password so the device can access the internet. You may also be given the option to update the operating system and software. We recommend that you let the system update. Once finished you will be prompted to restart.
 
@@ -32,23 +42,62 @@ sudo apt-get update
 sudo apt-get dist-upgrade 
 ```
 
-## Install the AEA Framework
-
-First, install pipenv: 
+## Install common dependencies
 
 ``` bash
-sudo apt-get install pipenv
+sudo apt install cmake golang -y
 ```
 
-Once installed, create and launch a clean virtual environment with Python 3.7:
+## Install less common dependencies (optional)
 
+For some of the more advanced AEAs that make use of SciPy, such as the Car Park Detector, you will need some additional dependencies.
+
+<details><summary>Install additional dependencies with the enclosed steps</summary>
+<p>
+
+Install additional dependencies
 ``` bash
-pipenv --python 3.7 && pipenv shell
+sudo apt install gfortran libatlas-base-dev libopenblas-dev -y
+```
+
+Increase the swap space for the SciPy installation:
+``` bash
+sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+sudo /sbin/mkswap /var/swap.1
+sudo chmod 600 /var/swap.1
+sudo /sbin/swapon /var/swap.1
+```
+
+Install NumPy and scikit-image (including SciPy)
+``` bash
+pip install numpy --upgrade
+pip install scikit-image
+```
+
+Revert to default swap space
+``` bash
+sudo swapoff /var/swap.1
+sudo rm /var/swap.1
+```
+
+</p>
+</details>
+
+## Install the AEA Framework
+
+Add to the local `PATH` environment variable (this will happen automatically the next time you login):
+``` bash
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 Finally, install the AEA framework from PyPI:
-
 ``` bash
 pip install aea[all]
 ```
 
+Check to make sure installation was successful:
+``` bash
+aea --version
+```
+
+Your Raspberry Pi is now ready to run an AEA!

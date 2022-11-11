@@ -1,18 +1,18 @@
 name: aggregation
 author: fetchai
-version: 0.2.3
-protocol_specification_id: fetchai/aggregation:0.2.3
+version: 0.2.4
+protocol_specification_id: fetchai/aggregation:0.2.4
 type: protocol
 description: A protocol for agents to aggregate individual observations
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmPnZsEaaj5gwbcmketQ1VgsEYqctWbPkLy56VbAv7RqXy
-  __init__.py: QmRC37StpRfpaakN79QsnRYFiPbtiX1Lr1PQp7qX4St9oA
+  README.md: QmaZHbD1m4WEYVc3eZwAdpW1oFKEi4rHhqjJ8wxFP2XJAp
+  __init__.py: QmbLoXSGB8v1rrTiVRdNxRYMsBg8AdhQ1wQaZ7PocQbqCN
   aggregation.proto: QmQwikqwimS6BDLWmBxMQ7hyaw8BPFFbUeV1fQC78BRmC9
   aggregation_pb2.py: QmXi2zGdc5QNgfybPBxnCfRNmnZH7TvkTuYE9P5EtYVG9L
   dialogues.py: QmZhvgjNtjwiSy6bHKaw4PG8jgY6pLfCFivbcr5xQ8JJN8
-  message.py: QmZcxCwyQCeBnEsk7TkswdZb1HwfDAbNi9bEFdHatrPshj
+  message.py: QmNuwtxG68GrKUWVUmJvDDmG1ZVi1CUgGFUkoLmeGrpcoK
   serialization.py: Qmdka2M9GFQMnrEYFY3t3mJh4KFPHkYqC8ecQkroM8rqzS
 fingerprint_ignore_patterns: []
 dependencies:
