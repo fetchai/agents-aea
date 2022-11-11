@@ -78,7 +78,7 @@ def get_file_from_tag(file_path: str, latest_tag: Optional[str] = None) -> str:
 if __name__ == "__main__":
     # Get all hashes from the latest tag, excluding the scaffold ones (that are not pushed)
 
-    packages_json = json.loads(get_file_from_tag("packages/packages.json"))
+    packages_json = json.loads(get_file_from_tag("packages/packages.json"))["dev"]
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = []
 
