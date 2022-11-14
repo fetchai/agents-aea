@@ -20,7 +20,7 @@
 """This module contains the tests for the aea.configurations.base module."""
 
 import re
-
+import tempfile
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
@@ -31,6 +31,8 @@ import pytest
 import semver
 import yaml
 from packaging.specifiers import SpecifierSet
+from aea.configurations.base import SkillComponentConfiguration
+from aea.helpers.yaml_utils import yaml_dump, yaml_load
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
@@ -1154,6 +1156,17 @@ class TestConfigurationContainingPathSerialization:
             r"jquery-1.2.1.min.js",
         ]
 
+    def yaml_config_dump_load_equal(self, data: dict) -> bool:
+        """Check whether config is the same after yaml dump and load"""
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_file = Path(tmp_dir) / "tmp_file"
+            with open(tmp_file, "w") as stream:
+                yaml_dump(data, stream)
+            with open(tmp_file, "r") as stream:
+                reconstituted_data = yaml_load(stream)
+            return data == reconstituted_data
+
     def test_filepath_ordering(self) -> None:
         """Test that filepath ordering remains equivalent when converting to POSIX"""
 
@@ -1168,3 +1181,9 @@ class TestConfigurationContainingPathSerialization:
         posix_paths = [Path(p).as_posix() for p in self.raw_paths]
         assert sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
         assert sorted_indices(self.raw_paths) == expected_posix_order
+
+    def test_skill_component_configuration_serialization(self) -> None:
+        """Test SkillComponentConfiguration serialization"""
+
+        config = SkillComponentConfiguration(class_name="class_name", file_path=__file__)
+        assert self.yaml_config_dump_load_equal(config.json)
