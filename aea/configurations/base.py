@@ -94,7 +94,7 @@ _ = [PackageId, PackageVersion]
 T = TypeVar("T")
 
 
-def dependencies_from_json(obj: Dict[str, Dict]) -> Dependencies:
+def dependencies_from_json(obj: Dict[str, Dict[str, str]]) -> Dependencies:
     """
     Parse a JSON object to get an instance of Dependencies.
 
@@ -104,7 +104,7 @@ def dependencies_from_json(obj: Dict[str, Dict]) -> Dependencies:
     return {key: Dependency.from_json({key: value}) for key, value in obj.items()}
 
 
-def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]:
+def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict[str, str]]:
     """
     Transform a Dependencies object into a JSON object.
 
