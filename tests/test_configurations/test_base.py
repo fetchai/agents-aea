@@ -1196,3 +1196,12 @@ class TestConfigurationContainingPathSerialization:
         expected = "4f407df8ed540bbc12b184086d7267d13c7960c7af3c4531c213bdba6ce88b9b2cca021c7f57fac456cca9de0fcfe000fb97c965826c76eebb60b063841a1a06"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
+
+    def test_skill_configuration_serialization(self) -> None:
+        """Test SkillConfig serialization"""
+
+        name, author = "name", "author"
+        config = SkillConfig(name=name, author=author, build_entrypoint=__file__, build_directory=__file__)
+        expected = "00c78f6595efa3ec2809a5a52c7517974cf13a50b0f21128a01e72e5aa37242c1a72a0233b20b35faf1f2b2a9e86c1a559406fe4a9e44b975563d2e3f0526da8"
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.get_hexdigest_from_config_json(config) == expected
