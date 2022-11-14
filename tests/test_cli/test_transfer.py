@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 Valory AG
+#   Copyright 2021-2022 Valory AG
 #   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,7 +104,9 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
 
         self.set_agent_context(self.agent_name)
         agent1_original_balance = self.get_balance()
-        self.generate_wealth(ledger_api_id=FetchAICrypto.identifier, password=self.PASSWORD)
+        self.generate_wealth(
+            ledger_api_id=FetchAICrypto.identifier, password=self.PASSWORD
+        )
 
         wait_for_condition(
             lambda: self.get_balance() > agent1_original_balance, timeout=15, period=1

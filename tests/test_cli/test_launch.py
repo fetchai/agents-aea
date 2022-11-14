@@ -31,7 +31,6 @@ from typing import Generator, List, Optional
 
 import pytest
 import yaml
-from aea_ledger_fetchai import FetchAICrypto
 from aea_ledger_ethereum import EthereumCrypto
 from pexpect.exceptions import EOF  # type: ignore
 
