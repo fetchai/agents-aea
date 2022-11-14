@@ -18,17 +18,19 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the aea.configurations.base module."""
+
 import re
+
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
 from unittest.mock import Mock
+from typing import List
 
 import pytest
 import semver
 import yaml
 from packaging.specifiers import SpecifierSet
-
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
@@ -1123,3 +1125,46 @@ def test_component_id_from_json():
         "version": "1.0.0",
     }
     assert ComponentId.from_json(json_data).json == json_data
+
+
+class TestConfigurationContainingPathSerialization:
+    """Test configurations containing paths are deterministic across different OS"""
+
+    def setup(self):
+        """Setup test"""
+
+        self.raw_paths = [
+            r"C:\Documents\Newsletters\Summer2018.pdf",
+            r"\Program Files\Custom Utilities\StringFinder.exe",
+            r"2018\January.xlsx",
+            r"..\Publications\TravelBrochure.pdf",
+            r"C:\Projects\apilibrary\apilibrary.sln",
+            r"C:Projects\apilibrary\apilibrary.sln",
+            r"c:\temp\test-file.txt",
+            r"\\127.0.0.1\c$\temp\test-file.txt",
+            r"\\LOCALHOST\c$\temp\test-file.txt",
+            r"\\.\c:\temp\test-file.txt",
+            r"\\?\c:\temp\test-file.txt",
+            r"\\.\UNC\LOCALHOST\c$\temp\test-file.txt",
+            r"jquery-1.1.1.js",
+            r"jquery-1.1.1.min.js",
+            r"jquery-1.1.1-vsdoc.js",
+            r"jquery-1.2.1-vsdoc.js",
+            r"jquery-1.2.1.js",
+            r"jquery-1.2.1.min.js",
+        ]
+
+    def test_filepath_ordering(self) -> None:
+        """Test that filepath ordering remains equivalent when converting to POSIX"""
+
+        # https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
+
+        def sorted_indices(li: List[str]) -> List[int]:
+            return sorted(range(len(li)), key=lambda i: li[i])
+
+        # since automagically converted to POSIX compliant-format when on Linux,
+        # hard-coded the expected posix order to ensure consistency across OS.
+        expected_posix_order = [3, 2, 5, 0, 4, 1, 11, 9, 7, 10, 8, 6, 14, 12, 13, 15, 16, 17]
+        posix_paths = [Path(p).as_posix() for p in self.raw_paths]
+        assert sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
+        assert sorted_indices(self.raw_paths) == expected_posix_order
