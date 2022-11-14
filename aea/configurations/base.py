@@ -1815,7 +1815,7 @@ class ContractConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "class_name": self.class_name,
-                "contract_interface_paths": {key: str(Path(path).as_posix()) for key, path in self.contract_interface_paths},
+                "contract_interface_paths": {key: str(Path(path).as_posix()) for key, path in self.contract_interface_paths.items()},
                 "dependencies": dependencies_to_json(self.dependencies),
                 CONTRACTS: sorted(map(str, self.contracts)),
             }
