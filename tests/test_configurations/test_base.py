@@ -21,20 +21,19 @@
 import hashlib
 import json
 import re
+import string
 import tempfile
 from copy import copy
 from pathlib import Path
+from typing import List, Union
 from unittest import TestCase, mock
 from unittest.mock import Mock
-from typing import List, Union
-import string
 
 import pytest
 import semver
 import yaml
 from packaging.specifiers import SpecifierSet
-from aea.configurations.base import SkillComponentConfiguration
-from aea.helpers.yaml_utils import yaml_dump, yaml_load
+
 from aea.configurations.base import (
     AgentConfig,
     CRUDCollection,
@@ -49,6 +48,7 @@ from aea.configurations.base import (
     ProtocolConfig,
     ProtocolSpecification,
     PublicId,
+    SkillComponentConfiguration,
     SkillConfig,
     SpeechActContentConfig,
     _check_aea_version,
@@ -65,6 +65,7 @@ from aea.configurations.constants import (
     DEFAULT_SKILL_CONFIG_FILE,
 )
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
+from aea.helpers.yaml_utils import yaml_dump, yaml_load
 
 from tests.conftest import (
     AUTHOR,
@@ -1169,7 +1170,12 @@ class TestConfigurationContainingPathSerialization:
                 reconstituted_data = yaml_load(stream)
             return data == reconstituted_data
 
-    def get_hexdigest_from_config_json(self, config: Union[SkillComponentConfiguration, SkillConfig, AgentConfig, ContractConfig]) -> str:
+    def get_hexdigest_from_config_json(
+        self,
+        config: Union[
+            SkillComponentConfiguration, SkillConfig, AgentConfig, ContractConfig
+        ],
+    ) -> str:
         """Get hexdigest from the json serialized configuration"""
 
         # this is tested because we assume config.json is deterministic
@@ -1185,15 +1191,17 @@ class TestConfigurationContainingPathSerialization:
 
         # since automagically converted to POSIX compliant-format when on Linux,
         # hard-coded the expected posix order to ensure consistency across OS.
-        expected_posix_order = [3, 2, 5, 0, 4, 1, 11, 9, 7, 10, 8, 6, 14, 12, 13, 15, 16, 17]
+        expected = [3, 2, 5, 0, 4, 1, 11, 9, 7, 10, 8, 6, 14, 12, 13, 15, 16, 17]
         posix_paths = [Path(p).as_posix() for p in self.raw_paths]
         assert sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
-        assert sorted_indices(self.raw_paths) == expected_posix_order
+        assert sorted_indices(self.raw_paths) == expected
 
     def test_skill_component_configuration_serialization(self) -> None:
         """Test SkillComponentConfiguration serialization"""
 
-        config = SkillComponentConfiguration(class_name="class_name", file_path=__file__)
+        config = SkillComponentConfiguration(
+            class_name="class_name", file_path=__file__
+        )
         expected = "4f407df8ed540bbc12b184086d7267d13c7960c7af3c4531c213bdba6ce88b9b2cca021c7f57fac456cca9de0fcfe000fb97c965826c76eebb60b063841a1a06"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
@@ -1202,7 +1210,12 @@ class TestConfigurationContainingPathSerialization:
         """Test SkillConfig serialization"""
 
         name, author = "name", "author"
-        config = SkillConfig(name=name, author=author, build_entrypoint=__file__, build_directory=__file__)
+        config = SkillConfig(
+            name=name,
+            author=author,
+            build_entrypoint=__file__,
+            build_directory=__file__,
+        )
         expected = "00c78f6595efa3ec2809a5a52c7517974cf13a50b0f21128a01e72e5aa37242c1a72a0233b20b35faf1f2b2a9e86c1a559406fe4a9e44b975563d2e3f0526da8"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
@@ -1211,7 +1224,12 @@ class TestConfigurationContainingPathSerialization:
         """Test AgentConfig serialization"""
 
         agent_name, author = "agent_name", "author"
-        config = AgentConfig(agent_name=agent_name, author=author, build_entrypoint=__file__, data_dir=__file__)
+        config = AgentConfig(
+            agent_name=agent_name,
+            author=author,
+            build_entrypoint=__file__,
+            data_dir=__file__,
+        )
         for dummy_key, raw_path in zip(string.ascii_letters, self.raw_paths):
             config.private_key_paths.create(dummy_key, raw_path)
             config.connection_private_key_paths.create(dummy_key, raw_path)
@@ -1224,7 +1242,13 @@ class TestConfigurationContainingPathSerialization:
 
         name, author = "name", "author"
         path_dict = dict(zip(string.ascii_letters, self.raw_paths))
-        config = ContractConfig(name=name, author=author, build_entrypoint=__file__, build_directory=__file__, contract_interface_paths=path_dict)
+        config = ContractConfig(
+            name=name,
+            author=author,
+            build_entrypoint=__file__,
+            build_directory=__file__,
+            contract_interface_paths=path_dict,
+        )
         expected = "1129d4774ca07f94c100e091d51d4835b5eab794a2416be71c96f7f1ca4789c6f82294d4433c0f3b8fae8103424a9856597449befc3eb9efbe45163b040cf077"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
