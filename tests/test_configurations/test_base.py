@@ -27,6 +27,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 from unittest.mock import Mock
 from typing import List, Union
+import string
 
 import pytest
 import semver
@@ -1203,5 +1204,17 @@ class TestConfigurationContainingPathSerialization:
         name, author = "name", "author"
         config = SkillConfig(name=name, author=author, build_entrypoint=__file__, build_directory=__file__)
         expected = "00c78f6595efa3ec2809a5a52c7517974cf13a50b0f21128a01e72e5aa37242c1a72a0233b20b35faf1f2b2a9e86c1a559406fe4a9e44b975563d2e3f0526da8"
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.get_hexdigest_from_config_json(config) == expected
+
+    def test_agent_configuration_serialization(self) -> None:
+        """Test AgentConfig serialization"""
+
+        agent_name, author = "agent_name", "author"
+        config = AgentConfig(agent_name=agent_name, author=author, build_entrypoint=__file__, data_dir=__file__)
+        for dummy_key, raw_path in zip(string.ascii_letters, self.raw_paths):
+            config.private_key_paths.create(dummy_key, raw_path)
+            config.connection_private_key_paths.create(dummy_key, raw_path)
+        expected = "e52b490699a9905551f95d3327b966e01de57817400c180df39b7c3e788061f89f9d6db07876e08072fef5a38da57aa913082cf036bffa48cac35984892c3e53"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
