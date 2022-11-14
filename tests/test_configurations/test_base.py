@@ -1218,3 +1218,13 @@ class TestConfigurationContainingPathSerialization:
         expected = "e52b490699a9905551f95d3327b966e01de57817400c180df39b7c3e788061f89f9d6db07876e08072fef5a38da57aa913082cf036bffa48cac35984892c3e53"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
+
+    def test_contract_configuration_serialization(self) -> None:
+        """Test ContractConfig serialization"""
+
+        name, author = "name", "author"
+        path_dict = dict(zip(string.ascii_letters, self.raw_paths))
+        config = ContractConfig(name=name, author=author, build_entrypoint=__file__, build_directory=__file__, contract_interface_paths=path_dict)
+        expected = "1129d4774ca07f94c100e091d51d4835b5eab794a2416be71c96f7f1ca4789c6f82294d4433c0f3b8fae8103424a9856597449befc3eb9efbe45163b040cf077"
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.get_hexdigest_from_config_json(config) == expected
