@@ -48,7 +48,7 @@ from packages.valory.connections.ledger.connection import PUBLIC_ID as LEDGER_PU
 from packages.valory.protocols.ledger_api.message import LedgerApiMessage
 
 
-FETCHAI = "fetchai"
+ETHEREUM = "ethereum"
 PACKAGE_ROOT = Path(__file__).parent.parent
 
 
@@ -82,7 +82,6 @@ class TestSearchBehaviour(BaseSkillTestCase):
         self.strategy.__dict__.update(self._init_strategy_kwargs)
         self.tx_behaviour.waiting.clear()
 
-    @pytest.mark.skip  # wrong ledger_id
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is True."""
         # operation
@@ -96,7 +95,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             to=str(LEDGER_PUBLIC_ID),
             sender=str(self.skill.public_id),
-            ledger_id=FETCHAI,
+            ledger_id=ETHEREUM,
             address=self.skill.skill_context.agent_address,
         )
         assert has_attributes, error_str
