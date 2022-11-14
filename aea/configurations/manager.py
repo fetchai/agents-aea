@@ -362,8 +362,6 @@ class AgentConfigManager:
                 ),
             )
 
-        print(data[1])
-
         agent_config = cls._loader.load_agent_config_from_json(data, validate=False)
         instance = cls(
             agent_config, aea_project_path, env_vars_friendly=not substitude_env_vars

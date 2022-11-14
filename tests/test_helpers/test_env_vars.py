@@ -52,6 +52,7 @@ def test_replace_with_env_var():
 
     assert replace_with_env_var("var", {}) == "var"
 
+
 def test_failures() -> None:
     """Test failures."""
 
