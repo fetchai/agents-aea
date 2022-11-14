@@ -30,41 +30,50 @@ from aea.helpers.env_vars import (
 
 def test_is_env_variable():
     """Test is_env_variable."""
-    assert is_env_variable("${test}")
-    assert is_env_variable("${test:int}")
-    assert is_env_variable("${test:int:12}")
+    assert is_env_variable("${TEST}")
+    assert is_env_variable("${TEST:int}")
+    assert is_env_variable("${TEST:int:12}")
 
     assert not is_env_variable("sdfsdf")
 
 
 def test_apply_env_variables():
     """Test apply_env_variables"""
-    assert apply_env_variables("${var}", {"var": "test"}) == "test"
+    assert apply_env_variables("${VAR}", {"VAR": "test"}) == "test"
     assert apply_env_variables("var", {"var": "test"}) == "var"
-    assert apply_env_variables(["${var}"], {"var": "test"}) == ["test"]
-    assert apply_env_variables({"${var}": "${var}"}, {"var": "test"}) == {
-        "test": "test"
-    }
+    assert apply_env_variables(["${VAR}"], {"VAR": "test"}) == ["test"]
 
 
 def test_replace_with_env_var():
     """Test replace_with_env_var."""
-    assert replace_with_env_var("${var:int:12}", {"var": "10"}) == 10
-    assert replace_with_env_var("${var:int:12}", {}) == 12
+    assert replace_with_env_var("${VAR:int:12}", {"VAR": "10"}) == 10
+    assert replace_with_env_var("${VAR:int:12}", {}) == 12
+    assert replace_with_env_var("${VAR}", {}, default_value=100) == 100
+
     assert replace_with_env_var("var", {}) == "var"
-    assert replace_with_env_var("${var}", {}, default_value=100) == 100
+
+def test_failures() -> None:
+    """Test failures."""
 
     with pytest.raises(
         ValueError,
-        match=r"`var` not found in env variables and no default value set!",
+        match=r"`VAR` not found in env variables and no default value set!",
     ):
-        replace_with_env_var("${var}", {})
+        replace_with_env_var("${VAR}", {})
+
+    with pytest.raises(KeyError, match="`var` is not a valid python data type"):
+        replace_with_env_var("${VAR:var}", {"VAR": "some_value"})
+
+    with pytest.raises(
+        ValueError, match="Cannot convert string `some_value` to type `float`"
+    ):
+        replace_with_env_var("${VAR:float}", {"VAR": "some_value"})
 
 
 def test_apply_none_with_env_var():
     """Test replace_with_env_var."""
-    assert replace_with_env_var("${var:int:none}", {"var": "10"}) == 10
-    assert replace_with_env_var("${var:int:none}", {}) is None
+    assert replace_with_env_var("${VAR:int:none}", {"VAR": "10"}) == 10
+    assert replace_with_env_var("${VAR:int:none}", {}) is None
 
 
 def test_convert_value_str_to_type():
