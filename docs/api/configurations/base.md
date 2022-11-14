@@ -9,7 +9,7 @@ Classes to handle AEA configurations.
 #### dependencies`_`from`_`json
 
 ```python
-def dependencies_from_json(obj: Dict[str, Dict]) -> Dependencies
+def dependencies_from_json(obj: Dict[str, Dict[str, str]]) -> Dependencies
 ```
 
 Parse a JSON object to get an instance of Dependencies.
@@ -27,7 +27,7 @@ a Dependencies object.
 #### dependencies`_`to`_`json
 
 ```python
-def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict]
+def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict[str, str]]
 ```
 
 Transform a Dependencies object into a JSON object.

@@ -1374,14 +1374,16 @@ class AgentConfig(PackageConfiguration):
     def private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: str(Path(path).as_posix()) for key, path in self.private_key_paths.read_all()
+            key: str(Path(path).as_posix())
+            for key, path in self.private_key_paths.read_all()
         }
 
     @property
     def connection_private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of connection private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: str(Path(path).as_posix()) for key, path in self.connection_private_key_paths.read_all()
+            key: str(Path(path).as_posix())
+            for key, path in self.connection_private_key_paths.read_all()
         }
 
     def component_configurations_json(self) -> List[OrderedDict]:
@@ -1815,7 +1817,10 @@ class ContractConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "class_name": self.class_name,
-                "contract_interface_paths": {key: str(Path(path).as_posix()) for key, path in self.contract_interface_paths.items()},
+                "contract_interface_paths": {
+                    key: str(Path(path).as_posix())
+                    for key, path in self.contract_interface_paths.items()
+                },
                 "dependencies": dependencies_to_json(self.dependencies),
                 CONTRACTS: sorted(map(str, self.contracts)),
             }
