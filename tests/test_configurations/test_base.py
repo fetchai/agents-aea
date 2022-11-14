@@ -18,14 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the aea.configurations.base module."""
-
+import hashlib
+import json
 import re
 import tempfile
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
 from unittest.mock import Mock
-from typing import List
+from typing import List, Union
 
 import pytest
 import semver
@@ -1167,6 +1168,12 @@ class TestConfigurationContainingPathSerialization:
                 reconstituted_data = yaml_load(stream)
             return data == reconstituted_data
 
+    def get_hexdigest_from_config_json(self, config: Union[SkillComponentConfiguration, SkillConfig, AgentConfig, ContractConfig]) -> str:
+        """Get hexdigest from the json serialized configuration"""
+
+        # this is tested because we assume config.json is deterministic
+        return hashlib.sha512(json.dumps(config.json).encode("utf-8")).hexdigest()
+
     def test_filepath_ordering(self) -> None:
         """Test that filepath ordering remains equivalent when converting to POSIX"""
 
@@ -1186,4 +1193,6 @@ class TestConfigurationContainingPathSerialization:
         """Test SkillComponentConfiguration serialization"""
 
         config = SkillComponentConfiguration(class_name="class_name", file_path=__file__)
+        expected = "4f407df8ed540bbc12b184086d7267d13c7960c7af3c4531c213bdba6ce88b9b2cca021c7f57fac456cca9de0fcfe000fb97c965826c76eebb60b063841a1a06"
         assert self.yaml_config_dump_load_equal(config.json)
+        assert self.get_hexdigest_from_config_json(config) == expected
