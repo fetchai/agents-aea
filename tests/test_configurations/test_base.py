@@ -1200,9 +1200,9 @@ class TestConfigurationContainingPathSerialization:
         """Test SkillComponentConfiguration serialization"""
 
         config = SkillComponentConfiguration(
-            class_name="class_name", file_path=__file__
+            class_name="class_name", file_path=self.raw_paths[0]
         )
-        expected = "4f407df8ed540bbc12b184086d7267d13c7960c7af3c4531c213bdba6ce88b9b2cca021c7f57fac456cca9de0fcfe000fb97c965826c76eebb60b063841a1a06"
+        expected = "813554f9b5a750bad28bfd7005705bfc001003ac2ed2970d9030cf1b2d2ec37db69390cfc810f141e228bd3232238a9462259c2df6a3f87631606f47d0183cf8"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
 
@@ -1213,10 +1213,10 @@ class TestConfigurationContainingPathSerialization:
         config = SkillConfig(
             name=name,
             author=author,
-            build_entrypoint=__file__,
-            build_directory=__file__,
+            build_entrypoint=self.raw_paths[0],
+            build_directory=self.raw_paths[0],
         )
-        expected = "00c78f6595efa3ec2809a5a52c7517974cf13a50b0f21128a01e72e5aa37242c1a72a0233b20b35faf1f2b2a9e86c1a559406fe4a9e44b975563d2e3f0526da8"
+        expected = "6de1f8810c55f1ae3d9cea3c58bf41e45049ca8a8078540d5550246a0b3783dbed60672f559a38d51cf802416b8f49b7b649e367dc840ed01cda38ef19a57182"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
 
@@ -1227,13 +1227,13 @@ class TestConfigurationContainingPathSerialization:
         config = AgentConfig(
             agent_name=agent_name,
             author=author,
-            build_entrypoint=__file__,
-            data_dir=__file__,
+            build_entrypoint=self.raw_paths[0],
+            data_dir=self.raw_paths[0],
         )
         for dummy_key, raw_path in zip(string.ascii_letters, self.raw_paths):
             config.private_key_paths.create(dummy_key, raw_path)
             config.connection_private_key_paths.create(dummy_key, raw_path)
-        expected = "e52b490699a9905551f95d3327b966e01de57817400c180df39b7c3e788061f89f9d6db07876e08072fef5a38da57aa913082cf036bffa48cac35984892c3e53"
+        expected = "9c9710263b5a6815605f374d6de25fc073cced9fa9f3f11485e1aa46734ab94e59bac9f7b868433ef4f66b4c41755e650a1e7ef0523870d6e28780d352fbf17a"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
 
@@ -1245,10 +1245,10 @@ class TestConfigurationContainingPathSerialization:
         config = ContractConfig(
             name=name,
             author=author,
-            build_entrypoint=__file__,
-            build_directory=__file__,
+            build_entrypoint=self.raw_paths[0],
+            build_directory=self.raw_paths[0],
             contract_interface_paths=path_dict,
         )
-        expected = "1129d4774ca07f94c100e091d51d4835b5eab794a2416be71c96f7f1ca4789c6f82294d4433c0f3b8fae8103424a9856597449befc3eb9efbe45163b040cf077"
+        expected = "4a9a4e3e8dd43a04da6130c6ae238f27d3f6029c36ee6b6b7ce3e5592736ddd167bdd528dc6044a88dcd2efe0bb71fc1a9c1b54228996088933fac1a614e0c34"
         assert self.yaml_config_dump_load_equal(config.json)
         assert self.get_hexdigest_from_config_json(config) == expected
