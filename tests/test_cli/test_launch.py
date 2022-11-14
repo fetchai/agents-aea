@@ -32,6 +32,7 @@ from typing import Generator, List, Optional
 import pytest
 import yaml
 from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
 from pexpect.exceptions import EOF  # type: ignore
 
 from aea.cli import cli
@@ -136,7 +137,7 @@ class BaseLaunchTestCase:
             [
                 *CLI_LOG_OPTION,
                 "generate-key",
-                FetchAICrypto.identifier,
+                EthereumCrypto.identifier,
                 *password_option,
             ],
         )
@@ -144,7 +145,7 @@ class BaseLaunchTestCase:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_option],
+            [*CLI_LOG_OPTION, "add-key", EthereumCrypto.identifier, *password_option],
         )
         assert result.exit_code == 0
         os.chdir(cls.t)
@@ -158,7 +159,7 @@ class BaseLaunchTestCase:
             [
                 *CLI_LOG_OPTION,
                 "generate-key",
-                FetchAICrypto.identifier,
+                EthereumCrypto.identifier,
                 *password_option,
             ],
         )
@@ -166,7 +167,7 @@ class BaseLaunchTestCase:
 
         result = cls.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_option],
+            [*CLI_LOG_OPTION, "add-key", EthereumCrypto.identifier, *password_option],
         )
         assert result.exit_code == 0
         os.chdir(cls.t)
@@ -189,7 +190,6 @@ class BaseLaunchTestCase:
 class TestLaunch(BaseLaunchTestCase):
     """Test that the command 'aea launch <agent_name>' works as expected."""
 
-    @pytest.mark.skip  # wrong ledger_id
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
@@ -208,7 +208,6 @@ class TestLaunch(BaseLaunchTestCase):
             )
 
 
-@pytest.mark.skip  # wrong ledger_id
 class TestLaunchWithPassword(TestLaunch):
     """Test that the command 'aea launch <agent_name> --password <password>' works as expected."""
 
@@ -234,7 +233,6 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
-    @pytest.mark.skip  # wrong ledger_id
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
@@ -297,7 +295,6 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
 class TestLaunchMultithreaded(BaseLaunchTestCase):
     """Test that the command 'aea launch <agent_names> --multithreaded' works as expected."""
 
-    @pytest.mark.skip  # wrong ledger_id
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch(
@@ -320,7 +317,6 @@ class TestLaunchMultithreaded(BaseLaunchTestCase):
 class TestLaunchOneAgent(BaseLaunchTestCase):
     """Test that the command 'aea launch <agent_name>' works as expected."""
 
-    @pytest.mark.skip  # wrong ledger_id
     def test_exit_code_equal_to_zero(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         with self._cli_launch([self.agent_name_1]) as process_launch:
