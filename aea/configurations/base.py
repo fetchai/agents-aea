@@ -113,13 +113,14 @@ def dependencies_to_json(dependencies: Dependencies) -> Dict[str, Dict[str, str]
              values are the JSON version of a Dependency object.
     """
     result = {}
-    for key, value in dependencies.items():
-        dep_to_json = value.to_json()
-        package_name = list(dep_to_json.items())[0][0]
+    for key, dependency in dependencies.items():
+        dep_to_json = dependency.to_json()
+        enforce(len(dep_to_json) == 1, f"Expecting single item, found: {dep_to_json}")
+        package_name, package_json = dep_to_json.popitem()
         enforce(
             key == package_name, f"Names of dependency differ: {key} != {package_name}"
         )
-        result[key] = dep_to_json[key]
+        result[key] = package_json
     return result
 
 
