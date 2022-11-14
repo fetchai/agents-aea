@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.transfer module."""
+
 import random
 import string
 from pathlib import Path
@@ -93,7 +94,6 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             wallet = get_wallet_from_agent_config(agent_config, password=self.PASSWORD)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
-    @pytest.mark.skip  # wrong ledger_id
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_integration(self):
         """Perform integration tests of cli transfer command with real transfer."""
@@ -104,7 +104,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
 
         self.set_agent_context(self.agent_name)
         agent1_original_balance = self.get_balance()
-        self.generate_wealth(password=self.PASSWORD)
+        self.generate_wealth(ledger_api_id=FetchAICrypto.identifier, password=self.PASSWORD)
 
         wait_for_condition(
             lambda: self.get_balance() > agent1_original_balance, timeout=15, period=1
