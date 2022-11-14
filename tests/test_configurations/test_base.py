@@ -20,6 +20,7 @@
 """This module contains the tests for the aea.configurations.base module."""
 import hashlib
 import json
+import platform
 import re
 import string
 import tempfile
@@ -1191,7 +1192,10 @@ class TestConfigurationContainingPathSerialization:
 
         # since automagically converted to POSIX compliant-format when on Linux,
         # hard-coded the expected posix order to ensure consistency across OS.
-        expected = [3, 2, 5, 0, 4, 1, 11, 9, 7, 10, 8, 6, 14, 12, 13, 15, 16, 17]
+        if platform.system() == "Windows":
+            expected = [3, 11, 9, 7, 10, 8, 1, 2, 0, 4, 5, 6, 14, 12, 13, 15, 16, 17]
+        else:
+            expected = [3, 2, 5, 0, 4, 1, 11, 9, 7, 10, 8, 6, 14, 12, 13, 15, 16, 17]
         posix_paths = [Path(p).as_posix() for p in self.raw_paths]
         assert sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
         assert sorted_indices(self.raw_paths) == expected
