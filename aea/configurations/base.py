@@ -716,9 +716,9 @@ class ConnectionConfig(ComponentConfiguration):
         if self.cert_requests is not None:
             result["cert_requests"] = list(map(attrgetter("json"), self.cert_requests))
         if self.build_entrypoint:
-            result["build_entrypoint"] = self.build_entrypoint
+            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
         if self.build_directory:
-            result["build_directory"] = self.build_directory
+            result["build_directory"] = str(Path(self.build_directory).as_posix())
         return result
 
     @classmethod
@@ -848,9 +848,9 @@ class ProtocolConfig(ComponentConfiguration):
             }
         )
         if self.build_entrypoint:
-            result["build_entrypoint"] = self.build_entrypoint
+            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
         if self.build_directory:
-            result["build_directory"] = self.build_directory
+            result["build_directory"] = str(Path(self.build_directory).as_posix())
         return result
 
     @classmethod
@@ -1066,9 +1066,9 @@ class SkillConfig(ComponentConfiguration):
             }
         )
         if self.build_entrypoint:
-            result["build_entrypoint"] = self.build_entrypoint
+            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
         if self.build_directory:
-            result["build_directory"] = self.build_directory
+            result["build_directory"] = str(Path(self.build_directory).as_posix())
         return result
 
     @classmethod
@@ -1373,14 +1373,14 @@ class AgentConfig(PackageConfiguration):
     def private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: path for key, path in self.private_key_paths.read_all()
+            key: str(Path(path).as_posix()) for key, path in self.private_key_paths.read_all()
         }
 
     @property
     def connection_private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of connection private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: path for key, path in self.connection_private_key_paths.read_all()
+            key: str(Path(path).as_posix()) for key, path in self.connection_private_key_paths.read_all()
         }
 
     def component_configurations_json(self) -> List[OrderedDict]:
@@ -1430,7 +1430,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[str, Any]
 
         if self.build_entrypoint:
-            config["build_entrypoint"] = self.build_entrypoint
+            config["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
 
         # framework optional configs are only printed if defined.
         if self.period is not None:
@@ -1814,15 +1814,15 @@ class ContractConfig(ComponentConfiguration):
                 "fingerprint": self.fingerprint,
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "class_name": self.class_name,
-                "contract_interface_paths": self.contract_interface_paths,
+                "contract_interface_paths": {key: str(Path(path).as_posix()) for key, path in self.contract_interface_paths},
                 "dependencies": dependencies_to_json(self.dependencies),
                 CONTRACTS: sorted(map(str, self.contracts)),
             }
         )
         if self.build_entrypoint:
-            result["build_entrypoint"] = self.build_entrypoint
+            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
         if self.build_directory:
-            result["build_directory"] = self.build_directory
+            result["build_directory"] = str(Path(self.build_directory).as_posix())
         return result
 
     @classmethod
