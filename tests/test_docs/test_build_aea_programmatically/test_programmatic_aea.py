@@ -23,8 +23,6 @@
 import os
 from pathlib import Path
 
-import pytest
-
 from aea.configurations.constants import DEFAULT_PRIVATE_KEY_FILE
 from aea.test_tools.test_cases import BaseAEATestCase
 
@@ -37,7 +35,6 @@ MD_FILE = "docs/build-aea-programmatically.md"
 PY_FILE = "test_docs/test_build_aea_programmatically/programmatic_aea.py"
 
 
-@pytest.mark.skip  # wrong ledger_id
 class TestProgrammaticAEA(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
@@ -53,7 +50,7 @@ class TestProgrammaticAEA(BaseAEATestCase):
     def test_read_md_file(self):
         """Read the code blocks. Last block should be the whole code."""
         assert (
-            self.code_blocks[-1] == self.python_file
+            self.code_blocks[-1].strip() == self.python_file.strip()
         ), "Files must be exactly the same."
 
     def test_run_agent(self):

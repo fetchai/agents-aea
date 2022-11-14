@@ -15,9 +15,9 @@ cd ..
 aea delete my_aea
 ```
 
-Also, install `open-aea-ledger-fetchai` plug-in:
+Also, install `open-aea-ledger-ethereum` plug-in:
 ```bash
-pip install open-aea-ledger-fetchai
+pip install open-aea-ledger-ethereum
 ```
 
 ## Imports
@@ -33,7 +33,7 @@ from threading import Thread
 Then, import the application specific libraries.
 
 ``` python
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -47,14 +47,14 @@ Set up a variable pointing to where the packages directory is located - this sho
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
+PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier)
 ```
 
 ## Create a private key
 We need a private key to populate the AEA's wallet.
 ``` python
     # Create a private key
-    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    create_private_key(EthereumCrypto.identifier, PRIVATE_KEY_FILE)
 ```
 
 ## Clearing the input and output files
@@ -79,7 +79,7 @@ We set the name, add the private key for the AEA to use and set the ledger confi
 ``` python
     builder.set_name("my_aea")
 
-    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    builder.add_private_key(EthereumCrypto.identifier, PRIVATE_KEY_FILE)
 ```
 
 Next, we add the `fetchai/stub:0.15.0` connection which will read/write messages from file:
@@ -192,7 +192,7 @@ import os
 import time
 from threading import Thread
 
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -204,14 +204,14 @@ from aea.skills.base import Skill
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
+PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier)
 
 
 def run():
     """Run demo."""
 
     # Create a private key
-    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    create_private_key(EthereumCrypto.identifier, PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -225,7 +225,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    builder.add_private_key(EthereumCrypto.identifier, PRIVATE_KEY_FILE)
 
     # Add the default protocol (assuming it is present in the local directory 'packages')
     builder.add_protocol("./packages/fetchai/protocols/default")
