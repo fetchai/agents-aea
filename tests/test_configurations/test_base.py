@@ -57,6 +57,7 @@ from aea.configurations.base import (
     _get_default_configuration_file_name_from_type,
     dependencies_from_json,
     dependencies_to_json,
+    as_posix_str,
 )
 from aea.configurations.constants import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -1181,6 +1182,15 @@ class TestConfigurationContainingPathSerialization:
 
         # this is tested because we assume config.json is deterministic
         return hashlib.sha512(json.dumps(config.json).encode("utf-8")).hexdigest()
+
+    def test_as_posix_string(self) -> None:
+        """Test if the POSIX format is as expected and identical on all OS."""
+
+        expected = ['C:\\Documents\\Newsletters\\Summer2018.pdf', '\\Program Files\\Custom Utilities\\StringFinder.exe', '2018\\January.xlsx', '..\\Publications\\TravelBrochure.pdf', 'C:\\Projects\\apilibrary\\apilibrary.sln', 'C:Projects\\apilibrary\\apilibrary.sln', 'c:\\temp\\test-file.txt', '\\\\127.0.0.1\\c$\\temp\\test-file.txt', '\\\\LOCALHOST\\c$\\temp\\test-file.txt', '\\\\.\\c:\\temp\\test-file.txt', '\\\\?\\c:\\temp\\test-file.txt', '\\\\.\\UNC\\LOCALHOST\\c$\\temp\\test-file.txt', 'jquery-1.1.1.js', 'jquery-1.1.1.min.js', 'jquery-1.1.1-vsdoc.js', 'jquery-1.2.1-vsdoc.js', 'jquery-1.2.1.js', 'jquery-1.2.1.min.js']
+        posix_string = list(map(as_posix_str, self.raw_paths))
+        different = [(a, b) for a, b in zip(posix_string, expected) if a != b]
+        assert len(posix_string) == len(self.raw_paths)
+        assert not different
 
     def test_filepath_ordering(self) -> None:
         """Test that filepath ordering remains equivalent when converting to POSIX"""
