@@ -4,6 +4,16 @@
 
 Classes to handle AEA configurations.
 
+<a id="aea.configurations.base.as_posix_str"></a>
+
+#### as`_`posix`_`str
+
+```python
+def as_posix_str(path: Union[Path, str]) -> str
+```
+
+Cast to POSIX format
+
 <a id="aea.configurations.base.dependencies_from_json"></a>
 
 #### dependencies`_`from`_`json

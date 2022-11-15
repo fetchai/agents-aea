@@ -26,7 +26,7 @@ import string
 import tempfile
 from copy import copy
 from pathlib import Path
-from typing import List, Union, Iterable
+from typing import Iterable, List, Union
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
@@ -55,9 +55,9 @@ from aea.configurations.base import (
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
+    as_posix_str,
     dependencies_from_json,
     dependencies_to_json,
-    as_posix_str,
 )
 from aea.configurations.constants import (
     DEFAULT_AEA_CONFIG_FILE,
@@ -1173,7 +1173,7 @@ class TestConfigurationContainingPathSerialization:
             return data == reconstituted_data
 
     def same_after_casting_to_posix_string(self, config) -> bool:
-        """Check serialization same after casting all non-dictionary values to posix"""
+        """Check serialization same after casting string values to POSIX"""
 
         def is_iterable_non_string(obj) -> bool:
             return not isinstance(obj, str) and isinstance(obj, Iterable)
@@ -1202,10 +1202,29 @@ class TestConfigurationContainingPathSerialization:
     def test_as_posix_string(self) -> None:
         """Test if the POSIX format is as expected and identical on all OS."""
 
-        expected = ['C:\\Documents\\Newsletters\\Summer2018.pdf', '\\Program Files\\Custom Utilities\\StringFinder.exe', '2018\\January.xlsx', '..\\Publications\\TravelBrochure.pdf', 'C:\\Projects\\apilibrary\\apilibrary.sln', 'C:Projects\\apilibrary\\apilibrary.sln', 'c:\\temp\\test-file.txt', '\\\\127.0.0.1\\c$\\temp\\test-file.txt', '\\\\LOCALHOST\\c$\\temp\\test-file.txt', '\\\\.\\c:\\temp\\test-file.txt', '\\\\?\\c:\\temp\\test-file.txt', '\\\\.\\UNC\\LOCALHOST\\c$\\temp\\test-file.txt', 'jquery-1.1.1.js', 'jquery-1.1.1.min.js', 'jquery-1.1.1-vsdoc.js', 'jquery-1.2.1-vsdoc.js', 'jquery-1.2.1.js', 'jquery-1.2.1.min.js']
-        posix_string = list(map(as_posix_str, self.raw_paths))
-        different = [(a, b) for a, b in zip(posix_string, expected) if a != b]
-        assert len(posix_string) == len(self.raw_paths)
+        expected = [
+            "C:\\Documents\\Newsletters\\Summer2018.pdf",
+            "\\Program Files\\Custom Utilities\\StringFinder.exe",
+            "2018\\January.xlsx",
+            "..\\Publications\\TravelBrochure.pdf",
+            "C:\\Projects\\apilibrary\\apilibrary.sln",
+            "C:Projects\\apilibrary\\apilibrary.sln",
+            "c:\\temp\\test-file.txt",
+            "\\\\127.0.0.1\\c$\\temp\\test-file.txt",
+            "\\\\LOCALHOST\\c$\\temp\\test-file.txt",
+            "\\\\.\\c:\\temp\\test-file.txt",
+            "\\\\?\\c:\\temp\\test-file.txt",
+            "\\\\.\\UNC\\LOCALHOST\\c$\\temp\\test-file.txt",
+            "jquery-1.1.1.js",
+            "jquery-1.1.1.min.js",
+            "jquery-1.1.1-vsdoc.js",
+            "jquery-1.2.1-vsdoc.js",
+            "jquery-1.2.1.js",
+            "jquery-1.2.1.min.js",
+        ]
+        posix_paths = list(map(as_posix_str, self.raw_paths))
+        different = [(a, b) for a, b in zip(posix_paths, expected) if a != b]
+        assert len(posix_paths) == len(self.raw_paths)
         assert not different
 
     def test_filepath_ordering(self) -> None:
@@ -1219,13 +1238,13 @@ class TestConfigurationContainingPathSerialization:
         # since automagically converted to POSIX compliant-format when on Linux,
         # hard-coded the expected posix order to ensure consistency across OS.
         posix_paths = [Path(p).as_posix() for p in self.raw_paths]
-        same_path_ordering = sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
+        same_ordering = sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
 
         if platform.system() == "Windows":
-            assert not same_path_ordering
+            assert not same_ordering
             expected = [3, 11, 9, 7, 10, 8, 1, 2, 0, 4, 5, 6, 14, 12, 13, 15, 16, 17]
         else:
-            assert same_path_ordering
+            assert same_ordering
             expected = [3, 2, 5, 0, 4, 1, 11, 9, 7, 10, 8, 6, 14, 12, 13, 15, 16, 17]
         assert sorted_indices(self.raw_paths) == expected
 

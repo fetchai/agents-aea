@@ -1379,8 +1379,7 @@ class AgentConfig(PackageConfiguration):
     def private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: as_posix_str(path)
-            for key, path in self.private_key_paths.read_all()
+            key: as_posix_str(path) for key, path in self.private_key_paths.read_all()
         }
 
     @property
