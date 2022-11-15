@@ -26,7 +26,7 @@ import string
 import tempfile
 from copy import copy
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Iterable
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
@@ -1172,6 +1172,22 @@ class TestConfigurationContainingPathSerialization:
                 reconstituted_data = yaml_load(stream)
             return data == reconstituted_data
 
+    def same_after_casting_to_posix_string(self, config) -> bool:
+        """Check serialization same after casting all non-dictionary values to posix"""
+
+        def is_iterable_non_string(obj) -> bool:
+            return not isinstance(obj, str) and isinstance(obj, Iterable)
+
+        def to_posix(obj):
+            if is_iterable_non_string(obj):
+                if isinstance(obj, dict):
+                    return {k: to_posix(v) for k, v in obj.items()}
+                return obj.__class__(*map(to_posix, obj))
+            # empty string to posix == "." hence we do not cast it.
+            return as_posix_str(obj) if obj and isinstance(obj, str) else obj
+
+        return to_posix(config.json) == config.json
+
     def get_hexdigest_from_config_json(
         self,
         config: Union[
@@ -1221,6 +1237,7 @@ class TestConfigurationContainingPathSerialization:
         )
         expected = "813554f9b5a750bad28bfd7005705bfc001003ac2ed2970d9030cf1b2d2ec37db69390cfc810f141e228bd3232238a9462259c2df6a3f87631606f47d0183cf8"
         assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
         assert self.get_hexdigest_from_config_json(config) == expected
 
     def test_skill_configuration_serialization(self) -> None:
@@ -1235,6 +1252,7 @@ class TestConfigurationContainingPathSerialization:
         )
         expected = "6de1f8810c55f1ae3d9cea3c58bf41e45049ca8a8078540d5550246a0b3783dbed60672f559a38d51cf802416b8f49b7b649e367dc840ed01cda38ef19a57182"
         assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
         assert self.get_hexdigest_from_config_json(config) == expected
 
     def test_agent_configuration_serialization(self) -> None:
@@ -1252,6 +1270,7 @@ class TestConfigurationContainingPathSerialization:
             config.connection_private_key_paths.create(dummy_key, raw_path)
         expected = "9c9710263b5a6815605f374d6de25fc073cced9fa9f3f11485e1aa46734ab94e59bac9f7b868433ef4f66b4c41755e650a1e7ef0523870d6e28780d352fbf17a"
         assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
         assert self.get_hexdigest_from_config_json(config) == expected
 
     def test_contract_configuration_serialization(self) -> None:
@@ -1268,4 +1287,5 @@ class TestConfigurationContainingPathSerialization:
         )
         expected = "4a9a4e3e8dd43a04da6130c6ae238f27d3f6029c36ee6b6b7ce3e5592736ddd167bdd528dc6044a88dcd2efe0bb71fc1a9c1b54228996088933fac1a614e0c34"
         assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
         assert self.get_hexdigest_from_config_json(config) == expected
