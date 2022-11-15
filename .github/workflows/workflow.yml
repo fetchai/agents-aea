@@ -472,7 +472,7 @@ jobs:
       - if: True
         name: Unit tests
         run: |
-          tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable' ./tests/test_packages_for_aea_tests ./tests/test_packages 
+          tox -e py${{ matrix.python_version }} -- --cov=packages/fetchai/connections --cov=packages/fetchai/contracts  --cov=packages/fetchai/protocols --cov=packages/fetchai/skills  -m 'not integration and not unstable' ./tests/test_packages_for_aea_tests ./tests/test_packages 
 
   platform_checks_sync_aea_loop:
     continue-on-error: True
