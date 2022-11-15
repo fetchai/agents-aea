@@ -1,5 +1,19 @@
 # Release History - open AEA
 
+## 1.24.0 (2022-11-15)
+
+AEA:
+- Adds deprecation warning for `--aev` flag
+- Makes the usage of environment variables default
+- Extends `push-all` command to push only the development packages
+- Adds support for generating environment variable names if not provided by default
+
+Test:
+- Fixes the tests skipped because of the wrongly configures ledger ID
+
+Chores:
+- Updates `scripts/check_ipfs_hashes_pushed.py` to use new `packages.json` format
+  
 ## 1.23.0 (2022-11-09)
 
 AEA:

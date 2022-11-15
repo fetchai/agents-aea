@@ -8,8 +8,8 @@ The following table shows which versions of `open-aea` are currently being suppo
 
 | Version   | Supported          |
 | --------- | ------------------ |
-| `1.23.x`   | :white_check_mark: |
-| `< 1.23.0` | :x:                |
+| `1.24.x`   | :white_check_mark: |
+| `< 1.24.0` | :x:                |
 
 ## Reporting a Vulnerability
 
