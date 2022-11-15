@@ -111,7 +111,7 @@ $ export FOO=some_other_value
 $ aea run --aev
 ```
 
-The environment variable loading mechanism also supports the auto generation of the environment variable name from the json path if the variable name is not provided by default. The auto generated environment variable follows `{COMPONENT_TYPE}_{COMPONENT_NAME}_{JSON_PATH}` format to generate variable names
+The environment variable loading mechanism also supports the auto generation of the environment variable name from the `json` path if the variable name is not provided by default. The auto generated environment variable follows `{COMPONENT_TYPE}_{COMPONENT_NAME}_{JSON_PATH}` format to generate variable names
 
 Let's take following override as an example
 
@@ -126,7 +126,7 @@ config:
   foo: ${str:bar}
 ```
 
-Here we haven't define a environment variable name for the placeholder, this means when checking for the value the loading mechanism will generate the environment variable name for `foo` using it's json path. If we follow the format above, the environment variable name should be `CONNECTION_CONNECTION_A_CONFIG_FOO`
+Here we haven't define a environment variable name for the placeholder, this means when checking for the value the loading mechanism will generate the environment variable name for `foo` using it's `json` path. If we follow the format above, the environment variable name should be `CONNECTION_CONNECTION_A_CONFIG_FOO`
 
 ### Best practices when using overrides and suggestions 
 
