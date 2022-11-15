@@ -94,6 +94,11 @@ _ = [PackageId, PackageVersion]
 T = TypeVar("T")
 
 
+def as_posix_str(path: Union[Path, str]) -> str:
+    """Cast to POSIX format"""
+    return str(Path(path).as_posix())
+
+
 def dependencies_from_json(obj: Dict[str, Dict[str, str]]) -> Dependencies:
     """
     Parse a JSON object to get an instance of Dependencies.
@@ -717,9 +722,9 @@ class ConnectionConfig(ComponentConfiguration):
         if self.cert_requests is not None:
             result["cert_requests"] = list(map(attrgetter("json"), self.cert_requests))
         if self.build_entrypoint:
-            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
+            result["build_entrypoint"] = as_posix_str(self.build_entrypoint)
         if self.build_directory:
-            result["build_directory"] = str(Path(self.build_directory).as_posix())
+            result["build_directory"] = as_posix_str(self.build_directory)
         return result
 
     @classmethod
@@ -849,9 +854,9 @@ class ProtocolConfig(ComponentConfiguration):
             }
         )
         if self.build_entrypoint:
-            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
+            result["build_entrypoint"] = as_posix_str(self.build_entrypoint)
         if self.build_directory:
-            result["build_directory"] = str(Path(self.build_directory).as_posix())
+            result["build_directory"] = as_posix_str(self.build_directory)
         return result
 
     @classmethod
@@ -906,7 +911,7 @@ class SkillComponentConfiguration:
         """Return the JSON representation."""
         result = {"class_name": self.class_name, "args": self.args}
         if self.file_path is not None:
-            result["file_path"] = str(self.file_path.as_posix())
+            result["file_path"] = as_posix_str(self.file_path)
         return result
 
     @classmethod
@@ -1067,9 +1072,9 @@ class SkillConfig(ComponentConfiguration):
             }
         )
         if self.build_entrypoint:
-            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
+            result["build_entrypoint"] = as_posix_str(self.build_entrypoint)
         if self.build_directory:
-            result["build_directory"] = str(Path(self.build_directory).as_posix())
+            result["build_directory"] = as_posix_str(self.build_directory)
         return result
 
     @classmethod
@@ -1374,7 +1379,7 @@ class AgentConfig(PackageConfiguration):
     def private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: str(Path(path).as_posix())
+            key: as_posix_str(path)
             for key, path in self.private_key_paths.read_all()
         }
 
@@ -1382,7 +1387,7 @@ class AgentConfig(PackageConfiguration):
     def connection_private_key_paths_dict(self) -> Dict[str, str]:
         """Get dictionary version of connection private key paths."""
         return {  # pylint: disable=unnecessary-comprehension
-            key: str(Path(path).as_posix())
+            key: as_posix_str(path)
             for key, path in self.connection_private_key_paths.read_all()
         }
 
@@ -1433,7 +1438,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[str, Any]
 
         if self.build_entrypoint:
-            config["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
+            config["build_entrypoint"] = as_posix_str(self.build_entrypoint)
 
         # framework optional configs are only printed if defined.
         if self.period is not None:
@@ -1818,7 +1823,7 @@ class ContractConfig(ComponentConfiguration):
                 "fingerprint_ignore_patterns": self.fingerprint_ignore_patterns,
                 "class_name": self.class_name,
                 "contract_interface_paths": {
-                    key: str(Path(path).as_posix())
+                    key: as_posix_str(path)
                     for key, path in self.contract_interface_paths.items()
                 },
                 "dependencies": dependencies_to_json(self.dependencies),
@@ -1826,9 +1831,9 @@ class ContractConfig(ComponentConfiguration):
             }
         )
         if self.build_entrypoint:
-            result["build_entrypoint"] = str(Path(self.build_entrypoint).as_posix())
+            result["build_entrypoint"] = as_posix_str(self.build_entrypoint)
         if self.build_directory:
-            result["build_directory"] = str(Path(self.build_directory).as_posix())
+            result["build_directory"] = as_posix_str(self.build_directory)
         return result
 
     @classmethod
