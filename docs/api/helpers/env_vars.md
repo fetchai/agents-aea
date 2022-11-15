@@ -19,7 +19,7 @@ Check is variable string with env variable pattern.
 #### replace`_`with`_`env`_`var
 
 ```python
-def replace_with_env_var(value: str, env_variables: dict, default_value: Any = NotSet) -> JSON_TYPES
+def replace_with_env_var(value: str, env_variables: dict, default_value: Any = NotSet, default_var_name: Optional[str] = None) -> JSON_TYPES
 ```
 
 Replace env var with value.
@@ -29,7 +29,7 @@ Replace env var with value.
 #### apply`_`env`_`variables
 
 ```python
-def apply_env_variables(data: Union[Dict, List[Dict]], env_variables: Mapping[str, Any], default_value: Any = NotSet) -> JSON_TYPES
+def apply_env_variables(data: Union[Dict, List[Dict]], env_variables: Mapping[str, Any], path: Optional[List[str]] = None, default_value: Any = NotSet) -> JSON_TYPES
 ```
 
 Create new resulting dict with env variables applied.
@@ -43,4 +43,14 @@ def convert_value_str_to_type(value: str, type_str: str) -> JSON_TYPES
 ```
 
 Convert value by type name to native python type.
+
+<a id="aea.helpers.env_vars.apply_env_variables_on_agent_config"></a>
+
+#### apply`_`env`_`variables`_`on`_`agent`_`config
+
+```python
+def apply_env_variables_on_agent_config(data: List[Dict], env_variables: Mapping[str, Any]) -> List[Dict]
+```
+
+Create new resulting dict with env variables applied.
 

@@ -49,7 +49,7 @@ from aea.configurations.data_types import ComponentType, PackageIdPrefix, Public
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.validation import SAME_MARK, filter_data
 from aea.exceptions import AEAException, enforce
-from aea.helpers.env_vars import apply_env_variables
+from aea.helpers.env_vars import apply_env_variables_on_agent_config
 from aea.helpers.io import open_file
 from aea.helpers.storage.backends.base import JSON_TYPES
 from aea.helpers.yaml_utils import yaml_load_all
@@ -354,7 +354,14 @@ class AgentConfigManager:
         """Create AgentConfigManager instance from agent project path."""
         data = cls._load_config_data(Path(aea_project_path))
         if substitude_env_vars:
-            data = cast(List[Dict], apply_env_variables(data, os.environ))
+            data = cast(
+                List[Dict],
+                apply_env_variables_on_agent_config(
+                    data=data,
+                    env_variables=os.environ,
+                ),
+            )
+
         agent_config = cls._loader.load_agent_config_from_json(data, validate=False)
         instance = cls(
             agent_config, aea_project_path, env_vars_friendly=not substitude_env_vars
