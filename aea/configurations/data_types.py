@@ -86,6 +86,8 @@ class PackageVersion:
 
     _version: PackageVersionLike
 
+    __slots__ = ("_version",)
+
     def __init__(self, version_like: PackageVersionLike) -> None:
         """
         Initialize a package version.
@@ -114,7 +116,9 @@ class PackageVersion:
 
     def __eq__(self, other: Any) -> bool:
         """Check equality."""
-        return isinstance(other, PackageVersion) and self._version == other._version
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance's __eq__.
+        return all(getattr(self, s) == getattr(other, s) for s in self.__slots__)
 
     def __lt__(self, other: Any) -> bool:
         """Compare with another object."""
