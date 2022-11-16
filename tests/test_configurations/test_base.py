@@ -18,9 +18,14 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the aea.configurations.base module."""
+import hashlib
+import json
 import re
+import string
+import tempfile
 from copy import copy
 from pathlib import Path
+from typing import Iterable, List, Union
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
@@ -43,11 +48,13 @@ from aea.configurations.base import (
     ProtocolConfig,
     ProtocolSpecification,
     PublicId,
+    SkillComponentConfiguration,
     SkillConfig,
     SpeechActContentConfig,
     _check_aea_version,
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
+    as_posix_str,
     dependencies_from_json,
     dependencies_to_json,
 )
@@ -59,6 +66,7 @@ from aea.configurations.constants import (
     DEFAULT_SKILL_CONFIG_FILE,
 )
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
+from aea.helpers.yaml_utils import yaml_dump, yaml_load
 
 from tests.conftest import (
     AUTHOR,
@@ -1123,3 +1131,138 @@ def test_component_id_from_json():
         "version": "1.0.0",
     }
     assert ComponentId.from_json(json_data).json == json_data
+
+
+class TestConfigurationContainingPathSerialization:
+    """Test configurations containing paths are deterministic across different OS"""
+
+    def setup(self):
+        """Setup test"""
+
+        # starting from posix-compliant format
+        self.raw_paths = [
+            "C:/Documents/Newsletters/Summer2018.pdf",
+            "/Program Files/Custom Utilities/StringFinder.exe",
+            "2018/January.xlsx",
+            "../Publications/TravelBrochure.pdf",
+            "C:/Projects/apilibrary/apilibrary.sln",
+            "C:Projects/apilibrary/apilibrary.sln",
+            "c:/temp/test-file.txt",
+            "//127.0.0.1/c$/temp/test-file.txt",
+            "//LOCALHOST/c$/temp/test-file.txt",
+            "//c:/temp/test-file.txt",
+            "//?/c:/temp/test-file.txt",
+            "//UNC/LOCALHOST/c$/temp/test-file.txt",
+            "jquery-1.1.1.js",
+            "jquery-1.1.1.min.js",
+            "jquery-1.1.1-vsdoc.js",
+            "jquery-1.2.1-vsdoc.js",
+            "jquery-1.2.1.js",
+            "jquery-1.2.1.min.js",
+        ]
+
+    def yaml_config_dump_load_equal(self, data: dict) -> bool:
+        """Check whether config is the same after yaml dump and load"""
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_file = Path(tmp_dir) / "tmp_file"
+            with open(tmp_file, "w") as stream:
+                yaml_dump(data, stream)
+            with open(tmp_file, "r") as stream:
+                reconstituted_data = yaml_load(stream)
+            return data == reconstituted_data
+
+    def same_after_casting_to_posix_string(self, config) -> bool:
+        """Check serialization same after casting string values to POSIX"""
+
+        def is_iterable_non_string(obj) -> bool:
+            return not isinstance(obj, str) and isinstance(obj, Iterable)
+
+        def to_posix(obj):
+            if is_iterable_non_string(obj):
+                if isinstance(obj, dict):
+                    return {k: to_posix(v) for k, v in obj.items()}
+                return obj.__class__(*map(to_posix, obj))
+            # empty string to posix == "." hence we do not cast it.
+            return as_posix_str(obj) if obj and isinstance(obj, str) else obj
+
+        return to_posix(config.json) == config.json
+
+    def get_hexdigest_from_config_json(
+        self,
+        config: Union[
+            SkillComponentConfiguration, SkillConfig, AgentConfig, ContractConfig
+        ],
+    ) -> str:
+        """Get hexdigest from the json serialized configuration"""
+
+        # this is tested because we assume config.json is deterministic
+        return hashlib.sha512(json.dumps(config.json).encode("utf-8")).hexdigest()
+
+    def test_filepath_ordering(self) -> None:
+        """Test that filepath ordering remains equivalent when converting to POSIX"""
+
+        # https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
+
+        def sorted_indices(li: List[str]) -> List[int]:
+            return sorted(range(len(li)), key=lambda i: li[i])
+
+        # since automagically converted to POSIX compliant-format when on Linux,
+        # hard-coded the expected posix order to ensure consistency across OS.
+        posix_paths = [Path(p).as_posix() for p in self.raw_paths]
+        expected = [3, 7, 10, 8, 11, 9, 1, 2, 0, 4, 5, 6, 14, 12, 13, 15, 16, 17]
+        assert sorted_indices(self.raw_paths) == sorted_indices(posix_paths)
+        assert sorted_indices(self.raw_paths) == expected
+
+    def test_skill_component_configuration_serialization(self) -> None:
+        """Test SkillComponentConfiguration serialization"""
+
+        config = SkillComponentConfiguration(
+            class_name="class_name", file_path=self.raw_paths[0]
+        )
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
+
+    def test_skill_configuration_serialization(self) -> None:
+        """Test SkillConfig serialization"""
+
+        name, author = "name", "author"
+        config = SkillConfig(
+            name=name,
+            author=author,
+            build_entrypoint=self.raw_paths[0],
+            build_directory=self.raw_paths[0],
+        )
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
+
+    def test_agent_configuration_serialization(self) -> None:
+        """Test AgentConfig serialization"""
+
+        agent_name, author = "agent_name", "author"
+        config = AgentConfig(
+            agent_name=agent_name,
+            author=author,
+            build_entrypoint=self.raw_paths[0],
+            data_dir=self.raw_paths[0],
+        )
+        for dummy_key, raw_path in zip(string.ascii_letters, self.raw_paths):
+            config.private_key_paths.create(dummy_key, raw_path)
+            config.connection_private_key_paths.create(dummy_key, raw_path)
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
+
+    def test_contract_configuration_serialization(self) -> None:
+        """Test ContractConfig serialization"""
+
+        name, author = "name", "author"
+        path_dict = dict(zip(string.ascii_letters, self.raw_paths))
+        config = ContractConfig(
+            name=name,
+            author=author,
+            build_entrypoint=self.raw_paths[0],
+            build_directory=self.raw_paths[0],
+            contract_interface_paths=path_dict,
+        )
+        assert self.yaml_config_dump_load_equal(config.json)
+        assert self.same_after_casting_to_posix_string(config)
