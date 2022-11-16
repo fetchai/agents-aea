@@ -521,7 +521,7 @@ Get the representation.
 def __eq__(other: Any) -> bool
 ```
 
-Compare with another object.
+Check equality.
 
 <a id="aea.configurations.data_types.PublicId.__lt__"></a>
 
@@ -795,7 +795,7 @@ Get the object representation in string.
 def __eq__(other: Any) -> bool
 ```
 
-Compare with another object.
+Check equality.
 
 <a id="aea.configurations.data_types.PackageId.__lt__"></a>
 
@@ -1080,7 +1080,7 @@ Get the string representation.
 def __eq__(other: Any) -> bool
 ```
 
-Compare with another object.
+Check equality.
 
 <a id="aea.configurations.data_types.Dependencies"></a>
 
