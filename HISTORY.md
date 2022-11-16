@@ -7,9 +7,12 @@ AEA:
 - Makes the usage of environment variables default
 - Extends `push-all` command to push only the development packages
 - Adds support for generating environment variable names if not provided by default
+- Changes log level from `debug` to `error` on `Exception` handling
+- Updates the configuration loader classes to make sure path string serialization is deterministic across the various platforms
 
 Test:
 - Fixes the tests skipped because of the wrongly configures ledger ID
+- Adds tests to check if path string serialization is deterministic across the various platforms
 
 Chores:
 - Updates `scripts/check_ipfs_hashes_pushed.py` to use new `packages.json` format
