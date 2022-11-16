@@ -455,13 +455,10 @@ class PublicId(JSONSerializable):
         return f"<{self}>"
 
     def __eq__(self, other: Any) -> bool:
-        """Compare with another object."""
-        return (
-            isinstance(other, PublicId)
-            and self.author == other.author
-            and self.name == other.name
-            and self.version == other.version
-        )
+        """Check equality."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance's __eq__.
+        return all(getattr(self, s) == getattr(other, s) for s in self.__slots__)
 
     def __lt__(self, other: Any) -> bool:
         """
@@ -651,12 +648,10 @@ class PackageId:
         return f"PackageId{self.__str__()}"
 
     def __eq__(self, other: Any) -> bool:
-        """Compare with another object."""
-        return (
-            isinstance(other, PackageId)
-            and self.package_type == other.package_type
-            and self.public_id == other.public_id
-        )
+        """Check equality."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance's __eq__.
+        return all(getattr(self, s) == getattr(other, s) for s in self.__slots__)
 
     def __lt__(self, other: Any) -> bool:
         """Compare two public ids."""
@@ -878,15 +873,10 @@ class Dependency:
         return f"{self.__class__.__name__}(name='{self.name}', version='{self.version}', index='{self.index}', git='{self.git}', ref='{self.ref}')"
 
     def __eq__(self, other: Any) -> bool:
-        """Compare with another object."""
-        return (
-            isinstance(other, Dependency)
-            and self._name == other._name
-            and self._version == other._version
-            and self._index == other._index
-            and self._git == other._git
-            and self._ref == other._ref
-        )
+        """Check equality."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance's __eq__.
+        return all(getattr(self, s) == getattr(other, s) for s in self.__slots__)
 
 
 Dependencies = Dict[str, Dependency]
