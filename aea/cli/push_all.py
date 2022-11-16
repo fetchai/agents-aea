@@ -21,15 +21,19 @@
 
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 import click
 
+from aea.cli.packages import get_package_manager
 from aea.cli.push import push_item_ipfs
 from aea.cli.registry.settings import REGISTRY_REMOTE, REMOTE_IPFS
 from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import get_default_remote_registry, load_item_config
 from aea.configurations.constants import PACKAGES, PYCACHE
+from aea.configurations.data_types import PackageId
+from aea.package_manager.v0 import PackageManagerV0
+from aea.package_manager.v1 import PackageManagerV1
 
 
 @click.command("push-all")
@@ -51,6 +55,9 @@ def push_all_packages(
     package_type_config_class: Optional[Dict] = None,
 ) -> None:
     """Push all packages."""
+
+    packages: Dict[PackageId, str]
+
     if registry != REGISTRY_REMOTE:
         raise click.ClickException(
             "Pushing all packages is not supported for the local registry."
@@ -64,13 +71,28 @@ def push_all_packages(
     if packages_dir is None:
         packages_dir = Path.cwd() / PACKAGES
 
-    for package_path in packages_dir.glob("*/*/*"):
+    package_manager = get_package_manager(
+        package_dir=packages_dir,
+    )
+
+    if isinstance(package_manager, PackageManagerV0):
+        packages = cast(PackageManagerV0, package_manager).packages
+
+    if isinstance(package_manager, PackageManagerV1):
+        packages = cast(PackageManagerV1, package_manager).dev_packages
+
+    for package_id in cast(Dict[PackageId, str], packages):
+        package_path = package_manager.package_path_from_package_id(
+            package_id=package_id,
+        )
         if not package_path.is_dir() or package_path.name == PYCACHE:
             continue
 
         click.echo(f"Pushing: {package_path}")
         item_config = load_item_config(
-            package_path.parent.name[:-1], package_path, package_type_config_class
+            item_type=str(package_id.package_type),
+            package_path=package_path,
+            package_type_config_class=package_type_config_class,
         )
         push_item_ipfs(package_path, item_config.public_id)
         click.echo("")

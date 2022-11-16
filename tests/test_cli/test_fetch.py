@@ -370,6 +370,20 @@ class TestFetchIPFS(BaseAEATestCase):
                     "--remote",
                 )
 
+    def test_not_an_agent_error(self) -> None:
+        """Test run."""
+
+        with mock.patch(
+            "aea.cli.fetch.get_default_remote_registry", return_value=REMOTE_IPFS
+        ), mock.patch.object(IPFSTool, "download", return_value="."):
+
+            with pytest.raises(ClickException, match="is not an agent package"):
+                self.run_cli_command(
+                    "fetch",
+                    self.dummy_id,
+                    "--remote",
+                )
+
 
 class TestFetchIPFSAlias(BaseAEATestCase):
     """Test fetching package from the IPFS registry."""

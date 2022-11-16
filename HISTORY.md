@@ -1,6 +1,36 @@
 # Release History - open AEA
 
-## 1.22.0 (2022-11-1)
+## 1.24.0 (2022-11-15)
+
+AEA:
+- Adds deprecation warning for `--aev` flag
+- Makes the usage of environment variables default
+- Extends `push-all` command to push only the development packages
+- Adds support for generating environment variable names if not provided by default
+- Changes log level from `debug` to `error` on `Exception` handling
+- Updates the configuration loader classes to make sure path string serialization is deterministic across the various platforms
+
+Test:
+- Fixes the tests skipped because of the wrongly configures ledger ID
+- Adds tests to check if path string serialization is deterministic across the various platforms
+
+Chores:
+- Updates `scripts/check_ipfs_hashes_pushed.py` to use new `packages.json` format
+  
+## 1.23.0 (2022-11-09)
+
+AEA:
+- Extracts package manager implementation into core module
+- Extends the package manager implementation to introduce separation between development and third party packages
+- Extends aea packages lock command to work with new `packages.json` format
+- Extends aea packages sync command with `--dev`, `--third-party`, `--all` flags to specify what packages to sync avoid updating hashes for third party packages
+- Updates the `check-packages` command to make sure we skip `open-aea` when generating list for third party packages in package dependency check
+- Adds proper exception handling on `aea fetch` command for bad packages
+
+Chores:
+- Updates dependencies in Dockerfile for documentation
+
+## 1.22.0 (2022-11-01)
 
 AEA:
 - Updates the cert request serialisation process to maintain consistency across different operating systems

@@ -36,6 +36,6 @@
 | skill/fetchai/erc1155_deploy/0.30.0                           | `bafybeibtjaylkd47ghbwgl7rdck2exvnrodwnyjhfvrtaluwrvkx5k5gtq` |
 | skill/fetchai/error/0.17.0                                    | `bafybeib7nhokw3bc46oxuk5mjazan42evipowmka2ikfcs6drcdz4mwkjm` |
 | skill/fetchai/fipa_dummy_buyer/0.2.0                          | `bafybeiha4jultg5srhr2ijplvubeo7esv4raq2cjlggmyzcaimop2ggg2m` |
-| skill/fetchai/generic_buyer/0.26.0                            | `bafybeidecu4tnhmbyzbysgccgtpsstj4q5hfqjgjzm5nf2hdb7hf6fnx2q` |
+| skill/fetchai/generic_buyer/0.26.0                            | `bafybeicutlnmjjovt6ttg4w4tb47dgudwilm7esak2fi2pbghfp4wfabhq` |
 | skill/fetchai/generic_seller/0.27.0                           | `bafybeidjpgp323esan54fjxr6xqnq365oqi5g45p3nts67e3su6u4kss3y` |
 | skill/fetchai/task_test_skill/0.1.0                           | `bafybeidv77u2xl52mnxakwvh7fuh46aiwfpteyof4eaptfd4agoi6cdble` |

@@ -51,7 +51,7 @@ class TaskTestCase(TestCase):
     def test_call_exception_while_executing(self):
         """Test call obj exception raised while executing."""
         obj = Task()
-        with mock.patch.object(obj.logger, "debug") as debug_mock:
+        with mock.patch.object(obj.logger, "error") as debug_mock:
             obj.setup = mock.Mock()
             obj.execute = _raise_exception
             obj.teardown = mock.Mock()

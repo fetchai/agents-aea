@@ -22,8 +22,9 @@
 import json
 import re
 from collections.abc import Mapping as MappingType
-from typing import Any, Dict, List, Mapping, Union
+from typing import Any, Dict, List, Mapping, Optional, Union, cast
 
+from aea.configurations.data_types import PublicId
 from aea.helpers.constants import (
     FALSE_EQUIVALENTS,
     FROM_STRING_TO_TYPE,
@@ -32,9 +33,7 @@ from aea.helpers.constants import (
 )
 
 
-ENV_VARIABLE_RE = re.compile(
-    r"^\$\{(?P<name>\w+)(:(?P<type>\w+)(:(?P<default>.+))?)?\}$", re.I
-)
+ENV_VARIABLE_RE = re.compile(r"^\$\{(([A-Z0-9_]+):?)?([a-z]+)?(:(.+))?}$")
 
 
 def is_env_variable(value: Any) -> bool:
@@ -46,7 +45,10 @@ NotSet = object()
 
 
 def replace_with_env_var(
-    value: str, env_variables: dict, default_value: Any = NotSet
+    value: str,
+    env_variables: dict,
+    default_value: Any = NotSet,
+    default_var_name: Optional[str] = None,
 ) -> JSON_TYPES:
     """Replace env var with value."""
     result = ENV_VARIABLE_RE.match(value)
@@ -54,9 +56,9 @@ def replace_with_env_var(
     if not result:
         return value
 
-    var_name = result.groupdict()["name"]
-    type_str = result.groupdict()["type"]
-    default = result.groupdict()["default"]
+    _, var_name, type_str, _, default = result.groups()
+    if var_name is None and default_var_name is not None:
+        var_name = default_var_name
 
     if var_name in env_variables:
         var_value = env_variables[var_name]
@@ -78,25 +80,44 @@ def replace_with_env_var(
 def apply_env_variables(
     data: Union[Dict, List[Dict]],
     env_variables: Mapping[str, Any],
+    path: Optional[List[str]] = None,
     default_value: Any = NotSet,
 ) -> JSON_TYPES:
     """Create new resulting dict with env variables applied."""
+    path = path or []
 
     if isinstance(data, (list, tuple)):
         result = []
         for i in data:
-            result.append(apply_env_variables(i, env_variables, default_value))
+            result.append(
+                apply_env_variables(
+                    data=i,
+                    env_variables=env_variables,
+                    path=path,
+                    default_value=default_value,
+                )
+            )
         return result
 
     if isinstance(data, MappingType):
         return {
-            apply_env_variables(k, env_variables, default_value): apply_env_variables(
-                v, env_variables, default_value
+            k: apply_env_variables(
+                data=v,
+                env_variables=env_variables,
+                path=[*path, k],
+                default_value=default_value,
             )
             for k, v in data.items()
         }
+
     if is_env_variable(data):
-        return replace_with_env_var(data, env_variables, default_value)
+        default_var_name = "_".join(path)
+        return replace_with_env_var(
+            data,
+            env_variables,
+            default_value,
+            default_var_name=default_var_name,
+        )
 
     return data
 
@@ -112,5 +133,44 @@ def convert_value_str_to_type(value: str, type_str: str) -> JSON_TYPES:
         if type_ in (dict, list):
             return json.loads(value)
         return type_(value)
-    except (ValueError, json.decoder.JSONDecodeError):  # pragma: no cover
+    except (ValueError, json.decoder.JSONDecodeError):
         raise ValueError(f"Cannot convert string `{value}` to type `{type_.__name__}`")  # type: ignore
+    except KeyError:
+        raise KeyError(f"`{type_str}` is not a valid python data type")
+
+
+def apply_env_variables_on_agent_config(
+    data: List[Dict],
+    env_variables: Mapping[str, Any],
+) -> List[Dict]:
+    """Create new resulting dict with env variables applied."""
+
+    agent_config, *overrides = data
+    agent_config_new = apply_env_variables(
+        data=agent_config,
+        env_variables=env_variables,
+        path=[
+            "agent",
+        ],
+    )
+
+    overrides_new = []
+    for component_config in overrides:
+        component_name = PublicId.from_str(
+            cast(str, component_config.get("public_id")),
+        ).name
+        component_type = cast(str, component_config.get("type"))
+        new_component_config = cast(
+            Dict,
+            apply_env_variables(
+                data=component_config,
+                env_variables=env_variables,
+                path=[
+                    component_type,
+                    component_name,
+                ],
+            ),
+        )
+        overrides_new.append(new_component_config)
+
+    return [cast(Dict, agent_config_new), *overrides_new]

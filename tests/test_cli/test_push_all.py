@@ -19,35 +19,65 @@
 
 """Tests for `aea push-all` command."""
 
+from collections import OrderedDict
+from pathlib import Path
 from unittest import mock
 
 import click
 import pytest
 
 from aea.cli.registry.settings import REMOTE_HTTP, REMOTE_IPFS
-from aea.configurations.constants import PYCACHE
+from aea.configurations.constants import PACKAGES
+from aea.configurations.data_types import PackageId, PackageType, PublicId
+from aea.package_manager.v0 import PackageManagerV0
+from aea.package_manager.v1 import PackageManagerV1
 from aea.test_tools.test_cases import BaseAEATestCase
+
+
+TEST_PACKAGE = PublicId(
+    "open_aea",
+    "signing",
+    "0.1.0",
+    "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44",
+)
+TEST_PACKAGE_ID = PackageId(PackageType.PROTOCOL, TEST_PACKAGE)
+TEST_PACKAGES = [
+    (
+        TEST_PACKAGE_ID,
+        TEST_PACKAGE.hash,
+    )
+]
 
 
 class TestPushAll(BaseAEATestCase):
     """Test `push-all` command"""
 
-    def test_run(
-        self,
-    ) -> None:
+    @pytest.mark.parametrize(
+        "package_manager",
+        (
+            PackageManagerV1(
+                path=Path(".", PACKAGES),
+                dev_packages=OrderedDict(TEST_PACKAGES),
+            ),
+            PackageManagerV0(
+                path=Path(".", PACKAGES),
+                packages=OrderedDict(TEST_PACKAGES),
+            ),
+        ),
+    )
+    def test_run(self, package_manager) -> None:
         """Test command invocation"""
 
         with mock.patch("aea.cli.push_all.push_item_ipfs"), mock.patch(
             "aea.cli.push_all.get_default_remote_registry", return_value=REMOTE_IPFS
+        ), mock.patch(
+            "aea.cli.push_all.get_package_manager", return_value=package_manager
         ):
             result = self.run_cli_command("push-all", "--remote")
 
+            package_path = package_manager.package_path_from_package_id(TEST_PACKAGE_ID)
             assert result.exit_code == 0, result.output
-            assert all(
-                f"Pushing: {package_path}" in result.output
-                for package_path in self.packages_dir_path.absolute().glob("*/*/*")
-                if package_path.is_dir() and package_path.name != PYCACHE
-            )
+            assert f"Pushing: {package_path}" in result.output
 
     def test_local(
         self,

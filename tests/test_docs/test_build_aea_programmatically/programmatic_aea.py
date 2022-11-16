@@ -24,7 +24,7 @@ import os
 import time
 from threading import Thread
 
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -36,14 +36,14 @@ from aea.skills.base import Skill
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
+PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier)
 
 
 def run():
     """Run demo."""
 
     # Create a private key
-    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    create_private_key(EthereumCrypto.identifier, PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -57,7 +57,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    builder.add_private_key(EthereumCrypto.identifier, PRIVATE_KEY_FILE)
 
     # Add the default protocol (assuming it is present in the local directory 'packages')
     builder.add_protocol("./packages/fetchai/protocols/default")

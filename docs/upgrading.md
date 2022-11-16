@@ -7,6 +7,23 @@ Below we describe the additional manual steps required to upgrade between differ
 
 # Open AEA
 
+
+## `v1.23.0` to `v1.24.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
+## `v1.22.0` to `v1.23.0`
+
+No backwards incompatible changes.
+
+Plugins from previous versions are not compatible anymore.
+
+### Upgrade guide
+
+This release introduces a new format for `packages.json` file, the older version is still supported but will be deprecated on `v2.0.0` so make sure to update your projects to use the new format.
+
 ## `v1.21.0` to `v1.22.0`
 
 No backwards incompatible changes.

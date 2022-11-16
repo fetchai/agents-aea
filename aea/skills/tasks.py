@@ -61,7 +61,7 @@ class Task(WithLogger):
         try:
             self._result = self.execute(*args, **kwargs)
         except Exception as e:  # pylint: disable=broad-except
-            self.logger.debug(
+            self.logger.error(
                 "Got exception of type {} with message '{}' while executing task.".format(
                     type(e), str(e)
                 )
