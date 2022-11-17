@@ -122,13 +122,8 @@ class PackageVersion:
 
     def __lt__(self, other: Any) -> bool:
         """Compare with another object."""
-        enforce(
-            isinstance(other, PackageVersion),
-            f"Cannot compare {type(self)} with type {type(other)}.",
-        )
-        other = cast(PackageVersion, other)
-        if self.is_latest or other.is_latest:
-            return self.is_latest < other.is_latest
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance.
         return str(self) < str(other)
 
 
@@ -461,37 +456,12 @@ class PublicId(JSONSerializable):
         return all(getattr(self, s) == getattr(other, s) for s in self.__slots__[:-1])
 
     def __lt__(self, other: Any) -> bool:
-        """
-        Compare two public ids.
-
-        >>> public_id_1 = PublicId("author_1", "name_1", "0.1.0")
-        >>> public_id_2 = PublicId("author_1", "name_1", "0.1.1")
-        >>> public_id_3 = PublicId("author_1", "name_2", "0.1.0")
-        >>> public_id_1 > public_id_2
-        False
-        >>> public_id_1 < public_id_2
-        True
-
-        >>> public_id_1 < public_id_3
-        Traceback (most recent call last):
-        ...
-        ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
-
-        :param other: the object to compate to
-        :raises ValueError: if the public ids cannot be confirmed
-        :return: whether or not the inequality is satisfied
-        """
-        if (
-            isinstance(other, PublicId)
-            and self.author == other.author
-            and self.name == other.name
-        ):
-            return self.package_version < other.package_version
-        raise ValueError(
-            "The public IDs {} and {} cannot be compared. Their author or name attributes are different.".format(
-                self, other
-            )
-        )
+        """Compare with another object."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance.
+        if not (self.author == other.author and self.name == other.name):
+            raise TypeError(f"Cannot compare different author and/or name: {self}\n{other}")
+        return self.package_version < other.package_version
 
     def without_hash(
         self,
@@ -655,6 +625,8 @@ class PackageId:
 
     def __lt__(self, other: Any) -> bool:
         """Compare two public ids."""
+        if not isinstance(other, self.__class__):
+            return NotImplemented  # Delegate comparison to the other instance.
         return str(self) < str(other)
 
 
