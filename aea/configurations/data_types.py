@@ -48,7 +48,6 @@ from aea.configurations.constants import (
     SERVICE,
     SKILL,
 )
-from aea.exceptions import enforce
 from aea.helpers.base import (
     IPFSHash,
     IPFSHashOrStr,
@@ -461,7 +460,9 @@ class PublicId(JSONSerializable):
         if not isinstance(other, self.__class__):
             return NotImplemented  # Delegate comparison to the other instance.
         if not (self.author == other.author and self.name == other.name):
-            raise TypeError(f"Cannot compare different author and/or name: {self}\n{other}")
+            raise TypeError(
+                f"Cannot compare different author and/or name: {self}\n{other}"
+            )
         return self.package_version < other.package_version
 
     def without_hash(
