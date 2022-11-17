@@ -458,7 +458,7 @@ class PublicId(JSONSerializable):
         """Check equality."""
         if not isinstance(other, self.__class__):
             return NotImplemented  # Delegate comparison to the other instance's __eq__.
-        return all(getattr(self, s) == getattr(other, s) for s in self.__slots__)
+        return all(getattr(self, s) == getattr(other, s) for s in self.__slots__[:-1])
 
     def __lt__(self, other: Any) -> bool:
         """
