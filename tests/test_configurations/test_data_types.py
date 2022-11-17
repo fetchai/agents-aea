@@ -61,14 +61,12 @@ def all_comparisons_operations_equal(pair_a, pair_b) -> bool:
     return version_comparison == package_comparison
 
 
-@pytest.mark.parametrize("self_type", [PublicId, PackageId, Dependency])
+@pytest.mark.parametrize("self_type", [PackageVersion, PublicId, PackageId])
 def test_self_type_comparison(self_type):
     """Test comparison to self"""
 
     self = st.from_type(self_type).example()
-    copy_self = copy.deepcopy(self)
-    other = st.from_type(self_type).example()
-    assert self == copy_self
+    other = copy.deepcopy(self)
     for f in COMPARISON_OPERATORS:
         assert isinstance(f(self, other), bool)
         assert isinstance(f(other, self), bool)
