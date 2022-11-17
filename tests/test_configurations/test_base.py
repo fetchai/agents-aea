@@ -707,7 +707,7 @@ def test_public_id_comparator_when_author_is_different():
     pid1 = PublicId("author_1", "name", "0.1.0")
     pid2 = PublicId("author_2", "name", "0.1.0")
     with pytest.raises(
-        ValueError,
+        TypeError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
         assert pid1 < pid2
@@ -718,7 +718,7 @@ def test_public_id_comparator_when_name_is_different():
     pid1 = PublicId("author", "name_1", "0.1.0")
     pid2 = PublicId("author", "name_2", "0.1.0")
     with pytest.raises(
-        ValueError,
+        TypeError,
         match="The public IDs .* and .* cannot be compared. Their author or name attributes are different.",
     ):
         assert pid1 < pid2

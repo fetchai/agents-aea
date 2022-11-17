@@ -461,7 +461,7 @@ class PublicId(JSONSerializable):
             return NotImplemented  # Delegate comparison to the other instance.
         if not (self.author == other.author and self.name == other.name):
             raise TypeError(
-                f"Cannot compare different author and/or name: {self}\n{other}"
+                f"The public IDs {self} and {other} cannot be compared. Their author or name attributes are different."
             )
         return self.package_version < other.package_version
 
