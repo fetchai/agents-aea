@@ -1005,7 +1005,7 @@ def test_package_version_lt():
     """Test package version __lt__."""
     v1 = PackageVersion("0.1.0")
     v2 = PackageVersion("0.2.0")
-    v3 = PackageVersion("latest")
+    v3 = PackageVersion("0.12.0")
     assert v1 < v2 < v3
 
 
