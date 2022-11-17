@@ -210,6 +210,7 @@ class ComponentType(Enum):
 PackageIdPrefix = Tuple[ComponentType, str, str]
 
 
+@functools.total_ordering
 class PublicId(JSONSerializable):
     """This class implement a public identifier.
 
@@ -488,6 +489,7 @@ class PublicId(JSONSerializable):
         )
 
 
+@functools.total_ordering
 class PackageId:
     """A package identifier."""
 
