@@ -32,8 +32,8 @@ from aea.configurations.data_types import (
     Dependency,
     GitRef,
     PackageId,
-    PackageVersion,
     PackageType,
+    PackageVersion,
     PublicId,
     PyPIPackageName,
 )
