@@ -307,7 +307,7 @@ def check_dependencies(
     data = unified_yaml_load(configuration_file)
 
     def _add_package_type(package_type: PackageType, public_id_str: str) -> PackageId:
-        return PackageId(package_type, PublicId.from_str(public_id_str).without_hash())
+        return PackageId(package_type, PublicId.from_str(public_id_str))
 
     def _get_package_ids(
         package_type: PackageType, public_ids: Set[PublicId]
