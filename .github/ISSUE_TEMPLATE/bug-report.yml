@@ -1,6 +1,6 @@
 name: 🐛 Bug Report
 description: Report a reproducible bug.
-title: "Bug report: <short description>"
+title: "<Short bug description>"
 labels: ["bug", "unconfirmed"]
 body:
   - type: markdown
@@ -46,11 +46,11 @@ body:
     id: context
     attributes:
       label: Context
-      description: Any relevant information about your setup (this is important in case the issue is not reproducible except for under certain conditions)
+      description: Any relevant information about your setup (this is important in case the issue is not reproducible except under certain conditions)
       placeholder: |
         Operating system [e.g. MacOS], Python version [e.g. 3.8.5], AEA version [e.g. 1.2.0], ...
     validations:
-      required: true
+      required: false
   - type: textarea
     id: logs
     attributes:

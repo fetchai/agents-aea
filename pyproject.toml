@@ -53,7 +53,6 @@ pywin32 = { version = "==303", markers = "sys_platform == 'win32' or platform_sy
 # cli, test_tools extras
 click = { version = "^8.0.0", optional = true }
 
-
 [tool.poetry.extras]
 cli = ["click"]
 all = ["click"]
@@ -63,7 +62,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 tox = "^3.26"
-py-sr25519-bindings = "^0.1.5"
+py-sr25519-bindings = "==0.1.5"
 pylint = "==2.15.5"
 cosmpy = ">=0.6.0,<0.7.0"
 bandit = "==1.7.4"
@@ -79,7 +78,6 @@ flake8-eradicate = "==1.4.0"
 flake8-isort = "==5.0"
 liccheck = "==0.7.2"
 black = "^22.10"
-
 
 [tool.poetry.group.testing]
 optional = true
@@ -139,6 +137,9 @@ memory-profiler = ">=0.57.0"
 gitpython = "==3.1.14"
 ipfshttpclient = "==0.8.0a2"
 
+
+[tool.poetry.group.types]
+optional = true
 
 [tool.poetry.group.types.dependencies]
 # types defenitions for mypy

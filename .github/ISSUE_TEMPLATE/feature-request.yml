@@ -1,12 +1,12 @@
 name: ☝️ Feature request
 description: Suggest an idea for this project
-title: "Feature request: <short description>"
-labels: ["enhancement", "unconfirmed"]
+title: "<Short description of the feature>"
+labels: ["feature-request", "unconfirmed"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a new idea for this project. Please complete the following to ensure we have all the details to get things started.
+        Thank you for suggesting a new idea for the AEA project.
   - type: checkboxes
     id: prerequisites
     attributes:
