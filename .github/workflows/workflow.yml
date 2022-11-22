@@ -455,6 +455,8 @@ jobs:
       - if: matrix.os == 'macos-latest'
         working-directory: ./libs/go/libp2p_node
         run: |
+          export PATH=$PATH:/usr/local/go/bin
+          echo $PATH
           export LINKPATH=`go env GOTOOLDIR`/link
           echo $LINKPATH
           sudo cp $LINKPATH ${LINKPATH}_orig
