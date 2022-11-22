@@ -111,7 +111,7 @@ def apply_env_variables(
         }
 
     if is_env_variable(data):
-        default_var_name = "_".join(path)
+        default_var_name = "_".join(map(str, path))
         return replace_with_env_var(
             data,
             env_variables,
