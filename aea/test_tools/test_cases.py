@@ -765,16 +765,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         os.chdir(Path(path))
 
     @classmethod
-    def _terminate_subprocesses(cls) -> None:
-        """Terminate all launched subprocesses."""
-        for process in cls.subprocesses:
-            if not process.returncode == 0:
-                poll = process.poll()
-                if poll is None:
-                    process.terminate()
-                    process.wait(timeout=TERMINATION_TIMEOUT)
-
-    @classmethod
     def _join_threads(cls) -> None:
         """Join all started threads."""
         for thread in cls.threads:
@@ -964,7 +954,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         """Teardown the test."""
         cls.change_directory(cls.old_cwd)
         cls.terminate_agents()
-        cls._terminate_subprocesses()
         cls._join_threads()
         cls.unset_agent_context()
         cls.last_cli_runner_result = None

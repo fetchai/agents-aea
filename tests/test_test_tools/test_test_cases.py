@@ -318,14 +318,6 @@ class TestGenericCases(AEATestCaseEmpty):
         assert diff
         assert diff[0] == DEFAULT_AEA_CONFIG_FILE
 
-    def test_terminate_subprocesses(self):
-        """Start and terminate long running python subprocess."""
-        proc = self.start_subprocess("-c", "import time; time.sleep(10)")
-        assert proc.returncode is None
-        self._terminate_subprocesses()
-        self.subprocesses.clear()
-        assert proc.returncode is not None
-
     def test_miss_from_output(self):
         """Test subprocess output missing output."""
         proc = self.start_subprocess("-c", "print('hi')")
