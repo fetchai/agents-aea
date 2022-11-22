@@ -14,6 +14,16 @@ def is_env_variable(value: Any) -> bool
 
 Check is variable string with env variable pattern.
 
+<a id="aea.helpers.env_vars.export_path_to_env_var_string"></a>
+
+#### export`_`path`_`to`_`env`_`var`_`string
+
+```python
+def export_path_to_env_var_string(export_path: List[str]) -> str
+```
+
+Conver export path to environment variable string.
+
 <a id="aea.helpers.env_vars.replace_with_env_var"></a>
 
 #### replace`_`with`_`env`_`var
