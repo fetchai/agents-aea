@@ -436,7 +436,11 @@ async def test_callable_wrong_number_of_arguments_apis_method_call(
             await ledger_apis_connection.send(envelope)
             await asyncio.sleep(0.01)
             assert (
-                "An error occurred while processing the contract api request: 'get_deploy_transaction() missing 1 required positional argument: 'deployer_address''."
+                "An error occurred while processing the contract api request:"
+                in caplog.text
+            )
+            assert (
+                "get_deploy_transaction() missing 1 required positional argument: 'deployer_address"
                 in caplog.text
             )
 
