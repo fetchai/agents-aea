@@ -197,12 +197,12 @@ def send_control_c(
     if platform.system() == "Windows":
         if process.stdin:  # cause ctrl-c event will be handled with stdin
             process.stdin.close()
-        os.kill(process.pid, signal.CTRL_C_EVENT)  # type: ignore   # pylint: disable=no-member
+        process.send_signal(signal.CTRL_C_EVENT)
     elif kill_group:
         pgid = os.getpgid(process.pid)
         os.killpg(pgid, signal.SIGINT)
     else:
-        os.kill(process.pid, signal.SIGINT)
+        process.send_signal(signal.SIGINT)
 
 
 class RegexConstrainedString(UserString):

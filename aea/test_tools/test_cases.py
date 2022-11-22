@@ -464,7 +464,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             try:
                 process.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
-                process.kill()
+                process.terminate()
+                process.wait(timeout=timeout)
 
     @classmethod
     def is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool:
@@ -962,7 +963,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     def teardown_class(cls) -> None:
         """Teardown the test."""
         cls.change_directory(cls.old_cwd)
-        cls.terminate_agents(*cls.subprocesses)
+        cls.terminate_agents()
         cls._terminate_subprocesses()
         cls._join_threads()
         cls.unset_agent_context()
