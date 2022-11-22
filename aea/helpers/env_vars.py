@@ -41,6 +41,12 @@ def is_env_variable(value: Any) -> bool:
     return isinstance(value, str) and bool(ENV_VARIABLE_RE.match(value))
 
 
+def export_path_to_env_var_string(export_path: List[str]) -> str:
+    """Conver export path to environment variable string."""
+    env_var_string = "_".join(map(str, export_path))
+    return env_var_string.upper()
+
+
 NotSet = object()
 
 
@@ -111,12 +117,11 @@ def apply_env_variables(
         }
 
     if is_env_variable(data):
-        default_var_name = "_".join(map(str, path))
         return replace_with_env_var(
             data,
             env_variables,
             default_value,
-            default_var_name=default_var_name,
+            default_var_name=export_path_to_env_var_string(export_path=path),
         )
 
     return data
