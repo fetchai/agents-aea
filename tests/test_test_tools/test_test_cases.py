@@ -213,9 +213,9 @@ class TestTerminateAgentTimeoutExpired(AEATestCaseEmpty):
         self.generate_private_key()
         self.add_private_key()
         process = self.run_agent()
-        side_effect = subprocess.TimeoutExpired([], 0)
+        side_effect = [subprocess.TimeoutExpired([], 0), None]
         with mock.patch.object(process, "wait", side_effect=side_effect):
-            with mock.patch.object(process, "kill") as m:
+            with mock.patch.object(process, "terminate") as m:
                 self.terminate_agents(process)
                 m.assert_called_once()
 
