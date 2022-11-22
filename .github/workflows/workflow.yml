@@ -36,12 +36,10 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
       - name: Install dependencies
-        run: |
+        run:
           pip install tox==3.25.1
-          pip install poetry
       - name: 'Run check ${{ matrix.tox-job }}'
-        run: |
-          poetry update --lock
+        run:
           tox -e ${{ matrix.tox-job }}
 
   go_code_checks:
