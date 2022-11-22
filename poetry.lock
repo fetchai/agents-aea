@@ -2022,6 +2022,17 @@ python-versions = "*"
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-mbedtls"
+version = "2.2.0"
+description = "hash, hmac, RSA, ECC, X.509, TLS, DTLS, handshakes, and secrets with an mbed TLS back end"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+certifi = "*"
+
+[[package]]
 name = "pywavelets"
 version = "1.4.1"
 description = "PyWavelets, wavelet transform module"
@@ -4552,6 +4563,21 @@ python-dateutil = [
 python-dotenv = [
     {file = "python-dotenv-0.17.1.tar.gz", hash = "sha256:b1ae5e9643d5ed987fc57cc2583021e38db531946518130777734f9589b3141f"},
     {file = "python_dotenv-0.17.1-py2.py3-none-any.whl", hash = "sha256:00aa34e92d992e9f8383730816359647f358f4a3be1ba45e5a5cefd27ee91544"},
+]
+python-mbedtls = [
+    {file = "python-mbedtls-2.2.0.tar.gz", hash = "sha256:ecd748045d191ba804776edee0c25799e6696ab88f2229087d057d5aa38678fa"},
+    {file = "python_mbedtls-2.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:08da2f4e08865d53213d0f1153efa02adaa6cd730d81af7e27e68d0fc061a6dd"},
+    {file = "python_mbedtls-2.2.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:12b47410fd41de58ac63d2b8c15f5e92005911fc8c3094b92d034162fbf1c10d"},
+    {file = "python_mbedtls-2.2.0-cp310-cp310-win_amd64.whl", hash = "sha256:2faf40df514999519c5667cfe54e4d92dc3da433564618b5d9625d5366b8d616"},
+    {file = "python_mbedtls-2.2.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:6f401783f96d8354b3851fa9f2aaeebfe750aca3113512210cda6c9ac0a4ce78"},
+    {file = "python_mbedtls-2.2.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f30adb80130912186737099ca5a174c79980b5d65435b679876caf313ae25a51"},
+    {file = "python_mbedtls-2.2.0-cp37-cp37m-win_amd64.whl", hash = "sha256:92f9202bcab4e3f69eff6a0785ace4f2e338057b0ebad7e950e9a794e268cea5"},
+    {file = "python_mbedtls-2.2.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:47ea2ce594ba26388b454678745c0ff4da3ab4873c52b337b7ed5099647e96ee"},
+    {file = "python_mbedtls-2.2.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7fe9d4818a99e46714b30a14537d107e6137d6688a7d5df7fe253dd25d3e0cd"},
+    {file = "python_mbedtls-2.2.0-cp38-cp38-win_amd64.whl", hash = "sha256:443f6f6e25943abf1c038b6f3735edc9792204ee83e606d1d92bba6c81f071b3"},
+    {file = "python_mbedtls-2.2.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:741401c69bf909da74e1cb9159c8cb2c9c2841ab4780d4fbc1a29e43bf651f7e"},
+    {file = "python_mbedtls-2.2.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:28bd7b56083a5982eb301366ac96855d02966a45c2d438dcecd733b8f6576100"},
+    {file = "python_mbedtls-2.2.0-cp39-cp39-win_amd64.whl", hash = "sha256:6ddbd912cb82c1b771696a5bf094b8e1377cfb3cac3df044e541d396180a7766"},
 ]
 pywavelets = [
     {file = "PyWavelets-1.4.1-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:d854411eb5ee9cb4bc5d0e66e3634aeb8f594210f6a1bed96dbed57ec70f181c"},
