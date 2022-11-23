@@ -682,7 +682,6 @@ class TestMultiAgentManagerAsyncMode(
     """Tests for MultiAgentManager in async mode."""
 
 
-@pytest.mark.skip  # need remote registry
 class TestMultiAgentManagerAsyncModeWithPassword(
     BaseTestMultiAgentManager
 ):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
