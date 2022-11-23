@@ -31,6 +31,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 from click import ClickException
@@ -669,10 +670,10 @@ def test_run_ethereum_private_key_config():
         pass
 
 
-@pytest.mark.skip  # need remote registry
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # install depends on network
 def test_run_with_install_deps():
     """Test that the command 'aea run --install-deps' does not crash."""
+    FetchAICrypto = EthereumCrypto
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
