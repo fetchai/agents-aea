@@ -25,7 +25,7 @@ import time
 from unittest import mock
 
 import pytest
-from _pytest.capture import CaptureFixture
+from _pytest.capture import CaptureFixture  # type: ignore
 
 from aea.exceptions import AEAException
 
