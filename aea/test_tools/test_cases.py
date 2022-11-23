@@ -19,6 +19,7 @@
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
 import copy
+import warnings
 import logging
 import os
 import random
@@ -763,6 +764,17 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param path: path to the new working directory.
         """
         os.chdir(Path(path))
+
+    @classmethod
+    def _terminate_subprocesses(cls) -> None:
+        """Terminate all launched subprocesses."""
+        warnings.warn(f'BaseAEATestCase._terminate_subprocesses is deprecated and will be removed next release', DeprecationWarning, stacklevel=2)
+        for process in cls.subprocesses:
+            if not process.returncode == 0:
+                poll = process.poll()
+                if poll is None:
+                    process.terminate()
+                    process.wait(timeout=TERMINATION_TIMEOUT)
 
     @classmethod
     def _join_threads(cls) -> None:
