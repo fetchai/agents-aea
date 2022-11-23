@@ -752,7 +752,7 @@ class TestMultiAgentManagerPackageConsistencyError:
         First add agent project "open_aea/my_first_aea:0.1.0".
         Then we mutate the stored `_package_id_prefix_to_version`
         change the path and mock the `_versionless_projects_set`.
-        When we attempt to add it anew, as if a different project,
+        and attempt to add it anew, as if a different project.
         The second addition will fail because the projects
         contain conflicting AEA package versions.
         """
@@ -797,35 +797,30 @@ class TestMultiAgentManagerWithPotentiallyConflictingPackages:
         """Set up the test case."""
         self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
         self.tmp_dir = TemporaryDirectory()
-        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
-        self.project_path = os.path.join(
-            self.working_dir, self.project_public_id.author, self.project_public_id.name
-        )
-        assert not os.path.exists(self.working_dir)
-        self.manager = MultiAgentManager(self.working_dir)
+        self.manager = MultiAgentManager(self.tmp_dir.name)
 
-    @pytest.mark.skip  # need remote registry
     def test_run(self):
         """
         Run the test.
 
-        First add agent project "fetchai/weather_station:0.27.0",
-        and then add "fetchai/weather_client:0.27.0".
+        First add agent project "open_aea/my_first_aea:0.1.0".
+        Then we change the path and mock the `_versionless_projects_set`,
+        and attempt to add it anew, as if a different project.
         The second addition will fail because the projects
         contain conflicting AEA package versions.
         """
         self.manager.start_manager()
-        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
-        self.manager.add_project(weather_station_id)
-        weather_client_id = PublicId.from_str("fetchai/weather_client:0.28.0")
-        self.manager.add_project(weather_client_id)
+        my_first_aea_id = PublicId.from_str("open_aea/my_first_aea:0.1.0")
+        self.manager.add_project(my_first_aea_id)
+        base = Path(self.tmp_dir.name, "open_aea")
+        shutil.move(base / "my_first_aea", base / "my_first_aea_bumped")
+        with patch.object(self.manager, "_versionless_projects_set"):
+            self.manager.add_project(my_first_aea_id)
 
     def teardown(self):
         """Tear down test case."""
         try:
             self.manager.stop_manager()
-            if os.path.exists(self.working_dir):
-                rmtree(self.working_dir)
         finally:
             self.tmp_dir.cleanup()
 
