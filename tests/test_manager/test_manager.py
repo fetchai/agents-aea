@@ -762,7 +762,7 @@ class TestMultiAgentManagerPackageConsistencyError:
         base = Path(self.tmp_dir.name, "open_aea")
         shutil.move(base / "my_first_aea", base / "my_first_aea_bumped")
         p2v = self.manager._package_id_prefix_to_version
-        for k, (version_str, public_id_set) in p2v.items():
+        for k, (_, public_id_set) in p2v.items():
             p2v[k] = ("0.0.0", public_id_set)
         with pytest.raises(
             ProjectPackageConsistencyCheckError,
