@@ -20,6 +20,9 @@
 """This module contains test case classes based on pytest for AEA end-to-end testing."""
 import copy
 import logging
+import contextlib
+import signal
+import platform
 import os
 import random
 import shutil
@@ -57,6 +60,7 @@ from aea.configurations.base import (
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
+from aea.test_tools.utils import consume
 from aea.configurations.constants import (
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_INPUT_FILE_NAME,
@@ -457,16 +461,31 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         """
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
-        for process in subprocesses:
-            process.poll()
-            if process.returncode is None:  # stop only pending processes
-                send_control_c(process)
-        for process in subprocesses:
-            try:
-                process.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                process.terminate()
-                process.wait(timeout=timeout)
+
+        def active_agents():
+            return filter(lambda p: p.poll() is None, subprocesses)
+
+        def close_stdin():
+            consume(map(lambda p: p.stdin.close(), active_agents()))
+
+        def send_signal_and_wait(s):
+            consume(map(lambda p: p.send_signal(s), active_agents()))
+            wait_for_condition(lambda: not any(active_agents()), timeout=timeout)
+
+        system_name = platform.system()
+        if system_name == "Windows":
+            close_stdin()  # ctrl-c event will be handled with stdin in Windows
+            signals = [signal.CTRL_C_EVENT, signal.CTRL_BREAK_EVENT, signal.SIGTERM]
+        elif system_name in {"Linux", "Darwin"}:
+            signals = [signal.SIGINT, signal.SIGTERM, signal.SIGKILL]
+        else:
+            raise RuntimeError(f"Platform {system_name} not supported")
+
+        with contextlib.suppress(TimeoutError):
+            consume(map(send_signal_and_wait, signals))
+
+        if any(active_agents()):
+            raise TimeoutError("Failed to terminate agents")
 
     @classmethod
     def is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool:
