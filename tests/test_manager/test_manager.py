@@ -707,7 +707,6 @@ class TestMultiAgentManagerMultiprocessMode(BaseTestMultiAgentManager):
         """Skip test cause multiprocess works another way."""
 
 
-@pytest.mark.skip  # need remote registry
 class TestMultiAgentManagerMultiprocessModeWithPassword(
     TestMultiAgentManagerMultiprocessMode
 ):
