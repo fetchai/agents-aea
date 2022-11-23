@@ -1352,7 +1352,6 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             )
 
 
-@pytest.mark.skip  # need remote registry
 class TestRunFailsWhenProtocolConfigFileNotFound:
     """Test that the command 'aea run' fails when a protocol configuration file is not found."""
 
@@ -1372,6 +1371,7 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
         result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
         )
         assert result.exit_code == 0
 
@@ -1387,9 +1387,9 @@ class TestRunFailsWhenProtocolConfigFileNotFound:
             cls.t,
             cls.agent_name,
             "vendor",
-            "fetchai",
+            "open_aea",
             "protocols",
-            "default",
+            "signing",
             "protocol.yaml",
         )
 
