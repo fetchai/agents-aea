@@ -22,7 +22,6 @@
 import logging
 import os
 import shutil
-import subprocess  # nosec
 import tempfile
 import time
 from pathlib import Path
