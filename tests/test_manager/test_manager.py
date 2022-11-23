@@ -23,13 +23,13 @@ import logging
 import os
 import pickle  # nosec
 import re
+import shutil
 import time
 from contextlib import suppress
 from copy import copy
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
-from textwrap import dedent
 from typing import Callable, Optional
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
@@ -737,58 +737,44 @@ class TestMultiAgentManagerPackageConsistencyError:
     exception with a descriptive error message.
     """
 
-    EXPECTED_ERROR_MESSAGE = dedent(
-        """    cannot add project 'fetchai/weather_client:0.27.0': the following AEA dependencies have conflicts with previously added projects:
-    - 'fetchai/ledger' of type connection: the new version '0.17.0' conflicts with existing version '0.18.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/p2p_libp2p' of type connection: the new version '0.20.0' conflicts with existing version '0.21.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/soef' of type connection: the new version '0.21.0' conflicts with existing version '0.22.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/contract_api' of type protocol: the new version '0.14.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/default' of type protocol: the new version '0.15.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/fipa' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/ledger_api' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/oef_search' of type protocol: the new version '0.16.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'open_aea/signing' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    - 'fetchai/state_update' of type protocol: the new version '0.13.0' conflicts with existing version '1.0.0' of the same package required by agents: [<fetchai/weather_station:0.27.0>]
-    """
-    )
+    EXPECTED_ERROR_MESSAGE = """cannot add project 'open_aea/my_first_aea:0.1.0': the following AEA dependencies have conflicts with previously added projects"""
 
     def setup(self):
         """Set up the test case."""
         self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
         self.tmp_dir = TemporaryDirectory()
-        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
-        self.project_path = os.path.join(
-            self.working_dir, self.project_public_id.author, self.project_public_id.name
-        )
-        assert not os.path.exists(self.working_dir)
-        self.manager = MultiAgentManager(self.working_dir)
+        self.manager = MultiAgentManager(self.tmp_dir.name)
 
-    @pytest.mark.skip  # need remote registry
-    def test_run(self):
+    def test_run(self, *args):
         """
         Run the test.
 
-        First add agent project "fetchai/weather_station:0.27.0",
-        and then add "fetchai/weather_client:0.27.0".
+        First add agent project "open_aea/my_first_aea:0.1.0".
+        Then we mutate the stored `_package_id_prefix_to_version`
+        change the path and mock the `_versionless_projects_set`.
+        When we attempt to add it anew, as if a different project,
         The second addition will fail because the projects
         contain conflicting AEA package versions.
         """
         self.manager.start_manager()
-        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
-        self.manager.add_project(weather_station_id)
-        weather_client_id = PublicId.from_str("fetchai/weather_client:0.27.0")
+        my_first_aea_id = PublicId.from_str("open_aea/my_first_aea:0.1.0")
+        self.manager.add_project(my_first_aea_id)
+        base = Path(self.tmp_dir.name, "open_aea")
+        shutil.move(base / "my_first_aea", base / "my_first_aea_bumped")
+        p2v = self.manager._package_id_prefix_to_version
+        for k, (version_str, public_id_set) in p2v.items():
+            p2v[k] = ("0.0.0", public_id_set)
         with pytest.raises(
             ProjectPackageConsistencyCheckError,
             match=re.escape(self.EXPECTED_ERROR_MESSAGE),
         ):
-            self.manager.add_project(weather_client_id)
+            with patch.object(self.manager, "_versionless_projects_set"):
+                self.manager.add_project(my_first_aea_id)
 
     def teardown(self):
         """Tear down test case."""
         try:
             self.manager.stop_manager()
-            if os.path.exists(self.working_dir):
-                rmtree(self.working_dir)
         finally:
             self.tmp_dir.cleanup()
 
