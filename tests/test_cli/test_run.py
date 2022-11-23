@@ -369,7 +369,6 @@ def test_run_with_default_connection():
             pass
 
 
-@pytest.mark.skip  # need remote registry
 @pytest.mark.parametrize(
     argnames=["connection_ids"],
     argvalues=[
@@ -380,6 +379,7 @@ def test_run_with_default_connection():
 )
 def test_run_multiple_connections(connection_ids):
     """Test that the command 'aea run' works as expected when specifying multiple connections."""
+    FetchAICrypto = EthereumCrypto
     runner = CliRunner()
     agent_name = "myagent"
     cwd = os.getcwd()
