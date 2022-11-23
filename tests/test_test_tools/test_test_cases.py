@@ -203,21 +203,13 @@ class TestRunAgent(AEATestCaseEmpty):
         process = self.run_agent()
         assert self.is_running(process, timeout=30)
 
+        with mock.patch("platform.system", return_value="TempleOS"):
+            with pytest.raises(RuntimeError, match="Platform TempleOS not supported"):
+                self.terminate_agents()
 
-class TestTerminateAgentTimeoutExpired(AEATestCaseEmpty):
-    """Tests for agent termination raises subprocess.TimeoutExpired"""
-
-    def test_terminate_agent_timeout_expired(self):
-        """Test terminate agent raises subprocess.TimeoutExpired."""
-
-        self.generate_private_key()
-        self.add_private_key()
-        process = self.run_agent()
-        side_effect = [subprocess.TimeoutExpired([], 0), None]
-        with mock.patch.object(process, "wait", side_effect=side_effect):
-            with mock.patch.object(process, "terminate") as m:
-                self.terminate_agents(process)
-                m.assert_called_once()
+        with mock.patch("subprocess.Popen.poll", return_value=None):
+            with pytest.raises(TimeoutError, match="Failed to terminate agents"):
+                self.terminate_agents()
 
 
 class TestTeardownClassTimeout:

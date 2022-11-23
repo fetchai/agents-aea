@@ -465,18 +465,16 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         def active_agents():
             return filter(lambda p: p.poll() is None, subprocesses)
 
-        def close_stdin():
-            consume(map(lambda p: p.stdin.close(), active_agents()))
-
         def send_signal_and_wait(s):
             consume(map(lambda p: p.send_signal(s), active_agents()))
             wait_for_condition(lambda: not any(active_agents()), timeout=timeout)
 
         system_name = platform.system()
-        if system_name == "Windows":
-            close_stdin()  # ctrl-c event will be handled with stdin in Windows
+        if system_name == "Windows":  # pragma: no cover
+            # ctrl-c event will be handled with stdin in Windows
+            consume(map(lambda p: p.stdin.close(), active_agents()))
             signals = [signal.CTRL_C_EVENT, signal.CTRL_BREAK_EVENT, signal.SIGTERM]
-        elif system_name in {"Linux", "Darwin"}:
+        elif system_name in {"Linux", "Darwin"}:  # pragma: no cover
             signals = [signal.SIGINT, signal.SIGTERM, signal.SIGKILL]
         else:
             raise RuntimeError(f"Platform {system_name} not supported")
