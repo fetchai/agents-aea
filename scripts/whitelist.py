@@ -326,6 +326,7 @@ reset_all_dialogues  # unused method (aea/test_tools/test_skill.py:524)
 lock_packages  # unused function (aea/cli/packages.py:97)
 to_csv  # unused function (aea/helpers/io.py:94)
 from_csv  # unused function (aea/helpers/io.py:105)
-
+_terminate_subprocesses  # unused function (aea/test_tools/test_cases.py:768)
 ACNWithBootstrappedEntryNodesDockerImage  # unused class (aea/test_tools/acn_image.py:166)
 default_method_call  # unused method (aea/contracts/base.py:260)
+send_control_c  # unused method (aea/helpers/base.py:188)
