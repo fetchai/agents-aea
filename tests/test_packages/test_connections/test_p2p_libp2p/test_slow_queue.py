@@ -146,7 +146,7 @@ class TestSlowQueue:
                 with open(self.conn.node.log_file) as f:
                     return "while sending slow envelope:" in f.read()
 
-            wait_for_condition(_check, timeout=30, period=1)
+            wait_for_condition(_check, timeout=30, period=0.1)
         finally:
             await self.conn.disconnect()
 

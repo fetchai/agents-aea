@@ -105,7 +105,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self.generate_wealth(password=self.PASSWORD)
 
         wait_for_condition(
-            lambda: self.get_balance() > agent1_original_balance, timeout=15, period=1
+            lambda: self.get_balance() > agent1_original_balance, timeout=15, period=0.1
         )
 
         agent1_balance = self.get_balance()
@@ -127,14 +127,14 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         wait_for_condition(
             lambda: self.get_balance() == (agent1_balance - amount - fee),
             timeout=15,
-            period=1,
+            period=0.1,
         )
 
         self.set_agent_context(self.agent_name2)
         wait_for_condition(
             lambda: self.get_balance() == (agent2_original_balance + amount),
             timeout=15,
-            period=1,
+            period=0.1,
         )
 
     @patch("aea.cli.transfer.do_transfer", return_value="some_digest")

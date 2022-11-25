@@ -397,7 +397,7 @@ class BaseTestMultiAgentManager(BaseCase):
             lambda: len(self.manager.list_agents())
             == len(self.manager.list_agents(running_only=True)),
             timeout=DEFAULT_TIMEOUT,
-            period=0.5,
+            period=0.1,
         )
 
         wait_for_condition(
@@ -513,7 +513,7 @@ class BaseTestMultiAgentManager(BaseCase):
         wait_for_condition(
             lambda: len(self.manager.list_agents(running_only=True)) == 0,
             timeout=DEFAULT_TIMEOUT,
-            period=0.5,
+            period=0.1,
         )
         assert self.agent_name not in self.manager.list_agents(running_only=True)
 

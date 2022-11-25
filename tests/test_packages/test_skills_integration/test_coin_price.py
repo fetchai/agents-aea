@@ -110,7 +110,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
             return "price" in coin_price
 
         wait_for_condition(
-            wait, timeout=10, period=1, error_msg="Response does not contain 'price'"
+            wait, timeout=10, period=0.1, error_msg="Response does not contain 'price'"
         )
 
         response = requests.get("http://127.0.0.1:8000")
