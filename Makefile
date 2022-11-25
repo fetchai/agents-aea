@@ -1,6 +1,7 @@
 AEA_SRC_DIR := aea
 BENCHMARK_DIR := benchmark
 EXAMPLES_DIR := examples
+LIBS_DIR := libs
 PACKAGES_DIR := packages
 PLUGINS_DIR := plugins
 SCRIPTS_DIR := scripts
@@ -38,8 +39,8 @@ PYTHON_CODE_DIRS := $(AEA_SRC_DIR) $(BENCHMARK_DIR) $(EXAMPLES_DIR) $(PACKAGES_D
 # Once finished, `poetry shell` to enter the virtual environment
 v := $(shell pip -V | grep virtualenvs)
 
-.PHONY: new_env
-new_env: clean
+.PHONY: new-env
+new-env: clean
 	if [ -z "$v" ];\
 	then\
 		poetry install --with dev,docs,packages,tools,testing,types;\
@@ -53,25 +54,26 @@ new_env: clean
 	fi
 
 ########################################
-### Useful linting command
-########################################
-
-# Automatically runs black and isort to format the code, and runs flake8 and vulture checks
-.PHONY: lint
-lint: black isort flake8 vulture
-
-########################################
 ### Tests
 ########################################
 
 # Run all tests
 .PHONY: test
-test:
+test: test-aea test-plugins
+
+# Run all aea tests
+.PHONY: test-aea
+test-aea:
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing --cov-config=.coveragerc
+	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
+
+# Run all plugin tests
+.PHONY: test-plugins
+test-plugins:
 	pytest -rfE $(PLUGIN_FETCHAI_TESTS)  --cov=aea_ledger_fetchai  --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE $(PLUGIN_ETHEREUM_TESTS) --cov=aea_ledger_ethereum --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE $(PLUGIN_COSMOS_TESTS)   --cov=aea_ledger_cosmos   --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE $(PLUGIN_CLI_IPFS_TESTS) --cov=aea_cli_ipfs        --cov-report=term-missing --cov-config=.coveragerc
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Run tests for a particular python package
@@ -87,46 +89,46 @@ test-sub-p:
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Produce the coverage report. Can see a report summary on the terminal.
-# Detailed report on all modules are placed under /coverage-report
+# Detailed report on all modules are placed under /htmlcov
 .PHONY: coverage-report
 coverage-report:
 	coverage report -m -i
 	coverage html
 
 ########################################
-### Automatic Styling
+### Code Styling
 ########################################
 
-# Automatically formats the code
+# Automatically run black and isort to format the code, and run flake8 and vulture checks
+.PHONY: lint
+lint: black isort flake8 vulture
+
+# Automatically format the code using black
 .PHONY: black
 black:
 	black $(PYTHON_CODE_DIRS)
 
-# Automatically sorts the imports
+# Automatically sort the imports
 .PHONY: isort
 isort:
 	isort $(PYTHON_CODE_DIRS)
 
-########################################
-### Code style checks
-########################################
-
-# Runs the black format checker
+# Check the code format
 .PHONY: black-check
 black-check:
 	black --check --verbose $(PYTHON_CODE_DIRS)
 
-# Runs the isort format checker
+# Check the imports are sorted
 .PHONY: isort-check
 isort-check:
 	isort --check-only --verbose $(PYTHON_CODE_DIRS)
 
-# Runs flake8 checker
+# Run flake8 linter
 .PHONY: flake8
-flake:
+flake8:
 	flake8 $(PYTHON_CODE_DIRS)
 
-# Runs vulture checker (checks for unused code)
+# Check for unused code
 .PHONY: vulture
 vulture:
 	vulture $(AEA_SRC_DIR) scripts/whitelist.py --exclude '*_pb2.py'
@@ -135,17 +137,17 @@ vulture:
 ### Security & safety checks
 ########################################
 
-# Run both bandit and safety
+# Run bandit and safety
 .PHONY: security
 security: bandit safety
 
-# Checks the security of the code
+# Check the security of the code
 .PHONY: bandit
 bandit:
 	bandit -r $(AEA_SRC_DIR) $(BENCHMARK_DIR) $(EXAMPLES_DIR) $(PACKAGES_DIR) $(PLUGIN_FETCHAI_SRC) $(PLUGIN_ETHEREUM_SRC) $(PLUGIN_COSMOS_SRC) $(PLUGIN_CLI_IPFS_SRC)
 	bandit -s B101 -r $(AEA_TESTS_DIR) $(SCRIPTS_DIR)
 
-# Checks the security of the code
+# Check the security of the code for known vulnerabilities
 .PHONY: safety
 safety:
 	safety check -i 44610 -i 50473
@@ -154,7 +156,7 @@ safety:
 ### Linters
 ########################################
 
-# Runs the mypy linter
+# Check types (statically) using mypy
 .PHONY: mypy
 mypy:
 	mypy aea packages benchmark --disallow-untyped-defs
@@ -162,7 +164,7 @@ mypy:
 	mypy scripts
 	mypy tests --exclude "serialization.py"
 
-# Runs the pylint linter
+# Lint the code using pylint
 .PHONY: pylint
 pylint:
 	pylint -j0 -d E1136 $(AEA_SRC_DIR) $(BENCHMARK_DIR) $(EXAMPLES_DIR) $(PACKAGES_DIR) $(SCRIPTS_DIR) $(PLUGIN_FETCHAI_SRC) $(PLUGIN_ETHEREUM_SRC) $(PLUGIN_COSMOS_SRC) $(PLUGIN_CLI_IPFS_SRC)
@@ -171,17 +173,17 @@ pylint:
 ### License and copyright checks
 ########################################
 
-# Check licenses
+# Check dependency licenses
 .PHONY: liccheck
 liccheck:
 	poetry export > tmp-requirements.txt
 	liccheck -s strategy.ini -r tmp-requirements.txt -l PARANOID
 	rm -frv tmp-requirements.txt
 
-# Check copyrights
+# Check that the relevant files have appropriate Copyright header
 .PHONY: copyright-check
 copyright-check:
-	python scripts/check_copyright.py
+	python scripts/check_copyright_notice.py --directory .
 
 ########################################
 ### Docs
@@ -200,10 +202,15 @@ docs-live:
 # Generate API documentation (ensure you add the new pages created into /mkdocs.yml --> nav)
 .PHONY: generate-api-docs
 generate-api-docs:
-	python scripts/generate_api_docs.py
+	python scripts/generate_api_docs.py $(args)
+
+# Check links are live in the documentation
+.PHONY: check-doc-links
+check-doc-links:
+	python scripts/check_doc_links.py
 
 ########################################
-### Update Poetry Lock
+### Poetry Lock
 ########################################
 
 # Updates the poetry lock
@@ -257,20 +264,55 @@ clean-test:
 	find . -name 'log.*.txt' -exec rm -fr {} +
 
 ########################################
-### Package checks
+### Packages
 ########################################
 
-# Run package checks (validate the hashes, correct version in the docs, etc)
-.PHONY: package_checks
-package_checks:
+# Update package hashes
+.PHONY: update-package-hashes
+update-package-hashes:
+	python scripts/generate_ipfs_hashes.py
+
+# Run all package checks
+.PHONY: package-checks
+package-checks: check-package-hashes check-package-versions-in-docs check-packages
+
+# Check package hashes
+.PHONY: check-package-hashes
+check-package-hashes:
 	python scripts/generate_ipfs_hashes.py --check
+
+# Check correct package version in the docs
+.PHONY: check-package-versions-in-docs
+check-package-versions-in-docs:
 	python scripts/check_package_versions_in_docs.py
+
+# Perform various checks on packages
+.PHONY: check-packages
+check-packages:
 	python scripts/check_packages.py
+
+########################################
+### Other checks
+########################################
+
+# Check that libp2p code in libs and connection aren't different
+.PHONY: libp2p-diffs
+libp2p-diffs:
+	diff libs/go/libp2p_node packages/fetchai/connections/p2p_libp2p/libp2p_node -r
+
+# Check that plugins for Cosmos and Fetch.ai, and Plugins' and main Licenses aren't different
+.PHONY: plugin-diffs
+plugin-diffs:
+	diff $(PLUGIN_COSMOS_SRC)/cosmos.py $(PLUGIN_FETCHAI_SRC)/_cosmos.py
+	diff LICENSE $(PLUGIN_COSMOS)/LICENSE
+	diff LICENSE $(PLUGIN_ETHEREUM)/LICENSE
+	diff LICENSE $(PLUGIN_FETCHAI)/LICENSE
 
 ########################################
 ### Build
 ########################################
 
+# Build the project
 .PHONY: dist
 dist: clean
 	poetry build

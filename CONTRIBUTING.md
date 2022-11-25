@@ -130,7 +130,7 @@ First, set up your environment by either using the `develop-image` or by followi
 
 - Install Python (version `3.8`, `3.9` or `3.10`) and `poetry`. Then run:
 
-      make new_env
+      make new-env
       poetry shell
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
@@ -148,7 +148,7 @@ We have various commands which are helpful during development.
 
 - For checking packages integrity:
 
-      make package_checks
+      make package-checks
 
 - To run tests: `make test`.
 

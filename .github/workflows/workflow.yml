@@ -20,7 +20,6 @@ jobs:
           - black-check
           - isort-check
           - flake8
-          - darglint
           - vulture
           - mypy
           - pylint
@@ -164,7 +163,7 @@ jobs:
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links
-        run: tox -e check_doc_links
+        run: tox -e check-doc-links
       - name: Check API Docs updated
         run: tox -e check_api_docs
       - name: Check spelling

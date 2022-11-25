@@ -9,17 +9,11 @@
   <a href="https://pypi.org/project/aea/">
     <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/aea">
   </a>
-  <a>
-    <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
-  </a>
   <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
   </a>
   <a href="https://pypi.org/project/aea/">
     <img alt="License" src="https://img.shields.io/pypi/dm/aea"> 
-  </a>
-  <a href="https://fetch-ai.slack.com/join/shared_invite/enQtNDI2MDYwMjE3OTQwLWY0ZjAyYjM0NGQzNWRhNDMxMzdjYmVhYTE3NDNhNTAyMTE0YWRkY2VmOWRmMGQ3ODM1N2NjOWUwNDExM2U3YjY">
-    <img alt="Slack" src="https://img.shields.io/badge/slack-fetchai-purple.svg">
   </a>
 </p>
 <p align="center">
@@ -29,17 +23,8 @@
   <a href="">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
   </a>
-  <a href="https://img.shields.io/badge/lint-flake8-blueviolet">
-    <img alt="flake8" src="https://img.shields.io/badge/lint-flake8-yellow" >
-  </a>
-  <a href="https://github.com/python/mypy">
-    <img alt="mypy" src="https://img.shields.io/badge/static%20check-mypy-blue">
-  </a>
-  <a href="https://github.com/psf/black">
-    <img alt="Black" src="https://img.shields.io/badge/code%20style-black-black">
-  </a>
-  <a href="https://github.com/PyCQA/bandit">
-    <img alt="mypy" src="https://img.shields.io/badge/security-bandit-lightgrey">
+<a href="https://discord.gg/hy8SyhNnXf">
+    <img src="https://img.shields.io/discord/441214316524339210.svg?logo=discord&logoColor=fff&label=Discord&color=7389d8" alt="Discord conversation" />
   </a>
 </p>
 
