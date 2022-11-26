@@ -18,10 +18,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains a test for aea.test_tools."""
+
 from unittest.mock import patch
 
+import click
 import pytest
-
+from _pytest.capture import CaptureFixture
 from aea.cli.core import cli
 from aea.test_tools.click_testing import CliRunner
 
@@ -64,10 +66,9 @@ def test_catch_exception():
         assert result.exit_code == 1
 
     # False
-
     with pytest.raises(ValueError, match="expected"):
         with patch.object(cli, "main", side_effect=ValueError("expected")):
-            result = cli_runner.invoke(cli, ["--help"], catch_exceptions=False)
+            cli_runner.invoke(cli, ["--help"], catch_exceptions=False)
 
 
 def test_mix_std_err_False():
@@ -77,7 +78,7 @@ def test_mix_std_err_False():
     result = cli_runner.invoke(cli, "-v DEBUG run")
     assert result.exit_code == 1
     # check for access, no exception should be raised
-    result.stderr
+    assert result.stderr
 
 
 def test_mix_std_err_True():
@@ -87,5 +88,37 @@ def test_mix_std_err_True():
     result = cli_runner.invoke(cli, "-v DEBUG run")
     assert result.exit_code == 1
 
-    with pytest.raises(ValueError):
-        result.stderr
+    with pytest.raises(ValueError, match="stderr not separately captured"):
+        assert result.stderr
+
+
+def test_click_version():
+    """Test click version"""
+
+    message = """
+    When this tests fails you need to ensure that the current versions implementation
+    of the click.testing.CliRunner remains compatible with our monkey-patched version
+    """
+    assert click.__version__ == "8.0.2", message
+
+
+def test_capfd_on_cli_runner(capfd: CaptureFixture):
+    """Test setting capfd on CliRunner to redirect streams"""
+
+    def run_cli_command_and_assert() -> None:
+        result = cli_runner.invoke(cli, ["--help"], standalone_mode=False)
+        expected = "Command-line tool for setting up an Autonomous Economic Agent"
+        assert expected in result.stdout
+
+    cli_runner = CliRunner()
+
+    with patch.object(capfd, "readouterr", wraps=capfd.readouterr) as m:
+
+        # streams captured via CliRunner.isolation context manager
+        run_cli_command_and_assert()
+        m.assert_not_called()
+
+        # streams captured via pytest capfd fixture
+        cli_runner.capfd = capfd
+        run_cli_command_and_assert()
+        m.assert_called_once()
