@@ -52,6 +52,7 @@ from typing import (
     cast,
 )
 
+import pytest
 import yaml
 
 from aea.cli import cli
@@ -96,6 +97,10 @@ TERMINATION_TIMEOUT = 30
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     """Base class for AEA test cases."""
+
+    @pytest.fixture(autouse=True)
+    def set_capfd_on_cli_runner(self, capfd):
+        CliRunner.capfd = capfd
 
     runner: CliRunner  # CLI runner
     last_cli_runner_result: Optional[Result] = None
