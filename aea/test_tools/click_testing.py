@@ -28,18 +28,25 @@ the testing outstream, it checks whether it has been already closed.
 Links:
 
     https://github.com/pallets/click/issues/824
+    https://github.com/valory-xyz/open-aea/issues/171
+    https://github.com/valory-xyz/open-aea/issues/353
 
 """
+import contextlib
+import logging
 import shlex
 import sys
 from typing import Optional
 
+from _pytest.capture import CaptureFixture
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
 
 class CliRunner(ClickCliRunner):
     """Patch of click.testing.CliRunner."""
+
+    capfd: Optional[CaptureFixture] = None
 
     def invoke(  # type: ignore
         self,
@@ -56,7 +63,12 @@ class CliRunner(ClickCliRunner):
         exception: Optional[BaseException] = None
         exit_code = 0
 
-        with self.isolation(input=input, env=env, color=color) as outstreams:
+        if self.capfd:
+            cm = contextlib.nullcontext()
+        else:
+            cm = self.isolation(input=input, env=env, color=color)
+
+        with cm as outstreams:
             if isinstance(args, str):
                 args = shlex.split(args)
 
@@ -88,15 +100,20 @@ class CliRunner(ClickCliRunner):
                 exit_code = 1
                 exc_info = sys.exc_info()
             finally:
-                sys.stdout.flush()
-                stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
-                if self.mix_stderr:
-                    # when it mixed, stderr always empty cause all output goes to stdout
-                    stderr: Optional[bytes] = None
+                if self.capfd:
+                    out, err = self.capfd.readouterr()
+                    stdout, stderr = out.encode(), err.encode()
+                    logging.error("capfd capturing")
                 else:
-                    stderr = (
-                        outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore
-                    )
+                    sys.stdout.flush()
+                    stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
+                    if self.mix_stderr:
+                        # when it mixed, stderr always empty cause all output goes to stdout
+                        stderr: Optional[bytes] = None
+                    else:
+                        stderr = (
+                            outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore
+                        )
 
         return Result(
             runner=self,
