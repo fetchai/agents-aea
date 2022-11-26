@@ -29,14 +29,14 @@
 </p>
 
 <p align="center">
-A framework for autonomous economic agent (AEA) development
+A framework for developing autonomous economic agents (AEAs)
 </p>
 
 <p align="center">
   <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
 </p>
 
-## Get started developing AEAs
+## To install
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 

@@ -187,7 +187,7 @@ def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
         "-m",
         "isort",
         "--settings-path",
-        "setup.cfg",
+        "pyproject.toml",
         "--verbose",
         str(directory.absolute()),
         **kwargs,
