@@ -33,7 +33,6 @@ Links:
 
 """
 import contextlib
-import logging
 import shlex
 import sys
 from typing import Optional
@@ -46,6 +45,7 @@ from click.testing import Result
 class CliRunner(ClickCliRunner):
     """Patch of click.testing.CliRunner."""
 
+    # NOTE: always set on the instance, never the class
     capfd: Optional[CaptureFixture] = None
 
     def invoke(  # type: ignore
@@ -103,7 +103,6 @@ class CliRunner(ClickCliRunner):
                 if self.capfd:
                     out, err = self.capfd.readouterr()
                     stdout, stderr = out.encode(), err.encode()
-                    logging.error("capfd capturing")
                 else:
                     sys.stdout.flush()
                     stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore

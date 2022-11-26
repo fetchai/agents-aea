@@ -100,7 +100,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @pytest.fixture(autouse=True)
     def set_capfd_on_cli_runner(self, capfd):
-        CliRunner.capfd = capfd
+        self.runner.capfd = capfd
 
     runner: CliRunner  # CLI runner
     last_cli_runner_result: Optional[Result] = None
