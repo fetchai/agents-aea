@@ -23,7 +23,7 @@ import os
 from collections import OrderedDict
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Sequence, Type, Union, cast
+from typing import Any, Callable, Generator, List, Optional, Sequence, Type, Union, cast
 
 import click
 from click import argument, option
@@ -385,7 +385,7 @@ def determine_package_type_for_directory(package_dir: Path) -> PackageType:
 
 
 @contextmanager
-def reraise_as_click_exception(*exceptions: Type[Exception]):
+def reraise_as_click_exception(*exceptions: Type[Exception]) -> Generator:
     """Reraise exceptions as ClickException"""
     try:
         yield

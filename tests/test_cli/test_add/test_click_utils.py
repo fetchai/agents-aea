@@ -44,7 +44,7 @@ def test_reraise_as_click_exception() -> None:
     with pytest.raises(ValueError):
         with pytest.raises(ZeroDivisionError):
             raise ValueError()
-        assert False
+        raise AssertionError()
 
     # 1. do not raise on pass
     with reraise_as_click_exception():
