@@ -23,7 +23,8 @@ from unittest.mock import patch
 
 import click
 import pytest
-from _pytest.capture import CaptureFixture
+from _pytest.capture import CaptureFixture  # type: ignore
+
 from aea.cli.core import cli
 from aea.test_tools.click_testing import CliRunner
 

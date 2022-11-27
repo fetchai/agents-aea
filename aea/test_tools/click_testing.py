@@ -33,12 +33,12 @@ Links:
 
 """
 
-from contextlib import nullcontext, redirect_stderr
 import shlex
 import sys
-from typing import Optional
+from contextlib import nullcontext, redirect_stderr
+from typing import ContextManager, Optional, cast
 
-from _pytest.capture import CaptureFixture
+from _pytest.capture import CaptureFixture  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
@@ -72,12 +72,12 @@ class CliRunner(ClickCliRunner):
             back the newly assigned sys.stdin, sys.stdout and sys.stderr
             immediately after they get initially re-assigned likely suffices
             """
-            assert not (input or env or color), message
+            assert not (input or env or color), message  # nosec
             cm = redirect_stderr(sys.stdout) if self.mix_stderr else nullcontext()
         else:
             cm = self.isolation(input=input, env=env, color=color)
 
-        with cm as outstreams:
+        with cast(ContextManager, cm) as outstreams:
             if isinstance(args, str):
                 args = shlex.split(args)
 
@@ -117,7 +117,7 @@ class CliRunner(ClickCliRunner):
                     stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
                     if self.mix_stderr:
                         # when it mixed, stderr always empty cause all output goes to stdout
-                        stderr: Optional[bytes] = None
+                        stderr = None
                     else:
                         stderr = (
                             outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore

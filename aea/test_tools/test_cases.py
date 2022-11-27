@@ -54,6 +54,7 @@ from typing import (
 
 import pytest
 import yaml
+from _pytest.capture import CaptureFixture  # type: ignore
 
 from aea.cli import cli
 from aea.configurations.base import (
@@ -99,7 +100,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     """Base class for AEA test cases."""
 
     @pytest.fixture(autouse=True)
-    def set_capfd_on_cli_runner(self, capfd):
+    def set_capfd_on_cli_runner(self, capfd: CaptureFixture) -> None:
+        """Set pytest capfd on CLI runner"""
         self.runner.capfd = capfd
 
     runner: CliRunner  # CLI runner
