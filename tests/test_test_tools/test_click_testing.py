@@ -79,7 +79,7 @@ def test_mix_std_err_False():
     result = cli_runner.invoke(cli, "-v DEBUG run")
     assert result.exit_code == 1
     # check for access, no exception should be raised
-    assert result.stderr
+    assert result.stderr is not None
 
 
 def test_mix_std_err_True():
