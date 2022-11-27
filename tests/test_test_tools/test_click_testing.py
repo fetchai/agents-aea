@@ -103,15 +103,19 @@ def test_click_version():
     assert click.__version__ == "8.0.2", message
 
 
-def test_capfd_on_cli_runner(capfd: CaptureFixture):
+@pytest.mark.parametrize("mix_stderr", [True, False])
+def test_capfd_on_cli_runner(mix_stderr: bool, capfd: CaptureFixture):
     """Test setting capfd on CliRunner to redirect streams"""
 
     def run_cli_command_and_assert() -> None:
         result = cli_runner.invoke(cli, ["--help"], standalone_mode=False)
         expected = "Command-line tool for setting up an Autonomous Economic Agent"
         assert expected in result.stdout
+        if mix_stderr:
+            with pytest.raises(ValueError, match="stderr not separately captured"):
+                assert result.stderr
 
-    cli_runner = CliRunner()
+    cli_runner = CliRunner(mix_stderr=mix_stderr)
 
     with patch.object(capfd, "readouterr", wraps=capfd.readouterr) as m:
 
