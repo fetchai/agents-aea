@@ -32,7 +32,8 @@ Links:
     https://github.com/valory-xyz/open-aea/issues/353
 
 """
-import contextlib
+
+from contextlib import nullcontext, redirect_stderr
 import shlex
 import sys
 from typing import Optional
@@ -64,7 +65,8 @@ class CliRunner(ClickCliRunner):
         exit_code = 0
 
         if self.capfd:
-            cm = contextlib.nullcontext()
+            assert not (input or env or color)
+            cm = redirect_stderr(sys.stdout) if self.mix_stderr else nullcontext()
         else:
             cm = self.isolation(input=input, env=env, color=color)
 
