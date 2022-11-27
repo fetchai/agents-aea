@@ -111,7 +111,8 @@ class CliRunner(ClickCliRunner):
             finally:
                 if self.capfd:
                     out, err = self.capfd.readouterr()
-                    stdout, stderr = out.encode(), err.encode()
+                    stdout = out.encode()
+                    stderr = err.encode() if not self.mix_stderr else None
                 else:
                     sys.stdout.flush()
                     stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
