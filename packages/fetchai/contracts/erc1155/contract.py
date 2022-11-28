@@ -26,7 +26,7 @@ from typing import Dict, List, Optional, cast
 from aea_ledger_cosmos import CosmosApi
 from aea_ledger_ethereum import EthereumApi
 from aea_ledger_fetchai import FetchAIApi
-from google.protobuf.any_pb2 import Any as ProtoAny  # pylint: disable=E0611
+from google.protobuf.any_pb2 import Any as ProtoAny
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
