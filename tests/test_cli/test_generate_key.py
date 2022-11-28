@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Type
 
 import pytest
+from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_FILE
 from aea_ledger_fetchai import FetchAICrypto
@@ -251,7 +252,7 @@ class TestGenerateN(AEATestCaseEmpty):
     n = 5
 
     @pytest.mark.parametrize(
-        argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto)
+        argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto, CosmosCrypto)
     )
     def test_generate_without_password(
         self,
@@ -297,7 +298,7 @@ class TestGenerateN(AEATestCaseEmpty):
         assert len(keys) == self.n
 
     @pytest.mark.parametrize(
-        argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto)
+        argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto, CosmosCrypto)
     )
     def test_generate_with_password(
         self,
