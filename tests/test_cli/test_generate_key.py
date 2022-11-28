@@ -21,7 +21,9 @@
 """This test module contains the tests for the `aea generate-key` sub-command."""
 import json
 import os
+import random
 import shutil
+import string
 import tempfile
 from pathlib import Path
 from typing import Type
@@ -247,7 +249,6 @@ class TestGenerateN(AEATestCaseEmpty):
     """Test generate N keys."""
 
     n = 5
-    password = "test_password"
 
     @pytest.mark.parametrize(
         argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto)
@@ -304,6 +305,10 @@ class TestGenerateN(AEATestCaseEmpty):
     ) -> None:
         """Test generate keys without password."""
 
+        password = "".join(
+            [random.choice(string.ascii_letters) for _ in range(10)],  # nosec
+        )
+
         with tempfile.TemporaryDirectory() as temp_dir:
             outfile = Path(temp_dir, crypto.identifier)
             result = self.run_cli_command(
@@ -313,7 +318,7 @@ class TestGenerateN(AEATestCaseEmpty):
                 "-n",
                 f"{self.n}",
                 "--password",
-                self.password,
+                password,
                 cwd=str(self.t),
             )
 
@@ -328,5 +333,5 @@ class TestGenerateN(AEATestCaseEmpty):
                 with open_file(key_file, "w") as fp:
                     fp.write(key["private_key"])
 
-                crypto_obj = crypto(private_key_path=key_file, password=self.password)
+                crypto_obj = crypto(private_key_path=key_file, password=password)
                 assert crypto_obj.address == key["address"]
