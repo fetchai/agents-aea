@@ -21,17 +21,25 @@
 """This test module contains the tests for the `aea generate-key` sub-command."""
 import json
 import os
+import random
 import shutil
+import string
 import tempfile
 from pathlib import Path
+from typing import Type
 
+import pytest
+from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_ethereum.test_tools.constants import ETHEREUM_PRIVATE_KEY_FILE
 from aea_ledger_fetchai import FetchAICrypto
 from aea_ledger_fetchai.test_tools.constants import FETCHAI_PRIVATE_KEY_FILE
 
 from aea.cli import cli
+from aea.configurations.constants import MULTIKEY_FILENAME
+from aea.crypto.base import Crypto as BaseCrypto
 from aea.crypto.registries import make_crypto
+from aea.helpers.io import open_file
 from aea.helpers.sym_link import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -236,3 +244,95 @@ class TestGenerateKeyWithAddKeyWithConnection(
 
     keys_config_path = "agent.connection_private_key_paths"
     args = ["--connection"]  # type: ignore
+
+
+class TestGenerateN(AEATestCaseEmpty):
+    """Test generate N keys."""
+
+    n = 5
+
+    @pytest.mark.parametrize(
+        argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto, CosmosCrypto)
+    )
+    def test_generate_without_password(
+        self,
+        crypto: Type[BaseCrypto],
+    ) -> None:
+        """Test generate keys without password."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outfile = Path(temp_dir, crypto.identifier)
+            result = self.run_cli_command(
+                "generate-key",
+                crypto.identifier,
+                str(outfile),
+                "-n",
+                f"{self.n}",
+                cwd=str(self.t),
+            )
+
+            assert result.exit_code == 0
+            assert outfile.exists()
+
+            keys = json.loads(outfile.read_text())
+            assert len(keys) == self.n
+
+    def test_generate_default_file(
+        self,
+    ) -> None:
+        """Test generate default output file."""
+
+        outfile = Path(self.t, MULTIKEY_FILENAME)
+        result = self.run_cli_command(
+            "generate-key",
+            EthereumCrypto.identifier,
+            "-n",
+            f"{self.n}",
+            cwd=str(self.t),
+        )
+
+        assert result.exit_code == 0
+        assert outfile.exists()
+
+        keys = json.loads(outfile.read_text())
+        assert len(keys) == self.n
+
+    @pytest.mark.parametrize(
+        argnames="crypto", argvalues=(EthereumCrypto, FetchAICrypto, CosmosCrypto)
+    )
+    def test_generate_with_password(
+        self,
+        crypto: Type[BaseCrypto],
+    ) -> None:
+        """Test generate keys without password."""
+
+        password = "".join(
+            [random.choice(string.ascii_letters) for _ in range(10)],  # nosec
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outfile = Path(temp_dir, crypto.identifier)
+            result = self.run_cli_command(
+                "generate-key",
+                crypto.identifier,
+                str(outfile),
+                "-n",
+                f"{self.n}",
+                "--password",
+                password,
+                cwd=str(self.t),
+            )
+
+            assert result.exit_code == 0
+            assert outfile.exists()
+
+            keys = json.loads(outfile.read_text())
+            assert len(keys) == self.n
+
+            for idx, key in enumerate(keys):
+                key_file = f"{crypto.identifier}_{idx}.txt"
+                with open_file(key_file, "w") as fp:
+                    fp.write(key["private_key"])
+
+                crypto_obj = crypto(private_key_path=key_file, password=password)
+                assert crypto_obj.address == key["address"]

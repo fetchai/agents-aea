@@ -39,7 +39,9 @@ from aea.crypto.registries import ledger_apis_registry
 @click.argument(
     "type_",
     metavar="TYPE",
-    type=click.Choice(ledger_apis_registry.supported_ids),
+    type=click.Choice(
+        choices=list(ledger_apis_registry.supported_ids),
+    ),
     required=True,
 )
 @password_option()

@@ -331,3 +331,4 @@ ACNWithBootstrappedEntryNodesDockerImage  # unused class (aea/test_tools/acn_ima
 default_method_call  # unused method (aea/contracts/base.py:260)
 send_control_c  # unused method (aea/helpers/base.py:188)
 set_capfd_on_cli_runner  # unused method (aea/test_tools/test_cases.py:102)
+reraise_as_click_exception  # unused function (aea/cli/utils/click_utils.py:387)
