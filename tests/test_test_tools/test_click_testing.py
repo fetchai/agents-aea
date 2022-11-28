@@ -127,3 +127,23 @@ def test_capfd_on_cli_runner(mix_stderr: bool, capfd: CaptureFixture):
         cli_runner.capfd = capfd
         run_cli_command_and_assert()
         m.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        dict(input="input"),
+        dict(env={"key": "value"}),
+        dict(color=True),
+    ]
+)
+def test_cli_runner_invoke_raises(kwargs, capfd: CaptureFixture):
+    """Test CliRunner with capfd raises"""
+
+    cli_runner = CliRunner()
+    cli_runner.capfd = capfd
+    with pytest.raises(
+        NotImplementedError,
+        match="Cannot use capfd in conjunction with `input`, `env` or `color`."
+    ):
+        cli_runner.invoke(cli, ["--help"], standalone_mode=False, **kwargs)
