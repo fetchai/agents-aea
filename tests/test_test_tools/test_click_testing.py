@@ -135,7 +135,7 @@ def test_capfd_on_cli_runner(mix_stderr: bool, capfd: CaptureFixture):
         dict(input="input"),
         dict(env={"key": "value"}),
         dict(color=True),
-    ]
+    ],
 )
 def test_cli_runner_invoke_raises(kwargs, capfd: CaptureFixture):
     """Test CliRunner with capfd raises"""
@@ -144,6 +144,6 @@ def test_cli_runner_invoke_raises(kwargs, capfd: CaptureFixture):
     cli_runner.capfd = capfd
     with pytest.raises(
         NotImplementedError,
-        match="Cannot use capfd in conjunction with `input`, `env` or `color`."
+        match="Cannot use capfd in conjunction with `input`, `env` or `color`.",
     ):
         cli_runner.invoke(cli, ["--help"], standalone_mode=False, **kwargs)

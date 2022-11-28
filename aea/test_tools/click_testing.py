@@ -66,13 +66,13 @@ class CliRunner(ClickCliRunner):
 
         if self.capfd:
             if input or env or color:
-                raise NotImplementedError("""
-                Cannot use capfd in conjunction with `input`, `env` or `color`.
+                raise NotImplementedError(
+                    """Cannot use capfd in conjunction with `input`, `env` or `color`.
                 If you wish to enable their usage with capfd, you may patch the
                 CliRunner.isolation context manager. Three lines of code to set
                 back the newly assigned sys.stdin, sys.stdout and sys.stderr
-                immediately after they get initially re-assigned likely suffices
-                """)
+                immediately after they get initially re-assigned likely suffices"""
+                )
             cm = redirect_stderr(sys.stdout) if self.mix_stderr else nullcontext()
         else:
             cm = self.isolation(input=input, env=env, color=color)
