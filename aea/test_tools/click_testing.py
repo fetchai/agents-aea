@@ -28,18 +28,26 @@ the testing outstream, it checks whether it has been already closed.
 Links:
 
     https://github.com/pallets/click/issues/824
+    https://github.com/valory-xyz/open-aea/issues/171
+    https://github.com/valory-xyz/open-aea/issues/353
 
 """
+
 import shlex
 import sys
-from typing import Optional
+from contextlib import nullcontext, redirect_stderr
+from typing import ContextManager, Optional, cast
 
+from _pytest.capture import CaptureFixture  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
 from click.testing import Result
 
 
 class CliRunner(ClickCliRunner):
     """Patch of click.testing.CliRunner."""
+
+    # NOTE: always set on the instance, never the class
+    capfd: Optional[CaptureFixture] = None
 
     def invoke(  # type: ignore
         self,
@@ -56,7 +64,20 @@ class CliRunner(ClickCliRunner):
         exception: Optional[BaseException] = None
         exit_code = 0
 
-        with self.isolation(input=input, env=env, color=color) as outstreams:
+        if self.capfd:
+            if input or env or color:
+                raise NotImplementedError(
+                    """Cannot use capfd in conjunction with `input`, `env` or `color`.
+                If you wish to enable their usage with capfd, you may patch the
+                CliRunner.isolation context manager. Three lines of code to set
+                back the newly assigned sys.stdin, sys.stdout and sys.stderr
+                immediately after they get initially re-assigned likely suffices"""
+                )
+            cm = redirect_stderr(sys.stdout) if self.mix_stderr else nullcontext()
+        else:
+            cm = self.isolation(input=input, env=env, color=color)
+
+        with cast(ContextManager, cm) as outstreams:
             if isinstance(args, str):
                 args = shlex.split(args)
 
@@ -88,15 +109,20 @@ class CliRunner(ClickCliRunner):
                 exit_code = 1
                 exc_info = sys.exc_info()
             finally:
-                sys.stdout.flush()
-                stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
-                if self.mix_stderr:
-                    # when it mixed, stderr always empty cause all output goes to stdout
-                    stderr: Optional[bytes] = None
+                if self.capfd:
+                    out, err = self.capfd.readouterr()
+                    stdout = out.encode()
+                    stderr = err.encode() if not self.mix_stderr else None
                 else:
-                    stderr = (
-                        outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore
-                    )
+                    sys.stdout.flush()
+                    stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
+                    if self.mix_stderr:
+                        # when it mixed, stderr always empty cause all output goes to stdout
+                        stderr = None
+                    else:
+                        stderr = (
+                            outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore
+                        )
 
         return Result(
             runner=self,
