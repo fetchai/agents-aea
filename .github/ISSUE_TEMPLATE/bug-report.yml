@@ -1,12 +1,12 @@
 name: 🐛 Bug Report
-description: Report a reproducible bug.
-title: "<Short bug description>"
+description: Report a reproducible bug
+title: "<Short description of the bug>"
 labels: ["bug", "unconfirmed"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting the issue you are facing. Please complete the following so we can have the details necessary to assist you.
+        Thank you for reporting the issue you are facing. Please complete this form so we can have the necessary information to assist you.
   - type: checkboxes
     id: prerequisites
     attributes:

@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a new idea for the AEA project.
+        Thank you for suggesting a new idea for the AEA project. Please complete this form so we can have the necessary information about the feature you are requesting.
   - type: checkboxes
     id: prerequisites
     attributes:
