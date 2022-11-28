@@ -18,13 +18,19 @@
 #
 # ------------------------------------------------------------------------------
 """Module wrapping the helpers of public and private key cryptography."""
+import json
 import logging
 import os
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 from aea.configurations.base import AgentConfig
-from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
+from aea.configurations.constants import (
+    ADDRESS,
+    MULTIKEY_FILENAME,
+    PRIVATE_KEY,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import ensure_dir
@@ -208,3 +214,27 @@ def hex_to_bytes_for_key(data: str) -> bytes:
         return bytes.fromhex(data)
     except ValueError as e:
         raise KeyIsIncorrect(str(e)) from e
+
+
+def generate_multiple_keys(
+    n: int,
+    type_: str,
+    password: Optional[str] = None,
+    extra_entropy: Union[str, bytes, int] = "",
+    file: Optional[str] = None,
+) -> None:
+    """Generate n key pairs."""
+
+    key_pairs = []
+    for _ in range(n):
+        crypto = make_crypto(type_, extra_entropy=extra_entropy)
+        priv_key = (
+            crypto.encrypt(password=password)
+            if password is not None
+            else crypto.private_key
+        )
+        key_pairs.append({ADDRESS: crypto.address, PRIVATE_KEY: priv_key})
+
+    file = file or MULTIKEY_FILENAME
+    with open(file, mode="w", encoding="utf-8") as fp:
+        json.dump(obj=key_pairs, fp=fp, indent=2)
