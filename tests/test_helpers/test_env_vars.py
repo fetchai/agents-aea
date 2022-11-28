@@ -26,6 +26,7 @@ from aea.helpers.env_vars import (
     apply_env_variables,
     convert_value_str_to_type,
     export_path_to_env_var_string,
+    generate_env_vars_recursively,
     is_env_variable,
     replace_with_env_var,
 )
@@ -116,3 +117,81 @@ def test_env_var_string_generator(export_path: List[str], var_string: str) -> No
     """Test `export_path_to_env_var_string` method"""
 
     assert export_path_to_env_var_string(export_path=export_path) == var_string
+
+
+@pytest.mark.parametrize(
+    ("export_data", "template"),
+    argvalues=[
+        (
+            {
+                "dict": "Viraj",
+            },
+            {
+                "dict": "${str}",
+            },
+        ),
+        (
+            {"list": [1, 2, 3]},
+            {"list": "${list}"},
+        ),
+        (
+            {
+                "nested_dict": {
+                    "dict": "Viraj",
+                }
+            },
+            {
+                "nested_dict": {
+                    "dict": "${str}",
+                },
+            },
+        ),
+        (
+            {"nested_list": [[1], [2], [3]]},
+            {"nested_list": "${list}"},
+        ),
+        (
+            {
+                "nested_dict": {
+                    "dict": "Viraj",
+                    "list": [1, 2, 3],
+                }
+            },
+            {
+                "nested_dict": {
+                    "dict": "${str}",
+                    "list": "${list}",
+                },
+            },
+        ),
+        (
+            {
+                "nested_list": [
+                    {
+                        "dict": "hello",
+                    },
+                    {
+                        "dict": "world",
+                    },
+                ]
+            },
+            {
+                "nested_list": [
+                    {"dict": "${str}"},
+                    {"dict": "${str}"},
+                ]
+            },
+        ),
+    ],
+)
+def test_match_export_parse_consistency(export_data, template) -> None:
+    """Test to match export and parsing consistency with different data structures."""
+
+    env_vars = generate_env_vars_recursively(
+        export_data,
+        export_path=[],
+    )
+
+    parsed_data = apply_env_variables(template, env_variables=env_vars)
+
+    assert parsed_data == export_data
