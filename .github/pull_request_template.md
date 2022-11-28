@@ -24,7 +24,7 @@ _Put an `x` in the boxes that apply._
 - [ ] Lint and unit tests pass locally with my changes.
 - [ ] I have added tests that prove my fix is effective or that my feature works.
 - [ ] I have checked that code coverage does not decrease.
-- [ ] I have added/updated the relevant documentations (if applicable).
+- [ ] I have added/updated the documentations (if applicable).
 - [ ] Any dependent changes have been merged and published in downstream modules.
 
 ## Further comments
