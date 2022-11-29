@@ -1,11 +1,6 @@
 name: AEA framework sanity checks and tests
 
-on:
-  push:
-    branches:
-      - develop
-      - main
-  pull_request:
+on: pull_request
 
 jobs:
   python_code_quality_checks:
@@ -25,7 +20,6 @@ jobs:
           - black-check
           - isort-check
           - flake8
-          - darglint
           - vulture
           - mypy
           - pylint
@@ -46,8 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
@@ -127,8 +121,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
@@ -152,8 +146,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-node@v1
@@ -169,7 +163,7 @@ jobs:
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links
-        run: tox -e check_doc_links
+        run: tox -e check-doc-links
       - name: Check API Docs updated
         run: tox -e check_api_docs
       - name: Check spelling
@@ -187,10 +181,10 @@ jobs:
         python_version: [3.8]
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - if: matrix.sys.os == 'windows-latest'
         uses: msys2/setup-msys2@v2
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - if: matrix.os == 'ubuntu-latest'
@@ -221,8 +215,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
@@ -249,8 +243,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
@@ -295,8 +289,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - name: Setup GCloud - production
@@ -334,8 +328,8 @@ jobs:
         python_version: [3.8, 3.9, "3.10"]
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - uses: actions/setup-go@v3
@@ -408,8 +402,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
@@ -444,8 +438,8 @@ jobs:
         python-version: [3.8]
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/setup-go@v3
@@ -472,12 +466,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.17
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v3
         with:
           go-version: 1.17
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
@@ -509,8 +503,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
