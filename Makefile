@@ -77,7 +77,7 @@ test-aea-core:
 
 .PHONY: test-packages
 test-packages:
-	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills --cov-config=.coveragerc $(PACKAGES_TESTS_DIRS)
+	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=term-missing --cov-config=.coveragerc $(PACKAGES_TESTS_DIRS)
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 
