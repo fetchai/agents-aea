@@ -1,12 +1,12 @@
 name: 🐛 Bug Report
-description: Report a reproducible bug.
-title: "Bug report: <short description>"
+description: Report a reproducible bug
+title: "<Short description of the bug>"
 labels: ["bug", "unconfirmed"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting the issue you are facing. Please complete the following so we can have the details necessary to assist you.
+        Thank you for reporting the issue you are facing. Please complete this form so we can have the necessary information to assist you.
   - type: checkboxes
     id: prerequisites
     attributes:
@@ -46,11 +46,11 @@ body:
     id: context
     attributes:
       label: Context
-      description: Any relevant information about your setup (this is important in case the issue is not reproducible except for under certain conditions)
+      description: Any relevant information about your setup (this is important in case the issue is not reproducible except under certain conditions)
       placeholder: |
         Operating system [e.g. MacOS], Python version [e.g. 3.8.5], AEA version [e.g. 1.2.0], ...
     validations:
-      required: true
+      required: false
   - type: textarea
     id: logs
     attributes:
