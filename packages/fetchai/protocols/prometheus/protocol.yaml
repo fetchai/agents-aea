@@ -7,10 +7,10 @@ description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmabM3obP1KwehSBjT77U1rPWEGWnyTsEZfWHX6Fz8jqWK
+  README.md: QmNYbYhKaRRKxnRXJyBvKLsAbuz2zwkhh5tRVxudgqKMa9
   __init__.py: QmeNbaLEMYYLtUpYMJQoQKfxiiL3trZpVX251jVVAgTvmM
   dialogues.py: QmVNNWsEzorKdYWxGSW1yUKd8PNXYjcRprtJijuuFSepkQ
-  message.py: QmbwRsuWAaVoV91nFXLeYVc1aQq79Hhf1kzVLECmK3mjks
+  message.py: QmfSQziJKt8NMuVx3rEonP6NFWHa7g36U6WvzjcMuvS9ih
   prometheus.proto: QmXzFWmrWVqQuxtVgaZwuMgbrEvSRrRVU63htURUsFJ1wv
   prometheus_pb2.py: QmNuDYT7RWNRmRKSMgsLqD76gmmNSNm88uTCSPcvoxTdHr
   serialization.py: QmeC957DMVN53eMSMiTUnyc6vwpTx2NTmg69KfdptEEd2E

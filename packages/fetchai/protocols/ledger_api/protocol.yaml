@@ -7,13 +7,13 @@ description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmeTENiMYauATeUpT8B8rHm8NXCy2Afot18iXrTL2qomEE
+  README.md: QmUsNEFJreHQqitTDhs84tqEtKE55Fj59zRUQLvhy96Sse
   __init__.py: QmVNPenv99bXcSeZyrAKguwhaFb8q7dBspsFyFXeJev8eu
   custom_types.py: QmWHcqh5AcpTLAsiRPaNDLBoNRgnQ6ykQCTZB5hf6womQT
   dialogues.py: QmUkhFxEAJ4YKPXddit7rWZ13r78MM3suZJ1uAAgTbuLwH
   ledger_api.proto: QmR92cmoxSxKANTvCmm9skftvgzYobNwcWCUanNkduJjyh
   ledger_api_pb2.py: QmNt9mSa71PcXDHFDwEWb3ay4RAE11KURX8hzZmFj8voEo
-  message.py: QmS2y42TwM6evnxwbSGeRjqFDpY8czaFV3WeWhka3vmj2i
+  message.py: QmUt8hbUVUrPQQCfe3ggnHLrYhfyZq7USC3dQH5AzPYztC
   serialization.py: QmcsSo3pzXF1j214TAq1hM2cypTg4yQLJSwWVBDyj5WK1g
 fingerprint_ignore_patterns: []
 dependencies:

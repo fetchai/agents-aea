@@ -7,12 +7,12 @@ description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmWzgGnSNTEG7tWwC6sR2osAaap2QnFhT9etBtctUjLBLt
+  README.md: QmRt89zuhGjrjaJm2daBGwxjHeJqMGyzDb2Vs189n1nyeS
   __init__.py: QmcvXQ439L7PxWrAzrAE1kiZr7W9iYtyJuZBL4p9YMq95s
   dialogues.py: QmXuWAkAHfkrQCBoqeYKKqUwkj9j79GJNSTQncYUHgT9QE
   http.proto: Qmag9uQYVPQwsdZfH1GEaBX5xgikoYuphQpXnWP2xob6Ys
   http_pb2.py: QmPck55KUSn1KfGQ3jGTq6eh2Fhh6Kdn5HPotrpFJeJ8u3
-  message.py: Qmb5Au4zpNRKrJT4nXgY5WSAPVSZLS8ubhwMxydteonPg6
+  message.py: QmbCszWJevPoU97H95VNP7eU7mNseSUfju5pAzmDtgCkTX
   serialization.py: QmTwkQB9VXRsxQQZapdR3HGRGXWpEmGuKJbtnnzsqo5zx3
 fingerprint_ignore_patterns: []
 dependencies:

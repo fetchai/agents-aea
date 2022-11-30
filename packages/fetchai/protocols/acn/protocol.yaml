@@ -7,13 +7,13 @@ description: The protocol used for envelope delivery on the ACN.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmUXc3ou55xJHWm1HQof97GJuiejdzSoyemb6xrGKTKibN
+  README.md: QmPYve9sDVQebpXVVunpxGp22WDSNzTY2PsbtkkzbKwz6e
   __init__.py: Qmcnm9iGbqCFSiCCd1koHQWaNJQn7hLGV33w6fB8jQenDb
   acn.proto: QmVWvXETUNe7QZTvBgzwpofNP3suFthwyxbTVUqSx8mdnE
   acn_pb2.py: Qmf3HYmJtGwugpCuWSmJEDVHwZcnCF6BWmeEouUSpBRs45
   custom_types.py: QmWG7yrphMBi1pxHW6ypM5oBPWCYqE1Aj5BfeSsgqb7BNf
   dialogues.py: QmcxdAUTH1zyu2S8aWbmAQ8ba62Yk4wB4qshNs8MWcMCpj
-  message.py: QmW4ghVr74u5VJ8EYt4ehbRbrGD5bZT1VkmNfDQbPPHrjy
+  message.py: QmZMELom2i7im2kfTQfnj9AHFKKefuup3VDxjbFuLjo1vw
   serialization.py: QmWaMfQEJCMCRjwxCYa4Zd8VFESMZSRgAnBa3XcRFFpKo9
 fingerprint_ignore_patterns: []
 dependencies:

@@ -6,7 +6,7 @@ description: The soef connection provides a connection api to the simple OEF.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVFNKmCbDWr8Zg5szWva3eFbji66kFYW2ZyeTTeVBbAHR
+  README.md: QmQE5LtAPaBmGNyifrWCEe9Fbkv5d8xr6RpRxS6JGaEsbz
   __init__.py: QmQNy17gZ5rHXFy7v8fqKBQuR7aR6pFaHBmmDxisq8Syi2
   connection.py: QmS89kWa9s2nqvC6iXuAJDQaZcPmqMJu94xsVuDtLoKnDv
 fingerprint_ignore_patterns: []
