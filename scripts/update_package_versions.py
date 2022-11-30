@@ -66,6 +66,7 @@ TYPE_TO_CONFIG_FILE = {
 }
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
 TEST_PROTOCOLS = ["t_protocol", "t_protocol_no_ct"]
+FILE_DOWNLOAD_TIMEOUT = 180
 
 
 def get_protocol_specification_header_regex(public_id: PublicId) -> Pattern:
@@ -124,7 +125,8 @@ def get_hashes_from_last_release() -> Dict[str, str]:
     """Get hashes from last release."""
     hashes = {}  # Dict[str, str]
     resp = requests.get(
-        url="https://raw.githubusercontent.com/fetchai/agents-aea/main/packages/hashes.csv"
+        url="https://raw.githubusercontent.com/fetchai/agents-aea/main/packages/hashes.csv",
+        timeout=FILE_DOWNLOAD_TIMEOUT,
     )
     hashes_raw = resp.text
     for line in hashes_raw.splitlines():
