@@ -30,8 +30,6 @@ import argparse
 import operator
 import os
 import re
-import requests
-import shutil
 import subprocess  # nosec
 import sys
 from collections import Counter
@@ -39,6 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Pattern, Set
 
 import click
+import requests
 import semver
 import yaml
 from click.testing import CliRunner
