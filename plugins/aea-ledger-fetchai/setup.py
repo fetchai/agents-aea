@@ -28,7 +28,7 @@ from setuptools import find_packages, setup
 here = os.path.abspath(os.path.dirname(__file__))
 plugin_dir = os.path.abspath(os.path.join(here, ".."))
 
-setu(
+setup(
     name="aea-ledger-fetchai",
     version="1.2.4",
     author="Fetch.AI Limited",
