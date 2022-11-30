@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The tests module contains the tests of the AEA package."""
+"""The tests module contains the extra tests for the AEA core."""

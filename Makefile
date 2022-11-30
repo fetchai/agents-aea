@@ -9,7 +9,7 @@ AEA_TESTS_DIR := tests
 AEA_CORE_TESTS_DIRS := tests/test_aea tests/test_aea_extra ./tests/test_docs
 EXAMPLES_TESTS_DIRS := tests/test_examples
 PACKAGES_TESTS_DIRS := packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills ./tests/test_packages ./tests/test_packages_for_aea_tests ./tests/test_aea_core_packages
-
+DOCS_TESTS_DIR := tests/test_docs
 CONNECTIONS_DIR := packages/fetchai/connections
 CONTRACTS_DIR := packages/fetchai/contracts
 PROTOCOLS_DIR := packages/fetchai/protocols
@@ -67,45 +67,50 @@ test: test-aea-all test-plugins
 # Run all aea tests
 .PHONY: test-aea-all
 test-aea-all:
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing --cov-config=.coveragerc
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-aea-core
 test-aea-core:
-	pytest -rfE --doctest-modules $(AEA_CORE_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing --cov-config=.coveragerc
+	pytest -rfE --doctest-modules $(AEA_CORE_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-packages
 test-packages:
-	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills --cov-config=.coveragerc $(PACKAGES_TESTS_DIRS)
+	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills $(PACKAGES_TESTS_DIRS)
+	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
+
+.PHONY: test-docs
+test-docs:
+	pytest -rfE --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea $(DOCS_TESTS_DIR)
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 
 .PHONY: test-examples
 test-examples:
-	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills --cov-config=.coveragerc $(EXAMPLES_TESTS_DIRS)
+	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills $(EXAMPLES_TESTS_DIRS)
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 
 # Run all plugin tests
 .PHONY: test-plugins
 test-plugins:
-	pytest -rfE $(PLUGIN_FETCHAI_TESTS)  --cov=aea_ledger_fetchai  --cov-report=term-missing --cov-config=.coveragerc
-	pytest -rfE $(PLUGIN_ETHEREUM_TESTS) --cov=aea_ledger_ethereum --cov-report=term-missing --cov-config=.coveragerc
-	pytest -rfE $(PLUGIN_COSMOS_TESTS)   --cov=aea_ledger_cosmos   --cov-report=term-missing --cov-config=.coveragerc
-	pytest -rfE $(PLUGIN_CLI_IPFS_TESTS) --cov=aea_cli_ipfs        --cov-report=term-missing --cov-config=.coveragerc
+	pytest -rfE $(PLUGIN_FETCHAI_TESTS)  --cov=aea_ledger_fetchai  --cov-report=term-missing
+	pytest -rfE $(PLUGIN_ETHEREUM_TESTS) --cov=aea_ledger_ethereum --cov-report=term-missing
+	pytest -rfE $(PLUGIN_COSMOS_TESTS)   --cov=aea_ledger_cosmos   --cov-report=term-missing
+	pytest -rfE $(PLUGIN_CLI_IPFS_TESTS) --cov=aea_cli_ipfs        --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Run tests for a particular python package
 .PHONY: test-sub
 test-sub:
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=term-missing --cov-config=.coveragerc
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Run tests for a particular aea package
 .PHONY: test-sub-p
 test-sub-p:
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=term-missing --cov-config=.coveragerc
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Produce the coverage report. Can see a report summary on the terminal.

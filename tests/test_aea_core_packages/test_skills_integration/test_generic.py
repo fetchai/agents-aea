@@ -422,12 +422,15 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
         missing_strings = self.missing_from_output(
             buyer_aea_process, check_strings, is_terminating=False
         )
+
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in buyer_aea output.".format(missing_strings)
 
         self.terminate_agents(seller_aea_process, buyer_aea_process)
+
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
+
         wait_for_localhost_ports_to_close([9000, 9001])

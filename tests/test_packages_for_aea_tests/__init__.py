@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The tests module contains the tests of the AEA package."""
+"""The tests module contains the tests for packages  required for AEA tests to run."""
