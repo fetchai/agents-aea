@@ -23,12 +23,22 @@ Load a configuration, knowing the type and the path to the package root.
 
 the configuration object.
 
+<a id="aea.package_manager.base.DepedencyMismatchErrors"></a>
+
+## DepedencyMismatchErrors Objects
+
+```python
+class DepedencyMismatchErrors(Enum)
+```
+
+Dependency mismatch errors.
+
 <a id="aea.package_manager.base.BasePackageManager"></a>
 
 ## BasePackageManager Objects
 
 ```python
-class BasePackageManager()
+class BasePackageManager(ABC)
 ```
 
 AEA package manager
@@ -42,6 +52,46 @@ def __init__(path: Path) -> None
 ```
 
 Initialize object.
+
+<a id="aea.package_manager.base.BasePackageManager.iter_dependency_tree"></a>
+
+#### iter`_`dependency`_`tree
+
+```python
+def iter_dependency_tree() -> Iterator[PackageId]
+```
+
+Iterate dependency tree.
+
+<a id="aea.package_manager.base.BasePackageManager.check_dependencies"></a>
+
+#### check`_`dependencies
+
+```python
+def check_dependencies(configuration: PackageConfiguration) -> List[Tuple[PackageId, DepedencyMismatchErrors]]
+```
+
+Verify hashes for package dependecies againts the available hashes.
+
+<a id="aea.package_manager.base.BasePackageManager.update_public_id_hash"></a>
+
+#### update`_`public`_`id`_`hash
+
+```python
+def update_public_id_hash(public_id_str: str, package_type: str) -> str
+```
+
+Update public id hash from the latest available hashes.
+
+<a id="aea.package_manager.base.BasePackageManager.update_dependencies"></a>
+
+#### update`_`dependencies
+
+```python
+def update_dependencies(package_id: PackageId) -> None
+```
+
+Update dependency hashes to latest for a package.
 
 <a id="aea.package_manager.base.BasePackageManager.add_package"></a>
 
@@ -63,6 +113,16 @@ def package_path_from_package_id(package_id: PackageId) -> Path
 
 Get package path from the package id.
 
+<a id="aea.package_manager.base.BasePackageManager.calculate_hash_from_package_id"></a>
+
+#### calculate`_`hash`_`from`_`package`_`id
+
+```python
+def calculate_hash_from_package_id(package_id: PackageId) -> str
+```
+
+Calculate package hash from package id.
+
 <a id="aea.package_manager.base.BasePackageManager.update_package"></a>
 
 #### update`_`package
@@ -73,15 +133,16 @@ def update_package(package_id: PackageId) -> "BasePackageManager"
 
 Update package.
 
-<a id="aea.package_manager.base.BasePackageManager.get_available_package_hashes"></a>
+<a id="aea.package_manager.base.BasePackageManager.get_package_hash"></a>
 
-#### get`_`available`_`package`_`hashes
+#### get`_`package`_`hash
 
 ```python
-def get_available_package_hashes() -> PackageIdToHashMapping
+@abstractmethod
+def get_package_hash(package_id: PackageId) -> Optional[str]
 ```
 
-Returns a mapping object between available packages and their hashes
+Return hash for the given package id.
 
 <a id="aea.package_manager.base.BasePackageManager.sync"></a>
 
