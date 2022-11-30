@@ -280,7 +280,7 @@ class BasePackageManager(ABC):
 
     @abstractmethod
     def get_package_hash(self, package_id: PackageId) -> Optional[str]:
-        """Sync local packages to the remote registry."""
+        """Return hash for the given package id."""
 
     @abstractmethod
     def sync(
