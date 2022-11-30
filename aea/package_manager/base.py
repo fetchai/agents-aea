@@ -23,17 +23,19 @@
 import json
 import logging
 import shutil
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections import OrderedDict
+from enum import Enum
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Iterator, List, Optional
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple, cast
 
 from aea.configurations.base import PackageConfiguration
-from aea.configurations.data_types import PackageId, PackageType
+from aea.configurations.constants import AGENT, PACKAGE_TYPE_TO_CONFIG_FILE
+from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.configurations.loader import load_configuration_object
-from aea.helpers.dependency_tree import DependencyTree
+from aea.helpers.dependency_tree import DependencyTree, dump_yaml, load_yaml
 from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 
@@ -65,7 +67,14 @@ def load_configuration(
     return cast(PackageConfiguration, configuration_obj)
 
 
-class BasePackageManager:
+class DepedencyMismatchErrors(Enum):
+    """Dependency mismatch errors."""
+
+    HASH_NOT_FOUND: int = 1
+    HASH_DOES_NOT_MATCH: int = 2
+
+
+class BasePackageManager(ABC):
     """AEA package manager"""
 
     path: Path
@@ -137,6 +146,88 @@ class BasePackageManager:
 
         return sync_needed, hash_updates, package_updates
 
+    def iter_dependency_tree(
+        self,
+    ) -> Iterator[PackageId]:
+        """Iterate dependency tree."""
+        for level in DependencyTree.generate(packages_dir=self.path):
+            for package_id in level:
+                yield package_id
+
+    def check_dependencies(
+        self,
+        configuration: PackageConfiguration,
+    ) -> List[Tuple[PackageId, DepedencyMismatchErrors]]:
+        """Verify hashes for package dependecies againts the available hashes."""
+
+        mismatches = []
+        for component_id in configuration.package_dependencies:
+            package_id = PackageId(
+                package_type=str(component_id.component_type),
+                public_id=component_id.public_id,
+            )
+            exppected_hash = self.get_package_hash(package_id)
+            if exppected_hash is None:
+                mismatches.append((package_id, DepedencyMismatchErrors.HASH_NOT_FOUND))
+                continue
+
+            if exppected_hash != package_id.package_hash:
+                mismatches.append(
+                    (package_id, DepedencyMismatchErrors.HASH_DOES_NOT_MATCH)
+                )
+        return mismatches
+
+    def update_public_id_hash(
+        self,
+        public_id_str: str,
+        package_type: str,
+    ) -> str:
+        """Update public id hash from the latest available hashes."""
+
+        public_id_old = PublicId.from_str(public_id_str).without_hash()
+        package_id = PackageId(package_type=package_type, public_id=public_id_old)
+        package_hash = self.get_package_hash(package_id=package_id)
+        return str(
+            PublicId.from_json(
+                {
+                    **public_id_old.json,
+                    "package_hash": package_hash,
+                }
+            )
+        )
+
+    def update_dependencies(
+        self,
+        package_id: PackageId,
+    ) -> None:
+        """Update dependency hashes to latest for a package."""
+
+        package_path = self.package_path_from_package_id(
+            package_id=package_id,
+        )
+        config_file = (
+            package_path / PACKAGE_TYPE_TO_CONFIG_FILE[package_id.package_type.value]
+        )
+        package_config, extra = load_yaml(file_path=config_file)
+        for component_type in PACKAGE_TYPE_TO_CONFIG_FILE:
+            if component_type == AGENT:
+                continue
+
+            components = PackageType(component_type).to_plural()
+            if components in package_config:
+                package_config[components] = [
+                    self.update_public_id_hash(
+                        public_id_str=dependency, package_type=component_type
+                    )
+                    for dependency in package_config.get(components, [])
+                ]
+
+        dump_yaml(
+            file_path=config_file,
+            data=package_config,
+            extra_data=extra,
+        )
+
     def add_package(self, package_id: PackageId) -> "BasePackageManager":
         """Add packages."""
 
@@ -166,6 +257,12 @@ class BasePackageManager:
             / package_id.name
         )
 
+    def calculate_hash_from_package_id(self, package_id: PackageId) -> str:
+        """Calculate package hash from package id."""
+
+        package_path = self.package_path_from_package_id(package_id=package_id)
+        return IPFSHashOnly.get(file_path=str(package_path))
+
     def update_package(
         self,
         package_id: PackageId,
@@ -181,20 +278,9 @@ class BasePackageManager:
         self.add_package(package_id)
         return self
 
-    def get_available_package_hashes(
-        self,
-    ) -> PackageIdToHashMapping:
-        """Returns a mapping object between available packages and their hashes"""
-
-        _packages = OrderedDict()
-        available_packages = DependencyTree.generate(self.path)
-        for _level in available_packages:
-            for package in _level:
-                path = self.package_path_from_package_id(package)
-                package_hash = IPFSHashOnly.get(str(path))
-                _packages[package] = package_hash
-
-        return _packages
+    @abstractmethod
+    def get_package_hash(self, package_id: PackageId) -> Optional[str]:
+        """Sync local packages to the remote registry."""
 
     @abstractmethod
     def sync(
@@ -207,9 +293,7 @@ class BasePackageManager:
         """Sync local packages to the remote registry."""
 
     @abstractmethod
-    def update_package_hashes(
-        self,
-    ) -> "BasePackageManager":
+    def update_package_hashes(self) -> "BasePackageManager":
         """Update package.json file."""
 
     @abstractmethod
