@@ -67,48 +67,48 @@ test: test-aea-all test-plugins
 # Run all aea tests
 .PHONY: test-aea-all
 test-aea-all:
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-aea-core
 test-aea-core:
-	pytest -rfE --doctest-modules $(AEA_CORE_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(AEA_CORE_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-packages
 test-packages:
-	pytest -rfE --doctest-modules $(PACKAGES_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(PACKAGES_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-docs
 test-docs:
-	pytest -rfE --doctest-modules $(DOCS_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(DOCS_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-examples
 test-examples:
-	pytest -rfE --doctest-modules $(EXAMPLES_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(EXAMPLES_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Run all plugin tests
 .PHONY: test-plugins
 test-plugins:
-	pytest -rfE $(PLUGIN_FETCHAI_TESTS)  --cov=aea_ledger_fetchai  --cov-report=term-missing
-	pytest -rfE $(PLUGIN_ETHEREUM_TESTS) --cov=aea_ledger_ethereum --cov-report=term-missing
-	pytest -rfE $(PLUGIN_COSMOS_TESTS)   --cov=aea_ledger_cosmos   --cov-report=term-missing
-	pytest -rfE $(PLUGIN_CLI_IPFS_TESTS) --cov=aea_cli_ipfs        --cov-report=term-missing
+	pytest -rfE $(PLUGIN_FETCHAI_TESTS)  --cov=aea_ledger_fetchai  --cov-report=term-missing --cov-config=pyproject.toml
+	pytest -rfE $(PLUGIN_ETHEREUM_TESTS) --cov=aea_ledger_ethereum --cov-report=term-missing --cov-config=pyproject.toml
+	pytest -rfE $(PLUGIN_COSMOS_TESTS)   --cov=aea_ledger_cosmos   --cov-report=term-missing --cov-config=pyproject.toml
+	pytest -rfE $(PLUGIN_CLI_IPFS_TESTS) --cov=aea_cli_ipfs        --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Run tests for a particular python package
 .PHONY: test-sub
 test-sub:
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_$(tdir) --cov=aea.$(dir) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Run tests for a particular aea package
 .PHONY: test-sub-p
 test-sub-p:
-	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=term-missing
+	pytest -rfE --doctest-modules $(AEA_TESTS_DIR)/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=term-missing --cov-config=pyproject.toml
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 # Produce the coverage report. Can see a report summary on the terminal.
