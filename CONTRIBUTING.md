@@ -54,7 +54,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 
 1. All Pull Requests should be based off of and opened against the `develop` branch. Do **not** open a Pull Request against `main`!
 
-2. Search [Exising PRs](https://github.com/fetchai/agents-aea/pulls) for an open or closed PR that relates to your submission.
+2. Search [Existing PRs](https://github.com/fetchai/agents-aea/pulls) for an open or closed PR that relates to your submission.
    You don't want to duplicate existing efforts.
 
 3. Be sure that an issue describes the problem you're fixing, or the design for the feature you'd like to add.
