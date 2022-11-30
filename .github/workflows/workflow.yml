@@ -233,6 +233,7 @@ jobs:
           make protolint
 
   integration_checks:
+    if: startsWith(github.ref_name, 'release')
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -272,13 +273,69 @@ jobs:
       - name: Pull SOEF Image
         run: |
           docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
-      - name: Sync AEA loop integration tests
+      - name: Pull fetchd
         run: |
-          tox -e py3.8 -- -m 'sync'  # --aea-loop sync
+          docker pull fetchai/fetchd:0.10.2
+      - name: Pull ganache
+        run: |
+          docker pull trufflesuite/ganache-cli:latest
       - name: Async integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+        run: tox -e py3.8 -- -m 'integration and not unstable and not ledger' ./tests --ignore=tests/test_aea_core_packages
+
+
+  core_integration_checks:
+    # tests intersection with ledger and integration
+    # limited tests set for quick checking primary functionality of the AEA
+    continue-on-error: True
+    needs:
+      - python_code_quality_checks
+      - go_code_checks
+      - misc_checks
+      - misc_checks_extra
+      - plugins_install_check
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "^1.17.0"
+      - name: Setup GCloud - production
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ secrets.GCLOUD_FETCH_AI_PROD_PROJECT }}
+          service_account_key: ${{ secrets.GCLOUD_FETCH_AI_PROD_KEY }}
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get install libmbedtls-dev
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker
+      - name: Pull SOEF Image
+        run: |
+          docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
+      - name: Pull fetchd
+        run: |
+          docker pull fetchai/fetchd:0.10.2
+      - name: Pull ganache
+        run: |
+          docker pull trufflesuite/ganache-cli:latest
+      - name: Async integration tests
+        run: tox -e py3.8 -- tests/test_aea_core_packages/
 
   integration_checks_ledger:
+    if: startsWith(github.ref_name, 'release')
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -311,9 +368,9 @@ jobs:
         run: |
           docker pull gcr.io/fetch-ai-images/soef:9e78611 # change this to latest tag
       - name: Integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
+        run: tox -e py3.8 -- -m 'integration and not unstable and ledger' ./tests --ignore=tests/test_aea_core_packages
 
-  platform_checks:
+  aea-core-tests:
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -386,12 +443,12 @@ jobs:
       - if: True
         name: Unit tests
         run: |
-          tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
+          tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable and not ledger' ./tests/test_docs ./tests/test_aea
       - name: Plugin tests
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
-
-  platform_checks_sync_aea_loop:
+  aea-examples-tests:
+    if: startsWith(github.ref_name, 'release')
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -400,7 +457,7 @@ jobs:
       - misc_checks_extra
       - plugins_install_check
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -409,20 +466,207 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "^1.17.0"
-      - name: Install dependencies (ubuntu-latest)
+      - if: matrix.os == 'ubuntu-latest'
+        name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
           sudo apt-get install libmbedtls-dev
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
           unzip protoc-3.19.4-linux-x86_64.zip -d protoc
           sudo mv protoc/bin/protoc /usr/local/bin/protoc
           make protolint_install
-      - name: Unit tests with sync agent loop
+      # sudo apt-get install -y protobuf-compiler
+      # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
+      # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
+      - if: matrix.os == 'macos-latest'
+        name: Install dependencies (macos-latest)
         run: |
-          tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
+          pip install tox
+          brew install gcc
+          # brew install protobuf
+          # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip
+          unzip protoc-3.19.4-osx-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          brew tap yoheimuta/protolint
+          brew install protolint
+      - if: matrix.os == 'windows-latest'
+        name: Install dependencies (windows-latest)
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          python -m pip install -U pip
+          echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+          choco install protoc --version 3.19.4
+          choco install mingw -y
+          choco install make -y
+          # to check make was installed
+          make --version
+          pip install tox
+          # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
+          # unzip protoc-3.19.4-win64.zip -d protoc
+          # sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          python scripts/update_symlinks_cross_platform.py
+          make protolint_install_win
+          # just check protolint runs
+          protolint version
+      - name: Unit tests
+        run: |
+          tox -e py${{ matrix.python_version }} -- ./tests/test_examples
+
+  aea-extras-tests:
+    continue-on-error: True
+    needs:
+      - python_code_quality_checks
+      - go_code_checks
+      - misc_checks
+      - misc_checks_extra
+      - plugins_install_check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python_version: [3.8, 3.9, "3.10"]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "^1.17.0"
+      - if: matrix.os == 'ubuntu-latest'
+        name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get install libmbedtls-dev
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          make protolint_install
+      # sudo apt-get install -y protobuf-compiler
+      # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
+      # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
+      - if: matrix.os == 'macos-latest'
+        name: Install dependencies (macos-latest)
+        run: |
+          pip install tox
+          brew install gcc
+          # brew install protobuf
+          # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip
+          unzip protoc-3.19.4-osx-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          brew tap yoheimuta/protolint
+          brew install protolint
+      - if: matrix.os == 'windows-latest'
+        name: Install dependencies (windows-latest)
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          python -m pip install -U pip
+          echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+          choco install protoc --version 3.19.4
+          choco install mingw -y
+          choco install make -y
+          # to check make was installed
+          make --version
+          pip install tox
+          # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
+          # unzip protoc-3.19.4-win64.zip -d protoc
+          # sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          python scripts/update_symlinks_cross_platform.py
+          make protolint_install_win
+          # just check protolint runs
+          protolint version
+      - name: Unit tests
+        run: |
+          tox -e py${{ matrix.python_version }} -- ./tests/test_aea_extra
+
+  packages-tests:
+    if: startsWith(github.ref_name, 'release')
+    continue-on-error: True
+    needs:
+      - python_code_quality_checks
+      - go_code_checks
+      - misc_checks
+      - misc_checks_extra
+      - plugins_install_check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python_version: [3.8, 3.9, "3.10"]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "^1.17.0"
+      - if: matrix.os == 'ubuntu-latest'
+        name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get install libmbedtls-dev
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
+          # install Protobuf compiler
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-linux-x86_64.zip
+          unzip protoc-3.19.4-linux-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          make protolint_install
+      # sudo apt-get install -y protobuf-compiler
+      # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
+      # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
+      - if: matrix.os == 'macos-latest'
+        name: Install dependencies (macos-latest)
+        run: |
+          pip install tox
+          brew install gcc
+          # brew install protobuf
+          # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/72457f0166d5619a83f508f2345b22d0617b5021/Formula/protobuf.rb
+          wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-osx-x86_64.zip
+          unzip protoc-3.19.4-osx-x86_64.zip -d protoc
+          sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          brew tap yoheimuta/protolint
+          brew install protolint
+      - if: matrix.os == 'windows-latest'
+        name: Install dependencies (windows-latest)
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          python -m pip install -U pip
+          echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
+          choco install protoc --version 3.19.4
+          choco install mingw -y
+          choco install make -y
+          # to check make was installed
+          make --version
+          pip install tox
+          # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protoc-3.19.4-win64.zip
+          # unzip protoc-3.19.4-win64.zip -d protoc
+          # sudo mv protoc/bin/protoc /usr/local/bin/protoc
+          python scripts/update_symlinks_cross_platform.py
+          make protolint_install_win
+          # just check protolint runs
+          protolint version
+      - if: True
+        name: Unit tests
+        run: |
+          tox -e py${{ matrix.python_version }} -- --cov=packages/fetchai/connections --cov=packages/fetchai/contracts  --cov=packages/fetchai/protocols --cov=packages/fetchai/skills  -m 'not integration and not unstable' ./tests/test_packages_for_aea_tests ./tests/test_packages 
 
   golang_checks:
     continue-on-error: True
@@ -525,7 +769,7 @@ jobs:
           make protolint_install
       - name: Run all tests
         run: |
-          tox -e py3.8-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+          tox -e py3.8-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_skills_integration -m 'not unstable'  ./tests
           tox -e plugins-py3.8-cov -- --cov-append -m 'not unstable'
         continue-on-error: true
       - name: Show full coverage report

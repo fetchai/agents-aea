@@ -96,7 +96,7 @@ def fetch_agent(
 
         # initialize fetched agent with empty folders for custom packages
         custom_items_folder = os.path.join(ctx.cwd, item_type_plural)
-        os.makedirs(custom_items_folder)
+        os.makedirs(custom_items_folder, exist_ok=True)
 
         config = getattr(ctx.agent_config, item_type_plural)
         for item_public_id in config:
