@@ -448,6 +448,7 @@ jobs:
         run: |
           tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
   aea-examples-tests:
+    if: startsWith(github.ref_name, 'release')
     continue-on-error: True
     needs:
       - python_code_quality_checks
@@ -455,11 +456,12 @@ jobs:
       - misc_checks
       - misc_checks_extra
       - plugins_install_check
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python_version: [3.8, 3.9, "3.10"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v3
