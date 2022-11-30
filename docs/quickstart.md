@@ -172,7 +172,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.2.3
+v1.2.4
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```

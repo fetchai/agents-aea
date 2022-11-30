@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "aea"
-version = "1.2.3"
+version = "1.2.4"
 description = "Autonomous Economic Agent framework"
 authors = ["Fetch.AI Limited"]
 readme = "README.md"
