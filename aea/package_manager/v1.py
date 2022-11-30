@@ -33,6 +33,7 @@ from aea.helpers.io import open_file
 from aea.helpers.ipfs.base import IPFSHashOnly
 from aea.package_manager.base import (
     BasePackageManager,
+    DepedencyMismatchErrors,
     PACKAGES_FILE,
     PackageFileNotValid,
     PackageIdToHashMapping,
@@ -75,6 +76,23 @@ class PackageManagerV1(BasePackageManager):
         """Returns mappings of package ids -> package hash"""
 
         return self._third_party_packages
+
+    def get_package_hash(self, package_id: PackageId) -> Optional[str]:
+        """Get package hash."""
+        package_id = package_id.without_hash()
+        return self.dev_packages.get(
+            package_id, self.third_party_packages.get(package_id)
+        )
+
+    def is_third_party_package(self, package_id: PackageId) -> bool:
+        """Check if a package is third party package."""
+
+        return self._third_party_packages.get(package_id) is not None
+
+    def is_dev_package(self, package_id: PackageId) -> bool:
+        """Check if a package is third party package."""
+
+        return self._dev_packages.get(package_id) is not None
 
     def sync(
         self,
@@ -152,20 +170,38 @@ class PackageManagerV1(BasePackageManager):
 
     def update_package_hashes(self) -> "PackageManagerV1":
         """Update package.json file."""
-        for package_id, package_hash in self.get_available_package_hashes().items():
-            is_dev_package = package_id in self._dev_packages
-            is_third_party_package = package_id in self._third_party_packages
+
+        for package_id in self.iter_dependency_tree():
+            is_dev_package = self.is_dev_package(package_id=package_id)
+            is_third_party_package = self.is_third_party_package(package_id=package_id)
             if not is_dev_package and not is_third_party_package:
                 raise PackageNotValid(
                     f"Found a package which is not listed in the `packages.json` with package id {package_id}"
                 )
 
+            self.update_dependencies(
+                package_id=package_id,
+            )
+
+            package_hash = self.calculate_hash_from_package_id(package_id=package_id)
             if is_dev_package:
                 if self._dev_packages[package_id] == package_hash:
                     continue
 
                 self._logger.info(f"Updating hash for {package_id}")
                 self._dev_packages[package_id] = package_hash
+
+            if is_third_party_package:
+                if self._third_party_packages[package_id] == package_hash:
+                    continue
+
+                self._third_party_packages[package_id] = package_hash
+                self._logger.warning(
+                    "Hash change detected for third party package"
+                    f"\n\tPackage: {package_id}"
+                    f"\n\tCalculated hash: {package_hash}"
+                    f"\n\tExpected hash: {self._third_party_packages[package_id]}"
+                )
 
         return self
 
@@ -179,38 +215,64 @@ class PackageManagerV1(BasePackageManager):
 
         failed = False
         try:
-            available_packages = self.get_available_package_hashes()
-            for package_id in available_packages:
+            for package_id in self.iter_dependency_tree():
                 self._logger.info(f"Verifying {package_id}")
                 package_path = self.package_path_from_package_id(package_id)
                 configuration_obj = config_loader(
                     package_id.package_type,
                     package_path,
                 )
+                calculated_hash = IPFSHashOnly.get(str(package_path))
 
                 fingerprint_check = check_fingerprint(configuration_obj)
                 if not fingerprint_check:
                     failed = True
-                    self._logger.info(
+                    self._logger.error(
                         f"Fingerprints does not match for {package_id} @ {package_path}"
                     )
+                    if self.is_third_party_package(package_id=package_id):
+                        self._third_party_packages[package_id] = calculated_hash
                     continue
 
                 expected_hash = self.dev_packages.get(
                     package_id, self.third_party_packages.get(package_id)
                 )
-
                 if expected_hash is None:
                     failed = True
-                    self._logger.info(f"Cannot find hash for {package_id}")
+                    self._logger.error(f"Cannot find hash for {package_id}")
                     continue
 
-                calculated_hash = IPFSHashOnly.get(str(package_path))
                 if calculated_hash != expected_hash:
+                    self._logger.error(f"Hash does not match for {package_id}")
+                    self._logger.error(f"\tCalculated hash: {calculated_hash}")
+                    self._logger.error(f"\tExpected hash: {expected_hash}")
                     failed = True
-                    self._logger.info(f"Hash does not match for {package_id}")
-                    self._logger.info(f"\tCalculated hash: {calculated_hash}")
-                    self._logger.info(f"\tExpected hash: {expected_hash}")
+                    continue
+
+                dependencies_with_mismatched_hashes = self.check_dependencies(
+                    configuration_obj
+                )
+                if len(dependencies_with_mismatched_hashes) > 0:
+                    package_type = (
+                        "Third party"
+                        if self.is_third_party_package(package_id)
+                        else "Dev"
+                    )
+                    for dep, failure in dependencies_with_mismatched_hashes:
+                        if failure == DepedencyMismatchErrors.HASH_NOT_FOUND:
+                            self._logger.error(
+                                f"{package_type} package contains a dependency that is not defined in the `packages.json`"
+                                f"\n\tPackage: {package_id}\n\tDependency: {dep.without_hash()}"
+                            )
+                            continue
+
+                        if failure == DepedencyMismatchErrors.HASH_DOES_NOT_MATCH:
+                            self._logger.error(
+                                f"Dependency check failed; Hash does not match for {dep.without_hash()} in {package_id} configuration."
+                            )
+                            continue
+
+                    failed = True
 
         except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
