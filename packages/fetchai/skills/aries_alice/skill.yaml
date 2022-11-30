@@ -18,9 +18,9 @@ connections:
 - fetchai/http_client:0.24.4
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/http:1.1.4
-- fetchai/oef_search:1.1.4
+- fetchai/default:1.1.5
+- fetchai/http:1.1.5
+- fetchai/oef_search:1.1.5
 skills: []
 behaviours:
   alice:

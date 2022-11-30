@@ -14,8 +14,8 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/oef_search:1.1.4
+- fetchai/default:1.1.5
+- fetchai/oef_search:1.1.5
 class_name: OEFConnection
 config:
   addr: 127.0.0.1

@@ -80,7 +80,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
         )
 
         default_routing = {
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         # generate random location
@@ -142,8 +142,8 @@ class TestTacSkills(AEATestCaseManyFlaky):
         self.nested_set_config(setting_path, data)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         self.run_cli_command("build", cwd=self._get_cwd())
@@ -359,9 +359,9 @@ class TestTacSkillsContractEthereum(AEATestCaseManyFlaky, UseGanache, UseSOEF):
 
         # default routing (both for controller and participants)
         default_routing = {
-            "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         # generate random location
@@ -872,9 +872,9 @@ class TestTacSkillsContractFetchai(AEATestCaseManyFlaky, UseLocalFetchNode, UseS
 
         # default routing (both for controller and participants)
         default_routing = {
-            "fetchai/contract_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/contract_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         # generate random location

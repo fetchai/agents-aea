@@ -52,8 +52,8 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         # generate random location
@@ -250,8 +250,8 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(thermometer_aea_name, thermometer_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-            "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4",
+            "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+            "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4",
         }
 
         # generate random location

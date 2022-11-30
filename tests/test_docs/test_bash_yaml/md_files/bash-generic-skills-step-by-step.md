@@ -55,8 +55,8 @@ aea issue-certificates
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 ```
 ``` bash
@@ -66,7 +66,7 @@ aea generate-wealth fetchai --sync
 aea add connection fetchai/p2p_libp2p:0.27.3
 aea add connection fetchai/soef:0.27.4
 aea add connection fetchai/ledger:0.21.3
-aea add protocol fetchai/fipa:1.1.4
+aea add protocol fetchai/fipa:1.1.5
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
@@ -76,8 +76,8 @@ aea run
 aea add connection fetchai/p2p_libp2p:0.27.3
 aea add connection fetchai/soef:0.27.4
 aea add connection fetchai/ledger:0.21.3
-aea add protocol fetchai/fipa:1.1.4
-aea add protocol fetchai/signing:1.1.4
+aea add protocol fetchai/fipa:1.1.5
+aea add protocol fetchai/signing:1.1.5
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
@@ -121,10 +121,10 @@ connections:
 - fetchai/ledger:0.21.3
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/fipa:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
+- fetchai/default:1.1.5
+- fetchai/fipa:1.1.5
+- fetchai/ledger_api:1.1.5
+- fetchai/oef_search:1.1.5
 skills: []
 behaviours:
   service_registration:
@@ -192,11 +192,11 @@ connections:
 - fetchai/ledger:0.21.3
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/fipa:1.1.4
-- fetchai/ledger_api:1.1.4
-- fetchai/oef_search:1.1.4
-- fetchai/signing:1.1.4
+- fetchai/default:1.1.5
+- fetchai/fipa:1.1.5
+- fetchai/ledger_api:1.1.5
+- fetchai/oef_search:1.1.5
+- fetchai/signing:1.1.5
 skills: []
 behaviours:
   search:

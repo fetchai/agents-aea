@@ -37,7 +37,7 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea install
 aea build
@@ -71,8 +71,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{
@@ -97,8 +97,8 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.27.3
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:1.1.4": "fetchai/ledger:0.21.3",
-  "fetchai/oef_search:1.1.4": "fetchai/soef:0.27.4"
+  "fetchai/ledger_api:1.1.5": "fetchai/ledger:0.21.3",
+  "fetchai/oef_search:1.1.5": "fetchai/soef:0.27.4"
 }'
 aea config set --type dict agent.decision_maker_handler \
 '{

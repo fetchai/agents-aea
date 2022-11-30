@@ -12,14 +12,14 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/prometheus:1.1.4
+- fetchai/prometheus:1.1.5
 class_name: PrometheusConnection
 config:
   host: 127.0.0.1
   port: 9090
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/prometheus:1.1.4
+- fetchai/prometheus:1.1.5
 dependencies:
   aioprometheus:
     version: <21.0.0,>=20.0.0

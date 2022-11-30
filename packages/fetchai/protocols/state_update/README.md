@@ -10,7 +10,7 @@ This is a protocol for updating the state of a decision maker.
 ---
 name: state_update
 author: fetchai
-version: 1.1.4
+version: 1.1.5
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'

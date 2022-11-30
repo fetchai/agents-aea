@@ -16,7 +16,7 @@ connections:
 - fetchai/ledger:0.21.3
 contracts: []
 protocols:
-- fetchai/ledger_api:1.1.4
+- fetchai/ledger_api:1.1.5
 skills: []
 behaviours:
   fetch_block_behaviour:

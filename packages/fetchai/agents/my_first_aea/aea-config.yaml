@@ -10,9 +10,9 @@ connections:
 - fetchai/stub:0.21.2
 contracts: []
 protocols:
-- fetchai/default:1.1.4
-- fetchai/signing:1.1.4
-- fetchai/state_update:1.1.4
+- fetchai/default:1.1.5
+- fetchai/signing:1.1.5
+- fetchai/state_update:1.1.5
 skills:
 - fetchai/echo:0.20.4
 default_connection: fetchai/stub:0.21.2

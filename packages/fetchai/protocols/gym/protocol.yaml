@@ -1,6 +1,6 @@
 name: gym
 author: fetchai
-version: 1.1.4
+version: 1.1.5
 protocol_specification_id: fetchai/gym:1.0.0
 type: protocol
 description: A protocol for interacting with a gym connection.

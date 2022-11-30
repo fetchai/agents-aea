@@ -16,7 +16,7 @@ connections:
 - fetchai/http_server:0.23.4
 contracts: []
 protocols:
-- fetchai/http:1.1.4
+- fetchai/http:1.1.5
 skills: []
 behaviours: {}
 handlers:
