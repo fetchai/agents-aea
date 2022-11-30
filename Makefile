@@ -77,20 +77,18 @@ test-aea-core:
 
 .PHONY: test-packages
 test-packages:
-	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills $(PACKAGES_TESTS_DIRS)
+	pytest -rfE --doctest-modules $(PACKAGES_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-docs
 test-docs:
-	pytest -rfE --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea $(DOCS_TESTS_DIR)
+	pytest -rfE --doctest-modules $(DOCS_TESTS_DIR) --cov=$(AEA_SRC_DIR) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
-
 
 .PHONY: test-examples
 test-examples:
-	pytest -rfE --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills $(EXAMPLES_TESTS_DIRS)
+	pytest -rfE --doctest-modules $(EXAMPLES_TESTS_DIRS) --cov=$(AEA_SRC_DIR) --cov=$(CONNECTIONS_DIR) --cov=$(CONTRACTS_DIR) --cov=$(PROTOCOLS_DIR) --cov=$(SKILLS_DIR) --cov-report=html --cov-report=term-missing
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
-
 
 # Run all plugin tests
 .PHONY: test-plugins

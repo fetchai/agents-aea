@@ -296,8 +296,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - uses: actions/setup-go@v3
@@ -611,8 +611,8 @@ jobs:
         python_version: [3.8, 3.9, "3.10"]
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
       - uses: actions/setup-go@v3
