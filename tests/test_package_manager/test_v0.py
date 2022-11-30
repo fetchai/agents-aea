@@ -49,7 +49,7 @@ class TestPackageManagerV0(BaseAEATestCase):
     ) -> None:
         """Setup test."""
 
-        # the current `packages.json` in `packages/` directory follows the v1 
+        # the current `packages.json` in `packages/` directory follows the v1
         # format so we will have to load it and convert it to v0 format
         packages_v1 = json.loads(PACKAGE_JSON_FILE.read_text(encoding="utf-8"))
 
