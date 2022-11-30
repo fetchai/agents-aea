@@ -30,6 +30,7 @@ import argparse
 import operator
 import os
 import re
+import requests
 import shutil
 import subprocess  # nosec
 import sys
@@ -122,22 +123,14 @@ arguments: argparse.Namespace = None  # type: ignore
 
 def get_hashes_from_last_release() -> Dict[str, str]:
     """Get hashes from last release."""
-    with subprocess.Popen(  # nosec
-        [
-            "svn",
-            "export",
-            "https://github.com/fetchai/agents-aea.git/trunk/packages/{}".format(
-                HASHES_CSV
-            ),
-        ]
-    ) as svn_call:
-        svn_call.wait()
     hashes = {}  # Dict[str, str]
-    with open(HASHES_CSV, encoding="utf-8") as f:
-        for line in f:
-            split = line.split(",")
-            hashes[split[0]] = split[1].rstrip()
-    os.remove(HASHES_CSV)
+    resp = requests.get(
+        url="https://raw.githubusercontent.com/fetchai/agents-aea/main/packages/hashes.csv"
+    )
+    hashes_raw = resp.text
+    for line in hashes_raw.splitlines():
+        split = line.split(",")
+        hashes[split[0]] = split[1].rstrip()
     return hashes
 
 
@@ -588,13 +581,6 @@ class Updater:
         self.option_context = context
 
     @staticmethod
-    def check_if_svn_installed() -> None:
-        """Check svn tool installed."""
-        res = shutil.which("svn")
-        if res is None:
-            raise Exception("Install svn first!")
-
-    @staticmethod
     def run_hashing() -> None:
         """Run hashes update."""
         hashing_call = update_hashes()
@@ -617,7 +603,6 @@ class Updater:
                 raise Exception("Cannot run script in unclean git state.")
 
     def _checks(self) -> None:
-        self.check_if_svn_installed()
         self.run_hashing()
         self.check_if_running_allowed()
 
