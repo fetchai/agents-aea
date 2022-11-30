@@ -30,6 +30,7 @@ from unittest import mock
 import pytest
 
 from aea.configurations.base import PackageConfiguration
+from aea.configurations.constants import PACKAGES
 from aea.configurations.data_types import ComponentId, PackageId, PackageType, PublicId
 from aea.package_manager.base import (
     BasePackageManager,
@@ -38,13 +39,20 @@ from aea.package_manager.base import (
 )
 from aea.test_tools.test_cases import BaseAEATestCase
 
+from tests.conftest import ROOT_DIR
+
 
 EXAMPLE_PACKAGE_ID = PackageId(
     package_type=PackageType.PROTOCOL,
     public_id=PublicId(author="open_aea", name="signing", version="1.0.0"),
 )
+DUMMY_PACKAGE_ID = PackageId(
+    package_type=PackageType.SKILL,
+    public_id=PublicId(author="dummy", name="name"),
+)
 EXAMPLE_PACKAGE_HASH = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44"
 DUMMY_PACKAGE_HASH = "bafybei0000000000000000000000000000000000000000000000000000"
+PACKAGE_JSON_FILE = Path(ROOT_DIR, PACKAGES, "packages.json")
 
 
 def _dummy_loader(

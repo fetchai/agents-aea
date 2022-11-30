@@ -26,26 +26,16 @@ from collections import OrderedDict
 from pathlib import Path
 from unittest import mock
 
-from aea.configurations.constants import PACKAGES
-from aea.configurations.data_types import PackageId, PackageType, PublicId
 from aea.package_manager.v0 import PackageManagerV0
 from aea.test_tools.test_cases import BaseAEATestCase
 
-from tests.conftest import ROOT_DIR
-
-
-SENTINAL = object()
-EXAMPLE_PACKAGE_ID = PackageId(
-    package_type=PackageType.PROTOCOL,
-    public_id=PublicId(author="open_aea", name="signing", version="1.0.0"),
+from tests.test_package_manager.test_base import (
+    DUMMY_PACKAGE_HASH,
+    DUMMY_PACKAGE_ID,
+    EXAMPLE_PACKAGE_HASH,
+    EXAMPLE_PACKAGE_ID,
+    PACKAGE_JSON_FILE,
 )
-DUMMY_PACKAGE_ID = PackageId(
-    package_type=PackageType.SKILL,
-    public_id=PublicId(author="dummy", name="name"),
-)
-EXAMPLE_PACKAGE_HASH = "bafybeiambqptflge33eemdhis2whik67hjplfnqwieoa6wblzlaf7vuo44"
-PACKAGE_JSON_FILE = Path(ROOT_DIR, PACKAGES, "packages.json")
-DUMMY_PACKAGE_HASH = "bafybei0000000000000000000000000000000000000000000000000000"
 
 
 class TestPackageManagerV0(BaseAEATestCase):
