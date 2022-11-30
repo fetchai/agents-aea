@@ -1,5 +1,19 @@
 # Release History
 
+## 1.2.4(2022-11-30)
+
+Agents:
+- Add hello_world skill and agent
+
+Docs:
+- Update repository documentations
+- Update installation guide for Raspberry Pis (add a link to prebuilt image for Raspberry Pis)
+
+Misc:
+- Update the dependencies (protobuf, jsonschema, cosmpy)
+- Various improvements in the repository structure (e.g. makefile, tox, workflows)
+- Speed up CI/CD
+- Various bug fixes
 
 ## 1.2.3(2022-11-03)
 
